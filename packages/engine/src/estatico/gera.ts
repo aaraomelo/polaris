@@ -7,6 +7,10 @@ import { paraTexto } from '../render/valor'
 import type { ErroRuntime } from '../render/tipos'
 import { INTERATIVOS, type Emissores } from './emissores'
 import { compilaExpr, type Fn } from './expr'
+import { funcoesPadrao } from '../expr/padrao'
+import { calculaCodigo } from '../codigo/calcula'
+import { saidaParaHtml, unidadeHtml } from '../codigo/emite'
+import type { SessaoCodigo } from '../codigo/sessao'
 import type { Escopo } from '../expr/avalia'
 
 // ---------------------------------------------------------------------------
@@ -19,16 +23,18 @@ import type { Escopo } from '../expr/avalia'
 // ---------------------------------------------------------------------------
 
 export type Motivo = { caminho: string; motivo: string }
+/** O que o HTML do servidor precisa para blocos de código: a sessão (sandbox, orçamento, cache) e para onde reportar. */
+export type ContextoCodigo = { sessao?: SessaoCodigo; relata: (e: ErroRuntime) => void }
 export type FronteiraInfo = { chave: string; vars: string[]; trocavel: boolean }
 export type Estatico = {
   /** o JavaScript gerado (para inspeção e para AOT: pode ser gravado em arquivo) */
   fonte: string
-  render(esc: Escopo, onErro?: (e: ErroRuntime) => void): string
+  render(esc: Escopo, onErro?: (e: ErroRuntime) => void, k?: ContextoCodigo): string
   titulo(esc: Escopo): string
   /** fronteiras de streaming do HTML marcado (só no modo vivo) */
   fronteiras: FronteiraInfo[]
   /** HTML do CONTEÚDO de uma fronteira (sem os marcadores), com o escopo dado */
-  renderFronteira(chave: string, esc: Escopo): string
+  renderFronteira(chave: string, esc: Escopo, k?: ContextoCodigo): string
   /** dados em streaming usados por fronteiras que não podem ser trocadas no HTML */
   retidas: string[]
 }
@@ -82,7 +88,12 @@ function elemento(c: Ctx, el: IRElemento, pg: boolean): string {
   if (!c.marc && el.esqueleto) c.motivos.push({ caminho: el.caminho, motivo: 'tem esqueleto (streaming)' })
   const props = '{' + Object.entries(el.props).map(([k, v]) => `${chave(k)}:${valor(c, v)}`).join(',') + '}'
 
-  if (el.bloco.impl === 'codigo') { c.motivos.push({ caminho: el.caminho, motivo: `o bloco '${el.bloco.interface}' é código customizado (executa isolado)` }); return '""' }
+  if (el.bloco.impl === 'codigo') {
+    // HTML estático (sem JS): código customizado exige execução; no HTML do runtime vivo o servidor executa (sandbox) e o resultado vem entre marcadores
+    if (!c.marc) { c.motivos.push({ caminho: el.caminho, motivo: `o bloco '${el.bloco.interface}' é código customizado (executa isolado)` }); return '""' }
+    if (!c.programa.codigos?.[el.bloco.interface]) { c.motivos.push({ caminho: el.caminho, motivo: `a definição do bloco de código '${el.bloco.interface}' não está no programa` }); return '""' }
+    return `X.cod(K, ${JSON.stringify(el.bloco.interface)}, ${props}, esc, ${JSON.stringify(el.caminho)})`
+  }
   if (el.bloco.impl === 'composto') {
     const f = funcaoDoBloco(c, el.bloco.interface, el.caminho)
     if (!f) return '""'
@@ -114,10 +125,16 @@ function nodo(c: Ctx, n: IRNo, pg: boolean): string {
 }
 
 /** Roteiro de tempo de execução usado pelo código gerado. */
-function runtime(emissores: Array<(e: never) => string>, marc: boolean) {
+function runtime(emissores: Array<(e: never) => string>, marc: boolean, programa: Programa) {
   return {
     t: paraTexto,
     v: verdadeiro,
+    cod: (k: ContextoCodigo | null, iface: string, props: Record<string, unknown>, esc: Escopo, caminho: string): string => {
+      const def = programa.codigos?.[iface]
+      if (!def) return unidadeHtml('')
+      const saida = calculaCodigo({ def, props, escopo: { props, tenant: esc.tenant }, ...(typeof esc.idioma === 'string' && esc.idioma ? { idioma: esc.idioma } : {}), caminho, funcoes: funcoesPadrao(), sessao: k?.sessao, relata: k?.relata ?? (() => {}) })
+      return unidadeHtml(saidaParaHtml(saida))
+    },
     pronto: (esc: Escopo, vars: string[]) => { const st = (esc.status ?? {}) as Record<string, string>; return vars.every((v) => st[v] !== 'carregando') },
     e: emissores,
     host: (entradas: Array<[string, () => string]>) => { const h = Object.create(null) as Record<string, () => string>; for (const [k, f] of entradas) h[k] = f; return h },
@@ -140,19 +157,19 @@ export function geraEstatico(programa: Programa, emissores: Emissores, funcoes: 
   const titulo = programa.pagina.titulo ? valor(c, programa.pagina.titulo) : '""'
   if (c.motivos.length) return { ok: false, motivos: c.motivos }
   const fonte = [
-    '"use strict";', 'let R = null;', 'const FR = {};',
+    '"use strict";', 'let R = null;', 'let K = null;', 'const FR = {};',
     ...c.fontesBlocos,
-    `function render(esc, onErro) { R = onErro || null; const host = null, d = 0; return ${raiz} }`,
+    `function render(esc, onErro, k) { R = onErro || null; K = k || null; const host = null, d = 0; return ${raiz} }`,
     `function titulo(esc) { const v = ${titulo}; return v === null || v === undefined || typeof v === "object" ? "" : String(v) }`,
-    ...c.fr,
+    ...c.fr.map((f) => f.replace('function (esc) {', 'function (esc, k) { K = k || K;')),
     'return { render: render, titulo: titulo, fr: FR };',
   ].join('\n')
-  const X = runtime(c.emissoresUsados, marc)
-  const f = new Function('E', 'X', fonte) as (E: Fn[], X: unknown) => { render: Estatico['render']; titulo: Estatico['titulo']; fr: Record<string, (esc: Escopo) => string> }
+  const X = runtime(c.emissoresUsados, marc, programa)
+  const f = new Function('E', 'X', fonte) as (E: Fn[], X: unknown) => { render: Estatico['render']; titulo: Estatico['titulo']; fr: Record<string, (esc: Escopo, k?: ContextoCodigo) => string> }
   const gerado = f(c.exprs, X)
   // uma fronteira só pode ser trocada no HTML se está no escopo da página E nenhum dado dela é usado por fronteira que não pode (o estado
   // do cliente precisa bater com o que o DOM mostra): os dados "retidos" chegam ao cliente só depois da hidratação
   const retidas = new Set(c.fronteiras.filter((x) => !x.pg).flatMap((x) => x.vars))
   const fronteiras: FronteiraInfo[] = c.fronteiras.map((x) => ({ chave: x.chave, vars: x.vars, trocavel: x.pg && !x.vars.some((v) => retidas.has(v)) }))
-  return { ok: true, estatico: { fonte, render: gerado.render, titulo: gerado.titulo, fronteiras, renderFronteira: (chave, esc) => gerado.fr[chave]?.(esc) ?? '', retidas: [...retidas].sort() } }
+  return { ok: true, estatico: { fonte, render: gerado.render, titulo: gerado.titulo, fronteiras, renderFronteira: (chave, esc, k) => gerado.fr[chave]?.(esc, k) ?? '', retidas: [...retidas].sort() } }
 }

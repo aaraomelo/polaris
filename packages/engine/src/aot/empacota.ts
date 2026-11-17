@@ -38,11 +38,12 @@ export function geraEntrada(programa: Programa, uso: Uso = usoDoPrograma(program
     imports.push(`import { d_${ident(i)} } from ${JSON.stringify(`${RAIZ}vivo/blocos.ts`)}`)
     ds.push(`${JSON.stringify(i)}: d_${ident(i)}`)
   }
+  if (uso.codigos.length) imports.push(`import { constroiCodigo } from ${JSON.stringify(`${RAIZ}vivo/codigo.ts`)}`)
   const fonte = [
     ...imports,
     `const funcoes = { ${fs.join(', ')} }`,
     `const descritores = { ${ds.join(', ')} }`,
-    'export function monta(opcoes) { return montaVivoNucleo({ ...opcoes, funcoes, descritores }) }',
+    `export function monta(opcoes) { return montaVivoNucleo({ ...opcoes, funcoes, descritores${uso.codigos.length ? ', blocoCodigo: constroiCodigo' : ''} }) }`,
     '// inicia(): monta a partir do documento (programa e estado embutidos + fila de dados em streaming)',
     'export function inicia(extra) { return iniciaDoDocumento(monta, extra) }',
     "if (typeof window !== 'undefined' && window.__PL && window.__PL.auto) iniciaQuando(() => inicia())",

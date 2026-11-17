@@ -1,13 +1,10 @@
 import { ExprErro, parseExpr, validaExpr, type Expr } from '../expr/index'
-import { paraTexto } from '../render/valor'
-import { avalia, FUNCOES_PADRAO, type Escopo } from '../expr/index'
 
 // Template de HTML de bloco em iframe: {{ expressão }}, com `props` e `tenant` no escopo.
 // (Chaves duplas porque HTML/CSS/JS usam { } o tempo todo.) O valor é SEMPRE escapado.
 
-export type ParteHtml = string | { ast: Expr; fonte: string }
-
-export const escapaHtml = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+export { escapaHtml, type ParteHtml } from './html-render'
+import type { ParteHtml } from './html-render'
 
 export function parseHtmlTemplate(src: string, escopo: readonly string[]): { partes: ParteHtml[]; erros: Array<{ mensagem: string; dica?: string }> } {
   const partes: ParteHtml[] = []
@@ -32,6 +29,10 @@ export function parseHtmlTemplate(src: string, escopo: readonly string[]): { par
   return { partes, erros }
 }
 
-export function renderHtmlTemplate(partes: readonly ParteHtml[], escopo: Escopo): string {
-  return partes.map((p) => (typeof p === 'string' ? p : escapaHtml(paraTexto(avalia(p.ast, escopo, FUNCOES_PADRAO))))).join('')
-}
+import { renderHtmlTemplate as renderBase } from './html-render'
+import { funcoesPadrao } from '../expr/padrao'
+import type { Escopo } from '../expr/avalia'
+import type { Funcoes } from '../expr/tipos'
+
+/** versão de servidor/React: com a biblioteca padrão completa (o cliente por página usa `html-render` com só as funções que a página usa) */
+export const renderHtmlTemplate = (partes: readonly ParteHtml[], escopo: Escopo, funcoes: Funcoes = funcoesPadrao()): string => renderBase(partes, escopo, funcoes)

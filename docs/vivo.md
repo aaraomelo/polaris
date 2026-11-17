@@ -94,3 +94,17 @@ listas com chave (só necessárias se a página tem `repetir`). Próximos cortes
 No cliente, `constroiFronteira` mostra o esqueleto enquanto algum dado de `aguarda` está `carregando` e troca pelo conteúdo quando o status muda
 (dependência `status.<dado>`); o esqueleto continua reativo. `Polaris.inicia()` (no pacote AOT) monta a partir do documento: programa, estado
 inicial e fila. Verificação: o fuzz roda ordem de chegada × ponto de montagem × falhas e confere, sempre, o DOM com o do React para o mesmo estado.
+
+## Blocos de código no runtime vivo (sem React)
+
+Páginas com blocos de código (sandbox, ver `sandbox.md`) já não caem no React.
+
+- **Servidor**: o HTML marcado traz a saída do bloco entre `<!--c:HASH-->…<!--/c-->` (hash = SHA-256 do HTML interno). O HTML vem de `calculaCodigo` (a mesma validação e allowlist do caminho React) e é sempre escapado. Sem sandbox configurado, a unidade sai vazia (fail-closed) e a falha é reportada.
+- **Hidratação**: o cliente adota a unidade e **não executa nada**: confia no HTML do servidor. Páginas cujos blocos têm props constantes nunca carregam sandbox no cliente. Marcador de início ou fim ausente é divergência e a página é reconstruída.
+- **Props que mudam**: o plugin `vivo/codigo.ts` recalcula com o mesmo `calculaCodigo`, só quando as props mudam por conteúdo, e só troca o DOM se o hash do resultado mudou. O DOM é montado com `createElement`/`setAttribute` a partir da UI já sanitizada, nunca com `innerHTML`. Sem sandbox no cliente, o conteúdo some e a falha é reportada.
+- **iframe**: `sandbox` sem `allow-same-origin`, `allow=""`, `referrerpolicy=no-referrer`. A altura (modo js) só obedece à mensagem do próprio `contentWindow`, é validada como número e limitada a 1–4000 px.
+- **Isolamento de falha**: se um controlador lança ao atualizar, o erro é reportado (`regra: 'render'`), ele para, e o resto da página continua reagindo.
+- **Relógio**: o `agora` do código é fixado no servidor e vai no estado, para o cliente reproduzir a mesma saída.
+- **AOT**: o plugin só entra no pacote das páginas que têm código (~16 KB gz no total, sem a biblioteca de funções). `pnpm aot --codigo` pré-renderiza essas páginas com o sandbox em worker; sem a flag, elas ficam sem HTML pré-feito.
+
+Limite conhecido: UI de tenant com aninhamento que o parser HTML reescreve (`p>div`, `table>li`…) pode diferir entre o HTML do servidor e o DOM montado no cliente.

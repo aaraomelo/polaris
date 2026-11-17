@@ -6,10 +6,10 @@ import type { Programa } from '../render/programa'
 // O que uma página USA: as funções da biblioteca chamadas por qualquer expressão (página, modelos dos blocos compostos, ações) e
 // os blocos nativos (interfaces) que ela instancia. É a entrada do bundle por página (AOT): o resto da biblioteca fica de fora.
 
-export type Uso = { funcoes: string[]; interfaces: string[] }
+export type Uso = { funcoes: string[]; interfaces: string[]; /** blocos de código (executam isolados; o pacote leva o plugin) */ codigos: string[] }
 
 export function usoDoPrograma(programa: Programa): Uso {
-  const funcoes = new Set<string>(), interfaces = new Set<string>()
+  const funcoes = new Set<string>(), interfaces = new Set<string>(), codigos = new Set<string>()
   const expr = (e: Expr) => { for (const c of analisa(e).chamadas) funcoes.add(c.fn) }
   const valor = (v: Valor): void => {
     switch (v.t) {
@@ -33,6 +33,7 @@ export function usoDoPrograma(programa: Programa): Uso {
     if (n.repetir) { expr(n.repetir.cada); if (n.repetir.chave) expr(n.repetir.chave) }
     if (n.tipo !== 'elemento') return
     if (n.bloco.impl === 'nativo') for (const c of n.bloco.cadeia) interfaces.add(c)
+    if (n.bloco.impl === 'codigo') { codigos.add(n.bloco.interface); for (const p of programa.codigos?.[n.bloco.interface]?.partes ?? []) if (typeof p !== 'string') expr(p.ast) } // {{ }} do html em iframe também chama funções
     Object.values(n.props).forEach(valor)
     for (const l of Object.values(n.slots)) l.forEach(no)
     for (const l of Object.values(n.eventos ?? {})) l.forEach(acao)
@@ -42,5 +43,5 @@ export function usoDoPrograma(programa: Programa): Uso {
   if (programa.pagina.titulo) valor(programa.pagina.titulo)
   for (const d of Object.values(programa.pagina.dados)) Object.values(d.args).forEach(valor)
   for (const m of Object.values(programa.blocos)) no(m.modelo)
-  return { funcoes: [...funcoes].sort(), interfaces: [...interfaces].sort() }
+  return { funcoes: [...funcoes].sort(), interfaces: [...interfaces].sort(), codigos: [...codigos].sort() }
 }

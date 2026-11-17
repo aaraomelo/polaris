@@ -14,6 +14,8 @@ import { caminhosMudados } from '../estado/caminho'
 import { chavesDeCaminhos, cruza, depsCabeca, depsValor, MARCA, raizDe, usaTotal } from './dep'
 import { aplicaLista, planoLista } from './lista'
 import { Divergencia, Pos } from './pos'
+import type { CodigoDef } from '../codigo/def'
+import type { ConfigCodigo } from '../codigo/sessao'
 
 // ---------------------------------------------------------------------------
 // Espelho DOM do Modelo. O DOM é só uma projeção: toda a verdade está no store imutável (src/modelo).
@@ -31,7 +33,31 @@ type Dono = { nos: Ctrl[] }
 type Host = Record<string, (pos: Pos) => Ctrl | null>
 type Entrada = { h: Record<string, (e: Event) => void>; sync?: () => void }
 
+/** Contrato do plugin de blocos de código (vivo/codigo.ts): o núcleo não importa o sandbox, a sanitização nem o QuickJS. */
+export type CtrlPublico = { usa: Set<string>; morto: boolean; atualiza(m: ReadonlySet<string>): void; destroi(): void }
+export type ArgsBlocoCodigo = {
+  def: CodigoDef
+  no: IRElemento
+  /** o escopo em que o bloco foi instanciado (tenant, idioma…) */
+  esc: Record<string, unknown>
+  /** a unidade entre marcadores: ao adotar, `hash` é o do HTML do servidor */
+  unidade: { ini: Comment; fim: Comment; hash: string | null }
+  adotou: boolean
+  /** props avaliadas agora */
+  props(): Record<string, unknown>
+  deps: Set<string>
+  /** as props nunca mudam nesta página (mundo fechado): o plugin não precisa executar nada no cliente */
+  estatico: boolean
+  codigo: ConfigCodigo | undefined
+  /** as funções da página (o pacote por página só leva as que ela usa) */
+  funcoes: Funcoes
+  relata(e: ErroRuntime): void
+}
+export type ConstroiCodigo = (a: ArgsBlocoCodigo) => CtrlPublico | void
+
 type Amb = {
+  blocoCodigo?: ConstroiCodigo
+  codigo?: ConfigCodigo
   programa: Programa
   desc: DescritoresDom
   funcoes: Funcoes
@@ -47,7 +73,16 @@ const tem = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 const copia = <T>(a: readonly T[]) => a.slice()
 
 function destroiNos(nos: Ctrl[]): void { for (const n of copia(nos)) n.destroi(); nos.length = 0 }
-function atualizaNos(nos: Ctrl[], m: ReadonlySet<string>): void { for (const n of copia(nos)) if (!n.morto && cruza(n.usa, m)) n.atualiza(m) }
+/** Falha ao atualizar UM controlador não derruba a página: é reportada e ele para (o resto segue). Equivalente ao `Isola` do caminho React. */
+function atualizaNos(nos: Ctrl[], m: ReadonlySet<string>, relata?: (e: ErroRuntime) => void): void {
+  for (const n of copia(nos)) {
+    if (n.morto || !cruza(n.usa, m)) continue
+    try { n.atualiza(m) } catch (e) {
+      n.morto = true
+      relata?.({ caminho: '/', regra: 'render', mensagem: e instanceof Error ? e.message : String(e) })
+    }
+  }
+}
 
 function faixa(ini: Node, fim: Node): Node[] { const r: Node[] = []; for (let n: Node | null = ini; n; n = n.nextSibling) { r.push(n); if (n === fim) break } return r }
 function removeFaixa(ini: Node, fim: Node): void { for (const n of faixa(ini, fim)) n.parentNode?.removeChild(n) }
@@ -118,7 +153,7 @@ function constroiFronteira(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Po
         const p = pronto()
         if (p !== estaPronto) { destroiNos(sub.nos); limpaEntre(ini, fim); estaPronto = p; monta(new Pos(fim.parentNode!, fim, false), p); return }
       }
-      atualizaNos(sub.nos, m)
+      atualizaNos(sub.nos, m, amb.onErro)
     },
     destroi() { this.morto = true; destroiNos(sub.nos) },
   })
@@ -142,7 +177,7 @@ function constroiSe(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
         if (c && !sub) return monta(new Pos(fim.parentNode!, fim, false))
         if (!c && sub) { destroiNos(sub.nos); limpaEntre(ini, fim); sub = null; return }
       }
-      if (sub) atualizaNos(sub.nos, m)
+      if (sub) atualizaNos(sub.nos, m, amb.onErro)
     },
     destroi() { this.morto = true; if (sub) destroiNos(sub.nos) },
   })
@@ -192,7 +227,7 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
         if (indiceMudou) { it.i = novo.i; it.esc.indice = novo.i; s.add('indice'); s.add(`indice${MARCA}`) }
       }
     }
-    if (mi.size) atualizaNos(it.dono.nos, mi)
+    if (mi.size) atualizaNos(it.dono.nos, mi, amb.onErro)
   }
   const calcula = (): Array<{ chave: string; item: unknown; i: number }> => {
     const l = avaliaC(cada, esc as Escopo, amb.funcoes)
@@ -256,8 +291,22 @@ function constroiUm(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
     return
   }
   if (no.bloco.impl === 'composto') return constroiComposto(no, cx, dono, amb, pos)
-  if (no.bloco.impl === 'codigo') { amb.onErro?.({ caminho: no.caminho, regra: 'componente-ausente', mensagem: `bloco de código '${no.bloco.interface}' não é suportado pelo runtime vivo` }); return }
+  if (no.bloco.impl === 'codigo') return constroiCodigoBloco(no, cx, dono, amb, pos)
   return constroiNativo(no, cx, dono, amb, pos)
+}
+
+function constroiCodigoBloco(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
+  const def = amb.programa.codigos?.[no.bloco.interface]
+  if (!def) { amb.onErro?.({ caminho: no.caminho, regra: 'bloco-ausente', mensagem: `a definição do bloco de código '${no.bloco.interface}' não está no programa` }); return }
+  const unidade = pos.unidade() // marcadores sempre (o HTML do servidor os traz): o conteúdo é do plugin
+  if (!amb.blocoCodigo) { amb.onErro?.({ caminho: no.caminho, regra: 'codigo', mensagem: `bloco de código '${no.bloco.interface}': o runtime não tem o plugin de blocos de código (opção blocoCodigo)` }); return }
+  const deps = depsProps(no)
+  const { esc } = cx
+  const ctrl = amb.blocoCodigo({
+    def, no, esc, unidade, adotou: pos.adota, props: () => avaliaProps(no, esc, amb.funcoes), deps,
+    estatico: cx.mut !== null && !cruzaMut(deps, cx.mut), codigo: amb.codigo, funcoes: amb.funcoes, relata: (e) => amb.onErro?.(e),
+  })
+  if (ctrl) regista(amb, dono, ctrl)
 }
 
 function constroiComposto(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
@@ -282,7 +331,7 @@ function constroiComposto(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos
       if (fixo) return null
       const c: Ctrl = {
         usa, morto: false,
-        atualiza(mm) { atualizaNos(sub.nos, mm) },
+        atualiza(mm) { atualizaNos(sub.nos, mm, amb.onErro) },
         destroi() { if (this.morto) return; this.morto = true; const i = dono.nos.indexOf(c); if (i >= 0) dono.nos.splice(i, 1); destroiNos(sub.nos) },
       }
       regista(amb, dono, c)
@@ -302,7 +351,7 @@ function constroiComposto(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos
         if (!igual(props[k], np[k])) chavesDeCaminhos('props', caminhosMudados(props[k], np[k]).map((f) => [k, ...f]), mi)
       }
       props = np; inner.props = np
-      atualizaNos(nosInner.nos, mi)
+      atualizaNos(nosInner.nos, mi, amb.onErro)
     },
     destroi() { this.morto = true; destroiNos(nosInner.nos) },
   })
@@ -381,7 +430,7 @@ function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos):
           }
         }
       }
-      atualizaNos(filhos.nos, m)
+      atualizaNos(filhos.nos, m, amb.onErro)
     },
     destroi() { this.morto = true; destroiNos(filhos.nos) },
   })
@@ -393,6 +442,10 @@ export type OpcoesVivo = Omit<OpcoesNucleo, 'programa'> & {
   programa: Programa
   container: Element
   descritores?: DescritoresDom
+  /** plugin de blocos de código (vivo/codigo.ts); sem ele, bloco de código é omitido e reportado */
+  blocoCodigo?: ConstroiCodigo
+  /** sandbox do cliente para blocos de código cujas props MUDAM (QuickJS local); páginas só com blocos estáticos não precisam */
+  codigo?: ConfigCodigo
   /** adota o HTML que o servidor já pôs no contêiner (em vez de construir). Se divergir, reconstrói tudo e avisa por onErro. */
   hidrata?: boolean
 }
@@ -423,7 +476,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
   let stats = { controladores: 0 }
   let raiz: Dono = { nos: [] }
   let hidratou = false
-  const amb = (): Amb => ({ programa, desc: o.descritores ?? descritoresPadrao(), funcoes, modelo, handlers, stats, ...(o.onErro ? { onErro: o.onErro } : {}) })
+  const amb = (): Amb => ({ ...(o.blocoCodigo ? { blocoCodigo: o.blocoCodigo } : {}), ...(o.codigo ? { codigo: o.codigo } : {}), programa, desc: o.descritores ?? descritoresPadrao(), funcoes, modelo, handlers, stats, ...(o.onErro ? { onErro: o.onErro } : {}) })
   const cx: Cx = { esc: modelo.escopo as Esc, host: null, mut: modelo.mutaveis, prof: 0 }
 
   const constroiTudo = (adota: boolean) => {
@@ -441,7 +494,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
     }
   } else constroiTudo(false)
 
-  const desassina = modelo.assina((m) => atualizaNos(raiz.nos, m.mudou))
+  const desassina = modelo.assina((m) => atualizaNos(raiz.nos, m.mudou, o.onErro))
   const ouve = (e: Event) => {
     for (let n = e.target as Node | null; n && n !== o.container; n = n.parentNode) {
       const ent = handlers.get(n)
@@ -467,7 +520,7 @@ export function elegivelVivo(programa: Programa, descritores: DescritoresDom = d
   const anda = (no: IRNo, visitados: Set<string>) => {
     if (no.tipo !== 'elemento') return
     if (no.esqueleto) anda(no.esqueleto, visitados)
-    if (no.bloco.impl === 'codigo') motivos.push({ caminho: no.caminho, motivo: `o bloco '${no.bloco.interface}' é código customizado` })
+    if (no.bloco.impl === 'codigo') { if (!programa.codigos?.[no.bloco.interface]) motivos.push({ caminho: no.caminho, motivo: `a definição do bloco de código '${no.bloco.interface}' não está no programa` }) }
     else if (no.bloco.impl === 'nativo' && !no.bloco.cadeia.some((c) => tem(descritores, c))) motivos.push({ caminho: no.caminho, motivo: `o bloco '${no.bloco.interface}' não tem descritor DOM` })
     else if (no.bloco.impl === 'composto' && !visitados.has(no.bloco.interface)) {
       visitados.add(no.bloco.interface)

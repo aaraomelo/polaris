@@ -35,6 +35,8 @@ export function iniciaDoDocumento(monta: (o: OpcoesVivo) => Vivo, extra: Partial
   const v = monta({
     programa, container: document.getElementById('polaris')!, hidrata: true, fechado: true, ...seed,
     dados: { ...seed.dados, ...s.dados }, status: { ...seed.status, ...s.status }, erros: { ...seed.erros, ...s.erros }, ...extra,
+    // o relógio do código é o que o SERVIDOR fixou (vai no estado): o cliente reproduz a mesma saída
+    ...(extra.codigo ? { codigo: { ...extra.codigo, agora: extra.codigo.agora ?? seed.agora } } : {}),
   } as OpcoesVivo)
   q.fila.length = 0
   q.montado = v

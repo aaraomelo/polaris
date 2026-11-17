@@ -33,11 +33,11 @@ describe('orçamento do bundle do cliente', () => {
     expect(proprio.length).toBeGreaterThan(5) // a medição enxerga o nosso código (não é um bundle vazio)
   })
 
-  it('o runtime vivo (sem React) não tem React, Ajv nem QuickJS e cabe em 16 KB gz (avaliador com listas, aritmética exata e caminhos, modelo, ações e blocos base inclusos)', async () => {
+  it('o runtime vivo (sem React) não tem React, Ajv nem QuickJS e cabe em 24 KB gz (TUDO: biblioteca completa, aritmética exata, caminhos, plugin de blocos de código; o pacote por página leva só o que usa)', async () => {
     const b = await empacota(`import { montaVivo } from './src/vivo/index'; montaVivo({} as never)`)
     for (const re of [...PROIBIDOS, /node_modules\/\.pnpm\/react/]) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
     // 7,5 KB no protótipo → 10,2 KB com modelo, hidratação e a biblioteca de listas/combinadores → 11,7 KB com a aritmética exata (BigInt) → 13,6 KB com caminhos/patches/histórico. A biblioteca padrão é o que mais pesa: o corte é incluí-la POR PROGRAMA (só as funções usadas). Próximo corte: incluir só as funções que o programa usa.
-    expect(b.gz).toBeLessThan(16 * 1024)
+    expect(b.gz).toBeLessThan(24 * 1024)
     expect(b.entradas.some((e) => /vivo\/monta/.test(e))).toBe(true)
   })
 

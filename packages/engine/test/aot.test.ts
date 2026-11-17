@@ -32,8 +32,8 @@ const loja = () => programa(P('layout/pilha', { slots: { filhos: [
 
 describe('uso: o que a página realmente chama', () => {
   it('funções (de qualquer expressão: página, modelo de bloco, ação) e blocos nativos, sem repetidos', () => {
-    expect(usoDoPrograma(simples())).toEqual({ funcoes: [], interfaces: ['texto/paragrafo'] })
-    expect(usoDoPrograma(contador())).toEqual({ funcoes: [], interfaces: ['layout/pilha', 'nav/botao', 'texto/paragrafo'] })
+    expect(usoDoPrograma(simples())).toEqual({ funcoes: [], interfaces: ['texto/paragrafo'], codigos: [] })
+    expect(usoDoPrograma(contador())).toEqual({ funcoes: [], interfaces: ['layout/pilha', 'nav/botao', 'texto/paragrafo'], codigos: [] })
     const u = usoDoPrograma(loja())
     expect(u.funcoes).toEqual(['brl', 'com', 'dobra', 'filtra', 'junta', 'maiusculas', 'mapeia', 'objeto', 'ordena', 'qbrl', 'qmul', 'qsoma', 'tamanho'])
     expect(u.interfaces).toEqual(['entrada/texto', 'layout/pilha', 'nav/botao', 'texto/paragrafo', 'texto/titulo'])
@@ -65,7 +65,7 @@ describe('entrada gerada: importa SÓ o que a página usa', () => {
     expect(fonte).toMatch(/import \{ fq_qsoma \} from .*expr\/exato\.ts/)
   })
   it('função inexistente na biblioteca é recusada (não gera import quebrado)', () => {
-    expect(() => geraEntrada(simples(), { funcoes: ['naoexiste'], interfaces: [] })).toThrow(/não existe na biblioteca/)
+    expect(() => geraEntrada(simples(), { funcoes: ['naoexiste'], interfaces: [], codigos: [] })).toThrow(/não existe na biblioteca/)
   })
 })
 

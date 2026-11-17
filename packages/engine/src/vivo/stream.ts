@@ -2,6 +2,7 @@ import { iniciaCargas, type OpcoesCarga } from '../dados/carrega'
 import { codificaChave } from '../estatico/gera'
 import { compilaHtmlVivo } from '../estatico/index'
 import { jsonSeguro } from '../render/json'
+import type { ConfigCodigo } from '../codigo/sessao'
 import type { Programa } from '../render/programa'
 import { iniciaStore, reduz, type Store } from '../render/store'
 import type { DescritoresDom } from './blocos'
@@ -40,6 +41,8 @@ export type OpcoesStreamVivo = OpcoesCarga & {
   abortaEmMs?: number
   /** nonce de CSP para os scripts inline (boot e inicialização) */
   nonce?: string
+  /** executor isolado dos blocos de código (SSR); o `agora` é decidido UMA vez aqui e vai no estado para o cliente reproduzir a saída */
+  codigo?: ConfigCodigo
 }
 
 /**
@@ -52,7 +55,8 @@ export async function* streamVivo(programa: Programa, opcoes: OpcoesStreamVivo):
   const pagina = h.pagina
   const cargas = iniciaCargas(programa, opcoes)
   const bloq = await cargas.bloqueantes
-  const base = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma }
+  const codigo = opcoes.codigo ? { ...opcoes.codigo, agora: opcoes.codigo.agora ?? new Date().toISOString() } : undefined
+  const base = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma, ...(codigo ? { codigo } : {}) }
   const entrada = (s: Store) => ({ ...base, estado: s.estado, dados: s.dados, status: s.status, erros: s.erros })
   let store: Store = iniciaStore(programa, { ...(opcoes.estado ? { estado: opcoes.estado } : {}), dados: bloq.dados, status: bloq.status, erros: bloq.erros })
 
@@ -62,7 +66,7 @@ export async function* streamVivo(programa: Programa, opcoes: OpcoesStreamVivo):
 
   const shell = pagina.render(entrada(store))
   const nonce = opcoes.nonce ? ` nonce="${esc(opcoes.nonce)}"` : ''
-  const seed = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma, estado: store.estado, dados: store.dados, status: store.status, erros: store.erros }
+  const seed = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma, estado: store.estado, dados: store.dados, status: store.status, erros: store.erros, ...(codigo?.agora ? { agora: codigo.agora } : {}) }
   yield `<!doctype html><html lang="${esc(opcoes.lang ?? opcoes.idioma ?? 'pt-BR')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(shell.titulo)}</title>` +
     `<script${nonce}>${BOOT}</script><script${nonce} async src="${esc(opcoes.clienteSrc)}"></script></head>` +
     `<body><div id="polaris">${shell.corpo}</div>` +

@@ -1,5 +1,4 @@
-import { createElement, type ReactNode } from 'react'
-import { urlSegura } from '../render/base'
+import { urlSegura } from '../render/url'
 import { normalizaOrigem } from './permissoes'
 
 // ---------------------------------------------------------------------------
@@ -19,7 +18,7 @@ export type OpcoesUI = {
 }
 
 const TAGS = new Set(['div', 'span', 'p', 'br', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'strong', 'em', 'b', 'i', 'u', 'small', 'code', 'pre', 'blockquote', 'img', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'section', 'article', 'header', 'footer', 'nav', 'main', 'aside', 'figure', 'figcaption'])
-const VAZIAS = new Set(['br', 'hr', 'img'])
+export const VAZIAS = new Set(['br', 'hr', 'img'])
 const ROLES = new Set(['list', 'listitem', 'img', 'presentation', 'heading', 'article', 'region', 'navigation', 'banner', 'contentinfo', 'main', 'note', 'table', 'row', 'cell', 'columnheader', 'figure'])
 const GLOBAIS = new Set(['class', 'title', 'role', 'aria-label', 'aria-hidden', 'lang', 'dir'])
 const POR_TAG: Record<string, Set<string>> = { a: new Set(['href']), img: new Set(['src', 'alt', 'width', 'height']), td: new Set(['colspan', 'rowspan']), th: new Set(['colspan', 'rowspan', 'scope']) }
@@ -95,16 +94,4 @@ export function sanitizaUI(raiz: unknown, op: OpcoesUI = {}): { no: NoUI | null;
     return { tag, ...(Object.keys(attrs).length ? { attrs } : {}), ...(filhos.length ? { children: filhos } : {}) }
   }
   return { no: anda(raiz, '', 0), violacoes }
-}
-
-/** Renderiza a descrição (já sanitizada) com createElement: o host nunca insere HTML cru. */
-export function renderUI(no: NoUI | null, chave = 'ui'): ReactNode {
-  if (no === null) return null
-  if (typeof no === 'string' || typeof no === 'number') return no
-  const props: Record<string, unknown> = { key: chave }
-  for (const [k, val] of Object.entries(no.attrs ?? {})) props[k === 'class' ? 'className' : k === 'colspan' ? 'colSpan' : k === 'rowspan' ? 'rowSpan' : k] = val
-  const filhos = (no.children ?? []).map((c, i) => renderUI(c, `${chave}.${i}`))
-  // imagem vinda de código de tenant: sem referrer, carregamento preguiçoso (também evita o preload automático do React)
-  if (no.tag === 'img') Object.assign(props, { referrerPolicy: 'no-referrer', loading: 'lazy', decoding: 'async' })
-  return VAZIAS.has(no.tag) ? createElement(no.tag, props) : createElement(no.tag, props, ...filhos)
 }

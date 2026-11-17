@@ -2,7 +2,8 @@ import { escopoDaStore, iniciaStore, type SementeStore } from '../render/store'
 import type { Programa } from '../render/programa'
 import type { ErroRuntime } from '../render/tipos'
 import { EMISSORES_BASE, type Emissores } from './emissores'
-import { geraEstatico, type Estatico, type FronteiraInfo, type Motivo } from './gera'
+import { geraEstatico, type ContextoCodigo, type Estatico, type FronteiraInfo, type Motivo } from './gera'
+import { SessaoCodigo, type ConfigCodigo } from '../codigo/sessao'
 import { DESCRITORES_BASE, type DescritoresDom } from '../vivo/blocos'
 import { emissoresDe } from '../vivo/emissor'
 
@@ -16,6 +17,8 @@ export type EntradaEstatica = SementeStore & {
   tenant?: Record<string, unknown>
   idioma?: string
   onErro?: (e: ErroRuntime) => void
+  /** sandbox e orçamento dos blocos de código (só no HTML do runtime vivo); sem isso, bloco de código sai vazio e é reportado */
+  codigo?: ConfigCodigo
 }
 
 export type PaginaEstatica = {
@@ -38,11 +41,20 @@ function paginaDe(programa: Programa, r: Extract<ReturnType<typeof geraEstatico>
   const est: Estatico = r.estatico
   // o mesmo escopo que o interpretador React monta (render/pagina.tsx), sem importar React
   const escopoDe = (e: EntradaEstatica) => escopoDaStore(programa, iniciaStore(programa, e), { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' })
+  const sessoes = new WeakMap<ConfigCodigo, SessaoCodigo>()
+  const contexto = (e: EntradaEstatica): ContextoCodigo => {
+    const relata = e.onErro ?? (() => {})
+    if (!e.codigo) return { relata }
+    let s = sessoes.get(e.codigo)
+    if (!s) { s = new SessaoCodigo(e.codigo); sessoes.set(e.codigo, s) }
+    s.novaPassagem()
+    return { sessao: s, relata }
+  }
   return {
     fonte: est.fonte,
     fronteiras: est.fronteiras, retidas: est.retidas,
-    render(e: EntradaEstatica = {}) { const esc = escopoDe(e); return { corpo: est.render(esc, e.onErro), titulo: est.titulo(esc) } },
-    renderFronteira(chave: string, e: EntradaEstatica = {}) { return est.renderFronteira(chave, escopoDe(e)) },
+    render(e: EntradaEstatica = {}) { const esc = escopoDe(e); return { corpo: est.render(esc, e.onErro, contexto(e)), titulo: est.titulo(esc) } },
+    renderFronteira(chave: string, e: EntradaEstatica = {}) { return est.renderFronteira(chave, escopoDe(e), contexto(e)) },
   }
 }
 

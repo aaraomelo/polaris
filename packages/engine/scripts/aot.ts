@@ -2,11 +2,12 @@
 import { Registry, formataErros, type Contexto } from '@polaris/schema'
 import { construirAot, nosDoDiretorio } from '../src/aot/index'
 import { registraBase } from '../src/index'
+import { criaSandboxWorker } from '../src/sandbox/worker'
 
 const args = process.argv.slice(2)
 const valor = (nome: string): string[] => args.flatMap((a, i) => (a === `--${nome}` && args[i + 1] ? [args[i + 1]!] : []))
 const [nos] = valor('nos'), [saida] = valor('saida')
-if (!nos || !saida) { console.error('uso: pnpm aot --nos <diretório com os nós *.json> --saida <diretório> [--tenant <id>]... [--segmento <s>]...'); process.exit(2) }
+if (!nos || !saida) { console.error('uso: pnpm aot --nos <diretório com os nós *.json> --saida <diretório> [--tenant <id>]... [--segmento <s>]... [--codigo [--origem https://…]...]'); process.exit(2) }
 
 const reg = new Registry()
 registraBase(reg)
@@ -15,7 +16,10 @@ for (const n of nosDoDiretorio(nos)) {
   try { reg.registra(n) } catch (e) { invalidos++; console.error(`✗ nó inválido: ${(e as Error).message}`) }
 }
 const contextos: Contexto[] = [{}, ...valor('tenant').map((tenantId) => ({ tenantId })), ...valor('segmento').map((segmento) => ({ segmento }))]
-const resultados = await construirAot(reg, { destino: saida, contextos })
+// blocos de código: --codigo cria o sandbox (QuickJS em worker, prazo duro) para PRÉ-RENDERIZAR; --origem libera origens https da plataforma
+const sandbox = args.includes('--codigo') ? await criaSandboxWorker() : undefined
+const resultados = await construirAot(reg, { destino: saida, contextos, ...(sandbox ? { codigo: { sandbox, origensPermitidas: valor('origem') } } : {}) })
+sandbox?.libera()
 let falhou = invalidos > 0
 for (const [i, r] of resultados.entries()) {
   const ctx = contextos[i]!

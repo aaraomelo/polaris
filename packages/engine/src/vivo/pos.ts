@@ -29,6 +29,25 @@ export class Pos {
     return n as Comment
   }
 
+  /**
+   * Uma UNIDADE opaca entre dois marcadores (`<!--c:HASH-->…<!--/c-->`): o conteúdo é de quem a gerencia (bloco de código), não do construtor.
+   * Ao adotar, salta até o marcador de fim e devolve o hash que o servidor escreveu; ao criar, insere os dois marcadores vazios.
+   */
+  unidade(): { ini: Comment; fim: Comment; hash: string | null } {
+    if (!this.adota) {
+      const ini = document.createComment('c:'), fim = document.createComment('/c')
+      this.pai.insertBefore(ini, this.ref); this.pai.insertBefore(fim, this.ref)
+      return { ini, fim, hash: null }
+    }
+    const ini = this.prox
+    if (!ini || ini.nodeType !== 8 || !(ini as Comment).data.startsWith('c:')) throw new Divergencia(`esperava o início de um bloco de código, achou ${descreve(ini)}`)
+    let n = ini.nextSibling
+    while (n && !(n.nodeType === 8 && (n as Comment).data === '/c')) n = n.nextSibling
+    if (!n) throw new Divergencia('bloco de código sem marcador de fim no HTML do servidor')
+    this.prox = n.nextSibling
+    return { ini: ini as Comment, fim: n as Comment, hash: (ini as Comment).data.slice(2) }
+  }
+
   /** insere o nó (criar) ou não faz nada (adotar: já está no lugar) */
   coloca(n: Node): void { if (!this.adota) this.pai.insertBefore(n, this.ref) }
 

@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path'
 import type { Contexto, Erro, Registry } from '@polaris/schema'
 import { compilaEstatico, compilaHtmlVivo, documentoEstatico } from '../estatico/index'
 import { compilaPrograma, type Programa } from '../render/programa'
+import type { ConfigCodigo } from '../codigo/sessao'
 import { jsonSeguro } from '../render/json'
 import { elegivelVivo } from '../vivo/monta'
 import { empacotaCliente } from './empacota'
@@ -78,7 +79,9 @@ export const INICIALIZACAO = 'Polaris.inicia()'
 
 type PaginaPronta = { entrada: EntradaManifesto; conteudos: Record<string, string> }
 
-async function constroiPagina(id: string, programa: Programa, no: { id: string; versao: string }, escopo: string): Promise<PaginaPronta> {
+const AGORA_PADRAO = '1970-01-01T00:00:00.000Z' // build determinístico: o relógio do código é fixo (e vai no HTML para o cliente reproduzir)
+
+async function constroiPagina(id: string, programa: Programa, no: { id: string; versao: string }, escopo: string, codigoCfg: ConfigCodigo | undefined): Promise<PaginaPronta> {
   const base = nomeBase(id)
   const progJson = JSON.stringify(programa)
   const hashP = sha(progJson).slice(0, 12)
@@ -90,7 +93,10 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
   const motivos: string[] = []
   if (temDados) motivos.push('a página tem dados: o HTML é renderizado a cada requisição')
   if (rotaDinamica) motivos.push('a rota tem parâmetros: o HTML é renderizado a cada requisição')
-  const prerenderizavel = !temDados && !rotaDinamica
+  const temCodigo = uso.codigos.length > 0
+  if (temCodigo && !codigoCfg) motivos.push('blocos de código sem sandbox no build: o HTML é renderizado a cada requisição (use --codigo para pré-renderizar)')
+  const codigo = codigoCfg ? { ...codigoCfg, agora: codigoCfg.agora ?? AGORA_PADRAO } : undefined
+  const prerenderizavel = !temDados && !rotaDinamica && (!temCodigo || !!codigo)
   const arquivos: EntradaManifesto['arquivos'] = { programa: arquivo(progNome, progJson) }
   const entrada: EntradaManifesto = { no: { id: no.id, versao: no.versao, escopo }, rota: programa.pagina.rota, modo: 'react', motivos, prerenderizada: false, arquivos, uso }
 
@@ -117,10 +123,10 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
   if (prerenderizavel) {
     const h = compilaHtmlVivo(programa)
     if (!h.ok) throw new Error('HTML do servidor recusado para página elegível')
-    const r = h.pagina.render({})
+    const r = h.pagina.render({ ...(codigo ? { codigo } : {}) })
     const ini = INICIALIZACAO
     const titulo = r.titulo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${titulo}</title></head><body><div id="polaris">${r.corpo}</div><script type="application/json" id="pl-programa">${jsonSeguro(programa)}</script><script src="${jsNome}"></script><script>${ini}</script></body></html>`
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${titulo}</title></head><body><div id="polaris">${r.corpo}</div><script type="application/json" id="pl-programa">${jsonSeguro(programa)}</script>${temCodigo ? `<script type="application/json" id="pl-estado">${jsonSeguro({ agora: codigo!.agora })}</script>` : ''}<script src="${jsNome}"></script><script>${ini}</script></body></html>`
     const nome = `${base}.${sha(html).slice(0, 12)}.html`
     conteudos[nome] = html; arquivos.html = arquivo(nome, html); entrada.prerenderizada = true
     entrada.cspScript = `sha256-${createHash('sha256').update(ini).digest('base64')}`
@@ -129,6 +135,8 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
 }
 
 export type OpcoesBuild = {
+  /** sandbox para pré-renderizar páginas com blocos de código (sem isso elas saem sem HTML pré-feito) */
+  codigo?: ConfigCodigo
   /** diretório de saída (cada contexto vai para uma subpasta: core, t-<tenant>, s-<segmento>) */
   destino: string
   contextos?: Contexto[]
@@ -149,7 +157,7 @@ export async function construirAot(reg: Registry, opcoes: OpcoesBuild): Promise<
       if (!r) continue
       const c = compilaPrograma(reg, r.no, ctx)
       if (!c.ok) { erros.push({ pagina: id, erros: c.erros }); continue }
-      const p = await constroiPagina(id, c.programa, { id: r.no.id, versao: r.no.versao }, r.escopo)
+      const p = await constroiPagina(id, c.programa, { id: r.no.id, versao: r.no.versao }, r.escopo, opcoes.codigo)
       paginas[id] = p.entrada
       Object.assign(conteudos, p.conteudos)
     }
