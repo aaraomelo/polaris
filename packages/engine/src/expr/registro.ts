@@ -6,7 +6,7 @@
 // Uma função nova só entra em FUNCOES_PADRAO se tiver entrada aqui (teste de completude).
 // ---------------------------------------------------------------------------
 
-export type Gerador = 'texto' | 'numero' | 'inteiro' | 'escalar' | 'lista' | 'qualquer'
+export type Gerador = 'texto' | 'numero' | 'inteiro' | 'escalar' | 'lista' | 'listas' | 'objeto' | 'qualquer'
 
 export type Exemplo = { expr: string; esc?: Record<string, unknown>; saida?: unknown; indefinido?: true }
 export type Lei = { expr: string; gera: Record<string, Gerador> }
@@ -44,6 +44,10 @@ export const REGISTRO: Def[] = [
     { expr: 'x ? "sim" : "não"', esc: { x: 1 }, saida: 'sim' }, { expr: 'x ? "sim" : "não"', esc: { x: '' }, saida: 'não' }, { expr: 'x ? "sim" : "não"', esc: { x: [] }, saida: 'não' }, { expr: 'x ? "sim" : "não"', esc: { x: {} }, saida: 'sim' },
   ], leis: [{ expr: '(c ? a : b) == (!c ? b : a)', gera: { c: 'qualquer', a: 'escalar', b: 'escalar' } }] },
 
+  { nome: 'fn', tipo: 'forma', assinatura: '{ fn: [param…], corpo: nó }  ≡  x => corpo  |  (a, b) => corpo', descricao: 'Função anônima de 1 a 3 parâmetros. SÓ pode ser o argumento de um combinador (mapeia, filtra, dobra, todos, algum, acha, ordena, agrupa); em qualquer outro lugar é erro de compilação. Enxerga as variáveis de fora e os próprios parâmetros. Não há recursão nem função como valor: a linguagem continua total.', exemplos: [
+    { expr: 'mapeia([1, 2, 3], x => x * 2)', saida: [2, 4, 6] }, { expr: 'mapeia(l, (x, i) => x + i)', esc: { l: [10, 20] }, saida: [10, 21] }, { expr: 'mapeia(l, x => x + k)', esc: { l: [1, 2], k: 10 }, saida: [11, 12] },
+  ] },
+
   // ---- operadores -----------------------------------------------------------
   { nome: '+', tipo: 'operador', assinatura: 'a + b', descricao: 'Soma de números; se um dos lados é texto, concatena (ausente/objeto/lista viram vazio); nos demais casos, ausente.', exemplos: [
     { expr: '1 + 2', saida: 3 }, { expr: '"a" + 1', saida: 'a1' }, { expr: '"a" + x', esc: {}, saida: 'a' }, { expr: '1 + x', esc: { x: null }, indefinido: U },
@@ -74,6 +78,78 @@ export const REGISTRO: Def[] = [
   { nome: 'neg', tipo: 'operador', assinatura: '-a  ≡  { chama: "neg", args: [a] }', descricao: 'Negativo de um número; outro tipo é ausente.', exemplos: [{ expr: '-x', esc: { x: 5 }, saida: -5 }, { expr: '-x', esc: { x: '5' }, indefinido: U }], leis: [{ expr: '-(-a) == a', gera: { a: 'numero' } }] },
 
   // ---- funções --------------------------------------------------------------
+  // combinadores (recebem função anônima): a ÚNICA iteração da linguagem, sempre sobre uma lista que já existe
+  { nome: 'mapeia', tipo: 'funcao', assinatura: 'mapeia(lista, x => …) → lista   (a função pode receber também o índice: (x, i) => …)', descricao: 'Aplica a função a cada item, na ordem. Funtor da lista: preserva o tamanho. Não-lista é ausente.', exemplos: [
+    { expr: 'mapeia([1, 2, 3], x => x * x)', saida: [1, 4, 9] }, { expr: 'mapeia(["a", "b"], (x, i) => x + i)', saida: ['a0', 'b1'] }, { expr: 'mapeia(5, x => x)', indefinido: U },
+  ], leis: [
+    { expr: 'igual(mapeia(l, x => x), l)', gera: { l: 'lista' } },
+    { expr: 'tamanho(mapeia(l, x => x * 2)) == tamanho(l)', gera: { l: 'lista' } },
+    { expr: 'igual(mapeia(mapeia(l, x => x + 1), x => x * 2), mapeia(l, x => (x + 1) * 2))', gera: { l: 'lista' } },
+    { expr: 'igual(mapeia(concat(a, b), x => x + 1), concat(mapeia(a, x => x + 1), mapeia(b, x => x + 1)))', gera: { a: 'lista', b: 'lista' } },
+  ] },
+  { nome: 'filtra', tipo: 'funcao', assinatura: 'filtra(lista, x => condição) → lista', descricao: 'Mantém os itens para os quais a função é verdadeira (mesma veracidade de `se`), na ordem original.', exemplos: [
+    { expr: 'filtra([1, 2, 3, 4], x => x % 2 == 0)', saida: [2, 4] }, { expr: 'filtra(l, x => x.ok)', esc: { l: [{ ok: true, n: 1 }, { ok: false, n: 2 }] }, saida: [{ ok: true, n: 1 }] },
+  ], leis: [
+    { expr: 'igual(filtra(filtra(l, x => x > 0), x => x > 0), filtra(l, x => x > 0))', gera: { l: 'lista' } },
+    { expr: 'tamanho(filtra(l, x => x > 0)) + tamanho(filtra(l, x => !(x > 0))) == tamanho(l)', gera: { l: 'lista' } },
+    { expr: 'igual(filtra(concat(a, b), x => x > 1), concat(filtra(a, x => x > 1), filtra(b, x => x > 1)))', gera: { a: 'lista', b: 'lista' } },
+  ] },
+  { nome: 'dobra', tipo: 'funcao', assinatura: 'dobra(lista, inicial, (acc, x) => …) → valor   (opcional: (acc, x, i))', descricao: 'Dobra à esquerda: acc₀ = inicial; accₖ₊₁ = f(accₖ, itemₖ). É o catamorfismo da lista: toda função definida por indução na lista é uma dobra. Um laço limitado pelo tamanho da lista, nunca aberto.', exemplos: [
+    { expr: 'dobra([1, 2, 3], 0, (a, x) => a + x)', saida: 6 }, { expr: 'dobra(["a", "b"], "", (a, x) => a + x)', saida: 'ab' }, { expr: 'dobra([], 7, (a, x) => a + x)', saida: 7 },
+  ], leis: [
+    { expr: 'dobra(l, 0, (a, x) => a + 1) == tamanho(l)', gera: { l: 'lista' } },
+    { expr: 'dobra(concat(a, b), 0, (s, x) => s + x) == dobra(b, dobra(a, 0, (s, x) => s + x), (s, x) => s + x)', gera: { a: 'lista', b: 'lista' } },
+    { expr: 'igual(dobra(l, [], (acc, x) => concat(acc, [x])), l)', gera: { l: 'lista' } },
+    { expr: 'igual(dobra(l, [], (acc, x) => concat([x], acc)), inverte(l))', gera: { l: 'lista' } },
+  ] },
+  { nome: 'todos', tipo: 'funcao', assinatura: 'todos(lista, x => condição) → booleano', descricao: 'Verdadeiro se a função é verdadeira para todos os itens (lista vazia: verdadeiro).', exemplos: [{ expr: 'todos([1, 2], x => x > 0)', saida: true }, { expr: 'todos([], x => false)', saida: true }], leis: [
+    { expr: 'todos(l, x => x > 0) == !algum(l, x => !(x > 0))', gera: { l: 'lista' } },
+    { expr: 'todos(concat(a, b), x => x > 0) == (todos(a, x => x > 0) && todos(b, x => x > 0))', gera: { a: 'lista', b: 'lista' } },
+  ] },
+  { nome: 'algum', tipo: 'funcao', assinatura: 'algum(lista, x => condição) → booleano', descricao: 'Verdadeiro se a função é verdadeira para algum item (lista vazia: falso).', exemplos: [{ expr: 'algum([1, 2], x => x > 1)', saida: true }, { expr: 'algum([], x => true)', saida: false }] },
+  { nome: 'acha', tipo: 'funcao', assinatura: 'acha(lista, x => condição) → item', descricao: 'Primeiro item para o qual a função é verdadeira; ausente se nenhum.', exemplos: [{ expr: 'acha([1, 5, 9], x => x > 3)', saida: 5 }, { expr: 'acha([1], x => x > 3)', indefinido: U }], leis: [{ expr: '(acha(l, x => x > 0) == null) == !algum(l, x => x > 0)', gera: { l: 'lista' } }] },
+  { nome: 'ordena', tipo: 'funcao', assinatura: 'ordena(lista, x => chave) → lista', descricao: 'Ordena pela chave, de forma ESTÁVEL. Ordem total e determinística das chaves: números < textos < booleanos < o resto (ausente por último); empates mantêm a ordem original.', exemplos: [
+    { expr: 'ordena([3, 1, 2], x => x)', saida: [1, 2, 3] }, { expr: 'ordena(["b", "a"], x => x)', saida: ['a', 'b'] }, { expr: 'ordena(l, x => x.n)', esc: { l: [{ n: 2, k: "a" }, { n: 1, k: "b" }, { n: 2, k: "c" }] }, saida: [{ n: 1, k: 'b' }, { n: 2, k: 'a' }, { n: 2, k: 'c' }] }, { expr: 'ordena([2, "a", 1, null], x => x)', saida: [1, 2, 'a', null] },
+  ], leis: [
+    { expr: 'igual(ordena(ordena(l, x => x), x => x), ordena(l, x => x))', gera: { l: 'lista' } },
+    { expr: 'tamanho(ordena(l, x => x)) == tamanho(l)', gera: { l: 'lista' } },
+    { expr: 'igual(ordena(inverte(l), x => x), ordena(l, x => x))', gera: { l: 'lista' } },
+    { expr: 'igual(ordena(l, x => x), inverte(ordena(l, x => -x)))', gera: { l: 'lista' } },
+  ] },
+  { nome: 'agrupa', tipo: 'funcao', assinatura: 'agrupa(lista, x => chave) → objeto', descricao: 'Agrupa os itens por chave (a chave vira texto: número e booleano convertem; o resto vira ""). Cada grupo mantém a ordem original.', exemplos: [
+    { expr: 'agrupa([1, 2, 3, 4], x => x % 2)', saida: { '0': [2, 4], '1': [1, 3] } }, { expr: 'agrupa(["a", "bb", "c"], x => tamanho(x))', saida: { '1': ['a', 'c'], '2': ['bb'] } },
+  ], leis: [{ expr: 'soma(mapeia(valores(agrupa(l, x => x % 2)), g => tamanho(g))) == tamanho(l)', gera: { l: 'lista' } }] },
+
+  // listas e objetos (a lista é o monoide livre: `concat` é a operação e `[]` a unidade)
+  { nome: 'igual', tipo: 'funcao', assinatura: 'igual(a, b) → booleano', descricao: 'Igualdade ESTRUTURAL (listas e objetos comparam por conteúdo; a ordem das chaves não importa; `null` e ausente são iguais). Diferente de `==`, que nunca iguala listas e objetos.', exemplos: [
+    { expr: 'igual([1, [2]], [1, [2]])', saida: true }, { expr: 'igual(a, b)', esc: { a: { x: 1, y: 2 }, b: { y: 2, x: 1 } }, saida: true }, { expr: 'igual([1], [1, 2])', saida: false }, { expr: 'igual(null, x)', esc: {}, saida: true },
+  ], leis: [{ expr: 'igual(a, a)', gera: { a: 'qualquer' } }, { expr: 'igual(a, b) == igual(b, a)', gera: { a: 'qualquer', b: 'qualquer' } }] },
+  { nome: 'concat', tipo: 'funcao', assinatura: 'concat(lista, …) → lista   (1 a 16 listas)', descricao: 'Concatena listas. É a operação do monoide livre: associativa, com `[]` como unidade. Resultado acima de 100 000 itens é ausente.', exemplos: [
+    { expr: 'concat([1], [2, 3])', saida: [1, 2, 3] }, { expr: 'concat([1], 5)', indefinido: U }, { expr: 'concat([], [])', saida: [] },
+  ], leis: [
+    { expr: 'igual(concat(concat(a, b), c), concat(a, concat(b, c)))', gera: { a: 'lista', b: 'lista', c: 'lista' } },
+    { expr: 'igual(concat(a, []), a) && igual(concat([], a), a)', gera: { a: 'lista' } },
+    { expr: 'tamanho(concat(a, b)) == tamanho(a) + tamanho(b)', gera: { a: 'lista', b: 'lista' } },
+  ] },
+  { nome: 'achata', tipo: 'funcao', assinatura: 'achata(lista) → lista', descricao: 'Remove UM nível de aninhamento (itens que não são lista ficam como estão).', exemplos: [{ expr: 'achata([[1], [2, 3], 4])', saida: [1, 2, 3, 4] }, { expr: 'achata([[[1]]])', saida: [[1]] }], leis: [
+    { expr: 'igual(achata(mapeia(l, x => [x])), l)', gera: { l: 'lista' } },
+    { expr: 'igual(achata(concat(a, b)), concat(achata(a), achata(b)))', gera: { a: 'listas', b: 'listas' } },
+  ] },
+  { nome: 'fatia', tipo: 'funcao', assinatura: 'fatia(lista|texto, início, fim?) → lista|texto', descricao: 'Trecho [início, fim); índices negativos contam do fim. Índice não inteiro é ausente.', exemplos: [{ expr: 'fatia([1, 2, 3, 4], 1, 3)', saida: [2, 3] }, { expr: 'fatia("banana", -2)', saida: 'na' }, { expr: 'fatia([1], 0.5)', indefinido: U }], leis: [{ expr: 'igual(concat(fatia(l, 0, k), fatia(l, k)), l)', gera: { l: 'lista', k: 'inteiro' } }] },
+  { nome: 'inverte', tipo: 'funcao', assinatura: 'inverte(lista) → lista', descricao: 'Lista na ordem contrária.', exemplos: [{ expr: 'inverte([1, 2, 3])', saida: [3, 2, 1] }], leis: [
+    { expr: 'igual(inverte(inverte(l)), l)', gera: { l: 'lista' } }, { expr: 'igual(inverte(concat(a, b)), concat(inverte(b), inverte(a)))', gera: { a: 'lista', b: 'lista' } },
+  ] },
+  { nome: 'primeiro', tipo: 'funcao', assinatura: 'primeiro(lista) → item', descricao: 'Primeiro item (ausente se vazia).', exemplos: [{ expr: 'primeiro([7, 8])', saida: 7 }, { expr: 'primeiro([])', indefinido: U }] },
+  { nome: 'ultimo', tipo: 'funcao', assinatura: 'ultimo(lista) → item', descricao: 'Último item (ausente se vazia).', exemplos: [{ expr: 'ultimo([7, 8])', saida: 8 }], leis: [{ expr: 'igual(primeiro(inverte(l)), ultimo(l))', gera: { l: 'lista' } }] },
+  { nome: 'unicos', tipo: 'funcao', assinatura: 'unicos(lista) → lista', descricao: 'Remove repetidos (igualdade estrutural), mantendo a primeira ocorrência.', exemplos: [{ expr: 'unicos([1, 2, 1, 3, 2])', saida: [1, 2, 3] }, { expr: 'unicos([[1], [1], [2]])', saida: [[1], [2]] }], leis: [
+    { expr: 'igual(unicos(unicos(l)), unicos(l))', gera: { l: 'lista' } }, { expr: 'tamanho(unicos(l)) <= tamanho(l)', gera: { l: 'lista' } }, { expr: 'todos(l, x => contem(unicos(l), x))', gera: { l: 'lista' } },
+  ] },
+  { nome: 'intervalo', tipo: 'funcao', assinatura: 'intervalo(fim) | intervalo(início, fim) → lista', descricao: 'Inteiros de início (padrão 0) até fim, exclusive. Vazio se fim ≤ início; acima de 100 000 itens é ausente.', exemplos: [{ expr: 'intervalo(4)', saida: [0, 1, 2, 3] }, { expr: 'intervalo(2, 5)', saida: [2, 3, 4] }, { expr: 'intervalo(-3)', saida: [] }, { expr: 'intervalo(0.5)', indefinido: U }], leis: [{ expr: 'tamanho(intervalo(n)) == maximo(n, 0)', gera: { n: 'inteiro' } }] },
+  { nome: 'soma', tipo: 'funcao', assinatura: 'soma(lista) → número', descricao: 'Soma de uma lista de números (da esquerda para a direita). Qualquer item não numérico torna o resultado ausente; lista vazia dá 0.', exemplos: [{ expr: 'soma([1, 2, 3])', saida: 6 }, { expr: 'soma([])', saida: 0 }, { expr: 'soma([1, "x"])', indefinido: U }], leis: [{ expr: 'soma(concat(a, b)) == soma(a) + soma(b)', gera: { a: 'lista', b: 'lista' } }] },
+  { nome: 'chaves', tipo: 'funcao', assinatura: 'chaves(objeto) → lista de textos', descricao: 'Chaves próprias em ORDEM ALFABÉTICA (determinística em qualquer plataforma).', exemplos: [{ expr: 'chaves(o)', esc: { o: { b: 1, a: 2 } }, saida: ['a', 'b'] }, { expr: 'chaves([1])', indefinido: U }], leis: [{ expr: 'tamanho(chaves(o)) == tamanho(o)', gera: { o: 'objeto' } }] },
+  { nome: 'valores', tipo: 'funcao', assinatura: 'valores(objeto) → lista', descricao: 'Valores na ordem alfabética das chaves.', exemplos: [{ expr: 'valores(o)', esc: { o: { b: 1, a: 2 } }, saida: [2, 1] }] },
+  { nome: 'entradas', tipo: 'funcao', assinatura: 'entradas(objeto) → lista de [chave, valor]', descricao: 'Pares [chave, valor] na ordem alfabética das chaves.', exemplos: [{ expr: 'entradas(o)', esc: { o: { b: 1, a: 2 } }, saida: [['a', 2], ['b', 1]] }], leis: [{ expr: 'igual(objeto(entradas(o)), o)', gera: { o: 'objeto' } }] },
+  { nome: 'objeto', tipo: 'funcao', assinatura: 'objeto(lista de [chave, valor]) → objeto', descricao: 'Constrói o objeto; chave repetida: vale a última. Par malformado ou chave que não é texto: ausente.', exemplos: [{ expr: 'objeto([["a", 1], ["b", 2]])', saida: { a: 1, b: 2 } }, { expr: 'objeto([["a", 1], ["a", 2]])', saida: { a: 2 } }, { expr: 'objeto([[1, 2]])', indefinido: U }] },
   { nome: 'tamanho', tipo: 'funcao', assinatura: 'tamanho(x) → número', descricao: 'Comprimento de texto ou lista; número de chaves de objeto; 0 para o resto.', exemplos: [
     { expr: 'tamanho("abc")', saida: 3 }, { expr: 'tamanho([1, 2])', saida: 2 }, { expr: 'tamanho(o)', esc: { o: { a: 1, b: 2 } }, saida: 2 }, { expr: 'tamanho(null)', saida: 0 },
   ], leis: [{ expr: 'tamanho(a + b) == tamanho(a) + tamanho(b)', gera: { a: 'texto', b: 'texto' } }] },

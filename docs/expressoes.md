@@ -38,7 +38,7 @@ Sem laços nem recursão: sempre termina. Limites: 2000 caracteres, 500 nós, 32
 - **Bloco (modelo)**: só `props` e `tenant` (encapsulamento). `core/slot` com `props.nome` projeta os filhos que a instância recebeu naquele slot.
 
 ## AST canônico e referência gerada
-A forma de referência da linguagem é o AST em JSON (sete formas: `lit`, `var`, `campo`, `indice`, `lista`, `se`, `chama`);
+A forma de referência da linguagem é o AST em JSON (oito formas: `lit`, `var`, `campo`, `indice`, `lista`, `se`, `chama`, `fn`);
 o texto é açúcar e `formata` o reconstrói de forma canônica. Onde o schema pede uma expressão (`se`, `repetir.cada`,
 `repetir.chave`, `definir.valor`) vale texto OU AST; em props, `{ "$expr": <AST> }` avalia no lugar. Os erros do AST
 apontam o caminho JSON dentro do próprio nó. A referência completa (formas, operadores, funções, exemplos executáveis e

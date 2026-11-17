@@ -293,7 +293,7 @@
       "minProperties": 1,
       "maxProperties": 3,
       "additionalProperties": false,
-      "description": "nó do AST canônico: lit | var | campo+de | indice+de | lista | se+entao+senao | chama+args (validação completa na compilação; ver docs/funcoes.md)",
+      "description": "nó do AST canônico: lit | var | campo+de | indice+de | lista | se+entao+senao | chama+args | fn+corpo (validação completa na compilação; ver docs/funcoes.md)",
       "properties": {
         "lit": {},
         "var": {
@@ -331,6 +331,17 @@
           "items": {
             "$ref": "#/$defs/exprAst"
           }
+        },
+        "fn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "corpo": {
+          "$ref": "#/$defs/exprAst"
         }
       }
     }

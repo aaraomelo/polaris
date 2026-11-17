@@ -24,6 +24,13 @@ export function depsExpr(e: Expr, out: Set<string>): void {
     case 'bin': depsExpr(e.a, out); depsExpr(e.b, out); break
     case 'cond': depsExpr(e.c, out); depsExpr(e.a, out); depsExpr(e.b, out); break
     case 'lista': for (const i of e.itens) depsExpr(i, out); break
+    case 'fn': {
+      // o que o corpo lê, menos os parâmetros (ligados dentro da função)
+      const dentro = new Set<string>()
+      depsExpr(e.corpo, dentro)
+      for (const k of dentro) { const r = k.indexOf('.') < 0 ? k : k.slice(0, k.indexOf('.')); if (!e.params.includes(r)) out.add(k) }
+      break
+    }
     case 'call': for (const a of e.args) depsExpr(a, out); break
     case 'lit': break
   }

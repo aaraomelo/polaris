@@ -33,10 +33,11 @@ describe('orçamento do bundle do cliente', () => {
     expect(proprio.length).toBeGreaterThan(5) // a medição enxerga o nosso código (não é um bundle vazio)
   })
 
-  it('o runtime vivo (sem React) não tem React, Ajv nem QuickJS e cabe em 10 KB gz (avaliador, ações e blocos base inclusos)', async () => {
+  it('o runtime vivo (sem React) não tem React, Ajv nem QuickJS e cabe em 12 KB gz (avaliador com a biblioteca de listas, modelo, ações e blocos base inclusos)', async () => {
     const b = await empacota(`import { montaVivo } from './src/vivo/index'; montaVivo({} as never)`)
     for (const re of [...PROIBIDOS, /node_modules\/\.pnpm\/react/]) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
-    expect(b.gz).toBeLessThan(10 * 1024)
+    // 7,5 KB no protótipo → 10,2 KB com modelo, hidratação e a biblioteca de listas/combinadores. Próximo corte: incluir só as funções que o programa usa.
+    expect(b.gz).toBeLessThan(12 * 1024)
     expect(b.entradas.some((e) => /vivo\/monta/.test(e))).toBe(true)
   })
 

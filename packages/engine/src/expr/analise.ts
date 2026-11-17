@@ -1,63 +1,89 @@
 import { sugere } from '@polaris/schema/sugere'
 import { FUNCOES_PADRAO } from './funcoes'
+import { ORDEM_SUPERIOR, ehOrdemSuperior } from './ordem-superior'
 import type { Expr, Funcoes } from './tipos'
 
-export type ProblemaExpr = { pos: number; mensagem: string; dica?: string; regra: 'variavel' | 'funcao' | 'aridade' }
+export type ProblemaExpr = { pos: number; mensagem: string; dica?: string; regra: 'variavel' | 'funcao' | 'aridade' | 'funcao-anonima' }
 
-/** Variáveis livres e chamadas de uma expressão. */
+/** Variáveis LIVRES (as ligadas por parâmetros de função anônima não contam) e chamadas de uma expressão. */
 export function analisa(e: Expr): { variaveis: Set<string>; chamadas: Array<{ fn: string; n: number; pos: number }> } {
   const variaveis = new Set<string>()
   const chamadas: Array<{ fn: string; n: number; pos: number }> = []
-  const anda = (x: Expr): void => {
+  const anda = (x: Expr, ligadas: readonly string[]): void => {
     switch (x.t) {
-      case 'var': variaveis.add(x.nome); break
-      case 'mem': anda(x.obj); break
-      case 'idx': anda(x.obj); anda(x.idx); break
-      case 'un': anda(x.x); break
-      case 'bin': anda(x.a); anda(x.b); break
-      case 'cond': anda(x.c); anda(x.a); anda(x.b); break
-      case 'lista': x.itens.forEach(anda); break
-      case 'call': chamadas.push({ fn: x.fn, n: x.args.length, pos: x.pos }); x.args.forEach(anda); break
+      case 'var': if (!ligadas.includes(x.nome)) variaveis.add(x.nome); break
+      case 'mem': anda(x.obj, ligadas); break
+      case 'idx': anda(x.obj, ligadas); anda(x.idx, ligadas); break
+      case 'un': anda(x.x, ligadas); break
+      case 'bin': anda(x.a, ligadas); anda(x.b, ligadas); break
+      case 'cond': anda(x.c, ligadas); anda(x.a, ligadas); anda(x.b, ligadas); break
+      case 'lista': x.itens.forEach((i) => anda(i, ligadas)); break
+      case 'fn': anda(x.corpo, [...ligadas, ...x.params]); break
+      case 'call': chamadas.push({ fn: x.fn, n: x.args.length, pos: x.pos }); x.args.forEach((a) => anda(a, ligadas)); break
       case 'lit': break
     }
   }
-  anda(e)
+  anda(e, [])
   return { variaveis, chamadas }
 }
 
-/** Checagem estática: variável fora do escopo, função desconhecida e número de argumentos. */
+const PARAMS_PROIBIDOS = new Set(['__proto__', 'constructor', 'prototype', 'true', 'false', 'null'])
+
+/** Checagem estática: variável fora do escopo, função desconhecida, número de argumentos e uso correto de função anônima. */
 export function validaExpr(e: Expr, escopo: readonly string[], funcoes: Funcoes = FUNCOES_PADRAO): ProblemaExpr[] {
   const out: ProblemaExpr[] = []
-  const a = analisa(e)
-  const posVar = new Map<string, number>()
-  const acha = (x: Expr): void => {
-    if (x.t === 'var' && !posVar.has(x.nome)) posVar.set(x.nome, x.pos)
-    if (x.t === 'mem') acha(x.obj)
-    else if (x.t === 'idx') { acha(x.obj); acha(x.idx) }
-    else if (x.t === 'un') acha(x.x)
-    else if (x.t === 'bin') { acha(x.a); acha(x.b) }
-    else if (x.t === 'cond') { acha(x.c); acha(x.a); acha(x.b) }
-    else if (x.t === 'lista') x.itens.forEach(acha)
-    else if (x.t === 'call') x.args.forEach(acha)
-  }
-  acha(e)
-  for (const v of a.variaveis) {
-    if (escopo.includes(v)) continue
-    const s = sugere(v, escopo)
-    out.push({
-      pos: posVar.get(v) ?? 0, regra: 'variavel', mensagem: `a variável '${v}' não existe neste ponto`,
-      dica: s ? `quis dizer '${s}'?` : escopo.length ? `variáveis disponíveis: ${escopo.join(', ')}` : 'não há variáveis disponíveis aqui',
-    })
-  }
-  for (const c of a.chamadas) {
-    const f = Object.prototype.hasOwnProperty.call(funcoes, c.fn) ? funcoes[c.fn] : undefined
-    if (!f) {
-      const s = sugere(c.fn, Object.keys(funcoes))
-      out.push({ pos: c.pos, regra: 'funcao', mensagem: `a função '${c.fn}' não existe`, dica: s ? `quis dizer '${s}'?` : `funções: ${Object.keys(funcoes).join(', ')}` })
-    } else if (c.n < f.min || c.n > f.max) {
-      const esp = f.min === f.max ? `${f.min}` : `${f.min} a ${f.max === Infinity ? 'N' : f.max}`
-      out.push({ pos: c.pos, regra: 'aridade', mensagem: `'${c.fn}' recebe ${esp} argumento(s), recebeu ${c.n}` })
+  const nomes = (extra: readonly string[]) => [...escopo, ...extra]
+  const anda = (x: Expr, ligadas: readonly string[], emArgFn: boolean): void => {
+    switch (x.t) {
+      case 'var':
+        if (!ligadas.includes(x.nome) && !escopo.includes(x.nome)) {
+          const s = sugere(x.nome, nomes(ligadas))
+          out.push({
+            pos: x.pos, regra: 'variavel', mensagem: `a variável '${x.nome}' não existe neste ponto`,
+            dica: s ? `quis dizer '${s}'?` : escopo.length || ligadas.length ? `variáveis disponíveis: ${nomes(ligadas).join(', ')}` : 'não há variáveis disponíveis aqui',
+          })
+        }
+        break
+      case 'mem': anda(x.obj, ligadas, false); break
+      case 'idx': anda(x.obj, ligadas, false); anda(x.idx, ligadas, false); break
+      case 'un': anda(x.x, ligadas, false); break
+      case 'bin': anda(x.a, ligadas, false); anda(x.b, ligadas, false); break
+      case 'cond': anda(x.c, ligadas, false); anda(x.a, ligadas, false); anda(x.b, ligadas, false); break
+      case 'lista': x.itens.forEach((i) => anda(i, ligadas, false)); break
+      case 'lit': break
+      case 'fn':
+        if (!emArgFn) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: 'função anônima só pode ser argumento de um combinador', dica: `use dentro de ${Object.keys(ORDEM_SUPERIOR).join(', ')}` })
+        for (const p of x.params) if (PARAMS_PROIBIDOS.has(p)) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: `nome de parâmetro inválido '${p}'` })
+        if (new Set(x.params).size !== x.params.length) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: 'parâmetros repetidos' })
+        anda(x.corpo, [...ligadas, ...x.params], false)
+        break
+      case 'call': {
+        if (ehOrdemSuperior(x.fn)) {
+          const os = ORDEM_SUPERIOR[x.fn]!
+          if (x.args.length !== os.fnPos + 1) out.push({ pos: x.pos, regra: 'aridade', mensagem: `'${x.fn}' recebe ${os.fnPos + 1} argumentos, recebeu ${x.args.length}` })
+          x.args.forEach((a, i) => {
+            if (i === os.fnPos) {
+              if (a.t !== 'fn') out.push({ pos: a.pos, regra: 'funcao-anonima', mensagem: `o argumento ${i + 1} de '${x.fn}' deve ser uma função anônima`, dica: `ex.: ${x.fn}(lista, x => …)` })
+              else if (a.params.length > os.paramsMax) out.push({ pos: a.pos, regra: 'funcao-anonima', mensagem: `a função de '${x.fn}' aceita até ${os.paramsMax} parâmetro(s), declarou ${a.params.length}` })
+              else anda(a, ligadas, true)
+            } else anda(a, ligadas, false)
+          })
+          break
+        }
+        const f = Object.prototype.hasOwnProperty.call(funcoes, x.fn) ? funcoes[x.fn] : undefined
+        if (!f) {
+          const s = sugere(x.fn, [...Object.keys(funcoes), ...Object.keys(ORDEM_SUPERIOR)])
+          out.push({ pos: x.pos, regra: 'funcao', mensagem: `a função '${x.fn}' não existe`, dica: s ? `quis dizer '${s}'?` : `funções: ${[...Object.keys(funcoes), ...Object.keys(ORDEM_SUPERIOR)].join(', ')}` })
+        } else if (x.args.length < f.min || x.args.length > f.max) {
+          const esp = f.min === f.max ? `${f.min}` : `${f.min} a ${f.max === Infinity ? 'N' : f.max}`
+          out.push({ pos: x.pos, regra: 'aridade', mensagem: `'${x.fn}' recebe ${esp} argumento(s), recebeu ${x.args.length}` })
+        }
+        x.args.forEach((a) => anda(a, ligadas, false))
+        break
+      }
     }
   }
-  return out
+  anda(e, [], false)
+  // ordem por posição, como antes (o autor lê o erro mais à esquerda primeiro)
+  return out.sort((a, b) => a.pos - b.pos)
 }

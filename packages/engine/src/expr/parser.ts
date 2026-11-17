@@ -3,7 +3,7 @@ import { ExprErro, LIMITES_EXPR, type Bin, type Expr } from './tipos'
 
 type Tok = { k: 'num' | 'str' | 'id' | 'op' | 'fim'; v: string; pos: number }
 
-const OPS = ['??', '||', '&&', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '!', '|', '.', ',', '(', ')', '[', ']', '?', ':']
+const OPS = ['=>', '??', '||', '&&', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '!', '|', '.', ',', '(', ')', '[', ']', '?', ':']
 const ESCAPES: Record<string, string> = { n: '\n', t: '\t', '\\': '\\', "'": "'", '"': '"' }
 
 function lex(src: string): Tok[] {
@@ -96,10 +96,39 @@ class Parser {
     return e
   }
 
+  /** `x => …` ou `(a, b) => …` começa aqui? (só se aceita função anônima como argumento de chamada) */
+  private ehLambda(): boolean {
+    const t = this.toks
+    const op = (k: number, v: string) => t[k]?.k === 'op' && t[k]!.v === v
+    if (this.tok.k === 'id') return op(this.i + 1, '=>')
+    if (!this.op('(')) return false
+    let k = this.i + 1
+    if (op(k, ')')) return op(k + 1, '=>')
+    for (;;) {
+      if (t[k]?.k !== 'id') return false
+      k++
+      if (op(k, ',')) { k++; continue }
+      return op(k, ')') && op(k + 1, '=>')
+    }
+  }
+
+  private lambda(): Expr {
+    const pos = this.tok.pos
+    const params: string[] = []
+    if (this.come('(')) {
+      while (!this.op(')')) { params.push(this.tok.v); this.i++; this.come(',') }
+      this.i++
+    } else { params.push(this.tok.v); this.i++ }
+    this.espera('=>', 'depois dos parâmetros da função')
+    return this.no({ t: 'fn', params, corpo: this.cond(), pos })
+  }
+
+  private arg(): Expr { return this.ehLambda() ? this.lambda() : this.cond() }
+
   private args(): Expr[] {
     const out: Expr[] = []
     if (!this.come(')')) {
-      do out.push(this.cond()); while (this.come(','))
+      do out.push(this.arg()); while (this.come(','))
       this.espera(')', 'ao fechar os argumentos')
     }
     return out

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { geraDocFuncoes } from '../src/expr/docs'
+import { ORDEM_SUPERIOR } from '../src/expr/ordem-superior'
 import { FUNCOES_PADRAO, OPERADORES, avalia, deAst, formata, paraAst, parseExpr, semPos, validaAst, verdadeiro, type Ast, type Expr } from '../src/expr/index'
 import { REGISTRO, type Gerador } from '../src/expr/registro'
 
@@ -13,11 +14,11 @@ const pick = <T,>(xs: readonly T[]): T => xs[ri(xs.length)]!
 describe('registro: a documentação é a fonte e não mente', () => {
   it('toda função padrão está documentada, e todo documentado como função existe', () => {
     const doc = REGISTRO.filter((d) => d.tipo === 'funcao').map((d) => d.nome).sort()
-    expect(doc).toEqual(Object.keys(FUNCOES_PADRAO).sort())
+    expect(doc).toEqual([...Object.keys(FUNCOES_PADRAO), ...Object.keys(ORDEM_SUPERIOR)].sort())
   })
   it('todo operador do AST está documentado (e vice-versa); as formas também', () => {
     expect(REGISTRO.filter((d) => d.tipo === 'operador').map((d) => d.nome).sort()).toEqual([...OPERADORES].sort())
-    expect(REGISTRO.filter((d) => d.tipo === 'forma').map((d) => d.nome).sort()).toEqual(['campo', 'indice', 'lista', 'lit', 'se', 'var'])
+    expect(REGISTRO.filter((d) => d.tipo === 'forma').map((d) => d.nome).sort()).toEqual(['campo', 'fn', 'indice', 'lista', 'lit', 'se', 'var'])
   })
   it('nomes únicos, descrição e ao menos um exemplo em todas as entradas', () => {
     expect(new Set(REGISTRO.map((d) => d.nome)).size).toBe(REGISTRO.length)
@@ -36,7 +37,9 @@ describe('registro: a documentação é a fonte e não mente', () => {
     numero: () => pick([0, 1, -1, 0.5, -0.5, 1e6, -1e6, 1e-6, 123.456, -78.9, rnd() * 200 - 100, Math.round(rnd() * 100), 1.005, 0.285]),
     inteiro: () => ri(41) - 20,
     escalar: () => pick([null, true, false, 0, 1, -3, 2.5, '', 'a', 'texto', ' x ', 7]),
-    lista: () => Array.from({ length: ri(4) }, () => ri(5)),
+    lista: () => Array.from({ length: ri(7) }, () => ri(9) - 3),
+    listas: () => Array.from({ length: ri(4) }, () => (rnd() < 0.8 ? Array.from({ length: ri(4) }, () => ri(5)) : ri(5))),
+    objeto: () => Object.fromEntries(Array.from({ length: ri(4) }, () => [pick(['a', 'b', 'c', 'k-1', '__proto__', 'ç']), pick([0, 1, 'x', null, true])])),
     qualquer: () => pick([null, undefined, true, false, 0, 1, -2, 3.5, '', 'a', [], [0], {}, { a: 1 }]),
   }
   it('LEIS: cada propriedade declarada vale para 400 entradas aleatórias de cada tipo', () => {

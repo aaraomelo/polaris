@@ -3,12 +3,13 @@
 > Gerado por `pnpm docs:funcoes` a partir de `packages/engine/src/expr/registro.ts`. **Não edite à mão.**
 > Todo exemplo abaixo é executado nos testes; toda lei é verificada com entradas aleatórias.
 
-A linguagem é **pura** (sem efeitos), **total** (sempre termina, sem recursão nem laços) e **tolerante a ausente**
+A linguagem é **pura** (sem efeitos), **total** (sempre termina: não há recursão nem laço aberto; a única iteração são os
+combinadores sobre listas que já existem, sob um orçamento de passos) e **tolerante a ausente**
 (valor ausente propaga como ausente; nunca lança erro). Sem `eval`: o texto vira o AST abaixo, e é o AST que se executa.
 
 ## Forma canônica (AST em JSON)
 
-O texto (`a + b | brl`) é açúcar. A forma de referência é JSON, com sete formas de nó, todas objetos:
+O texto (`a + b | brl`) é açúcar. A forma de referência é JSON, com oito formas de nó, todas objetos:
 
 ```jsonc
 { "lit": null | true | 1.5 | "texto" }        // número finito e NÃO negativo; negativo é neg
@@ -18,6 +19,7 @@ O texto (`a + b | brl`) é açúcar. A forma de referência é JSON, com sete fo
 { "lista": [<nó>, …] }
 { "se": <nó>, "entao": <nó>, "senao": <nó> }  // c ? a : b
 { "chama": "nome", "args": [<nó>, …] }        // função ou operador (+, &&, !, neg, brl, …)
+{ "fn": ["x"], "corpo": <nó> }                  // x => corpo: SÓ como argumento de mapeia, filtra, dobra…
 ```
 
 Exemplo: `preco * (1 - desconto) | brl`
@@ -124,6 +126,18 @@ Condicional. Só o ramo escolhido é avaliado. Veracidade: são falsos `null`, a
 
 **Leis** (testadas com entradas aleatórias):
 - `(c ? a : b) == (!c ? b : a)`
+
+### `fn`
+
+`{ fn: [param…], corpo: nó }  ≡  x => corpo  |  (a, b) => corpo`
+
+Função anônima de 1 a 3 parâmetros. SÓ pode ser o argumento de um combinador (mapeia, filtra, dobra, todos, algum, acha, ordena, agrupa); em qualquer outro lugar é erro de compilação. Enxerga as variáveis de fora e os próprios parâmetros. Não há recursão nem função como valor: a linguagem continua total.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mapeia([1, 2, 3], x => x * 2)` |  | `[2,4,6]` |
+| `mapeia(l, (x, i) => x + i)` | `{"l":[10,20]}` | `[10,21]` |
+| `mapeia(l, x => x + k)` | `{"l":[1,2],"k":10}` | `[11,12]` |
 
 ## Operadores
 
@@ -346,6 +360,329 @@ Negativo de um número; outro tipo é ausente.
 - `-(-a) == a`
 
 ## Funções
+
+### `mapeia`
+
+`mapeia(lista, x => …) → lista   (a função pode receber também o índice: (x, i) => …)`
+
+Aplica a função a cada item, na ordem. Funtor da lista: preserva o tamanho. Não-lista é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mapeia([1, 2, 3], x => x * x)` |  | `[1,4,9]` |
+| `mapeia(["a", "b"], (x, i) => x + i)` |  | `["a0","b1"]` |
+| `mapeia(5, x => x)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(mapeia(l, x => x), l)`
+- `tamanho(mapeia(l, x => x * 2)) == tamanho(l)`
+- `igual(mapeia(mapeia(l, x => x + 1), x => x * 2), mapeia(l, x => (x + 1) * 2))`
+- `igual(mapeia(concat(a, b), x => x + 1), concat(mapeia(a, x => x + 1), mapeia(b, x => x + 1)))`
+
+### `filtra`
+
+`filtra(lista, x => condição) → lista`
+
+Mantém os itens para os quais a função é verdadeira (mesma veracidade de `se`), na ordem original.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `filtra([1, 2, 3, 4], x => x % 2 == 0)` |  | `[2,4]` |
+| `filtra(l, x => x.ok)` | `{"l":[{"ok":true,"n":1},{"ok":false,"n":2}]}` | `[{"ok":true,"n":1}]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(filtra(filtra(l, x => x > 0), x => x > 0), filtra(l, x => x > 0))`
+- `tamanho(filtra(l, x => x > 0)) + tamanho(filtra(l, x => !(x > 0))) == tamanho(l)`
+- `igual(filtra(concat(a, b), x => x > 1), concat(filtra(a, x => x > 1), filtra(b, x => x > 1)))`
+
+### `dobra`
+
+`dobra(lista, inicial, (acc, x) => …) → valor   (opcional: (acc, x, i))`
+
+Dobra à esquerda: acc₀ = inicial; accₖ₊₁ = f(accₖ, itemₖ). É o catamorfismo da lista: toda função definida por indução na lista é uma dobra. Um laço limitado pelo tamanho da lista, nunca aberto.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `dobra([1, 2, 3], 0, (a, x) => a + x)` |  | `6` |
+| `dobra(["a", "b"], "", (a, x) => a + x)` |  | `"ab"` |
+| `dobra([], 7, (a, x) => a + x)` |  | `7` |
+
+**Leis** (testadas com entradas aleatórias):
+- `dobra(l, 0, (a, x) => a + 1) == tamanho(l)`
+- `dobra(concat(a, b), 0, (s, x) => s + x) == dobra(b, dobra(a, 0, (s, x) => s + x), (s, x) => s + x)`
+- `igual(dobra(l, [], (acc, x) => concat(acc, [x])), l)`
+- `igual(dobra(l, [], (acc, x) => concat([x], acc)), inverte(l))`
+
+### `todos`
+
+`todos(lista, x => condição) → booleano`
+
+Verdadeiro se a função é verdadeira para todos os itens (lista vazia: verdadeiro).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `todos([1, 2], x => x > 0)` |  | `true` |
+| `todos([], x => false)` |  | `true` |
+
+**Leis** (testadas com entradas aleatórias):
+- `todos(l, x => x > 0) == !algum(l, x => !(x > 0))`
+- `todos(concat(a, b), x => x > 0) == (todos(a, x => x > 0) && todos(b, x => x > 0))`
+
+### `algum`
+
+`algum(lista, x => condição) → booleano`
+
+Verdadeiro se a função é verdadeira para algum item (lista vazia: falso).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `algum([1, 2], x => x > 1)` |  | `true` |
+| `algum([], x => true)` |  | `false` |
+
+### `acha`
+
+`acha(lista, x => condição) → item`
+
+Primeiro item para o qual a função é verdadeira; ausente se nenhum.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `acha([1, 5, 9], x => x > 3)` |  | `5` |
+| `acha([1], x => x > 3)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `(acha(l, x => x > 0) == null) == !algum(l, x => x > 0)`
+
+### `ordena`
+
+`ordena(lista, x => chave) → lista`
+
+Ordena pela chave, de forma ESTÁVEL. Ordem total e determinística das chaves: números < textos < booleanos < o resto (ausente por último); empates mantêm a ordem original.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `ordena([3, 1, 2], x => x)` |  | `[1,2,3]` |
+| `ordena(["b", "a"], x => x)` |  | `["a","b"]` |
+| `ordena(l, x => x.n)` | `{"l":[{"n":2,"k":"a"},{"n":1,"k":"b"},{"n":2,"k":"c"}]}` | `[{"n":1,"k":"b"},{"n":2,"k":"a"},{"n":2,"k":"c"}]` |
+| `ordena([2, "a", 1, null], x => x)` |  | `[1,2,"a",null]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(ordena(ordena(l, x => x), x => x), ordena(l, x => x))`
+- `tamanho(ordena(l, x => x)) == tamanho(l)`
+- `igual(ordena(inverte(l), x => x), ordena(l, x => x))`
+- `igual(ordena(l, x => x), inverte(ordena(l, x => -x)))`
+
+### `agrupa`
+
+`agrupa(lista, x => chave) → objeto`
+
+Agrupa os itens por chave (a chave vira texto: número e booleano convertem; o resto vira ""). Cada grupo mantém a ordem original.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `agrupa([1, 2, 3, 4], x => x % 2)` |  | `{"0":[2,4],"1":[1,3]}` |
+| `agrupa(["a", "bb", "c"], x => tamanho(x))` |  | `{"1":["a","c"],"2":["bb"]}` |
+
+**Leis** (testadas com entradas aleatórias):
+- `soma(mapeia(valores(agrupa(l, x => x % 2)), g => tamanho(g))) == tamanho(l)`
+
+### `igual`
+
+`igual(a, b) → booleano`
+
+Igualdade ESTRUTURAL (listas e objetos comparam por conteúdo; a ordem das chaves não importa; `null` e ausente são iguais). Diferente de `==`, que nunca iguala listas e objetos.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `igual([1, [2]], [1, [2]])` |  | `true` |
+| `igual(a, b)` | `{"a":{"x":1,"y":2},"b":{"y":2,"x":1}}` | `true` |
+| `igual([1], [1, 2])` |  | `false` |
+| `igual(null, x)` |  | `true` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(a, a)`
+- `igual(a, b) == igual(b, a)`
+
+### `concat`
+
+`concat(lista, …) → lista   (1 a 16 listas)`
+
+Concatena listas. É a operação do monoide livre: associativa, com `[]` como unidade. Resultado acima de 100 000 itens é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `concat([1], [2, 3])` |  | `[1,2,3]` |
+| `concat([1], 5)` |  | _(ausente)_ |
+| `concat([], [])` |  | `[]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(concat(concat(a, b), c), concat(a, concat(b, c)))`
+- `igual(concat(a, []), a) && igual(concat([], a), a)`
+- `tamanho(concat(a, b)) == tamanho(a) + tamanho(b)`
+
+### `achata`
+
+`achata(lista) → lista`
+
+Remove UM nível de aninhamento (itens que não são lista ficam como estão).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `achata([[1], [2, 3], 4])` |  | `[1,2,3,4]` |
+| `achata([[[1]]])` |  | `[[1]]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(achata(mapeia(l, x => [x])), l)`
+- `igual(achata(concat(a, b)), concat(achata(a), achata(b)))`
+
+### `fatia`
+
+`fatia(lista|texto, início, fim?) → lista|texto`
+
+Trecho [início, fim); índices negativos contam do fim. Índice não inteiro é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `fatia([1, 2, 3, 4], 1, 3)` |  | `[2,3]` |
+| `fatia("banana", -2)` |  | `"na"` |
+| `fatia([1], 0.5)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(concat(fatia(l, 0, k), fatia(l, k)), l)`
+
+### `inverte`
+
+`inverte(lista) → lista`
+
+Lista na ordem contrária.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `inverte([1, 2, 3])` |  | `[3,2,1]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(inverte(inverte(l)), l)`
+- `igual(inverte(concat(a, b)), concat(inverte(b), inverte(a)))`
+
+### `primeiro`
+
+`primeiro(lista) → item`
+
+Primeiro item (ausente se vazia).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `primeiro([7, 8])` |  | `7` |
+| `primeiro([])` |  | _(ausente)_ |
+
+### `ultimo`
+
+`ultimo(lista) → item`
+
+Último item (ausente se vazia).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `ultimo([7, 8])` |  | `8` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(primeiro(inverte(l)), ultimo(l))`
+
+### `unicos`
+
+`unicos(lista) → lista`
+
+Remove repetidos (igualdade estrutural), mantendo a primeira ocorrência.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `unicos([1, 2, 1, 3, 2])` |  | `[1,2,3]` |
+| `unicos([[1], [1], [2]])` |  | `[[1],[2]]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(unicos(unicos(l)), unicos(l))`
+- `tamanho(unicos(l)) <= tamanho(l)`
+- `todos(l, x => contem(unicos(l), x))`
+
+### `intervalo`
+
+`intervalo(fim) | intervalo(início, fim) → lista`
+
+Inteiros de início (padrão 0) até fim, exclusive. Vazio se fim ≤ início; acima de 100 000 itens é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `intervalo(4)` |  | `[0,1,2,3]` |
+| `intervalo(2, 5)` |  | `[2,3,4]` |
+| `intervalo(-3)` |  | `[]` |
+| `intervalo(0.5)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `tamanho(intervalo(n)) == maximo(n, 0)`
+
+### `soma`
+
+`soma(lista) → número`
+
+Soma de uma lista de números (da esquerda para a direita). Qualquer item não numérico torna o resultado ausente; lista vazia dá 0.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `soma([1, 2, 3])` |  | `6` |
+| `soma([])` |  | `0` |
+| `soma([1, "x"])` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `soma(concat(a, b)) == soma(a) + soma(b)`
+
+### `chaves`
+
+`chaves(objeto) → lista de textos`
+
+Chaves próprias em ORDEM ALFABÉTICA (determinística em qualquer plataforma).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `chaves(o)` | `{"o":{"b":1,"a":2}}` | `["a","b"]` |
+| `chaves([1])` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `tamanho(chaves(o)) == tamanho(o)`
+
+### `valores`
+
+`valores(objeto) → lista`
+
+Valores na ordem alfabética das chaves.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `valores(o)` | `{"o":{"b":1,"a":2}}` | `[2,1]` |
+
+### `entradas`
+
+`entradas(objeto) → lista de [chave, valor]`
+
+Pares [chave, valor] na ordem alfabética das chaves.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `entradas(o)` | `{"o":{"b":1,"a":2}}` | `[["a",2],["b",1]]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(objeto(entradas(o)), o)`
+
+### `objeto`
+
+`objeto(lista de [chave, valor]) → objeto`
+
+Constrói o objeto; chave repetida: vale a última. Par malformado ou chave que não é texto: ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `objeto([["a", 1], ["b", 2]])` |  | `{"a":1,"b":2}` |
+| `objeto([["a", 1], ["a", 2]])` |  | `{"a":2}` |
+| `objeto([[1, 2]])` |  | _(ausente)_ |
 
 ### `tamanho`
 

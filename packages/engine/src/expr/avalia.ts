@@ -1,16 +1,13 @@
-import type { Expr, Funcoes } from './tipos'
+import { LIMITES_EXPR, type Expr, type Funcoes } from './tipos'
+import { ORDEM_SUPERIOR, ehOrdemSuperior } from './ordem-superior'
+import { verdadeiro } from './verdade'
+
+export { verdadeiro }
 
 // Avaliador puro: nunca lança, nunca usa eval/Function, só lê dados próprios do escopo.
 // Valor ausente propaga como `undefined` (renderiza vazio), nunca como erro.
 
 export const PROIBIDAS = new Set(['__proto__', 'constructor', 'prototype'])
-
-export const verdadeiro = (v: unknown): boolean => {
-  if (v === null || v === undefined || v === false || v === 0 || v === '') return false
-  if (typeof v === 'number' && Number.isNaN(v)) return false
-  if (Array.isArray(v) && v.length === 0) return false
-  return true
-}
 
 const ehObjeto = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 
@@ -61,28 +58,66 @@ function binario(op: string, a: unknown, b: unknown): unknown {
 
 export type Escopo = Record<string, unknown>
 
-export function avalia(e: Expr, escopo: Escopo, funcoes: Funcoes): unknown {
+/** Variáveis ligadas por funções anônimas (lista encadeada: o parâmetro mais interno primeiro). */
+type Lig = { nome: string; valor: unknown; prox: Lig | null } | null
+type Orc = { n: number }
+const ESGOTOU = Symbol('orcamento')
+
+function av(e: Expr, escopo: Escopo, funcoes: Funcoes, lig: Lig, orc: Orc): unknown {
+  if (--orc.n < 0) throw ESGOTOU
+  const a_ = (x: Expr) => av(x, escopo, funcoes, lig, orc)
   switch (e.t) {
     case 'lit': return e.v
-    case 'var': return !PROIBIDAS.has(e.nome) && Object.prototype.hasOwnProperty.call(escopo, e.nome) ? escopo[e.nome] : undefined
-    case 'mem': return campo(avalia(e.obj, escopo, funcoes), e.nome)
-    case 'idx': return indice(avalia(e.obj, escopo, funcoes), avalia(e.idx, escopo, funcoes))
-    case 'lista': return e.itens.map((x) => avalia(x, escopo, funcoes))
+    case 'var': {
+      for (let l = lig; l; l = l.prox) if (l.nome === e.nome) return l.valor
+      return !PROIBIDAS.has(e.nome) && Object.prototype.hasOwnProperty.call(escopo, e.nome) ? escopo[e.nome] : undefined
+    }
+    case 'mem': return campo(a_(e.obj), e.nome)
+    case 'idx': return indice(a_(e.obj), a_(e.idx))
+    case 'lista': return e.itens.map(a_)
+    case 'fn': return undefined // função anônima fora de um combinador não tem valor
     case 'un': {
-      const v = avalia(e.x, escopo, funcoes)
+      const v = a_(e.x)
       return e.op === '!' ? !verdadeiro(v) : num(v) ? -v : undefined
     }
-    case 'cond': return verdadeiro(avalia(e.c, escopo, funcoes)) ? avalia(e.a, escopo, funcoes) : avalia(e.b, escopo, funcoes)
+    case 'cond': return verdadeiro(a_(e.c)) ? a_(e.a) : a_(e.b)
     case 'bin': {
-      if (e.op === '&&') { const a = avalia(e.a, escopo, funcoes); return verdadeiro(a) ? avalia(e.b, escopo, funcoes) : a }
-      if (e.op === '||') { const a = avalia(e.a, escopo, funcoes); return verdadeiro(a) ? a : avalia(e.b, escopo, funcoes) }
-      if (e.op === '??') { const a = avalia(e.a, escopo, funcoes); return a === null || a === undefined ? avalia(e.b, escopo, funcoes) : a }
-      return binario(e.op, avalia(e.a, escopo, funcoes), avalia(e.b, escopo, funcoes))
+      if (e.op === '&&') { const a = a_(e.a); return verdadeiro(a) ? a_(e.b) : a }
+      if (e.op === '||') { const a = a_(e.a); return verdadeiro(a) ? a : a_(e.b) }
+      if (e.op === '??') { const a = a_(e.a); return a === null || a === undefined ? a_(e.b) : a }
+      return binario(e.op, a_(e.a), a_(e.b))
     }
     case 'call': {
+      if (ehOrdemSuperior(e.fn)) {
+        const os = ORDEM_SUPERIOR[e.fn]!
+        const fn = e.args[os.fnPos]
+        if (!fn || fn.t !== 'fn' || fn.params.length < 1 || fn.params.length > os.paramsMax || e.args.length !== os.fnPos + 1) return undefined
+        const args = e.args.map((x, i) => (i === os.fnPos ? undefined : a_(x)))
+        const aplica = (...vals: unknown[]) => {
+          let l: Lig = lig
+          fn.params.forEach((p, i) => { l = { nome: p, valor: vals[i], prox: l } })
+          return av(fn.corpo, escopo, funcoes, l, orc)
+        }
+        return os.impl(args, aplica)
+      }
       const f = Object.prototype.hasOwnProperty.call(funcoes, e.fn) ? funcoes[e.fn] : undefined
       if (!f || e.args.length < f.min || e.args.length > f.max) return undefined
-      try { return f.fn(...e.args.map((a) => avalia(a, escopo, funcoes))) } catch { return undefined }
+      const vals = e.args.map(a_)
+      try { return f.fn(...vals) } catch { return undefined }
     }
+  }
+}
+
+/** Avalia com orçamento de passos (nós avaliados): estourou → ausente. Nunca lança, sempre termina. */
+export function avalia(e: Expr, escopo: Escopo, funcoes: Funcoes): unknown {
+  try { return av(e, escopo, funcoes, null, { n: LIMITES_EXPR.passos }) } catch (x) { if (x === ESGOTOU) return undefined; throw x }
+}
+
+/** Como `avalia`, mas diz quantos passos gastou e se o orçamento acabou (para testes e diagnóstico). */
+export function avaliaMedindo(e: Expr, escopo: Escopo, funcoes: Funcoes, passos = LIMITES_EXPR.passos): { valor: unknown; passos: number; esgotou: boolean } {
+  const orc = { n: passos }
+  try { const valor = av(e, escopo, funcoes, null, orc); return { valor, passos: passos - orc.n, esgotou: false } } catch (x) {
+    if (x === ESGOTOU) return { valor: undefined, passos, esgotou: true }
+    throw x
   }
 }

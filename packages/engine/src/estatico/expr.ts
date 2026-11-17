@@ -1,4 +1,5 @@
 import { avalia, campo, indice, PROIBIDAS } from '../expr/avalia'
+import { ehOrdemSuperior } from '../expr/ordem-superior'
 import type { Escopo } from '../expr/avalia'
 import type { Expr, Funcoes } from '../expr/tipos'
 
@@ -19,6 +20,7 @@ export function compilaExpr(e: Expr, funcoes: Funcoes): Fn {
     case 'mem': { const o = compilaExpr(e.obj, funcoes), nome = e.nome; return (esc) => campo(o(esc), nome) }
     case 'idx': { const o = compilaExpr(e.obj, funcoes), i = compilaExpr(e.idx, funcoes); return (esc) => indice(o(esc), i(esc)) }
     case 'call': {
+      if (ehOrdemSuperior(e.fn)) return (esc) => avalia(e, esc, funcoes)
       const f = tem.call(funcoes, e.fn) ? funcoes[e.fn] : undefined
       if (!f || e.args.length < f.min || e.args.length > f.max) return () => undefined
       const a = e.args.map((x) => compilaExpr(x, funcoes)), fn = f.fn

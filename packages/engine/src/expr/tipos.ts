@@ -9,6 +9,8 @@ export type Expr =
   | { t: 'bin'; op: Bin; a: Expr; b: Expr; pos: number }
   | { t: 'cond'; c: Expr; a: Expr; b: Expr; pos: number }
   | { t: 'lista'; itens: Expr[]; pos: number }
+  /** função anônima: só vale como argumento de um combinador (mapeia, filtra, dobra…) */
+  | { t: 'fn'; params: string[]; corpo: Expr; pos: number }
 
 export type Bin = '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||' | '??'
 
@@ -22,4 +24,5 @@ export class ExprErro extends Error {
 export type Funcao = { min: number; max: number; fn: (...args: unknown[]) => unknown }
 export type Funcoes = Record<string, Funcao>
 
-export const LIMITES_EXPR = { comprimento: 2000, nos: 500, profundidade: 32 }
+/** passos = nós avaliados por avaliação (o orçamento que garante que sempre termina rápido); lista = tamanho máximo de uma lista construída */
+export const LIMITES_EXPR = { comprimento: 2000, nos: 500, profundidade: 32, passos: 200_000, lista: 100_000 }

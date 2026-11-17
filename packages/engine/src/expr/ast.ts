@@ -3,7 +3,7 @@ import { LIMITES_EXPR, type Bin, type Expr } from './tipos'
 
 // ---------------------------------------------------------------------------
 // AST CANÔNICO em JSON da linguagem de expressões. É a forma de referência: o texto (`a + b | brl`) é só açúcar que
-// compila para ela e pode ser reconstruído dela (`formata`). Sete formas, todas objetos, nenhuma ambígua:
+// compila para ela e pode ser reconstruído dela (`formata`). Oito formas, todas objetos, nenhuma ambígua:
 //   { lit: null|boolean|número|texto }      literal (número finito e NÃO negativo: o negativo é `neg`)
 //   { var: nome }                           variável do escopo
 //   { campo: nome, de: nó }                 acesso a campo (tolerante a ausente)
@@ -11,6 +11,7 @@ import { LIMITES_EXPR, type Bin, type Expr } from './tipos'
 //   { lista: [nó…] }                        lista literal
 //   { se: nó, entao: nó, senao: nó }        condicional (só avalia o ramo escolhido)
 //   { chama: nome, args: [nó…] }            função OU operador do registro (`+`, `&&`, `!`, `neg`, `brl`, …)
+//   { fn: [param…], corpo: nó }             função anônima: SÓ como argumento de um combinador (mapeia, filtra, dobra…)
 // Operadores são chamadas: uma tabela só (registro.ts) documenta e testa tudo.
 // ---------------------------------------------------------------------------
 
@@ -22,15 +23,17 @@ export type Ast =
   | { lista: Ast[] }
   | { se: Ast; entao: Ast; senao: Ast }
   | { chama: string; args: Ast[] }
+  | { fn: string[]; corpo: Ast }
 
 export type ErroAst = { caminho: string; mensagem: string; dica?: string }
 
 const BINARIOS: readonly Bin[] = ['??', '||', '&&', '==', '!=', '<', '<=', '>', '>=', '+', '-', '*', '/', '%']
 const EH_BINARIO = new Set<string>(BINARIOS)
 const RESERVADAS = new Set(['true', 'false', 'null'])
+const PROIBIDOS = new Set(['__proto__', 'constructor', 'prototype'])
 const IDENT = /^[A-Za-z_$][A-Za-z0-9_$]*$/
 const FORMAS: Record<string, readonly string[]> = {
-  lit: ['lit'], var: ['var'], campo: ['campo', 'de'], indice: ['indice', 'de'], lista: ['lista'], se: ['se', 'entao', 'senao'], chama: ['chama', 'args'],
+  lit: ['lit'], var: ['var'], campo: ['campo', 'de'], indice: ['indice', 'de'], lista: ['lista'], se: ['se', 'entao', 'senao'], chama: ['chama', 'args'], fn: ['fn', 'corpo'],
 }
 const CHAVES_FORMA = Object.keys(FORMAS)
 
@@ -88,6 +91,16 @@ export function validaAst(x: unknown): ErroAst[] {
       case 'se':
         for (const k of ['se', 'entao', 'senao']) if (k in n) anda(n[k], esc(caminho, k), prof + 1)
         break
+      case 'fn': {
+        const ps = n.fn
+        if (!Array.isArray(ps) || ps.length < 1 || ps.length > 3) erros.push({ caminho: esc(caminho, 'fn'), mensagem: "'fn' é a lista de 1 a 3 nomes de parâmetros", dica: '{ "fn": ["x"], "corpo": … }' })
+        else {
+          ps.forEach((p, k) => { if (typeof p !== 'string' || !IDENT.test(p) || RESERVADAS.has(p) || PROIBIDOS.has(p)) erros.push({ caminho: esc(esc(caminho, 'fn'), k), mensagem: `nome de parâmetro inválido (${JSON.stringify(p)})` }) })
+          if (new Set(ps).size !== ps.length) erros.push({ caminho: esc(caminho, 'fn'), mensagem: 'parâmetros repetidos' })
+        }
+        if ('corpo' in n) anda(n.corpo, esc(caminho, 'corpo'), prof + 1)
+        break
+      }
       case 'chama': {
         const nome = n.chama
         if ('chama' in n && (typeof nome !== 'string' || (!IDENT.test(nome) && !OPERADORES.has(nome)) || RESERVADAS.has(nome))) erros.push({ caminho: esc(caminho, 'chama'), mensagem: `nome de função inválido (${JSON.stringify(nome)})` })
@@ -119,6 +132,7 @@ export function paraAst(e: Expr): Ast {
     case 'mem': return { campo: e.nome, de: paraAst(e.obj) }
     case 'idx': return { indice: paraAst(e.idx), de: paraAst(e.obj) }
     case 'lista': return { lista: e.itens.map(paraAst) }
+    case 'fn': return { fn: [...e.params], corpo: paraAst(e.corpo) }
     case 'cond': return { se: paraAst(e.c), entao: paraAst(e.a), senao: paraAst(e.b) }
     case 'un': return { chama: e.op === '!' ? '!' : 'neg', args: [paraAst(e.x)] }
     case 'bin': return { chama: e.op, args: [paraAst(e.a), paraAst(e.b)] }
@@ -134,6 +148,7 @@ export function deAstValidado(n: Ast): Expr {
   if ('campo' in n) return { t: 'mem', obj: deAstValidado(n.de), nome: n.campo, pos }
   if ('indice' in n) return { t: 'idx', obj: deAstValidado(n.de), idx: deAstValidado(n.indice), pos }
   if ('lista' in n) return { t: 'lista', itens: n.lista.map(deAstValidado), pos }
+  if ('fn' in n) return { t: 'fn', params: [...n.fn], corpo: deAstValidado(n.corpo), pos }
   if ('se' in n) return { t: 'cond', c: deAstValidado(n.se), a: deAstValidado(n.entao), b: deAstValidado(n.senao), pos }
   if (n.chama === '!') return { t: 'un', op: '!', x: deAstValidado(n.args[0]!), pos }
   if (n.chama === 'neg') return { t: 'un', op: '-', x: deAstValidado(n.args[0]!), pos }
@@ -162,6 +177,7 @@ export function formata(e: Expr, minimo = 0): string {
     case 'mem': return `${formata(e.obj, 9)}.${e.nome}`
     case 'idx': return `${formata(e.obj, 9)}[${formata(e.idx, 0)}]`
     case 'lista': return `[${e.itens.map((i) => formata(i, 0)).join(', ')}]`
+    case 'fn': return envolve(0, `${e.params.length === 1 ? e.params[0] : `(${e.params.join(', ')})`} => ${formata(e.corpo, 0)}`)
     case 'call': return `${e.fn}(${e.args.map((a) => formata(a, 0)).join(', ')})`
     case 'un': return envolve(NIVEL_UNARIO, `${e.op}${formata(e.x, NIVEL_UNARIO)}`)
     case 'cond': return envolve(0, `${formata(e.c, 1)} ? ${formata(e.a, 0)} : ${formata(e.b, 0)}`)
