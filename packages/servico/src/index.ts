@@ -1,4 +1,5 @@
 export { criaServico } from './app'
+export { contextoPorJwt, regrasDoRegistry } from './acesso'
 export { dbDePglite } from './pglite'
 export { ErroApi } from './erros'
 export type { Consulta, Contexto, Db, EntradaOperacao, OpcoesServico, RequisicaoInfo } from './tipos'

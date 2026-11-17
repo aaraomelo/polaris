@@ -1,4 +1,5 @@
 import type { Erro, No } from './index'
+import { validaPapel } from './acesso'
 import type { Contexto, Registry } from './registry'
 import { validaProps } from './props'
 
@@ -130,6 +131,7 @@ function conferePasta(reg: Registry, raiz: Inst, base: string, ctx: Contexto, li
 
 /** Validação estrutural de um nó (pagina → /spec/raiz; bloco → /spec/modelo). Outros kinds: sem árvore. */
 export function validaEstrutura(reg: Registry, no: No, ctx: Contexto = {}, limites: Partial<Limites> = {}): Erro[] {
+  if (no.kind === 'papel') return validaPapel(reg, no, ctx) // papel: sujeitos, ações e campos contra os serviços registrados
   const lim = { ...LIMITES_PADRAO, ...limites }
   const out: Erro[] = []
   const spec = no.spec as Record<string, any>

@@ -26,9 +26,13 @@ describe('rotasDe: as rotas do serviço, derivadas uma vez', () => {
       'delete /produtos/{id} removerProduto', 'get /produtos/{id} obterProduto', 'patch /produtos/{id} atualizarProduto', 'get /vitrines listarVitrine',
     ])
   })
-  it('permissão: padrão `autenticada`; a do crud vale para as suas rotas; `publica` dispensa autenticação', () => {
+  it('permissão: padrão e qualquer nome desconhecido = `protegida` (fail-closed); só publica/autenticada abrem', () => {
     const p = Object.fromEntries(rotasDe(LOJA).map((r) => [r.id, r.permissao]))
-    expect(p).toMatchObject({ listarProduto: 'autenticada', criarPedido: 'vendas', cancelar: 'vendas', buscar: 'publica', listarVitrine: 'publica' })
+    expect(p).toMatchObject({ listarProduto: 'protegida', criarPedido: 'protegida', cancelar: 'protegida', buscar: 'publica', listarVitrine: 'publica' })
+  })
+  it('cada rota diz (acao, sujeito) para as regras de acesso: CRUD → (operação, servico.entidade); operação → (id, servico.saida ou servico.operacoes)', () => {
+    const r = Object.fromEntries(rotasDe(LOJA).map((x) => [x.id, `${x.acao} ${x.sujeito}`]))
+    expect(r).toMatchObject({ listarProduto: 'listar loja.produto', criarPedido: 'criar loja.pedido', removerProduto: 'remover loja.produto', cancelar: 'cancelar loja.pedido', buscar: 'buscar loja.produto' })
   })
   it('caminhos Fastify (:id) e OpenAPI ({id}); parâmetros de caminho saem da entrada; filtros do listar são só campos simples', () => {
     const r = Object.fromEntries(rotasDe(LOJA).map((x) => [x.id, x]))
@@ -86,7 +90,7 @@ describe('OpenAPI 3.1 gerado', () => {
   it('segurança: pública sem `security` e sem 401/403; as demais exigem bearer e declaram a permissão e os eventos', () => {
     expect(doc.paths['/vitrines'].get.security).toEqual([]); expect(doc.paths['/vitrines'].get.responses['401']).toBeUndefined()
     const c = doc.paths['/pedidos/{id}/cancelar'].post
-    expect(c.security).toEqual([{ bearer: [] }]); expect(c.responses['401']).toBeDefined(); expect(c['x-permissao']).toBe('vendas'); expect(c['x-publica']).toEqual(['pedidoCancelado'])
+    expect(c.security).toEqual([{ bearer: [] }]); expect(c.responses['401']).toBeDefined(); expect(c['x-acesso']).toEqual({ modo: 'protegida', acao: 'cancelar', sujeito: 'loja.pedido' }); expect(c['x-publica']).toEqual(['pedidoCancelado'])
     expect(doc['x-consome']).toEqual(['pagamentoConfirmado'])
   })
   it('determinístico e sem tenant em lugar nenhum', () => {

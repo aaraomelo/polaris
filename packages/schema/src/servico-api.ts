@@ -26,12 +26,17 @@ export type Rota = {
   /** entidade devolvida; ausente = 204 */
   saida?: string
   lista: boolean
-  /** `publica` dispensa autenticação; qualquer outro valor é uma permissão exigida de quem chama */
-  permissao: string
+  /** `publica`: sem autenticação. `autenticada`: qualquer autenticado. `protegida` (padrão): autenticado E permitido pelas regras dos papéis para (acao, sujeito) */
+  permissao: 'publica' | 'autenticada' | 'protegida'
+  /** o que as regras de acesso avaliam: ação (listar, obter, criar, atualizar, remover, ou o id da operação) e sujeito (`servico.entidade`) */
+  acao: string
+  sujeito: string
   publica: string[]
 }
 
 export const PADRAO_DINHEIRO = '^-?[0-9]{1,15}(\\.[0-9]{1,4})?$'
+/** só `publica` e `autenticada` abrem a rota; QUALQUER outro valor (ou ausente) é `protegida`: fail-closed, os papéis decidem */
+export const modoDeAcesso = (v: string | undefined): 'publica' | 'autenticada' | 'protegida' => (v === 'publica' || v === 'autenticada' ? v : 'protegida')
 const cap = (s: string) => s[0]!.toUpperCase() + s.slice(1)
 
 /** JSON Schema de UM campo. `dinheiro` é texto decimal exato (nunca float); `json` é qualquer valor. */
@@ -77,21 +82,24 @@ export function rotasDe(no: No): Rota[] {
   const spec = no.spec as Spec
   const rotas: Rota[] = []
   const usados = new Set<string>()
-  const add = (r: Omit<Rota, 'caminho' | 'params' | 'caminhoFastify'> & { caminhoFastify: string }) => {
+  const add = (r: Omit<Rota, 'caminho' | 'params' | 'caminhoFastify' | 'acao' | 'sujeito'> & { caminhoFastify: string }) => {
     if (usados.has(r.id)) throw new EmissaoErro(`servico ${no.id}: operação duplicada '${r.id}' (uma operação declarada colide com a rota CRUD gerada)`)
     usados.add(r.id)
-    rotas.push({ ...r, caminho: aOpenApi(r.caminhoFastify), params: ids(r.caminhoFastify) })
+    const acao = r.origem.tipo === 'crud' ? r.origem.crud : r.id
+    const sujeito = `${no.id}.${r.origem.tipo === 'crud' ? r.origem.entidade : (r.saida ?? 'operacoes')}`
+    rotas.push({ ...r, acao, sujeito, caminho: aOpenApi(r.caminhoFastify), params: ids(r.caminhoFastify) })
   }
   for (const [nome, o] of Object.entries(spec.operacoes)) {
     const params = ids(o.caminho)
     const entrada = Object.fromEntries(Object.entries(o.entrada ?? {}).filter(([k]) => !params.includes(k)))
     for (const p of params) if (!(o.entrada && p in o.entrada)) throw new EmissaoErro(`servico ${no.id}: '${nome}' usa :${p} no caminho mas não declara '${p}' em entrada`)
     if (o.saida !== undefined && !(o.saida in spec.entidades)) throw new EmissaoErro(`servico ${no.id}: '${nome}' devolve a entidade inexistente '${o.saida}'`)
-    add({ id: nome, metodo: o.metodo.toLowerCase() as Rota['metodo'], caminhoFastify: o.caminho, origem: { tipo: 'operacao' }, entrada, ...(o.saida !== undefined ? { saida: o.saida } : {}), lista: !!o.lista, permissao: o.permissao ?? 'autenticada', publica: o.publica ?? [] })
+    add({ id: nome, metodo: o.metodo.toLowerCase() as Rota['metodo'], caminhoFastify: o.caminho, origem: { tipo: 'operacao' }, entrada, ...(o.saida !== undefined ? { saida: o.saida } : {}), lista: !!o.lista, permissao: modoDeAcesso(o.permissao), publica: o.publica ?? [] })
   }
   for (const [nome, ent] of Object.entries(spec.entidades)) {
     if (!ent.crud) continue
-    const { caminho, permissao = 'autenticada' } = ent.crud
+    const { caminho } = ent.crud
+    const permissao = modoDeAcesso(ent.crud.permissao)
     const ops = ent.crud.operacoes ?? ['listar', 'obter', 'criar', 'atualizar', 'remover']
     const idParam = { id: { tipo: 'uuid', obrigatorio: true } } as Record<string, Campo>
     const filtros = Object.fromEntries(Object.entries(ent.campos).filter(([, c]) => !c.lista && c.tipo !== 'json').map(([k, c]) => [k, { ...c, obrigatorio: false }])) as Record<string, Campo>
@@ -142,7 +150,7 @@ export function emiteOpenApi(no: No): string {
       ...(!emQuery && Object.keys(r.entrada).length ? { requestBody: { required: true, content: { 'application/json': { schema: entradaCorpo } } } } : {}),
       responses: { ...sucesso, '400': resp('requisição inválida'), ...(r.permissao === 'publica' ? {} : { '401': resp('não autenticado'), '403': resp('sem permissão') }), ...(r.params.length ? { '404': resp('não encontrado') } : {}), '409': resp('conflito (duplicado ou referência)') },
       security: r.permissao === 'publica' ? [] : [{ bearer: [] }],
-      'x-permissao': r.permissao, ...(r.publica.length ? { 'x-publica': r.publica } : {}),
+      'x-acesso': { modo: r.permissao, ...(r.permissao === 'protegida' ? { acao: r.acao, sujeito: r.sujeito } : {}) }, ...(r.publica.length ? { 'x-publica': r.publica } : {}),
     }
     ;(paths[r.caminho] ??= {})[r.metodo] = op
   }

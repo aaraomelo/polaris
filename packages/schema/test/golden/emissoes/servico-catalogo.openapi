@@ -166,7 +166,11 @@
         "tags": [
           "operacoes"
         ],
-        "x-permissao": "produto.ler"
+        "x-acesso": {
+          "acao": "listarProdutos",
+          "modo": "protegida",
+          "sujeito": "catalogo.produto"
+        }
       }
     }
   }

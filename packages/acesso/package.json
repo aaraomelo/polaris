@@ -1,0 +1,26 @@
+{
+  "name": "@polaris/acesso",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "tipos": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@polaris/schema": "workspace:*",
+    "jose": "^5.9.6",
+    "@ucast/mongo2js": "^1.4.1",
+    "@casl/ability": "^6.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "~5.6.3",
+    "vitest": "^2.1.8",
+    "@electric-sql/pglite": "^0.5.16"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

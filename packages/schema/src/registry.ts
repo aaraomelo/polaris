@@ -191,6 +191,9 @@ export class Registry {
         for (const [op, o] of Object.entries<any>(s.operacoes ?? {})) (o.publica ?? []).forEach((id: string, n: number) => refs.push({ kind: 'evento', id, caminho: `/spec/operacoes/${op}/publica/${n}` }))
         ;(s.consome ?? []).forEach((id: string, n: number) => refs.push({ kind: 'evento', id, caminho: `/spec/consome/${n}` }))
         break
+      case 'papel':
+        ;(s.herda ?? []).forEach((id: string, n: number) => refs.push({ kind: 'papel', id, caminho: `/spec/herda/${n}` }))
+        break
       case 'dados':
         if (s.fonte?.tipo === 'servico') refs.push({ kind: 'servico', id: s.fonte.servico, caminho: '/spec/fonte/servico' })
         break

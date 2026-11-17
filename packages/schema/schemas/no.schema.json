@@ -22,7 +22,8 @@
         "kernel",
         "documento",
         "tenant",
-        "backend"
+        "backend",
+        "papel"
       ]
     },
     "id": {
@@ -299,6 +300,25 @@
             "type": "string"
           },
           "segmento": {}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "papel"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/papel/v1"
+          }
         }
       }
     }

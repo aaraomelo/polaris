@@ -15,9 +15,17 @@ function leitura(nome: string, c: Campo): string {
     default: return col
   }
 }
-export const colunas = (ent: Ent): string =>
-  ['id::text AS "id"', ...Object.entries(ent.campos).map(([n, c]) => `${leitura(n, c)} AS ${ident(n)}`),
-    `to_char(criado_em AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS "criadoEm"`, `to_char(atualizado_em AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS "atualizadoEm"`].join(', ')
+const ISO = (c: string) => `to_char(${c} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`
+/** colunas a ler; `permitidos` (de `camposPermitidos`) restringe: o id vai sempre, o resto só se estiver na lista (`null` = todos) */
+export const colunas = (ent: Ent, permitidos: string[] | null = null): string => {
+  const ok = (n: string) => permitidos === null || permitidos.includes(n)
+  return ['id::text AS "id"', ...Object.entries(ent.campos).filter(([n]) => ok(n)).map(([n, c]) => `${leitura(n, c)} AS ${ident(n)}`),
+    ...(ok('criadoEm') ? [`${ISO('criado_em')} AS "criadoEm"`] : []), ...(ok('atualizadoEm') ? [`${ISO('atualizado_em')} AS "atualizadoEm"`] : [])].join(', ')
+}
+/** todos os nomes de campo que a API expõe de uma entidade */
+export const nomesDeCampos = (ent: Ent): string[] => [...Object.keys(ent.campos), 'criadoEm', 'atualizadoEm']
+/** campo → tipo, para a linguagem de condição (listas viram `tipo[]`) */
+export const tiposDe = (ent: Ent): Record<string, string> => ({ id: 'uuid', criadoEm: 'dataHora', atualizadoEm: 'dataHora', ...Object.fromEntries(Object.entries(ent.campos).map(([n, c]) => [n, c.lista && c.tipo !== 'json' ? `${c.tipo}[]` : c.tipo])) })
 
 /** do que o banco devolveu (texto) para o que a API promete (número onde o campo é inteiro/decimal) */
 export function linhaParaApi(ent: Ent, row: Record<string, unknown>): Record<string, unknown> {

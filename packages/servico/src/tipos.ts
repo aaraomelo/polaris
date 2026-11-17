@@ -6,8 +6,10 @@ export type Consulta = (sql: string, params?: unknown[]) => Promise<{ rows: Reco
  */
 export type Db = { transacao<T>(tenantId: string, fn: (q: Consulta) => Promise<T>): Promise<T> }
 
-/** Quem chama, já AUTENTICADO. O tenant vem SEMPRE daqui (token ou host), nunca do corpo, da query nem de cabeçalho do cliente. */
-export type Contexto = { tenantId: string; usuario?: string; permissoes?: string[] }
+import type { Regra } from '@polaris/acesso'
+
+/** Quem chama, já AUTENTICADO. O tenant vem SEMPRE daqui (token ou host), nunca do corpo, da query nem de cabeçalho do cliente. `papeis` são nomes de nós `papel`. */
+export type Contexto = { tenantId: string; usuario?: string; papeis?: string[] }
 export type RequisicaoInfo = { headers: Record<string, string | string[] | undefined>; hostname: string; ip: string }
 
 export type EntradaOperacao = {
@@ -18,6 +20,8 @@ export type EntradaOperacao = {
   ctx: Contexto
   /** consulta dentro da transação, com a RLS do tenant */
   q: Consulta
+  /** o chamador pode (ação, sujeito) — sobre esta linha e este campo, se informados? Use para decidir DENTRO da operação (nunca confie só na rota). */
+  pode(acao: string, sujeito: string, linha?: Record<string, unknown>, campo?: string): boolean
   /** publica um evento declarado em `publica`: é gravado no OUTBOX, na mesma transação do dado (commit junto, rollback junto); o relay o leva ao barramento */
   publica(evento: string, payload: Record<string, unknown>): Promise<void>
 }
@@ -25,8 +29,8 @@ export type OpcoesServico = {
   db: Db
   /** resolve o chamador; `null` = anônimo. Rotas públicas ainda precisam de `tenantId` (resolvido, por exemplo, pelo host) */
   contexto(req: RequisicaoInfo): Promise<Contexto | null> | Contexto | null
-  /** o chamador pode exercer `permissao`? Padrão: `autenticada` basta estar autenticado; as demais precisam estar em `ctx.permissoes` */
-  autoriza?(ctx: Contexto, permissao: string): boolean
+  /** as REGRAS de acesso do chamador (de seus papéis). Obrigatório se alguma rota for `protegida` (o padrão); veja `regrasDoRegistry` */
+  acesso?: { regras(ctx: Contexto): Promise<Regra[]> | Regra[] }
   /** implementação das operações declaradas que não são CRUD; sem implementação a rota responde 501 */
   operacoes?: Record<string, (e: EntradaOperacao) => Promise<unknown>>
   /** os nós `evento` dos eventos que o serviço publica (contrato do payload, versão e chave de idempotência). Obrigatório se alguma operação declara `publica` */

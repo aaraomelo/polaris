@@ -1,8 +1,8 @@
 import { PGlite } from '@electric-sql/pglite'
-import { emite, rotasDe, type No } from '@polaris/schema'
+import { Registry, emite, rotasDe, type No } from '@polaris/schema'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { criaServico, dbDePglite, type Contexto } from '../src/index'
+import { criaServico, dbDePglite, regrasDoRegistry, type Contexto } from '../src/index'
 
 // Ponta a ponta: Fastify real + Postgres real (PGlite) com RLS, papel SEM bypass. O que se testa é o COMPORTAMENTO que o schema promete.
 
@@ -13,6 +13,7 @@ const LOJA: No = { kind: 'servico', id: 'loja', versao: '1.0.0', estatuto: 'publ
     produto: { campos: { sku: { tipo: 'texto', obrigatorio: true }, nome: { tipo: 'texto', obrigatorio: true }, preco: { tipo: 'dinheiro', obrigatorio: true }, estoque: { tipo: 'inteiro', padrao: 0 }, ativo: { tipo: 'booleano', padrao: true }, tags: { tipo: 'texto', lista: true }, extra: { tipo: 'json' }, lancadoEm: { tipo: 'data' }, peso: { tipo: 'decimal' } }, indices: [['sku']], crud: { caminho: '/produtos', permissao: 'catalogo' } },
     pedido: { campos: { clienteId: { tipo: 'uuid', obrigatorio: true, referencia: 'cliente' }, total: { tipo: 'dinheiro', obrigatorio: true }, situacao: { tipo: 'texto', padrao: 'aberto' } }, crud: { caminho: '/pedidos', operacoes: ['listar', 'obter', 'criar'] } },
     vitrine: { campos: { titulo: { tipo: 'texto' } }, crud: { caminho: '/vitrines', operacoes: ['listar'], permissao: 'publica' } },
+    aviso: { campos: { texto: { tipo: 'texto' } }, crud: { caminho: '/avisos', operacoes: ['listar'], permissao: 'autenticada' } },
   },
   operacoes: {
     cancelar: { metodo: 'POST', caminho: '/pedidos/:id/cancelar', entrada: { id: { tipo: 'uuid', obrigatorio: true }, motivo: { tipo: 'texto' } }, saida: 'pedido', permissao: 'vendas', publica: ['pedido.cancelado'] },
@@ -23,7 +24,11 @@ const LOJA: No = { kind: 'servico', id: 'loja', versao: '1.0.0', estatuto: 'publ
 } } as never
 // (um pedido: pega o id e devolve com a situação alterada; "vaza" devolve campos que a API NÃO promete)
 
-const TOKENS: Record<string, Contexto> = { tA: { tenantId: A, usuario: 'ana', permissoes: ['catalogo', 'vendas'] }, tB: { tenantId: B, usuario: 'bia', permissoes: ['catalogo', 'vendas'] }, tSemPerm: { tenantId: A, usuario: 'cadu', permissoes: [] } }
+const TOKENS: Record<string, Contexto> = { tA: { tenantId: A, usuario: 'ana', papeis: ['catalogo', 'vendas'] }, tB: { tenantId: B, usuario: 'bia', papeis: ['catalogo', 'vendas'] }, tSemPerm: { tenantId: A, usuario: 'cadu', papeis: [] } }
+const papel = (id: string, regras: object[]) => ({ kind: 'papel', id, versao: '1.0.0', estatuto: 'publicado', spec: { regras } }) as never
+const REGISTRY = new Registry()
+REGISTRY.registra(papel('catalogo', [{ acoes: ['manage'], sujeitos: ['loja.produto'] }]))
+REGISTRY.registra(papel('vendas', [{ acoes: ['manage'], sujeitos: ['loja.cliente', 'loja.pedido'] }, { acoes: ['quebra'], sujeitos: ['loja.operacoes'] }]))
 const HOSTS: Record<string, string> = { 'a.loja.test': A, 'b.loja.test': B }
 const PEDIDO_CANCELADO = { kind: 'evento', id: 'pedido.cancelado', versao: '1.0.0', estatuto: 'publicado', spec: { nome: 'pedido.cancelado', produtor: 'loja', payload: { id: { tipo: 'uuid', obrigatorio: true }, motivo: { tipo: 'texto' } }, idempotencia: 'id' } } as never
 const erros: unknown[] = []
@@ -40,6 +45,7 @@ beforeAll(async () => {
   await pg.exec(`RESET ROLE; GRANT USAGE ON SCHEMA loja TO app; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA loja TO app; SET ROLE app;`) // a conexão da aplicação: SEM bypass
   app = criaServico(LOJA, {
     db: dbDePglite(pg),
+    acesso: regrasDoRegistry(REGISTRY),
     contexto: (r) => { const a = String(r.headers.authorization ?? ''); if (a.startsWith('Bearer ')) return TOKENS[a.slice(7)] ?? null; const t = HOSTS[r.hostname]; return t ? { tenantId: t } : null },
     eventos: { 'pedido.cancelado': PEDIDO_CANCELADO },
     aoErro: (e) => { erros.push(e) },
@@ -65,9 +71,10 @@ describe('autenticação e autorização (antes de qualquer validação)', () =>
     const r = await req(null, 'POST', '/produtos', { lixo: true }); expect(r.statusCode).toBe(401); expect(json(r).erro.codigo).toBe('nao_autenticado')
     expect((await req('token-falso', 'GET', '/clientes')).statusCode).toBe(401)
   })
-  it('credencial sem a permissão da rota → 403; com ela → ok; `autenticada` basta estar autenticado', async () => {
+  it('credencial sem papel que permita → 403; com ele → ok; `autenticada` explícito basta estar autenticado', async () => {
     expect((await req('tSemPerm', 'GET', '/produtos')).statusCode).toBe(403)
-    expect((await req('tSemPerm', 'GET', '/clientes')).statusCode).toBe(200) // permissão padrão: autenticada
+    expect((await req('tSemPerm', 'GET', '/clientes')).statusCode).toBe(403) // sem papel, o padrão (protegida) NEGA
+    expect((await req('tSemPerm', 'GET', '/avisos')).statusCode).toBe(200) // `autenticada` (explícito): basta estar autenticado
     expect((await req('tA', 'GET', '/produtos')).statusCode).toBe(200)
   })
   it('rota pública: sem token, o tenant vem do HOST; host desconhecido → 400 (nunca "todos os tenants")', async () => {
@@ -194,10 +201,10 @@ describe('operações declaradas, eventos e erros', () => {
 
 describe('contratos de evento', () => {
   it('serviço que declara `publica` sem o nó evento nem sobe (falha rápida, com o nome do evento)', () => {
-    expect(() => criaServico(LOJA, { db: dbDePglite(pg), contexto: () => null })).toThrow(/faltam os nós evento de pedido\.cancelado/)
+    expect(() => criaServico(LOJA, { db: dbDePglite(pg), acesso: regrasDoRegistry(REGISTRY), contexto: () => null })).toThrow(/faltam os nós evento de pedido\.cancelado/)
   })
   it('publicar um evento não declarado na operação, ou com payload fora do contrato, é erro de programação: 500 e NADA no outbox', async () => {
-    const mk = (impl: (e: any) => Promise<unknown>) => criaServico(LOJA, { db: dbDePglite(pg), contexto: () => TOKENS.tA!, eventos: { 'pedido.cancelado': PEDIDO_CANCELADO }, operacoes: { quebra: impl as never } })
+    const mk = (impl: (e: any) => Promise<unknown>) => criaServico(LOJA, { db: dbDePglite(pg), acesso: regrasDoRegistry(REGISTRY), contexto: () => TOKENS.tA!, eventos: { 'pedido.cancelado': PEDIDO_CANCELADO }, operacoes: { quebra: impl as never } })
     for (const impl of [
       async ({ publica }: any) => { await publica('pedido.outro', { id: A }) },
       async ({ publica }: any) => { await publica('pedido.cancelado', { id: 'x' }) },

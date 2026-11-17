@@ -56,7 +56,7 @@
               },
               "permissao": {
                 "type": "string",
-                "description": "padrão: autenticada; 'publica' dispensa autenticação"
+                "description": "publica (sem autenticação) | autenticada (qualquer autenticado) | qualquer outro valor, inclusive o padrão, é protegida: decidida pelas regras dos papéis (nunca abre por engano)"
               }
             }
           }
@@ -97,7 +97,8 @@
             "description": "entidade ou evento"
           },
           "permissao": {
-            "type": "string"
+            "type": "string",
+            "description": "publica (sem autenticação) | autenticada (qualquer autenticado) | qualquer outro valor, inclusive o padrão, é protegida: decidida pelas regras dos papéis (nunca abre por engano)"
           },
           "publica": {
             "type": "array",

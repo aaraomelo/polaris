@@ -1,0 +1,24 @@
+\subsection*{papel: vendedor}
+\begin{tabular}{@{}ll@{}}
+versão & 1.0.0 \\
+estatuto & rascunho \\
+escopo & core \\
+\end{tabular}
+
+\begin{tabular}{@{}p{0.35\linewidth}p{0.6\linewidth}@{}}
+\texttt{spec.descricao} & Atende o balcão: lê o catálogo e gerencia só os próprios pedidos. \\
+\texttt{spec.herda[0]} & leitor \\
+\texttt{spec.regras[0].acoes[0]} & listar \\
+\texttt{spec.regras[0].acoes[1]} & obter \\
+\texttt{spec.regras[0].sujeitos[0]} & loja.produto \\
+\texttt{spec.regras[1].acoes[0]} & manage \\
+\texttt{spec.regras[1].onde.criadoPor} & \$usuario \\
+\texttt{spec.regras[1].sujeitos[0]} & loja.pedido \\
+\texttt{spec.regras[2].acoes[0]} & remover \\
+\texttt{spec.regras[2].negar} & true \\
+\texttt{spec.regras[2].sujeitos[0]} & all \\
+\texttt{spec.regras[3].acoes[0]} & atualizar \\
+\texttt{spec.regras[3].campos[0]} & telefone \\
+\texttt{spec.regras[3].campos[1]} & email \\
+\texttt{spec.regras[3].sujeitos[0]} & loja.cliente \\
+\end{tabular}

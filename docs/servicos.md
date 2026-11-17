@@ -19,7 +19,7 @@ Um serviço é um nó `servico` (entidades, operações, eventos). Dele saem **t
 ```
 - `crud` gera `listar` (filtros por campo + `pagina`/`limite` ≤ 100), `obter`, `criar` (201), `atualizar` (PATCH parcial), `remover` (204). Ids: `listarProduto`, `criarProduto`…
 - `operacoes` são as demais; `lista: true` marca saída em lista. Parâmetros `:x` do caminho precisam estar em `entrada`.
-- `permissao`: `publica` (sem autenticação) | `autenticada` (padrão) | qualquer outro nome, exigido de quem chama.
+- `permissao`: `publica` (sem autenticação) | `autenticada` (qualquer usuário autenticado) | qualquer outro valor, inclusive o padrão = `protegida`: os papéis decidem (ver `docs/acesso.md`).
 - Esquemas dos campos: `dinheiro` = **texto** decimal exato (`"49.90"`, até 4 casas; número é recusado), `inteiro` limitado aos inteiros seguros, `uuid`/`data`/`dataHora` com formato, `json` livre.
 
 ## Rodar
@@ -27,8 +27,8 @@ Um serviço é um nó `servico` (entidades, operações, eventos). Dele saem **t
 import { criaServico, dbDePglite } from '@polaris/servico'
 const app = criaServico(no, {
   db,                                   // { transacao(tenantId, fn) } — abre transação e fixa app.tenant_id
-  contexto: (req) => /* token/host → { tenantId, usuario, permissoes } | null */,
-  autoriza,                             // opcional; padrão: autenticada basta estar autenticado; senão ∈ permissoes
+  contexto: contextoPorJwt(autenticadorJwt, (req) => /* rotas públicas: tenant pelo host */ null),
+  acesso: regrasDoRegistry(registry),   // regras dos papéis do chamador (obrigatório se houver rota protegida)
   operacoes: { cancelar: async ({ params, entrada, ctx, q, publica }) => { … await publica('pedido.cancelado', {…}); return pedido } },
   eventos: { "pedido.cancelado": nodeEvento },  // contratos do que as operações publicam (obrigatório se houver `publica`)
 })
@@ -38,7 +38,7 @@ Sem implementação, uma operação declarada responde **501**. `dbDePglite` é 
 
 ## Garantias (todas testadas, `packages/servico/test/servico.test.ts`: Fastify real + Postgres real com RLS)
 - **Tenant só da autenticação.** Corpo/query com `tenantId`/`tenant_id` → 400; cabeçalho `x-tenant-id` é ignorado. Rota pública resolve o tenant pelo host; host desconhecido → 400, nunca "todos".
-- **Autenticar antes de validar**: um anônimo recebe 401 mesmo com corpo inválido (não aprende o contrato por mensagens de validação). Sem a permissão: 403.
+- **Autenticar antes de validar**: um anônimo recebe 401 mesmo com corpo inválido (não aprende o contrato por mensagens de validação). Sem permissão: 403. Escopo de linha, campos e JWT: `docs/acesso.md`.
 - **Corpo sem coerção de tipo** (`49.9` em dinheiro é recusado); **campo desconhecido é rejeitado**, não descartado; query é coagida (tudo chega como texto).
 - **RLS como barreira final**: id de outro tenant → **404** (não revela existência); FK composta recusa referência cruzada (409); 20 requisições concorrentes de dois tenants não vazam entre si.
 - **Resposta filtrada** pelo esquema de saída: o que a API não promete (`tenant_id`, campos extras de um handler) nunca sai.
