@@ -1,0 +1,1 @@
+{ "kind": "tema", "id": "tema.varejo", "versao": "1.0.0", "estatuto": "publicado", "tenantId": null, "segmento": "varejo", "spec": { "tokens": { "cor": { "primaria": "#0A7" } } } }

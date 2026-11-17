@@ -1,0 +1,38 @@
+{
+  "kind": "pagina",
+  "id": "home",
+  "versao": "1.0.0",
+  "spec": {
+    "rota": "/",
+    "titulo": "{loja.nome}",
+    "dados": {
+      "loja": "dados.loja"
+    },
+    "raiz": {
+      "bloco": "layout/pilha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "commerce/vitrine",
+            "props": {
+              "colecao": "destaques"
+            }
+          },
+          {
+            "bloco": "texto/titulo",
+            "props": {
+              "texto": "{produto.nome}"
+            },
+            "repetir": {
+              "cada": "produtos",
+              "como": "produto"
+            },
+            "se": "produtos.length"
+          }
+        ]
+      }
+    }
+  },
+  "estatuto": "publicado",
+  "tenantId": null
+}

@@ -1,4 +1,5 @@
 import { criaValidador, type Erro, type No } from './index'
+import type { Migrador } from './migracao'
 
 // ---------------------------------------------------------------------------
 // Registry de schemas: guarda nós validados e os resolve por escopo e versão.
@@ -56,12 +57,19 @@ export function fonteHttp(url: string, f: typeof fetch = fetch): Fonte {
 
 export class Registry {
   private readonly valida = criaValidador()
+
+  /** Com `migrador`, nós de majors antigos são migrados ao registrar. */
+  constructor(private readonly opcoes: { migrador?: Migrador } = {}) {}
+
   /** chave → escopo|dono → versao → nó */
   private readonly nos = new Map<string, Map<string, Map<string, No>>>()
   private readonly cache = new Map<string, Resolvido | null>()
 
   /** Valida e registra um nó. Lança RegistryErro (com caminhos JSON) se inválido. */
   registra(dado: unknown): No {
+    if (this.opcoes.migrador && dado && typeof dado === 'object') {
+      dado = this.opcoes.migrador.migra(dado as Record<string, unknown>).no
+    }
     const r = this.valida(dado)
     if (!r.ok) {
       const id = (dado as { id?: unknown })?.id

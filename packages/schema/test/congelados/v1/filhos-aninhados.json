@@ -1,0 +1,24 @@
+{
+  "kind": "pagina",
+  "id": "pai",
+  "versao": "1.0.0",
+  "spec": {
+    "rota": "/pai",
+    "raiz": {
+      "bloco": "layout/pilha"
+    }
+  },
+  "filhos": [
+    {
+      "kind": "pagina",
+      "id": "filha",
+      "versao": "1.0.0",
+      "spec": {
+        "rota": "/pai/filha",
+        "raiz": {
+          "bloco": "layout/pilha"
+        }
+      }
+    }
+  ]
+}

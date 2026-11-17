@@ -12,17 +12,24 @@ import kernel from '../schemas/kinds/kernel.schema.json'
 import documento from '../schemas/kinds/documento.schema.json'
 import tenant from '../schemas/kinds/tenant.schema.json'
 import backend from '../schemas/kinds/backend.schema.json'
+import migracao from '../schemas/migracao.schema.json'
 
 export const KINDS = ['pagina', 'bloco', 'tema', 'dados', 'servico', 'evento', 'kernel', 'documento', 'tenant', 'backend'] as const
 export type Kind = (typeof KINDS)[number]
 
-export const SCHEMAS = { no, comum, pagina, bloco, tema, dados, servico, evento, kernel, documento, tenant, backend }
+export const SCHEMAS = { no, comum, migracao, pagina, bloco, tema, dados, servico, evento, kernel, documento, tenant, backend }
+
+/** Major atual do schema de cada kind. Subir aqui exige uma migração (src/migracao.ts) e fixtures congeladas. */
+export const ESQUEMA_ATUAL: Record<Kind, number> = {
+  pagina: 1, bloco: 1, tema: 1, dados: 1, servico: 1, evento: 1, kernel: 1, documento: 1, tenant: 1, backend: 1,
+}
 export const ID_NO = 'polaris://no/v1'
 
 export type No = {
   kind: Kind
   id: string
   versao: string
+  esquema?: number
   estatuto?: 'rascunho' | 'publicado' | 'obsoleto'
   tenantId?: string | null
   segmento?: string
@@ -60,3 +67,4 @@ export function criaValidador() {
 }
 
 export * from './registry'
+export * from './migracao'

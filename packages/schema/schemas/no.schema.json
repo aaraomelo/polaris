@@ -33,6 +33,13 @@
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "description": "semver do schema deste nó"
     },
+    "esquema": {
+      "enum": [
+        1
+      ],
+      "default": 1,
+      "description": "major do schema do kind ao qual o nó se conforma. Muda só em quebra; adicionar campo opcional não muda. Nós antigos são migrados por polaris://migracao/v1"
+    },
     "estatuto": {
       "enum": [
         "rascunho",

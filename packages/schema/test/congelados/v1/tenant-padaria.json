@@ -1,0 +1,15 @@
+{
+  "kind": "tenant",
+  "id": "padaria-sol",
+  "versao": "1.0.0",
+  "spec": {
+    "alias": "padaria-sol",
+    "segmento": "alimentos",
+    "modulos": [
+      "catalogo",
+      "pedidos"
+    ],
+    "tema": "tema.base"
+  },
+  "tenantId": "padaria-sol"
+}

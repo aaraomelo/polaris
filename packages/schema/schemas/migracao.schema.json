@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://migracao/v1",
+  "title": "Migração de schema (kind, major N → N+1)",
+  "type": "object",
+  "required": [
+    "kind",
+    "de",
+    "para",
+    "ops"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "pagina",
+        "bloco",
+        "tema",
+        "dados",
+        "servico",
+        "evento",
+        "kernel",
+        "documento",
+        "tenant",
+        "backend"
+      ]
+    },
+    "de": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "para": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "nota": {
+      "type": "string"
+    },
+    "ops": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "op",
+              "de",
+              "para"
+            ],
+            "properties": {
+              "op": {
+                "const": "renomeia"
+              },
+              "de": {
+                "type": "string",
+                "pattern": "^(/[^/]+)+$",
+                "description": "JSON Pointer a partir da raiz do nó, ex.: /spec/rota"
+              },
+              "para": {
+                "type": "string",
+                "pattern": "^(/[^/]+)+$",
+                "description": "JSON Pointer a partir da raiz do nó, ex.: /spec/rota"
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "op",
+              "caminho",
+              "valor"
+            ],
+            "properties": {
+              "op": {
+                "const": "define"
+              },
+              "caminho": {
+                "type": "string",
+                "pattern": "^(/[^/]+)+$",
+                "description": "JSON Pointer a partir da raiz do nó, ex.: /spec/rota"
+              },
+              "valor": {},
+              "sobrescreve": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "op",
+              "caminho"
+            ],
+            "properties": {
+              "op": {
+                "const": "remove"
+              },
+              "caminho": {
+                "type": "string",
+                "pattern": "^(/[^/]+)+$",
+                "description": "JSON Pointer a partir da raiz do nó, ex.: /spec/rota"
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "op",
+              "caminho",
+              "tabela"
+            ],
+            "properties": {
+              "op": {
+                "const": "mapeia"
+              },
+              "caminho": {
+                "type": "string",
+                "pattern": "^(/[^/]+)+$",
+                "description": "JSON Pointer a partir da raiz do nó, ex.: /spec/rota"
+              },
+              "tabela": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}
