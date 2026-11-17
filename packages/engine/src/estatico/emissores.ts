@@ -1,4 +1,6 @@
 import { urlSegura } from '../render/url'
+import { emissoresDe } from '../vivo/emissor'
+import { DESCRITORES_BASE } from '../vivo/blocos'
 import { escHtml, px } from './escape'
 
 // Emissores estáticos: o mesmo HTML que os componentes React de render/base.tsx produzem (conferido por teste diferencial),
@@ -19,7 +21,7 @@ const caixa = (direcao: 'column' | 'row'): Emissor => ({ props, filhos, id }) =>
   return `<div${idAttr(id)} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}">${filhos.filhos ?? ''}</div>`
 }
 
-export const EMISSORES_BASE: Emissores = {
+const MAO: Emissores = {
   'layout/pilha': caixa('column'),
   'layout/linha': caixa('row'),
   'texto/titulo': ({ props, id }) => {
@@ -40,5 +42,8 @@ export const EMISSORES_BASE: Emissores = {
   },
 }
 
+/** Os blocos escritos à mão acima (os primeiros) e os demais derivados do descritor DOM: uma definição só para servidor e cliente. */
+export const EMISSORES_BASE: Emissores = { ...emissoresDe(DESCRITORES_BASE), ...MAO }
+
 /** Blocos que só fazem sentido com JavaScript (têm eventos/estado no cliente): uma página que os usa não é estática. */
-export const INTERATIVOS = new Set(['nav/botao', 'entrada/texto'])
+export const INTERATIVOS = new Set(['nav/botao', 'entrada/texto', 'entrada/numero', 'entrada/caixa'])

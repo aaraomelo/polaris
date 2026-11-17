@@ -12,6 +12,7 @@ export function emissorDe(d: Descritor): Emissor {
     let attrs = ''
     for (const [k, v] of Object.entries(d.attrs(props, id))) attrs += ` ${k}="${escHtml(v)}"`
     if (d.valor) attrs += ` value="${escHtml(d.valor(props))}"`
+    if (d.marcado?.(props)) attrs += ' checked=""'
     if (VAZIOS.has(tag)) return `<${tag}${attrs}/>`
     const t = d.texto?.(props)
     return `<${tag}${attrs}>${t !== undefined ? escHtml(t) : d.filhos ? (filhos.filhos ?? '') : ''}</${tag}>`

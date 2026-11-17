@@ -397,6 +397,7 @@ function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos):
     attrs = d.attrs(props, no.id)
     for (const [k, v] of Object.entries(attrs)) poeAttr(el, k, v)
     if (d.valor) (el as HTMLInputElement).value = d.valor(props)
+    if (d.marcado) (el as HTMLInputElement).checked = d.marcado(props)
     const t = d.texto?.(props)
     if (t !== undefined) { if (el.textContent !== t) el.textContent = t }
     else if (d.filhos) {
@@ -412,6 +413,7 @@ function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos):
       }
       const entrada: Entrada = { h }
       if (d.valor) entrada.sync = () => { const v = d.valor!(props); if ((el as HTMLInputElement).value !== v) (el as HTMLInputElement).value = v }
+      else if (d.marcado) entrada.sync = () => { const v = d.marcado!(props); if ((el as HTMLInputElement).checked !== v) (el as HTMLInputElement).checked = v }
       amb.handlers.set(el, entrada)
     }
     atual = el; p.coloca(el)
@@ -445,6 +447,7 @@ function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos):
             const t = d.texto?.(np)
             if (t !== undefined && el.textContent !== t) el.textContent = t
             if (d.valor) { const v = d.valor(np); if ((el as HTMLInputElement).value !== v) (el as HTMLInputElement).value = v }
+            if (d.marcado) { const v = d.marcado(np); if ((el as HTMLInputElement).checked !== v) (el as HTMLInputElement).checked = v }
           }
         }
       }
