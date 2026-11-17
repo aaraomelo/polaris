@@ -1,0 +1,10 @@
+{
+  "kind": "bloco",
+  "id": "layout.item",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "layout/item",
+    "slots": {}
+  }
+}

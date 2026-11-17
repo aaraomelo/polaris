@@ -1,0 +1,13 @@
+{
+  "id": "glsl",
+  "kind": "backend",
+  "spec": {
+    "alvo": "glsl",
+    "faz": "filtrar",
+    "operacoes": {
+      "emit": true,
+      "parse": false
+    }
+  },
+  "versao": "1.0.0"
+}

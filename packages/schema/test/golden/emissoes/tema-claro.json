@@ -1,0 +1,26 @@
+{
+  "id": "tema.base",
+  "kind": "tema",
+  "spec": {
+    "modos": {
+      "escuro": {
+        "cor": {
+          "primaria": "#A78BFA"
+        }
+      }
+    },
+    "tokens": {
+      "cor": {
+        "primaria": "#6C3AED"
+      },
+      "espacamento": {
+        "1": 4,
+        "2": 8
+      },
+      "raio": {
+        "m": 6
+      }
+    }
+  },
+  "versao": "1.0.0"
+}

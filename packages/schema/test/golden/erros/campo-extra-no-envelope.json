@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/faces",
+    "regra": "unevaluatedProperties",
+    "mensagem": "o campo 'faces' não existe aqui",
+    "dica": "campos válidos: kind, id, versao, esquema, estatuto, tenantId, meta, emit, spec, filhos, segmento"
+  }
+]

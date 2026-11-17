@@ -1,0 +1,14 @@
+{
+  "kind": "documento",
+  "id": "d",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A4",
+    "blocos": [
+      {
+        "texto": "x"
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "dados",
+  "id": "d",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "fonte": {
+      "tipo": "ftp"
+    }
+  }
+}

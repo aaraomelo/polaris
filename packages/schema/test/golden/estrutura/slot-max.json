@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/filhos",
+    "regra": "slot-max",
+    "mensagem": "slot 'filhos' de 'layout/linha' aceita no máximo 2 (tem 3)"
+  }
+]

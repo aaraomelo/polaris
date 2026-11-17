@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/item",
+    "regra": "slot-min",
+    "mensagem": "slot 'item' de 'layout/lista' exige no mínimo 1 (tem 0)"
+  }
+]

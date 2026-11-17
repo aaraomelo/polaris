@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/props/type",
+    "regra": "const",
+    "mensagem": "deve ser exatamente \"object\""
+  }
+]

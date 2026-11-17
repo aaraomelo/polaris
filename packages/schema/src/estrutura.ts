@@ -143,6 +143,7 @@ export function validaEstrutura(reg: Registry, no: No, ctx: Contexto = {}, limit
   if (no.kind === 'bloco') usados.unshift(spec.interface as string)
   const reportados = new Set<string>()
   for (const i of usados) {
+    if (estado.has(i)) continue // já percorrido (ou parte de um ciclo já reportado)
     const ciclo = achaCiclo(reg, i, ctx, estado, [])
     if (ciclo) {
       const chave = [...ciclo].sort().join('|')

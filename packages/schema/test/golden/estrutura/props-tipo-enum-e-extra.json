@@ -1,0 +1,19 @@
+[
+  {
+    "caminho": "/spec/raiz/props/nivell",
+    "regra": "props",
+    "mensagem": "o campo 'nivell' não existe aqui",
+    "dica": "quis dizer 'nivel'?"
+  },
+  {
+    "caminho": "/spec/raiz/props/texto",
+    "regra": "props",
+    "mensagem": "esperado texto, recebido número"
+  },
+  {
+    "caminho": "/spec/raiz/props/estilo",
+    "regra": "props",
+    "mensagem": "valor \"fort\" não é permitido; aceitos: 'normal', 'forte'",
+    "dica": "quis dizer 'forte'?"
+  }
+]

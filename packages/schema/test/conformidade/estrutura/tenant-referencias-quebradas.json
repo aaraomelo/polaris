@@ -1,0 +1,14 @@
+{
+  "kind": "tenant",
+  "id": "loja",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "alias": "loja",
+    "segmento": "varejo",
+    "tema": "tema.fantasma",
+    "paginas": [
+      "home"
+    ]
+  }
+}

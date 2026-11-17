@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/tokens/cor/a b",
+    "regra": "pattern",
+    "mensagem": "\"a b\" não segue o formato esperado",
+    "dica": "use letras, números, '_' e '-', começando por letra ou número (ex.: primaria, 1)"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/blocos/0",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'tipo'",
+    "dica": "adicione \"tipo\" em /spec/blocos/0"
+  }
+]

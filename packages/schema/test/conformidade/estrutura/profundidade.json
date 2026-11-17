@@ -1,0 +1,250 @@
+{
+  "kind": "pagina",
+  "id": "a",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/a",
+    "raiz": {
+      "bloco": "layout/pilha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "layout/pilha",
+            "slots": {
+              "filhos": [
+                {
+                  "bloco": "layout/pilha",
+                  "slots": {
+                    "filhos": [
+                      {
+                        "bloco": "layout/pilha",
+                        "slots": {
+                          "filhos": [
+                            {
+                              "bloco": "layout/pilha",
+                              "slots": {
+                                "filhos": [
+                                  {
+                                    "bloco": "layout/pilha",
+                                    "slots": {
+                                      "filhos": [
+                                        {
+                                          "bloco": "layout/pilha",
+                                          "slots": {
+                                            "filhos": [
+                                              {
+                                                "bloco": "layout/pilha",
+                                                "slots": {
+                                                  "filhos": [
+                                                    {
+                                                      "bloco": "layout/pilha",
+                                                      "slots": {
+                                                        "filhos": [
+                                                          {
+                                                            "bloco": "layout/pilha",
+                                                            "slots": {
+                                                              "filhos": [
+                                                                {
+                                                                  "bloco": "layout/pilha",
+                                                                  "slots": {
+                                                                    "filhos": [
+                                                                      {
+                                                                        "bloco": "layout/pilha",
+                                                                        "slots": {
+                                                                          "filhos": [
+                                                                            {
+                                                                              "bloco": "layout/pilha",
+                                                                              "slots": {
+                                                                                "filhos": [
+                                                                                  {
+                                                                                    "bloco": "layout/pilha",
+                                                                                    "slots": {
+                                                                                      "filhos": [
+                                                                                        {
+                                                                                          "bloco": "layout/pilha",
+                                                                                          "slots": {
+                                                                                            "filhos": [
+                                                                                              {
+                                                                                                "bloco": "layout/pilha",
+                                                                                                "slots": {
+                                                                                                  "filhos": [
+                                                                                                    {
+                                                                                                      "bloco": "layout/pilha",
+                                                                                                      "slots": {
+                                                                                                        "filhos": [
+                                                                                                          {
+                                                                                                            "bloco": "layout/pilha",
+                                                                                                            "slots": {
+                                                                                                              "filhos": [
+                                                                                                                {
+                                                                                                                  "bloco": "layout/pilha",
+                                                                                                                  "slots": {
+                                                                                                                    "filhos": [
+                                                                                                                      {
+                                                                                                                        "bloco": "layout/pilha",
+                                                                                                                        "slots": {
+                                                                                                                          "filhos": [
+                                                                                                                            {
+                                                                                                                              "bloco": "layout/pilha",
+                                                                                                                              "slots": {
+                                                                                                                                "filhos": [
+                                                                                                                                  {
+                                                                                                                                    "bloco": "layout/pilha",
+                                                                                                                                    "slots": {
+                                                                                                                                      "filhos": [
+                                                                                                                                        {
+                                                                                                                                          "bloco": "layout/pilha",
+                                                                                                                                          "slots": {
+                                                                                                                                            "filhos": [
+                                                                                                                                              {
+                                                                                                                                                "bloco": "layout/pilha",
+                                                                                                                                                "slots": {
+                                                                                                                                                  "filhos": [
+                                                                                                                                                    {
+                                                                                                                                                      "bloco": "layout/pilha",
+                                                                                                                                                      "slots": {
+                                                                                                                                                        "filhos": [
+                                                                                                                                                          {
+                                                                                                                                                            "bloco": "layout/pilha",
+                                                                                                                                                            "slots": {
+                                                                                                                                                              "filhos": [
+                                                                                                                                                                {
+                                                                                                                                                                  "bloco": "layout/pilha",
+                                                                                                                                                                  "slots": {
+                                                                                                                                                                    "filhos": [
+                                                                                                                                                                      {
+                                                                                                                                                                        "bloco": "layout/pilha",
+                                                                                                                                                                        "slots": {
+                                                                                                                                                                          "filhos": [
+                                                                                                                                                                            {
+                                                                                                                                                                              "bloco": "layout/pilha",
+                                                                                                                                                                              "slots": {
+                                                                                                                                                                                "filhos": [
+                                                                                                                                                                                  {
+                                                                                                                                                                                    "bloco": "layout/pilha",
+                                                                                                                                                                                    "slots": {
+                                                                                                                                                                                      "filhos": [
+                                                                                                                                                                                        {
+                                                                                                                                                                                          "bloco": "layout/pilha",
+                                                                                                                                                                                          "slots": {
+                                                                                                                                                                                            "filhos": [
+                                                                                                                                                                                              {
+                                                                                                                                                                                                "bloco": "layout/pilha",
+                                                                                                                                                                                                "slots": {
+                                                                                                                                                                                                  "filhos": [
+                                                                                                                                                                                                    {
+                                                                                                                                                                                                      "bloco": "layout/pilha",
+                                                                                                                                                                                                      "slots": {
+                                                                                                                                                                                                        "filhos": [
+                                                                                                                                                                                                          {
+                                                                                                                                                                                                            "bloco": "layout/pilha",
+                                                                                                                                                                                                            "slots": {
+                                                                                                                                                                                                              "filhos": [
+                                                                                                                                                                                                                {
+                                                                                                                                                                                                                  "bloco": "layout/item"
+                                                                                                                                                                                                                }
+                                                                                                                                                                                                              ]
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                        ]
+                                                                                                                                                                                                      }
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                  ]
+                                                                                                                                                                                                }
+                                                                                                                                                                                              }
+                                                                                                                                                                                            ]
+                                                                                                                                                                                          }
+                                                                                                                                                                                        }
+                                                                                                                                                                                      ]
+                                                                                                                                                                                    }
+                                                                                                                                                                                  }
+                                                                                                                                                                                ]
+                                                                                                                                                                              }
+                                                                                                                                                                            }
+                                                                                                                                                                          ]
+                                                                                                                                                                        }
+                                                                                                                                                                      }
+                                                                                                                                                                    ]
+                                                                                                                                                                  }
+                                                                                                                                                                }
+                                                                                                                                                              ]
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        ]
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                  ]
+                                                                                                                                                }
+                                                                                                                                              }
+                                                                                                                                            ]
+                                                                                                                                          }
+                                                                                                                                        }
+                                                                                                                                      ]
+                                                                                                                                    }
+                                                                                                                                  }
+                                                                                                                                ]
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                          ]
+                                                                                                                        }
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                }
+                                                                                                              ]
+                                                                                                            }
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    }
+                                                                                                  ]
+                                                                                                }
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        }
+                                                                                      ]
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                }
+                                                              ]
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

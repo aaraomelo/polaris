@@ -15,6 +15,12 @@ describe('sugere (quis dizer)', () => {
     expect(sugere('servco', ['servico', 'evento'])).toBe('servico')
     expect(sugere('banana', ['pagina', 'bloco', 'tema'])).toBeNull()
   })
+
+  it('não sugere quando a diferença é grande demais para ser digitação', () => {
+    expect(sugere('ftp', ['servico', 'estatico', 'http'])).toBeNull()
+    expect(sugere('FETCH', ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])).toBeNull()
+    expect(sugere('A0', ['A4', 'A5', 'Letter'])).toBe('A4')
+  })
 })
 
 describe('mensagens acionáveis', () => {
@@ -64,6 +70,17 @@ describe('mensagens acionáveis', () => {
     expect(dica(env('evento', { nome: 'PedidoCriado', payload: {} }))).toMatch(/pedido\.criado/)
     expect(dica(env('tenant', { alias: '-ruim-', segmento: 'varejo' }))).toMatch(/padaria-sol/)
     expect(dica(env('pagina', { rota: '/', raiz: { bloco: 'Layout Pilha' } }))).toMatch(/commerce\/vitrine/)
+  })
+
+  it('nome de chave inválido aponta a chave, sem erro duplicado', () => {
+    const es = erros(env('servico', { entidades: { Produto: { campos: {} } }, operacoes: {} }))
+    expect(es).toHaveLength(1)
+    expect(es[0]).toMatchObject({ caminho: '/spec/entidades/Produto', regra: 'pattern' })
+  })
+
+  it('a dica de campo ausente usa o caminho real, na raiz ou aninhado', () => {
+    expect(erros({ kind: 'pagina', id: 'x', versao: '1.0.0' })[0]!.dica).toBe('adicione "spec" na raiz do nó')
+    expect(erros(env('pagina', { raiz: { bloco: 'a/b' } }))[0]!.dica).toBe('adicione "rota" em /spec')
   })
 
   it('tipo errado diz esperado e recebido em pt-BR', () => {

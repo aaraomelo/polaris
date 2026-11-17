@@ -1,0 +1,18 @@
+{
+  "kind": "bloco",
+  "id": "layout.lista",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "layout/lista",
+    "slots": {
+      "item": {
+        "aceita": [
+          "layout/item"
+        ],
+        "min": 1,
+        "max": 2
+      }
+    }
+  }
+}

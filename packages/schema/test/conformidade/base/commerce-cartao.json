@@ -1,0 +1,10 @@
+{
+  "kind": "bloco",
+  "id": "commerce.cartao",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "commerce/cartao",
+    "extends": "layout/item"
+  }
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0/slots/filhos/0",
+    "regra": "limite",
+    "mensagem": "profundidade 33 excede o máximo de 32"
+  }
+]

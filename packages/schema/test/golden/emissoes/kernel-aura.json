@@ -1,0 +1,31 @@
+{
+  "emit": [
+    "glsl",
+    "wasm"
+  ],
+  "id": "aura",
+  "kind": "kernel",
+  "spec": {
+    "emissoes": [
+      {
+        "alvo": "glsl",
+        "backend": "glsl"
+      },
+      {
+        "alvo": "wasm",
+        "backend": "wasm"
+      }
+    ],
+    "entradas": {
+      "amplitude": {
+        "tipo": "decimal"
+      }
+    },
+    "saidas": {
+      "cor": {
+        "tipo": "json"
+      }
+    }
+  },
+  "versao": "1.0.0"
+}

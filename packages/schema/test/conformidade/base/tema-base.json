@@ -1,0 +1,13 @@
+{
+  "kind": "tema",
+  "id": "tema.base",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tokens": {
+      "cor": {
+        "a": "#111"
+      }
+    }
+  }
+}

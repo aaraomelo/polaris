@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/emissoes/0/alvo",
+    "regra": "enum",
+    "mensagem": "valor \"cobol\" não é permitido; aceitos: 'glsl', 'wasm', 'ptx', 'js'"
+  }
+]

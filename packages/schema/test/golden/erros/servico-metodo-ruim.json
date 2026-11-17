@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/operacoes/x/metodo",
+    "regra": "enum",
+    "mensagem": "valor \"FETCH\" não é permitido; aceitos: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'"
+  }
+]

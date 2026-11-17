@@ -1,0 +1,11 @@
+{
+  "kind": "bloco",
+  "id": "b",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "props": {
+      "type": "object"
+    }
+  }
+}

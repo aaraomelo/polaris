@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/modelo",
+    "regra": "ciclo",
+    "mensagem": "composição circular de blocos: conf/ciclo → conf/ciclo"
+  }
+]

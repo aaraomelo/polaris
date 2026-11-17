@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/raiz/bloco",
+    "regra": "pattern",
+    "mensagem": "\"Layout Pilha\" não segue o formato esperado",
+    "dica": "use o formato grupo/nome em minúsculas (ex.: commerce/vitrine)"
+  }
+]

@@ -27,8 +27,9 @@ describe('1. composição de blocos é DAG', () => {
   it('bloco que contém a si mesmo → ciclo', () => {
     const r = monta()
     const b = r.registra(bloco('a/x', { modelo: { bloco: 'layout/pilha', slots: { filhos: [{ bloco: 'a/x' }] } } })) as No
-    const e = validaEstrutura(r, b)
-    expect(e.some((x) => x.regra === 'ciclo' && x.mensagem.includes('a/x → a/x'))).toBe(true)
+    const e = validaEstrutura(r, b).filter((x) => x.regra === 'ciclo')
+    expect(e).toHaveLength(1) // uma vez só, sem eco degenerado
+    expect(e[0]!.mensagem).toBe('composição circular de blocos: a/x → a/x')
   })
 
   it('ciclo indireto a → b → c → a é reportado uma vez com o caminho do ciclo', () => {

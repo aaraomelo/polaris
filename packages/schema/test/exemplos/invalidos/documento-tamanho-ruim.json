@@ -1,0 +1,10 @@
+{
+  "kind": "documento",
+  "id": "d",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A0",
+    "blocos": []
+  }
+}

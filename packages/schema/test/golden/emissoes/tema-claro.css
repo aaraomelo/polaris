@@ -1,0 +1,17 @@
+/* polaris: tema tema.base@1.0.0 */
+:root {
+  --cor-primaria: #6C3AED;
+  --espacamento-1: 4px;
+  --espacamento-2: 8px;
+  --raio-m: 6px;
+}
+
+[data-modo="escuro"] {
+  --cor-primaria: #A78BFA;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-modo]) {
+    --cor-primaria: #A78BFA;
+  }
+}

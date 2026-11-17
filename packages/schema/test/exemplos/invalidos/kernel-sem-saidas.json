@@ -1,0 +1,9 @@
+{
+  "kind": "kernel",
+  "id": "k",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "entradas": {}
+  }
+}

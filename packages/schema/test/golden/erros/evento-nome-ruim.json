@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/nome",
+    "regra": "pattern",
+    "mensagem": "\"PedidoCriado\" não segue o formato esperado",
+    "dica": "use nomes em minúsculas separados por ponto (ex.: pedido.criado)"
+  }
+]

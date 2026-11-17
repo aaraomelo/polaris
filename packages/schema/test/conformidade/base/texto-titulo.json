@@ -1,0 +1,30 @@
+{
+  "kind": "bloco",
+  "id": "texto.titulo",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "texto/titulo",
+    "props": {
+      "type": "object",
+      "properties": {
+        "texto": {
+          "type": "string"
+        },
+        "nivel": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "estilo": {
+          "enum": [
+            "normal",
+            "forte"
+          ]
+        }
+      },
+      "required": [
+        "texto"
+      ]
+    }
+  }
+}

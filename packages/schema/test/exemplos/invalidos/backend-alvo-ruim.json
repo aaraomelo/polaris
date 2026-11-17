@@ -1,0 +1,12 @@
+{
+  "kind": "backend",
+  "id": "b",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "alvo": "cobol",
+    "operacoes": {
+      "emit": true
+    }
+  }
+}

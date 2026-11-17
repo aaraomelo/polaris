@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/raiz/props",
+    "regra": "props",
+    "mensagem": "falta o campo obrigatório 'texto'",
+    "dica": "adicione \"texto\" em /spec/raiz/props"
+  }
+]

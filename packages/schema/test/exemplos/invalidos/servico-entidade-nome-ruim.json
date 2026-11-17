@@ -1,0 +1,14 @@
+{
+  "kind": "servico",
+  "id": "s",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "entidades": {
+      "Produto": {
+        "campos": {}
+      }
+    },
+    "operacoes": {}
+  }
+}

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{loja.nome}</title>
+</head>
+<body data-pagina="home" data-versao="1.0.0" data-rota="/">
+  <pl-layout--pilha>
+    <div data-slot="filhos">
+      <pl-commerce--vitrine data-props="{&quot;colecao&quot;:&quot;destaques&quot;}"></pl-commerce--vitrine>
+      <pl-texto--titulo data-se="produtos.length" data-repetir-cada="produtos" data-repetir-como="produto" data-props="{&quot;texto&quot;:&quot;{produto.nome}&quot;}"></pl-texto--titulo>
+    </div>
+  </pl-layout--pilha>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'fonte'",
+    "dica": "adicione \"fonte\" em /spec"
+  }
+]

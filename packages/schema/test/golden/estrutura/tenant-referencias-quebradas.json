@@ -1,0 +1,12 @@
+[
+  {
+    "caminho": "/spec/tema",
+    "regra": "ref",
+    "mensagem": "tema 'tema.fantasma' não encontrado"
+  },
+  {
+    "caminho": "/spec/paginas/0",
+    "regra": "ref",
+    "mensagem": "pagina 'home' não encontrado"
+  }
+]

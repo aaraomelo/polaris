@@ -1,0 +1,15 @@
+{
+  "id": "dados.loja",
+  "kind": "dados",
+  "spec": {
+    "cache": {
+      "ttlSegundos": 60
+    },
+    "fonte": {
+      "operacao": "obterLoja",
+      "servico": "catalogo",
+      "tipo": "servico"
+    }
+  },
+  "versao": "1.0.0"
+}

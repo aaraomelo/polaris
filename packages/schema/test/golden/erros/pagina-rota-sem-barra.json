@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/rota",
+    "regra": "pattern",
+    "mensagem": "\"home\" não segue o formato esperado",
+    "dica": "deve começar com '/' (ex.: /produtos)"
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/filhos/0/bloco",
+    "regra": "ref",
+    "mensagem": "bloco 'nao/existe' não encontrado"
+  }
+]

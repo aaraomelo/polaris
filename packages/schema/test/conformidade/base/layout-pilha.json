@@ -1,0 +1,12 @@
+{
+  "kind": "bloco",
+  "id": "layout.pilha",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "layout/pilha",
+    "slots": {
+      "filhos": {}
+    }
+  }
+}

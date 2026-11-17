@@ -26,7 +26,7 @@ export function sugere(valor: string, opcoes: readonly string[]): string | null 
     const d = distancia(valor.toLowerCase(), o.toLowerCase())
     if (d < menor) (menor = d), (melhor = o)
   }
-  return melhor !== null && menor <= Math.max(2, Math.floor(valor.length / 3)) ? melhor : null
+  return melhor !== null && menor <= Math.max(1, Math.floor(valor.length / 3)) ? melhor : null
 }
 
 const PADROES: Array<[RegExp, string]> = [
@@ -35,6 +35,7 @@ const PADROES: Array<[RegExp, string]> = [
   [/^\^\//, "deve começar com '/' (ex.: /produtos)"],
   [/a-z0-9\]\(\?:\[a-z0-9-\]/, "use minúsculas, números e '-', sem '-' nas pontas (ex.: padaria-sol)"],
   [/a-z\]\+\(\\\.\[a-z\]\+\)\+/, "use nomes em minúsculas separados por ponto (ex.: pedido.criado)"],
+  [/\^\[A-Za-z0-9\]\[A-Za-z0-9_-\]\*\$/, "use letras, números, '_' e '-', começando por letra ou número (ex.: primaria, 1)"],
   [/a-z\]\[A-Za-z0-9\]\*/, "use camelCase começando por minúscula (ex.: precoUnitario)"],
   [/a-z0-9\._-\]\*\(\/\[a-z0-9\._-\]\+\)\*/, "use o formato grupo/nome em minúsculas (ex.: commerce/vitrine)"],
 ]
@@ -51,13 +52,15 @@ function camposConhecidos(e: ErrorObject): string[] {
 
 export function traduz(e: ErrorObject, base = ''): Erro | null {
   if (e.keyword === 'if') return null
-  const caminho = base + (e.instancePath || '') || '/'
+  // erro de nome de chave (propertyNames): o caminho é o da chave, não o do objeto
+  const daChave = e.schemaPath.includes('/propertyNames/') && typeof e.data === 'string'
+  const caminho = base + (e.instancePath || '') + (daChave ? `/${e.data}` : '') || '/'
   const p = e.params as Record<string, any>
   const out = (mensagem: string, dica?: string): Erro => ({ caminho, mensagem, regra: e.keyword, ...(dica ? { dica } : {}), ...(e.data !== undefined ? { valor: e.data } : {}) })
 
   switch (e.keyword) {
     case 'required':
-      return { caminho, regra: 'required', mensagem: `falta o campo obrigatório '${p.missingProperty}'`, dica: `adicione "${p.missingProperty}" em ${e.instancePath || 'na raiz do nó'}` }
+      return { caminho, regra: 'required', mensagem: `falta o campo obrigatório '${p.missingProperty}'`, dica: `adicione "${p.missingProperty}" ${caminho === '/' ? 'na raiz do nó' : `em ${caminho}`}` }
     case 'additionalProperties':
     case 'unevaluatedProperties': {
       const campo = String(p.additionalProperty ?? p.unevaluatedProperty)
@@ -105,6 +108,8 @@ export function traduzTodos(erros: readonly ErrorObject[], base = ''): Erro[] {
   const vistos = new Set<string>()
   const saida: Erro[] = []
   for (const e of erros) {
+    // o 'propertyNames' é só o invólucro do erro real da chave
+    if (e.keyword === 'propertyNames' && erros.some((o) => o !== e && o.schemaPath.startsWith(`${e.schemaPath}/`))) continue
     const t = traduz(e, base)
     if (!t) continue
     const k = `${t.caminho}|${t.regra}|${t.mensagem}`

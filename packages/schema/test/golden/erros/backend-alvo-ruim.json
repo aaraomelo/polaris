@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/alvo",
+    "regra": "enum",
+    "mensagem": "valor \"cobol\" não é permitido; aceitos: 'html', 'css', 'js', 'sql', 'wasm', 'glsl', 'ptx', 'pdf'"
+  }
+]

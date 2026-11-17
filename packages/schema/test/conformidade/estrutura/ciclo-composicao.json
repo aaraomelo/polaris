@@ -1,0 +1,19 @@
+{
+  "kind": "bloco",
+  "id": "conf.ciclo",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "conf/ciclo",
+    "modelo": {
+      "bloco": "layout/pilha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "conf/ciclo"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "kind": "pagina",
+  "id": "ok",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/ok",
+    "raiz": {
+      "bloco": "layout/pilha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "layout/lista",
+            "slots": {
+              "item": [
+                {
+                  "bloco": "commerce/cartao"
+                },
+                {
+                  "bloco": "layout/item"
+                }
+              ]
+            }
+          },
+          {
+            "bloco": "texto/titulo",
+            "props": {
+              "texto": "{x}",
+              "nivel": 2
+            }
+          }
+        ]
+      }
+    }
+  }
+}

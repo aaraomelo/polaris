@@ -1,0 +1,14 @@
+{
+  "kind": "bloco",
+  "id": "layout.linha",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "layout/linha",
+    "slots": {
+      "filhos": {
+        "max": 2
+      }
+    }
+  }
+}

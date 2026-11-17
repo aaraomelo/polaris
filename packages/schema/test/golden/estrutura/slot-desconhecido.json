@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/rodape",
+    "regra": "slot",
+    "mensagem": "bloco 'layout/pilha' não tem o slot 'rodape' (tem: filhos)"
+  }
+]

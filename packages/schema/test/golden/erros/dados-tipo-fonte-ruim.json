@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/fonte/tipo",
+    "regra": "enum",
+    "mensagem": "valor \"ftp\" não é permitido; aceitos: 'servico', 'estatico', 'http'"
+  }
+]

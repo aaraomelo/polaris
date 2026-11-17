@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/tamanho",
+    "regra": "enum",
+    "mensagem": "valor \"A0\" não é permitido; aceitos: 'A4', 'A5', 'Letter'",
+    "dica": "quis dizer 'A4'?"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/",
+    "regra": "not",
+    "mensagem": "combinação de campos não permitida",
+    "dica": "um nó tem escopo de tenant (tenantId) OU de segmento (segmento), nunca os dois"
+  }
+]

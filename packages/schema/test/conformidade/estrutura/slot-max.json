@@ -1,0 +1,25 @@
+{
+  "kind": "pagina",
+  "id": "a",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/a",
+    "raiz": {
+      "bloco": "layout/linha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "layout/item"
+          },
+          {
+            "bloco": "layout/item"
+          },
+          {
+            "bloco": "layout/item"
+          }
+        ]
+      }
+    }
+  }
+}

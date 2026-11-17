@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/filhos/0/id",
+    "regra": "id-unico",
+    "mensagem": "id 'x' já usado em /spec/raiz"
+  }
+]

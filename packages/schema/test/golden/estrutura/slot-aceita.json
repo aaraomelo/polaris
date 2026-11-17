@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/raiz/slots/item/0/bloco",
+    "regra": "slot-aceita",
+    "mensagem": "slot 'item' de 'layout/lista' aceita [layout/item]; recebeu 'texto/titulo'"
+  }
+]
