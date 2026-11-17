@@ -123,6 +123,11 @@ export function compilaPagina(reg: Registry, no: No, ctx: Contexto = {}): Result
   const cx = new Cx(reg, ctx, 'pagina')
   cx.erros.push(...confere(reg, no, ctx))
   const dados = spec.dados ?? {}
+  for (const nome of Object.keys(dados)) {
+    if ((ESCOPO_PAGINA as readonly string[]).includes(nome) || nome === 'indice') {
+      cx.erro(`/spec/dados/${nome}`, 'dados', `'${nome}' é um nome reservado da página e sombrearia o valor do sistema`, `escolha outro nome (reservados: ${[...ESCOPO_PAGINA, 'indice'].join(', ')})`)
+    }
+  }
   const escopo = [...ESCOPO_PAGINA, ...Object.keys(dados)]
   const titulo = spec.titulo !== undefined ? compilaTexto(cx, spec.titulo, escopo, '/spec/titulo') : undefined
   const raiz = compilaInst(cx, spec.raiz, '/spec/raiz', escopo)

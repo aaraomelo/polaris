@@ -22,6 +22,9 @@
       "description": "nome → referência a nó kind=dados",
       "additionalProperties": {
         "type": "string"
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
       }
     },
     "raiz": {

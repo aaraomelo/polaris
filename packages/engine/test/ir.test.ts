@@ -135,6 +135,14 @@ describe('compilaPagina — erros', () => {
     expect(e2[0]!.regra).toBe('repetir')
   })
 
+  it('dados com nome reservado (params, consulta, tenant, indice) é erro; nome fora do padrão é recusado pelo schema', () => {
+    const r = monta()
+    const res = compilaPagina(r, r.registra(no('pagina', 'pr', { rota: '/', dados: { params: 'dados.loja', tenant: 'dados.loja' }, raiz: P('layout/pilha') })))
+    expect(res.ok).toBe(false)
+    if (!res.ok) expect(res.erros.filter((e) => e.regra === 'dados').map((e) => e.caminho)).toEqual(['/spec/dados/params', '/spec/dados/tenant'])
+    expect(() => r.registra(no('pagina', 'pn', { rota: '/', dados: { 'a-b': 'dados.loja' }, raiz: P('layout/pilha') }))).toThrow(/não segue o formato|inválido/)
+  })
+
   it('título com variável inexistente', () => {
     const e = falha(compila(P('layout/pilha'), { titulo: '{naoexiste}' }))
     expect(e[0]).toMatchObject({ caminho: '/spec/titulo', regra: 'binding' })
