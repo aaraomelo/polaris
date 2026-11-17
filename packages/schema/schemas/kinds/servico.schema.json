@@ -26,6 +26,39 @@
                 "type": "string"
               }
             }
+          },
+          "crud": {
+            "type": "object",
+            "required": [
+              "caminho"
+            ],
+            "additionalProperties": false,
+            "description": "gera as rotas padrão da entidade (listar, obter, criar, atualizar, remover)",
+            "properties": {
+              "caminho": {
+                "type": "string",
+                "pattern": "^/[a-z0-9/-]*$",
+                "description": "coleção, ex.: /produtos (o item é /produtos/{id})"
+              },
+              "operacoes": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "listar",
+                    "obter",
+                    "criar",
+                    "atualizar",
+                    "remover"
+                  ]
+                },
+                "description": "padrão: as cinco"
+              },
+              "permissao": {
+                "type": "string",
+                "description": "padrão: autenticada; 'publica' dispensa autenticação"
+              }
+            }
           }
         },
         "additionalProperties": false
@@ -72,6 +105,11 @@
               "type": "string"
             },
             "description": "eventos publicados"
+          },
+          "lista": {
+            "type": "boolean",
+            "default": false,
+            "description": "a saída é uma lista de `saida` (com paginação)"
           }
         },
         "additionalProperties": false

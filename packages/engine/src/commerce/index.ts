@@ -40,9 +40,9 @@ export const SERVICOS = [
       } },
     },
     operacoes: {
-      listarProdutos: { metodo: 'GET', caminho: '/produtos', entrada: { busca: { tipo: 'texto' }, pagina: { tipo: 'inteiro', padrao: 1 }, limite: { tipo: 'inteiro', padrao: 24 } }, saida: 'produto', permissao: 'publica' },
+      listarProdutos: { metodo: 'GET', caminho: '/produtos', entrada: { busca: { tipo: 'texto' }, pagina: { tipo: 'inteiro', padrao: 1 }, limite: { tipo: 'inteiro', padrao: 24 } }, saida: 'produto', lista: true, permissao: 'publica' },
       obterProduto: { metodo: 'GET', caminho: '/produtos/:id', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'produto', permissao: 'publica' },
-      listarVariantes: { metodo: 'GET', caminho: '/produtos/:id/variantes', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'variante', permissao: 'publica' },
+      listarVariantes: { metodo: 'GET', caminho: '/produtos/:id/variantes', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'variante', lista: true, permissao: 'publica' },
     },
   }),
   no('servico', 'carrinho', {

@@ -1,3 +1,4 @@
+import { emiteOpenApi } from './servico-api'
 import type { No } from './index'
 import type { Contexto, Registry } from './registry'
 
@@ -11,10 +12,11 @@ import type { Contexto, Registry } from './registry'
 //   tex  | todos                                  | ficha de documentação em LaTeX
 //   css  | tema                                   | custom properties (+ modos)
 //   sql  | servico                                | DDL PostgreSQL com tenant_id e RLS
+//   openapi | servico                             | OpenAPI 3.1 (rotas das operações e do crud; schemas das entidades)
 //   html | pagina                                 | HTML canônico (blocos como custom elements, ilhas)
 // ---------------------------------------------------------------------------
 
-export type Alvo = 'json' | 'js' | 'tex' | 'css' | 'sql' | 'html'
+export type Alvo = 'json' | 'js' | 'tex' | 'css' | 'sql' | 'html' | 'openapi'
 
 export class EmissaoErro extends Error {
   constructor(mensagem: string) {
@@ -28,7 +30,7 @@ export type OpcoesEmissao = { registry?: Registry; ctx?: Contexto }
 const TODOS: Alvo[] = ['json', 'js', 'tex']
 const POR_KIND: Partial<Record<No['kind'], Alvo[]>> = {
   tema: ['css'],
-  servico: ['sql'],
+  servico: ['sql', 'openapi'],
   pagina: ['html'],
 }
 
@@ -302,6 +304,7 @@ export function emite(no: No, alvo: Alvo, _opcoes: OpcoesEmissao = {}): string {
     case 'css': return emiteCss(no)
     case 'sql': return emiteSql(no)
     case 'html': return emiteHtml(no)
+    case 'openapi': return emiteOpenApi(no)
   }
 }
 

@@ -5,6 +5,7 @@ import { COMPONENTES_BASE, compilaHtmlVivo, compilaPrograma, montaVivo, registra
 import { BLOCOS_COMMERCE, SERVICOS, registraCommerce } from '../src/commerce/index'
 import { geraCatalogo } from '../src/catalogo/index'
 import { registraTemas } from '../src/tema/index'
+import { emite, rotasDe } from '@polaris/schema'
 
 const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0.0', estatuto: 'publicado', spec }) as any
 const novoReg = () => { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); return r }
@@ -40,6 +41,16 @@ describe('contratos de serviço', () => {
   it('dinheiro é decimal exato (tipo `dinheiro`), nunca número: preço, total, desconto e frete', () => {
     const campos = (s: string, e: string) => ((SERVICOS.find((x) => x.id === s)!.spec as any).entidades[e].campos) as Record<string, { tipo: string }>
     for (const [s, e, f] of [['catalogo', 'produto', 'preco'], ['catalogo', 'produto', 'precoDe'], ['carrinho', 'itemCarrinho', 'precoUnitario'], ['carrinho', 'carrinho', 'total'], ['pedidos', 'pedido', 'frete']] as const) expect(campos(s, e)[f]!.tipo, `${e}.${f}`).toBe('dinheiro')
+  })
+  it('cada contrato gera OpenAPI e rotas; as listagens são listas paginadas (200 com array)', () => {
+    for (const s of SERVICOS) {
+      const rs = rotasDe(s as never); expect(rs.length, s.id).toBeGreaterThan(0)
+      const doc = JSON.parse(emite(s as never, 'openapi')); expect(doc.openapi).toBe('3.1.0')
+      for (const ref of JSON.stringify(doc).matchAll(/#\/components\/schemas\/(\w+)/g)) expect(doc.components.schemas[ref[1]!], `${s.id}:${ref[1]}`).toBeDefined()
+    }
+    const cat = JSON.parse(emite(SERVICOS[0] as never, 'openapi'))
+    expect(cat.paths['/produtos'].get.responses['200'].content['application/json'].schema.type).toBe('array')
+    expect(cat.paths['/produtos'].get.security).toEqual([]) // permissão pública
   })
   it('os blocos só leem campos que o contrato declara (acoplamento forma-dados conferido)', () => {
     const ent = (s: string, e: string) => Object.keys(((SERVICOS.find((x) => x.id === s)!.spec as any).entidades[e].campos))
