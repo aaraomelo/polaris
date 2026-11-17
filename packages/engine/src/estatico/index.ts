@@ -91,6 +91,7 @@ export function compilaEstatico(programa: Programa, emissores: Emissores = EMISS
 const escAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 /** Documento HTML completo de uma página estática: sem estado de hidratação, sem <script>, sem contêiner. Zero JavaScript. */
-export function documentoEstatico(p: { corpo: string; titulo: string; lang?: string }): string {
-  return `<!doctype html><html lang="${escAttr(p.lang ?? 'pt-BR')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escAttr(p.titulo)}</title></head><body>${p.corpo}</body></html>`
+export function documentoEstatico(p: { corpo: string; titulo: string; lang?: string; /** folhas de estilo (href), p.ex. o CSS do tema */ estilos?: string[]; /** modo do tema (claro/escuro…); sem ele, segue prefers-color-scheme */ modo?: string }): string {
+  const links = (p.estilos ?? []).map((h) => `<link rel="stylesheet" href="${escAttr(h)}">`).join('')
+  return `<!doctype html><html lang="${escAttr(p.lang ?? 'pt-BR')}"${p.modo ? ` data-modo="${escAttr(p.modo)}"` : ''}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escAttr(p.titulo)}</title>${links}</head><body>${p.corpo}</body></html>`
 }

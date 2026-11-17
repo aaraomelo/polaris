@@ -6,6 +6,7 @@ import type { Contexto, Erro, Registry } from '@polaris/schema'
 import { compilaEstatico, compilaHtmlVivo, documentoEstatico } from '../estatico/index'
 import { compilaPrograma, type Programa } from '../render/programa'
 import type { ConfigCodigo } from '../codigo/sessao'
+import { cssDoTema } from '../tema/index'
 import { jsonSeguro } from '../render/json'
 import { elegivelVivo } from '../vivo/monta'
 import { empacotaCliente } from './empacota'
@@ -30,7 +31,7 @@ export type EntradaManifesto = {
   motivos: string[]
   /** HTML completo pré-renderizado no build (só páginas sem dados e sem parâmetros de rota); null = renderizada a cada requisição */
   prerenderizada: boolean
-  arquivos: { programa: Arquivo; html?: Arquivo; cliente?: Arquivo }
+  arquivos: { programa: Arquivo; html?: Arquivo; cliente?: Arquivo; /** CSS do tema da página (compartilhado entre páginas do mesmo tema) */ tema?: Arquivo }
   uso: Uso
   /** a página tem dados em streaming: o servidor transmite o HTML (`streamVivo`, @polaris/engine/servidor-vivo) com o cliente deste manifesto */
   streaming?: boolean
@@ -81,7 +82,7 @@ type PaginaPronta = { entrada: EntradaManifesto; conteudos: Record<string, strin
 
 const AGORA_PADRAO = '1970-01-01T00:00:00.000Z' // build determinístico: o relógio do código é fixo (e vai no HTML para o cliente reproduzir)
 
-async function constroiPagina(id: string, programa: Programa, no: { id: string; versao: string }, escopo: string, codigoCfg: ConfigCodigo | undefined): Promise<PaginaPronta> {
+async function constroiPagina(id: string, programa: Programa, no: { id: string; versao: string }, escopo: string, codigoCfg: ConfigCodigo | undefined, estiloHref?: string): Promise<PaginaPronta> {
   const base = nomeBase(id)
   const progJson = JSON.stringify(programa)
   const hashP = sha(progJson).slice(0, 12)
@@ -105,7 +106,7 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
     entrada.modo = 'estatico'
     if (prerenderizavel) {
       const r = est.pagina.render({})
-      const html = documentoEstatico({ corpo: r.corpo, titulo: r.titulo })
+      const html = documentoEstatico({ corpo: r.corpo, titulo: r.titulo, ...(estiloHref ? { estilos: [estiloHref] } : {}) })
       const nome = `${base}.${sha(html).slice(0, 12)}.html`
       conteudos[nome] = html; arquivos.html = arquivo(nome, html); entrada.prerenderizada = true
     }
@@ -126,7 +127,7 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
     const r = h.pagina.render({ ...(codigo ? { codigo } : {}) })
     const ini = INICIALIZACAO
     const titulo = r.titulo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${titulo}</title></head><body><div id="polaris">${r.corpo}</div><script type="application/json" id="pl-programa">${jsonSeguro(programa)}</script>${temCodigo ? `<script type="application/json" id="pl-estado">${jsonSeguro({ agora: codigo!.agora })}</script>` : ''}<script src="${jsNome}"></script><script>${ini}</script></body></html>`
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${titulo}</title>${estiloHref ? `<link rel="stylesheet" href="${estiloHref}">` : ''}</head><body><div id="polaris">${r.corpo}</div><script type="application/json" id="pl-programa">${jsonSeguro(programa)}</script>${temCodigo ? `<script type="application/json" id="pl-estado">${jsonSeguro({ agora: codigo!.agora })}</script>` : ''}<script src="${jsNome}"></script><script>${ini}</script></body></html>`
     const nome = `${base}.${sha(html).slice(0, 12)}.html`
     conteudos[nome] = html; arquivos.html = arquivo(nome, html); entrada.prerenderizada = true
     entrada.cspScript = `sha256-${createHash('sha256').update(ini).digest('base64')}`
@@ -135,6 +136,8 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
 }
 
 export type OpcoesBuild = {
+  /** não aplicar tema às páginas (padrão: aplica `spec.tema` ou o tema `padrao` se existir no registry) */
+  semTema?: boolean
   /** sandbox para pré-renderizar páginas com blocos de código (sem isso elas saem sem HTML pré-feito) */
   codigo?: ConfigCodigo
   /** diretório de saída (cada contexto vai para uma subpasta: core, t-<tenant>, s-<segmento>) */
@@ -157,7 +160,13 @@ export async function construirAot(reg: Registry, opcoes: OpcoesBuild): Promise<
       if (!r) continue
       const c = compilaPrograma(reg, r.no, ctx)
       if (!c.ok) { erros.push({ pagina: id, erros: c.erros }); continue }
-      const p = await constroiPagina(id, c.programa, { id: r.no.id, versao: r.no.versao }, r.escopo, opcoes.codigo)
+      // tema (cascata tenant → segmento → core): o `tema` do nó do tenant, ou o `padrao` quando houver
+      const temaId = (ctx.tenantId ? (reg.resolve('tenant', ctx.tenantId, ctx)?.no.spec as { tema?: string } | undefined)?.tema : undefined) ?? 'padrao'
+      const tema = opcoes.semTema ? null : reg.resolve('tema', temaId, ctx)
+      let estiloHref: string | undefined
+      if (tema) { const css = cssDoTema(tema.no); estiloHref = `tema.${sha(css).slice(0, 12)}.css`; conteudos[estiloHref] = css }
+      const p = await constroiPagina(id, c.programa, { id: r.no.id, versao: r.no.versao }, r.escopo, opcoes.codigo, estiloHref)
+      if (estiloHref) p.entrada.arquivos.tema = arquivo(estiloHref, conteudos[estiloHref]!)
       paginas[id] = p.entrada
       Object.assign(conteudos, p.conteudos)
     }

@@ -41,6 +41,10 @@ export type OpcoesStreamVivo = OpcoesCarga & {
   abortaEmMs?: number
   /** nonce de CSP para os scripts inline (boot e inicialização) */
   nonce?: string
+  /** folhas de estilo (href), p.ex. o CSS do tema; vão no <head> antes do conteúdo (sem flash sem estilo) */
+  estilos?: string[]
+  /** modo do tema (`data-modo` no <html>); sem ele, segue prefers-color-scheme */
+  modo?: string
   /** executor isolado dos blocos de código (SSR); o `agora` é decidido UMA vez aqui e vai no estado para o cliente reproduzir a saída */
   codigo?: ConfigCodigo
 }
@@ -67,7 +71,8 @@ export async function* streamVivo(programa: Programa, opcoes: OpcoesStreamVivo):
   const shell = pagina.render(entrada(store))
   const nonce = opcoes.nonce ? ` nonce="${esc(opcoes.nonce)}"` : ''
   const seed = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma, estado: store.estado, dados: store.dados, status: store.status, erros: store.erros, ...(codigo?.agora ? { agora: codigo.agora } : {}) }
-  yield `<!doctype html><html lang="${esc(opcoes.lang ?? opcoes.idioma ?? 'pt-BR')}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(shell.titulo)}</title>` +
+  const links = (opcoes.estilos ?? []).map((h) => `<link rel="stylesheet" href="${esc(h)}">`).join('')
+  yield `<!doctype html><html lang="${esc(opcoes.lang ?? opcoes.idioma ?? 'pt-BR')}"${opcoes.modo ? ` data-modo="${esc(opcoes.modo)}"` : ''}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(shell.titulo)}</title>${links}` +
     `<script${nonce}>${BOOT}</script><script${nonce} async src="${esc(opcoes.clienteSrc)}"></script></head>` +
     `<body><div id="polaris">${shell.corpo}</div>` +
     `<script type="application/json" id="pl-programa">${jsonSeguro(programa)}</script><script type="application/json" id="pl-estado">${jsonSeguro(seed)}</script>`
