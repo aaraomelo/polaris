@@ -1,6 +1,318 @@
 # Catálogo de blocos
 
-27 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+33 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+
+## commerce
+
+### Carrinho (`commerce/carrinho`)
+
+Itens do carrinho (do contrato `carrinho.obterCarrinho`) e o resumo. Vazio mostra a mensagem. O slot `acoes` recebe "Finalizar compra".
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `desconto` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `frete` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `itens` | lista | sim |  |  |
+| `subtotal` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `total` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `acoes` | qualquer bloco |  |  |
+
+**Exemplo: Com itens**
+
+```json
+{
+  "bloco": "commerce/carrinho",
+  "props": {
+    "itens": [
+      {
+        "id": "i1",
+        "nome": "Pão de queijo 500 g",
+        "quantidade": 2,
+        "precoUnitario": "24.90",
+        "total": "49.80"
+      },
+      {
+        "id": "i2",
+        "nome": "Café 250 g",
+        "quantidade": 1,
+        "precoUnitario": "18.50",
+        "total": "18.50"
+      }
+    ],
+    "subtotal": "68.30",
+    "frete": "12.00",
+    "total": "80.30"
+  },
+  "slots": {
+    "acoes": [
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Finalizar compra"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Exemplo: Vazio**
+
+```json
+{
+  "bloco": "commerce/carrinho",
+  "props": {
+    "itens": []
+  }
+}
+```
+
+### Cartão de produto (`commerce/cartao-produto`)
+
+Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `acoes` recebe botões da página (ex.: "Adicionar").
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `href` | texto | não |  |  |
+| `produto` | objeto | sim |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `acoes` | qualquer bloco |  |  |
+
+**Exemplo: Com ação**
+
+```json
+{
+  "bloco": "commerce/cartao-produto",
+  "props": {
+    "produto": {
+      "id": "p1",
+      "nome": "Pão de queijo 500 g",
+      "descricao": "Receita tradicional mineira, congelado.",
+      "preco": "24.90",
+      "precoDe": "29.90",
+      "fotoUrl": "exemplos/produto.svg",
+      "disponivel": true
+    },
+    "href": "/produto/p1"
+  },
+  "slots": {
+    "acoes": [
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Adicionar"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Exemplo: Esgotado**
+
+```json
+{
+  "bloco": "commerce/cartao-produto",
+  "props": {
+    "produto": {
+      "id": "p2",
+      "nome": "Bolo de fubá",
+      "descricao": "Receita tradicional mineira, congelado.",
+      "preco": "18.00",
+      "fotoUrl": "exemplos/produto.svg",
+      "disponivel": false
+    }
+  }
+}
+```
+
+### Detalhe do produto (`commerce/detalhe-produto`)
+
+Página de produto (PDP): foto ao lado do nome, preço, descrição e disponibilidade. O slot `acoes` recebe quantidade e "Adicionar ao carrinho".
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `produto` | objeto | sim |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `acoes` | qualquer bloco |  |  |
+
+**Exemplo: Com ações**
+
+```json
+{
+  "bloco": "commerce/detalhe-produto",
+  "props": {
+    "produto": {
+      "id": "p1",
+      "nome": "Pão de queijo 500 g",
+      "descricao": "Receita tradicional mineira, congelado.",
+      "preco": "24.90",
+      "precoDe": "29.90",
+      "fotoUrl": "exemplos/produto.svg",
+      "disponivel": true
+    }
+  },
+  "slots": {
+    "acoes": [
+      {
+        "bloco": "entrada/numero",
+        "props": {
+          "valor": 1,
+          "min": 1
+        }
+      },
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Adicionar ao carrinho"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Preço (`commerce/preco`)
+
+Preço em reais, com o preço anterior riscado de forma semântica ("de …") quando informado. Aceita texto decimal exato ou número.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `de` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `valor` | texto \| número | sim |  | valor em reais: texto decimal exato ("49.90") ou número |
+
+**Exemplo: Simples**
+
+```json
+{
+  "bloco": "commerce/preco",
+  "props": {
+    "valor": "49.90"
+  }
+}
+```
+
+**Exemplo: Com preço anterior**
+
+```json
+{
+  "bloco": "commerce/preco",
+  "props": {
+    "valor": "49.90",
+    "de": "59.90"
+  }
+}
+```
+
+### Resumo do pedido (`commerce/resumo-pedido`)
+
+Subtotal, desconto, frete e total (mesma forma de `carrinho` e `pedido` dos contratos). Desconto e frete só aparecem se forem diferentes de zero.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `desconto` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `frete` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `subtotal` | texto \| número | sim |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `total` | texto \| número | sim |  | valor em reais: texto decimal exato ("49.90") ou número |
+
+**Exemplo: Com frete e desconto**
+
+```json
+{
+  "bloco": "commerce/resumo-pedido",
+  "props": {
+    "subtotal": "68.30",
+    "desconto": "5.00",
+    "frete": "12.00",
+    "total": "75.30"
+  }
+}
+```
+
+### Vitrine (`commerce/vitrine`)
+
+Grade de cartões de produto a partir de uma lista (`produtos`, do contrato `catalogo.listarProdutos`). `hrefBase` + id forma o link de cada cartão. Sem produtos, mostra a mensagem de vazio. Para ações em cada cartão, componha `layout/grade` + `repetir` na página.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `colunas` | inteiro ≥ 1 ≤ 6 | não | 3 |  |
+| `hrefBase` | texto | não |  | ex.: "/produto/" |
+| `produtos` | lista | sim |  |  |
+
+**Exemplo: Três produtos**
+
+```json
+{
+  "bloco": "commerce/vitrine",
+  "props": {
+    "produtos": [
+      {
+        "id": "p1",
+        "nome": "Pão de queijo 500 g",
+        "descricao": "Receita tradicional mineira, congelado.",
+        "preco": "24.90",
+        "precoDe": "29.90",
+        "fotoUrl": "exemplos/produto.svg",
+        "disponivel": true
+      },
+      {
+        "id": "p2",
+        "nome": "Bolo de fubá",
+        "descricao": "Receita tradicional mineira, congelado.",
+        "preco": "18.00",
+        "fotoUrl": "exemplos/produto.svg",
+        "disponivel": false
+      },
+      {
+        "id": "p3",
+        "nome": "Café 250 g",
+        "descricao": "Receita tradicional mineira, congelado.",
+        "preco": "18.50",
+        "fotoUrl": "exemplos/produto.svg",
+        "disponivel": true
+      }
+    ],
+    "colunas": 3,
+    "hrefBase": "/produto/"
+  }
+}
+```
+
+**Exemplo: Vazia**
+
+```json
+{
+  "bloco": "commerce/vitrine",
+  "props": {
+    "produtos": []
+  }
+}
+```
 
 ## core
 
