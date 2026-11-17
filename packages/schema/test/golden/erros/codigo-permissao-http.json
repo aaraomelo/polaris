@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/codigo/permissoes/0",
+    "regra": "pattern",
+    "mensagem": "\"rede:http://api.exemplo.com\" não segue o formato esperado",
+    "dica": "use 'formularios', 'rede:https://origem' ou 'imagens:https://origem': só https, sem curinga (*) e sem caminho"
+  }
+]

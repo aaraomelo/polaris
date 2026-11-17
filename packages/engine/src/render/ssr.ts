@@ -13,7 +13,7 @@ export const ID_RAIZ = 'polaris'
 export const ID_ESTADO = '__POLARIS__'
 
 /** Estado enviado ao cliente para hidratar sem nova busca. Não inclui os componentes (código do cliente). */
-export type EstadoCliente = Pick<EntradaPagina, 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant' | 'idioma'> & { programa: Programa }
+export type EstadoCliente = Pick<EntradaPagina, 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant' | 'idioma'> & { programa: Programa; /** relógio fixo da requisição, para o código isolado do cliente reproduzir a saída do servidor */ agora?: string }
 
 export type SaidaSsr = { html: string; corpo: string; titulo: string; estado: EstadoCliente }
 
@@ -31,6 +31,7 @@ export function renderPaginaHtml(entrada: EntradaPagina, opcoes: { scripts?: str
     ...(entrada.consulta ? { consulta: entrada.consulta } : {}),
     ...(entrada.tenant ? { tenant: entrada.tenant } : {}),
     ...(entrada.idioma ? { idioma: entrada.idioma } : {}),
+    ...(entrada.codigo?.agora ? { agora: entrada.codigo.agora } : {}),
   }
   const scripts = (opcoes.scripts ?? []).map((s) => `<script type="module" src="${esc(s)}"></script>`).join('')
   const html =

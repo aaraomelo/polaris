@@ -1,0 +1,19 @@
+{
+  "kind": "bloco",
+  "id": "mapa",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "x/mapa",
+    "codigo": {
+      "linguagem": "html",
+      "fonte": "<h1>{{props.t}}</h1>",
+      "altura": 300,
+      "permissoes": [
+        "imagens:https://tiles.exemplo.com",
+        "rede:https://api.exemplo.com:8443",
+        "formularios"
+      ]
+    }
+  }
+}

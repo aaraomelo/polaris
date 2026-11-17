@@ -5,6 +5,8 @@ import type { IRElemento, IRNo } from '../ir/tipos'
 import type { Programa } from './programa'
 import { LIMITES_RUNTIME, type Componentes, type ErroRuntime } from './tipos'
 import { executaAcoes, type ContextoAcoes } from './acoes'
+import { renderizaCodigo } from '../codigo/bloco'
+import type { SessaoCodigo } from '../codigo/sessao'
 import { jsonSeguro } from './json'
 import { carregado, ehLazy, envoltorioLazy, falhou } from './lazy'
 import { valorDe } from './valor'
@@ -23,6 +25,8 @@ export type Ambiente = {
   acoes?: ContextoAcoes
   /** SERVIDOR: cargas em streaming já em andamento; o Suspense as consome. No cliente fica indefinido (o valor vem do HTML). */
   stream?: Record<string, Promise<ResultadoUm>>
+  /** execução isolada de blocos de código (orçamento + cache); sem ela, blocos de código são omitidos e reportados */
+  codigo?: SessaoCodigo
 }
 
 /** Filhos que a instância de um bloco composto recebeu, avaliados no escopo de QUEM os passou. */
@@ -109,8 +113,17 @@ function um(no: IRNo, escopo: Escopo, amb: Ambiente, host: SlotsDoHost | null, c
   }
 
   if (impl === 'codigo') {
-    relata(amb, { caminho: no.caminho, regra: 'codigo', mensagem: `bloco de código '${iface}': execução em sandbox ainda não disponível` })
-    return []
+    const def = amb.programa.codigos?.[iface]
+    if (!def) {
+      relata(amb, { caminho: no.caminho, regra: 'bloco-ausente', mensagem: `a definição do bloco de código '${iface}' não está no programa` })
+      return []
+    }
+    const n = renderizaCodigo({
+      def, props, escopo: { props, tenant: escopo.tenant }, caminho: no.caminho, chave, sessao: amb.codigo,
+      ...(typeof escopo.idioma === 'string' && escopo.idioma ? { idioma: escopo.idioma } : {}),
+      relata: (e) => relata(amb, e),
+    })
+    return n === null ? [] : [createElement(Isola, { key: chave, caminho: no.caminho, onErro: amb.onErro }, n)]
   }
 
   const alvo = cadeia.find((c) => amb.componentes[c])

@@ -36,6 +36,7 @@ const PADROES: Array<[RegExp, string]> = [
   [/a-z0-9\]\(\?:\[a-z0-9-\]/, "use minúsculas, números e '-', sem '-' nas pontas (ex.: padaria-sol)"],
   [/a-z\]\+\(\\\.\[a-z\]\+\)\+/, "use nomes em minúsculas separados por ponto (ex.: pedido.criado)"],
   [/\^\[A-Za-z0-9\]\[A-Za-z0-9_-\]\*\$/, "use letras, números, '_' e '-', começando por letra ou número (ex.: primaria, 1)"],
+  [/formularios\|\(rede\|imagens\)/, "use 'formularios', 'rede:https://origem' ou 'imagens:https://origem': só https, sem curinga (*) e sem caminho"],
   [/\(\\\.\[a-z\]\[A-Za-z0-9\]\*\)\*/, "use nomes em camelCase separados por ponto (ex.: produto.ler, pedido.cancelar)"],
   [/\{2,3\}\(-\[A-Z\]\{2\}\)/, "use o código do idioma: pt, en ou com região, como pt-BR"],
   [/a-z\]\[A-Za-z0-9\]\*/, "use camelCase começando por minúscula (ex.: precoUnitario)"],

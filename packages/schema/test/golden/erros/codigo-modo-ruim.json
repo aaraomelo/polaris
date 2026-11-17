@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/codigo/modo",
+    "regra": "enum",
+    "mensagem": "valor \"vm\" não é permitido; aceitos: 'puro', 'iframe'"
+  }
+]

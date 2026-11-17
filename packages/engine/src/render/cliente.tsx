@@ -1,5 +1,6 @@
 import { createElement } from 'react'
 import { hydrateRoot, type Root } from 'react-dom/client'
+import type { ConfigCodigo } from '../codigo/sessao'
 import type { Carregador } from './acoes'
 import { preCarregaBlocos } from './lazy'
 import { Pagina, tituloDaPagina, type EntradaPagina } from './pagina'
@@ -14,12 +15,13 @@ export function leEstado(doc: Document = document): EstadoCliente {
 }
 
 /** Hidrata a página renderizada no servidor. `componentes` é o código do cliente (precisa ser o mesmo conjunto do servidor). */
-export function hidrata(componentes: Componentes, opcoes: { doc?: Document; estado?: EstadoCliente; onErro?: (e: ErroRuntime) => void; carregador?: Carregador; navegar?: (url: string) => void } = {}): Root {
+export function hidrata(componentes: Componentes, opcoes: { doc?: Document; estado?: EstadoCliente; onErro?: (e: ErroRuntime) => void; carregador?: Carregador; navegar?: (url: string) => void; /** sandbox do cliente; o `agora` vem do estado do servidor */ codigo?: ConfigCodigo } = {}): Root {
   const doc = opcoes.doc ?? document
   const raiz = doc.getElementById(ID_RAIZ)
   if (!raiz) throw new Error(`contêiner #${ID_RAIZ} não encontrado`)
   const estado = opcoes.estado ?? leEstado(doc)
-  const entrada: EntradaPagina = { ...estado, componentes, ...(opcoes.onErro ? { onErro: opcoes.onErro } : {}), ...(opcoes.carregador ? { carregador: opcoes.carregador } : {}), ...(opcoes.navegar ? { navegar: opcoes.navegar } : {}) }
+  const entrada: EntradaPagina = { ...estado, componentes, ...(opcoes.onErro ? { onErro: opcoes.onErro } : {}), ...(opcoes.carregador ? { carregador: opcoes.carregador } : {}), ...(opcoes.navegar ? { navegar: opcoes.navegar } : {}),
+    ...(opcoes.codigo ? { codigo: { ...opcoes.codigo, agora: estado.agora ?? opcoes.codigo.agora } } : {}) }
   return hydrateRoot(raiz, createElement(Pagina as never, entrada as never), { onRecoverableError: (e) => opcoes.onErro?.({ caminho: '/', regra: 'render', mensagem: String((e as Error).message) }) })
 }
 

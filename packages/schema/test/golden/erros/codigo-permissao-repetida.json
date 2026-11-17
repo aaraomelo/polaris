@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/codigo/permissoes",
+    "regra": "uniqueItems",
+    "mensagem": "a lista não pode ter itens repetidos",
+    "dica": "os itens 1 e 0 são iguais"
+  }
+]

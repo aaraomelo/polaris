@@ -188,6 +188,18 @@ describe('streaming: estrutura e navegador', () => {
     g.libera(); await l.fim
   })
 
+  it('REGRESSÃO: se a raiz da página é a própria fronteira, o shell com o esqueleto sai antes do dado (precisa de um elemento acima)', async () => {
+    const g = portao()
+    const raiz = P('texto/paragrafo', { props: { texto: '{prods.length}' }, esqueleto: P('texto/paragrafo', { props: { texto: 'esqueleto-da-raiz' } }) })
+    const s = await renderPaginaStream(programa({ raiz }), COMPONENTES_BASE, { provedores: provedor({ loja: async () => lojaOk, produtos: async () => { await g.p; return [1, 2, 3] } }) })
+    const l = leitor(s.stream)
+    await l.ate((t) => t.includes('esqueleto-da-raiz</p>'))
+    expect(l.texto).toContain('<div style="display:contents">')
+    expect(l.texto.slice(l.texto.indexOf('id="polaris"'))).not.toContain('<p>3</p>') // o dado ainda não chegou
+    g.libera(); await l.fim
+    expect(l.texto).toContain('<p>3</p>')
+  })
+
   it('num navegador real (scripts executados) o conteúdo troca o esqueleto no lugar certo', async () => {
     const s = await renderPaginaStream(programa(), COMPONENTES_BASE, { provedores: provedor({ loja: async () => lojaOk, produtos: async () => { await espera(15); return [{ nome: 'pão' }, { nome: 'bolo' }] } }) })
     const html = await textoDoStream(s.stream)

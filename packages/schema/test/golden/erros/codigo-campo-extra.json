@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/codigo/sandbox",
+    "regra": "additionalProperties",
+    "mensagem": "o campo 'sandbox' não existe aqui",
+    "dica": "campos válidos: linguagem, modo, fonte, permissoes, altura"
+  }
+]

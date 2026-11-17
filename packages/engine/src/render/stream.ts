@@ -2,6 +2,7 @@ import { PassThrough, type Readable } from 'node:stream'
 import { createElement } from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
 import { iniciaCargas, type OpcoesCarga } from '../dados/carrega'
+import type { ConfigCodigo } from '../codigo/sessao'
 import { chunksParaPreload, preCarregaBlocos, type ResultadoPreCarga } from './lazy'
 import { jsonSeguro } from './json'
 import { Pagina, tituloDaPagina, type EntradaPagina } from './pagina'
@@ -27,6 +28,8 @@ export type OpcoesStream = OpcoesCarga & {
   abortaEmMs?: number
   /** nonce de CSP: vai nos scripts inline que o React emite no streaming e nos <script type=module> */
   nonce?: string
+  /** executor isolado de blocos de código; `agora` é fixado aqui (e vai no estado) para o cliente reproduzir a saída */
+  codigo?: ConfigCodigo
 }
 
 export type SaidaStream = {
@@ -49,19 +52,22 @@ export async function renderPaginaStream(programa: Programa, componentes: Compon
   const preCarga = opcoes.preCarrega === false ? { carregados: [], falhas: [] } : await preCarregaBlocos(programa, componentes)
   for (const f of preCarga.falhas) opcoes.onErroRuntime?.({ caminho: '/', regra: 'componente-ausente', mensagem: `bloco '${f.interface}' não carregou: ${f.erro}` })
 
+  // o relógio do código é decidido UMA vez, aqui, e viaja no estado: servidor e cliente executam com o mesmo `agora`
+  const codigo = opcoes.codigo ? { ...opcoes.codigo, agora: opcoes.codigo.agora ?? new Date().toISOString() } : undefined
   const cargas = iniciaCargas(programa, opcoes)
   const bloq = await cargas.bloqueantes
   const entrada: EntradaPagina = {
     programa, componentes, dados: bloq.dados, status: bloq.status, erros: bloq.erros, stream: cargas.stream,
     ...(opcoes.params ? { params: opcoes.params } : {}), ...(opcoes.consulta ? { consulta: opcoes.consulta } : {}),
     ...(opcoes.tenant ? { tenant: opcoes.tenant } : {}), ...(opcoes.estado ? { estado: opcoes.estado } : {}), ...(opcoes.idioma ? { idioma: opcoes.idioma } : {}),
-    ...(opcoes.onErroRuntime ? { onErro: opcoes.onErroRuntime } : {}),
+    ...(opcoes.onErroRuntime ? { onErro: opcoes.onErroRuntime } : {}), ...(codigo ? { codigo } : {}),
   }
 
   const estado: EstadoCliente = {
     programa, dados: bloq.dados, status: bloq.status, erros: bloq.erros,
     ...(opcoes.params ? { params: opcoes.params } : {}), ...(opcoes.consulta ? { consulta: opcoes.consulta } : {}),
     ...(opcoes.tenant ? { tenant: opcoes.tenant } : {}), ...(opcoes.estado ? { estado: opcoes.estado } : {}), ...(opcoes.idioma ? { idioma: opcoes.idioma } : {}),
+    ...(codigo?.agora ? { agora: codigo.agora } : {}),
   }
   const links = chunksParaPreload(programa, componentes).map((u) => `<link rel="modulepreload" href="${esc(u)}">`).join('')
   const nonce = opcoes.nonce ? ` nonce="${esc(opcoes.nonce)}"` : ''

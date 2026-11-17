@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/codigo/linguagem",
+    "regra": "enum",
+    "mensagem": "valor \"python\" não é permitido; aceitos: 'js', 'html'"
+  }
+]

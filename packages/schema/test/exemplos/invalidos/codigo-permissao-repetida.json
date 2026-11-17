@@ -1,0 +1,18 @@
+{
+  "kind": "bloco",
+  "id": "x",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "x/x",
+    "codigo": {
+      "linguagem": "js",
+      "modo": "iframe",
+      "fonte": "x",
+      "permissoes": [
+        "formularios",
+        "formularios"
+      ]
+    }
+  }
+}

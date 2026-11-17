@@ -1,0 +1,14 @@
+{
+  "kind": "bloco",
+  "id": "grafico",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "x/grafico",
+    "codigo": {
+      "linguagem": "js",
+      "modo": "puro",
+      "fonte": "function render(props){ return {tag:'p',children:[String(props.t)]} }"
+    }
+  }
+}

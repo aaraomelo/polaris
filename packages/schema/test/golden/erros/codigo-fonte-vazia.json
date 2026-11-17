@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/codigo/fonte",
+    "regra": "minLength",
+    "mensagem": "o texto precisa de pelo menos 1 caractere(s)"
+  }
+]

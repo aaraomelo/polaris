@@ -38,6 +38,9 @@ e o **tenant sempre faz parte da chave** (inclusive com `cache.chave` customizad
 - `navegar { para }`: só URLs seguras (`urlSegura`).
 Limites: 5 níveis de `depois`/`emErro` e 50 ações por evento. Eventos só em páginas (o modelo de um bloco não tem estado nem dados).
 
+## Código customizado
+Blocos com `codigo` rodam isolados (QuickJS/WASM em modo `puro`, ou `<iframe sandbox>` com CSP). Ver **docs/sandbox.md** (modelo de ameaça e limites).
+
 ## Streaming SSR (`@polaris/engine/servidor`)
 `renderPaginaStream(programa, componentes, opcoes)` devolve `{ status, stream, tudoPronto, abort, preCarga }`; rejeita se o **shell** falhar (ainda dá para responder 500). Falha de dado ou de fronteira nunca derruba a página.
 - `spec.dados.<nome>: { dados, args?, stream: true }` marca um dado como **em streaming**: não bloqueia o primeiro byte. Todas as cargas `auto` começam **imediatamente**, em paralelo; só as bloqueantes seguram o shell.
@@ -56,4 +59,4 @@ Limites: 5 níveis de `depois`/`emErro` e 50 ações por evento. Eventos só em 
 - `chunksParaPreload` → `<link rel="modulepreload">` no `<head>` (só dos que informaram `chunk`).
 
 ## Ainda não coberto (cards seguintes da E2)
-Navegação no cliente do roteamento (ver docs/rotas.md), sandbox de código (33k), JIT/AOT (33e/33f), segurança do runtime (33m), re-render localizado e histórico/diff de estado (58q/58r). Versão web (`renderToReadableStream`) do streaming.
+Navegação no cliente do roteamento (ver docs/rotas.md), JIT/AOT (33e/33f), segurança do runtime (33m), re-render localizado e histórico/diff de estado (58q/58r). Versão web (`renderToReadableStream`) do streaming.

@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/codigo/altura",
+    "regra": "minimum",
+    "mensagem": "deve ser maior ou igual a 1"
+  }
+]

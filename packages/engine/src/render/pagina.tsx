@@ -1,6 +1,7 @@
 import { createElement, Fragment, useEffect, useReducer, useRef, type ReactNode } from 'react'
 import { FUNCOES_PADRAO, type Escopo } from '../expr/index'
 import type { ResultadoUm, StatusDado } from '../dados/carrega'
+import { SessaoCodigo, type ConfigCodigo } from '../codigo/sessao'
 import { executaAcoes, type Carregador, type ContextoAcoes } from './acoes'
 import { renderiza, type Ambiente } from './interpreta'
 import type { Programa } from './programa'
@@ -29,6 +30,8 @@ export type EntradaPagina = {
   navegar?: (url: string) => void
   /** SERVIDOR (streaming): cargas já em andamento que o Suspense consome */
   stream?: Record<string, Promise<ResultadoUm>>
+  /** executor isolado de blocos de código (ver docs/sandbox.md) */
+  codigo?: ConfigCodigo
 }
 
 export { escopoDaStore }
@@ -52,6 +55,10 @@ function PaginaInterativa(e: EntradaPagina): ReactNode {
   const ref = useRef({ atual: store })
   ref.current.atual = store
   const sequencia = useRef<Record<string, number>>({})
+  // uma sessão por montagem (o cache sobrevive aos re-renders); o orçamento recomeça a cada passagem de render
+  const sessaoCodigo = useRef<SessaoCodigo | null>(null)
+  if (e.codigo && (!sessaoCodigo.current || sessaoCodigo.current.cfg !== e.codigo)) sessaoCodigo.current = new SessaoCodigo(e.codigo)
+  sessaoCodigo.current?.novaPassagem()
   const vivo = useRef({ atual: true })
   useEffect(() => { vivo.current.atual = true; return () => { vivo.current.atual = false } }, [])
 
@@ -65,8 +72,14 @@ function PaginaInterativa(e: EntradaPagina): ReactNode {
     programa: e.programa, store: ref.current, dispatch, sequencia: sequencia.current, vivo: vivo.current,
     ...(e.carregador ? { carregador: e.carregador } : {}), ...(e.navegar ? { navegar: e.navegar } : {}), ...(e.onErro ? { onErro: e.onErro } : {}),
   }
-  const amb: Ambiente = { programa: e.programa, componentes: e.componentes, acoes, ...(e.onErro ? { onErro: e.onErro } : {}), ...(e.stream ? { stream: e.stream } : {}) }
-  return createElement(Fragment, null, ...renderiza(e.programa.pagina.raiz, escopo, amb, null, 'r'))
+  const amb: Ambiente = { programa: e.programa, componentes: e.componentes, acoes, ...(e.onErro ? { onErro: e.onErro } : {}), ...(e.stream ? { stream: e.stream } : {}), ...(sessaoCodigo.current ? { codigo: sessaoCodigo.current } : {}) }
+  const filhos = renderiza(e.programa.pagina.raiz, escopo, amb, null, 'r')
+  // Uma fronteira Suspense SEM elemento DOM acima dela não é liberada pelo React no streaming: o shell (inclusive o
+  // esqueleto) só sairia quando o dado chegasse. Se a raiz da página é a própria fronteira, ela ganha um invólucro
+  // sem efeito visual (display: contents).
+  const raiz = e.programa.pagina.raiz
+  const raizEhFronteira = raiz.tipo === 'elemento' && !!raiz.aguarda?.length
+  return raizEhFronteira ? createElement('div', { style: { display: 'contents' } }, ...filhos) : createElement(Fragment, null, ...filhos)
 }
 
 /** Componente React da página: mesma entrada inicial, mesma saída (SSR e hidratação batem). */
