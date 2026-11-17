@@ -4,6 +4,8 @@ import type { Carregador, ContextoAcoes } from '../render/acoes'
 import type { Programa } from '../render/programa'
 import { escopoDaStore, iniciaStore, reduz, type AcaoStore, type SementeStore, type Store } from '../render/store'
 import type { ErroRuntime } from '../render/tipos'
+import { aplica, caminhosMudados, difere, inverso, type Patch } from '../estado/caminho'
+import { chavesDeCaminhos } from '../vivo/dep'
 
 // ---------------------------------------------------------------------------
 // MODELO: o estado da página e as operações sobre ele. Não conhece DOM, HTML nem React.
@@ -13,7 +15,8 @@ import type { ErroRuntime } from '../render/tipos'
 //   - o histórico de mudanças (ação, chaves, antes/depois) fica disponível sem custo para depuração, undo e diff.
 // ---------------------------------------------------------------------------
 
-export type Mudanca = { acoes: AcaoStore[]; mudou: ReadonlySet<string>; antes: Store; depois: Store }
+/** Uma mudança do store. `patches()` (preguiçoso e em cache) são os patches reversíveis entre `antes` e `depois`; os caminhos começam em 'estado' | 'dados' | 'status' | 'erros'. */
+export type Mudanca = { acoes: AcaoStore[]; mudou: ReadonlySet<string>; antes: Store; depois: Store; patches(): Patch[] }
 export type Espelho = (m: Mudanca) => void
 
 export type OpcoesModelo = SementeStore & {
@@ -44,6 +47,11 @@ export type Modelo = {
   flush(): void
   assina(e: Espelho): () => void
   historico(): readonly Mudanca[]
+  /** desfaz a última mudança no ESTADO da página (dados e status vindos do servidor não são desfeitos); precisa de `historico` > 0. false se não há o que desfazer */
+  desfaz(): boolean
+  refaz(): boolean
+  podeDesfazer(): boolean
+  podeRefazer(): boolean
   /** contexto do executor de ações (definir / executar / navegar) */
   cx: ContextoAcoes
   destroi(): void
@@ -51,16 +59,18 @@ export type Modelo = {
 
 const tem = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 
-/** Chaves de mudança entre dois stores (por referência). `estado`, `status` e `erros` geram a chave-curinga e uma por campo. */
+/**
+ * Chaves de mudança entre dois stores: o diff por REFERÊNCIA do store imutável, em granularidade de caminho (`estado.itens.3.nome`).
+ * Subárvores com a mesma referência não são visitadas: o custo é proporcional ao que mudou.
+ */
 export function chavesMudadas(a: Store, b: Store, programa: Programa): Set<string> {
   const m = new Set<string>()
-  for (const g of ['estado', 'status', 'erros'] as const) {
-    if (a[g] === b[g]) continue
-    m.add(g)
-    const x = a[g] as Record<string, unknown>, y = b[g] as Record<string, unknown>
-    for (const k of new Set([...Object.keys(x), ...Object.keys(y)])) if (tem(x, k) !== tem(y, k) || x[k] !== y[k]) m.add(`${g}.${k}`)
+  for (const g of ['estado', 'status', 'erros'] as const) if (a[g] !== b[g]) chavesDeCaminhos(g, caminhosMudados(a[g], b[g]), m)
+  for (const k of Object.keys(programa.pagina.dados)) {
+    const tinha = tem(a.dados, k), tem2 = tem(b.dados, k)
+    if (tinha !== tem2) chavesDeCaminhos(k, [[]], m)
+    else if (tinha && a.dados[k] !== b.dados[k]) chavesDeCaminhos(k, caminhosMudados(a.dados[k], b.dados[k]), m)
   }
-  for (const k of Object.keys(programa.pagina.dados)) if (tem(a.dados, k) !== tem(b.dados, k) || a.dados[k] !== b.dados[k]) m.add(k)
   return m
 }
 
@@ -98,6 +108,11 @@ export function criaModelo(o: OpcoesModelo): Modelo {
   const mutaveis = o.fechado ? chavesMutaveis(programa) : null
   const espelhos = new Set<Espelho>()
   const hist: Mudanca[] = []
+  /** mudanças desfeitas (pilha do refazer); uma mudança nova a esvazia */
+  const desfeitas: Array<{ m: Mudanca; patches: Patch[] }> = []
+  /** mudanças do histórico que já foram desfeitas */
+  const jaDesfeitas = new Set<Mudanca>()
+  let emDesfazer = false
   let pendentes: AcaoStore[] = []
   let agendado = false
   const vivo = { atual: true }
@@ -112,9 +127,10 @@ export function criaModelo(o: OpcoesModelo): Modelo {
     ultima = depois
     escopo.estado = depois.estado; escopo.status = depois.status; escopo.erros = depois.erros
     for (const k of Object.keys(programa.pagina.dados)) { if (tem(depois.dados, k)) escopo[k] = depois.dados[k]; else delete escopo[k] }
-    const m: Mudanca = { acoes: pendentes, mudou, antes, depois }
+    let cache: Patch[] | undefined
+    const m: Mudanca = { acoes: pendentes, mudou, antes, depois, patches: () => (cache ??= difere(antes, depois) ?? []) }
     pendentes = []
-    if (o.historico) { hist.push(m); if (hist.length > o.historico) hist.shift() }
+    if (o.historico && !emDesfazer) { hist.push(m); desfeitas.length = 0; if (hist.length > o.historico) hist.shift() }
     for (const e of [...espelhos]) e(m)
   }
 
@@ -125,6 +141,11 @@ export function criaModelo(o: OpcoesModelo): Modelo {
     ...(o.navegar ? { navegar: o.navegar } : {}),
     ...(o.onErro ? { onErro: o.onErro } : {}),
   }
+
+  /** só os patches do ESTADO da página (o que o desfazer desfaz) */
+  const patchesDoEstado = (m: Mudanca) => m.patches().filter((p) => p.caminho[0] === 'estado')
+  /** aplica um store novo (vindo de desfazer/refazer) notificando os espelhos, sem gravar no histórico */
+  const troca = (novo: Store) => { emDesfazer = true; try { store.atual = novo; flush() } finally { emDesfazer = false } }
 
   return {
     store: () => store.atual,
@@ -139,6 +160,32 @@ export function criaModelo(o: OpcoesModelo): Modelo {
     },
     assina(e) { espelhos.add(e); return () => { espelhos.delete(e) } },
     historico: () => hist,
+    podeDesfazer: () => hist.some((m) => !jaDesfeitas.has(m) && patchesDoEstado(m).length > 0),
+    podeRefazer: () => desfeitas.length > 0,
+    desfaz() {
+      flush()
+      for (let i = hist.length - 1; i >= 0; i--) {
+        const m = hist[i]!
+        if (jaDesfeitas.has(m)) continue
+        const ps = patchesDoEstado(m)
+        if (ps.length === 0) continue
+        const novo = aplica(store.atual, inverso(ps))
+        if (novo === undefined) return false
+        jaDesfeitas.add(m); desfeitas.push({ m, patches: ps })
+        troca(novo as Store)
+        return true
+      }
+      return false
+    },
+    refaz() {
+      const d = desfeitas.pop()
+      if (!d) return false
+      const novo = aplica(store.atual, d.patches)
+      if (novo === undefined) { desfeitas.push(d); return false }
+      jaDesfeitas.delete(d.m)
+      troca(novo as Store)
+      return true
+    },
     destroi() { vivo.atual = false; espelhos.clear() },
   }
 }

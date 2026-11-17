@@ -6,7 +6,7 @@
 // Uma função nova só entra em FUNCOES_PADRAO se tiver entrada aqui (teste de completude).
 // ---------------------------------------------------------------------------
 
-export type Gerador = 'texto' | 'numero' | 'inteiro' | 'escalar' | 'lista' | 'listas' | 'objeto' | 'racional' | 'decimal' | 'qualquer'
+export type Gerador = 'texto' | 'numero' | 'inteiro' | 'escalar' | 'lista' | 'listas' | 'objeto' | 'racional' | 'decimal' | 'json' | 'indice' | 'qualquer'
 
 export type Exemplo = { expr: string; esc?: Record<string, unknown>; saida?: unknown; indefinido?: true }
 export type Lei = { expr: string; gera: Record<string, Gerador> }
@@ -242,6 +242,41 @@ export const REGISTRO: Def[] = [
   { nome: 'qformata', tipo: 'funcao', assinatura: 'qformata(x, casas = 2, modo = "longe") → texto pt-BR', descricao: 'Como `qdec`, formatado em pt-BR (milhar com ponto, decimal com vírgula), exato e sem Intl.', exemplos: [{ expr: 'qformata("1234567.891")', saida: '1.234.567,89' }, { expr: 'qformata("-1234.5")', saida: '-1.234,50' }, { expr: 'qformata("0.5", 0, "par")', saida: '0' }] },
   { nome: 'qbrl', tipo: 'funcao', assinatura: 'qbrl(x) → texto', descricao: 'Reais com 2 casas, arredondamento comercial (`longe`), exato. Igual a `brl` onde o double é exato; correto onde o double não é.', exemplos: [{ expr: 'qbrl("1234.5")', saida: 'R$ 1.234,50' }, { expr: 'qbrl("-0.005")', saida: '-R$ 0,01' }, { expr: 'qbrl("0.1") == brl(0.1)', saida: true }], leis: [{ expr: 'qbrl(a) == brl(qnum(qdec(a, 2)))', gera: { a: 'decimal' } }] },
   { nome: 'qnum', tipo: 'funcao', assinatura: 'qnum(x) → número', descricao: 'Aproximação em double (arredondada corretamente quando numerador e denominador cabem em 53 bits). Use só para exibir ou desenhar; nunca para calcular dinheiro.', exemplos: [{ expr: 'qnum("1/4")', saida: 0.25 }, { expr: 'qnum("1/3")', saida: 1 / 3 }] },
+
+  // ---- árvore de estado imutável, por caminho ------------------------------------
+  // Caminho = lista de chaves (texto) e índices (inteiro ≥ 0): ["itens", 0, "nome"]. Nada muta a entrada; só o caminho é copiado, o resto é a MESMA
+  // referência; se nada muda, volta a MESMA referência. Caminho inválido, tipo errado e índice fora do alcance são ausentes.
+  { nome: 'obter', tipo: 'funcao', assinatura: 'obter(x, caminho, padrão?) → valor', descricao: 'Valor no caminho; se não existe (ou é null), o padrão (ausente se omitido). Equivale a `x.a[0].b`, mas com caminho calculado.', exemplos: [
+    { expr: 'obter(x, ["a", 1, "b"])', esc: { x: { a: [0, { b: 7 }] } }, saida: 7 }, { expr: 'obter(x, ["z"], "nada")', esc: { x: {} }, saida: 'nada' }, { expr: 'obter(x, [])', esc: { x: 5 }, saida: 5 }, { expr: 'obter(x, ["a", "__proto__"])', esc: { x: { a: {} } }, indefinido: U },
+  ], leis: [{ expr: 'igual(obter(x, []), x) || x == null', gera: { x: 'json' } }] },
+  { nome: 'com', tipo: 'funcao', assinatura: "com(x, caminho, valor) → x'", descricao: 'Nova árvore com o valor no caminho. Cria o que falta (texto → objeto; índice 0 → lista; índice = tamanho → anexa); índice além disso é ausente. Só o caminho é copiado; se o valor já é o mesmo, devolve a mesma referência. Chaves `__proto__`, `constructor` e `prototype` e caminhos com mais de 64 passos são recusados.', exemplos: [
+    { expr: 'com(x, ["a", "b"], 1)', esc: { x: { a: { c: 0 } } }, saida: { a: { c: 0, b: 1 } } }, { expr: 'com(x, [0, "n"], 1)', esc: { x: [] }, saida: [{ n: 1 }] }, { expr: 'com(x, [5], 1)', esc: { x: [] }, indefinido: U },
+    { expr: 'com(x, ["a", "b"], 1)', esc: { x: { a: 1 } }, indefinido: U }, { expr: 'com(x, ["__proto__", "p"], 1)', esc: { x: {} }, indefinido: U },
+  ], leis: [
+    { expr: 'com(x, ["k", "v"], a) == null || igual(obter(com(x, ["k", "v"], a), ["k", "v"]), a) || a == null', gera: { x: 'json', a: 'json' } },
+    { expr: 'com(x, ["k"], a) == null || igual(com(com(x, ["k"], a), ["k"], b), com(x, ["k"], b))', gera: { x: 'json', a: 'json', b: 'json' } },
+  ] },
+  { nome: 'sem', tipo: 'funcao', assinatura: "sem(x, caminho) → x'", descricao: 'Remove a chave (objeto) ou a posição (lista, os seguintes sobem). Já ausente: a mesma referência. Caminho vazio é ausente (a raiz não se remove).', exemplos: [
+    { expr: 'sem(x, ["a"])', esc: { x: { a: 1, b: 2 } }, saida: { b: 2 } }, { expr: 'sem(x, ["l", 1])', esc: { x: { l: [1, 2, 3] } }, saida: { l: [1, 3] } }, { expr: 'sem(x, ["z"])', esc: { x: { a: 1 } }, saida: { a: 1 } }, { expr: 'sem(x, [])', esc: { x: 1 }, indefinido: U },
+  ], leis: [{ expr: 'x == null || com(x, ["k"], a) == null || igual(sem(com(x, ["k"], a), ["k"]), sem(x, ["k"]))', gera: { x: 'json', a: 'json' } }] },
+  { nome: 'atualiza', tipo: 'funcao', assinatura: "atualiza(x, caminho, v => novo) → x'", descricao: 'Troca o valor do caminho pelo que a função devolve a partir do valor atual (ausente se não existe). É `com(x, caminho, f(obter(x, caminho)))` numa passada só.', exemplos: [
+    { expr: 'atualiza(x, ["n"], v => v + 1)', esc: { x: { n: 1, m: 2 } }, saida: { n: 2, m: 2 } }, { expr: 'atualiza(x, ["l"], l => concat(l, [9]))', esc: { x: { l: [1] } }, saida: { l: [1, 9] } }, { expr: 'atualiza(x, ["itens", 1, "ok"], v => !v)', esc: { x: { itens: [{ ok: true }, { ok: false }] } }, saida: { itens: [{ ok: true }, { ok: true }] } },
+  ], leis: [{ expr: '!contem(chaves(o), "a") || igual(atualiza(o, ["a"], v => v), o)', gera: { o: 'objeto' } }] },
+  { nome: 'insere', tipo: 'funcao', assinatura: 'insere(lista, i, valor) → lista', descricao: 'Insere na posição `i` (0 a tamanho), empurrando os seguintes. Fora disso, ausente.', exemplos: [{ expr: 'insere([1, 2], 1, 9)', saida: [1, 9, 2] }, { expr: 'insere([1, 2], 2, 9)', saida: [1, 2, 9] }, { expr: 'insere([1, 2], 3, 9)', indefinido: U }], leis: [{ expr: 'i > tamanho(l) || igual(sem(insere(l, i, v), [i]), l)', gera: { l: 'lista', i: 'indice', v: 'escalar' } }] },
+  { nome: 'move', tipo: 'funcao', assinatura: 'move(lista, de, para) → lista', descricao: 'Move o item da posição `de` para a posição `para` (ambas existentes). Mesma posição: a mesma referência.', exemplos: [{ expr: 'move([1, 2, 3, 4], 0, 2)', saida: [2, 3, 1, 4] }, { expr: 'move([1, 2, 3, 4], 3, 0)', saida: [4, 1, 2, 3] }, { expr: 'move([1], 0, 1)', indefinido: U }], leis: [{ expr: 'i >= tamanho(l) || j >= tamanho(l) || igual(move(move(l, i, j), j, i), l)', gera: { l: 'lista', i: 'indice', j: 'indice' } }] },
+  { nome: 'mescla', tipo: 'funcao', assinatura: 'mescla(a, b) → objeto', descricao: 'Mescla RASA de dois objetos: as chaves de `b` valem sobre as de `a`. Nada muda: a mesma referência. Chaves proibidas em `b` são ausente.', exemplos: [{ expr: 'mescla(a, b)', esc: { a: { x: 1, y: 2 }, b: { y: 3, z: 4 } }, saida: { x: 1, y: 3, z: 4 } }, { expr: 'mescla(a, 5)', esc: { a: {} }, indefinido: U }], leis: [
+    { expr: 'igual(mescla(mescla(a, b), c), mescla(a, mescla(b, c)))', gera: { a: 'objeto', b: 'objeto', c: 'objeto' } }, { expr: 'mescla(a, a) == null || igual(mescla(a, a), a)', gera: { a: 'objeto' } },
+  ] },
+  { nome: 'difere', tipo: 'funcao', assinatura: 'difere(a, b) → lista de patches', descricao: 'Patches (estilo JSON Patch, reversíveis) que levam `a` a `b`: `{op: "add"|"remove"|"replace", caminho, valor?, antes?}`. Pula subárvores com a mesma referência: o custo é proporcional ao que mudou. Remoções de lista vêm do fim para o começo. Mais de 100 000 patches é ausente.', exemplos: [
+    { expr: 'difere(a, b)', esc: { a: { x: 1, y: 2 }, b: { x: 1, y: 3, z: 4 } }, saida: [{ op: 'replace', caminho: ['y'], valor: 3, antes: 2 }, { op: 'add', caminho: ['z'], valor: 4 }] },
+    { expr: 'difere(a, b)', esc: { a: { l: [1, 2, 3] }, b: { l: [1] } }, saida: [{ op: 'remove', caminho: ['l', 2], antes: 3 }, { op: 'remove', caminho: ['l', 1], antes: 2 }] },
+  ], leis: [{ expr: 'tamanho(difere(a, a)) == 0', gera: { a: 'json' } }, { expr: 'igual(aplica(a, difere(a, b)), b)', gera: { a: 'json', b: 'json' } }] },
+  { nome: 'aplica', tipo: 'funcao', assinatura: "aplica(x, patches) → x'", descricao: 'Aplica os patches em sequência. Atômico: qualquer patch inválido (forma, caminho, tipo) torna o resultado ausente e nada é aplicado.', exemplos: [
+    { expr: 'aplica(a, difere(a, b))', esc: { a: { x: 1 }, b: { x: 2, y: [1] } }, saida: { x: 2, y: [1] } }, { expr: 'aplica(a, ps)', esc: { a: {}, ps: [{ op: 1 }] }, indefinido: U },
+  ] },
+  { nome: 'inverso', tipo: 'funcao', assinatura: 'inverso(patches) → patches', descricao: 'Os patches que DESFAZEM: ordem inversa, `add` ↔ `remove`, `replace` troca `valor` e `antes`. Exige o valor antigo nos patches (os de `difere` já o trazem).', exemplos: [
+    { expr: 'inverso(difere(a, b))', esc: { a: { x: 1 }, b: { x: 2 } }, saida: [{ op: 'replace', caminho: ['x'], valor: 1, antes: 2 }] },
+  ], leis: [{ expr: 'igual(aplica(b, inverso(difere(a, b))), a)', gera: { a: 'json', b: 'json' } }] },
 ]
 
 export const defDe = (nome: string): Def | undefined => REGISTRO.find((d) => d.nome === nome)

@@ -7,7 +7,8 @@ import type { AcaoStore, Store } from '../render/store'
 import { LIMITES_RUNTIME, type ErroRuntime } from '../render/tipos'
 import { valorDe } from '../render/valor'
 import { DESCRITORES_BASE, type DescritoresDom } from './blocos'
-import { cruza, depsCabeca, depsValor, raizDe, usaTotal } from './dep'
+import { caminhosMudados } from '../estado/caminho'
+import { chavesDeCaminhos, cruza, depsCabeca, depsValor, MARCA, raizDe, usaTotal } from './dep'
 import { aplicaLista, planoLista } from './lista'
 import { Divergencia, Pos } from './pos'
 
@@ -67,13 +68,11 @@ function avaliaProps(no: IRElemento, esc: Esc, f: Funcoes): Record<string, unkno
 }
 function depsProps(no: IRElemento): Set<string> { const s = new Set<string>(); for (const v of Object.values(no.props)) depsValor(v, s); return s }
 
-/** Uma dependência `k` pode ser afetada por alguma chave mutável? (`estado` sem campo cruza com qualquer `estado.x`) */
+/** Alguma dependência pode ser afetada por alguma chave mutável? Um caminho contém o outro: `estado.itens.0.nome` × `estado.itens` (e o inverso). */
 function cruzaMut(deps: ReadonlySet<string>, mut: ReadonlySet<string>): boolean {
   for (const k of deps) {
-    if (mut.has(k)) return true
-    const i = k.indexOf('.')
-    if (i >= 0) { if (mut.has(k.slice(0, i))) return true }
-    else for (const m of mut) if (m === k || m.startsWith(`${k}.`)) return true
+    for (let i = k.indexOf('.'); ; i = k.indexOf('.', i + 1)) { if (mut.has(i < 0 ? k : k.slice(0, i))) return true; if (i < 0) break } // k ou um prefixo de k é mutável
+    for (const m of mut) if (m.startsWith(`${k}.`)) return true // algo DENTRO de k é mutável
   }
   return false
 }
@@ -148,8 +147,9 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
       if (tem(esc, r)) it.esc[r] = esc[r]; else delete it.esc[r]
     }
     if (novo) {
-      if (!Object.is(it.item, novo.item)) { it.item = novo.item; it.esc[como] = novo.item; mi.add(como) }
-      if (it.i !== novo.i) { it.i = novo.i; it.esc.indice = novo.i; mi.add('indice') }
+      // o item mudou: só os CAMINHOS dele que mudaram (p.preco, não p inteiro) acordam as expressões do item
+      if (!Object.is(it.item, novo.item)) { chavesDeCaminhos(como, caminhosMudados(it.item, novo.item), mi); it.item = novo.item; it.esc[como] = novo.item }
+      if (it.i !== novo.i) { it.i = novo.i; it.esc.indice = novo.i; mi.add('indice'); mi.add(`indice${MARCA}`) }
     }
     if (mi.size) atualizaNos(it.dono.nos, mi)
   }
@@ -247,8 +247,10 @@ function constroiComposto(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos
       if (!cruza(deps, mm)) return
       const np = avaliaProps(no, esc, amb.funcoes)
       if (igual(props, np)) return
-      const mi = new Set<string>(['props'])
-      for (const k of new Set([...Object.keys(props), ...Object.keys(np)])) if (!igual(props[k], np[k])) mi.add(`props.${k}`)
+      const mi = new Set<string>()
+      for (const k of new Set([...Object.keys(props), ...Object.keys(np)])) {
+        if (!igual(props[k], np[k])) chavesDeCaminhos('props', caminhosMudados(props[k], np[k]).map((f) => [k, ...f]), mi)
+      }
       props = np; inner.props = np
       atualizaNos(nosInner.nos, mi)
     },

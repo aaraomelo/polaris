@@ -18,9 +18,11 @@ export type AcaoStore =
 
 export function reduz(s: Store, a: AcaoStore): Store {
   switch (a.t) {
-    case 'estado': return { ...s, estado: { ...s.estado, [a.nome]: a.valor } }
-    case 'carregando': return { ...s, status: { ...s.status, [a.nome]: 'carregando' } }
+    // valor igual (mesma referência): o store NÃO muda — mesma referência de volta, nada a notificar, nada no histórico
+    case 'estado': return Object.prototype.hasOwnProperty.call(s.estado, a.nome) && Object.is(s.estado[a.nome], a.valor) ? s : { ...s, estado: { ...s.estado, [a.nome]: a.valor } }
+    case 'carregando': return s.status[a.nome] === 'carregando' ? s : { ...s, status: { ...s.status, [a.nome]: 'carregando' } }
     case 'dado': {
+      if (Object.prototype.hasOwnProperty.call(s.dados, a.nome) && Object.is(s.dados[a.nome], a.valor) && s.status[a.nome] === 'ok' && !Object.prototype.hasOwnProperty.call(s.erros, a.nome)) return s
       const { [a.nome]: _, ...erros } = s.erros
       return { ...s, dados: { ...s.dados, [a.nome]: a.valor }, status: { ...s.status, [a.nome]: 'ok' }, erros }
     }

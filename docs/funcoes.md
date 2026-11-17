@@ -1297,3 +1297,152 @@ Aproximação em double (arredondada corretamente quando numerador e denominador
 |---|---|---|
 | `qnum("1/4")` |  | `0.25` |
 | `qnum("1/3")` |  | `0.3333333333333333` |
+
+### `obter`
+
+`obter(x, caminho, padrão?) → valor`
+
+Valor no caminho; se não existe (ou é null), o padrão (ausente se omitido). Equivale a `x.a[0].b`, mas com caminho calculado.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `obter(x, ["a", 1, "b"])` | `{"x":{"a":[0,{"b":7}]}}` | `7` |
+| `obter(x, ["z"], "nada")` | `{"x":{}}` | `"nada"` |
+| `obter(x, [])` | `{"x":5}` | `5` |
+| `obter(x, ["a", "__proto__"])` | `{"x":{"a":{}}}` | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(obter(x, []), x) || x == null`
+
+### `com`
+
+`com(x, caminho, valor) → x'`
+
+Nova árvore com o valor no caminho. Cria o que falta (texto → objeto; índice 0 → lista; índice = tamanho → anexa); índice além disso é ausente. Só o caminho é copiado; se o valor já é o mesmo, devolve a mesma referência. Chaves `__proto__`, `constructor` e `prototype` e caminhos com mais de 64 passos são recusados.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `com(x, ["a", "b"], 1)` | `{"x":{"a":{"c":0}}}` | `{"a":{"c":0,"b":1}}` |
+| `com(x, [0, "n"], 1)` | `{"x":[]}` | `[{"n":1}]` |
+| `com(x, [5], 1)` | `{"x":[]}` | _(ausente)_ |
+| `com(x, ["a", "b"], 1)` | `{"x":{"a":1}}` | _(ausente)_ |
+| `com(x, ["__proto__", "p"], 1)` | `{"x":{}}` | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `com(x, ["k", "v"], a) == null || igual(obter(com(x, ["k", "v"], a), ["k", "v"]), a) || a == null`
+- `com(x, ["k"], a) == null || igual(com(com(x, ["k"], a), ["k"], b), com(x, ["k"], b))`
+
+### `sem`
+
+`sem(x, caminho) → x'`
+
+Remove a chave (objeto) ou a posição (lista, os seguintes sobem). Já ausente: a mesma referência. Caminho vazio é ausente (a raiz não se remove).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `sem(x, ["a"])` | `{"x":{"a":1,"b":2}}` | `{"b":2}` |
+| `sem(x, ["l", 1])` | `{"x":{"l":[1,2,3]}}` | `{"l":[1,3]}` |
+| `sem(x, ["z"])` | `{"x":{"a":1}}` | `{"a":1}` |
+| `sem(x, [])` | `{"x":1}` | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `x == null || com(x, ["k"], a) == null || igual(sem(com(x, ["k"], a), ["k"]), sem(x, ["k"]))`
+
+### `atualiza`
+
+`atualiza(x, caminho, v => novo) → x'`
+
+Troca o valor do caminho pelo que a função devolve a partir do valor atual (ausente se não existe). É `com(x, caminho, f(obter(x, caminho)))` numa passada só.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `atualiza(x, ["n"], v => v + 1)` | `{"x":{"n":1,"m":2}}` | `{"n":2,"m":2}` |
+| `atualiza(x, ["l"], l => concat(l, [9]))` | `{"x":{"l":[1]}}` | `{"l":[1,9]}` |
+| `atualiza(x, ["itens", 1, "ok"], v => !v)` | `{"x":{"itens":[{"ok":true},{"ok":false}]}}` | `{"itens":[{"ok":true},{"ok":true}]}` |
+
+**Leis** (testadas com entradas aleatórias):
+- `!contem(chaves(o), "a") || igual(atualiza(o, ["a"], v => v), o)`
+
+### `insere`
+
+`insere(lista, i, valor) → lista`
+
+Insere na posição `i` (0 a tamanho), empurrando os seguintes. Fora disso, ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `insere([1, 2], 1, 9)` |  | `[1,9,2]` |
+| `insere([1, 2], 2, 9)` |  | `[1,2,9]` |
+| `insere([1, 2], 3, 9)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `i > tamanho(l) || igual(sem(insere(l, i, v), [i]), l)`
+
+### `move`
+
+`move(lista, de, para) → lista`
+
+Move o item da posição `de` para a posição `para` (ambas existentes). Mesma posição: a mesma referência.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `move([1, 2, 3, 4], 0, 2)` |  | `[2,3,1,4]` |
+| `move([1, 2, 3, 4], 3, 0)` |  | `[4,1,2,3]` |
+| `move([1], 0, 1)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `i >= tamanho(l) || j >= tamanho(l) || igual(move(move(l, i, j), j, i), l)`
+
+### `mescla`
+
+`mescla(a, b) → objeto`
+
+Mescla RASA de dois objetos: as chaves de `b` valem sobre as de `a`. Nada muda: a mesma referência. Chaves proibidas em `b` são ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mescla(a, b)` | `{"a":{"x":1,"y":2},"b":{"y":3,"z":4}}` | `{"x":1,"y":3,"z":4}` |
+| `mescla(a, 5)` | `{"a":{}}` | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(mescla(mescla(a, b), c), mescla(a, mescla(b, c)))`
+- `mescla(a, a) == null || igual(mescla(a, a), a)`
+
+### `difere`
+
+`difere(a, b) → lista de patches`
+
+Patches (estilo JSON Patch, reversíveis) que levam `a` a `b`: `{op: "add"|"remove"|"replace", caminho, valor?, antes?}`. Pula subárvores com a mesma referência: o custo é proporcional ao que mudou. Remoções de lista vêm do fim para o começo. Mais de 100 000 patches é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `difere(a, b)` | `{"a":{"x":1,"y":2},"b":{"x":1,"y":3,"z":4}}` | `[{"op":"replace","caminho":["y"],"valor":3,"antes":2},{"op":"add","caminho":["z"],"valor":4}]` |
+| `difere(a, b)` | `{"a":{"l":[1,2,3]},"b":{"l":[1]}}` | `[{"op":"remove","caminho":["l",2],"antes":3},{"op":"remove","caminho":["l",1],"antes":2}]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `tamanho(difere(a, a)) == 0`
+- `igual(aplica(a, difere(a, b)), b)`
+
+### `aplica`
+
+`aplica(x, patches) → x'`
+
+Aplica os patches em sequência. Atômico: qualquer patch inválido (forma, caminho, tipo) torna o resultado ausente e nada é aplicado.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `aplica(a, difere(a, b))` | `{"a":{"x":1},"b":{"x":2,"y":[1]}}` | `{"x":2,"y":[1]}` |
+| `aplica(a, ps)` | `{"a":{},"ps":[{"op":1}]}` | _(ausente)_ |
+
+### `inverso`
+
+`inverso(patches) → patches`
+
+Os patches que DESFAZEM: ordem inversa, `add` ↔ `remove`, `replace` troca `valor` e `antes`. Exige o valor antigo nos patches (os de `difere` já o trazem).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `inverso(difere(a, b))` | `{"a":{"x":1},"b":{"x":2}}` | `[{"op":"replace","caminho":["x"],"valor":1,"antes":2}]` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(aplica(b, inverso(difere(a, b))), a)`

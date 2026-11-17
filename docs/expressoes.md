@@ -43,3 +43,7 @@ o texto é açúcar e `formata` o reconstrói de forma canônica. Onde o schema 
 `repetir.chave`, `definir.valor`) vale texto OU AST; em props, `{ "$expr": <AST> }` avalia no lugar. Os erros do AST
 apontam o caminho JSON dentro do próprio nó. A referência completa (formas, operadores, funções, exemplos executáveis e
 leis testadas) é gerada por `pnpm docs:funcoes` em [funcoes.md](funcoes.md).
+
+## Árvore de estado por caminho
+Caminho = lista de chaves e índices (`["itens", 0, "nome"]`). `obter`, `com`, `sem`, `atualiza`, `insere`, `move` e `mescla` são imutáveis e
+compartilham estrutura; `difere`, `aplica` e `inverso` trabalham com patches reversíveis. Detalhes e leis testadas em [funcoes.md](funcoes.md).

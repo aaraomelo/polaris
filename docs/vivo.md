@@ -23,7 +23,7 @@ estado (`test/vivo.test.tsx`: cenários, fuzz de sequências de ações, identid
 `test/vivo-lista.test.ts` prova o mínimo de movimentos por fuzz contra uma referência O(n²).
 
 ## Medido
-- Bundle: **~11,7 KB gz** (avaliador com listas e aritmética exata, modelo, ações, blocos base e o runtime), contra ~135 KB gz do `react-dom`. Guarda: `test/bundle.test.ts` (< 14 KB gz, sem React/Ajv/QuickJS). Era 7,5 KB no protótipo; o próximo corte é incluir só as funções que o programa usa.
+- Bundle: **~13,6 KB gz** (avaliador com listas e aritmética exata, modelo, ações, blocos base e o runtime), contra ~135 KB gz do `react-dom`. Guarda: `test/bundle.test.ts` (< 16 KB gz, sem React/Ajv/QuickJS). Era 7,5 KB no protótipo; o próximo corte é incluir só as funções que o programa usa.
 - `pnpm bench:vivo` (jsdom; números absolutos são pessimistas): mudar chave fora da lista ≈ 0,01–0,03 ms (independe do
   tamanho); alterar 1 item de 1000 ≈ 1,7 ms; inserir 1 no meio de 1000 cria 1 nó.
 
@@ -46,3 +46,13 @@ mudar (ações `definir`/`executar`, inclusive em `depois`/`emErro`, e dados em 
 - **Mundo fechado** (`fechado: true`): só as chaves de `chavesMutaveis` aceitam `despacha` externo, e subárvores cujas
   dependências não cruzam com elas **não ganham controlador** (`diagnostico().controladores`). Props constantes de um
   composto tornam seu modelo interno estático; lista constante torna os itens estáticos.
+
+## Dependências por caminho, patches e histórico
+- **Chaves por caminho**: `estado.itens[0].nome` depende de `"estado.itens.0.nome"`; a cadeia estática vira uma chave, o que é dinâmico
+  (índice calculado, `.length`, chamada) para no prefixo. O Modelo entrega o conjunto de caminhos que mudaram — o diff por REFERÊNCIA do store
+  imutável (`caminhosMudados`), que pula subárvores iguais — e uma expressão acorda se um caminho contém o outro (`cruza`).
+- **No repetir e nos compostos**: trocar `p.preco` não reavalia o que só lê `p.nome`; um cartão cujo `props.item.nome` não mudou não reavalia.
+- **Árvore de estado** (`src/estado/caminho.ts`, e na linguagem `obter`/`com`/`sem`/`atualiza`/`insere`/`move`/`mescla`): imutável, só o caminho é copiado,
+  nada muda → a mesma referência. `difere`/`aplica`/`inverso` geram e aplicam patches reversíveis (JSON Patch com o valor antigo).
+- **Histórico**: `criaModelo({ historico: N })` guarda as últimas N mudanças (`patches()` preguiçoso); `desfaz()`/`refaz()` revertem o ESTADO da
+  página (dados do servidor não voltam). Valor igual no `despacha` não muda o store (mesma referência: nada notificado, nada no histórico).

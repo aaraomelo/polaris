@@ -1,3 +1,4 @@
+import { caminhoValido, com, obter } from '../estado/caminho'
 import { LIMITES_EXPR } from './tipos'
 import { verdadeiro } from './verdade'
 
@@ -29,6 +30,8 @@ export function comparaChaves(a: unknown, b: unknown): number {
 const texto = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' || typeof v === 'boolean' ? String(v) : '')
 
 export const ORDEM_SUPERIOR: Record<string, OrdemSuperior> = {
+  // atualiza(x, caminho, v => novo): troca o valor no caminho pelo que a função devolve (ausente se o caminho não existe e a função não cria)
+  atualiza: { fnPos: 2, paramsMax: 1, impl: ([x, c], f) => (caminhoValido(c) ? com(x, c, f(obter(x, c))) : undefined) },
   mapeia: { fnPos: 1, paramsMax: 2, impl: ([l], f) => (Array.isArray(l) ? l.map((x, i) => f(x, i)) : undefined) },
   filtra: { fnPos: 1, paramsMax: 2, impl: ([l], f) => (Array.isArray(l) ? l.filter((x, i) => verdadeiro(f(x, i))) : undefined) },
   dobra: { fnPos: 2, paramsMax: 3, impl: ([l, z], f) => (Array.isArray(l) ? l.reduce((acc, x, i) => f(acc, x, i), z) : undefined) },

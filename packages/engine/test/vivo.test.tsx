@@ -516,7 +516,7 @@ describe('mundo fechado: casos de borda da análise de mutabilidade', () => {
     const vistas: string[] = []
     v.modelo.assina((m) => vistas.push([...m.mudou].sort().join(',')))
     v.despacha({ t: 'estado', nome: 'n', valor: 1 }); v.despacha({ t: 'estado', nome: 'n', valor: 2 }); v.despacha({ t: 'estado', nome: 'n', valor: 3 })
-    expect(vistas).toEqual(['estado,estado.n', 'estado,estado.n', 'estado,estado.n'])
+    expect(vistas).toEqual(Array(3).fill('estado,estado.n,estado.n\u0001')) // prefixos do caminho + a folha marcada
     const h = v.modelo.historico()
     expect(h).toHaveLength(2) // anel de 2
     expect(h[0]!.antes.estado.n).toBe(1); expect(h[1]!.depois.estado.n).toBe(3); expect(h[1]!.acoes).toEqual([{ t: 'estado', nome: 'n', valor: 3 }])
@@ -540,3 +540,19 @@ describe('hidratação: divergências dentro de elementos e marcadores trocados'
   it('elemento no lugar de um marcador', () => { expect(tenta((h) => h.replace('<!---->', '<span></span>'))).toContain('hidratacao') })
   it('o HTML correto não gera aviso', () => { expect(tenta((h) => h)).toEqual([]) })
 })
+
+describe('mundo fechado: dependência em um objeto que CONTÉM algo mutável', () => {
+  it('ler `estado` inteiro (valores(estado)) é dinâmico se qualquer campo dele pode mudar', () => {
+    const pg = programa(P('layout/pilha', { slots: { filhos: [
+      P('texto/paragrafo', { id: 'todos', props: { texto: '{junta(valores(estado), ",")}' } }),
+      P('nav/botao', { id: 'b', props: { texto: 'x' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'n', valor: 'estado.n + 1' }] } }),
+    ] } }), { estado: { n: { tipo: 'inteiro', inicial: 0 }, fixo: { tipo: 'texto', inicial: 'f' } } })
+    const container = document.createElement('div')
+    const v = montaVivo({ programa: pg, container, fechado: true })
+    expect(container.querySelector('#todos')!.textContent).toBe('f,0')
+    ;(container.querySelector('#b') as HTMLElement).click()
+    expect(container.querySelector('#todos')!.textContent).toBe('f,1')
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+  })
+})
+

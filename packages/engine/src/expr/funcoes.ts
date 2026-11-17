@@ -1,4 +1,5 @@
 import { FUNCOES_EXATAS } from './exato'
+import * as E from '../estado/caminho'
 import { LIMITES_EXPR, type Funcoes } from './tipos'
 
 // Biblioteca padrão: funções puras e totais (nunca lançam; entrada inválida → undefined ou texto vazio).
@@ -72,9 +73,32 @@ function canonico(v: unknown, prof = 0): string | null {
 
 const chavesOrdenadas = (o: Record<string, unknown>) => Object.keys(o).sort()
 
+/** Patches vindos de dados: forma conferida (op, caminho válido, valores presentes); fora disso, ausente. */
+function patchesDe(v: unknown, exigeAntes = false): E.Patch[] | undefined {
+  if (!ehLista(v) || v.length > MAX) return undefined
+  for (const p of v) {
+    if (!ehObj(p) || !E.caminhoValido(p.caminho)) return undefined
+    if (p.op === 'add') { if (p.valor === undefined) return undefined }
+    else if (p.op === 'remove') { if (exigeAntes && p.antes === undefined) return undefined }
+    else if (p.op === 'replace') { if (p.valor === undefined || (exigeAntes && p.antes === undefined)) return undefined }
+    else return undefined
+  }
+  return v as E.Patch[]
+}
+
 export const FUNCOES_PADRAO: Funcoes = {
   ...FUNCOES_EXATAS,
   igual: { min: 2, max: 2, fn: (a, b) => igualProfundo(a, b) },
+  // árvore de estado imutável, por caminho (lista de chaves de texto e índices): ver src/estado/caminho.ts
+  obter: { min: 2, max: 3, fn: (x, c, d) => { if (!E.caminhoValido(c)) return undefined; const r = E.obter(x, c); return r === undefined || r === null ? d : r } },
+  com: { min: 3, max: 3, fn: (x, c, v) => (E.caminhoValido(c) ? E.com(x, c, v) : undefined) },
+  sem: { min: 2, max: 2, fn: (x, c) => (E.caminhoValido(c) ? E.sem(x, c) : undefined) },
+  insere: { min: 3, max: 3, fn: (l, i, v) => E.insere(l, i, v) },
+  move: { min: 3, max: 3, fn: (l, de, para) => E.move(l, de, para) },
+  mescla: { min: 2, max: 2, fn: (a, b) => E.mescla(a, b) },
+  difere: { min: 2, max: 2, fn: (a, b) => E.difere(a, b) },
+  aplica: { min: 2, max: 2, fn: (x, ps) => { const p = patchesDe(ps); return p ? E.aplica(x, p) : undefined } },
+  inverso: { min: 1, max: 1, fn: (ps) => { const p = patchesDe(ps, true); return p ? E.inverso(p) : undefined } },
   concat: { min: 1, max: 16, fn: (...ls) => {
     if (!ls.every(ehLista)) return undefined
     const n = (ls as unknown[][]).reduce((t, l) => t + l.length, 0)

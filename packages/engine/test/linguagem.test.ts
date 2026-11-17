@@ -52,6 +52,8 @@ describe('registro: a documentação é a fonte e não mente', () => {
       }
     },
     decimal: () => `${rnd() < 0.4 ? '-' : ''}${ri(100000)}.${String(ri(10000)).padStart(1 + ri(4), '0').slice(-4)}`.replace(/\.$/, ''),
+    json: () => { const f = (p: number): unknown => (p <= 0 || rnd() < 0.3 ? pick([null, true, 0, 1, -2.5, 'x', '']) : rnd() < 0.45 ? Array.from({ length: ri(4) }, () => f(p - 1)) : Object.fromEntries(Array.from({ length: ri(4) }, () => [pick(['a', 'b', 'k', 'v', 'ç']), f(p - 1)]))); return f(3) },
+    indice: () => ri(6),
     objeto: () => Object.fromEntries(Array.from({ length: ri(4) }, () => [pick(['a', 'b', 'c', 'k-1', '__proto__', 'ç']), pick([0, 1, 'x', null, true])])),
     qualquer: () => pick([null, undefined, true, false, 0, 1, -2, 3.5, '', 'a', [], [0], {}, { a: 1 }]),
   }
