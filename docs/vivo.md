@@ -77,3 +77,20 @@ por quem importa a entrada do servidor, não importada pelo núcleo; o históric
 
 Ainda pesa no núcleo (~8,7 KB): `monta.ts`, `dep.ts` (análise de dependências, que pode ser pré-calculada no build), `avalia.ts`, `nucleo.ts`, ações, store e
 listas com chave (só necessárias se a página tem `repetir`). Próximos cortes: dependências pré-calculadas no Programa e módulos por recurso.
+
+## Streaming sem Suspense (`@polaris/engine/servidor-vivo`)
+`streamVivo(programa, { provedores, clienteSrc, … })` transmite o documento em pedaços, sem React:
+1. **Shell**: dados bloqueantes resolvidos; cada fronteira (`aguarda`/`esqueleto` do IR) sai com o ESQUELETO entre marcadores `<!--f:chave-->…<!--/f:chave-->`
+   (os mesmos que o cliente adota). Segue o programa e o estado inicial como JSON inerte e o bundle do cliente (`async`).
+2. **Pedaços**: a cada dado que resolve, um `<script type="application/json" data-pl-c>` + um sentinela `<i data-pl-f hidden>`. Um script de boot
+   (um só, estático: um hash de CSP serve a todas as páginas) guarda o pedaço numa fila e, enquanto o runtime não montou, TROCA no DOM o HTML das
+   fronteiras que ficaram prontas. Depois da montagem, o runtime recebe só os dados (`chega`) e renderiza ele mesmo.
+3. **Hidratar em qualquer ponto dá o mesmo DOM**: o estado semeado é exatamente o que o DOM mostra. Fronteiras que o servidor não consegue
+   renderizar sozinho (dentro de `repetir`) e os dados que elas usam são `tarde`: chegam ao runtime depois da hidratação. Fronteiras que partilham
+   um desses dados também não são trocadas no HTML.
+4. Falha de dado vira erro opaco (o detalhe vai para `onErro`); o que não resolve em `abortaEmMs` vira `tempo esgotado`; `esperaTudo` (robôs/SEO)
+   manda a página completa de uma vez.
+
+No cliente, `constroiFronteira` mostra o esqueleto enquanto algum dado de `aguarda` está `carregando` e troca pelo conteúdo quando o status muda
+(dependência `status.<dado>`); o esqueleto continua reativo. `Polaris.inicia()` (no pacote AOT) monta a partir do documento: programa, estado
+inicial e fila. Verificação: o fuzz roda ordem de chegada × ponto de montagem × falhas e confere, sempre, o DOM com o do React para o mesmo estado.

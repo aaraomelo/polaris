@@ -136,6 +136,9 @@ export function usaTotal(no: IRNo): Set<string> {
   const { se, cabeca } = depsCabeca(no)
   const interno = new Set<string>()
   if (no.tipo === 'elemento') {
+    // fronteira de streaming: acorda quando o status de um dado que ela aguarda muda; o esqueleto também conta
+    for (const v of no.aguarda ?? []) interno.add(`status.${v}`)
+    if (no.esqueleto) for (const k of usaTotal(no.esqueleto)) interno.add(k)
     for (const v of Object.values(no.props)) depsValor(v, interno)
     for (const lista of Object.values(no.slots)) for (const f of lista) for (const k of usaTotal(f)) interno.add(k)
   }

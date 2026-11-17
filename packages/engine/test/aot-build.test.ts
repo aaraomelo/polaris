@@ -25,6 +25,8 @@ const NOS = {
     raiz: P('layout/pilha', { slots: { filhos: [P('texto/paragrafo', { id: 'n', props: { texto: 'n={estado.n}' } }), P('nav/botao', { id: 'mais', props: { texto: '+' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'n', valor: 'estado.n + 1' }] } })] } }) }),
   produto: no('pagina', 'produto', { rota: '/p/:id', params: { id: { tipo: 'texto' } }, raiz: P('texto/paragrafo', { props: { texto: 'produto {params.id}' } }) }),
   loja: no('pagina', 'loja', { rota: '/loja', dados: { loja: 'd.loja' }, raiz: P('texto/paragrafo', { props: { texto: '{loja.nome}' } }) }),
+  semdesc: no('bloco', 'x.semdesc', { interface: 'x/semdesc' }),
+  codigo: no('pagina', 'codigo', { rota: '/c', raiz: P('x/semdesc') }),
   lento: no('pagina', 'lento', { rota: '/lento', dados: { loja: { dados: 'd.loja', stream: true } }, raiz: P('texto/paragrafo', { props: { texto: '{loja.nome}' } }) }),
 }
 const registro = (nos: object[]) => { const r = new Registry(); registraBase(r); for (const n of nos) r.registra(n); return r }
@@ -36,7 +38,7 @@ describe('construirAot: o modo mais barato que serve a cada página', () => {
     const [r] = await construirAot(todos(), { destino: tmp('modos') }) as [Resultado]
     expect(r.ok).toBe(true)
     const p = r.manifesto.paginas
-    expect(Object.keys(p)).toEqual(['contador', 'inicio', 'loja', 'lento', 'produto'].sort())
+    expect(Object.keys(p)).toEqual(['codigo', 'contador', 'inicio', 'lento', 'loja', 'produto'])
     // início: nada interativo, sem dados, rota fixa → HTML puro, zero JS
     expect(p.inicio).toMatchObject({ modo: 'estatico', prerenderizada: true })
     expect(p.inicio!.arquivos.cliente).toBeUndefined(); expect(p.inicio!.cspScript).toBeUndefined()
@@ -46,9 +48,11 @@ describe('construirAot: o modo mais barato que serve a cada página', () => {
     // rota com parâmetro e página com dados: elegíveis ao modo mais barato, mas renderizadas por requisição (sem HTML pré-feito)
     expect(p.produto).toMatchObject({ modo: 'estatico', prerenderizada: false }); expect(p.produto!.motivos.join()).toContain('parâmetros')
     expect(p.loja).toMatchObject({ modo: 'estatico', prerenderizada: false }); expect(p.loja!.motivos.join()).toContain('dados')
-    // streaming: o runtime sem React não cobre (ainda) → fallback com o motivo
-    expect(p.lento).toMatchObject({ modo: 'react', prerenderizada: false }); expect(p.lento!.motivos.join()).toMatch(/streaming/)
-    expect(p.lento!.arquivos.cliente).toBeUndefined()
+    // streaming: o runtime sem React também cobre; o HTML é transmitido a cada requisição (streamVivo) com o cliente do manifesto
+    expect(p.lento).toMatchObject({ modo: 'vivo', prerenderizada: false, streaming: true }); expect(p.lento!.motivos.join()).toMatch(/streaming/)
+    expect(p.lento!.arquivos.cliente).toBeDefined(); expect(p.lento!.arquivos.html).toBeUndefined()
+    // e o que o runtime não cobre cai no fallback com o motivo
+    expect(p.codigo).toMatchObject({ modo: 'react' }); expect(p.codigo!.motivos.join()).toMatch(/descritor|código/)
   })
 
   it('o HTML estático é um documento sem <script>, com título e texto escapados; o vivo traz marcadores, programa, bundle e inicialização', async () => {
@@ -97,7 +101,7 @@ describe('determinismo e incrementalidade', () => {
 
     // nova versão do contador: texto do botão muda
     const novo = { ...NOS.contador, versao: '1.1.0', spec: { ...NOS.contador.spec, raiz: P('layout/pilha', { slots: { filhos: [P('texto/paragrafo', { id: 'n', props: { texto: 'n={estado.n}' } }), P('nav/botao', { id: 'mais', props: { texto: 'MAIS' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'n', valor: 'estado.n + 1' }] } })] } }) } }
-    const [r3] = await construirAot(registro([NOS.servico, NOS.dados, NOS.inicio, novo, NOS.produto, NOS.loja, NOS.lento]), { destino: dir }) as [Resultado]
+    const [r3] = await construirAot(registro([NOS.servico, NOS.dados, NOS.inicio, novo, NOS.produto, NOS.loja, NOS.lento, NOS.semdesc, NOS.codigo]), { destino: dir }) as [Resultado]
     expect(r3.manifesto.paginas.contador!.no.versao).toBe('1.1.0')
     expect(r3.escritos.every((f) => f.startsWith('contador.') || f === 'manifesto.json')).toBe(true)
     expect(r3.removidos.length).toBeGreaterThan(0); expect(r3.removidos.every((f) => f.startsWith('contador.'))).toBe(true)
@@ -154,8 +158,10 @@ describe('o resultado RODA: abre o HTML gerado num navegador simulado e hidrata'
     ;(w.document.getElementById('mais') as HTMLElement).click()
     expect(n.textContent).toBe('n=4')
     // o script inline de inicialização é exatamente o que a CSP autoriza pelo hash
-    const inline = [...w.document.querySelectorAll('script:not([src]):not([type])')].map((s) => s.textContent!).find((t) => t.includes('Polaris.monta'))!
-    expect(`sha256-${createHash('sha256').update(inline.replace(js, '')).digest('base64')}`).toBe(e.cspScript)
+    const inline = [...w.document.querySelectorAll('script:not([src]):not([type])')].map((s) => s.textContent!).find((t) => t === 'Polaris.inicia()')!
+    expect(`sha256-${createHash('sha256').update(inline).digest('base64')}`).toBe(e.cspScript)
+    // e é o MESMO para toda página vivo: uma só entrada na CSP serve ao site inteiro
+
   })
 })
 

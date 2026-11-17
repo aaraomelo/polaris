@@ -84,10 +84,43 @@ const regista = (amb: Amb, dono: Dono, c: Ctrl) => { amb.stats.controladores++; 
 
 // ---- construção ------------------------------------------------------------
 
-function constroi(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
+function constroi(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos, semFronteira = false): void {
   if (cx.prof > LIMITES_RUNTIME.profundidade) { amb.onErro?.({ caminho: no.caminho, regra: 'limite', mensagem: `profundidade de renderização acima de ${LIMITES_RUNTIME.profundidade}` }); return }
+  if (!semFronteira && no.tipo === 'elemento' && no.aguarda?.length) return constroiFronteira(no, cx, dono, amb, pos)
   if (no.se) return constroiSe(no, cx, dono, amb, pos)
   return constroiRep(no, cx, dono, amb, pos)
+}
+
+/**
+ * Fronteira de streaming: o nó usa dados que podem ainda não ter chegado. Enquanto algum estiver `carregando` mostra o esqueleto
+ * (ou nada); quando todos chegam (ou falham) constrói o conteúdo. Tudo dentro de dois marcadores, que o HTML do servidor também traz.
+ */
+function constroiFronteira(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
+  const { esc } = cx
+  const vars = no.aguarda!
+  const deps = new Set(vars.map((v) => `status.${v}`))
+  const pronto = () => { const st = esc.status as Record<string, string> | undefined; return vars.every((v) => st?.[v] !== 'carregando') }
+  let sub: Dono = { nos: [] }
+  let estaPronto = pronto()
+  const monta = (p: Pos, conteudo: boolean) => {
+    sub = { nos: [] }
+    if (conteudo) constroi(no, cx, sub, amb, p, true)
+    else if (no.esqueleto) constroi(no.esqueleto, cx, sub, amb, p)
+  }
+  const ini = pos.com(); pos.coloca(ini)
+  monta(pos, estaPronto)
+  const fim = pos.com(); pos.coloca(fim)
+  regista(amb, dono, {
+    usa: usaTotal(no), morto: false,
+    atualiza(m) {
+      if (cruza(deps, m)) {
+        const p = pronto()
+        if (p !== estaPronto) { destroiNos(sub.nos); limpaEntre(ini, fim); estaPronto = p; monta(new Pos(fim.parentNode!, fim, false), p); return }
+      }
+      atualizaNos(sub.nos, m)
+    },
+    destroi() { this.morto = true; destroiNos(sub.nos) },
+  })
 }
 
 function constroiSe(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
@@ -349,6 +382,9 @@ export type OpcoesVivo = Omit<OpcoesNucleo, 'programa'> & {
   hidrata?: boolean
 }
 
+/** Um dado em streaming que chegou: nome, deu certo?, valor (ok) ou mensagem (erro). */
+export type Chegada = readonly [nome: string, ok: boolean, valor: unknown]
+
 export type Vivo = {
   /** o modelo (store imutável, ações). O DOM é só o espelho dele. Histórico/desfazer: `montaVivo` (completo) ou `anexaHistorico(modelo, n)`. */
   modelo: ModeloNucleo
@@ -356,6 +392,8 @@ export type Vivo = {
   despacha(a: AcaoStore): void
   flush(): void
   titulo(): string
+  /** dados em streaming que chegaram depois da montagem: [nome, ok, valor | erro] (o status vira ok/erro e as fronteiras se abrem) */
+  chega(dados: ReadonlyArray<Chegada>): void
   /** quantos controladores (efeitos de atualização) ficaram retidos: nós estáticos não geram nenhum */
   diagnostico(): { controladores: number; hidratou: boolean }
   destroi(): void
@@ -401,20 +439,19 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
 
   return {
     modelo, store: modelo.store, despacha: modelo.despacha, flush: modelo.flush,
+    chega(dados) { for (const [nome, ok, v] of dados) modelo.despacha(ok ? { t: 'dado', nome, valor: v } : { t: 'erro', nome, erro: String(v) }) },
     titulo: () => { const t = programa.pagina.titulo; if (!t) return ''; const v = valorDe(t, modelo.escopo, funcoes); return v === null || v === undefined || typeof v === 'object' ? '' : String(v) },
     diagnostico: () => ({ controladores: stats.controladores, hidratou }),
     destroi() { desassina(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
   }
 }
 
-/** A página pode rodar no runtime vivo? (sem streaming, esqueleto, blocos de código nem blocos sem descritor) */
+/** A página pode rodar no runtime vivo? (streaming e esqueletos são suportados; blocos de código e blocos sem descritor não) */
 export function elegivelVivo(programa: Programa, descritores: DescritoresDom = descritoresPadrao()): { ok: true } | { ok: false; motivos: Array<{ caminho: string; motivo: string }> } {
   const motivos: Array<{ caminho: string; motivo: string }> = []
-  for (const [n, d] of Object.entries(programa.pagina.dados)) if (d.stream) motivos.push({ caminho: `/spec/dados/${n}`, motivo: 'dado em streaming' })
   const anda = (no: IRNo, visitados: Set<string>) => {
     if (no.tipo !== 'elemento') return
-    if (no.aguarda?.length) motivos.push({ caminho: no.caminho, motivo: 'usa dado em streaming' })
-    if (no.esqueleto) motivos.push({ caminho: no.caminho, motivo: 'tem esqueleto (streaming)' })
+    if (no.esqueleto) anda(no.esqueleto, visitados)
     if (no.bloco.impl === 'codigo') motivos.push({ caminho: no.caminho, motivo: `o bloco '${no.bloco.interface}' é código customizado` })
     else if (no.bloco.impl === 'nativo' && !no.bloco.cadeia.some((c) => tem(descritores, c))) motivos.push({ caminho: no.caminho, motivo: `o bloco '${no.bloco.interface}' não tem descritor DOM` })
     else if (no.bloco.impl === 'composto' && !visitados.has(no.bloco.interface)) {

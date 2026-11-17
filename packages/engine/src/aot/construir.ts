@@ -31,6 +31,8 @@ export type EntradaManifesto = {
   prerenderizada: boolean
   arquivos: { programa: Arquivo; html?: Arquivo; cliente?: Arquivo }
   uso: Uso
+  /** a página tem dados em streaming: o servidor transmite o HTML (`streamVivo`, @polaris/engine/servidor-vivo) com o cliente deste manifesto */
+  streaming?: boolean
   /** vivo + prerenderizada: hash SHA-256 (base64) do script inline de inicialização, para a CSP */
   cspScript?: string
 }
@@ -71,9 +73,8 @@ const escreve = (caminho: string, conteudo: string) => {
   renameSync(tmp, caminho)
 }
 
-function inicializacao(): string {
-  return `Polaris.monta({programa:JSON.parse(document.getElementById('pl-programa').textContent),container:document.getElementById('polaris'),hidrata:true,fechado:true})`
-}
+/** Script de inicialização, o MESMO para toda página: um hash de CSP serve a todas. O programa e o estado inicial estão no documento. */
+export const INICIALIZACAO = 'Polaris.inicia()'
 
 type PaginaPronta = { entrada: EntradaManifesto; conteudos: Record<string, string> }
 
@@ -108,6 +109,7 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
   if (!v.ok) { entrada.motivos = [...motivos, ...v.motivos.map((m) => `${m.caminho}: ${m.motivo}`)]; return { entrada, conteudos } }
 
   entrada.modo = 'vivo'
+  if (Object.values(programa.pagina.dados).some((d) => d.stream)) { entrada.streaming = true; motivos.push('dados em streaming: o HTML é transmitido a cada requisição (streamVivo)') }
   const pacote = await empacotaCliente(programa)
   if (!pacote.ok) throw new Error('o pacote do cliente foi recusado depois de elegível') // inatingível: mesma checagem
   const jsNome = `${base}.${sha(pacote.pacote.codigo).slice(0, 12)}.js`
@@ -116,7 +118,7 @@ async function constroiPagina(id: string, programa: Programa, no: { id: string; 
     const h = compilaHtmlVivo(programa)
     if (!h.ok) throw new Error('HTML do servidor recusado para página elegível')
     const r = h.pagina.render({})
-    const ini = inicializacao()
+    const ini = INICIALIZACAO
     const titulo = r.titulo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${titulo}</title></head><body><div id="polaris">${r.corpo}</div><script type="application/json" id="pl-programa">${jsonSeguro(programa)}</script><script src="${jsNome}"></script><script>${ini}</script></body></html>`
     const nome = `${base}.${sha(html).slice(0, 12)}.html`

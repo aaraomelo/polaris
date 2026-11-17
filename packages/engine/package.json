@@ -35,6 +35,7 @@
     "./servidor": "./src/render/stream.ts",
     "./sandbox": "./src/sandbox/local.ts",
     "./sandbox-node": "./src/sandbox/worker.ts",
-    "./aot": "./src/aot/index.ts"
+    "./aot": "./src/aot/index.ts",
+    "./servidor-vivo": "./src/vivo/stream.ts"
   }
 }

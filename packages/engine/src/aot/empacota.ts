@@ -25,7 +25,7 @@ export type Entrada = { fonte: string; uso: Uso }
 
 /** Fonte JS da entrada do cliente desta página: importa só o que ela usa e expõe `monta(opcoes)`. */
 export function geraEntrada(programa: Programa, uso: Uso = usoDoPrograma(programa)): Entrada {
-  const imports: string[] = [`import { montaVivoNucleo } from ${JSON.stringify(`${RAIZ}vivo/monta.ts`)}`]
+  const imports: string[] = [`import { montaVivoNucleo } from ${JSON.stringify(`${RAIZ}vivo/monta.ts`)}`, `import { iniciaDoDocumento, iniciaQuando } from ${JSON.stringify(`${RAIZ}vivo/fila.ts`)}`]
   const fs: string[] = [], ds: string[] = []
   for (const f of uso.funcoes) {
     if (!temFuncao(f)) throw new Error(`função '${f}' não existe na biblioteca`)
@@ -43,6 +43,9 @@ export function geraEntrada(programa: Programa, uso: Uso = usoDoPrograma(program
     `const funcoes = { ${fs.join(', ')} }`,
     `const descritores = { ${ds.join(', ')} }`,
     'export function monta(opcoes) { return montaVivoNucleo({ ...opcoes, funcoes, descritores }) }',
+    '// inicia(): monta a partir do documento (programa e estado embutidos + fila de dados em streaming)',
+    'export function inicia(extra) { return iniciaDoDocumento(monta, extra) }',
+    "if (typeof window !== 'undefined' && window.__PL && window.__PL.auto) iniciaQuando(() => inicia())",
     '',
   ].join('\n')
   return { fonte, uso }

@@ -2,7 +2,7 @@ import { escopoDaStore, iniciaStore, type SementeStore } from '../render/store'
 import type { Programa } from '../render/programa'
 import type { ErroRuntime } from '../render/tipos'
 import { EMISSORES_BASE, type Emissores } from './emissores'
-import { geraEstatico, type Estatico, type Motivo } from './gera'
+import { geraEstatico, type Estatico, type FronteiraInfo, type Motivo } from './gera'
 import { DESCRITORES_BASE, type DescritoresDom } from '../vivo/blocos'
 import { emissoresDe } from '../vivo/emissor'
 
@@ -22,6 +22,12 @@ export type PaginaEstatica = {
   /** o JavaScript gerado: pode ser gravado em arquivo (AOT) */
   fonte: string
   render(entrada?: EntradaEstatica): { corpo: string; titulo: string }
+  /** fronteiras de streaming (HTML marcado do modo vivo) */
+  fronteiras: FronteiraInfo[]
+  /** dados em streaming usados por fronteiras que não podem ser trocadas no HTML (chegam ao cliente só depois da hidratação) */
+  retidas: string[]
+  /** HTML do conteúdo de uma fronteira com o estado dado (sem os marcadores) */
+  renderFronteira(chave: string, entrada?: EntradaEstatica): string
 }
 
 const cache = new WeakMap<Programa, WeakMap<Emissores, ReturnType<typeof geraEstatico>>>()
@@ -30,14 +36,13 @@ const emissoresVivo = new WeakMap<DescritoresDom, Emissores>()
 
 function paginaDe(programa: Programa, r: Extract<ReturnType<typeof geraEstatico>, { ok: true }>): PaginaEstatica {
   const est: Estatico = r.estatico
+  // o mesmo escopo que o interpretador React monta (render/pagina.tsx), sem importar React
+  const escopoDe = (e: EntradaEstatica) => escopoDaStore(programa, iniciaStore(programa, e), { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' })
   return {
     fonte: est.fonte,
-    render(e: EntradaEstatica = {}) {
-      // o mesmo escopo que o interpretador React monta (render/pagina.tsx), sem importar React
-      const base = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' }
-      const esc = escopoDaStore(programa, iniciaStore(programa, e), base)
-      return { corpo: est.render(esc, e.onErro), titulo: est.titulo(esc) }
-    },
+    fronteiras: est.fronteiras, retidas: est.retidas,
+    render(e: EntradaEstatica = {}) { const esc = escopoDe(e); return { corpo: est.render(esc, e.onErro), titulo: est.titulo(esc) } },
+    renderFronteira(chave: string, e: EntradaEstatica = {}) { return est.renderFronteira(chave, escopoDe(e)) },
   }
 }
 
