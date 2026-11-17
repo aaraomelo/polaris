@@ -306,3 +306,237 @@ describe('vivo: só reavalia o que depende do que mudou (e nada do que foi remov
     if (!res.ok) expect(res.erros.some((e) => e.caminho.endsWith('/repetir/chave') && /'q'/.test(e.mensagem))).toBe(true)
   })
 })
+
+import { compilaHtmlVivo } from '../src/index'
+
+describe('hidratação: o cliente ADOTA o HTML do servidor (sem recriar nós) e continua igual ao React', () => {
+  const pagina = () => programa(P('layout/pilha', { id: 'raiz', slots: { filhos: [
+    P('texto/titulo', { props: { texto: '{estado.nome}', nivel: 2 } }),
+    P('texto/paragrafo', { se: 'estado.mostra', props: { texto: 'n={estado.n} <&>' } }),
+    P('x/cartao', { repetir: { cada: 'estado.itens', como: 'p', chave: 'p.id' }, props: { titulo: '{p.nome}', preco: '{p.preco}' }, slots: { rodape: [P('texto/paragrafo', { props: { texto: '#{indice} {estado.nome}' } })] } }),
+    P('nav/botao', { id: 'mais', props: { texto: 'mais' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'n', valor: 'estado.n + 1' }] } }),
+    P('entrada/texto', { id: 'campo', props: { valor: '{estado.nome}' }, eventos: { aoMudar: [{ acao: 'definir', estado: 'nome', valor: 'evento' }] } }),
+    P('midia/imagem', { props: { src: '{estado.url}', alt: 'x' } }),
+    P('nav/link', { props: { href: '/x' }, slots: { filhos: [P('texto/paragrafo', { props: { texto: 'dentro' } })] } }),
+    P('texto/paragrafo', { props: { texto: 'fixo' } }),
+  ] } }), { estado: {
+    nome: { tipo: 'texto', inicial: "Sol & 'Lua'" }, n: { tipo: 'inteiro', inicial: 2 }, mostra: { tipo: 'booleano', inicial: true }, url: { tipo: 'texto', inicial: '' },
+    itens: { tipo: 'json', inicial: [{ id: 1, nome: 'pão', preco: 5.5 }, { id: 2, nome: '<b>', preco: null }] },
+  } })
+
+  const servidor = (pg: Programa, semente: Record<string, unknown> = {}) => {
+    const h = compilaHtmlVivo(pg)
+    if (!h.ok) throw new Error(JSON.stringify(h.motivos))
+    return h.pagina.render(semente).corpo
+  }
+  const todos = (raiz: Node): Node[] => { const r: Node[] = []; const anda = (n: Node) => { r.push(n); n.childNodes.forEach(anda) }; raiz.childNodes.forEach(anda); return r }
+
+  it('adota todos os nós (nenhum createElement/createComment) e o DOM fica igual ao do React; depois continua reagindo', () => {
+    const pg = pagina()
+    const container = document.createElement('div'); document.body.appendChild(container)
+    container.innerHTML = servidor(pg)
+    const antes = todos(container)
+    const criar = { el: document.createElement, com: document.createComment }
+    let criados = 0
+    document.createElement = ((...a: Parameters<typeof criar.el>) => { criados++; return criar.el.apply(document, a) }) as typeof document.createElement
+    document.createComment = ((...a: Parameters<typeof criar.com>) => { criados++; return criar.com.apply(document, a) }) as typeof document.createComment
+    let v!: Vivo
+    try { v = montaVivo({ programa: pg, container, hidrata: true }) } finally { document.createElement = criar.el; document.createComment = criar.com }
+    expect(v.diagnostico().hidratou).toBe(true)
+    expect(criados).toBe(0)
+    const depois = todos(container)
+    expect(depois.length).toBe(antes.length)
+    depois.forEach((n, i) => expect(n).toBe(antes[i])) // os MESMOS nós
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+    // e segue viva
+    ;(container.querySelector('#mais') as HTMLElement).click()
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+    v.despacha({ t: 'estado', nome: 'itens', valor: [{ id: 2, nome: 'dois', preco: 1 }, { id: 3, nome: 'três', preco: 2 }, { id: 1, nome: 'um', preco: 3 }] })
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+    const campo = container.querySelector('#campo') as HTMLInputElement
+    campo.value = 'digitado'; campo.dispatchEvent(new Event('input', { bubbles: true }))
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+  })
+
+  it('FUZZ: servidor emite o estado S, o cliente adota e aplica ações: sempre igual ao React', () => {
+    let s = 7
+    const rnd = () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)
+    const ri = (k: number) => Math.floor(rnd() * k)
+    const pg = pagina()
+    for (let rodada = 0; rodada < 40; rodada++) {
+      const semente = {
+        estado: {
+          nome: ["x<&>'\"", '', 'ç日😀'][ri(3)], n: ri(5), mostra: rnd() < 0.5, url: ['', '/p', 'javascript:x', 'https://e.com/?a=1&b=2'][ri(4)],
+          itens: Array.from({ length: ri(6) }, (_, i) => ({ id: i * 2 + ri(2), nome: `i${i}`, preco: rnd() < 0.3 ? null : i * 1.5 })).filter((x, i, a) => a.findIndex((y) => y.id === x.id) === i),
+        },
+      }
+      const container = document.createElement('div'); document.body.appendChild(container)
+      container.innerHTML = servidor(pg, semente)
+      const v = montaVivo({ programa: pg, container, hidrata: true, ...semente })
+      expect(v.diagnostico().hidratou, `rodada ${rodada}`).toBe(true)
+      expect(doContainer(container), `rodada ${rodada} (hidratado)`).toBe(oraculo(pg, v))
+      for (let passo = 0; passo < 10; passo++) {
+        const k = ri(4)
+        if (k === 0) v.despacha({ t: 'estado', nome: 'n', valor: ri(9) })
+        else if (k === 1) v.despacha({ t: 'estado', nome: 'mostra', valor: rnd() < 0.5 })
+        else if (k === 2) v.despacha({ t: 'estado', nome: 'url', valor: ['', '/q', 'javascript:y'][ri(3)] })
+        else v.despacha({ t: 'estado', nome: 'itens', valor: Array.from({ length: ri(7) }, () => ({ id: ri(8), nome: `r${ri(5)}`, preco: ri(3) })).filter((x, i, a) => a.findIndex((y) => y.id === x.id) === i) })
+        expect(doContainer(container), `rodada ${rodada} passo ${passo}`).toBe(oraculo(pg, v))
+      }
+      v.destroi(); container.remove()
+    }
+  })
+
+  it('HTML do servidor divergente: avisa, reconstrói tudo no cliente e o resultado continua correto', () => {
+    const pg = pagina()
+    const container = document.createElement('div'); document.body.appendChild(container)
+    container.innerHTML = servidor(pg).replace('<h2', '<h3').replace('</h2>', '</h3>') // servidor "errado"
+    const erros: string[] = []
+    const v = montaVivo({ programa: pg, container, hidrata: true, onErro: (e) => erros.push(`${e.regra}: ${e.mensagem}`) })
+    expect(v.diagnostico().hidratou).toBe(false)
+    expect(erros.some((e) => e.startsWith('hidratacao:') && e.includes('esperava <h2>'))).toBe(true)
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+    v.despacha({ t: 'estado', nome: 'n', valor: 7 })
+    expect(doContainer(container)).toBe(oraculo(pg, v))
+  })
+
+  it('HTML com nó sobrando ou faltando também diverge (nunca adota pela metade)', () => {
+    const pg = pagina()
+    for (const quebra of [(h: string) => h + '<p>intruso</p>', (h: string) => h.replace(/<!---->/, ''), (h: string) => h.replace('<p>fixo</p>', '')]) {
+      const container = document.createElement('div'); document.body.appendChild(container)
+      container.innerHTML = quebra(servidor(pg))
+      const erros: string[] = []
+      const v = montaVivo({ programa: pg, container, hidrata: true, onErro: (e) => erros.push(e.regra) })
+      expect(erros).toContain('hidratacao')
+      expect(doContainer(container)).toBe(oraculo(pg, v))
+    }
+  })
+})
+
+describe('mundo fechado: nós estáticos não geram controlador', () => {
+  const pagina = () => programa(P('layout/pilha', { slots: { filhos: [
+    P('texto/titulo', { props: { texto: 'título fixo' } }),
+    P('texto/paragrafo', { props: { texto: 'tenant={tenant.nome} idioma={idioma} q={consulta.q}' } }),
+    P('x/cartao', { repetir: { cada: 'estado.fixos', como: 'f' }, props: { titulo: '{f.nome}' }, slots: { rodape: [P('texto/paragrafo', { props: { texto: 'rodapé fixo {indice}' } })] } }),
+    P('texto/paragrafo', { se: 'estado.mostra', props: { texto: 'dinâmico {estado.n}' } }),
+    P('nav/botao', { id: 'b', props: { texto: 'x' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'n', valor: 'estado.n + 1' }, { acao: 'definir', estado: 'mostra', valor: '!estado.mostra' }] } }),
+  ] } }), { estado: {
+    n: { tipo: 'inteiro', inicial: 0 }, mostra: { tipo: 'booleano', inicial: true },
+    fixos: { tipo: 'json', inicial: [{ nome: 'a' }, { nome: 'b' }, { nome: 'c' }] }, // nenhuma ação escreve em estado.fixos
+  } })
+
+  it('só o que depende de `n` e `mostra` ganha controlador; o resto (inclusive a lista fixa e seu composto) não', () => {
+    const pg = pagina()
+    const aberto = sobe(pg, { tenant: { nome: 'T' } }).v.diagnostico().controladores
+    const container = document.createElement('div')
+    const v = montaVivo({ programa: pg, container, tenant: { nome: 'T' }, fechado: true })
+    const fechado = v.diagnostico().controladores
+    expect(fechado).toBeLessThan(aberto)
+    expect(fechado).toBe(3) // a raiz (guarda os filhos dinâmicos), o `se` (estado.mostra) e o parágrafo dinâmico dentro dele
+    expect(doContainer(container)).toBe(oraculo(pg, v, { tenant: { nome: 'T' } }))
+    ;(container.querySelector('#b') as HTMLElement).click()
+    expect(doContainer(container)).toBe(oraculo(pg, v, { tenant: { nome: 'T' } }))
+    ;(container.querySelector('#b') as HTMLElement).click()
+    expect(doContainer(container)).toBe(oraculo(pg, v, { tenant: { nome: 'T' } }))
+  })
+
+  it('despacho externo fora do que a página declara é recusado (a poda depende desse contrato)', () => {
+    const erros: string[] = []
+    const container = document.createElement('div')
+    const v = montaVivo({ programa: pagina(), container, fechado: true, onErro: (e) => erros.push(e.mensagem) })
+    const antes = v.store()
+    v.despacha({ t: 'estado', nome: 'fixos', valor: [] })
+    expect(v.store()).toBe(antes)
+    expect(erros[0]).toContain("'fixos' não é alterável")
+    v.despacha({ t: 'estado', nome: 'n', valor: 3 }) // este é declarado
+    expect(v.store().estado.n).toBe(3)
+  })
+
+  it('FUZZ no modo fechado e hidratado: igual ao React', () => {
+    let s = 11
+    const rnd = () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)
+    const pg = pagina()
+    const h = compilaHtmlVivo(pg)
+    if (!h.ok) throw new Error('x')
+    for (let r = 0; r < 20; r++) {
+      const container = document.createElement('div'); document.body.appendChild(container)
+      container.innerHTML = h.pagina.render({ tenant: { nome: 'T' }, consulta: { q: 'a&b' } }).corpo
+      const v = montaVivo({ programa: pg, container, hidrata: true, fechado: true, tenant: { nome: 'T' }, consulta: { q: 'a&b' } })
+      for (let i = 0; i < 12; i++) {
+        if (rnd() < 0.5) (container.querySelector('#b') as HTMLElement).click()
+        else v.despacha({ t: 'estado', nome: 'n', valor: Math.floor(rnd() * 9) })
+        expect(doContainer(container), `rodada ${r} passo ${i}`).toBe(oraculo(pg, v, { tenant: { nome: 'T' }, consulta: { q: 'a&b' } }))
+      }
+      v.destroi(); container.remove()
+    }
+  })
+})
+
+describe('mundo fechado: casos de borda da análise de mutabilidade', () => {
+  const espera = (ms = 5) => new Promise((r) => setTimeout(r, ms))
+
+  it('composto com props dinâmicas: o modelo interno (que lê props.*) NÃO é estático', () => {
+    const pg = programa(P('layout/pilha', { slots: { filhos: [
+      P('x/cartao', { repetir: { cada: 'estado.itens', como: 'p', chave: 'p.id' }, props: { titulo: '{p.nome}', preco: '{p.preco}' }, slots: { rodape: [P('texto/paragrafo', { props: { texto: '{estado.nome}' } })] } }),
+      P('x/cartao', { props: { titulo: '{estado.nome}', preco: '{estado.n}' } }),
+      P('x/cartao', { props: { titulo: 'fixo', preco: 3 } }), // props constantes: aí sim o interno é estático
+      P('nav/botao', { props: { texto: 'a' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'nome', valor: "'z'" }, { acao: 'definir', estado: 'n', valor: '1' }, { acao: 'definir', estado: 'itens', valor: '[]' }] } }),
+    ] } }), { estado: { nome: { tipo: 'texto', inicial: 'a' }, n: { tipo: 'inteiro', inicial: 0 }, itens: { tipo: 'json', inicial: [{ id: 1, nome: 'um', preco: 1 }] } } })
+    const container = document.createElement('div')
+    const v = montaVivo({ programa: pg, container, fechado: true })
+    const oc = () => canon(renderPaginaHtml({ programa: pg, componentes: COMPONENTES_BASE, estado: v.store().estado }).corpo)
+    expect(doContainer(container)).toBe(oc())
+    v.despacha({ t: 'estado', nome: 'nome', valor: 'novo <&>' }); expect(doContainer(container)).toBe(oc())
+    v.despacha({ t: 'estado', nome: 'n', valor: 42 }); expect(doContainer(container)).toBe(oc())
+    v.despacha({ t: 'estado', nome: 'itens', valor: [{ id: 1, nome: 'renomeado', preco: 9 }, { id: 2, nome: 'dois', preco: null }] }); expect(doContainer(container)).toBe(oc())
+  })
+
+  it('estado escrito só dentro de `depois`/`emErro` de uma ação executar também é mutável', async () => {
+    const pg = programa(P('layout/pilha', { slots: { filhos: [
+      P('texto/paragrafo', { id: 'msg', props: { texto: '{estado.msg}' } }),
+      P('texto/paragrafo', { id: 'st', props: { texto: '{status.loja}|{erros.loja}' } }),
+      P('nav/botao', { id: 'b', props: { texto: 'x' }, eventos: { aoClicar: [{ acao: 'executar', dados: 'loja', args: {},
+        depois: [{ acao: 'definir', estado: 'msg', valor: "'ok:' + resultado.n" }], emErro: [{ acao: 'definir', estado: 'msg', valor: "'erro'" }] }] } }),
+    ] } }), { dados: { loja: 'd.loja' }, estado: { msg: { tipo: 'texto', inicial: '' } } })
+    let rejeita = false
+    const carregador = () => (rejeita ? Promise.reject(new Error('falhou')) : Promise.resolve({ n: 5 }))
+    const container = document.createElement('div'); document.body.appendChild(container)
+    const v = montaVivo({ programa: pg, container, fechado: true, carregador, dados: { loja: { n: 0 } } })
+    const q = () => `${container.querySelector('#msg')!.textContent}|${container.querySelector('#st')!.textContent}`
+    ;(container.querySelector('#b') as HTMLElement).click(); expect(q()).toBe('|carregando|'); await espera()
+    expect(q()).toBe('ok:5|ok|')
+    rejeita = true; ;(container.querySelector('#b') as HTMLElement).click(); await espera()
+    expect(q()).toBe('erro|erro|falhou')
+    v.destroi()
+  })
+
+  it('o modelo guarda histórico (ações, chaves, antes/depois) e os espelhos assinam as mudanças', () => {
+    const pg = programa(P('texto/paragrafo', { props: { texto: '{estado.n}' } }), { estado: { n: { tipo: 'inteiro', inicial: 0 } } })
+    const v = montaVivo({ programa: pg, container: document.createElement('div'), historico: 2 })
+    const vistas: string[] = []
+    v.modelo.assina((m) => vistas.push([...m.mudou].sort().join(',')))
+    v.despacha({ t: 'estado', nome: 'n', valor: 1 }); v.despacha({ t: 'estado', nome: 'n', valor: 2 }); v.despacha({ t: 'estado', nome: 'n', valor: 3 })
+    expect(vistas).toEqual(['estado,estado.n', 'estado,estado.n', 'estado,estado.n'])
+    const h = v.modelo.historico()
+    expect(h).toHaveLength(2) // anel de 2
+    expect(h[0]!.antes.estado.n).toBe(1); expect(h[1]!.depois.estado.n).toBe(3); expect(h[1]!.acoes).toEqual([{ t: 'estado', nome: 'n', valor: 3 }])
+    expect(h[1]!.antes.dados).toBe(h[1]!.depois.dados) // o que não mudou é a MESMA referência (compartilhamento estrutural)
+  })
+})
+
+describe('hidratação: divergências dentro de elementos e marcadores trocados', () => {
+  const pg = () => programa(P('layout/pilha', { slots: { filhos: [P('texto/paragrafo', { se: 'estado.m', props: { texto: 'a' } }), P('layout/linha', { slots: { filhos: [P('texto/paragrafo', { props: { texto: 'fixo' } })] } })] } }), { estado: { m: { tipo: 'booleano', inicial: true } } })
+  const tenta = (altera: (h: string) => string) => {
+    const p = pg()
+    const h = compilaHtmlVivo(p); if (!h.ok) throw new Error('x')
+    const container = document.createElement('div'); document.body.appendChild(container)
+    container.innerHTML = altera(h.pagina.render().corpo)
+    const erros: string[] = []
+    const v = montaVivo({ programa: p, container, hidrata: true, onErro: (e) => erros.push(e.regra) })
+    expect(doContainer(container)).toBe(oraculo(p, v))
+    return erros
+  }
+  it('nó sobrando DENTRO de um elemento', () => { expect(tenta((h) => h.replace('<p>fixo</p>', '<p>fixo</p><p>intruso</p>'))).toContain('hidratacao') })
+  it('elemento no lugar de um marcador', () => { expect(tenta((h) => h.replace('<!---->', '<span></span>'))).toContain('hidratacao') })
+  it('o HTML correto não gera aviso', () => { expect(tenta((h) => h)).toEqual([]) })
+})

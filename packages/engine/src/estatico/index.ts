@@ -3,6 +3,8 @@ import type { Programa } from '../render/programa'
 import type { ErroRuntime } from '../render/tipos'
 import { EMISSORES_BASE, type Emissores } from './emissores'
 import { geraEstatico, type Estatico, type Motivo } from './gera'
+import { DESCRITORES_BASE, type DescritoresDom } from '../vivo/blocos'
+import { emissoresDe } from '../vivo/emissor'
 
 export { EMISSORES_BASE, INTERATIVOS, type Emissor, type Emissores, type EntradaEmissor } from './emissores'
 export { escHtml } from './escape'
@@ -23,6 +25,38 @@ export type PaginaEstatica = {
 }
 
 const cache = new WeakMap<Programa, WeakMap<Emissores, ReturnType<typeof geraEstatico>>>()
+const cacheVivo = new WeakMap<Programa, WeakMap<DescritoresDom, ReturnType<typeof geraEstatico>>>()
+const emissoresVivo = new WeakMap<DescritoresDom, Emissores>()
+
+function paginaDe(programa: Programa, r: Extract<ReturnType<typeof geraEstatico>, { ok: true }>): PaginaEstatica {
+  const est: Estatico = r.estatico
+  return {
+    fonte: est.fonte,
+    render(e: EntradaEstatica = {}) {
+      // o mesmo escopo que o interpretador React monta (render/pagina.tsx), sem importar React
+      const base = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' }
+      const esc = escopoDaStore(programa, iniciaStore(programa, e), base)
+      return { corpo: est.render(esc, e.onErro), titulo: est.titulo(esc) }
+    },
+  }
+}
+
+/**
+ * HTML de servidor para o runtime vivo: os mesmos blocos (derivados dos descritores DOM), mais os marcadores de comentário
+ * (`<!---->`) de `se`, `repetir` e itens que o cliente ADOTA na hidratação. Aceita eventos e blocos interativos.
+ */
+export function compilaHtmlVivo(programa: Programa, descritores: DescritoresDom = DESCRITORES_BASE): { ok: true; pagina: PaginaEstatica } | { ok: false; motivos: Motivo[] } {
+  let por = cacheVivo.get(programa)
+  if (!por) { por = new WeakMap(); cacheVivo.set(programa, por) }
+  let r = por.get(descritores)
+  if (!r) {
+    let em = emissoresVivo.get(descritores)
+    if (!em) { em = emissoresDe(descritores); emissoresVivo.set(descritores, em) }
+    r = geraEstatico(programa, em, undefined, true)
+    por.set(descritores, r)
+  }
+  return r.ok ? { ok: true, pagina: paginaDe(programa, r) } : r
+}
 
 /**
  * Traduz o programa para uma função JS especializada, se a página não precisa de JavaScript no cliente
@@ -34,20 +68,7 @@ export function compilaEstatico(programa: Programa, emissores: Emissores = EMISS
   if (!porEmissores) { porEmissores = new WeakMap(); cache.set(programa, porEmissores) }
   let r = porEmissores.get(emissores)
   if (!r) { r = geraEstatico(programa, emissores); porEmissores.set(emissores, r) }
-  if (!r.ok) return r
-  const est: Estatico = r.estatico
-  return {
-    ok: true,
-    pagina: {
-      fonte: est.fonte,
-      render(e: EntradaEstatica = {}) {
-        // o mesmo escopo que o interpretador React monta (render/pagina.tsx), sem importar React
-        const base = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' }
-        const esc = escopoDaStore(programa, iniciaStore(programa, e), base)
-        return { corpo: est.render(esc, e.onErro), titulo: est.titulo(esc) }
-      },
-    },
-  }
+  return r.ok ? { ok: true, pagina: paginaDe(programa, r) } : r
 }
 
 const escAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')

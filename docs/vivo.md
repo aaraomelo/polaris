@@ -31,3 +31,18 @@ estado (`test/vivo.test.tsx`: cenários, fuzz de sequências de ações, identid
 Streaming/Suspense, blocos de código (sandbox), `Isola` (falha de um bloco não derruba a página), hidratação do HTML do
 servidor (hoje o vivo monta no contêiner vazio) e medição em navegador real (INP, tempo de hidratação).
 `elegivelVivo` devolve os motivos quando a página usa algo disso e o servidor segue pelo caminho React.
+
+## Modelo × espelho (desacoplamento)
+`src/modelo/` não conhece DOM, HTML nem React: store imutável, `AcaoStore` pura, diff por referência (`chavesMudadas`),
+histórico (anel de N mudanças com ações, chaves, antes/depois) e assinatura de espelhos. O DOM vivo, o HTML do servidor e o
+React do oráculo são espelhos do mesmo modelo. `chavesMutaveis(programa)` é a análise estática de tudo o que a página pode
+mudar (ações `definir`/`executar`, inclusive em `depois`/`emErro`, e dados em streaming).
+
+## Hidratação e poda
+- **Adotar, não recriar**: o construtor emite nós em ordem de documento por um `Pos`, que ou cria ou adota o nó que o
+  servidor já pôs (`hidrata: true`). O mesmo código serve aos dois. O HTML do servidor vem de `compilaHtmlVivo` (emissores
+  derivados dos MESMOS descritores DOM + marcadores `<!---->` de `se`/`repetir`/item). Divergência (tag errada, nó
+  sobrando/faltando, marcador trocado) é detectada, avisada por `onErro` (`hidratacao`) e a página é reconstruída.
+- **Mundo fechado** (`fechado: true`): só as chaves de `chavesMutaveis` aceitam `despacha` externo, e subárvores cujas
+  dependências não cruzam com elas **não ganham controlador** (`diagnostico().controladores`). Props constantes de um
+  composto tornam seu modelo interno estático; lista constante torna os itens estáticos.

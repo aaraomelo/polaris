@@ -17,7 +17,7 @@ export type Componentes = Record<string, Componente | ComponenteLazy>
 
 export type ErroRuntime = {
   caminho: string
-  regra: 'componente-ausente' | 'bloco-ausente' | 'codigo' | 'limite' | 'render' | 'acao' | 'dados' | 'navegacao'
+  regra: 'componente-ausente' | 'bloco-ausente' | 'codigo' | 'limite' | 'render' | 'acao' | 'dados' | 'navegacao' | 'hidratacao'
   mensagem: string
 }
 

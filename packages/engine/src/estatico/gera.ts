@@ -30,7 +30,7 @@ const LIMITE_ITERACOES = 1000
 const LIMITE_PROFUNDIDADE = 200
 const chave = (k: string) => (k === '__proto__' ? '["__proto__"]' : JSON.stringify(k)) // literal {"__proto__": v} mudaria o protótipo
 
-type Ctx = { exprs: Fn[]; emissoresUsados: Array<(e: never) => string>; porNome: Map<string, number>; blocos: Map<string, string>; fontesBlocos: string[]; motivos: Motivo[]; programa: Programa; emissores: Emissores; funcoes: Funcoes }
+type Ctx = { marc: boolean; exprs: Fn[]; emissoresUsados: Array<(e: never) => string>; porNome: Map<string, number>; blocos: Map<string, string>; fontesBlocos: string[]; motivos: Motivo[]; programa: Programa; emissores: Emissores; funcoes: Funcoes }
 
 const expr = (c: Ctx, ast: Parameters<typeof compilaExpr>[0]): string => { c.exprs.push(compilaExpr(ast, c.funcoes)); return `E[${c.exprs.length - 1}]` }
 
@@ -47,7 +47,7 @@ function valor(c: Ctx, v: Valor): string {
 const concat = (partes: string[]) => (partes.length ? '(' + partes.join('+') + ')' : '""')
 
 function emissorDe(c: Ctx, el: IRElemento): number | null {
-  for (const i of el.bloco.cadeia) if (INTERATIVOS.has(i)) { c.motivos.push({ caminho: el.caminho, motivo: `o bloco '${i}' é interativo (precisa de JavaScript no cliente)` }); return null }
+  for (const i of el.bloco.cadeia) if (!c.marc && INTERATIVOS.has(i)) { c.motivos.push({ caminho: el.caminho, motivo: `o bloco '${i}' é interativo (precisa de JavaScript no cliente)` }); return null }
   const iface = el.bloco.cadeia.find((i) => c.emissores[i])
   if (!iface) { c.motivos.push({ caminho: el.caminho, motivo: `o bloco '${el.bloco.interface}' não tem emissor estático` }); return null }
   let k = c.porNome.get(iface)
@@ -68,7 +68,7 @@ function funcaoDoBloco(c: Ctx, iface: string, caminho: string): string | null {
 }
 
 function elemento(c: Ctx, el: IRElemento): string {
-  if (el.eventos && Object.keys(el.eventos).length) c.motivos.push({ caminho: el.caminho, motivo: 'tem eventos (precisa de JavaScript no cliente)' })
+  if (!c.marc && el.eventos && Object.keys(el.eventos).length) c.motivos.push({ caminho: el.caminho, motivo: 'tem eventos (precisa de JavaScript no cliente)' })
   if (el.aguarda?.length) c.motivos.push({ caminho: el.caminho, motivo: 'usa dado em streaming' })
   if (el.esqueleto) c.motivos.push({ caminho: el.caminho, motivo: 'tem esqueleto (streaming)' })
   const props = '{' + Object.entries(el.props).map(([k, v]) => `${chave(k)}:${valor(c, v)}`).join(',') + '}'
@@ -83,18 +83,19 @@ function elemento(c: Ctx, el: IRElemento): string {
   const k = emissorDe(c, el)
   if (k === null) return '""'
   const filhos = '{' + Object.entries(el.slots).map(([nome, lista]) => `${chave(nome)}:${concat(lista.map((n) => nodo(c, n)))}`).join(',') + '}'
-  return `X.e[${k}]({props:${props},filhos:${filhos},id:${el.id === undefined ? 'undefined' : JSON.stringify(el.id)}})`
+  const chamada = `X.e[${k}]({props:${props},filhos:${filhos},id:${el.id === undefined ? 'undefined' : JSON.stringify(el.id)}})`
+  return c.marc ? `(${chamada} || "<!---->")` : chamada
 }
 
 function nodo(c: Ctx, n: IRNo): string {
   let out = n.tipo === 'slot' ? `X.slot(host, ${JSON.stringify(n.nome)})` : elemento(c, n)
   if (n.repetir) out = `X.rep(${expr(c, n.repetir.cada)}(esc), ${JSON.stringify(n.repetir.como)}, esc, (esc) => ${out}, R, ${JSON.stringify(n.caminho)})`
-  if (n.se) out = `(X.v(${expr(c, n.se)}(esc)) ? ${out} : "")`
+  if (n.se) out = c.marc ? `("<!---->" + (X.v(${expr(c, n.se)}(esc)) ? ${out} : "") + "<!---->")` : `(X.v(${expr(c, n.se)}(esc)) ? ${out} : "")`
   return out
 }
 
 /** Roteiro de tempo de execução usado pelo código gerado. */
-function runtime(emissores: Array<(e: never) => string>) {
+function runtime(emissores: Array<(e: never) => string>, marc: boolean) {
   return {
     t: paraTexto,
     v: verdadeiro,
@@ -102,18 +103,18 @@ function runtime(emissores: Array<(e: never) => string>) {
     host: (entradas: Array<[string, () => string]>) => { const h = Object.create(null) as Record<string, () => string>; for (const [k, f] of entradas) h[k] = f; return h },
     slot: (host: Record<string, () => string> | null, nome: string) => (host !== null && host[nome] ? host[nome]!() : ''),
     rep: (lista: unknown, como: string, esc: Escopo, f: (e: Escopo) => string, R: ((e: ErroRuntime) => void) | null, caminho: string): string => {
-      if (!Array.isArray(lista)) return ''
+      if (!Array.isArray(lista)) return marc ? '<!----><!---->' : ''
       const n = lista.length > LIMITE_ITERACOES ? LIMITE_ITERACOES : lista.length
       if (lista.length > LIMITE_ITERACOES) R?.({ caminho, regra: 'limite', mensagem: `repetir com ${lista.length} itens; renderizando os primeiros ${LIMITE_ITERACOES}` })
-      let r = ''
-      for (let i = 0; i < n; i++) r += f({ ...esc, [como]: lista[i], indice: i })
-      return r
+      let r = marc ? '<!---->' : ''
+      for (let i = 0; i < n; i++) r += marc ? '<!---->' + f({ ...esc, [como]: lista[i], indice: i }) + '<!---->' : f({ ...esc, [como]: lista[i], indice: i })
+      return marc ? r + '<!---->' : r
     },
   }
 }
 
-export function geraEstatico(programa: Programa, emissores: Emissores, funcoes: Funcoes = FUNCOES_PADRAO): { ok: true; estatico: Estatico } | { ok: false; motivos: Motivo[] } {
-  const c: Ctx = { exprs: [], emissoresUsados: [], porNome: new Map(), blocos: new Map(), fontesBlocos: [], motivos: [], programa, emissores, funcoes }
+export function geraEstatico(programa: Programa, emissores: Emissores, funcoes: Funcoes = FUNCOES_PADRAO, marc = false): { ok: true; estatico: Estatico } | { ok: false; motivos: Motivo[] } {
+  const c: Ctx = { marc, exprs: [], emissoresUsados: [], porNome: new Map(), blocos: new Map(), fontesBlocos: [], motivos: [], programa, emissores, funcoes }
   for (const [nome, d] of Object.entries(programa.pagina.dados)) if (d.stream) c.motivos.push({ caminho: `/spec/dados/${nome}`, motivo: 'dado em streaming' })
   const raiz = nodo(c, programa.pagina.raiz)
   const titulo = programa.pagina.titulo ? valor(c, programa.pagina.titulo) : '""'
@@ -125,7 +126,7 @@ export function geraEstatico(programa: Programa, emissores: Emissores, funcoes: 
     `function titulo(esc) { const v = ${titulo}; return v === null || v === undefined || typeof v === "object" ? "" : String(v) }`,
     'return { render: render, titulo: titulo };',
   ].join('\n')
-  const X = runtime(c.emissoresUsados)
+  const X = runtime(c.emissoresUsados, marc)
   const f = new Function('E', 'X', fonte) as (E: Fn[], X: unknown) => { render: Estatico['render']; titulo: Estatico['titulo'] }
   return { ok: true, estatico: { fonte, ...f(c.exprs, X) } }
 }
