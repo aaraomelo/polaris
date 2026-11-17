@@ -1,0 +1,25 @@
+{
+  "_": "Orçamento de performance do runtime. Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
+  "bundle_gz_bytes": {
+    "estatica-simples": 11100,
+    "contador": 11400,
+    "lista-formatos": 11800,
+    "dinheiro-exato": 12000,
+    "com-bloco-de-codigo": 17300
+  },
+  "ssr_vivo_ms": {
+    "lista_900_cartoes_mediana": 120
+  },
+  "navegador": {
+    "_": "pior caso em 900 itens, CPU 4x + 4G lenta (1,6 Mbps/150 ms), headless; folga ~1,5x sobre o medido em 2026-11-17",
+    "tti_ms": 900,
+    "inp_pior_ms": {
+      "b-n": 56,
+      "b-um": 56,
+      "b-add": 72,
+      "b-rem": 72,
+      "b-inv": 150
+    },
+    "long_tasks_ms": 150
+  }
+}

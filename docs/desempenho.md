@@ -146,3 +146,10 @@ Custo em tamanho: +0,6 KB gz no cliente (o compilador é maior que o interpretad
 | INP, inverter a lista — React / vivo | 40 / 56 ms | 104 / 96 ms | 144 / **136** ms |
 
 **Leitura honesta.** Com CPU e rede limitadas, o ganho que antes era "indistinguível em localhost" aparece: o vivo fica interativo **2,4× mais cedo** (578 × 1411 ms) e todas as interações pequenas ficam abaixo de 50 ms de INP (limite "bom" é 200 ms) mesmo a 6×. O React já passa de 100 ms a 6× em inserir/remover. **Inverter a lista inteira é empate** (e no sem-limite o vivo é pior: 56 × 40 ms): é a operação limitada por estilo/layout do navegador, como no card do filtro. Limites: headless; throttling de CPU é emulado (não é um telefone); Event Timing só enxerga eventos ≥ 16 ms e tem resolução de 8 ms; sem o quadro de pintura final real. Repetir em aparelho físico continua sendo a medição definitiva.
+
+## Orçamento de performance (card 1dff4uhe35a)
+Metas versionadas em `packages/engine/orcamento.json`:
+- **Bundle por página** (gz; limite ~5% acima do medido): simples 11,1 KB, contador 11,4, lista com formatos 11,8, dinheiro exato 12,0, com bloco de código 17,3. Verificado por `test/orcamento.test.ts`, que roda com a suíte (CI): estourar = PR bloqueado.
+- **SSR do vivo**: HTML de 900 cartões, mediana ≤ 120 ms (mesmo teste).
+- **Navegador** (CPU 4× + 4G lenta, 900 itens): TTI ≤ 900 ms, long tasks ≤ 150 ms, INP pior caso por interação (≤ 56–72 ms; inverter ≤ 150). Verificado por `pnpm orcamento:navegador` (precisa de Chrome; fora do CI padrão). Medido em 2026-11-17: TTI 574–578 ms, long tasks 77–86 ms.
+Para subir um limite: justificar no PR e atualizar esta seção.

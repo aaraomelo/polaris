@@ -89,4 +89,17 @@ for (const p of PERFIS) {
     console.log(`${p.nome} | ${va}`, JSON.stringify(saida[`${p.nome} | ${va}`]))
   }
 }
+if (process.argv.includes('--verifica')) {
+  const { readFileSync } = await import('node:fs')
+  const orc = JSON.parse(readFileSync(new URL('../../orcamento.json', import.meta.url), 'utf8')).navegador
+  const falhas = []
+  for (const [k, r] of Object.entries(saida)) {
+    if (!k.includes('vivo') || !k.includes('CPU 4×')) continue
+    if (r.tti_ms > orc.tti_ms) falhas.push(`${k}: TTI ${r.tti_ms.toFixed(0)} > ${orc.tti_ms}`)
+    if (r.long_tasks_ms > orc.long_tasks_ms) falhas.push(`${k}: long tasks ${r.long_tasks_ms} > ${orc.long_tasks_ms}`)
+    for (const [id, lim] of Object.entries(orc.inp_pior_ms)) if (r.inp[id].max !== null && r.inp[id].max > lim) falhas.push(`${k}: INP ${id} ${r.inp[id].max} > ${lim}`)
+  }
+  console.log(falhas.length ? `ORÇAMENTO ESTOURADO:\n  ${falhas.join('\n  ')}` : 'orçamento de navegador: ok')
+  fim(); process.exit(falhas.length ? 1 : 0)
+}
 fim(); process.exit(0)
