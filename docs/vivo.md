@@ -23,7 +23,7 @@ estado (`test/vivo.test.tsx`: cenários, fuzz de sequências de ações, identid
 `test/vivo-lista.test.ts` prova o mínimo de movimentos por fuzz contra uma referência O(n²).
 
 ## Medido
-- Bundle: **~10 KB gz** (avaliador com a biblioteca de listas, modelo, ações, blocos base e o runtime), contra ~135 KB gz do `react-dom`. Guarda: `test/bundle.test.ts` (< 12 KB gz, sem React/Ajv/QuickJS). Era 7,5 KB no protótipo; o próximo corte é incluir só as funções que o programa usa.
+- Bundle: **~11,7 KB gz** (avaliador com listas e aritmética exata, modelo, ações, blocos base e o runtime), contra ~135 KB gz do `react-dom`. Guarda: `test/bundle.test.ts` (< 14 KB gz, sem React/Ajv/QuickJS). Era 7,5 KB no protótipo; o próximo corte é incluir só as funções que o programa usa.
 - `pnpm bench:vivo` (jsdom; números absolutos são pessimistas): mudar chave fora da lista ≈ 0,01–0,03 ms (independe do
   tamanho); alterar 1 item de 1000 ≈ 1,7 ms; inserir 1 no meio de 1000 cria 1 nó.
 

@@ -1,3 +1,4 @@
+import { FUNCOES_EXATAS } from './exato'
 import { LIMITES_EXPR, type Funcoes } from './tipos'
 
 // Biblioteca padrão: funções puras e totais (nunca lançam; entrada inválida → undefined ou texto vazio).
@@ -72,6 +73,7 @@ function canonico(v: unknown, prof = 0): string | null {
 const chavesOrdenadas = (o: Record<string, unknown>) => Object.keys(o).sort()
 
 export const FUNCOES_PADRAO: Funcoes = {
+  ...FUNCOES_EXATAS,
   igual: { min: 2, max: 2, fn: (a, b) => igualProfundo(a, b) },
   concat: { min: 1, max: 16, fn: (...ls) => {
     if (!ls.every(ehLista)) return undefined

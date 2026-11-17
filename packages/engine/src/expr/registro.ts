@@ -6,7 +6,7 @@
 // Uma função nova só entra em FUNCOES_PADRAO se tiver entrada aqui (teste de completude).
 // ---------------------------------------------------------------------------
 
-export type Gerador = 'texto' | 'numero' | 'inteiro' | 'escalar' | 'lista' | 'listas' | 'objeto' | 'qualquer'
+export type Gerador = 'texto' | 'numero' | 'inteiro' | 'escalar' | 'lista' | 'listas' | 'objeto' | 'racional' | 'decimal' | 'qualquer'
 
 export type Exemplo = { expr: string; esc?: Record<string, unknown>; saida?: unknown; indefinido?: true }
 export type Lei = { expr: string; gera: Record<string, Gerador> }
@@ -190,6 +190,58 @@ export const REGISTRO: Def[] = [
   { nome: 'pct', tipo: 'funcao', assinatura: 'pct(x, casas = 0) → texto', descricao: 'Fração como porcentagem (0,256 → 25,6%).', exemplos: [{ expr: 'pct(0.256, 1)', saida: '25,6%' }, { expr: 'pct(0.5)', saida: '50%' }] },
   { nome: 'data', tipo: 'funcao', assinatura: 'data(x) → texto', descricao: 'Data em dd/mm/aaaa. "AAAA-MM-DD" puro não escorrega de dia; instantes usam o fuso de São Paulo.', exemplos: [{ expr: 'data("2026-06-08")', saida: '08/06/2026' }, { expr: 'data("lixo")', saida: '' }] },
   { nome: 'dataHora', tipo: 'funcao', assinatura: 'dataHora(x) → texto', descricao: 'Data e hora curtas no fuso de São Paulo (idêntico no servidor e no cliente).', exemplos: [{ expr: 'dataHora("2026-06-08T15:30:00Z")', saida: '08/06/2026, 12:30' }] },
+
+  // ---- aritmética exata (ℚ) -----------------------------------------------------
+  // Valores = TEXTO canônico: "12", "-3/4" (reduzido, denominador > 1). Entradas: inteiro, decimal ("12.34", "1e3"), fração ou número JS.
+  // Nada arredonda sozinho; ausente = entrada inválida, divisão por zero ou resultado acima de 1000 dígitos.
+  { nome: 'racional', tipo: 'funcao', assinatura: 'racional(x) → texto canônico', descricao: 'Normaliza para a CLASSE do número: fração reduzida, denominador positivo, inteiro sem "/1". Duas entradas que valem o mesmo número dão o MESMO texto, então `==` compara números exatos. Número JS entra pelo texto mais curto (0.1 vira 1/10).', exemplos: [
+    { expr: 'racional("2/4")', saida: '1/2' }, { expr: 'racional("0.50")', saida: '1/2' }, { expr: 'racional("1e3")', saida: '1000' }, { expr: 'racional(0.1)', saida: '1/10' }, { expr: 'racional("-0")', saida: '0' }, { expr: 'racional("6/-4")', indefinido: U }, { expr: 'racional("1/0")', indefinido: U }, { expr: 'racional("x")', indefinido: U },
+  ], leis: [{ expr: 'racional(racional(a)) == racional(a)', gera: { a: 'racional' } }, { expr: 'racional(qneg(qneg(a))) == racional(a)', gera: { a: 'racional' } }] },
+  { nome: 'qsoma', tipo: 'funcao', assinatura: 'qsoma(a, b, …) → racional   (1 a 16 operandos)', descricao: 'Soma exata (⊕ cruzado: a·d + b·c sobre b·d, reduzido). Qualquer operando inválido torna o resultado ausente.', exemplos: [
+    { expr: 'qsoma("0.1", "0.2")', saida: '3/10' }, { expr: 'qsoma("1/3", "1/6")', saida: '1/2' }, { expr: 'qsoma(1, 2, 3)', saida: '6' }, { expr: 'qsoma("0.1", "x")', indefinido: U },
+  ], leis: [
+    { expr: 'qsoma(a, b) == qsoma(b, a)', gera: { a: 'racional', b: 'racional' } }, { expr: 'qsoma(qsoma(a, b), c) == qsoma(a, qsoma(b, c))', gera: { a: 'racional', b: 'racional', c: 'racional' } },
+    { expr: 'qsoma(a, 0) == racional(a)', gera: { a: 'racional' } }, { expr: 'qsoma(a, qneg(a)) == "0"', gera: { a: 'racional' } },
+  ], naoLeis: ['Ao contrário de `+` (ponto flutuante), `qsoma` É associativa e exata: 0,1 + 0,2 = 3/10, sempre.'] },
+  { nome: 'qsub', tipo: 'funcao', assinatura: 'qsub(a, b) → racional', descricao: 'Diferença exata.', exemplos: [{ expr: 'qsub("1/2", "1/3")', saida: '1/6' }, { expr: 'qsub(5, 5)', saida: '0' }], leis: [{ expr: 'qsub(a, a) == "0"', gera: { a: 'racional' } }, { expr: 'qsoma(qsub(a, b), b) == racional(a)', gera: { a: 'racional', b: 'racional' } }] },
+  { nome: 'qmul', tipo: 'funcao', assinatura: 'qmul(a, b, …) → racional   (1 a 16 operandos)', descricao: 'Produto exato (⊗ por componentes: a·c sobre b·d, reduzido).', exemplos: [{ expr: 'qmul("2/3", "3/4")', saida: '1/2' }, { expr: 'qmul("0.1", "0.1")', saida: '1/100' }, { expr: 'qmul(1, 2, 3, 4)', saida: '24' }], leis: [
+    { expr: 'qmul(a, b) == qmul(b, a)', gera: { a: 'racional', b: 'racional' } }, { expr: 'qmul(qmul(a, b), c) == qmul(a, qmul(b, c))', gera: { a: 'racional', b: 'racional', c: 'racional' } },
+    { expr: 'qmul(a, 1) == racional(a)', gera: { a: 'racional' } }, { expr: 'qmul(a, 0) == "0"', gera: { a: 'racional' } },
+    { expr: 'qmul(a, qsoma(b, c)) == qsoma(qmul(a, b), qmul(a, c))', gera: { a: 'racional', b: 'racional', c: 'racional' } },
+  ] },
+  { nome: 'qdiv', tipo: 'funcao', assinatura: 'qdiv(a, b) → racional', descricao: 'Quociente exato. Divisão por zero é ausente: o preço do andar ℚ, que torna a divisão total exceto no zero.', exemplos: [{ expr: 'qdiv(1, 3)', saida: '1/3' }, { expr: 'qdiv(6, -4)', saida: '-3/2' }, { expr: 'qdiv(1, 0)', indefinido: U }], leis: [{ expr: 'racional(b) == "0" || qdiv(qmul(a, b), b) == racional(a)', gera: { a: 'racional', b: 'racional' } }] },
+  { nome: 'qresto', tipo: 'funcao', assinatura: 'qresto(a, b) → racional', descricao: 'Resto matemático a − b·⌊a/b⌋: tem o sinal de `b` (diferente de `%`, que tem o do dividendo). Vale para racionais.', exemplos: [{ expr: 'qresto(7, 3)', saida: '1' }, { expr: 'qresto(-7, 3)', saida: '2' }, { expr: 'qresto(7, -3)', saida: '-2' }, { expr: 'qresto("5.5", 2)', saida: '3/2' }, { expr: 'qresto(1, 0)', indefinido: U }], leis: [{ expr: 'racional(b) == "0" || qcmp(qresto(a, b), 0) == 0 || qcmp(qresto(a, b), 0) == qcmp(b, 0)', gera: { a: 'racional', b: 'racional' } }] },
+  { nome: 'qneg', tipo: 'funcao', assinatura: 'qneg(x) → racional', descricao: 'Oposto exato do número (zero continua zero, sem sinal).', exemplos: [{ expr: 'qneg("1/2")', saida: '-1/2' }, { expr: 'qneg(0)', saida: '0' }] },
+  { nome: 'qabs', tipo: 'funcao', assinatura: 'qabs(x) → racional', descricao: 'Valor absoluto.', exemplos: [{ expr: 'qabs("-3/4")', saida: '3/4' }], leis: [{ expr: 'qcmp(qabs(a), 0) >= 0', gera: { a: 'racional' } }, { expr: 'qabs(qmul(a, b)) == qmul(qabs(a), qabs(b))', gera: { a: 'racional', b: 'racional' } }] },
+  { nome: 'qcmp', tipo: 'funcao', assinatura: 'qcmp(a, b) → -1 | 0 | 1', descricao: 'Compara SEM dividir (produto cruzado a·d × c·b). Ordem total.', exemplos: [{ expr: 'qcmp("1/3", "0.33")', saida: 1 }, { expr: 'qcmp("1/2", "0.5")', saida: 0 }, { expr: 'qcmp(1, 2)', saida: -1 }], leis: [
+    { expr: 'qcmp(a, b) == -qcmp(b, a)', gera: { a: 'racional', b: 'racional' } }, { expr: 'qcmp(a, a) == 0', gera: { a: 'racional' } },
+    { expr: '!(qcmp(a, b) < 0 && qcmp(b, c) < 0) || qcmp(a, c) < 0', gera: { a: 'racional', b: 'racional', c: 'racional' } },
+    { expr: '!(qcmp(a, b) < 0) || qcmp(qsoma(a, c), qsoma(b, c)) < 0', gera: { a: 'racional', b: 'racional', c: 'racional' } },
+    { expr: '(qcmp(a, b) == 0) == (racional(a) == racional(b))', gera: { a: 'racional', b: 'racional' } },
+  ] },
+  { nome: 'qpot', tipo: 'funcao', assinatura: 'qpot(x, k) → racional   (k inteiro, |k| ≤ 1000)', descricao: 'Potência inteira exata; expoente negativo inverte (base zero é ausente). Resultado acima do teto de 1000 dígitos é ausente (cortado ANTES de calcular).', exemplos: [{ expr: 'qpot(2, 10)', saida: '1024' }, { expr: 'qpot("2/3", 2)', saida: '4/9' }, { expr: 'qpot(2, -2)', saida: '1/4' }, { expr: 'qpot(10, 1000)', indefinido: U }, { expr: 'qpot(0, -1)', indefinido: U }], leis: [{ expr: 'qpot(a, 0) == "1"', gera: { a: 'racional' } }, { expr: 'qmul(qpot(a, 2), qpot(a, 3)) == qpot(a, 5)', gera: { a: 'racional' } }] },
+  { nome: 'qpiso', tipo: 'funcao', assinatura: 'qpiso(x) → inteiro (texto)', descricao: 'Maior inteiro ≤ x, sem passar por double.', exemplos: [{ expr: 'qpiso("7/2")', saida: '3' }, { expr: 'qpiso("-7/2")', saida: '-4' }], leis: [{ expr: 'qcmp(qpiso(a), a) <= 0 && qcmp(a, qsoma(qpiso(a), 1)) < 0', gera: { a: 'racional' } }] },
+  { nome: 'qnumerador', tipo: 'funcao', assinatura: 'qnumerador(x) → inteiro (texto)', descricao: 'Numerador da classe reduzida (leva o sinal).', exemplos: [{ expr: 'qnumerador("6/4")', saida: '3' }, { expr: 'qnumerador("-0.5")', saida: '-1' }] },
+  { nome: 'qdenominador', tipo: 'funcao', assinatura: 'qdenominador(x) → inteiro (texto)', descricao: 'Denominador da classe reduzida (sempre positivo; 1 para inteiros).', exemplos: [{ expr: 'qdenominador("6/4")', saida: '2' }, { expr: 'qdenominador(5)', saida: '1' }], leis: [{ expr: 'qdiv(qnumerador(a), qdenominador(a)) == racional(a)', gera: { a: 'racional' } }] },
+  { nome: 'qmdc', tipo: 'funcao', assinatura: 'qmdc(a, b) → inteiro (texto)', descricao: 'Máximo divisor comum de DOIS INTEIROS (racional não inteiro é ausente). mdc(0, 0) = 0.', exemplos: [{ expr: 'qmdc(12, 18)', saida: '6' }, { expr: 'qmdc(0, 0)', saida: '0' }, { expr: 'qmdc("1/2", 2)', indefinido: U }, { expr: 'qmdc(-4, 6)', saida: '2' }] },
+  { nome: 'qmmc', tipo: 'funcao', assinatura: 'qmmc(a, b) → inteiro (texto)', descricao: 'Mínimo múltiplo comum de dois inteiros (zero se algum for zero).', exemplos: [{ expr: 'qmmc(4, 6)', saida: '12' }, { expr: 'qmmc(0, 5)', saida: '0' }], leis: [{ expr: 'qmul(qmdc(a, b), qmmc(a, b)) == qabs(qmul(a, b))', gera: { a: 'inteiro', b: 'inteiro' } }] },
+  { nome: 'qmin', tipo: 'funcao', assinatura: 'qmin(a, b, …) → racional', descricao: 'Menor dos operandos, exato.', exemplos: [{ expr: 'qmin("1/2", "1/3")', saida: '1/3' }], leis: [{ expr: 'qcmp(qmin(a, b), qmax(a, b)) <= 0', gera: { a: 'racional', b: 'racional' } }] },
+  { nome: 'qmax', tipo: 'funcao', assinatura: 'qmax(a, b, …) → racional', descricao: 'Maior dos operandos, exato.', exemplos: [{ expr: 'qmax("1/2", "1/3")', saida: '1/2' }] },
+  { nome: 'qdec', tipo: 'funcao', assinatura: 'qdec(x, casas = 2, modo = "longe") → texto decimal', descricao: 'ÚNICO lugar onde se arredonda: texto decimal com exatamente `casas` (0 a 100) dígitos fracionários. Modos: `longe` (meio para longe do zero: arredondamento comercial), `par` (meio para o par), `zero` (trunca), `baixo` (⌊⌋), `cima` (⌈⌉). Sem passar por double: 2.675 → 2.68 (o toFixed do JavaScript dá 2.67).', exemplos: [
+    { expr: 'qdec("1/3", 4)', saida: '0.3333' }, { expr: 'qdec("2.675", 2)', saida: '2.68' }, { expr: 'qdec("2.665", 2, "par")', saida: '2.66' }, { expr: 'qdec("2.665", 2)', saida: '2.67' },
+    { expr: 'qdec("-2.5", 0, "baixo")', saida: '-3' }, { expr: 'qdec("-2.5", 0, "cima")', saida: '-2' }, { expr: 'qdec("-2.5", 0, "zero")', saida: '-2' }, { expr: 'qdec("-2.5", 0)', saida: '-3' },
+    { expr: 'qdec("-0.001", 2)', saida: '0.00' }, { expr: 'qdec(5)', saida: '5.00' }, { expr: 'qdec(1, 2, "xx")', indefinido: U }, { expr: 'qdec(1, 101)', indefinido: U },
+  ], leis: [
+    { expr: 'qcmp(qdec(a, absoluto(k) % 8, "baixo"), a) <= 0', gera: { a: 'racional', k: 'inteiro' } }, { expr: 'qcmp(qdec(a, absoluto(k) % 8, "cima"), a) >= 0', gera: { a: 'racional', k: 'inteiro' } },
+    { expr: 'qcmp(qabs(qsub(qdec(a, absoluto(k) % 8), a)), qdiv(1, qmul(2, qpot(10, absoluto(k) % 8)))) <= 0', gera: { a: 'racional', k: 'inteiro' } },
+    { expr: 'qcmp(qabs(qsub(qdec(a, absoluto(k) % 8, "par"), a)), qdiv(1, qmul(2, qpot(10, absoluto(k) % 8)))) <= 0', gera: { a: 'racional', k: 'inteiro' } },
+    { expr: 'qcmp(qabs(qsub(qdec(a, absoluto(k) % 8, "zero"), a)), qdiv(1, qpot(10, absoluto(k) % 8))) < 0', gera: { a: 'racional', k: 'inteiro' } },
+    { expr: 'qdec(qdec(a, absoluto(k) % 8, "par"), absoluto(k) % 8, "par") == qdec(a, absoluto(k) % 8, "par")', gera: { a: 'racional', k: 'inteiro' } },
+    { expr: 'racional(qdec(a, 4)) == racional(a)', gera: { a: 'decimal' } },
+  ] },
+  { nome: 'qformata', tipo: 'funcao', assinatura: 'qformata(x, casas = 2, modo = "longe") → texto pt-BR', descricao: 'Como `qdec`, formatado em pt-BR (milhar com ponto, decimal com vírgula), exato e sem Intl.', exemplos: [{ expr: 'qformata("1234567.891")', saida: '1.234.567,89' }, { expr: 'qformata("-1234.5")', saida: '-1.234,50' }, { expr: 'qformata("0.5", 0, "par")', saida: '0' }] },
+  { nome: 'qbrl', tipo: 'funcao', assinatura: 'qbrl(x) → texto', descricao: 'Reais com 2 casas, arredondamento comercial (`longe`), exato. Igual a `brl` onde o double é exato; correto onde o double não é.', exemplos: [{ expr: 'qbrl("1234.5")', saida: 'R$ 1.234,50' }, { expr: 'qbrl("-0.005")', saida: '-R$ 0,01' }, { expr: 'qbrl("0.1") == brl(0.1)', saida: true }], leis: [{ expr: 'qbrl(a) == brl(qnum(qdec(a, 2)))', gera: { a: 'decimal' } }] },
+  { nome: 'qnum', tipo: 'funcao', assinatura: 'qnum(x) → número', descricao: 'Aproximação em double (arredondada corretamente quando numerador e denominador cabem em 53 bits). Use só para exibir ou desenhar; nunca para calcular dinheiro.', exemplos: [{ expr: 'qnum("1/4")', saida: 0.25 }, { expr: 'qnum("1/3")', saida: 1 / 3 }] },
 ]
 
 export const defDe = (nome: string): Def | undefined => REGISTRO.find((d) => d.nome === nome)

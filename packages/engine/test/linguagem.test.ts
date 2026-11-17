@@ -39,6 +39,19 @@ describe('registro: a documentação é a fonte e não mente', () => {
     escalar: () => pick([null, true, false, 0, 1, -3, 2.5, '', 'a', 'texto', ' x ', 7]),
     lista: () => Array.from({ length: ri(7) }, () => ri(9) - 3),
     listas: () => Array.from({ length: ri(4) }, () => (rnd() < 0.8 ? Array.from({ length: ri(4) }, () => ri(5)) : ri(5))),
+    racional: () => {
+      const dig = (n: number) => Array.from({ length: 1 + ri(n) }, () => ri(10)).join('')
+      const sinal = () => (rnd() < 0.4 ? '-' : '')
+      switch (ri(6)) {
+        case 0: return `${sinal()}${dig(3)}`
+        case 1: return `${sinal()}${dig(4)}.${dig(4)}`
+        case 2: return `${sinal()}${dig(3)}/${1 + ri(40)}`
+        case 3: return `${sinal()}${dig(30)}`
+        case 4: return `${sinal()}${dig(2)}e${ri(8) - 3}`
+        default: return ri(2001) - 1000
+      }
+    },
+    decimal: () => `${rnd() < 0.4 ? '-' : ''}${ri(100000)}.${String(ri(10000)).padStart(1 + ri(4), '0').slice(-4)}`.replace(/\.$/, ''),
     objeto: () => Object.fromEntries(Array.from({ length: ri(4) }, () => [pick(['a', 'b', 'c', 'k-1', '__proto__', 'ç']), pick([0, 1, 'x', null, true])])),
     qualquer: () => pick([null, undefined, true, false, 0, 1, -2, 3.5, '', 'a', [], [0], {}, { a: 1 }]),
   }

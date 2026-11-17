@@ -969,3 +969,331 @@ Data e hora curtas no fuso de São Paulo (idêntico no servidor e no cliente).
 | Expressão | Escopo | Resultado |
 |---|---|---|
 | `dataHora("2026-06-08T15:30:00Z")` |  | `"08/06/2026, 12:30"` |
+
+### `racional`
+
+`racional(x) → texto canônico`
+
+Normaliza para a CLASSE do número: fração reduzida, denominador positivo, inteiro sem "/1". Duas entradas que valem o mesmo número dão o MESMO texto, então `==` compara números exatos. Número JS entra pelo texto mais curto (0.1 vira 1/10).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `racional("2/4")` |  | `"1/2"` |
+| `racional("0.50")` |  | `"1/2"` |
+| `racional("1e3")` |  | `"1000"` |
+| `racional(0.1)` |  | `"1/10"` |
+| `racional("-0")` |  | `"0"` |
+| `racional("6/-4")` |  | _(ausente)_ |
+| `racional("1/0")` |  | _(ausente)_ |
+| `racional("x")` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `racional(racional(a)) == racional(a)`
+- `racional(qneg(qneg(a))) == racional(a)`
+
+### `qsoma`
+
+`qsoma(a, b, …) → racional   (1 a 16 operandos)`
+
+Soma exata (⊕ cruzado: a·d + b·c sobre b·d, reduzido). Qualquer operando inválido torna o resultado ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qsoma("0.1", "0.2")` |  | `"3/10"` |
+| `qsoma("1/3", "1/6")` |  | `"1/2"` |
+| `qsoma(1, 2, 3)` |  | `"6"` |
+| `qsoma("0.1", "x")` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `qsoma(a, b) == qsoma(b, a)`
+- `qsoma(qsoma(a, b), c) == qsoma(a, qsoma(b, c))`
+- `qsoma(a, 0) == racional(a)`
+- `qsoma(a, qneg(a)) == "0"`
+
+**Não vale:**
+- Ao contrário de `+` (ponto flutuante), `qsoma` É associativa e exata: 0,1 + 0,2 = 3/10, sempre.
+
+### `qsub`
+
+`qsub(a, b) → racional`
+
+Diferença exata.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qsub("1/2", "1/3")` |  | `"1/6"` |
+| `qsub(5, 5)` |  | `"0"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qsub(a, a) == "0"`
+- `qsoma(qsub(a, b), b) == racional(a)`
+
+### `qmul`
+
+`qmul(a, b, …) → racional   (1 a 16 operandos)`
+
+Produto exato (⊗ por componentes: a·c sobre b·d, reduzido).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qmul("2/3", "3/4")` |  | `"1/2"` |
+| `qmul("0.1", "0.1")` |  | `"1/100"` |
+| `qmul(1, 2, 3, 4)` |  | `"24"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qmul(a, b) == qmul(b, a)`
+- `qmul(qmul(a, b), c) == qmul(a, qmul(b, c))`
+- `qmul(a, 1) == racional(a)`
+- `qmul(a, 0) == "0"`
+- `qmul(a, qsoma(b, c)) == qsoma(qmul(a, b), qmul(a, c))`
+
+### `qdiv`
+
+`qdiv(a, b) → racional`
+
+Quociente exato. Divisão por zero é ausente: o preço do andar ℚ, que torna a divisão total exceto no zero.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qdiv(1, 3)` |  | `"1/3"` |
+| `qdiv(6, -4)` |  | `"-3/2"` |
+| `qdiv(1, 0)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `racional(b) == "0" || qdiv(qmul(a, b), b) == racional(a)`
+
+### `qresto`
+
+`qresto(a, b) → racional`
+
+Resto matemático a − b·⌊a/b⌋: tem o sinal de `b` (diferente de `%`, que tem o do dividendo). Vale para racionais.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qresto(7, 3)` |  | `"1"` |
+| `qresto(-7, 3)` |  | `"2"` |
+| `qresto(7, -3)` |  | `"-2"` |
+| `qresto("5.5", 2)` |  | `"3/2"` |
+| `qresto(1, 0)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `racional(b) == "0" || qcmp(qresto(a, b), 0) == 0 || qcmp(qresto(a, b), 0) == qcmp(b, 0)`
+
+### `qneg`
+
+`qneg(x) → racional`
+
+Oposto exato do número (zero continua zero, sem sinal).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qneg("1/2")` |  | `"-1/2"` |
+| `qneg(0)` |  | `"0"` |
+
+### `qabs`
+
+`qabs(x) → racional`
+
+Valor absoluto.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qabs("-3/4")` |  | `"3/4"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qcmp(qabs(a), 0) >= 0`
+- `qabs(qmul(a, b)) == qmul(qabs(a), qabs(b))`
+
+### `qcmp`
+
+`qcmp(a, b) → -1 | 0 | 1`
+
+Compara SEM dividir (produto cruzado a·d × c·b). Ordem total.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qcmp("1/3", "0.33")` |  | `1` |
+| `qcmp("1/2", "0.5")` |  | `0` |
+| `qcmp(1, 2)` |  | `-1` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qcmp(a, b) == -qcmp(b, a)`
+- `qcmp(a, a) == 0`
+- `!(qcmp(a, b) < 0 && qcmp(b, c) < 0) || qcmp(a, c) < 0`
+- `!(qcmp(a, b) < 0) || qcmp(qsoma(a, c), qsoma(b, c)) < 0`
+- `(qcmp(a, b) == 0) == (racional(a) == racional(b))`
+
+### `qpot`
+
+`qpot(x, k) → racional   (k inteiro, |k| ≤ 1000)`
+
+Potência inteira exata; expoente negativo inverte (base zero é ausente). Resultado acima do teto de 1000 dígitos é ausente (cortado ANTES de calcular).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qpot(2, 10)` |  | `"1024"` |
+| `qpot("2/3", 2)` |  | `"4/9"` |
+| `qpot(2, -2)` |  | `"1/4"` |
+| `qpot(10, 1000)` |  | _(ausente)_ |
+| `qpot(0, -1)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `qpot(a, 0) == "1"`
+- `qmul(qpot(a, 2), qpot(a, 3)) == qpot(a, 5)`
+
+### `qpiso`
+
+`qpiso(x) → inteiro (texto)`
+
+Maior inteiro ≤ x, sem passar por double.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qpiso("7/2")` |  | `"3"` |
+| `qpiso("-7/2")` |  | `"-4"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qcmp(qpiso(a), a) <= 0 && qcmp(a, qsoma(qpiso(a), 1)) < 0`
+
+### `qnumerador`
+
+`qnumerador(x) → inteiro (texto)`
+
+Numerador da classe reduzida (leva o sinal).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qnumerador("6/4")` |  | `"3"` |
+| `qnumerador("-0.5")` |  | `"-1"` |
+
+### `qdenominador`
+
+`qdenominador(x) → inteiro (texto)`
+
+Denominador da classe reduzida (sempre positivo; 1 para inteiros).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qdenominador("6/4")` |  | `"2"` |
+| `qdenominador(5)` |  | `"1"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qdiv(qnumerador(a), qdenominador(a)) == racional(a)`
+
+### `qmdc`
+
+`qmdc(a, b) → inteiro (texto)`
+
+Máximo divisor comum de DOIS INTEIROS (racional não inteiro é ausente). mdc(0, 0) = 0.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qmdc(12, 18)` |  | `"6"` |
+| `qmdc(0, 0)` |  | `"0"` |
+| `qmdc("1/2", 2)` |  | _(ausente)_ |
+| `qmdc(-4, 6)` |  | `"2"` |
+
+### `qmmc`
+
+`qmmc(a, b) → inteiro (texto)`
+
+Mínimo múltiplo comum de dois inteiros (zero se algum for zero).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qmmc(4, 6)` |  | `"12"` |
+| `qmmc(0, 5)` |  | `"0"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qmul(qmdc(a, b), qmmc(a, b)) == qabs(qmul(a, b))`
+
+### `qmin`
+
+`qmin(a, b, …) → racional`
+
+Menor dos operandos, exato.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qmin("1/2", "1/3")` |  | `"1/3"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qcmp(qmin(a, b), qmax(a, b)) <= 0`
+
+### `qmax`
+
+`qmax(a, b, …) → racional`
+
+Maior dos operandos, exato.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qmax("1/2", "1/3")` |  | `"1/2"` |
+
+### `qdec`
+
+`qdec(x, casas = 2, modo = "longe") → texto decimal`
+
+ÚNICO lugar onde se arredonda: texto decimal com exatamente `casas` (0 a 100) dígitos fracionários. Modos: `longe` (meio para longe do zero: arredondamento comercial), `par` (meio para o par), `zero` (trunca), `baixo` (⌊⌋), `cima` (⌈⌉). Sem passar por double: 2.675 → 2.68 (o toFixed do JavaScript dá 2.67).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qdec("1/3", 4)` |  | `"0.3333"` |
+| `qdec("2.675", 2)` |  | `"2.68"` |
+| `qdec("2.665", 2, "par")` |  | `"2.66"` |
+| `qdec("2.665", 2)` |  | `"2.67"` |
+| `qdec("-2.5", 0, "baixo")` |  | `"-3"` |
+| `qdec("-2.5", 0, "cima")` |  | `"-2"` |
+| `qdec("-2.5", 0, "zero")` |  | `"-2"` |
+| `qdec("-2.5", 0)` |  | `"-3"` |
+| `qdec("-0.001", 2)` |  | `"0.00"` |
+| `qdec(5)` |  | `"5.00"` |
+| `qdec(1, 2, "xx")` |  | _(ausente)_ |
+| `qdec(1, 101)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `qcmp(qdec(a, absoluto(k) % 8, "baixo"), a) <= 0`
+- `qcmp(qdec(a, absoluto(k) % 8, "cima"), a) >= 0`
+- `qcmp(qabs(qsub(qdec(a, absoluto(k) % 8), a)), qdiv(1, qmul(2, qpot(10, absoluto(k) % 8)))) <= 0`
+- `qcmp(qabs(qsub(qdec(a, absoluto(k) % 8, "par"), a)), qdiv(1, qmul(2, qpot(10, absoluto(k) % 8)))) <= 0`
+- `qcmp(qabs(qsub(qdec(a, absoluto(k) % 8, "zero"), a)), qdiv(1, qpot(10, absoluto(k) % 8))) < 0`
+- `qdec(qdec(a, absoluto(k) % 8, "par"), absoluto(k) % 8, "par") == qdec(a, absoluto(k) % 8, "par")`
+- `racional(qdec(a, 4)) == racional(a)`
+
+### `qformata`
+
+`qformata(x, casas = 2, modo = "longe") → texto pt-BR`
+
+Como `qdec`, formatado em pt-BR (milhar com ponto, decimal com vírgula), exato e sem Intl.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qformata("1234567.891")` |  | `"1.234.567,89"` |
+| `qformata("-1234.5")` |  | `"-1.234,50"` |
+| `qformata("0.5", 0, "par")` |  | `"0"` |
+
+### `qbrl`
+
+`qbrl(x) → texto`
+
+Reais com 2 casas, arredondamento comercial (`longe`), exato. Igual a `brl` onde o double é exato; correto onde o double não é.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qbrl("1234.5")` |  | `"R$ 1.234,50"` |
+| `qbrl("-0.005")` |  | `"-R$ 0,01"` |
+| `qbrl("0.1") == brl(0.1)` |  | `true` |
+
+**Leis** (testadas com entradas aleatórias):
+- `qbrl(a) == brl(qnum(qdec(a, 2)))`
+
+### `qnum`
+
+`qnum(x) → número`
+
+Aproximação em double (arredondada corretamente quando numerador e denominador cabem em 53 bits). Use só para exibir ou desenhar; nunca para calcular dinheiro.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qnum("1/4")` |  | `0.25` |
+| `qnum("1/3")` |  | `0.3333333333333333` |
