@@ -132,6 +132,24 @@ describe('funções e formatadores', () => {
     expect(ev("data('lixo')", {})).toBe('')
   })
 
+  it('formatadores com Intl reaproveitado dão EXATAMENTE a saída do toLocaleString (a otimização não muda o resultado)', () => {
+    let seed = 5
+    const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)
+    const valores = [0, -0, 1, -1, 0.005, 1234.5, 1e9, -9876543.219, 1e21, 123456789.987654321, ...Array.from({ length: 300 }, () => (rnd() - 0.5) * 10 ** Math.floor(rnd() * 12))]
+    for (const v of valores) {
+      expect(ev('brl(v)', { v }), `brl ${v}`).toBe(v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+      for (const c of [0, 1, 2, 5]) {
+        expect(ev(`numero(v, ${c})`, { v }), `numero ${v}/${c}`).toBe(v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: c }))
+        expect(ev(`pct(v, ${c})`, { v }), `pct ${v}/${c}`).toBe((v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: c }) + '%')
+      }
+    }
+    for (const d of ['2026-06-08', '2020-02-29', '1999-12-31']) expect(ev('data(d)', { d })).toBe(new Date(`${d}T12:00:00Z`).toLocaleDateString('pt-BR', { timeZone: 'UTC' }))
+    for (const d of ['2026-06-08T02:00:00Z', '2026-12-31T23:59:59Z', '2026-01-01T00:00:00Z']) {
+      expect(ev('data(d)', { d })).toBe(new Date(d).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }))
+      expect(ev('dataHora(d)', { d })).toBe(new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' }))
+    }
+  })
+
   it('pipe é açúcar para chamada com o valor como 1º argumento', () => {
     expect(ev('produto.preco | brl', esc)).toBe('R$ 12,50')
     expect(ev('produto.preco | arredonda(0) | texto', esc)).toBe('13')

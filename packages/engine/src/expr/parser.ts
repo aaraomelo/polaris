@@ -1,4 +1,4 @@
-import { sugere } from '@polaris/schema'
+import { sugere } from '@polaris/schema/sugere'
 import { ExprErro, LIMITES_EXPR, type Bin, type Expr } from './tipos'
 
 type Tok = { k: 'num' | 'str' | 'id' | 'op' | 'fim'; v: string; pos: number }

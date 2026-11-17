@@ -14,6 +14,21 @@ const casas = (v: unknown, padrao: number) => { const n = aNum(v); return n === 
 
 const FUSO = 'America/Sao_Paulo'
 
+// Intl é caro de CRIAR (~33 µs por toLocaleString) e barato de USAR (~0,4 µs): os formatadores são criados uma vez.
+// A saída é idêntica à de toLocaleString com as mesmas opções.
+const nfCache = new Map<string, Intl.NumberFormat>()
+const nf = (chave: string, opcoes: Intl.NumberFormatOptions): Intl.NumberFormat => {
+  let f = nfCache.get(chave)
+  if (!f) { f = new Intl.NumberFormat('pt-BR', opcoes); nfCache.set(chave, f) }
+  return f
+}
+const dfCache = new Map<string, Intl.DateTimeFormat>()
+const df = (chave: string, opcoes: Intl.DateTimeFormatOptions): Intl.DateTimeFormat => {
+  let f = dfCache.get(chave)
+  if (!f) { f = new Intl.DateTimeFormat('pt-BR', opcoes); dfCache.set(chave, f) }
+  return f
+}
+
 function dataDe(v: unknown): Date | null {
   if (v === null || v === undefined || v === '') return null
   if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) return new Date(`${v}T12:00:00Z`) // data pura: meio-dia UTC não escorrega de dia
@@ -33,7 +48,7 @@ export const FUNCOES_PADRAO: Funcoes = {
   texto: { min: 1, max: 1, fn: (x) => txt(x) },
   numero: { min: 1, max: 2, fn: (x, c) => {
     const n = aNum(x)
-    return n === undefined ? '' : n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: casas(c, 0) })
+    return n === undefined ? '' : nf(`n${casas(c, 0)}`, { minimumFractionDigits: 0, maximumFractionDigits: casas(c, 0) }).format(n)
   } },
   arredonda: { min: 1, max: 2, fn: (x, c) => { const n = aNum(x); if (n === undefined) return undefined; const f = 10 ** casas(c, 0); return Math.round(n * f) / f } },
   piso: { min: 1, max: 1, fn: (x) => { const n = aNum(x); return n === undefined ? undefined : Math.floor(n) } },
@@ -43,8 +58,8 @@ export const FUNCOES_PADRAO: Funcoes = {
   maximo: { min: 1, max: 16, fn: (...xs) => { const ns = xs.map(aNum); return ns.some((n) => n === undefined) ? undefined : Math.max(...(ns as number[])) } },
   padrao: { min: 2, max: 2, fn: (x, d) => (x === null || x === undefined || x === '' ? d : x) },
   // formatadores
-  brl: { min: 1, max: 1, fn: (x) => { const n = aNum(x); return n === undefined ? '' : n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 }) } },
-  pct: { min: 1, max: 2, fn: (x, c) => { const n = aNum(x); return n === undefined ? '' : (n * 100).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: casas(c, 0) }) + '%' } },
-  data: { min: 1, max: 1, fn: (x) => { const d = dataDe(x); return d ? d.toLocaleDateString('pt-BR', { timeZone: typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) ? 'UTC' : FUSO }) : '' } },
-  dataHora: { min: 1, max: 1, fn: (x) => { const d = dataDe(x); return d ? d.toLocaleString('pt-BR', { timeZone: FUSO, dateStyle: 'short', timeStyle: 'short' }) : '' } },
+  brl: { min: 1, max: 1, fn: (x) => { const n = aNum(x); return n === undefined ? '' : nf('brl', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) } },
+  pct: { min: 1, max: 2, fn: (x, c) => { const n = aNum(x); return n === undefined ? '' : nf(`p${casas(c, 0)}`, { minimumFractionDigits: 0, maximumFractionDigits: casas(c, 0) }).format(n * 100) + '%' } },
+  data: { min: 1, max: 1, fn: (x) => { const d = dataDe(x); return d ? df(typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) ? 'dUTC' : 'dBR', { timeZone: typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) ? 'UTC' : FUSO }).format(d) : '' } },
+  dataHora: { min: 1, max: 1, fn: (x) => { const d = dataDe(x); return d ? df('dh', { timeZone: FUSO, dateStyle: 'short', timeStyle: 'short' }).format(d) : '' } },
 }

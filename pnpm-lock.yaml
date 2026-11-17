@@ -193,6 +193,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.3.0(@types/react@19.3.0)
+      esbuild:
+        specifier: 0.21.5
+        version: 0.21.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1

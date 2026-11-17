@@ -1,4 +1,4 @@
-import { sugere } from '@polaris/schema'
+import { sugere } from '@polaris/schema/sugere'
 import { FUNCOES_PADRAO } from './funcoes'
 import type { Expr, Funcoes } from './tipos'
 
