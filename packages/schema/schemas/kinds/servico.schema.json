@@ -29,6 +29,9 @@
           }
         },
         "additionalProperties": false
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
       }
     },
     "operacoes": {
@@ -72,6 +75,9 @@
           }
         },
         "additionalProperties": false
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
       }
     },
     "consome": {

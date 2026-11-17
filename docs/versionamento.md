@@ -21,3 +21,7 @@ Dois números distintos no envelope do nó:
 2. Escrever e registrar a migração N→N+1.
 3. Subir `ESQUEMA_ATUAL`.
 4. Adicionar `congelados/v<N+1>/`.
+
+## Emissões
+`emite(no, alvo)` (packages/schema/src/emissao.ts): json e js e tex em todos os kinds; css em tema; sql em servico; html em pagina.
+Mudar o formato de uma emissão é mudança observável (golden files em `test/emissao.test.ts`): atualize o teste de propósito.
