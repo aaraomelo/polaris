@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/servico/v1",
+  "title": "Microsserviço",
+  "required": [
+    "entidades",
+    "operacoes"
+  ],
+  "properties": {
+    "entidades": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "campos"
+        ],
+        "properties": {
+          "campos": {
+            "$ref": "polaris://comum/v1#/$defs/campos"
+          },
+          "indices": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "operacoes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "metodo",
+          "caminho"
+        ],
+        "properties": {
+          "metodo": {
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          },
+          "caminho": {
+            "type": "string",
+            "pattern": "^/"
+          },
+          "entrada": {
+            "$ref": "polaris://comum/v1#/$defs/campos"
+          },
+          "saida": {
+            "type": "string",
+            "description": "entidade ou evento"
+          },
+          "permissao": {
+            "type": "string"
+          },
+          "publica": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "eventos publicados"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "consome": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "eventos consumidos"
+    },
+    "multitenant": {
+      "const": true,
+      "default": true,
+      "description": "sempre true: toda entidade tem tenantId"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

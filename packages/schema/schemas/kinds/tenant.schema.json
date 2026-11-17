@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/tenant/v1",
+  "title": "Tenant",
+  "required": [
+    "alias",
+    "segmento"
+  ],
+  "properties": {
+    "alias": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$"
+    },
+    "nome": {
+      "type": "string"
+    },
+    "segmento": {
+      "enum": [
+        "varejo",
+        "servicos",
+        "alimentos",
+        "educacao",
+        "saude",
+        "outro"
+      ]
+    },
+    "modulos": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "tema": {
+      "type": "string"
+    },
+    "dominios": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "paginas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

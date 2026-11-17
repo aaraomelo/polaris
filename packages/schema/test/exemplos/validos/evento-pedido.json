@@ -1,0 +1,16 @@
+{
+  "kind": "evento",
+  "id": "pedido.criado",
+  "versao": "1.0.0",
+  "spec": {
+    "nome": "pedido.criado",
+    "produtor": "pedidos",
+    "payload": {
+      "pedidoId": {
+        "tipo": "uuid",
+        "obrigatorio": true
+      }
+    },
+    "idempotencia": "pedidoId"
+  }
+}

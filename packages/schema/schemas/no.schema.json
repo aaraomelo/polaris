@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://no/v1",
+  "title": "Nó Polaris",
+  "$comment": "Envelope único. O corpo (spec) é validado pelo schema do kind. Derivado do Schema U do Tiffany sem a cruz de duas metades (ver docs/estudo-schema-u.md).",
+  "type": "object",
+  "required": [
+    "kind",
+    "id",
+    "versao",
+    "spec"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "pagina",
+        "bloco",
+        "tema",
+        "dados",
+        "servico",
+        "evento",
+        "kernel",
+        "documento",
+        "tenant",
+        "backend"
+      ]
+    },
+    "id": {
+      "$ref": "polaris://comum/v1#/$defs/identificador"
+    },
+    "versao": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "semver do schema deste nó"
+    },
+    "estatuto": {
+      "enum": [
+        "rascunho",
+        "publicado",
+        "obsoleto"
+      ],
+      "default": "rascunho"
+    },
+    "tenantId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "null = global (core/segmento)"
+    },
+    "meta": {
+      "type": "object",
+      "description": "evidencia, proibicao, nota, fonte (texto livre)"
+    },
+    "emit": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "json",
+          "html",
+          "css",
+          "js",
+          "sql",
+          "wasm",
+          "glsl",
+          "ptx",
+          "pdf"
+        ]
+      }
+    },
+    "spec": {
+      "type": "object"
+    },
+    "filhos": {
+      "type": "array",
+      "items": {
+        "$ref": "polaris://no/v1"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "pagina"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/pagina/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "bloco"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/bloco/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "tema"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/tema/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "dados"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/dados/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "servico"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/servico/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "evento"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/evento/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "kernel"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/kernel/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "documento"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/documento/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "tenant"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/tenant/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "backend"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/backend/v1"
+          }
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

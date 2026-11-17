@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://comum/v1",
+  "title": "Definições compartilhadas",
+  "$defs": {
+    "identificador": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "interface": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*$",
+      "description": "id de interface de bloco, ex.: commerce/vitrine"
+    },
+    "expressao": {
+      "type": "string",
+      "description": "binding: texto com {caminho | formatador}. Linguagem de expressões completa fica para o card E11."
+    },
+    "tipoDado": {
+      "enum": [
+        "texto",
+        "inteiro",
+        "decimal",
+        "booleano",
+        "data",
+        "dataHora",
+        "dinheiro",
+        "uuid",
+        "json"
+      ]
+    },
+    "ref": {
+      "type": "object",
+      "required": [
+        "$ref"
+      ],
+      "properties": {
+        "$ref": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "campo": {
+      "type": "object",
+      "required": [
+        "tipo"
+      ],
+      "properties": {
+        "tipo": {
+          "$ref": "#/$defs/tipoDado"
+        },
+        "obrigatorio": {
+          "type": "boolean",
+          "default": false
+        },
+        "lista": {
+          "type": "boolean",
+          "default": false
+        },
+        "padrao": {},
+        "descricao": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "campos": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/campo"
+      }
+    },
+    "instancia": {
+      "type": "object",
+      "required": [
+        "bloco"
+      ],
+      "properties": {
+        "bloco": {
+          "$ref": "#/$defs/interface"
+        },
+        "id": {
+          "type": "string"
+        },
+        "props": {
+          "type": "object"
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/instancia"
+            }
+          }
+        },
+        "se": {
+          "$ref": "#/$defs/expressao"
+        },
+        "repetir": {
+          "type": "object",
+          "required": [
+            "cada",
+            "como"
+          ],
+          "properties": {
+            "cada": {
+              "$ref": "#/$defs/expressao"
+            },
+            "como": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

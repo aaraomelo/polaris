@@ -1,0 +1,11 @@
+{
+  "kind": "tema",
+  "id": "t",
+  "versao": "1.0.0",
+  "spec": {
+    "tokens": {}
+  },
+  "faces": {
+    "menos": {}
+  }
+}

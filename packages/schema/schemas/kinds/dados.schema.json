@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/dados/v1",
+  "title": "Fonte de dados",
+  "required": [
+    "fonte"
+  ],
+  "properties": {
+    "fonte": {
+      "type": "object",
+      "required": [
+        "tipo"
+      ],
+      "properties": {
+        "tipo": {
+          "enum": [
+            "servico",
+            "estatico",
+            "http"
+          ]
+        },
+        "servico": {
+          "type": "string"
+        },
+        "operacao": {
+          "type": "string"
+        },
+        "valor": {},
+        "url": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "parametros": {
+      "$ref": "polaris://comum/v1#/$defs/campos"
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "ttlSegundos": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "chave": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

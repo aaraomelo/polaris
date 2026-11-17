@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/backend/v1",
+  "title": "Backend de emissão/execução",
+  "required": [
+    "alvo",
+    "operacoes"
+  ],
+  "properties": {
+    "alvo": {
+      "enum": [
+        "html",
+        "css",
+        "js",
+        "sql",
+        "wasm",
+        "glsl",
+        "ptx",
+        "pdf"
+      ]
+    },
+    "faz": {
+      "type": "string"
+    },
+    "fonte": {
+      "type": "string"
+    },
+    "exports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "operacoes": {
+      "type": "object",
+      "properties": {
+        "emit": {
+          "type": "boolean"
+        },
+        "parse": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

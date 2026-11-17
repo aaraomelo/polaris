@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/tema/v1",
+  "title": "Tema (design tokens)",
+  "required": [
+    "tokens"
+  ],
+  "properties": {
+    "tokens": {
+      "type": "object",
+      "properties": {
+        "cor": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tipografia": {
+          "type": "object"
+        },
+        "espacamento": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "raio": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "modos": {
+      "type": "object",
+      "description": "modo → sobrescritas de tokens (ex.: escuro)",
+      "additionalProperties": {
+        "type": "object"
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

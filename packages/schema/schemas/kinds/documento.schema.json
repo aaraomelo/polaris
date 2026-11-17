@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/documento/v1",
+  "title": "Documento (PDF/impressão)",
+  "required": [
+    "tamanho",
+    "blocos"
+  ],
+  "properties": {
+    "tamanho": {
+      "enum": [
+        "A4",
+        "A5",
+        "Letter"
+      ]
+    },
+    "orientacao": {
+      "enum": [
+        "retrato",
+        "paisagem"
+      ],
+      "default": "retrato"
+    },
+    "margem": {
+      "type": "object",
+      "properties": {
+        "topo": {
+          "type": "number"
+        },
+        "direita": {
+          "type": "number"
+        },
+        "baixo": {
+          "type": "number"
+        },
+        "esquerda": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fonte": {
+      "type": "string"
+    },
+    "rodape": {
+      "$ref": "polaris://comum/v1#/$defs/expressao"
+    },
+    "blocos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "properties": {
+          "tipo": {
+            "enum": [
+              "espaco",
+              "barraSecao",
+              "paragrafo",
+              "campo",
+              "colunas",
+              "tabela",
+              "resumo",
+              "assinaturas",
+              "imagem"
+            ]
+          }
+        }
+      },
+      "description": "DocBlock do erp-app; detalhado no card E9"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "p",
+  "versao": "1.0.0",
+  "spec": {
+    "rota": "home",
+    "raiz": {
+      "bloco": "layout/pilha"
+    }
+  }
+}

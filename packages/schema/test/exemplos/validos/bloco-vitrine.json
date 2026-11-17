@@ -1,0 +1,28 @@
+{
+  "kind": "bloco",
+  "id": "commerce.vitrine",
+  "versao": "1.0.0",
+  "spec": {
+    "interface": "commerce/vitrine",
+    "extends": "layout/lista",
+    "props": {
+      "type": "object",
+      "properties": {
+        "colecao": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "colecao"
+      ]
+    },
+    "slots": {
+      "item": {
+        "aceita": [
+          "commerce/cartao-produto"
+        ],
+        "min": 1
+      }
+    }
+  }
+}

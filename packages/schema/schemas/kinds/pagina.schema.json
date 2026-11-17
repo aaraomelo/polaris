@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/pagina/v1",
+  "title": "Página",
+  "required": [
+    "rota",
+    "raiz"
+  ],
+  "properties": {
+    "rota": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "titulo": {
+      "$ref": "polaris://comum/v1#/$defs/expressao"
+    },
+    "layout": {
+      "$ref": "polaris://comum/v1#/$defs/interface"
+    },
+    "dados": {
+      "type": "object",
+      "description": "nome → referência a nó kind=dados",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "raiz": {
+      "$ref": "polaris://comum/v1#/$defs/instancia"
+    },
+    "guarda": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "permissões exigidas (CASL)"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

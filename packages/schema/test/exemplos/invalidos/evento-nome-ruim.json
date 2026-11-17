@@ -1,0 +1,9 @@
+{
+  "kind": "evento",
+  "id": "e",
+  "versao": "1.0.0",
+  "spec": {
+    "nome": "PedidoCriado",
+    "payload": {}
+  }
+}

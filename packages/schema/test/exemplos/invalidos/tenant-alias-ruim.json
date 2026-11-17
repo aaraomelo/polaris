@@ -1,0 +1,9 @@
+{
+  "kind": "tenant",
+  "id": "t",
+  "versao": "1.0.0",
+  "spec": {
+    "alias": "-ruim-",
+    "segmento": "varejo"
+  }
+}

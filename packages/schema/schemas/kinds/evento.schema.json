@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/evento/v1",
+  "title": "Evento de domínio",
+  "required": [
+    "nome",
+    "payload"
+  ],
+  "properties": {
+    "nome": {
+      "type": "string",
+      "pattern": "^[a-z]+(\\.[a-z]+)+$"
+    },
+    "produtor": {
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "polaris://comum/v1#/$defs/campos"
+    },
+    "idempotencia": {
+      "type": "string",
+      "description": "campo do payload usado como chave"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

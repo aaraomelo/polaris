@@ -1,0 +1,29 @@
+{
+  "kind": "servico",
+  "id": "catalogo",
+  "versao": "1.0.0",
+  "spec": {
+    "entidades": {
+      "produto": {
+        "campos": {
+          "nome": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "preco": {
+            "tipo": "dinheiro",
+            "obrigatorio": true
+          }
+        }
+      }
+    },
+    "operacoes": {
+      "listarProdutos": {
+        "metodo": "GET",
+        "caminho": "/produtos",
+        "saida": "produto",
+        "permissao": "produto.ler"
+      }
+    }
+  }
+}

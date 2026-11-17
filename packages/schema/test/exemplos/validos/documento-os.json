@@ -1,0 +1,17 @@
+{
+  "kind": "documento",
+  "id": "ordem-servico",
+  "versao": "1.0.0",
+  "spec": {
+    "tamanho": "A4",
+    "blocos": [
+      {
+        "tipo": "barraSecao",
+        "texto": "Ordem de Serviço"
+      },
+      {
+        "tipo": "tabela"
+      }
+    ]
+  }
+}

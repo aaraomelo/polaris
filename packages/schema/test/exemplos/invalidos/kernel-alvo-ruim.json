@@ -1,0 +1,14 @@
+{
+  "kind": "kernel",
+  "id": "k",
+  "versao": "1.0.0",
+  "spec": {
+    "entradas": {},
+    "saidas": {},
+    "emissoes": [
+      {
+        "alvo": "cobol"
+      }
+    ]
+  }
+}

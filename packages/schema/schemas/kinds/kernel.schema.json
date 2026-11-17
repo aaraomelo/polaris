@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/kernel/v1",
+  "title": "Kernel de computação",
+  "required": [
+    "entradas",
+    "saidas"
+  ],
+  "properties": {
+    "entradas": {
+      "$ref": "polaris://comum/v1#/$defs/campos"
+    },
+    "saidas": {
+      "$ref": "polaris://comum/v1#/$defs/campos"
+    },
+    "dominio": {
+      "type": "object",
+      "description": "grade/limites de avaliação"
+    },
+    "restricoes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "emissoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "alvo"
+        ],
+        "properties": {
+          "alvo": {
+            "enum": [
+              "glsl",
+              "wasm",
+              "ptx",
+              "js"
+            ]
+          },
+          "backend": {
+            "type": "string"
+          },
+          "fonte": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

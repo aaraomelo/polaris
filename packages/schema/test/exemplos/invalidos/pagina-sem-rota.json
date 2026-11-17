@@ -1,0 +1,10 @@
+{
+  "kind": "pagina",
+  "id": "p",
+  "versao": "1.0.0",
+  "spec": {
+    "raiz": {
+      "bloco": "layout/pilha"
+    }
+  }
+}

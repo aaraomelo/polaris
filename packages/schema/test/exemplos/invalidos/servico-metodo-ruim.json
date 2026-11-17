@@ -1,0 +1,14 @@
+{
+  "kind": "servico",
+  "id": "s",
+  "versao": "1.0.0",
+  "spec": {
+    "entidades": {},
+    "operacoes": {
+      "x": {
+        "metodo": "FETCH",
+        "caminho": "/x"
+      }
+    }
+  }
+}

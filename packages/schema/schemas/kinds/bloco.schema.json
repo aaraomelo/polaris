@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/bloco/v1",
+  "title": "Definição de bloco (interface + contrato)",
+  "required": [
+    "interface"
+  ],
+  "properties": {
+    "interface": {
+      "$ref": "polaris://comum/v1#/$defs/interface"
+    },
+    "extends": {
+      "$ref": "polaris://comum/v1#/$defs/interface"
+    },
+    "props": {
+      "type": "object",
+      "description": "JSON Schema (type=object) das props",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "object"
+        }
+      }
+    },
+    "slots": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "aceita": {
+            "type": "array",
+            "items": {
+              "$ref": "polaris://comum/v1#/$defs/interface"
+            }
+          },
+          "min": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "modelo": {
+      "$ref": "polaris://comum/v1#/$defs/instancia",
+      "description": "implementação declarativa (composição de outros blocos)"
+    },
+    "codigo": {
+      "type": "object",
+      "description": "escape hatch: implementação específica (js/html), roda em sandbox",
+      "required": [
+        "linguagem",
+        "fonte"
+      ],
+      "properties": {
+        "linguagem": {
+          "enum": [
+            "js",
+            "html"
+          ]
+        },
+        "fonte": {
+          "type": "string"
+        },
+        "permissoes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}
