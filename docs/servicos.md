@@ -29,7 +29,7 @@ const app = criaServico(no, {
   db,                                   // { transacao(tenantId, fn) } — abre transação e fixa app.tenant_id
   contexto: (req) => /* token/host → { tenantId, usuario, permissoes } | null */,
   autoriza,                             // opcional; padrão: autenticada basta estar autenticado; senão ∈ permissoes
-  operacoes: { cancelar: async ({ params, entrada, ctx, q, publica }) => { … publica('pedidoCancelado', {…}); return pedido } },
+  operacoes: { cancelar: async ({ params, entrada, ctx, q, publica }) => { … await publica('pedido.cancelado', {…}); return pedido } },
   eventos: { "pedido.cancelado": nodeEvento },  // contratos do que as operações publicam (obrigatório se houver `publica`)
 })
 await app.listen({ port: 3000 })
