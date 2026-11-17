@@ -46,4 +46,4 @@ Sem implementação, uma operação declarada responde **501**. `dbDePglite` é 
 - **SQL só com identificadores do schema** e valores por parâmetro. Só `application/json`. Cabeçalhos `nosniff` e `no-store`. O serviço serve exatamente as rotas do OpenAPI.
 
 ## Fora desta entrega
-O gateway/BFF são cards seguintes; autorização por papéis (CASL) idem (aqui `autoriza` é um gancho); GraphQL; geração do serviço como **arquivos** de código (aqui o servidor é montado do schema em runtime, o equivalente do interpretador; o AOT do serviço seria emitir esse mesmo código especializado).
+O gateway/BFF é um card seguinte; GraphQL; geração do serviço como **arquivos** de código (aqui o servidor é montado do schema em runtime, o equivalente do interpretador; o AOT do serviço seria emitir esse mesmo código especializado).
