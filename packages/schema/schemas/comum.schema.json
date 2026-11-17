@@ -134,6 +134,10 @@
             }
           },
           "description": "evento do bloco → ações executadas em sequência"
+        },
+        "esqueleto": {
+          "$ref": "#/$defs/instancia",
+          "description": "o que mostrar enquanto os dados em streaming usados por esta instância não chegam (não pode usar esses dados)"
         }
       },
       "additionalProperties": false

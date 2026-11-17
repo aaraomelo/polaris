@@ -38,5 +38,22 @@ e o **tenant sempre faz parte da chave** (inclusive com `cache.chave` customizad
 - `navegar { para }`: só URLs seguras (`urlSegura`).
 Limites: 5 níveis de `depois`/`emErro` e 50 ações por evento. Eventos só em páginas (o modelo de um bloco não tem estado nem dados).
 
+## Streaming SSR (`@polaris/engine/servidor`)
+`renderPaginaStream(programa, componentes, opcoes)` devolve `{ status, stream, tudoPronto, abort, preCarga }`; rejeita se o **shell** falhar (ainda dá para responder 500). Falha de dado ou de fronteira nunca derruba a página.
+- `spec.dados.<nome>: { dados, args?, stream: true }` marca um dado como **em streaming**: não bloqueia o primeiro byte. Todas as cargas `auto` começam **imediatamente**, em paralelo; só as bloqueantes seguram o shell.
+- **Fronteira** = o nó mais externo cujas expressões próprias (`props`, `se`, `repetir.cada`) usam o dado. Fica atrás de `Suspense`; o descendente que usa o mesmo dado não cria outra. `status.x`, `erros.x` e eventos **não** criam fronteira.
+- `esqueleto: instância` (na mesma instância) é o que aparece até o dado chegar. Não pode usar o dado em streaming (erro de compilação); esqueleto sem dado em streaming também é erro. O `titulo` não pode depender de dado em streaming.
+- O valor do dado viaja **dentro do HTML da fronteira** (`<script type="application/json" data-pl-b="chave">`). O React só hidrata o trecho depois que o HTML dele chegou, então o cliente lê o valor do DOM: **sem segunda chamada**, sem depender da ordem de entrega. O JSON sai escapado (`<`, `>`, `&`, U+2028/9).
+- O estado de hidratação (`__POLARIS__`) vai **antes** do conteúdo e traz só o que é bloqueante; o `status` de um dado em streaming começa `carregando` no cliente e passa a `ok` (ou `erro`) na hidratação.
+- `esperaTudo: true` (robôs/SEO) espera tudo e envia a página completa, sem esqueletos. `abortaEmMs` (padrão 20 s) entrega ao cliente as fronteiras que não terminaram. `nonce` (CSP) vai nos scripts inline do React e nos `<script type=module>`.
+- Limitação: nós `status.x` fora de fronteira só atualizam depois da hidratação (sem JS ficam `carregando`); use esqueleto/fronteira para conteúdo que precisa estar certo sem JS.
+
+## Code splitting por bloco
+`lazyBloco(() => import('./grafico'), { chunk: '/assets/grafico.js' })` registra um bloco carregado sob demanda.
+- Só os blocos que o **programa usa** (inclusive dentro de modelos compostos e esqueletos) são carregados: `blocosUsados`. Registrar não carrega.
+- `preCarregaBlocos` os carrega **antes** de renderizar; depois disso o bloco é chamado de forma síncrona (sem Suspense nem fallback), então servidor e cliente geram a mesma árvore. `renderPaginaStream` faz isso por padrão; no cliente use `hidrataAsync` (de `@polaris/engine/cliente`).
+- Sem pré-carga cai em `React.lazy` + `Suspense` (navegação no cliente). Módulo que falha: relatado, o bloco é omitido e o resto da página sai.
+- `chunksParaPreload` → `<link rel="modulepreload">` no `<head>` (só dos que informaram `chunk`).
+
 ## Ainda não coberto (cards seguintes da E2)
-Streaming/Suspense e code splitting (33g), roteamento (33j), sandbox de código (33k), JIT/AOT (33e/33f). Ideia em avaliação: re-render localizado por dependência (seletores sobre o store imutável).
+Roteamento (33j), sandbox de código (33k), JIT/AOT (33e/33f), segurança do runtime (33m), re-render localizado e histórico/diff de estado (58q/58r). Versão web (`renderToReadableStream`) do streaming.

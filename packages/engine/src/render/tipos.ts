@@ -11,7 +11,9 @@ export type PropsComponente = {
   caminho: string
 }
 export type Componente = (p: PropsComponente) => ReactNode
-export type Componentes = Record<string, Componente>
+/** Bloco carregado sob demanda (code splitting): `carrega` importa o módulo; `chunk` é a URL do módulo, para `modulepreload`. */
+export type ComponenteLazy = { lazy: () => Promise<Componente | { default: Componente }>; chunk?: string }
+export type Componentes = Record<string, Componente | ComponenteLazy>
 
 export type ErroRuntime = {
   caminho: string

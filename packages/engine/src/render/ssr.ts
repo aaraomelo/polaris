@@ -1,15 +1,13 @@
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
+import { jsonSeguro } from './json'
 import { carregaDados, type OpcoesCarga, type ResultadoDados } from '../dados/carrega'
 import { Pagina, tituloDaPagina, type EntradaPagina } from './pagina'
 import type { Programa } from './programa'
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-/** JSON seguro para <script type="application/json">: nada de </script>, <!-- ou U+2028/9. */
-export function jsonSeguro(v: unknown): string {
-  return JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
-}
+export { jsonSeguro }
 
 export const ID_RAIZ = 'polaris'
 export const ID_ESTADO = '__POLARIS__'

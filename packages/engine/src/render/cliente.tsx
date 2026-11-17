@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { hydrateRoot, type Root } from 'react-dom/client'
 import type { Carregador } from './acoes'
+import { preCarregaBlocos } from './lazy'
 import { Pagina, tituloDaPagina, type EntradaPagina } from './pagina'
 import { ID_ESTADO, ID_RAIZ, type EstadoCliente } from './ssr'
 import type { Componentes, ErroRuntime } from './tipos'
@@ -23,3 +24,15 @@ export function hidrata(componentes: Componentes, opcoes: { doc?: Document; esta
 }
 
 export { tituloDaPagina }
+
+/**
+ * Como `hidrata`, mas primeiro carrega os módulos lazy que a página usa (os mesmos que o servidor pré-carregou).
+ * Necessário quando há blocos com code splitting: hidratar sem eles divergiria do HTML do servidor.
+ */
+export async function hidrataAsync(componentes: Componentes, opcoes: Parameters<typeof hidrata>[1] = {}): Promise<Root> {
+  const doc = opcoes.doc ?? document
+  const estado = opcoes.estado ?? leEstado(doc)
+  const r = await preCarregaBlocos(estado.programa, componentes)
+  for (const f of r.falhas) opcoes.onErro?.({ caminho: '/', regra: 'componente-ausente', mensagem: `bloco '${f.interface}' não carregou: ${f.erro}` })
+  return hidrata(componentes, { ...opcoes, estado })
+}

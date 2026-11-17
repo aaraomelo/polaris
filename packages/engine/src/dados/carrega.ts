@@ -141,3 +141,26 @@ export function criaCarregador(programa: Programa, base: OpcoesCarga): (req: { d
     return r.valor
   }
 }
+
+export type CargasIniciadas = {
+  /** variáveis que bloqueiam o primeiro byte (auto e não-stream): resolvidas por `bloqueantes` */
+  bloqueantes: Promise<ResultadoDados>
+  /** variáveis em streaming: já em andamento, resolvem quando chegarem; NUNCA rejeitam */
+  stream: Record<string, Promise<ResultadoUm>>
+}
+
+/**
+ * Inicia TODAS as cargas automáticas imediatamente (em paralelo). As bloqueantes são agregadas numa promessa;
+ * as em streaming ficam soltas para o renderizador consumir quando o Suspense pedir.
+ */
+export function iniciaCargas(programa: Programa, op: OpcoesCarga): CargasIniciadas {
+  const { dados, fontes } = programa.pagina
+  const auto = Object.keys(dados).filter((n) => fontes[dados[n]!.id]?.carregar !== 'manual')
+  const stream: Record<string, Promise<ResultadoUm>> = {}
+  const bloqueantes: string[] = []
+  for (const n of auto) {
+    if (dados[n]!.stream) stream[n] = carregaDado(programa, n, op)
+    else bloqueantes.push(n)
+  }
+  return { bloqueantes: carregaDados(programa, op, bloqueantes), stream }
+}

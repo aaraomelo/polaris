@@ -54,7 +54,7 @@ describe('dados com argumentos', () => {
       dados: { loja: 'd.loja', prods: { dados: 'd.prod', args: { id: '{params.id}', q: 'fixo', pagina: 2 } } },
       raiz: P('layout/pilha'),
     }))
-    expect(ir.dados.loja).toEqual({ id: 'd.loja', args: {} })
+    expect(ir.dados.loja).toEqual({ id: 'd.loja', args: {}, stream: false })
     expect(ir.dados.prods!.args.q).toEqual({ t: 'lit', v: 'fixo' })
     expect(ir.dados.prods!.args.id).toMatchObject({ t: 'expr', fonte: 'params.id' })
     expect(ir.fontes['d.prod']).toMatchObject({ id: 'd.prod', carregar: 'auto', fonte: { tipo: 'servico', operacao: 'listar' } })

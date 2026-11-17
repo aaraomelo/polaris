@@ -42,6 +42,13 @@ export type IRElemento = Comum & {
   slots: Record<string, IRNo[]>
   /** evento → ações (só em páginas) */
   eventos?: Record<string, IRAcao[]>
+  /**
+   * Fronteira de streaming: variáveis de dados em streaming que ESTE nó usa (e que nenhum ancestral já cobre).
+   * O runtime envolve o nó em Suspense até esses dados chegarem.
+   */
+  aguarda?: string[]
+  /** o que mostrar enquanto `aguarda` não chega (não usa dados em streaming) */
+  esqueleto?: IRNo
 }
 
 /** `core/slot`: projeta, dentro do modelo de um bloco, os filhos que a instância recebeu naquele slot. */
@@ -50,7 +57,7 @@ export type IRSlot = Comum & { tipo: 'slot'; nome: string }
 export type IRNo = IRElemento | IRSlot
 
 /** Uma variável de dados da página: qual fonte e com quais argumentos. */
-export type IRDado = { id: string; args: Record<string, Valor> }
+export type IRDado = { id: string; args: Record<string, Valor>; stream: boolean }
 
 export type CampoParametro = { tipo: string; obrigatorio?: boolean; lista?: boolean; padrao?: unknown; descricao?: string }
 

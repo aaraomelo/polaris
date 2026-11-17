@@ -34,7 +34,7 @@ const falha = (res: ReturnType<typeof compila>) => { if (res.ok) throw new Error
 describe('compilaPagina — IR', () => {
   it('estrutura, caminhos e classificação dos blocos', () => {
     const ir = ok(compila(P('layout/pilha', { id: 'topo', slots: { filhos: [P('commerce/cartao', { props: { titulo: 'Oi' } }), P('x/codigo'), P('texto/titulo', { props: { texto: 'a' } })] } })))
-    expect(ir).toMatchObject({ tipo: 'pagina', rota: '/', dados: { loja: { id: 'dados.loja', args: {} }, produtos: { id: 'dados.produtos', args: {} } }, estado: {} })
+    expect(ir).toMatchObject({ tipo: 'pagina', rota: '/', dados: { loja: { id: 'dados.loja', args: {}, stream: false }, produtos: { id: 'dados.produtos', args: {}, stream: false } }, estado: {} })
     expect(Object.keys(ir.fontes).sort()).toEqual(['dados.loja', 'dados.produtos'])
     const raiz = ir.raiz as IRElemento
     expect(raiz).toMatchObject({ tipo: 'elemento', id: 'topo', caminho: '/spec/raiz', bloco: { interface: 'layout/pilha', impl: 'nativo' } })

@@ -43,7 +43,9 @@ export function iniciaStore(programa: Programa, semente: SementeStore = {}): Sto
   const erros: Record<string, string> = {}
   for (const nome of Object.keys(programa.pagina.dados)) {
     if (semente.dados && tem(semente.dados, nome)) dados[nome] = semente.dados[nome]
-    status[nome] = semente.status && tem(semente.status, nome) ? semente.status[nome]! : 'ok'
+    // dado em streaming que não veio na semente ainda está a caminho
+    const aCaminho = programa.pagina.dados[nome]!.stream && !(semente.dados && tem(semente.dados, nome))
+    status[nome] = semente.status && tem(semente.status, nome) ? semente.status[nome]! : aCaminho ? 'carregando' : 'ok'
     if (semente.erros && tem(semente.erros, nome)) erros[nome] = semente.erros[nome]!
   }
   return { estado, dados, status, erros }

@@ -1,6 +1,6 @@
 import { createElement, Fragment, useEffect, useReducer, useRef, type ReactNode } from 'react'
 import { FUNCOES_PADRAO, type Escopo } from '../expr/index'
-import type { StatusDado } from '../dados/carrega'
+import type { ResultadoUm, StatusDado } from '../dados/carrega'
 import { executaAcoes, type Carregador, type ContextoAcoes } from './acoes'
 import { renderiza, type Ambiente } from './interpreta'
 import type { Programa } from './programa'
@@ -25,6 +25,8 @@ export type EntradaPagina = {
   carregador?: Carregador
   /** cliente: como navegar (padrão: window.location.assign, só para URLs seguras) */
   navegar?: (url: string) => void
+  /** SERVIDOR (streaming): cargas já em andamento que o Suspense consome */
+  stream?: Record<string, Promise<ResultadoUm>>
 }
 
 export { escopoDaStore }
@@ -61,7 +63,7 @@ function PaginaInterativa(e: EntradaPagina): ReactNode {
     programa: e.programa, store: ref.current, dispatch, sequencia: sequencia.current, vivo: vivo.current,
     ...(e.carregador ? { carregador: e.carregador } : {}), ...(e.navegar ? { navegar: e.navegar } : {}), ...(e.onErro ? { onErro: e.onErro } : {}),
   }
-  const amb: Ambiente = { programa: e.programa, componentes: e.componentes, acoes, ...(e.onErro ? { onErro: e.onErro } : {}) }
+  const amb: Ambiente = { programa: e.programa, componentes: e.componentes, acoes, ...(e.onErro ? { onErro: e.onErro } : {}), ...(e.stream ? { stream: e.stream } : {}) }
   return createElement(Fragment, null, ...renderiza(e.programa.pagina.raiz, escopo, amb, null, 'r'))
 }
 

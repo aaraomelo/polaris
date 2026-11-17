@@ -39,6 +39,11 @@
               },
               "args": {
                 "type": "object"
+              },
+              "stream": {
+                "type": "boolean",
+                "default": false,
+                "description": "true: não bloqueia o primeiro byte; as instâncias que usam o valor aparecem quando ele chegar (Suspense)"
               }
             },
             "additionalProperties": false

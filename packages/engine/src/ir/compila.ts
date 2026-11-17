@@ -13,7 +13,7 @@ import {
 type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar'; estado?: string; valor?: string; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
 type Inst = {
   bloco: string; id?: string; props?: unknown; slots?: Record<string, Inst[]>
-  se?: string; repetir?: { cada: string; como: string }; eventos?: Record<string, AcaoSrc[]>
+  se?: string; repetir?: { cada: string; como: string }; eventos?: Record<string, AcaoSrc[]>; esqueleto?: Inst
 }
 
 export type Resultado<T> = { ok: true; ir: T } | { ok: false; erros: Erro[] }
@@ -22,11 +22,13 @@ const MAX_ACOES_POR_EVENTO = 50
 const MAX_PROFUNDIDADE_ACOES = 5
 
 /** Contexto de uma página em compilação: o que as ações podem referenciar. */
-type PaginaCx = { estado: IREstado; dados: Record<string, IRDado>; fontes: Record<string, FonteDados> }
+type PaginaCx = { estado: IREstado; dados: Record<string, IRDado>; fontes: Record<string, FonteDados>; stream: Set<string> }
 
 class Cx {
   readonly erros: Erro[] = []
   readonly usa = new Set<string>()
+  /** variáveis usadas pelas expressões PRÓPRIAS do nó em compilação (props, se, repetir.cada), para achar fronteiras de streaming */
+  proprio: Set<string> | null = null
   constructor(readonly reg: Registry, readonly ctx: Contexto, readonly modo: 'pagina' | 'bloco', readonly slotsDoBloco: readonly string[] = [], readonly pagina: PaginaCx | null = null) {}
   erro(caminho: string, regra: string, mensagem: string, dica?: string, valor?: unknown) {
     this.erros.push({ caminho, regra, mensagem, ...(dica ? { dica } : {}), ...(valor !== undefined ? { valor } : {}) })
@@ -34,7 +36,7 @@ class Cx {
 }
 
 function checaExpr(cx: Cx, ast: Expr, escopo: readonly string[], caminho: string, fonte: string, base: number): void {
-  for (const v of analisa(ast).variaveis) if (escopo.includes(v)) cx.usa.add(v)
+  for (const v of analisa(ast).variaveis) if (escopo.includes(v)) { cx.usa.add(v); cx.proprio?.add(v) }
   for (const p of validaExpr(ast, escopo, FUNCOES_PADRAO)) {
     cx.erro(caminho, 'binding', `${p.mensagem} (em '${fonte}', posição ${base + p.pos})`, p.dica, fonte)
   }
@@ -157,8 +159,12 @@ function compilaAcoes(cx: Cx, lista: AcaoSrc[], caminho: string, escopo: readonl
 
 // ---- árvore -----------------------------------------------------------------
 
-function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly string[]): IRNo {
+function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly string[], cobertas: ReadonlySet<string> = new Set()): IRNo {
   const base = { caminho } as { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string } }
+  // coleta as variáveis das expressões PRÓPRIAS do nó (se, repetir.cada, props): é o que decide a fronteira de streaming
+  const proprio = new Set<string>()
+  const anterior = cx.proprio
+  cx.proprio = proprio
   // `se` e `repetir.cada` veem só o escopo de fora; `como` e `indice` valem para props, filhos, slots e eventos.
   if (inst.se !== undefined) base.se = exprPura(cx, inst.se, escopo, `${caminho}/se`)
   let interno = escopo
@@ -181,6 +187,7 @@ function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly strin
       const s = sugere(nome, cx.slotsDoBloco)
       cx.erro(`${caminho}/props/nome`, 'slot-nativo', `o bloco não declara o slot '${nome}'`, s ? `quis dizer '${s}'?` : `slots declarados: ${cx.slotsDoBloco.join(', ') || 'nenhum'}`)
     }
+    cx.proprio = anterior
     return { tipo: 'slot', nome: typeof nome === 'string' ? nome : '', ...base }
   }
 
@@ -188,9 +195,27 @@ function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly strin
   const bloco: IRBloco = resolvido ? { interface: resolvido.interface, cadeia: resolvido.cadeia, impl: resolvido.impl } : { interface: inst.bloco, cadeia: [inst.bloco], impl: 'nativo' }
   const props: Record<string, Valor> = {}
   for (const [k, v] of Object.entries((inst.props ?? {}) as Record<string, unknown>)) props[k] = compilaValor(cx, v, interno, `${caminho}/props/${k}`)
+  cx.proprio = anterior
+
+  // Fronteira de streaming: o nó usa um dado em streaming que nenhum ancestral já cobre.
+  const stream = cx.pagina?.stream
+  const novas = stream ? [...proprio].filter((v) => stream.has(v) && !cobertas.has(v)).sort() : []
+  const cobertasFilhos = novas.length ? new Set([...cobertas, ...novas]) : cobertas
+
   const slots: Record<string, IRNo[]> = {}
   for (const [nome, lista] of Object.entries(inst.slots ?? {})) {
-    slots[nome] = lista.map((f, n) => compilaInst(cx, f, `${caminho}/slots/${nome}/${n}`, interno))
+    slots[nome] = lista.map((f, n) => compilaInst(cx, f, `${caminho}/slots/${nome}/${n}`, interno, cobertasFilhos))
+  }
+
+  let esqueleto: IRNo | undefined
+  if (inst.esqueleto) {
+    if (!novas.length) {
+      cx.erro(`${caminho}/esqueleto`, 'esqueleto', 'esqueleto só tem efeito em instâncias que usam dados em streaming', 'marque o dado com stream: true em spec.dados e use-o nesta instância, ou remova o esqueleto')
+    } else {
+      // o esqueleto aparece ANTES dos dados chegarem: não pode usá-los
+      const semStream = interno.filter((v) => !stream!.has(v))
+      esqueleto = compilaInst(cx, inst.esqueleto, `${caminho}/esqueleto`, semStream, stream!)
+    }
   }
 
   let eventos: Record<string, IRAcao[]> | undefined
@@ -208,12 +233,25 @@ function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly strin
       }
     }
   }
-  return { tipo: 'elemento', ...(inst.id !== undefined ? { id: inst.id } : {}), bloco, props, slots, ...(eventos ? { eventos } : {}), ...base }
+  return { tipo: 'elemento', ...(inst.id !== undefined ? { id: inst.id } : {}), bloco, props, slots, ...(eventos ? { eventos } : {}), ...(novas.length ? { aguarda: novas } : {}), ...(esqueleto ? { esqueleto } : {}), ...base }
 }
 
 // ---- página -----------------------------------------------------------------
 
-type DadoSrc = string | { dados: string; args?: Record<string, unknown> }
+/** Variáveis raiz referenciadas por um Valor compilado. */
+function varsDeValor(v: Valor): string[] {
+  const out = new Set<string>()
+  const anda = (x: Valor): void => {
+    if (x.t === 'expr') for (const n of analisa(x.ast).variaveis) out.add(n)
+    else if (x.t === 'tpl') for (const p of x.partes) { if (typeof p !== 'string') for (const n of analisa(p.ast).variaveis) out.add(n) }
+    else if (x.t === 'arr') x.itens.forEach(anda)
+    else if (x.t === 'obj') Object.values(x.campos).forEach(anda)
+  }
+  anda(v)
+  return [...out]
+}
+
+type DadoSrc = string | { dados: string; args?: Record<string, unknown>; stream?: boolean }
 type EstadoSrc = Record<string, { tipo: string; inicial?: unknown; lista?: boolean }>
 
 function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
@@ -257,14 +295,22 @@ export function compilaPagina(reg: Registry, no: No, ctx: Contexto = {}): Result
     if (fonte) fontes[id] = fonte
     const args = typeof d === 'string' ? {} : compilaArgs(base, d.args ?? {}, fonte, ESCOPO_ARGS, `${caminho}/args`)
     if (fonte && fonte.carregar === 'auto') faltaObrigatorio(base, fonte, new Set(Object.keys(args)), caminho, `a variável '${nome}'`)
-    dados[nome] = { id, args }
+    dados[nome] = { id, args, stream: typeof d !== 'string' && d.stream === true }
+    if (dados[nome]!.stream && fonte?.carregar === 'manual') {
+      base.erro(caminho, 'dados', `'${nome}' é manual: só uma ação executar o carrega, então não há o que transmitir em streaming`, 'remova stream: true ou use carregar: auto')
+    }
   }
 
-  const cx = new Cx(reg, ctx, 'pagina', [], { estado, dados, fontes })
+  const stream = new Set(Object.entries(dados).filter(([, d]) => d.stream).map(([n]) => n))
+  const cx = new Cx(reg, ctx, 'pagina', [], { estado, dados, fontes, stream })
   cx.erros.push(...base.erros)
   for (const v of base.usa) cx.usa.add(v)
   const escopo = [...ESCOPO_PAGINA, ...Object.keys(dados)]
   const titulo = spec.titulo !== undefined ? compilaTexto(cx, spec.titulo, escopo, '/spec/titulo') : undefined
+  if (titulo) {
+    const usados = varsDeValor(titulo).filter((v) => stream.has(v))
+    if (usados.length) cx.erro('/spec/titulo', 'titulo', `o título não pode depender de dado em streaming (${usados.join(', ')}): ele é enviado antes de os dados chegarem`, 'use um dado bloqueante no título ou tire a variável dele')
+  }
   const raiz = compilaInst(cx, spec.raiz, '/spec/raiz', escopo)
   if (cx.erros.length) return { ok: false, erros: cx.erros }
   return { ok: true, ir: { tipo: 'pagina', id: no.id, versao: no.versao, rota: spec.rota, ...(titulo ? { titulo } : {}), dados, fontes, estado, raiz, usa: [...cx.usa].sort() } }
