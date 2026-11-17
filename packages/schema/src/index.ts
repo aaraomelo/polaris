@@ -68,3 +68,4 @@ export function criaValidador() {
 
 export * from './registry'
 export * from './migracao'
+export * from './estrutura'
