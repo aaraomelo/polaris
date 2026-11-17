@@ -5,7 +5,7 @@ import { SLOT_NATIVO } from './tipos'
 export const NATIVOS = [
   {
     kind: 'bloco', id: 'core.slot', versao: '1.0.0', estatuto: 'publicado',
-    spec: { interface: SLOT_NATIVO, props: { type: 'object', properties: { nome: { type: 'string' } }, required: ['nome'] } },
+    spec: { interface: SLOT_NATIVO, titulo: 'Slot', descricao: 'Ponto de inserção dentro do modelo de um bloco composto: o conteúdo que a página põe naquele slot do bloco aparece aqui. Só faz sentido dentro de `modelo`.', props: { type: 'object', properties: { nome: { type: 'string' } }, required: ['nome'] } },
   },
 ]
 

@@ -2,6 +2,7 @@ import { createElement, type CSSProperties } from 'react'
 import type { Registry } from '@polaris/schema'
 import { registraNativos } from '../ir/nativos'
 import type { Componentes } from './tipos'
+import { DOCS_BASE } from './base-doc'
 
 // Biblioteca nativa mínima (layout, texto, mídia, link). Serve de base e de prova do contrato;
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
@@ -81,34 +82,34 @@ export const COMPONENTES_BASE: Componentes = {
   },
 }
 
-const bloco = (iface: string, spec: object = {}) => ({ kind: 'bloco', id: iface.replace('/', '.'), versao: '1.0.0', estatuto: 'publicado', spec: { interface: iface, ...spec } })
+const bloco = (iface: string, spec: object = {}) => ({ kind: 'bloco', id: iface.replace('/', '.'), versao: '1.0.0', estatuto: 'publicado', spec: { interface: iface, ...(DOCS_BASE[iface] ?? {}), ...spec } })
 
 export const BLOCOS_BASE = [
   bloco('layout/pilha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] } } } }),
   bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] } } } }),
-  bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6 } }, required: ['texto'] } }),
+  bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6, default: 1 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 } }, required: ['src'] } }),
   bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
-  bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12 }, gap: { type: 'number', minimum: 0 } } } }),
+  bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/divisor'),
-  bloco('layout/espacador', { props: { type: 'object', properties: { tamanho: { type: 'number', minimum: 0 } } } }),
+  bloco('layout/espacador', { props: { type: 'object', properties: { tamanho: { type: 'number', minimum: 0, default: 8 } } } }),
   bloco('texto/rotulo', { props: { type: 'object', properties: { texto: { type: 'string' }, para: { type: 'string' } }, required: ['texto'] } }),
   bloco('texto/destaque', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('texto/pequeno', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('texto/codigo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
-  bloco('lista/lista', { slots: { filhos: { aceita: ['lista/item'] } }, props: { type: 'object', properties: { ordenada: { type: 'boolean' } } } }),
+  bloco('lista/lista', { slots: { filhos: { aceita: ['lista/item'] } }, props: { type: 'object', properties: { ordenada: { type: 'boolean', default: false } } } }),
   bloco('lista/item', { slots: { filhos: {} } }),
   bloco('tabela/tabela', { slots: { filhos: { aceita: ['tabela/cabecalho', 'tabela/corpo'] } } }),
   bloco('tabela/cabecalho', { slots: { filhos: { aceita: ['tabela/linha'] } } }),
   bloco('tabela/corpo', { slots: { filhos: { aceita: ['tabela/linha'] } } }),
   bloco('tabela/linha', { slots: { filhos: { aceita: ['tabela/celula'] } } }),
-  bloco('tabela/celula', { slots: { filhos: {} }, props: { type: 'object', properties: { texto: { type: 'string' }, cabecalho: { type: 'boolean' }, colunas: { type: 'integer', minimum: 1, maximum: 1000 }, linhas: { type: 'integer', minimum: 1, maximum: 65534 } } } }),
+  bloco('tabela/celula', { slots: { filhos: {} }, props: { type: 'object', properties: { texto: { type: 'string' }, cabecalho: { type: 'boolean', default: false }, colunas: { type: 'integer', minimum: 1, maximum: 1000 }, linhas: { type: 'integer', minimum: 1, maximum: 65534 } } } }),
   bloco('entrada/numero', { props: { type: 'object', properties: { valor: { type: ['number', 'string'] }, min: { type: 'number' }, max: { type: 'number' }, passo: { type: 'number' }, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'decimal' } } }),
   bloco('entrada/caixa', { props: { type: 'object', properties: { marcado: { type: 'boolean' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'booleano' } } }),
-  bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'] } }, required: ['texto'] } }),
-  bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'] } } } }),
+  bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } }, required: ['texto'] } }),
+  bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } } } }),
   bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' } }, required: ['href'] } }),
 ]
 

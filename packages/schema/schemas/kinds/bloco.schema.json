@@ -9,6 +9,37 @@
     "interface": {
       "$ref": "polaris://comum/v1#/$defs/interface"
     },
+    "titulo": {
+      "type": "string",
+      "description": "nome legível do bloco (catálogo)"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "para que serve (catálogo)"
+    },
+    "exemplos": {
+      "type": "array",
+      "description": "usos de exemplo: viram o preview e a documentação do catálogo; são conferidos contra os slots do bloco",
+      "items": {
+        "type": "object",
+        "required": [
+          "titulo",
+          "instancia"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "titulo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "instancia": {
+            "$ref": "polaris://comum/v1#/$defs/instancia"
+          }
+        }
+      }
+    },
     "extends": {
       "$ref": "polaris://comum/v1#/$defs/interface"
     },

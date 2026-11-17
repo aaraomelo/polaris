@@ -177,3 +177,29 @@ describe('outros kinds', () => {
     expect(validaEstrutura(r, t)).toEqual([])
   })
 })
+
+describe('exemplos de bloco (catálogo)', () => {
+  const novo = () => { const r = new Registry(); for (const n of [
+    { kind: 'bloco', id: 'l.lista', versao: '1.0.0', estatuto: 'publicado', spec: { interface: 'l/lista', slots: { filhos: { aceita: ['l/item'], min: 1 } } } },
+    { kind: 'bloco', id: 'l.item', versao: '1.0.0', estatuto: 'publicado', spec: { interface: 'l/item' } },
+    { kind: 'bloco', id: 'l.outro', versao: '1.0.0', estatuto: 'publicado', spec: { interface: 'l/outro' } },
+  ]) r.registra(n as never); return r }
+  const bloco = (exemplos: unknown) => ({ kind: 'bloco', id: 'x.ex', versao: '1.0.0', estatuto: 'publicado', spec: { interface: 'x/ex', titulo: 'T', descricao: 'D', exemplos } }) as never
+  it('exemplo que respeita os slots é válido', () => {
+    const r = novo()
+    const n = r.registra(bloco([{ titulo: 'ok', instancia: { bloco: 'l/lista', slots: { filhos: [{ bloco: 'l/item' }] } } }]))
+    expect(validaEstrutura(r, n)).toEqual([])
+  })
+  it('exemplo que viola `aceita` ou `min` é reportado com o caminho dentro de /spec/exemplos', () => {
+    const r = novo()
+    const n = r.registra(bloco([{ titulo: 'a', instancia: { bloco: 'l/lista', slots: { filhos: [{ bloco: 'l/outro' }] } } }, { titulo: 'b', instancia: { bloco: 'l/lista' } }]))
+    const e = validaEstrutura(r, n)
+    expect(e.map((x) => x.caminho)).toEqual(expect.arrayContaining(['/spec/exemplos/0/instancia/slots/filhos/0/bloco', '/spec/exemplos/1/instancia/slots/filhos']))
+    expect(e.length).toBe(2)
+  })
+  it('o schema recusa exemplo sem título ou com campo desconhecido', () => {
+    const r = novo()
+    expect(() => r.registra(bloco([{ instancia: { bloco: 'l/item' } }]))).toThrow()
+    expect(() => r.registra(bloco([{ titulo: 't', instancia: { bloco: 'l/item' }, extra: 1 }]))).toThrow()
+  })
+})

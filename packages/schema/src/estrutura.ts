@@ -135,6 +135,10 @@ export function validaEstrutura(reg: Registry, no: No, ctx: Contexto = {}, limit
   const spec = no.spec as Record<string, any>
   const arvore: { raiz?: Inst; base: string } | null =
     no.kind === 'pagina' ? { raiz: spec.raiz, base: '/spec/raiz' } : no.kind === 'bloco' ? { raiz: spec.modelo, base: '/spec/modelo' } : null
+  // exemplos do catálogo (bloco): cada instância de exemplo precisa respeitar os slots, como qualquer outra
+  if (no.kind === 'bloco' && Array.isArray(spec.exemplos)) {
+    ;(spec.exemplos as Array<{ instancia?: Inst }>).forEach((e, i) => { if (e?.instancia) conferePasta(reg, e.instancia, `/spec/exemplos/${i}/instancia`, ctx, lim, out) })
+  }
   if (!arvore?.raiz) return out
 
   // 1. DAG: nenhum bloco usado pode (direta ou indiretamente) conter a si mesmo.

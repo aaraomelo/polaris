@@ -1,0 +1,10 @@
+/* catálogo: só o que não é bloco; tudo pelas variáveis do tema */
+.cat-corpo{display:grid;grid-template-columns:14rem 1fr;gap:calc(var(--espacamento-base) * 4);max-width:90rem;margin:0 auto;padding:calc(var(--espacamento-base) * 2)}
+.cat-nav{position:sticky;top:var(--espacamento-base);align-self:start;max-height:95vh;overflow:auto;font-size:.9em}
+.cat-nav ul{list-style:none;padding:0;margin:0 0 var(--espacamento-base)}
+.cat-previa{padding:calc(var(--espacamento-base) * 2);background:var(--cor-fundo);border:var(--espacamento-borda) dashed var(--cor-borda);border-radius:var(--raio-grande);margin-bottom:var(--espacamento-base)}
+.cat-exemplo{margin-bottom:calc(var(--espacamento-base) * 2)}
+.cat-amostra{display:inline-block;width:1em;height:1em;border:var(--espacamento-borda) solid var(--cor-borda);vertical-align:middle}
+article{padding-bottom:calc(var(--espacamento-base) * 3);border-bottom:var(--espacamento-borda) solid var(--cor-borda);margin-bottom:calc(var(--espacamento-base) * 3)}
+pre{overflow:auto;background:var(--cor-superficie-alt);padding:var(--espacamento-base);border-radius:var(--raio-pequeno)}
+@media (max-width:48rem){.cat-corpo{grid-template-columns:1fr}.cat-nav{position:static}}
