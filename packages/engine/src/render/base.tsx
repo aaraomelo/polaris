@@ -6,18 +6,8 @@ import type { Componentes } from './tipos'
 // Biblioteca nativa mínima (layout, texto, mídia, link). Serve de base e de prova do contrato;
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
 
-const SCHEMES_OK = new Set(['http:', 'https:', 'mailto:', 'tel:'])
-
-/** URL segura para href/src: relativa ou com esquema permitido. Bloqueia javascript:, data:, vbscript: etc. */
-export function urlSegura(v: unknown): string | undefined {
-  if (typeof v !== 'string') return undefined
-  // navegadores ignoram espaços e controles dentro do esquema ("java\nscript:")
-  const limpa = v.replace(/[\u0000- \u007f-\u009f]/g, '')
-  if (!limpa) return undefined
-  const m = /^([a-zA-Z][a-zA-Z0-9+.-]*:)/.exec(limpa)
-  if (m) return SCHEMES_OK.has(m[1]!.toLowerCase()) ? v.trim() : undefined
-  return v.trim()
-}
+export { urlSegura } from './url'
+import { urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)

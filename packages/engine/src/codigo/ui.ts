@@ -28,14 +28,14 @@ const CLASSE = /^[A-Za-z0-9 _-]{1,200}$/
 const curto = (s: string) => (s.length > 40 ? s.slice(0, 40) + '…' : s)
 
 /** <img src>: o código recebe props (que podem ter dados do usuário) e uma imagem externa seria um canal de exfiltração (?dado=...). */
-function imagemPermitida(v: unknown, origens: readonly string[]): boolean {
+function imagemPermitida(v: unknown, origens: readonly string[]): string | null {
   const u = urlSegura(v)
-  if (!u) return false
+  if (!u) return null
   const limpa = u.replace(/[\u0000-\u0020\u007f-\u009f]/g, '')
-  if (limpa.startsWith('/') && !limpa.startsWith('//')) return true // do próprio site
+  if (limpa.startsWith('/') && !limpa.startsWith('//')) return u // do próprio site
   const m = /^(https:\/\/[^/?#]+)/i.exec(limpa)
   const o = m ? normalizaOrigem(m[1]!) : null
-  return !!o && o.ok && origens.some((x) => { const n = normalizaOrigem(x); return n.ok && n.origem === o.origem })
+  return o && o.ok && origens.some((x) => { const n = normalizaOrigem(x); return n.ok && n.origem === o.origem }) ? u : null
 }
 
 function atributoOk(tag: string, nome: string, v: unknown, op: OpcoesUI): { ok: true; valor: string | number | boolean } | { ok: false; motivo: string } {
@@ -48,7 +48,7 @@ function atributoOk(tag: string, nome: string, v: unknown, op: OpcoesUI): { ok: 
   if (nome === 'width' || nome === 'height' || nome === 'colspan' || nome === 'rowspan') {
     return typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 4000 ? { ok: true, valor: v } : { ok: false, motivo: `'${nome}' é um inteiro de 1 a 4000` }
   }
-  if (nome === 'src' && tag === 'img') return imagemPermitida(v, op.origensImagem ?? []) ? { ok: true, valor: String(v).trim() } : { ok: false, motivo: "'src' da imagem: só do próprio site (caminho relativo) ou de origem liberada pela plataforma" }
+  if (nome === 'src' && tag === 'img') { const u = imagemPermitida(v, op.origensImagem ?? []); return u ? { ok: true, valor: u } : { ok: false, motivo: "'src' da imagem: só do próprio site (caminho relativo) ou de origem liberada pela plataforma" } }
   if (nome === 'href' || nome === 'src') {
     const u = urlSegura(v)
     return u ? { ok: true, valor: u } : { ok: false, motivo: `'${nome}' com URL ausente ou insegura` }

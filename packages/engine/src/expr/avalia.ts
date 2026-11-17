@@ -3,7 +3,7 @@ import type { Expr, Funcoes } from './tipos'
 // Avaliador puro: nunca lança, nunca usa eval/Function, só lê dados próprios do escopo.
 // Valor ausente propaga como `undefined` (renderiza vazio), nunca como erro.
 
-const PROIBIDAS = new Set(['__proto__', 'constructor', 'prototype'])
+export const PROIBIDAS = new Set(['__proto__', 'constructor', 'prototype'])
 
 export const verdadeiro = (v: unknown): boolean => {
   if (v === null || v === undefined || v === false || v === 0 || v === '') return false
@@ -14,14 +14,14 @@ export const verdadeiro = (v: unknown): boolean => {
 
 const ehObjeto = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 
-function campo(base: unknown, nome: string): unknown {
+export function campo(base: unknown, nome: string): unknown {
   if (PROIBIDAS.has(nome)) return undefined
   if (typeof base === 'string' || Array.isArray(base)) return nome === 'length' ? base.length : undefined
   if (ehObjeto(base) && Object.prototype.hasOwnProperty.call(base, nome)) return base[nome]
   return undefined
 }
 
-function indice(base: unknown, i: unknown): unknown {
+export function indice(base: unknown, i: unknown): unknown {
   if (Array.isArray(base) || typeof base === 'string') {
     return typeof i === 'number' && Number.isInteger(i) && i >= 0 ? (base as ArrayLike<unknown>)[i] : undefined
   }

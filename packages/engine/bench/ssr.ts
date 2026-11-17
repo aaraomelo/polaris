@@ -2,7 +2,7 @@
 import { Registry } from '@polaris/schema'
 import { createElement, Fragment } from 'react'
 import { renderToString } from 'react-dom/server'
-import { avalia, compilaPrograma, escopoDaPagina, FUNCOES_PADRAO, parseExpr, registraBase, renderiza, renderPaginaHtml, COMPONENTES_BASE, type Programa } from '../src/index'
+import { avalia, compilaEstatico, compilaPrograma, escopoDaPagina, FUNCOES_PADRAO, parseExpr, registraBase, renderiza, renderPaginaHtml, COMPONENTES_BASE, type Programa } from '../src/index'
 
 const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0.0', estatuto: 'publicado', spec }) as any
 const P = (b: string, extra: object = {}) => ({ bloco: b, ...extra })
@@ -87,7 +87,11 @@ for (const n of [200, 1000]) {
   const interp = mede('  └ interpretador → elementos React', () => renderiza(pg.pagina.raiz, escopo, amb, null, 'r'))
   const rts = mede('  └ React renderToString da árvore pronta', () => renderToString(createElement(Fragment, null, ...arvore)))
   const semReact = mede('protótipo: IR → string direto (sem React)', () => strNo(pg.pagina.raiz, escopo, pg, null))
-  tab([total, interp, rts, semReact], total.med)
+  const est = compilaEstatico(pg)
+  if (!est.ok) throw new Error('página do benchmark não é estática')
+  const mesmo = est.pagina.render({ dados: d }).corpo === htmlReact
+  const estatico = mede(`caminho estático (compilaEstatico) [idêntico ao React: ${mesmo}]`, () => est.pagina.render({ dados: d }))
+  tab([total, interp, rts, semReact, estatico], total.med)
   console.log(`  → React (renderToString) = ${((rts.med / total.med) * 100).toFixed(0)}% do SSR; interpretador = ${((interp.med / total.med) * 100).toFixed(0)}%\n`)
 }
 

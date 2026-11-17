@@ -50,3 +50,25 @@ Mas o que a renderização faz é **montar strings, acessar propriedades e forma
 
 ## Falta medir
 Hidratação e interação (INP) no navegador, TTFB com rede, e o caminho de streaming sob concorrência. Esta suíte mede CPU de servidor e tamanho de bundle.
+
+## Caminho estático (IR → função JS, zero JS no cliente)
+
+`compilaEstatico(programa)` traduz o IR para uma função JS especializada (`src/estatico/`): blocos compostos viram funções,
+`repetir` vira laço, `se` vira condicional, blocos nativos viram emissores de string e expressões viram closures
+(equivalência com o avaliador conferida por fuzz). `documentoEstatico` entrega HTML sem `<script>` nem estado de hidratação.
+
+Medido (`pnpm bench`, Node 24, lista de cartões, saída idêntica à do React byte a byte):
+
+| cartões | React SSR (hoje) | estático | ganho |
+|---|---|---|---|
+| 200 | 11,4 ms | 0,63 ms | 18× |
+| 1000 | 46,1 ms | 1,98 ms | 23× |
+
+Elegibilidade: só páginas sem eventos, streaming, esqueleto, blocos de código nem blocos interativos (`nav/botao`,
+`entrada/texto`) e cujos blocos tenham emissor. Caso contrário `compilaEstatico` devolve `{ ok: false, motivos }` com
+caminho e razão por nó, e o servidor segue pelo caminho React. O código gerado só contém literais JSON e referências a
+closures: nenhum texto do usuário vira código (teste de veneno). `fonte` pode ser gravado em arquivo (AOT).
+
+Achado de segurança no caminho: `urlSegura` usava `trim()` (remove NBSP, U+2028, BOM), que transformava a URL relativa
+inofensiva `" javascript:x"` em `javascript:x`. Agora só se apara o que o navegador apara (U+0000–U+0020); teste de
+regressão e fuzz em `test/url.test.ts`.
