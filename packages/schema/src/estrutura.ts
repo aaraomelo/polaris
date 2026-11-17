@@ -1,12 +1,14 @@
 import type { Erro, No } from './index'
 import type { Contexto, Registry } from './registry'
+import { validaProps } from './props'
 
 // ---------------------------------------------------------------------------
 // Validação estrutural de árvores: o que o JSON Schema não expressa.
 //  1. composição de blocos (modelo) é um DAG: sem recursão infinita;
 //  2. cada instância respeita os slots do bloco resolvido (existência, aceita, min, max);
 //  3. ids de instância únicos dentro da árvore;
-//  4. limites de profundidade, fan-out e total de nós.
+//  4. limites de profundidade, fan-out e total de nós;
+//  5. props de cada instância conformes ao schema de props do bloco resolvido.
 // Referências quebradas (bloco inexistente) são tarefa de Registry.verifica; aqui são puladas.
 // ---------------------------------------------------------------------------
 
@@ -16,6 +18,7 @@ export const LIMITES_PADRAO: Limites = { maxProfundidade: 32, maxFilhosPorSlot: 
 type Inst = {
   bloco: string
   id?: string
+  props?: unknown
   slots?: Record<string, Inst[]>
   se?: string
   repetir?: unknown
@@ -87,6 +90,7 @@ function conferePasta(reg: Registry, raiz: Inst, base: string, ctx: Contexto, li
     const slots = inst.slots ?? {}
 
     if (def) {
+      out.push(...validaProps(inst.props, def.props, caminho))
       for (const nome of Object.keys(slots)) {
         if (!(nome in def.slots)) {
           out.push(erro(`${caminho}/slots/${nome}`, 'slot', `bloco '${inst.bloco}' não tem o slot '${nome}' (tem: ${Object.keys(def.slots).join(', ') || 'nenhum'})`))

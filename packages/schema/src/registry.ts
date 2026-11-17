@@ -73,7 +73,8 @@ export class Registry {
     const r = this.valida(dado)
     if (!r.ok) {
       const id = (dado as { id?: unknown })?.id
-      throw new RegistryErro(`nó inválido (${String(id)}): ${r.erros[0]?.caminho} ${r.erros[0]?.mensagem}`, r.erros)
+      const e0 = r.erros[0]
+      throw new RegistryErro(`nó inválido (${String(id)}): ${e0?.caminho} ${e0?.mensagem}${e0?.dica ? ` — ${e0.dica}` : ''}${r.erros.length > 1 ? ` (+${r.erros.length - 1} erro(s))` : ''}`, r.erros)
     }
     const no = r.no
     const { escopo, dono } = escopoDe(no)
