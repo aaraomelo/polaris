@@ -25,6 +25,7 @@ export type No = {
   versao: string
   estatuto?: 'rascunho' | 'publicado' | 'obsoleto'
   tenantId?: string | null
+  segmento?: string
   meta?: Record<string, unknown>
   emit?: string[]
   spec: Record<string, unknown>
@@ -57,3 +58,5 @@ export function criaValidador() {
     return { ok: false, erros }
   }
 }
+
+export * from './registry'

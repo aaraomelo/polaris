@@ -46,7 +46,7 @@
         "string",
         "null"
       ],
-      "description": "null = global (core/segmento)"
+      "description": "escopo tenant; ausente/null = core ou segmento"
     },
     "meta": {
       "type": "object",
@@ -77,6 +77,17 @@
       "items": {
         "$ref": "polaris://no/v1"
       }
+    },
+    "segmento": {
+      "enum": [
+        "varejo",
+        "servicos",
+        "alimentos",
+        "educacao",
+        "saude",
+        "outro"
+      ],
+      "description": "escopo segmento (sem tenantId). Cascata: core → segmento → tenant"
     }
   },
   "allOf": [
@@ -267,6 +278,20 @@
           "spec": {
             "$ref": "polaris://kind/backend/v1"
           }
+        }
+      }
+    },
+    {
+      "not": {
+        "required": [
+          "tenantId",
+          "segmento"
+        ],
+        "properties": {
+          "tenantId": {
+            "type": "string"
+          },
+          "segmento": {}
         }
       }
     }
