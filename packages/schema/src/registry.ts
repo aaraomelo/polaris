@@ -98,6 +98,12 @@ export class Registry {
     return lista.length
   }
 
+  /** Ids distintos de um kind, em ordem alfabética (para varrer o registry: build, listagens). Blocos aparecem pela `interface`. */
+  ids(kind: No['kind']): string[] {
+    const ps = `${kind}:`
+    return [...this.nos.keys()].filter((k) => k.startsWith(ps)).map((k) => k.slice(ps.length)).sort()
+  }
+
   /** Resolve pela cascata tenant → segmento → core; dentro do escopo, a maior versão elegível. */
   resolve(kind: No['kind'], id: string, ctx: Contexto = {}): Resolvido | null {
     const chave = `${kind}:${id}`
