@@ -11,6 +11,7 @@
     "bench:vivo": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/vivo.ts",
     "docs:funcoes": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs scripts/docs-funcoes.ts",
     "aot": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs scripts/aot.ts --",
+    "perfil:lista": "rm -rf .perfil && node --cpu-prof --cpu-prof-dir=.perfil ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/perfil-lista.ts && node bench/analisa.mjs .perfil",
     "perfil": "rm -rf .perfil && node --cpu-prof --cpu-prof-dir=.perfil ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/perfil.ts && node bench/analisa.mjs .perfil"
   },
   "dependencies": {
