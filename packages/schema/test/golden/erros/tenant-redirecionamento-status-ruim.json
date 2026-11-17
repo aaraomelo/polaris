@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/redirecionamentos/0/status",
+    "regra": "enum",
+    "mensagem": "valor 302.5 não é permitido; aceitos: 301, 302, 307, 308"
+  }
+]

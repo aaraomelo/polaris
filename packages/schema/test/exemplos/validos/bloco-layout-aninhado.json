@@ -1,0 +1,13 @@
+{
+  "kind": "bloco",
+  "id": "layout.loja",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "interface": "layout/loja",
+    "layout": "layout/raiz",
+    "slots": {
+      "conteudo": {}
+    }
+  }
+}

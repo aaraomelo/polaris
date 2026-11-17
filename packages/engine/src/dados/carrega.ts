@@ -29,6 +29,8 @@ export type OpcoesCarga = {
   params?: Record<string, unknown>
   consulta?: Record<string, unknown>
   tenant?: Record<string, unknown>
+  /** idioma da requisição (variável `idioma`) */
+  idioma?: string
   estado?: Record<string, unknown>
   cache?: CacheDados
   /** padrão 10000 */
@@ -75,7 +77,7 @@ export async function carregaDado(programa: Programa, nome: string, op: OpcoesCa
   if (!decl) return { ok: false, erro: `variável de dados '${nome}' não declarada` }
   const fonte = programa.pagina.fontes[decl.id]
   if (!fonte) return { ok: false, erro: `fonte '${decl.id}' ausente no programa` }
-  const escopo = { params: op.params ?? {}, consulta: op.consulta ?? {}, tenant: op.tenant ?? {}, estado: op.estado ?? {} }
+  const escopo = { params: op.params ?? {}, consulta: op.consulta ?? {}, tenant: op.tenant ?? {}, idioma: op.idioma ?? '', estado: op.estado ?? {} }
 
   const brutos: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(decl.args)) brutos[k] = valorDe(v, escopo, FUNCOES_PADRAO)

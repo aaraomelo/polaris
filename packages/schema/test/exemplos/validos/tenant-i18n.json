@@ -1,0 +1,33 @@
+{
+  "kind": "tenant",
+  "id": "loja-i18n",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "alias": "loja-i18n",
+    "segmento": "varejo",
+    "idiomas": [
+      "pt-BR",
+      "en"
+    ],
+    "idiomaPadrao": "pt-BR",
+    "rotaLogin": "/entrar",
+    "paginaNegado": "negado",
+    "paginaNaoEncontrada": "nao-encontrada",
+    "redirecionamentos": [
+      {
+        "de": "/antiga/:id",
+        "para": "/produtos/:id",
+        "status": 301
+      },
+      {
+        "de": "/promo",
+        "para": "/ofertas"
+      }
+    ],
+    "paginas": [
+      "home",
+      "produto"
+    ]
+  }
+}

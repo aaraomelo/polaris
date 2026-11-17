@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/rotaLogin",
+    "regra": "pattern",
+    "mensagem": "\"https://evil.com/login\" não segue o formato esperado",
+    "dica": "deve começar com '/' (ex.: /produtos)"
+  }
+]

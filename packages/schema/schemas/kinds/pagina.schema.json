@@ -56,10 +56,12 @@
     },
     "guarda": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)*$"
       },
-      "description": "permissões exigidas (CASL)"
+      "description": "permissões exigidas (todas). Sem sessão: login; sem permissão: 403"
     },
     "estado": {
       "type": "object",
@@ -83,6 +85,40 @@
         },
         "additionalProperties": false
       }
+    },
+    "params": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
+      },
+      "description": "tipo dos parâmetros da rota (:nome). URL com valor inválido não casa (404)",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "properties": {
+          "tipo": {
+            "$ref": "polaris://comum/v1#/$defs/tipoDado"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "rotasI18n": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+      },
+      "description": "idioma → padrão de rota (mesmos parâmetros de rota)",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^/"
+      }
+    },
+    "layoutProps": {
+      "type": "object",
+      "description": "props (templates) passadas ao bloco de layout, avaliadas no escopo da página"
     }
   },
   "type": "object",

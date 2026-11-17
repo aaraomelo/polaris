@@ -1,0 +1,15 @@
+{
+  "kind": "tenant",
+  "id": "t",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "alias": "t",
+    "segmento": "varejo",
+    "redirecionamentos": [
+      {
+        "de": "/a"
+      }
+    ]
+  }
+}

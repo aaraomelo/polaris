@@ -98,10 +98,12 @@ export type IRBlocoModelo = {
 }
 
 /** Escopo-base de cada contexto de compilação. */
-export const ESCOPO_PAGINA = ['params', 'consulta', 'tenant', 'estado', 'status', 'erros'] as const
+export const ESCOPO_PAGINA = ['params', 'consulta', 'tenant', 'idioma', 'estado', 'status', 'erros'] as const
 /** Escopo dos argumentos de dados no carregamento (antes de existir qualquer dado ou status). */
-export const ESCOPO_ARGS = ['params', 'consulta', 'tenant', 'estado'] as const
+export const ESCOPO_ARGS = ['params', 'consulta', 'tenant', 'idioma', 'estado'] as const
 export const ESCOPO_BLOCO = ['props', 'tenant'] as const
 export const SLOT_NATIVO = 'core/slot'
+/** Slot do bloco de layout onde o conteúdo da página (ou do layout filho) é projetado. */
+export const SLOT_CONTEUDO = 'conteudo'
 /** Nomes que `spec.dados` e `repetir.como` não podem usar (sombreariam valores do sistema). */
 export const RESERVADOS = [...ESCOPO_PAGINA, 'indice', 'evento', 'resultado', 'erro', 'props'] as const

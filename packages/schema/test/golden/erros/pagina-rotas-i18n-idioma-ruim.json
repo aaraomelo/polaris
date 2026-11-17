@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/rotasI18n/portugues",
+    "regra": "pattern",
+    "mensagem": "\"portugues\" não segue o formato esperado",
+    "dica": "use o código do idioma: pt, en ou com região, como pt-BR"
+  }
+]

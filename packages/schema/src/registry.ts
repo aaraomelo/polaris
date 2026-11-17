@@ -174,6 +174,7 @@ export class Registry {
         break
       case 'bloco':
         if (s.extends) refs.push({ kind: 'bloco', id: s.extends, caminho: '/spec/extends' })
+        if (s.layout) refs.push({ kind: 'bloco', id: s.layout, caminho: '/spec/layout' })
         for (const [slot, def] of Object.entries<any>(s.slots ?? {})) {
           ;(def.aceita ?? []).forEach((id: string, n: number) => refs.push({ kind: 'bloco', id, caminho: `/spec/slots/${slot}/aceita/${n}` }))
         }
@@ -185,6 +186,7 @@ export class Registry {
       case 'tenant':
         if (s.tema) refs.push({ kind: 'tema', id: s.tema, caminho: '/spec/tema' })
         ;(s.paginas ?? []).forEach((id: string, n: number) => refs.push({ kind: 'pagina', id, caminho: `/spec/paginas/${n}` }))
+        for (const k of ['paginaNegado', 'paginaNaoEncontrada']) if (s[k]) refs.push({ kind: 'pagina', id: s[k], caminho: `/spec/${k}` })
         break
       case 'kernel':
         ;(s.emissoes ?? []).forEach((e: any, n: number) => {

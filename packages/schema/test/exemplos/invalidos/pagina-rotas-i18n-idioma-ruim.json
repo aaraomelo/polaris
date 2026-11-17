@@ -1,0 +1,15 @@
+{
+  "kind": "pagina",
+  "id": "p",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/",
+    "rotasI18n": {
+      "portugues": "/x"
+    },
+    "raiz": {
+      "bloco": "a/b"
+    }
+  }
+}

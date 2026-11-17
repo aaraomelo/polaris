@@ -3,7 +3,7 @@ import { confereValor } from '../dados/args'
 import { ExprErro, parseExpr, validaExpr, type Expr, FUNCOES_PADRAO, analisa } from '../expr/index'
 import { parseTemplate, TemplateErro, type Template } from '../template'
 import {
-  ESCOPO_ARGS, ESCOPO_BLOCO, ESCOPO_PAGINA, RESERVADOS, SLOT_NATIVO,
+  ESCOPO_ARGS, ESCOPO_BLOCO, ESCOPO_PAGINA, RESERVADOS, SLOT_CONTEUDO, SLOT_NATIVO,
   type CampoParametro, type FonteDados, type IRAcao, type IRBloco, type IRBlocoModelo, type IRDado, type IREstado, type IRNo, type IRPagina, type ImplBloco, type Valor,
 } from './tipos'
 
@@ -275,10 +275,48 @@ function fonteDe(cx: Cx, id: string): FonteDados | undefined {
   return { id, fonte: s.fonte, parametros: s.parametros ?? {}, ...(s.cache ? { cache: s.cache } : {}), carregar: s.carregar ?? 'auto', ...(s.timeoutMs ? { timeoutMs: s.timeoutMs } : {}) }
 }
 
+const MAX_LAYOUTS = 5
+
+/**
+ * Envolve o conteúdo da página na cadeia de layouts: o bloco `layout` da página, depois o `layout` (pai) declarado
+ * no spec de cada bloco, e assim por diante. Cada layout recebe o que está dentro dele no slot `conteudo`.
+ * Só o layout direto da página recebe `layoutProps` (avaliadas no escopo da página).
+ */
+function envolveEmLayouts(cx: Cx, conteudo: IRNo, layout: string, layoutProps: Record<string, unknown> | undefined, escopo: readonly string[]): IRNo {
+  let atual = conteudo
+  let iface: string | undefined = layout
+  const visitados: string[] = []
+  while (iface) {
+    if (visitados.includes(iface)) { cx.erro('/spec/layout', 'layout', `layouts em ciclo: ${[...visitados, iface].join(' → ')}`); break }
+    if (visitados.length >= MAX_LAYOUTS) { cx.erro('/spec/layout', 'layout', `layouts aninhados demais (mais de ${MAX_LAYOUTS} níveis)`, `cadeia: ${visitados.join(' → ')}`); break }
+    const primeiro = visitados.length === 0
+    visitados.push(iface)
+    let def
+    try { def = cx.reg.resolveBloco(iface, cx.ctx) } catch (e) { cx.erro('/spec/layout', 'ref', (e as Error).message); break }
+    if (!(SLOT_CONTEUDO in def.slots)) {
+      cx.erro('/spec/layout', 'layout', `o bloco '${iface}' é usado como layout e precisa declarar o slot '${SLOT_CONTEUDO}'`, `slots declarados: ${Object.keys(def.slots).join(', ') || 'nenhum'}`)
+      break
+    }
+    const props: Record<string, Valor> = {}
+    if (primeiro) {
+      for (const [k, v] of Object.entries(layoutProps ?? {})) {
+        const c = compilaValor(cx, v, escopo, `/spec/layoutProps/${k}`)
+        const emStream = cx.pagina ? varsDeValor(c).filter((n) => cx.pagina!.stream.has(n)) : []
+        if (emStream.length) cx.erro(`/spec/layoutProps/${k}`, 'layout', `layoutProps não pode depender de dado em streaming (${emStream.join(', ')}): o layout envolve a página e não tem esqueleto`, 'use um dado bloqueante')
+        props[k] = c
+      }
+    }
+    const impl: ImplBloco = def.modelo ? 'composto' : def.codigo ? 'codigo' : 'nativo'
+    atual = { tipo: 'elemento', caminho: primeiro ? '/spec/layout' : `layout:${iface}`, bloco: { interface: iface, cadeia: def.cadeia, impl }, props, slots: { [SLOT_CONTEUDO]: [atual] } }
+    iface = (cx.reg.resolve('bloco', iface, cx.ctx)?.no.spec as { layout?: string } | undefined)?.layout
+  }
+  return atual
+}
+
 /** Compila uma página (nó `pagina`) para IR. Inclui os erros de referência, slots, props, ciclos e limites. */
 export function compilaPagina(reg: Registry, no: No, ctx: Contexto = {}): Resultado<IRPagina> {
   if (no.kind !== 'pagina') return { ok: false, erros: [{ caminho: '/kind', regra: 'kind', mensagem: `compilaPagina espera kind 'pagina', recebeu '${no.kind}'` }] }
-  const spec = no.spec as { rota: string; titulo?: string; dados?: Record<string, DadoSrc>; estado?: EstadoSrc; raiz: Inst }
+  const spec = no.spec as { rota: string; titulo?: string; dados?: Record<string, DadoSrc>; estado?: EstadoSrc; raiz: Inst; layout?: string; layoutProps?: Record<string, unknown> }
   const base = new Cx(reg, ctx, 'pagina')
   base.erros.push(...confere(reg, no, ctx))
 
@@ -311,7 +349,9 @@ export function compilaPagina(reg: Registry, no: No, ctx: Contexto = {}): Result
     const usados = varsDeValor(titulo).filter((v) => stream.has(v))
     if (usados.length) cx.erro('/spec/titulo', 'titulo', `o título não pode depender de dado em streaming (${usados.join(', ')}): ele é enviado antes de os dados chegarem`, 'use um dado bloqueante no título ou tire a variável dele')
   }
-  const raiz = compilaInst(cx, spec.raiz, '/spec/raiz', escopo)
+  const conteudo = compilaInst(cx, spec.raiz, '/spec/raiz', escopo)
+  if (spec.layoutProps && !spec.layout) cx.erro('/spec/layoutProps', 'layout', 'layoutProps sem layout: não há bloco de layout para recebê-las', 'declare spec.layout ou remova layoutProps')
+  const raiz = spec.layout ? envolveEmLayouts(cx, conteudo, spec.layout, spec.layoutProps, escopo) : conteudo
   if (cx.erros.length) return { ok: false, erros: cx.erros }
   return { ok: true, ir: { tipo: 'pagina', id: no.id, versao: no.versao, rota: spec.rota, ...(titulo ? { titulo } : {}), dados, fontes, estado, raiz, usa: [...cx.usa].sort() } }
 }

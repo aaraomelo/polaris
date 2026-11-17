@@ -20,6 +20,8 @@ export type EntradaPagina = {
   params?: Record<string, unknown>
   consulta?: Record<string, unknown>
   tenant?: Record<string, unknown>
+  /** idioma da requisição (variável `idioma`) */
+  idioma?: string
   onErro?: (e: ErroRuntime) => void
   /** cliente: como executar uma variável de dados (ação `executar`) */
   carregador?: Carregador
@@ -32,8 +34,8 @@ export type EntradaPagina = {
 export { escopoDaStore }
 
 /** Escopo da página: params/consulta/tenant + store (estado inicial do schema se não houver). */
-export function escopoDaPagina(e: Pick<EntradaPagina, 'programa' | 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant'>): Escopo {
-  const base: Escopo = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {} }
+export function escopoDaPagina(e: Pick<EntradaPagina, 'programa' | 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant' | 'idioma'>): Escopo {
+  const base: Escopo = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' }
   return escopoDaStore(e.programa, iniciaStore(e.programa, e), base)
 }
 
@@ -53,7 +55,7 @@ function PaginaInterativa(e: EntradaPagina): ReactNode {
   const vivo = useRef({ atual: true })
   useEffect(() => { vivo.current.atual = true; return () => { vivo.current.atual = false } }, [])
 
-  const base: Escopo = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {} }
+  const base: Escopo = { params: e.params ?? {}, consulta: e.consulta ?? {}, tenant: e.tenant ?? {}, idioma: e.idioma ?? '' }
   const escopo = escopoDaStore(e.programa, store, base)
 
   const titulo = e.programa.pagina.titulo ? valorDe(e.programa.pagina.titulo, escopo, FUNCOES_PADRAO) : undefined

@@ -54,20 +54,20 @@ export async function renderPaginaStream(programa: Programa, componentes: Compon
   const entrada: EntradaPagina = {
     programa, componentes, dados: bloq.dados, status: bloq.status, erros: bloq.erros, stream: cargas.stream,
     ...(opcoes.params ? { params: opcoes.params } : {}), ...(opcoes.consulta ? { consulta: opcoes.consulta } : {}),
-    ...(opcoes.tenant ? { tenant: opcoes.tenant } : {}), ...(opcoes.estado ? { estado: opcoes.estado } : {}),
+    ...(opcoes.tenant ? { tenant: opcoes.tenant } : {}), ...(opcoes.estado ? { estado: opcoes.estado } : {}), ...(opcoes.idioma ? { idioma: opcoes.idioma } : {}),
     ...(opcoes.onErroRuntime ? { onErro: opcoes.onErroRuntime } : {}),
   }
 
   const estado: EstadoCliente = {
     programa, dados: bloq.dados, status: bloq.status, erros: bloq.erros,
     ...(opcoes.params ? { params: opcoes.params } : {}), ...(opcoes.consulta ? { consulta: opcoes.consulta } : {}),
-    ...(opcoes.tenant ? { tenant: opcoes.tenant } : {}), ...(opcoes.estado ? { estado: opcoes.estado } : {}),
+    ...(opcoes.tenant ? { tenant: opcoes.tenant } : {}), ...(opcoes.estado ? { estado: opcoes.estado } : {}), ...(opcoes.idioma ? { idioma: opcoes.idioma } : {}),
   }
   const links = chunksParaPreload(programa, componentes).map((u) => `<link rel="modulepreload" href="${esc(u)}">`).join('')
   const nonce = opcoes.nonce ? ` nonce="${esc(opcoes.nonce)}"` : ''
   const scripts = (opcoes.scripts ?? []).map((s) => `<script type="module"${nonce} src="${esc(s)}"></script>`).join('')
   const prefixo =
-    `<!doctype html><html lang="${esc(opcoes.lang ?? 'pt-BR')}"><head><meta charset="utf-8">` +
+    `<!doctype html><html lang="${esc(opcoes.lang ?? opcoes.idioma ?? 'pt-BR')}"><head><meta charset="utf-8">` +
     `<meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(tituloDaPagina(entrada))}</title>${links}${scripts}</head>` +
     // o estado vem ANTES do conteúdo: o cliente pode hidratar assim que o primeiro trecho chegar
     `<body><script type="application/json" id="${ID_ESTADO}">${jsonSeguro(estado)}</script><div id="${ID_RAIZ}">`

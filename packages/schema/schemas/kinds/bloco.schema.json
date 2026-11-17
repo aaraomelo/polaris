@@ -92,6 +92,10 @@
         },
         "additionalProperties": false
       }
+    },
+    "layout": {
+      "$ref": "polaris://comum/v1#/$defs/interface",
+      "description": "layout-pai: este bloco, quando usado como layout, é envolvido por ele (precisa do slot conteudo)"
     }
   },
   "type": "object",

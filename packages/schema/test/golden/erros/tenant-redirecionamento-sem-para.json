@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/redirecionamentos/0",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'para'",
+    "dica": "adicione \"para\" em /spec/redirecionamentos/0"
+  }
+]

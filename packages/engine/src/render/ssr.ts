@@ -13,7 +13,7 @@ export const ID_RAIZ = 'polaris'
 export const ID_ESTADO = '__POLARIS__'
 
 /** Estado enviado ao cliente para hidratar sem nova busca. Não inclui os componentes (código do cliente). */
-export type EstadoCliente = Pick<EntradaPagina, 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant'> & { programa: Programa }
+export type EstadoCliente = Pick<EntradaPagina, 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant' | 'idioma'> & { programa: Programa }
 
 export type SaidaSsr = { html: string; corpo: string; titulo: string; estado: EstadoCliente }
 
@@ -30,10 +30,11 @@ export function renderPaginaHtml(entrada: EntradaPagina, opcoes: { scripts?: str
     ...(entrada.params ? { params: entrada.params } : {}),
     ...(entrada.consulta ? { consulta: entrada.consulta } : {}),
     ...(entrada.tenant ? { tenant: entrada.tenant } : {}),
+    ...(entrada.idioma ? { idioma: entrada.idioma } : {}),
   }
   const scripts = (opcoes.scripts ?? []).map((s) => `<script type="module" src="${esc(s)}"></script>`).join('')
   const html =
-    `<!doctype html><html lang="${esc(opcoes.lang ?? 'pt-BR')}"><head><meta charset="utf-8">` +
+    `<!doctype html><html lang="${esc(opcoes.lang ?? entrada.idioma ?? 'pt-BR')}"><head><meta charset="utf-8">` +
     `<meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(titulo)}</title></head>` +
     `<body><div id="${ID_RAIZ}">${corpo}</div>` +
     `<script type="application/json" id="${ID_ESTADO}">${jsonSeguro(estado)}</script>${scripts}</body></html>`
@@ -53,7 +54,7 @@ export async function renderPaginaCompleta(
   const saida = renderPaginaHtml({
     programa, componentes, dados: resultado.dados, status: resultado.status, erros: resultado.erros,
     ...(carga.params ? { params: carga.params } : {}), ...(carga.consulta ? { consulta: carga.consulta } : {}),
-    ...(carga.tenant ? { tenant: carga.tenant } : {}), ...(carga.estado ? { estado: carga.estado } : {}),
+    ...(carga.tenant ? { tenant: carga.tenant } : {}), ...(carga.estado ? { estado: carga.estado } : {}), ...(carga.idioma ? { idioma: carga.idioma } : {}),
   }, { ...(scripts ? { scripts } : {}), ...(lang ? { lang } : {}) })
   return { ...saida, resultado }
 }

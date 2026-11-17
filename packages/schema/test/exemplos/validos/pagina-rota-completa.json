@@ -1,0 +1,28 @@
+{
+  "kind": "pagina",
+  "id": "produto",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/produtos/:id",
+    "rotasI18n": {
+      "en": "/products/:id",
+      "es": "/productos/:id"
+    },
+    "params": {
+      "id": {
+        "tipo": "uuid"
+      }
+    },
+    "layout": "layout/loja",
+    "layoutProps": {
+      "titulo": "{tenant.nome}"
+    },
+    "guarda": [
+      "produto.ler"
+    ],
+    "raiz": {
+      "bloco": "layout/pilha"
+    }
+  }
+}

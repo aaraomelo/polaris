@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/params/id/tipo",
+    "regra": "enum",
+    "mensagem": "valor \"numerao\" não é permitido; aceitos: 'texto', 'inteiro', 'decimal', 'booleano', 'data', 'dataHora', 'dinheiro', 'uuid', 'json'"
+  }
+]

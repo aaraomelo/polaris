@@ -56,4 +56,4 @@ Limites: 5 níveis de `depois`/`emErro` e 50 ações por evento. Eventos só em 
 - `chunksParaPreload` → `<link rel="modulepreload">` no `<head>` (só dos que informaram `chunk`).
 
 ## Ainda não coberto (cards seguintes da E2)
-Roteamento (33j), sandbox de código (33k), JIT/AOT (33e/33f), segurança do runtime (33m), re-render localizado e histórico/diff de estado (58q/58r). Versão web (`renderToReadableStream`) do streaming.
+Navegação no cliente do roteamento (ver docs/rotas.md), sandbox de código (33k), JIT/AOT (33e/33f), segurança do runtime (33m), re-render localizado e histórico/diff de estado (58q/58r). Versão web (`renderToReadableStream`) do streaming.
