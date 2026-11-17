@@ -4,6 +4,8 @@ import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify'
 import { codigoSucesso, esquemaDeEntidade, esquemaDoCampo, rotasDe, snake, type Campo, type No, type Rota } from '@polaris/schema'
 import { aSql, avalia, camposPermitidos, permite, resolve, type Regra, type Resolvido, type Tipos } from '@polaris/acesso'
 import { criaPublicador } from '@polaris/eventos'
+import { criaObservabilidade, serializaErro, type Span } from '@polaris/observabilidade'
+import { randomUUID, timingSafeEqual } from 'node:crypto'
 import { ErroApi, corpoErro, erroDoBanco } from './erros'
 import { colunas, ident, linhaParaApi, nomesDeCampos, tabela, tiposDe, type Ent } from './sql'
 import type { Contexto, OpcoesServico } from './tipos'
@@ -22,7 +24,9 @@ import type { Contexto, OpcoesServico } from './tipos'
 type Spec = { entidades: Record<string, Ent & { campos: Record<string, Campo> }> }
 /** a decisão de acesso desta requisição (só nas rotas `protegida`) */
 type Acesso = { regras: Regra[]; v: { usuario?: string; tenant: string }; resolvido: Resolvido }
-type Requisicao = FastifyRequest & { ctx?: Contexto; acesso?: Acesso }
+type Requisicao = FastifyRequest & { ctx?: Contexto; acesso?: Acesso; obs?: { t0: number; reqId: string; span: Span; rota: string } }
+const ID_REQUISICAO = /^[A-Za-z0-9._-]{1,64}$/
+const SILENCIOSAS = new Set(['/saude', '/pronto', '/metrics'])
 
 const SEGUNDOS_ID = { type: 'object', additionalProperties: false } as const
 const PAGINA = { pagina: { type: 'integer', minimum: 1, default: 1 }, limite: { type: 'integer', minimum: 1, maximum: 100, default: 24 } }
@@ -30,6 +34,17 @@ const PAGINA = { pagina: { type: 'integer', minimum: 1, default: 1 }, limite: { 
 export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
   const spec = no.spec as Spec
   const rotas = rotasDe(no)
+  // observabilidade INJETADA: logs estruturados, métricas e traces sem o autor do serviço escrever nada
+  const obs = o.obs ?? criaObservabilidade({ servico: no.id, versao: no.versao })
+  const { log, metricas, tracer } = obs
+  if (o.metricasToken !== undefined && o.metricasToken.length < 16) throw new Error("metricasToken precisa ter ao menos 16 caracteres")
+  const mReq = metricas.contador('http_requests_total', 'Requisições HTTP atendidas', ['metodo', 'rota', 'status'])
+  const mDur = metricas.histograma('http_request_duration_seconds', 'Duração das requisições HTTP', ['metodo', 'rota'])
+  const mVoo = metricas.gauge('http_requests_in_flight', 'Requisições em andamento')
+  const mNeg = metricas.contador('http_recusadas_total', 'Requisições recusadas por autenticação ou permissão', ['status', 'codigo'])
+  const mDb = metricas.contador('db_transacoes_total', 'Transações no banco, por resultado', ['resultado'])
+  const mDbDur = metricas.histograma('db_transacao_duracao_segundos', 'Duração das transações no banco', ['resultado'])
+  const mEv = metricas.contador('eventos_publicados_total', 'Eventos gravados no outbox', ['evento'])
   const app = Fastify({ bodyLimit: o.limiteCorpoBytes ?? 100 * 1024, logger: false })
   app.removeContentTypeParser('text/plain') // só JSON: qualquer outro tipo de conteúdo é 415
 
@@ -42,24 +57,62 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
   })
 
   app.setErrorHandler((erro, req, reply) => {
+    const rid = (req as Requisicao).obs?.reqId
     const validation = (erro as { validation?: Array<{ instancePath: string; message?: string; keyword: string; params?: Record<string, unknown> }> }).validation
     if (validation) {
       const detalhes = validation.map((x) => ({ caminho: x.instancePath || '/', mensagem: mensagemValidacao(x) }))
-      return reply.status(400).send(corpoErro(new ErroApi(400, 'requisicao_invalida', 'a requisição não respeita o contrato', detalhes)))
+      return reply.status(400).send(corpoErro(new ErroApi(400, 'requisicao_invalida', 'a requisição não respeita o contrato', detalhes), rid))
     }
-    if (erro instanceof ErroApi) return reply.status(erro.status).send(corpoErro(erro))
+    if (erro instanceof ErroApi) { if (erro.status === 401 || erro.status === 403) mNeg.inc({ status: erro.status, codigo: erro.codigo }); return reply.status(erro.status).send(corpoErro(erro, rid)) }
     const status = (erro as { statusCode?: number }).statusCode
     if (status && status >= 400 && status < 500) { // erros do próprio Fastify (corpo grande demais, tipo de conteúdo…)
-      return reply.status(status).send(corpoErro(new ErroApi(status, status === 413 ? 'corpo_grande_demais' : status === 415 ? 'tipo_nao_suportado' : 'requisicao_invalida', status === 413 ? 'o corpo excede o limite' : status === 415 ? 'use application/json' : 'requisição inválida')))
+      return reply.status(status).send(corpoErro(new ErroApi(status, status === 413 ? 'corpo_grande_demais' : status === 415 ? 'tipo_nao_suportado' : 'requisicao_invalida', status === 413 ? 'o corpo excede o limite' : status === 415 ? 'use application/json' : 'requisição inválida'), rid))
     }
     const db = erroDoBanco(erro)
-    if (db) return reply.status(db.status).send(corpoErro(db))
+    if (db) return reply.status(db.status).send(corpoErro(db, rid))
     o.aoErro?.(erro, `${req.method} ${req.url}`)
-    return reply.status(500).send(corpoErro(new ErroApi(500, 'erro_interno', 'erro interno')))
+    log.error('erro inesperado', { erro: serializaErro(erro), requisicaoId: rid, rota: (req as Requisicao).obs?.rota, ...(((req as Requisicao).obs?.span) ? { traceId: (req as Requisicao).obs!.span.traceId } : {}) })
+    return reply.status(500).send(corpoErro(new ErroApi(500, 'erro_interno', 'erro interno'), rid))
   })
-  app.setNotFoundHandler((_req, reply) => reply.status(404).send(corpoErro(new ErroApi(404, 'rota_inexistente', 'rota inexistente'))))
+  app.setNotFoundHandler((req, reply) => reply.status(404).send(corpoErro(new ErroApi(404, 'rota_inexistente', 'rota inexistente'), (req as Requisicao).obs?.reqId)))
   app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); reply.header('cache-control', 'no-store') })
   app.get('/saude', async () => ({ ok: true, servico: no.id, versao: no.versao }))
+  // pronto = consegue falar com o banco (o `saude` só diz que o processo está de pé). Sem detalhe do erro para fora.
+  app.get('/pronto', async (_req, reply) => {
+    try { await o.db.transacao('00000000-0000-0000-0000-000000000000', (q) => q('SELECT 1')); return { ok: true } } catch (e) { log.error('banco indisponível', { erro: serializaErro(e) }); reply.status(503); return { ok: false } }
+  })
+  if (o.metricasToken !== undefined) {
+    const esperado = Buffer.from(`Bearer ${o.metricasToken}`)
+    app.get('/metrics', async (req, reply) => {
+      const a = Buffer.from(String(req.headers.authorization ?? ''))
+      if (a.length !== esperado.length || !timingSafeEqual(a, esperado)) throw new ErroApi(401, 'nao_autenticado', 'autenticação necessária') // comparação em tempo constante
+      reply.header('content-type', 'text/plain; version=0.0.4; charset=utf-8')
+      return metricas.texto()
+    })
+  }
+
+  // um span por requisição, aberto na forma com CALLBACK: é o que faz o contexto atravessar os hooks e o handler do Fastify
+  app.addHook('onRequest', (req, reply, done) => {
+    const idCliente = req.headers['x-request-id']
+    const reqId = typeof idCliente === 'string' && ID_REQUISICAO.test(idCliente) ? idCliente : randomUUID() // só um id bem formado é aceito (nada de injeção em log/cabeçalho)
+    const rota = req.routeOptions?.url ?? 'desconhecida' // o TEMPLATE (/pedidos/:id), nunca a URL real: cardinalidade fixa
+    const span = tracer.inicia(`${req.method} ${rota}`, { pai: tracer.extrai(req.headers.traceparent), tipo: 'servidor', atributos: { 'http.metodo': req.method, 'http.rota': rota, 'requisicao.id': reqId } })
+    ;(req as Requisicao).obs = { t0: performance.now(), reqId, span, rota }
+    reply.header('x-request-id', reqId)
+    mVoo.inc()
+    tracer.com(span, () => done())
+  })
+  app.addHook('onResponse', async (req, reply) => {
+    const x = (req as Requisicao).obs; if (!x) return
+    const status = reply.statusCode, seg = (performance.now() - x.t0) / 1000, ctx = (req as Requisicao).ctx
+    mVoo.dec(); mReq.inc({ metodo: req.method, rota: x.rota, status }); mDur.observa(seg, { metodo: req.method, rota: x.rota })
+    x.span.define('http.status', status); if (ctx) { x.span.define('tenant', ctx.tenantId); if (ctx.usuario) x.span.define('usuario', ctx.usuario) }
+    if (status >= 500) x.span.erro(`HTTP ${status}`)
+    x.span.fim()
+    // uma linha por requisição, SEM corpo, SEM cabeçalhos e SEM query string (podem ter dados pessoais e segredos): só o que identifica e mede
+    const nivel = SILENCIOSAS.has(x.rota) ? 'debug' : status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info'
+    log[nivel]('requisicao', { metodo: req.method, rota: x.rota, status, duracaoMs: Math.round(seg * 1000 * 100) / 100, requisicaoId: x.reqId, traceId: x.span.traceId, spanId: x.span.spanId, ...(ctx ? { tenantId: ctx.tenantId, ...(ctx.usuario ? { usuario: ctx.usuario } : {}) } : {}) })
+  })
 
   // eventos: todo evento declarado em `publica` precisa de contrato (nó `evento`), senão o serviço nem sobe
   const declarados = [...new Set(rotas.flatMap((r) => r.publica))]
@@ -126,12 +179,13 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
     const ctx = req.ctx!
     const params = (req.params ?? {}) as Record<string, string>
     const entrada = ((r.metodo === 'get' || r.metodo === 'delete' ? req.query : req.body) ?? {}) as Record<string, unknown>
-    const resultado = await o.db.transacao(ctx.tenantId, async (q) => {
+    const t0db = performance.now(); let resDb = 'confirmada'
+    const resultado = await tracer.emSpan('db.transacao', { tipo: 'cliente', atributos: { 'db.sistema': 'postgresql', 'db.operacao': r.id } }, () => o.db.transacao(ctx.tenantId, async (q) => {
       if (r.origem.tipo === 'crud') return crud(r.origem.crud, r.origem.entidade, { params, entrada, ctx, q, acesso: req.acesso, rota: r })
       const impl = o.operacoes?.[r.id]
       if (!impl) throw new ErroApi(501, 'nao_implementado', `a operação '${r.id}' ainda não tem implementação`)
-      return impl({ params, entrada, ctx, q, pode: req.acesso ? podeCom(req.acesso) : () => r.permissao === 'autenticada', publica: async (e, p) => { if (!r.publica.includes(e)) throw new Error(`a operação '${r.id}' não declara o evento '${e}' em 'publica'`); await publicador!.publicar(q, ctx.tenantId, e, p) } })
-    })
+      return impl({ params, entrada, ctx, q, pode: req.acesso ? podeCom(req.acesso) : () => r.permissao === 'autenticada', publica: async (e, p) => { if (!r.publica.includes(e)) throw new Error(`a operação '${r.id}' não declara o evento '${e}' em 'publica'`); await tracer.emSpan('evento.publica', { tipo: 'produtor', atributos: { evento: e } }, (sp) => publicador!.publicar(q, ctx.tenantId, e, p, sp.traceparent())); mEv.inc({ evento: e }) } })
+    })).catch((err) => { resDb = 'desfeita'; throw err }).finally(() => { mDb.inc({ resultado: resDb }); mDbDur.observa((performance.now() - t0db) / 1000, { resultado: resDb }) })
     if (r.saida === undefined) { ;(reply.status(204) as { send(): void }).send(); return }
     if (codigoSucesso(r) === '201') reply.status(201)
     return resultado

@@ -236,6 +236,9 @@ importers:
 
   packages/eventos:
     dependencies:
+      '@polaris/observabilidade':
+        specifier: workspace:*
+        version: link:../observabilidade
       '@polaris/schema':
         specifier: workspace:*
         version: link:../schema
@@ -249,6 +252,18 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.5.16
         version: 0.5.16
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.20.5
+      typescript:
+        specifier: ~5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.5)(jsdom@25.0.1)
+
+  packages/observabilidade:
+    devDependencies:
       '@types/node':
         specifier: ^22.10.5
         version: 22.20.5
@@ -289,6 +304,9 @@ importers:
       '@polaris/eventos':
         specifier: workspace:*
         version: link:../eventos
+      '@polaris/observabilidade':
+        specifier: workspace:*
+        version: link:../observabilidade
       '@polaris/schema':
         specifier: workspace:*
         version: link:../schema

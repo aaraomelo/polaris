@@ -231,8 +231,10 @@ export function ddlEventos(servico: string, publica: boolean, consome: boolean):
   "tentativas" integer NOT NULL DEFAULT 0,
   "proxima_em" timestamptz NOT NULL DEFAULT now(),
   "erro" text,
-  "morto_em" timestamptz
+  "morto_em" timestamptz,
+  "traceparent" text
 );`,
+      `ALTER TABLE ${t} ADD COLUMN IF NOT EXISTS "traceparent" text;`, // outbox criado antes desta coluna: reaplicar o DDL a acrescenta (o trace atravessa serviços pelo evento)
       `CREATE UNIQUE INDEX IF NOT EXISTS "outbox_chave_uidx" ON ${t} ("tenant_id", "tipo", "chave") WHERE "chave" IS NOT NULL;`, // o MESMO fato publicado duas vezes vira um evento só
       `CREATE INDEX IF NOT EXISTS "outbox_pendentes_idx" ON ${t} ("proxima_em", "ocorrido_em", "id") WHERE "publicado_em" IS NULL AND "morto_em" IS NULL;`,
       ...sqlRls(t, 'outbox'))

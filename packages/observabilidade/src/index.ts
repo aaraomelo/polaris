@@ -1,0 +1,5 @@
+export { criaLogger, type Logger, type Nivel, type NivelMinimo, type OpcoesLogger } from './logger'
+export { BUCKETS_SEGUNDOS, Contador, Gauge, Histograma, Metricas } from './metricas'
+export { REDIGIDO, chaveSensivel, redige, redigeTexto, serializaErro } from './redacao'
+export { Span, Tracer, exportadorMemoria, formataTraceparent, parseTraceparent, type ContextoTrace, type Exportador, type OpcoesSpan, type OpcoesTracer, type SpanFinal } from './trace'
+export { criaObservabilidade, type Observabilidade, type OpcoesObservabilidade } from './obs'

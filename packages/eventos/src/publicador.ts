@@ -1,5 +1,6 @@
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
+import { parseTraceparent } from '@polaris/observabilidade'
 import { esquemaDoCampo, type Campo, type No } from '@polaris/schema'
 import type { Consulta } from './tipos'
 
@@ -9,7 +10,7 @@ type Ev = { nome: string; payload: Record<string, Campo>; idempotencia?: string 
 
 export type Publicador = {
   /** grava o evento no outbox (dentro da transação de `q`). Devolve o id, ou `null` se já existia um evento com a mesma chave de idempotência. */
-  publicar(q: Consulta, tenantId: string, tipo: string, payload: Record<string, unknown>): Promise<string | null>
+  publicar(q: Consulta, tenantId: string, tipo: string, payload: Record<string, unknown>, traceparent?: string): Promise<string | null>
 }
 
 export class EventoInvalido extends Error {
@@ -28,12 +29,13 @@ export function criaPublicador(servico: string, eventos: Record<string, No>): Pu
   }
   const t = `"${servico.replace(/"/g, '""')}"."outbox"`
   return {
-    async publicar(q, tenantId, tipo, payload) {
+    async publicar(q, tenantId, tipo, payload, traceparent) {
       const v = validadores.get(tipo)
       if (!v) throw new EventoInvalido(`evento '${tipo}' desconhecido para o serviço '${servico}' (registre o nó evento)`)
       if (!v.validate(payload)) throw new EventoInvalido(`payload de '${tipo}' inválido: ${(v.validate.errors ?? []).map((e) => `${e.instancePath || '/'} ${e.message}`).join('; ')}`)
       const chave = v.chave ? String(payload[v.chave]) : null
-      const r = await q(`INSERT INTO ${t} ("tenant_id", "tipo", "versao", "chave", "payload") VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING RETURNING "id"::text AS "id"`, [tenantId, tipo, v.versao, chave, JSON.stringify(payload)])
+      const tp = parseTraceparent(traceparent) ? traceparent! : null // só um traceparent VÁLIDO é guardado
+      const r = await q(`INSERT INTO ${t} ("tenant_id", "tipo", "versao", "chave", "payload", "traceparent") VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING RETURNING "id"::text AS "id"`, [tenantId, tipo, v.versao, chave, JSON.stringify(payload), tp])
       return (r.rows[0]?.id as string | undefined) ?? null
     },
   }

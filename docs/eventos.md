@@ -36,6 +36,9 @@ O handler roda numa transação **do tenant do evento** (a RLS vale: gravar para
 ## Barramento
 `Barramento { publica, assina }`: aceita o evento e entrega depois (como um broker). A implementação de referência é em memória (`criaBarramentoMemoria`: tentativas, fila de **mortas**, filtro por tipo e major, replay). Trocar por NATS/Kafka/SQS é implementar essas duas funções; o at-least-once e a deduplicação por id são o contrato.
 
+## Observabilidade
+O outbox leva o `traceparent` de quem publicou; relay e consumidor (opção `obs`) continuam o trace e expõem métricas (`outbox_pendentes`, `outbox_idade_maxima_segundos`, mortos, falhas, consumidos). O payload nunca vai para o log. Ver `docs/observabilidade.md`.
+
 ## Limites
 - Sem particionamento nem garantia de ordem global; só ordem por tenant com um relay.
 - O barramento de memória não persiste: em produção o broker é quem guarda (o outbox continua sendo a fonte durável e o replay sai dele).

@@ -14,6 +14,8 @@ export type Envelope = {
   ocorridoEm: string
   payload: Record<string, unknown>
   chave?: string
+  /** contexto de trace (W3C): quem consome continua o trace de quem publicou */
+  traceparent?: string
 }
 
 export type Assinatura = {

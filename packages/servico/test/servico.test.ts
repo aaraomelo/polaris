@@ -1,3 +1,4 @@
+process.env.POLARIS_LOG_NIVEL = 'silencio' // o serviço loga em JSON por padrão; os testes não precisam do ruído
 import { PGlite } from '@electric-sql/pglite'
 import { Registry, emite, rotasDe, type No } from '@polaris/schema'
 import type { FastifyInstance } from 'fastify'
@@ -190,7 +191,7 @@ describe('operações declaradas, eventos e erros', () => {
   it('erro inesperado → 500 genérico (a mensagem interna não vaza), é reportado, e a transação DESFEZ o que fez antes de falhar', async () => {
     erros.length = 0
     const r = await req('tA', 'POST', '/quebra', {}); expect(r.statusCode).toBe(500)
-    expect(json(r)).toEqual({ erro: { codigo: 'erro_interno', mensagem: 'erro interno' } }); expect(r.body).not.toMatch(/SELECT|secret|bug interno/)
+    expect(json(r)).toEqual({ erro: { codigo: 'erro_interno', mensagem: 'erro interno', requisicaoId: expect.stringMatching(/^[0-9a-f-]{36}$/) } }); expect(r.headers['x-request-id']).toBe(json(r).erro.requisicaoId); expect(r.body).not.toMatch(/SELECT|secret|bug interno/)
     expect(String((erros[0] as Error).message)).toContain('bug interno')
     await pg.exec('RESET ROLE; SET ROLE migrador')
     expect((await pg.query(`SELECT count(*)::int AS n FROM loja.cliente WHERE nome = 'fantasma'`)).rows[0]).toEqual({ n: 0 }) // rollback

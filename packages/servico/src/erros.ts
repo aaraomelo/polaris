@@ -1,7 +1,8 @@
 export class ErroApi extends Error {
   constructor(readonly status: number, readonly codigo: string, mensagem: string, readonly detalhes?: unknown) { super(mensagem); this.name = 'ErroApi' }
 }
-export const corpoErro = (e: ErroApi) => ({ erro: { codigo: e.codigo, mensagem: e.message, ...(e.detalhes !== undefined ? { detalhes: e.detalhes } : {}) } })
+/** o formato único de erro; `requisicaoId` (o mesmo do cabeçalho x-request-id) deixa o suporte achar a requisição nos logs e no trace */
+export const corpoErro = (e: ErroApi, requisicaoId?: string) => ({ erro: { codigo: e.codigo, mensagem: e.message, ...(e.detalhes !== undefined ? { detalhes: e.detalhes } : {}), ...(requisicaoId ? { requisicaoId } : {}) } })
 
 /** erros do Postgres que são do CLIENTE (não bug nosso): código SQLSTATE → resposta */
 export function erroDoBanco(e: unknown): ErroApi | null {

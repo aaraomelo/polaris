@@ -14,7 +14,8 @@
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "@polaris/eventos": "workspace:*",
-    "@polaris/acesso": "workspace:*"
+    "@polaris/acesso": "workspace:*",
+    "@polaris/observabilidade": "workspace:*"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",

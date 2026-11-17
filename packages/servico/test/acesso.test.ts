@@ -1,3 +1,4 @@
+process.env.POLARIS_LOG_NIVEL = 'silencio' // o serviço loga em JSON por padrão; os testes não precisam do ruído
 import { PGlite } from '@electric-sql/pglite'
 import { criaAutenticadorJwt } from '@polaris/acesso'
 import { Registry, emite, type No } from '@polaris/schema'

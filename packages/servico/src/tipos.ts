@@ -39,4 +39,8 @@ export type OpcoesServico = {
   limiteCorpoBytes?: number
   /** recebe erros inesperados (500); o cliente nunca vê a mensagem */
   aoErro?(erro: unknown, rota: string): void
+  /** logs, métricas e traces. Padrão: criado AUTOMÁTICO (JSON em stdout, métricas em memória, traces amostrados 100%); passe o seu para exportar os spans (OTLP, Jaeger) */
+  obs?: import('@polaris/observabilidade').Observabilidade
+  /** habilita `GET /metrics` (Prometheus) exigindo `Authorization: Bearer <este token>` (mín. 16 caracteres). SEM ele, a rota não existe: métricas nunca ficam abertas por esquecimento */
+  metricasToken?: string
 }
