@@ -13,6 +13,15 @@ describe('confereValor', () => {
     ['json', { qualquer: [1] }, true], ['json', 'x', true],
   ])('%s ← %j: %s', (tipo, valor, ok) => expect(confereValor({ tipo }, valor).ok).toBe(ok))
 
+  it('DINHEIRO é texto decimal exato: nunca vira float ("49.90" fica "49.90"; 1.005 não é arredondado)', () => {
+    expect(confereValor({ tipo: 'dinheiro' }, '49.90')).toEqual({ ok: true, valor: '49.90' })
+    expect(confereValor({ tipo: 'dinheiro' }, ' 1.005 ')).toEqual({ ok: true, valor: '1.005' })
+    expect(confereValor({ tipo: 'dinheiro' }, 49.9)).toEqual({ ok: true, valor: '49.9' })
+    expect(confereValor({ tipo: 'dinheiro' }, '9007199254740993.00').ok).toBe(false) // 16 inteiros: além do que o banco guarda
+    for (const v of ['1e3', '1,5', '', 'R$ 1', '1.23456', 1e21, Infinity, '-', '.5']) expect(confereValor({ tipo: 'dinheiro' }, v).ok, String(v)).toBe(false)
+    expect(confereValor({ tipo: 'dinheiro', lista: true }, ['1.10', 2])).toEqual({ ok: true, valor: ['1.10', '2'] })
+  })
+
   it('normaliza texto numérico (parâmetros de URL chegam como texto)', () => {
     expect(confereValor({ tipo: 'inteiro' }, '7')).toEqual({ ok: true, valor: 7 })
     expect(confereValor({ tipo: 'booleano' }, 'true')).toEqual({ ok: true, valor: true })

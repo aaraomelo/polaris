@@ -13,9 +13,13 @@ const descreve = (c: Pick<CampoParametro, 'tipo' | 'lista'>) => (c.lista ? `list
 function escalar(tipo: string, v: unknown): ResultadoValor {
   switch (tipo) {
     case 'texto': return typeof v === 'string' ? { ok: true, valor: v } : { ok: false, esperado: 'texto' }
-    case 'inteiro':
-    case 'decimal':
     case 'dinheiro': {
+      // DINHEIRO é texto decimal EXATO (até 15 inteiros e 4 casas), nunca float: "49.90" fica "49.90". Número só passa se a forma decimal é segura (sem notação científica).
+      const t = typeof v === 'number' ? (Number.isFinite(v) ? String(v) : '') : typeof v === 'string' ? v.trim() : ''
+      return /^-?\d{1,15}(\.\d{1,4})?$/.test(t) ? { ok: true, valor: t } : { ok: false, esperado: 'dinheiro (texto decimal, ex.: "49.90")' }
+    }
+    case 'inteiro':
+    case 'decimal': {
       // aceita texto numérico (parâmetros de URL chegam como texto) e normaliza
       const n = typeof v === 'string' && v.trim() !== '' ? Number(v) : v
       if (typeof n !== 'number' || !Number.isFinite(n)) return { ok: false, esperado: tipo }

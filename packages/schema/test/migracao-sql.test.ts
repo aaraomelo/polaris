@@ -1,3 +1,5 @@
+import { vi } from 'vitest'
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 }) // sobe um Postgres (WASM): com várias suítes em paralelo, 5 s é pouco
 import { PGlite } from '@electric-sql/pglite'
 import { afterEach, describe, expect, it } from 'vitest'
 import { emite, migraSql, type No } from '../src/index'

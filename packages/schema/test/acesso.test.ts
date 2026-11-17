@@ -51,3 +51,23 @@ describe('validação do papel contra os serviços', () => {
     expect(confere(r, r.registra(papel('w', [], { herda: ['fantasma'] }) as never)).map((e) => e.caminho)).toEqual(['/spec/herda/0'])
   })
 })
+
+describe('dados: a fonte de serviço é um contrato com o serviço', () => {
+  const dados = (id: string, fonte: object, parametros?: object): No => ({ kind: 'dados', id, versao: '1.0.0', estatuto: 'publicado', spec: { fonte: { tipo: 'servico', servico: 'loja', ...fonte }, ...(parametros ? { parametros } : {}) } }) as never
+  const erros = (n: No) => confere(reg(), reg().registra(n as never)).map((e) => `${e.caminho} [${e.regra}] ${e.mensagem}${e.dica ? ` (${e.dica})` : ''}`)
+  it('operação do crud, operação declarada e parâmetros corretos passam', () => {
+    expect(erros(dados('d.a', { operacao: 'listarProduto' }, { nome: { tipo: 'texto' }, pagina: { tipo: 'inteiro' }, limite: { tipo: 'inteiro' } }))).toEqual([])
+    expect(erros(dados('d.b', { operacao: 'cancelar' }, { id: { tipo: 'uuid', obrigatorio: true } }))).toEqual([])
+    expect(erros(dados('d.c', { operacao: 'obterPedido' }, { id: { tipo: 'uuid' } }))).toEqual([])
+  })
+  it('operação inexistente é apontada com sugestão; parâmetro desconhecido e de tipo errado também', () => {
+    expect(erros(dados('d.x', { operacao: 'listarProdutos' }))[0]).toContain("quis dizer 'listarProduto'?")
+    const e = erros(dados('d.y', { operacao: 'listarProduto' }, { nom: { tipo: 'texto' }, preco: { tipo: 'texto' }, pagina: { tipo: 'texto' } }))
+    expect(e.some((x) => x.includes("não aceita o parâmetro 'nom'") && x.includes("quis dizer 'nome'?"))).toBe(true)
+    expect(e.some((x) => x.startsWith('/spec/parametros/preco/tipo') && x.includes('espera dinheiro'))).toBe(true) // `preco` é filtro válido, mas o tipo é dinheiro
+    expect(e.some((x) => x.startsWith('/spec/parametros/pagina/tipo') && x.includes('espera inteiro'))).toBe(true)
+  })
+  it('fonte estática/http não é verificada aqui; serviço inexistente é referência quebrada (outro lugar)', () => {
+    expect(erros({ kind: 'dados', id: 'd.e', versao: '1.0.0', estatuto: 'publicado', spec: { fonte: { tipo: 'estatico', valor: 1 } } } as never)).toEqual([])
+  })
+})

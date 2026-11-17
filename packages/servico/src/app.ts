@@ -1,11 +1,10 @@
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify'
-import { codigoSucesso, esquemaDeEntidade, esquemaDoCampo, rotasDe, snake, type Campo, type No, type Rota } from '@polaris/schema'
+import { codigoSucesso, esquemaDeEntidade, esquemasHttp, rotasDe, snake, type Campo, type No, type Rota } from '@polaris/schema'
 import { aSql, avalia, camposPermitidos, permite, resolve, type Regra, type Resolvido, type Tipos } from '@polaris/acesso'
 import { criaPublicador } from '@polaris/eventos'
-import { criaObservabilidade, serializaErro, type Span } from '@polaris/observabilidade'
-import { randomUUID, timingSafeEqual } from 'node:crypto'
+import { criaObservabilidade, instalaObservabilidadeFastify, serializaErro, type ReqComObs } from '@polaris/observabilidade'
 import { ErroApi, corpoErro, erroDoBanco } from './erros'
 import { colunas, ident, linhaParaApi, nomesDeCampos, tabela, tiposDe, type Ent } from './sql'
 import type { Contexto, OpcoesServico } from './tipos'
@@ -24,12 +23,8 @@ import type { Contexto, OpcoesServico } from './tipos'
 type Spec = { entidades: Record<string, Ent & { campos: Record<string, Campo> }> }
 /** a decisão de acesso desta requisição (só nas rotas `protegida`) */
 type Acesso = { regras: Regra[]; v: { usuario?: string; tenant: string }; resolvido: Resolvido }
-type Requisicao = FastifyRequest & { ctx?: Contexto; acesso?: Acesso; obs?: { t0: number; reqId: string; span: Span; rota: string } }
-const ID_REQUISICAO = /^[A-Za-z0-9._-]{1,64}$/
-const SILENCIOSAS = new Set(['/saude', '/pronto', '/metrics'])
+type Requisicao = FastifyRequest & ReqComObs & { ctx?: Contexto; acesso?: Acesso }
 
-const SEGUNDOS_ID = { type: 'object', additionalProperties: false } as const
-const PAGINA = { pagina: { type: 'integer', minimum: 1, default: 1 }, limite: { type: 'integer', minimum: 1, maximum: 100, default: 24 } }
 
 export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
   const spec = no.spec as Spec
@@ -37,11 +32,6 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
   // observabilidade INJETADA: logs estruturados, métricas e traces sem o autor do serviço escrever nada
   const obs = o.obs ?? criaObservabilidade({ servico: no.id, versao: no.versao })
   const { log, metricas, tracer } = obs
-  if (o.metricasToken !== undefined && o.metricasToken.length < 16) throw new Error("metricasToken precisa ter ao menos 16 caracteres")
-  const mReq = metricas.contador('http_requests_total', 'Requisições HTTP atendidas', ['metodo', 'rota', 'status'])
-  const mDur = metricas.histograma('http_request_duration_seconds', 'Duração das requisições HTTP', ['metodo', 'rota'])
-  const mVoo = metricas.gauge('http_requests_in_flight', 'Requisições em andamento')
-  const mNeg = metricas.contador('http_recusadas_total', 'Requisições recusadas por autenticação ou permissão', ['status', 'codigo'])
   const mDb = metricas.contador('db_transacoes_total', 'Transações no banco, por resultado', ['resultado'])
   const mDbDur = metricas.histograma('db_transacao_duracao_segundos', 'Duração das transações no banco', ['resultado'])
   const mEv = metricas.contador('eventos_publicados_total', 'Eventos gravados no outbox', ['evento'])
@@ -77,42 +67,8 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
   app.setNotFoundHandler((req, reply) => reply.status(404).send(corpoErro(new ErroApi(404, 'rota_inexistente', 'rota inexistente'), (req as Requisicao).obs?.reqId)))
   app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); reply.header('cache-control', 'no-store') })
   app.get('/saude', async () => ({ ok: true, servico: no.id, versao: no.versao }))
-  // pronto = consegue falar com o banco (o `saude` só diz que o processo está de pé). Sem detalhe do erro para fora.
-  app.get('/pronto', async (_req, reply) => {
-    try { await o.db.transacao('00000000-0000-0000-0000-000000000000', (q) => q('SELECT 1')); return { ok: true } } catch (e) { log.error('banco indisponível', { erro: serializaErro(e) }); reply.status(503); return { ok: false } }
-  })
-  if (o.metricasToken !== undefined) {
-    const esperado = Buffer.from(`Bearer ${o.metricasToken}`)
-    app.get('/metrics', async (req, reply) => {
-      const a = Buffer.from(String(req.headers.authorization ?? ''))
-      if (a.length !== esperado.length || !timingSafeEqual(a, esperado)) throw new ErroApi(401, 'nao_autenticado', 'autenticação necessária') // comparação em tempo constante
-      reply.header('content-type', 'text/plain; version=0.0.4; charset=utf-8')
-      return metricas.texto()
-    })
-  }
-
-  // um span por requisição, aberto na forma com CALLBACK: é o que faz o contexto atravessar os hooks e o handler do Fastify
-  app.addHook('onRequest', (req, reply, done) => {
-    const idCliente = req.headers['x-request-id']
-    const reqId = typeof idCliente === 'string' && ID_REQUISICAO.test(idCliente) ? idCliente : randomUUID() // só um id bem formado é aceito (nada de injeção em log/cabeçalho)
-    const rota = req.routeOptions?.url ?? 'desconhecida' // o TEMPLATE (/pedidos/:id), nunca a URL real: cardinalidade fixa
-    const span = tracer.inicia(`${req.method} ${rota}`, { pai: tracer.extrai(req.headers.traceparent), tipo: 'servidor', atributos: { 'http.metodo': req.method, 'http.rota': rota, 'requisicao.id': reqId } })
-    ;(req as Requisicao).obs = { t0: performance.now(), reqId, span, rota }
-    reply.header('x-request-id', reqId)
-    mVoo.inc()
-    tracer.com(span, () => done())
-  })
-  app.addHook('onResponse', async (req, reply) => {
-    const x = (req as Requisicao).obs; if (!x) return
-    const status = reply.statusCode, seg = (performance.now() - x.t0) / 1000, ctx = (req as Requisicao).ctx
-    mVoo.dec(); mReq.inc({ metodo: req.method, rota: x.rota, status }); mDur.observa(seg, { metodo: req.method, rota: x.rota })
-    x.span.define('http.status', status); if (ctx) { x.span.define('tenant', ctx.tenantId); if (ctx.usuario) x.span.define('usuario', ctx.usuario) }
-    if (status >= 500) x.span.erro(`HTTP ${status}`)
-    x.span.fim()
-    // uma linha por requisição, SEM corpo, SEM cabeçalhos e SEM query string (podem ter dados pessoais e segredos): só o que identifica e mede
-    const nivel = SILENCIOSAS.has(x.rota) ? 'debug' : status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info'
-    log[nivel]('requisicao', { metodo: req.method, rota: x.rota, status, duracaoMs: Math.round(seg * 1000 * 100) / 100, requisicaoId: x.reqId, traceId: x.span.traceId, spanId: x.span.spanId, ...(ctx ? { tenantId: ctx.tenantId, ...(ctx.usuario ? { usuario: ctx.usuario } : {}) } : {}) })
-  })
+  // /pronto (fala com o banco), /metrics (fechado sem token), span por requisição, log e métricas HTTP: o mesmo que o gateway usa
+  const { recusadas: mNeg } = instalaObservabilidadeFastify(app, obs, { ...(o.metricasToken !== undefined ? { metricasToken: o.metricasToken } : {}), pronto: async () => { await o.db.transacao('00000000-0000-0000-0000-000000000000', (q) => q('SELECT 1')) }, erroNaoAutenticado: () => new ErroApi(401, 'nao_autenticado', 'autenticação necessária') })
 
   // eventos: todo evento declarado em `publica` precisa de contrato (nó `evento`), senão o serviço nem sobe
   const declarados = [...new Set(rotas.flatMap((r) => r.publica))]
@@ -137,16 +93,12 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
 
   for (const r of rotas) {
     const emQuery = r.metodo === 'get' || r.metodo === 'delete'
-    const props = (campos: Record<string, Campo>, todosOpcionais = false) => ({ properties: Object.fromEntries(Object.entries(campos).map(([k, c]) => [k, esquemaDoCampo(c)])), required: todosOpcionais ? [] : Object.entries(campos).filter(([, c]) => c.obrigatorio && c.padrao === undefined).map(([k]) => k) })
     // a resposta pode OMITIR campos (restrição por papel): só o id é obrigatório no serializador; o OpenAPI continua descrevendo o contrato completo
     const saida = r.saida ? { ...esquemaDeEntidade(spec.entidades[r.saida]!, 'saida'), required: ['id'] } : undefined
     const schema: Record<string, unknown> = {
-      ...(r.params.length ? { params: { type: 'object', properties: Object.fromEntries(r.params.map((p) => [p, { type: 'string', format: 'uuid' }])), required: r.params, additionalProperties: false } } : {}),
-      ...(emQuery ? { querystring: { type: 'object', ...props(r.entrada, r.origem.tipo === 'crud'), properties: { ...props(r.entrada).properties, ...(r.lista ? PAGINA : {}) }, additionalProperties: false } } : {}),
-      ...(!emQuery ? { body: { type: 'object', ...props(r.entrada, r.origem.tipo === 'crud' && r.origem.crud === 'atualizar'), additionalProperties: false } } : {}),
+      ...esquemasHttp(r), // a MESMA validação que o gateway aplica (fonte única no schema)
       response: { [codigoSucesso(r)]: saida ? (r.lista ? { type: 'array', items: saida } : saida) : { type: 'null' } },
     }
-    void SEGUNDOS_ID
     app.route({
       method: r.metodo.toUpperCase() as 'GET', url: r.caminhoFastify, schema,
       // autenticar e autorizar ANTES de validar

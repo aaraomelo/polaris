@@ -219,7 +219,7 @@ describe('/pronto e saúde do relay', () => {
     const r = await app.inject({ url: '/pronto' })
     falhaBanco = false
     expect(r.statusCode).toBe(503); expect(json(r)).toEqual({ ok: false }); expect(r.body).not.toMatch(/conexão|postgres|ECONN/)
-    const l = logs().find((x) => x.msg === 'banco indisponível')!; expect(l.nivel).toBe('error'); expect(JSON.stringify(l)).not.toMatch(/s3nha|eyJ/); expect(l.erro.mensagem).toContain('postgres://[REDIGIDO]@db')
+    const l = logs().find((x) => x.msg === 'dependência indisponível')!; expect(l.nivel).toBe('error'); expect(JSON.stringify(l)).not.toMatch(/s3nha|eyJ/); expect(l.erro.mensagem).toContain('postgres://[REDIGIDO]@db')
   })
   it('relay: pendentes e idade do mais antigo viram gauges; falha e morto viram contadores e logs (sem o payload)', async () => {
     limpa()

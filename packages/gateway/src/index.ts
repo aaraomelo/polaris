@@ -1,0 +1,6 @@
+export { CacheDoGateway, VisaoDeCache, type EscopoCache } from './cache'
+export { criaChamador, indiceDeRotas, type Chamador, type ChamadorCompleto, type ContextoChamada, type ServicoConfig, type Servicos } from './chamador'
+export { FalhaServico, clienteEmProcesso, clienteHttp, montaQuery, type ClienteServico, type PedidoServico, type RespostaServico } from './cliente'
+export { ErroGw, criaGateway, traduz, type CtxGw, type Gateway, type OpcoesGateway } from './gateway'
+export { geraSchema, type OpcoesGraphql } from './graphql'
+export { LimiteTaxa, type OpcoesTaxa } from './taxa'

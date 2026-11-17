@@ -34,6 +34,8 @@ export class CacheDados {
     return p
   }
 
+  /** remove UMA chave (para invalidação por quem conhece o escopo); devolve se existia */
+  apaga(chave: string): boolean { return this.itens.delete(chave) }
   limpa(): void { this.itens.clear() }
   get tamanho(): number { return this.itens.size }
 }

@@ -117,6 +117,23 @@ export function rotasDe(no: No): Rota[] {
   return rotas.sort((a, b) => (a.caminho === b.caminho ? (a.metodo < b.metodo ? -1 : 1) : a.caminho < b.caminho ? -1 : 1))
 }
 
+// ---- esquemas HTTP de uma rota (fonte ÚNICA: o serviço e o gateway validam IGUAL) ------------------------------------------------------------------
+const PAGINA_HTTP = { pagina: { type: 'integer', minimum: 1, default: 1 }, limite: { type: 'integer', minimum: 1, maximum: 100, default: 24 } }
+/** JSON Schemas de `params`, `querystring` (GET/DELETE) e `body` (demais) de uma rota. Sempre `additionalProperties: false`: campo desconhecido é rejeitado, não ignorado. */
+export function esquemasHttp(r: Rota): { params?: Record<string, unknown>; querystring?: Record<string, unknown>; body?: Record<string, unknown> } {
+  const emQuery = r.metodo === 'get' || r.metodo === 'delete'
+  const crud = r.origem.tipo === 'crud'
+  const props = (campos: Record<string, Campo>, todosOpcionais: boolean) => ({
+    properties: Object.fromEntries(Object.entries(campos).map(([k, c]) => [k, esquemaDoCampo(c)])),
+    required: todosOpcionais ? [] : Object.entries(campos).filter(([, c]) => c.obrigatorio && c.padrao === undefined).map(([k]) => k),
+  })
+  return {
+    ...(r.params.length ? { params: { type: 'object', properties: Object.fromEntries(r.params.map((p) => [p, { type: 'string', format: 'uuid' }])), required: r.params, additionalProperties: false } } : {}),
+    ...(emQuery ? { querystring: { type: 'object', ...props(r.entrada, crud), properties: { ...props(r.entrada, false).properties, ...(r.lista ? PAGINA_HTTP : {}) }, additionalProperties: false } } : {}),
+    ...(!emQuery ? { body: { type: 'object', ...props(r.entrada, crud && r.origem.tipo === 'crud' && r.origem.crud === 'atualizar'), additionalProperties: false } } : {}),
+  }
+}
+
 // ---- OpenAPI ----------------------------------------------------------------------------------------------------------------------------------
 
 const ERRO = { type: 'object', required: ['erro'], properties: { erro: { type: 'object', required: ['codigo', 'mensagem'], properties: { codigo: { type: 'string' }, mensagem: { type: 'string' }, detalhes: {} } } } }

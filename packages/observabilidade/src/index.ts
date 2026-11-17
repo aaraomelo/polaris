@@ -3,3 +3,4 @@ export { BUCKETS_SEGUNDOS, Contador, Gauge, Histograma, Metricas } from './metri
 export { REDIGIDO, chaveSensivel, redige, redigeTexto, serializaErro } from './redacao'
 export { Span, Tracer, exportadorMemoria, formataTraceparent, parseTraceparent, type ContextoTrace, type Exportador, type OpcoesSpan, type OpcoesTracer, type SpanFinal } from './trace'
 export { criaObservabilidade, type Observabilidade, type OpcoesObservabilidade } from './obs'
+export { instalaObservabilidadeFastify, obsDe, type DadosObs, type OpcoesFastify, type ReqComObs } from './fastify'
