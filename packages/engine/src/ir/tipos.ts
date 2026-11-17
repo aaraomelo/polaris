@@ -32,7 +32,7 @@ export type IRAcao =
   | { acao: 'executar'; dados: string; args: Record<string, Valor>; depois: IRAcao[]; emErro: IRAcao[]; caminho: string }
   | { acao: 'navegar'; para: Valor; caminho: string }
 
-type Comum = { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string } }
+type Comum = { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string; chave?: Expr } }
 
 export type IRElemento = Comum & {
   tipo: 'elemento'

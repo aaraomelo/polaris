@@ -1,6 +1,6 @@
 import { avalia, FUNCOES_PADRAO, type Escopo, type Funcoes } from '../expr/index'
 import type { IRAcao } from '../ir/tipos'
-import { urlSegura } from './base'
+import { urlSegura } from './url'
 import type { Programa } from './programa'
 import { escopoDaStore, reduz, type AcaoStore, type Store } from './store'
 import type { ErroRuntime } from './tipos'

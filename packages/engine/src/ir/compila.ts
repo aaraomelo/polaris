@@ -13,7 +13,7 @@ import {
 type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar'; estado?: string; valor?: string; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
 type Inst = {
   bloco: string; id?: string; props?: unknown; slots?: Record<string, Inst[]>
-  se?: string; repetir?: { cada: string; como: string }; eventos?: Record<string, AcaoSrc[]>; esqueleto?: Inst
+  se?: string; repetir?: { cada: string; como: string; chave?: string }; eventos?: Record<string, AcaoSrc[]>; esqueleto?: Inst
 }
 
 export type Resultado<T> = { ok: true; ir: T } | { ok: false; erros: Erro[] }
@@ -160,7 +160,7 @@ function compilaAcoes(cx: Cx, lista: AcaoSrc[], caminho: string, escopo: readonl
 // ---- árvore -----------------------------------------------------------------
 
 function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly string[], cobertas: ReadonlySet<string> = new Set()): IRNo {
-  const base = { caminho } as { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string } }
+  const base = { caminho } as { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string; chave?: Expr } }
   // coleta as variáveis das expressões PRÓPRIAS do nó (se, repetir.cada, props): é o que decide a fronteira de streaming
   const proprio = new Set<string>()
   const anterior = cx.proprio
@@ -174,8 +174,9 @@ function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly strin
     if (escopo.includes(como) || (RESERVADOS as readonly string[]).includes(como)) {
       cx.erro(`${caminho}/repetir/como`, 'repetir', `'${como}' já existe neste escopo ou é reservado e seria sobrescrito`, `escolha outro nome (em uso: ${[...new Set([...escopo, 'indice'])].join(', ')})`)
     }
-    if (cada) base.repetir = { cada, como }
     interno = [...escopo, como, 'indice']
+    const chave = inst.repetir.chave !== undefined ? exprPura(cx, inst.repetir.chave, interno, `${caminho}/repetir/chave`) : undefined
+    if (cada) base.repetir = { cada, como, ...(chave ? { chave } : {}) }
   }
 
   if (inst.bloco === SLOT_NATIVO) {

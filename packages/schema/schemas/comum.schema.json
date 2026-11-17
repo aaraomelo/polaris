@@ -116,6 +116,10 @@
               "type": "string",
               "pattern": "^[a-z][A-Za-z0-9]*$",
               "description": "nome da variável de cada item"
+            },
+            "chave": {
+              "$ref": "#/$defs/expressao",
+              "description": "identidade estável de cada item (ex.: p.id), avaliada no escopo do item. Com ela o runtime só move/cria/remove o necessário; sem ela, a posição é a identidade"
             }
           },
           "additionalProperties": false

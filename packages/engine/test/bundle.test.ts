@@ -33,6 +33,13 @@ describe('orçamento do bundle do cliente', () => {
     expect(proprio.length).toBeGreaterThan(5) // a medição enxerga o nosso código (não é um bundle vazio)
   })
 
+  it('o runtime vivo (sem React) não tem React, Ajv nem QuickJS e cabe em 10 KB gz (avaliador, ações e blocos base inclusos)', async () => {
+    const b = await empacota(`import { montaVivo } from './src/vivo/index'; montaVivo({} as never)`)
+    for (const re of [...PROIBIDOS, /node_modules\/\.pnpm\/react/]) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
+    expect(b.gz).toBeLessThan(10 * 1024)
+    expect(b.entradas.some((e) => /vivo\/monta/.test(e))).toBe(true)
+  })
+
   it('o QuickJS só entra no bundle de quem pede o sandbox (subpath separado)', async () => {
     const sem = await empacota(`import { hidrataAsync } from './src/render/cliente'; hidrataAsync({} as never)`)
     const com = await empacota(`import { hidrataAsync } from './src/render/cliente'; import { criaSandboxLocal } from './src/sandbox/local'; criaSandboxLocal().then((s) => hidrataAsync({} as never, { codigo: { sandbox: s } }))`)
