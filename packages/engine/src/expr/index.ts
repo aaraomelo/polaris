@@ -1,0 +1,5 @@
+export * from './tipos'
+export { parseExpr } from './parser'
+export { avalia, verdadeiro, type Escopo } from './avalia'
+export { FUNCOES_PADRAO } from './funcoes'
+export { analisa, validaExpr, type ProblemaExpr } from './analise'

@@ -14,7 +14,8 @@
     },
     "expressao": {
       "type": "string",
-      "description": "binding: texto com {caminho | formatador}. Linguagem de expressões completa fica para o card E11."
+      "minLength": 1,
+      "description": "expressão pura (sem chaves), ex.: produtos.length > 0. Usada em se e repetir.cada"
     },
     "tipoDado": {
       "enum": [
@@ -112,13 +113,19 @@
               "$ref": "#/$defs/expressao"
             },
             "como": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$",
+              "description": "nome da variável de cada item"
             }
           },
           "additionalProperties": false
         }
       },
       "additionalProperties": false
+    },
+    "template": {
+      "type": "string",
+      "description": "texto com bindings {expressao | formatador}; {{ e }} literais não existem: use \\{ e \\}. Um texto que é só um binding mantém o tipo do valor"
     }
   }
 }

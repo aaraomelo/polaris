@@ -43,7 +43,7 @@
       "type": "string"
     },
     "rodape": {
-      "$ref": "polaris://comum/v1#/$defs/expressao"
+      "$ref": "polaris://comum/v1#/$defs/template"
     },
     "blocos": {
       "type": "array",
