@@ -15,6 +15,7 @@
     "ajv-formats": "^3.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@types/node": "^22.10.5",
     "typescript": "~5.6.3",
     "vitest": "^2.1.8"

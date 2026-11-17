@@ -65,7 +65,7 @@ const TEX: Record<string, string> = { '\\': '\\textbackslash{}', '&': '\\&', '%'
 const escTex = (s: string) => s.replace(/[\\&%$#_{}~^]/g, (c) => TEX[c]!)
 
 const aspasSql = (s: string) => `'${s.replace(/'/g, "''")}'`
-const identSql = (s: string) => `"${s.replace(/"/g, '""')}"`
+export const identSql = (s: string) => `"${s.replace(/"/g, '""')}"`
 
 // ---- js -------------------------------------------------------------------
 
@@ -153,13 +153,13 @@ function emiteCss(no: No): string {
 
 // ---- sql ------------------------------------------------------------------
 
-const TIPO_SQL: Record<string, string> = {
+export const TIPO_SQL: Record<string, string> = {
   texto: 'text', inteiro: 'bigint', decimal: 'numeric', booleano: 'boolean', data: 'date',
   dataHora: 'timestamptz', dinheiro: 'numeric(19,4)', uuid: 'uuid', json: 'jsonb',
 }
-const snake = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
+export const snake = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
 
-function literalSql(v: unknown, tipo: string): string {
+export function literalSql(v: unknown, tipo: string): string {
   if (v === null) return 'NULL'
   if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE'
   if (typeof v === 'number') {
@@ -170,9 +170,9 @@ function literalSql(v: unknown, tipo: string): string {
   return aspasSql(String(v))
 }
 
-type Campo = { tipo: string; obrigatorio?: boolean; lista?: boolean; padrao?: unknown }
+export type Campo = { tipo: string; obrigatorio?: boolean; lista?: boolean; padrao?: unknown; referencia?: string }
 
-function colunaSql(nome: string, c: Campo): string {
+export function colunaSql(nome: string, c: Campo): string {
   const base = TIPO_SQL[c.tipo]!
   const tipo = c.lista && c.tipo !== 'json' ? `${base}[]` : base
   const partes = [`  ${identSql(snake(nome))} ${tipo}`]
@@ -181,36 +181,71 @@ function colunaSql(nome: string, c: Campo): string {
   return partes.join(' ')
 }
 
-function emiteSql(no: No): string {
-  const spec = no.spec as { entidades: Record<string, { campos: Record<string, Campo>; indices?: string[][] }> }
-  const esq = identSql(no.id)
-  const out: string[] = [`-- polaris: servico ${no.id}@${no.versao}`, `CREATE SCHEMA IF NOT EXISTS ${esq};`]
-  for (const nome of Object.keys(spec.entidades).sort()) {
-    const ent = spec.entidades[nome]!
-    const tab = `${esq}.${identSql(snake(nome))}`
-    const reservados = ['id', 'tenant_id', 'criado_em', 'atualizado_em']
-    for (const campo of Object.keys(ent.campos)) {
-      if (reservados.includes(snake(campo))) throw new EmissaoErro(`servico ${no.id}: campo '${campo}' em '${nome}' colide com coluna reservada (${reservados.join(', ')})`)
-    }
-    const colunas = [
-      '  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid()',
-      '  "tenant_id" uuid NOT NULL',
-      ...Object.keys(ent.campos).map((c) => colunaSql(c, ent.campos[c]!)),
-      '  "criado_em" timestamptz NOT NULL DEFAULT now()',
-      '  "atualizado_em" timestamptz NOT NULL DEFAULT now()',
-    ]
-    out.push('', `CREATE TABLE IF NOT EXISTS ${tab} (\n${colunas.join(',\n')}\n);`)
-    out.push(`CREATE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_tenant_idx`)} ON ${tab} ("tenant_id");`)
-    for (const cols of ent.indices ?? []) {
-      for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${no.id}: índice de '${nome}' usa campo inexistente '${c}'`)
-      const nomes = cols.map(snake)
-      out.push(`CREATE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_${nomes.join('_')}_idx`)} ON ${tab} ("tenant_id", ${nomes.map(identSql).join(', ')});`)
-    }
-    out.push(`ALTER TABLE ${tab} ENABLE ROW LEVEL SECURITY;`, `ALTER TABLE ${tab} FORCE ROW LEVEL SECURITY;`)
-    const cond = `"tenant_id" = current_setting('app.tenant_id')::uuid`
-    // USING cobre SELECT/UPDATE/DELETE e WITH CHECK cobre INSERT/UPDATE: o tenant não escreve linha de outro.
-    out.push(`DROP POLICY IF EXISTS ${identSql(`${snake(nome)}_tenant`)} ON ${tab};`, `CREATE POLICY ${identSql(`${snake(nome)}_tenant`)} ON ${tab}\n  USING (${cond})\n  WITH CHECK (${cond});`)
+type EntidadeSql = { campos: Record<string, Campo>; indices?: string[][] }
+const RESERVADOS = ['id', 'tenant_id', 'criado_em', 'atualizado_em']
+
+/** Nome da FK composta de um campo. */
+export const nomeFk = (entidade: string, campo: string) => `${snake(entidade)}_${snake(campo)}_fk`
+export const nomeIndice = (entidade: string, campos: string[]) => `${snake(entidade)}_${campos.map(snake).join('_')}_idx`
+
+/** O comando que cria a FK COMPOSTA (tenant_id, id): as checagens de integridade do Postgres IGNORAM a RLS, então um FK simples deixaria um tenant apontar para a linha de outro. */
+export function sqlFk(servico: string, entidade: string, campo: string, alvo: string): string[] {
+  const tab = `${identSql(servico)}.${identSql(snake(entidade))}`
+  const fk = identSql(nomeFk(entidade, campo))
+  return [`ALTER TABLE ${tab} DROP CONSTRAINT IF EXISTS ${fk};`, `ALTER TABLE ${tab} ADD CONSTRAINT ${fk} FOREIGN KEY ("tenant_id", ${identSql(snake(campo))}) REFERENCES ${identSql(servico)}.${identSql(snake(alvo))} ("tenant_id", "id");`]
+}
+
+export function validaReferencia(servico: string, entidade: string, campo: string, c: Campo, entidades: Record<string, unknown>): void {
+  if (c.referencia === undefined) return
+  if (c.tipo !== 'uuid') throw new EmissaoErro(`servico ${servico}: '${entidade}.${campo}' tem referencia '${c.referencia}' mas é do tipo '${c.tipo}' (use uuid)`)
+  if (c.lista) throw new EmissaoErro(`servico ${servico}: '${entidade}.${campo}' é uma lista; chave estrangeira não vale para lista de uuids`)
+  if (!(c.referencia in entidades)) throw new EmissaoErro(`servico ${servico}: '${entidade}.${campo}' referencia a entidade inexistente '${c.referencia}'`)
+}
+
+/** DDL de UMA entidade (tabela, índices, RLS) e as FKs dela, separadas porque só podem ser criadas depois de todas as tabelas. */
+export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, entidades: Record<string, unknown>): { tabela: string[]; fks: string[] } {
+  const esq = identSql(servico), tab = `${esq}.${identSql(snake(nome))}`
+  const tabela: string[] = [], fks: string[] = []
+  for (const [campo, c] of Object.entries(ent.campos)) {
+    validaReferencia(servico, nome, campo, c, entidades)
+    if (c.referencia !== undefined) fks.push(...sqlFk(servico, nome, campo, c.referencia))
+    if (RESERVADOS.includes(snake(campo))) throw new EmissaoErro(`servico ${servico}: campo '${campo}' em '${nome}' colide com coluna reservada (${RESERVADOS.join(', ')})`)
   }
+  const colunas = [
+    '  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid()',
+    '  "tenant_id" uuid NOT NULL',
+    ...Object.keys(ent.campos).map((c) => colunaSql(c, ent.campos[c]!)),
+    '  "criado_em" timestamptz NOT NULL DEFAULT now()',
+    '  "atualizado_em" timestamptz NOT NULL DEFAULT now()',
+  ]
+  tabela.push('', `CREATE TABLE IF NOT EXISTS ${tab} (\n${colunas.join(',\n')}\n);`)
+  tabela.push(`CREATE UNIQUE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_tenant_id_uidx`)} ON ${tab} ("tenant_id", "id");`) // alvo das FKs compostas
+  tabela.push(`CREATE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_tenant_idx`)} ON ${tab} ("tenant_id");`)
+  for (const cols of ent.indices ?? []) {
+    for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: índice de '${nome}' usa campo inexistente '${c}'`)
+    tabela.push(sqlIndice(servico, nome, cols))
+  }
+  tabela.push(`ALTER TABLE ${tab} ENABLE ROW LEVEL SECURITY;`, `ALTER TABLE ${tab} FORCE ROW LEVEL SECURITY;`)
+  // `current_setting(…, true)` não falha se o parâmetro nunca foi definido e `nullif` trata o vazio (sobra de um RESET numa conexão reutilizada):
+  // sem tenant, a comparação dá NULL e NENHUMA linha passa (falha fechada), em vez de erro de configuração.
+  const cond = `"tenant_id" = nullif(current_setting('app.tenant_id', true), '')::uuid`
+  // USING cobre SELECT/UPDATE/DELETE e WITH CHECK cobre INSERT/UPDATE: o tenant não escreve linha de outro.
+  tabela.push(`DROP POLICY IF EXISTS ${identSql(`${snake(nome)}_tenant`)} ON ${tab};`, `CREATE POLICY ${identSql(`${snake(nome)}_tenant`)} ON ${tab}\n  USING (${cond})\n  WITH CHECK (${cond});`)
+  return { tabela, fks }
+}
+
+export const sqlIndice = (servico: string, entidade: string, cols: string[]): string =>
+  `CREATE INDEX IF NOT EXISTS ${identSql(nomeIndice(entidade, cols))} ON ${identSql(servico)}.${identSql(snake(entidade))} ("tenant_id", ${cols.map(snake).map(identSql).join(', ')});`
+
+function emiteSql(no: No): string {
+  const spec = no.spec as { entidades: Record<string, EntidadeSql> }
+  const out: string[] = [`-- polaris: servico ${no.id}@${no.versao}`, `CREATE SCHEMA IF NOT EXISTS ${identSql(no.id)};`]
+  const fks: string[] = [] // FKs vão DEPOIS de todas as tabelas (ordem e ciclos deixam de importar)
+  for (const nome of Object.keys(spec.entidades).sort()) {
+    const d = ddlEntidade(no.id, nome, spec.entidades[nome]!, spec.entidades)
+    out.push(...d.tabela); fks.push(...d.fks)
+  }
+  if (fks.length) out.push('', ...fks)
   return out.join('\n') + '\n'
 }
 

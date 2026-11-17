@@ -73,6 +73,11 @@
         "padrao": {},
         "descricao": {
           "type": "string"
+        },
+        "referencia": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "description": "entidade do mesmo serviço a que este campo (uuid) aponta; vira chave estrangeira COMPOSTA (tenant_id, id): a referência nunca cruza tenants"
         }
       },
       "additionalProperties": false
