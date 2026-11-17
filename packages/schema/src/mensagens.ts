@@ -95,7 +95,8 @@ export function traduz(e: ErrorObject, base = ''): Erro | null {
     case 'propertyNames':
       return out(`nome de campo inválido: ${JSON.stringify(p.propertyName)}`)
     case 'oneOf':
-      return out('não corresponde a nenhuma das formas permitidas', 'confira o campo "op" e os campos exigidos por ela')
+    case 'anyOf':
+      return out('não corresponde a nenhuma das formas permitidas', 'confira o campo que distingue a forma (op, acao…) e os campos exigidos por ela')
     case 'not':
       return out('combinação de campos não permitida', 'um nó tem escopo de tenant (tenantId) OU de segmento (segmento), nunca os dois')
     default:
@@ -104,7 +105,35 @@ export function traduz(e: ErrorObject, base = ''): Erro | null {
 }
 
 /** Traduz, remove ruído e deduplica (mesmo caminho + regra + mensagem). */
+/**
+ * oneOf/anyOf: o Ajv devolve os erros de TODOS os ramos, o que é ruído. Mantém só os do ramo que o usuário
+ * provavelmente quis (o de menos erros) e descarta o invólucro; se esse ramo falha no discriminador
+ * (const/enum), o usuário não escolheu nenhuma forma: fica só o invólucro, com a dica.
+ */
+function podaRamos(erros: readonly ErrorObject[]): ErrorObject[] {
+  const fora = new Set<ErrorObject>()
+  for (const w of erros.filter((e) => e.keyword === 'oneOf' || e.keyword === 'anyOf')) {
+    const prefixo = `${w.schemaPath}/`
+    const porRamo = new Map<number, ErrorObject[]>()
+    for (const e of erros) {
+      if (e === w || !e.schemaPath.startsWith(prefixo)) continue
+      const i = Number(e.schemaPath.slice(prefixo.length).split('/')[0])
+      porRamo.set(i, [...(porRamo.get(i) ?? []), e])
+    }
+    if (porRamo.size === 0) continue
+    // ramo que o dado "tenta ser": sem erro de tipo (um objeto não é um ramo de texto), depois o de menos erros
+    const pontos = (es: ErrorObject[]) => (es.some((e) => e.keyword === 'type' && e.instancePath === w.instancePath) ? 1000 : 0) + es.length
+    const [melhor] = [...porRamo.entries()].sort((a, b) => pontos(a[1]) - pontos(b[1]) || a[0] - b[0])
+    const todos = [...porRamo.values()].flat()
+    const escolheuForma = !melhor![1].some((e) => e.keyword === 'const' || e.keyword === 'enum')
+    if (escolheuForma) { fora.add(w); for (const e of todos) if (!melhor![1].includes(e)) fora.add(e) }
+    else for (const e of todos) fora.add(e)
+  }
+  return erros.filter((e) => !fora.has(e))
+}
+
 export function traduzTodos(erros: readonly ErrorObject[], base = ''): Erro[] {
+  erros = podaRamos(erros)
   const vistos = new Set<string>()
   const saida: Erro[] = []
   for (const e of erros) {

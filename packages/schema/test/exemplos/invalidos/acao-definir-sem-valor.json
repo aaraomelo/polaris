@@ -1,0 +1,20 @@
+{
+  "kind": "pagina",
+  "id": "p",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/",
+    "raiz": {
+      "bloco": "a/b",
+      "eventos": {
+        "aoClicar": [
+          {
+            "acao": "definir",
+            "estado": "x"
+          }
+        ]
+      }
+    }
+  }
+}

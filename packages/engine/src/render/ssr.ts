@@ -1,5 +1,6 @@
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
+import { carregaDados, type OpcoesCarga, type ResultadoDados } from '../dados/carrega'
 import { Pagina, tituloDaPagina, type EntradaPagina } from './pagina'
 import type { Programa } from './programa'
 
@@ -14,7 +15,7 @@ export const ID_RAIZ = 'polaris'
 export const ID_ESTADO = '__POLARIS__'
 
 /** Estado enviado ao cliente para hidratar sem nova busca. Não inclui os componentes (código do cliente). */
-export type EstadoCliente = Pick<EntradaPagina, 'dados' | 'params' | 'consulta' | 'tenant'> & { programa: Programa }
+export type EstadoCliente = Pick<EntradaPagina, 'dados' | 'status' | 'erros' | 'estado' | 'params' | 'consulta' | 'tenant'> & { programa: Programa }
 
 export type SaidaSsr = { html: string; corpo: string; titulo: string; estado: EstadoCliente }
 
@@ -25,6 +26,9 @@ export function renderPaginaHtml(entrada: EntradaPagina, opcoes: { scripts?: str
   const estado: EstadoCliente = {
     programa: entrada.programa,
     ...(entrada.dados ? { dados: entrada.dados } : {}),
+    ...(entrada.status ? { status: entrada.status } : {}),
+    ...(entrada.erros ? { erros: entrada.erros } : {}),
+    ...(entrada.estado ? { estado: entrada.estado } : {}),
     ...(entrada.params ? { params: entrada.params } : {}),
     ...(entrada.consulta ? { consulta: entrada.consulta } : {}),
     ...(entrada.tenant ? { tenant: entrada.tenant } : {}),
@@ -36,4 +40,22 @@ export function renderPaginaHtml(entrada: EntradaPagina, opcoes: { scripts?: str
     `<body><div id="${ID_RAIZ}">${corpo}</div>` +
     `<script type="application/json" id="${ID_ESTADO}">${jsonSeguro(estado)}</script>${scripts}</body></html>`
   return { html, corpo, titulo, estado }
+}
+
+export type SaidaCompleta = SaidaSsr & { resultado: ResultadoDados }
+
+/** Carrega os dados `auto` da página (em paralelo, sem lançar) e renderiza no servidor. Falha de fonte vira status/erro, não exceção. */
+export async function renderPaginaCompleta(
+  programa: Programa,
+  componentes: EntradaPagina['componentes'],
+  opcoes: OpcoesCarga & { scripts?: string[]; lang?: string },
+): Promise<SaidaCompleta> {
+  const resultado = await carregaDados(programa, opcoes)
+  const { scripts, lang, ...carga } = opcoes
+  const saida = renderPaginaHtml({
+    programa, componentes, dados: resultado.dados, status: resultado.status, erros: resultado.erros,
+    ...(carga.params ? { params: carga.params } : {}), ...(carga.consulta ? { consulta: carga.consulta } : {}),
+    ...(carga.tenant ? { tenant: carga.tenant } : {}), ...(carga.estado ? { estado: carga.estado } : {}),
+  }, { ...(scripts ? { scripts } : {}), ...(lang ? { lang } : {}) })
+  return { ...saida, resultado }
 }

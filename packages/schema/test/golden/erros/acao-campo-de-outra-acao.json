@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/raiz/eventos/aoClicar/0/estado",
+    "regra": "additionalProperties",
+    "mensagem": "o campo 'estado' não existe aqui",
+    "dica": "campos válidos: acao, para"
+  }
+]

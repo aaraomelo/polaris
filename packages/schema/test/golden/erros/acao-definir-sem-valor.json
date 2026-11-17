@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/raiz/eventos/aoClicar/0",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'valor'",
+    "dica": "adicione \"valor\" em /spec/raiz/eventos/aoClicar/0"
+  }
+]

@@ -1,4 +1,7 @@
 export * from './expr/index'
 export * from './template'
 export * from './ir/index'
+export * from './dados/args'
 export * from './render/index'
+export * from './dados/cache'
+export * from './dados/carrega'

@@ -119,6 +119,21 @@
             }
           },
           "additionalProperties": false
+        },
+        "eventos": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][A-Za-z0-9]*$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/$defs/acao"
+            }
+          },
+          "description": "evento do bloco → ações executadas em sequência"
         }
       },
       "additionalProperties": false
@@ -126,6 +141,133 @@
     "template": {
       "type": "string",
       "description": "texto com bindings {expressao | formatador}; {{ e }} literais não existem: use \\{ e \\}. Um texto que é só um binding mantém o tipo do valor"
+    },
+    "acao": {
+      "type": "object",
+      "required": [
+        "acao"
+      ],
+      "properties": {
+        "acao": {
+          "enum": [
+            "definir",
+            "executar",
+            "navegar"
+          ]
+        },
+        "estado": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "description": "definir: nome de uma entrada de spec.estado"
+        },
+        "valor": {
+          "$ref": "#/$defs/expressao",
+          "description": "definir: expressão avaliada na hora do evento (vê evento e o escopo da página)"
+        },
+        "dados": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "description": "executar: nome de uma entrada de spec.dados"
+        },
+        "args": {
+          "type": "object",
+          "description": "executar: argumentos (templates; veem evento e o escopo)"
+        },
+        "depois": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/acao"
+          },
+          "description": "executar: ações após sucesso (vêem resultado)"
+        },
+        "emErro": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/acao"
+          },
+          "description": "executar: ações após falha (vêem erro)"
+        },
+        "para": {
+          "$ref": "#/$defs/template",
+          "description": "navegar: URL ou rota de destino"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "acao": {
+                "const": "definir"
+              }
+            },
+            "required": [
+              "acao"
+            ]
+          },
+          "then": {
+            "properties": {
+              "acao": {},
+              "estado": {},
+              "valor": {}
+            },
+            "required": [
+              "estado",
+              "valor"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "acao": {
+                "const": "executar"
+              }
+            },
+            "required": [
+              "acao"
+            ]
+          },
+          "then": {
+            "properties": {
+              "acao": {},
+              "dados": {},
+              "args": {},
+              "depois": {},
+              "emErro": {}
+            },
+            "required": [
+              "dados"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "acao": {
+                "const": "navegar"
+              }
+            },
+            "required": [
+              "acao"
+            ]
+          },
+          "then": {
+            "properties": {
+              "acao": {},
+              "para": {}
+            },
+            "required": [
+              "para"
+            ],
+            "additionalProperties": false
+          }
+        }
+      ],
+      "unevaluatedProperties": false
     }
   }
 }

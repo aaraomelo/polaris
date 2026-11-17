@@ -1,0 +1,13 @@
+{
+  "kind": "dados",
+  "id": "d",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "fonte": {
+      "tipo": "estatico",
+      "valor": 1
+    },
+    "carregar": "as vezes"
+  }
+}

@@ -42,6 +42,13 @@ export const COMPONENTES_BASE: Componentes = {
     if (!src) return null
     return createElement('img', { ...(id ? { id } : {}), src, alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy' })
   },
+  'nav/botao': ({ props, on, id }) =>
+    createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, onClick: () => on.aoClicar?.() }, txt(props.texto)),
+  'entrada/texto': ({ props, on, id }) =>
+    createElement('input', {
+      ...(id ? { id } : {}), type: 'text', value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
+      onChange: (e: { target: { value: string } }) => on.aoMudar?.(e.target.value),
+    }),
   'nav/link': ({ props, slots, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
@@ -57,6 +64,8 @@ export const BLOCOS_BASE = [
   bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 } }, required: ['src'] } }),
+  bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
+  bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' } }, required: ['href'] } }),
 ]
 

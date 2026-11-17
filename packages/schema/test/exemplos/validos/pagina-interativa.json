@@ -1,0 +1,88 @@
+{
+  "kind": "pagina",
+  "id": "busca",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/busca",
+    "titulo": "Busca",
+    "estado": {
+      "termo": {
+        "tipo": "texto",
+        "inicial": ""
+      },
+      "pagina": {
+        "tipo": "inteiro",
+        "inicial": 1
+      }
+    },
+    "dados": {
+      "produtos": {
+        "dados": "dados.produtos",
+        "args": {
+          "q": "{estado.termo}",
+          "pagina": "{estado.pagina}"
+        }
+      },
+      "loja": "dados.loja"
+    },
+    "raiz": {
+      "bloco": "layout/pilha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "entrada/texto",
+            "props": {
+              "valor": "{estado.termo}"
+            },
+            "eventos": {
+              "aoMudar": [
+                {
+                  "acao": "definir",
+                  "estado": "termo",
+                  "valor": "evento"
+                },
+                {
+                  "acao": "executar",
+                  "dados": "produtos"
+                }
+              ]
+            }
+          },
+          {
+            "bloco": "nav/botao",
+            "props": {
+              "texto": "Proxima"
+            },
+            "eventos": {
+              "aoClicar": [
+                {
+                  "acao": "definir",
+                  "estado": "pagina",
+                  "valor": "estado.pagina + 1"
+                },
+                {
+                  "acao": "executar",
+                  "dados": "produtos",
+                  "depois": [
+                    {
+                      "acao": "navegar",
+                      "para": "/busca?p={estado.pagina}"
+                    }
+                  ],
+                  "emErro": [
+                    {
+                      "acao": "definir",
+                      "estado": "termo",
+                      "valor": "''"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

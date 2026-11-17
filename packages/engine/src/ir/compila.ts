@@ -1,25 +1,33 @@
 import { confere, sugere, type Contexto, type Erro, type No, type Registry } from '@polaris/schema'
+import { confereValor } from '../dados/args'
 import { ExprErro, parseExpr, validaExpr, type Expr, FUNCOES_PADRAO, analisa } from '../expr/index'
 import { parseTemplate, TemplateErro, type Template } from '../template'
 import {
-  ESCOPO_BLOCO, ESCOPO_PAGINA, SLOT_NATIVO,
-  type IRBloco, type IRBlocoModelo, type IRNo, type IRPagina, type ImplBloco, type Valor,
+  ESCOPO_ARGS, ESCOPO_BLOCO, ESCOPO_PAGINA, RESERVADOS, SLOT_NATIVO,
+  type CampoParametro, type FonteDados, type IRAcao, type IRBloco, type IRBlocoModelo, type IRDado, type IREstado, type IRNo, type IRPagina, type ImplBloco, type Valor,
 } from './tipos'
 
 // Compila nós `pagina` e `bloco` do registry para IR. Nunca lança por erro de conteúdo:
 // devolve { ok: false, erros } com caminho JSON, regra e dica (mesmo formato dos outros validadores).
 
+type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar'; estado?: string; valor?: string; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
 type Inst = {
   bloco: string; id?: string; props?: unknown; slots?: Record<string, Inst[]>
-  se?: string; repetir?: { cada: string; como: string }
+  se?: string; repetir?: { cada: string; como: string }; eventos?: Record<string, AcaoSrc[]>
 }
 
 export type Resultado<T> = { ok: true; ir: T } | { ok: false; erros: Erro[] }
 
+const MAX_ACOES_POR_EVENTO = 50
+const MAX_PROFUNDIDADE_ACOES = 5
+
+/** Contexto de uma página em compilação: o que as ações podem referenciar. */
+type PaginaCx = { estado: IREstado; dados: Record<string, IRDado>; fontes: Record<string, FonteDados> }
+
 class Cx {
   readonly erros: Erro[] = []
   readonly usa = new Set<string>()
-  constructor(readonly reg: Registry, readonly ctx: Contexto, readonly modo: 'pagina' | 'bloco', readonly slotsDoBloco: readonly string[] = []) {}
+  constructor(readonly reg: Registry, readonly ctx: Contexto, readonly modo: 'pagina' | 'bloco', readonly slotsDoBloco: readonly string[] = [], readonly pagina: PaginaCx | null = null) {}
   erro(caminho: string, regra: string, mensagem: string, dica?: string, valor?: unknown) {
     this.erros.push({ caminho, regra, mensagem, ...(dica ? { dica } : {}), ...(valor !== undefined ? { valor } : {}) })
   }
@@ -68,27 +76,97 @@ function compilaValor(cx: Cx, v: unknown, escopo: readonly string[], caminho: st
   return { t: 'lit', v: null }
 }
 
-function resolveBloco(cx: Cx, interfaceId: string, caminho: string): IRBloco | undefined {
+/** Argumentos de uma fonte: nomes conhecidos (com "quis dizer") e tipo dos valores literais. Obrigatórios são checados por quem junta as origens. */
+function compilaArgs(cx: Cx, args: Record<string, unknown>, fonte: FonteDados | undefined, escopo: readonly string[], caminho: string): Record<string, Valor> {
+  const out: Record<string, Valor> = {}
+  for (const [nome, v] of Object.entries(args)) {
+    const campo = fonte?.parametros[nome]
+    if (fonte && !campo) {
+      const s = sugere(nome, Object.keys(fonte.parametros))
+      cx.erro(`${caminho}/${nome}`, 'dados-arg', `'${nome}' não é um parâmetro da fonte '${fonte.id}'`, s ? `quis dizer '${s}'?` : `parâmetros: ${Object.keys(fonte.parametros).join(', ') || 'nenhum'}`)
+    }
+    const c = compilaValor(cx, v, escopo, `${caminho}/${nome}`)
+    if (campo && c.t === 'lit' && c.v !== null) {
+      const r = confereValor(campo, c.v)
+      if (!r.ok) cx.erro(`${caminho}/${nome}`, 'dados-arg', `o argumento '${nome}' deveria ser ${r.esperado}`, undefined, c.v)
+    }
+    out[nome] = c
+  }
+  return out
+}
+
+function faltaObrigatorio(cx: Cx, fonte: FonteDados, informados: Set<string>, caminho: string, quem: string): void {
+  for (const [nome, c] of Object.entries(fonte.parametros)) {
+    if (c.obrigatorio && c.padrao === undefined && !informados.has(nome)) {
+      cx.erro(caminho, 'dados-arg', `${quem}: falta o argumento obrigatório '${nome}' da fonte '${fonte.id}'`, `adicione "${nome}" em args`)
+    }
+  }
+}
+
+function resolveBloco(cx: Cx, interfaceId: string, caminho: string): (IRBloco & { eventos: string[] }) | undefined {
   try {
     const r = cx.reg.resolveBloco(interfaceId, cx.ctx)
     const impl: ImplBloco = r.modelo ? 'composto' : r.codigo ? 'codigo' : 'nativo'
-    return { interface: interfaceId, cadeia: r.cadeia, impl }
+    return { interface: interfaceId, cadeia: r.cadeia, impl, eventos: Object.keys(r.eventos) }
   } catch (e) {
     cx.erro(`${caminho}/bloco`, 'ref', (e as Error).message)
     return undefined
   }
 }
 
+// ---- ações ------------------------------------------------------------------
+
+function compilaAcoes(cx: Cx, lista: AcaoSrc[], caminho: string, escopo: readonly string[], prof: number, contador: { n: number }): IRAcao[] {
+  if (prof > MAX_PROFUNDIDADE_ACOES) {
+    cx.erro(caminho, 'acao-limite', `ações aninhadas demais (mais de ${MAX_PROFUNDIDADE_ACOES} níveis de depois/emErro)`)
+    return []
+  }
+  const pg = cx.pagina!
+  const out: IRAcao[] = []
+  lista.forEach((a, i) => {
+    const c = `${caminho}/${i}`
+    if (++contador.n === MAX_ACOES_POR_EVENTO + 1) cx.erro(c, 'acao-limite', `mais de ${MAX_ACOES_POR_EVENTO} ações em um mesmo evento`)
+    if (a.acao === 'definir') {
+      if (!(a.estado! in pg.estado)) {
+        const s = sugere(a.estado!, Object.keys(pg.estado))
+        cx.erro(`${c}/estado`, 'acao', `o estado '${a.estado}' não foi declarado em spec.estado`, s ? `quis dizer '${s}'?` : `estados declarados: ${Object.keys(pg.estado).join(', ') || 'nenhum'}`)
+      }
+      const valor = exprPura(cx, a.valor!, escopo, `${c}/valor`)
+      if (valor) out.push({ acao: 'definir', estado: a.estado!, valor, fonte: a.valor!, caminho: c })
+    } else if (a.acao === 'executar') {
+      const nome = a.dados!
+      const dado = pg.dados[nome]
+      if (!dado) {
+        const s = sugere(nome, Object.keys(pg.dados))
+        cx.erro(`${c}/dados`, 'acao', `a variável de dados '${nome}' não foi declarada em spec.dados`, s ? `quis dizer '${s}'?` : `dados declarados: ${Object.keys(pg.dados).join(', ') || 'nenhum'}`)
+      }
+      const fonte = dado ? pg.fontes[dado.id] : undefined
+      const args = compilaArgs(cx, a.args ?? {}, fonte, escopo, `${c}/args`)
+      if (fonte && dado) faltaObrigatorio(cx, fonte, new Set([...Object.keys(dado.args), ...Object.keys(args)]), c, 'executar')
+      out.push({
+        acao: 'executar', dados: nome, args, caminho: c,
+        depois: compilaAcoes(cx, a.depois ?? [], `${c}/depois`, [...escopo, 'resultado'], prof + 1, contador),
+        emErro: compilaAcoes(cx, a.emErro ?? [], `${c}/emErro`, [...escopo, 'erro'], prof + 1, contador),
+      })
+    } else {
+      out.push({ acao: 'navegar', para: compilaTexto(cx, a.para!, escopo, `${c}/para`), caminho: c })
+    }
+  })
+  return out
+}
+
+// ---- árvore -----------------------------------------------------------------
+
 function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly string[]): IRNo {
   const base = { caminho } as { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string } }
-  // `se` e `repetir.cada` veem só o escopo de fora; `como` e `indice` valem para props, filhos e slots.
+  // `se` e `repetir.cada` veem só o escopo de fora; `como` e `indice` valem para props, filhos, slots e eventos.
   if (inst.se !== undefined) base.se = exprPura(cx, inst.se, escopo, `${caminho}/se`)
   let interno = escopo
   if (inst.repetir) {
     const cada = exprPura(cx, inst.repetir.cada, escopo, `${caminho}/repetir/cada`)
     const como = inst.repetir.como
-    if (escopo.includes(como) || como === 'indice') {
-      cx.erro(`${caminho}/repetir/como`, 'repetir', `'${como}' já existe neste escopo e seria sobrescrito`, `escolha outro nome (em uso: ${escopo.join(', ')}, indice)`)
+    if (escopo.includes(como) || (RESERVADOS as readonly string[]).includes(como)) {
+      cx.erro(`${caminho}/repetir/como`, 'repetir', `'${como}' já existe neste escopo ou é reservado e seria sobrescrito`, `escolha outro nome (em uso: ${[...new Set([...escopo, 'indice'])].join(', ')})`)
     }
     if (cada) base.repetir = { cada, como }
     interno = [...escopo, como, 'indice']
@@ -106,33 +184,90 @@ function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly strin
     return { tipo: 'slot', nome: typeof nome === 'string' ? nome : '', ...base }
   }
 
-  const bloco = resolveBloco(cx, inst.bloco, caminho) ?? { interface: inst.bloco, cadeia: [inst.bloco], impl: 'nativo' as const }
+  const resolvido = resolveBloco(cx, inst.bloco, caminho)
+  const bloco: IRBloco = resolvido ? { interface: resolvido.interface, cadeia: resolvido.cadeia, impl: resolvido.impl } : { interface: inst.bloco, cadeia: [inst.bloco], impl: 'nativo' }
   const props: Record<string, Valor> = {}
   for (const [k, v] of Object.entries((inst.props ?? {}) as Record<string, unknown>)) props[k] = compilaValor(cx, v, interno, `${caminho}/props/${k}`)
   const slots: Record<string, IRNo[]> = {}
   for (const [nome, lista] of Object.entries(inst.slots ?? {})) {
     slots[nome] = lista.map((f, n) => compilaInst(cx, f, `${caminho}/slots/${nome}/${n}`, interno))
   }
-  return { tipo: 'elemento', ...(inst.id !== undefined ? { id: inst.id } : {}), bloco, props, slots, ...base }
+
+  let eventos: Record<string, IRAcao[]> | undefined
+  if (inst.eventos) {
+    if (!cx.pagina) {
+      cx.erro(`${caminho}/eventos`, 'evento', 'eventos só são aceitos em instâncias de páginas', 'o modelo de um bloco não tem estado nem dados para as ações usarem')
+    } else {
+      eventos = {}
+      for (const [nome, acoes] of Object.entries(inst.eventos)) {
+        if (resolvido && !resolvido.eventos.includes(nome)) {
+          const s = sugere(nome, resolvido.eventos)
+          cx.erro(`${caminho}/eventos/${nome}`, 'evento', `o bloco '${inst.bloco}' não emite o evento '${nome}'`, s ? `quis dizer '${s}'?` : `eventos do bloco: ${resolvido.eventos.join(', ') || 'nenhum'}`)
+        }
+        eventos[nome] = compilaAcoes(cx, acoes, `${caminho}/eventos/${nome}`, [...interno, 'evento'], 1, { n: 0 })
+      }
+    }
+  }
+  return { tipo: 'elemento', ...(inst.id !== undefined ? { id: inst.id } : {}), bloco, props, slots, ...(eventos ? { eventos } : {}), ...base }
+}
+
+// ---- página -----------------------------------------------------------------
+
+type DadoSrc = string | { dados: string; args?: Record<string, unknown> }
+type EstadoSrc = Record<string, { tipo: string; inicial?: unknown; lista?: boolean }>
+
+function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
+  const out: IREstado = {}
+  for (const [nome, d] of Object.entries(src)) {
+    if ((RESERVADOS as readonly string[]).includes(nome)) cx.erro(`/spec/estado/${nome}`, 'estado', `'${nome}' é um nome reservado`, `reservados: ${RESERVADOS.join(', ')}`)
+    const inicial = d.inicial === undefined ? null : d.inicial
+    if (inicial !== null) {
+      const r = confereValor({ tipo: d.tipo, lista: d.lista }, inicial)
+      if (!r.ok) cx.erro(`/spec/estado/${nome}/inicial`, 'estado', `o valor inicial de '${nome}' deveria ser ${r.esperado}`, undefined, inicial)
+    }
+    out[nome] = { tipo: d.tipo, inicial, ...(d.lista ? { lista: true } : {}) }
+  }
+  return out
+}
+
+function fonteDe(cx: Cx, id: string): FonteDados | undefined {
+  const r = cx.reg.resolve('dados', id, cx.ctx)
+  if (!r) return undefined // a referência quebrada já é reportada por confere()
+  const s = r.no.spec as { fonte: FonteDados['fonte']; parametros?: Record<string, CampoParametro>; cache?: FonteDados['cache']; carregar?: 'auto' | 'manual'; timeoutMs?: number }
+  return { id, fonte: s.fonte, parametros: s.parametros ?? {}, ...(s.cache ? { cache: s.cache } : {}), carregar: s.carregar ?? 'auto', ...(s.timeoutMs ? { timeoutMs: s.timeoutMs } : {}) }
 }
 
 /** Compila uma página (nó `pagina`) para IR. Inclui os erros de referência, slots, props, ciclos e limites. */
 export function compilaPagina(reg: Registry, no: No, ctx: Contexto = {}): Resultado<IRPagina> {
   if (no.kind !== 'pagina') return { ok: false, erros: [{ caminho: '/kind', regra: 'kind', mensagem: `compilaPagina espera kind 'pagina', recebeu '${no.kind}'` }] }
-  const spec = no.spec as { rota: string; titulo?: string; dados?: Record<string, string>; raiz: Inst }
-  const cx = new Cx(reg, ctx, 'pagina')
-  cx.erros.push(...confere(reg, no, ctx))
-  const dados = spec.dados ?? {}
-  for (const nome of Object.keys(dados)) {
-    if ((ESCOPO_PAGINA as readonly string[]).includes(nome) || nome === 'indice') {
-      cx.erro(`/spec/dados/${nome}`, 'dados', `'${nome}' é um nome reservado da página e sombrearia o valor do sistema`, `escolha outro nome (reservados: ${[...ESCOPO_PAGINA, 'indice'].join(', ')})`)
+  const spec = no.spec as { rota: string; titulo?: string; dados?: Record<string, DadoSrc>; estado?: EstadoSrc; raiz: Inst }
+  const base = new Cx(reg, ctx, 'pagina')
+  base.erros.push(...confere(reg, no, ctx))
+
+  const estado = compilaEstado(base, spec.estado ?? {})
+  const dados: Record<string, IRDado> = {}
+  const fontes: Record<string, FonteDados> = {}
+  for (const [nome, d] of Object.entries(spec.dados ?? {})) {
+    const caminho = `/spec/dados/${nome}`
+    if ((RESERVADOS as readonly string[]).includes(nome)) {
+      base.erro(caminho, 'dados', `'${nome}' é um nome reservado da página e sombrearia o valor do sistema`, `escolha outro nome (reservados: ${RESERVADOS.join(', ')})`)
     }
+    const id = typeof d === 'string' ? d : d.dados
+    const fonte = fonteDe(base, id)
+    if (fonte) fontes[id] = fonte
+    const args = typeof d === 'string' ? {} : compilaArgs(base, d.args ?? {}, fonte, ESCOPO_ARGS, `${caminho}/args`)
+    if (fonte && fonte.carregar === 'auto') faltaObrigatorio(base, fonte, new Set(Object.keys(args)), caminho, `a variável '${nome}'`)
+    dados[nome] = { id, args }
   }
+
+  const cx = new Cx(reg, ctx, 'pagina', [], { estado, dados, fontes })
+  cx.erros.push(...base.erros)
+  for (const v of base.usa) cx.usa.add(v)
   const escopo = [...ESCOPO_PAGINA, ...Object.keys(dados)]
   const titulo = spec.titulo !== undefined ? compilaTexto(cx, spec.titulo, escopo, '/spec/titulo') : undefined
   const raiz = compilaInst(cx, spec.raiz, '/spec/raiz', escopo)
   if (cx.erros.length) return { ok: false, erros: cx.erros }
-  return { ok: true, ir: { tipo: 'pagina', id: no.id, versao: no.versao, rota: spec.rota, ...(titulo ? { titulo } : {}), dados, raiz, usa: [...cx.usa].sort() } }
+  return { ok: true, ir: { tipo: 'pagina', id: no.id, versao: no.versao, rota: spec.rota, ...(titulo ? { titulo } : {}), dados, fontes, estado, raiz, usa: [...cx.usa].sort() } }
 }
 
 /** Compila o `modelo` de um bloco composto. Escopo: `props` e `tenant`; `core/slot` projeta os filhos recebidos. */

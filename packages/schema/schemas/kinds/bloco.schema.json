@@ -76,6 +76,22 @@
         }
       },
       "additionalProperties": false
+    },
+    "eventos": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
+      },
+      "description": "eventos que o bloco emite (a instância liga ações a eles)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "$ref": "polaris://comum/v1#/$defs/tipoDado"
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "type": "object",

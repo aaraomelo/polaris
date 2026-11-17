@@ -1,0 +1,39 @@
+\subsection*{pagina: busca}
+\begin{tabular}{@{}ll@{}}
+versão & 1.0.0 \\
+estatuto & publicado \\
+escopo & core \\
+\end{tabular}
+
+\begin{tabular}{@{}p{0.35\linewidth}p{0.6\linewidth}@{}}
+\texttt{spec.dados.loja} & dados.loja \\
+\texttt{spec.dados.produtos.args.pagina} & \{estado.pagina\} \\
+\texttt{spec.dados.produtos.args.q} & \{estado.termo\} \\
+\texttt{spec.dados.produtos.dados} & dados.produtos \\
+\texttt{spec.estado.pagina.inicial} & 1 \\
+\texttt{spec.estado.pagina.tipo} & inteiro \\
+\texttt{spec.estado.termo.inicial} &  \\
+\texttt{spec.estado.termo.tipo} & texto \\
+\texttt{spec.raiz.bloco} & layout/pilha \\
+\texttt{spec.raiz.slots.filhos[0].bloco} & entrada/texto \\
+\texttt{spec.raiz.slots.filhos[0].eventos.aoMudar[0].acao} & definir \\
+\texttt{spec.raiz.slots.filhos[0].eventos.aoMudar[0].estado} & termo \\
+\texttt{spec.raiz.slots.filhos[0].eventos.aoMudar[0].valor} & evento \\
+\texttt{spec.raiz.slots.filhos[0].eventos.aoMudar[1].acao} & executar \\
+\texttt{spec.raiz.slots.filhos[0].eventos.aoMudar[1].dados} & produtos \\
+\texttt{spec.raiz.slots.filhos[0].props.valor} & \{estado.termo\} \\
+\texttt{spec.raiz.slots.filhos[1].bloco} & nav/botao \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[0].acao} & definir \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[0].estado} & pagina \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[0].valor} & estado.pagina + 1 \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].acao} & executar \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].dados} & produtos \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].depois[0].acao} & navegar \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].depois[0].para} & /busca?p=\{estado.pagina\} \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].emErro[0].acao} & definir \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].emErro[0].estado} & termo \\
+\texttt{spec.raiz.slots.filhos[1].eventos.aoClicar[1].emErro[0].valor} & '' \\
+\texttt{spec.raiz.slots.filhos[1].props.texto} & Proxima \\
+\texttt{spec.rota} & /busca \\
+\texttt{spec.titulo} & Busca \\
+\end{tabular}

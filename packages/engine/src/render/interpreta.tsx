@@ -3,6 +3,7 @@ import { avalia, FUNCOES_PADRAO, verdadeiro, type Escopo, type Funcoes } from '.
 import type { IRElemento, IRNo } from '../ir/tipos'
 import type { Programa } from './programa'
 import { LIMITES_RUNTIME, type Componentes, type ErroRuntime } from './tipos'
+import { executaAcoes, type ContextoAcoes } from './acoes'
 import { valorDe } from './valor'
 
 // ---------------------------------------------------------------------------
@@ -15,6 +16,8 @@ export type Ambiente = {
   componentes: Componentes
   funcoes?: Funcoes
   onErro?: (e: ErroRuntime) => void
+  /** executor de ações (só no cliente interativo; sem ele os eventos não fazem nada) */
+  acoes?: ContextoAcoes
 }
 
 /** Filhos que a instância de um bloco composto recebeu, avaliados no escopo de QUEM os passou. */
@@ -107,5 +110,9 @@ function um(no: IRNo, escopo: Escopo, amb: Ambiente, host: SlotsDoHost | null, c
   }
   const slots = slotsDe(no, escopo, amb, host, chave, prof)
   const comp = amb.componentes[alvo]!
-  return [createElement(Isola, { key: chave, caminho: no.caminho, onErro: amb.onErro }, createElement(Fragment, null, comp({ props, slots, ...(no.id !== undefined ? { id: no.id } : {}), caminho: no.caminho })))]
+  const on: Record<string, (payload?: unknown) => void> = {}
+  for (const [evento, acoes] of Object.entries(no.eventos ?? {})) {
+    on[evento] = (payload?: unknown) => { if (amb.acoes) void executaAcoes(acoes, escopo, { evento: payload }, amb.acoes) }
+  }
+  return [createElement(Isola, { key: chave, caminho: no.caminho, onErro: amb.onErro }, createElement(Fragment, null, comp({ props, slots, on, ...(no.id !== undefined ? { id: no.id } : {}), caminho: no.caminho })))]
 }

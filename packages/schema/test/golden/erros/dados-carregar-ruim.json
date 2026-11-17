@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/carregar",
+    "regra": "enum",
+    "mensagem": "valor \"as vezes\" não é permitido; aceitos: 'auto', 'manual'"
+  }
+]

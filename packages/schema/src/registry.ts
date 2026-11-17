@@ -139,7 +139,7 @@ export class Registry {
     if (!r) throw new RegistryErro(`bloco não encontrado: ${interfaceId}`)
     const spec = r.no.spec as unknown as BlocoSpec
     if (!spec.extends) {
-      return { interface: interfaceId, cadeia: [interfaceId], props: spec.props, slots: { ...spec.slots }, modelo: spec.modelo, codigo: spec.codigo }
+      return { interface: interfaceId, cadeia: [interfaceId], props: spec.props, slots: { ...spec.slots }, eventos: { ...spec.eventos }, modelo: spec.modelo, codigo: spec.codigo }
     }
     const pai = this.resolveBlocoRec(spec.extends, ctx, [...pilha, interfaceId])
     return {
@@ -147,6 +147,7 @@ export class Registry {
       cadeia: [interfaceId, ...pai.cadeia],
       props: mesclaProps(pai.props, spec.props),
       slots: { ...pai.slots, ...spec.slots },
+      eventos: { ...pai.eventos, ...spec.eventos },
       modelo: spec.modelo ?? pai.modelo,
       codigo: spec.codigo ?? pai.codigo,
     }
@@ -165,7 +166,9 @@ export class Registry {
     }
     switch (no.kind) {
       case 'pagina':
-        for (const [nome, id] of Object.entries<string>(s.dados ?? {})) refs.push({ kind: 'dados', id, caminho: `/spec/dados/${nome}` })
+        for (const [nome, d] of Object.entries<string | { dados: string }>(s.dados ?? {})) {
+          refs.push({ kind: 'dados', id: typeof d === 'string' ? d : d.dados, caminho: typeof d === 'string' ? `/spec/dados/${nome}` : `/spec/dados/${nome}/dados` })
+        }
         if (s.layout) refs.push({ kind: 'bloco', id: s.layout, caminho: '/spec/layout' })
         instancias(s.raiz, '/spec/raiz')
         break
@@ -226,6 +229,7 @@ export type BlocoSpec = {
   extends?: string
   props?: { type: 'object'; properties?: Record<string, unknown>; required?: string[] }
   slots?: Record<string, { aceita?: string[]; min?: number; max?: number }>
+  eventos?: Record<string, { payload?: string }>
   modelo?: unknown
   codigo?: unknown
 }
@@ -236,6 +240,8 @@ export type BlocoResolvido = {
   cadeia: string[]
   props?: BlocoSpec['props']
   slots: NonNullable<BlocoSpec['slots']>
+  /** eventos declarados (herdados via extends) */
+  eventos: NonNullable<BlocoSpec['eventos']>
   modelo?: unknown
   codigo?: unknown
 }

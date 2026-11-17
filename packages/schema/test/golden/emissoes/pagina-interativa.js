@@ -1,0 +1,92 @@
+// polaris: pagina busca@1.0.0
+export const kind = "pagina";
+export const id = "busca";
+export const versao = "1.0.0";
+export default {
+  "estatuto": "publicado",
+  "id": "busca",
+  "kind": "pagina",
+  "spec": {
+    "dados": {
+      "loja": "dados.loja",
+      "produtos": {
+        "args": {
+          "pagina": "{estado.pagina}",
+          "q": "{estado.termo}"
+        },
+        "dados": "dados.produtos"
+      }
+    },
+    "estado": {
+      "pagina": {
+        "inicial": 1,
+        "tipo": "inteiro"
+      },
+      "termo": {
+        "inicial": "",
+        "tipo": "texto"
+      }
+    },
+    "raiz": {
+      "bloco": "layout/pilha",
+      "slots": {
+        "filhos": [
+          {
+            "bloco": "entrada/texto",
+            "eventos": {
+              "aoMudar": [
+                {
+                  "acao": "definir",
+                  "estado": "termo",
+                  "valor": "evento"
+                },
+                {
+                  "acao": "executar",
+                  "dados": "produtos"
+                }
+              ]
+            },
+            "props": {
+              "valor": "{estado.termo}"
+            }
+          },
+          {
+            "bloco": "nav/botao",
+            "eventos": {
+              "aoClicar": [
+                {
+                  "acao": "definir",
+                  "estado": "pagina",
+                  "valor": "estado.pagina + 1"
+                },
+                {
+                  "acao": "executar",
+                  "dados": "produtos",
+                  "depois": [
+                    {
+                      "acao": "navegar",
+                      "para": "/busca?p={estado.pagina}"
+                    }
+                  ],
+                  "emErro": [
+                    {
+                      "acao": "definir",
+                      "estado": "termo",
+                      "valor": "''"
+                    }
+                  ]
+                }
+              ]
+            },
+            "props": {
+              "texto": "Proxima"
+            }
+          }
+        ]
+      }
+    },
+    "rota": "/busca",
+    "titulo": "Busca"
+  },
+  "versao": "1.0.0"
+};

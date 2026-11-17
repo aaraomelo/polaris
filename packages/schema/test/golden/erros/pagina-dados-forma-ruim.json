@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/dados/x",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'dados'",
+    "dica": "adicione \"dados\" em /spec/dados/x"
+  }
+]

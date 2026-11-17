@@ -1,0 +1,17 @@
+{
+  "kind": "pagina",
+  "id": "p",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "rota": "/",
+    "estado": {
+      "x": {
+        "inicial": 1
+      }
+    },
+    "raiz": {
+      "bloco": "a/b"
+    }
+  }
+}

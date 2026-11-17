@@ -19,12 +19,31 @@
     },
     "dados": {
       "type": "object",
-      "description": "nome → referência a nó kind=dados",
-      "additionalProperties": {
-        "type": "string"
-      },
       "propertyNames": {
         "pattern": "^[a-z][A-Za-z0-9]*$"
+      },
+      "description": "nome da variável → id do nó dados (texto) ou { dados, args } com argumentos (templates)",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "required": [
+              "dados"
+            ],
+            "properties": {
+              "dados": {
+                "type": "string"
+              },
+              "args": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
       }
     },
     "raiz": {
@@ -36,6 +55,29 @@
         "type": "string"
       },
       "description": "permissões exigidas (CASL)"
+    },
+    "estado": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
+      },
+      "description": "estado local da página (variável `estado.<nome>`)",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "properties": {
+          "tipo": {
+            "$ref": "polaris://comum/v1#/$defs/tipoDado"
+          },
+          "inicial": {},
+          "lista": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "type": "object",

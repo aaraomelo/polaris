@@ -47,6 +47,19 @@
         }
       },
       "additionalProperties": false
+    },
+    "carregar": {
+      "enum": [
+        "auto",
+        "manual"
+      ],
+      "default": "auto",
+      "description": "auto: carregado ao renderizar; manual: só por uma ação executar (mutations)"
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60000
     }
   },
   "type": "object",
