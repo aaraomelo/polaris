@@ -1,0 +1,22 @@
+# segredos locais: nunca entram no git (so o .env.exemplo)
+.env
+.env.*
+!.env.exemplo
+segredo/
+*.pem
+*.key
+id_ed25519*
+id_rsa*
+
+# ruido
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.claude/settings.local.json
+
+dist/
+coverage/
+.turbo/

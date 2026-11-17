@@ -1,0 +1,90 @@
+[
+ {"epic":"E0 · Fundação e operação","desc":"Repo, regras, ClickUp, CI. Base para tudo.","stories":[
+  ["Monorepo pnpm + Turborepo + TS estrito","packages/, services/, apps/, tools/; lint, format, vitest; scripts raiz."],
+  ["CI (build, tipos, testes, check-no-secrets)","Pipeline por pacote afetado; cache do Turborepo."],
+  ["Fluxo ClickUp ↔ git (card → branch → PR → concluído)","Skill clickup-cards adaptada; commits `PL-<id> tipo(escopo): msg`; seed do backlog (scripts/clickup-seed.sh)."],
+  ["Ambiente de dev (docker compose)","Postgres, Redis, NATS/event bus, gateway; um comando sobe tudo."],
+  ["ADRs iniciais (docs/adr)","Registrar: schema canônico, runtime vs AOT, isomorfismo, política de backends."]]},
+
+ {"epic":"E1 · Contrato de Schema (Schema U do Tiffany → Polaris)","desc":"Fonte única da verdade: tudo é nó JSON canônico (kind, id, formato, estatuto, filhos). Base: tiffany/app/src/banco_schema.js, banco_pagina_u.js, cards.json.","stories":[
+  ["Estudo e extração do Schema U (banco_schema.js, manifesto.json, cards.json)","Mapear kinds, campos obrigatórios, estatuto/evidência/proibição; decidir o que entra e o que fica de fora."],
+  ["Meta-schema Polaris em JSON Schema 2020-12 ($id polaris://…)","kinds: pagina, bloco, componente, tema, dados, servico, evento, kernel, documento, tenant."],
+  ["Versionamento e migração de schemas","semver por kind; migradores declarativos; compatibilidade para trás testada."],
+  ["Validador (Ajv) + mensagens de erro com caminho JSON","Mesmo validador em Node e navegador; erros acionáveis."],
+  ["Registry de schemas (resolução de $ref, extends, interfaces)","Carregar de disco/DB/HTTP; cache; resolução por tenant e por versão."],
+  ["Emissões canônicas (json → html/js/css/sql/tex)","Projeções do nó canônico, nenhuma privilegiada (princípio do manifesto de backends)."],
+  ["Suíte de conformidade (golden files)","Cada kind com exemplos válidos/inválidos; roda no CI."]]},
+
+ {"epic":"E2 · Compilador e runtime: schema → HTML/JS (React)","desc":"Página, componente e tudo declarativo. Código específico (JS/HTML) é gerado do schema, em runtime ou AOT.","stories":[
+  ["IR de página: schema → árvore tipada (AST) com bindings","Slots, props, condicionais, loops, expressões seguras (sem eval livre)."],
+  ["Runtime interpretador isomórfico (React 19) — renderiza direto do JSON","SSR no servidor + hidratação no cliente; mesmo código."],
+  ["Gerador schema → JS/HTML em tempo de execução (JIT) com cache","Compila nó para módulo ESM; invalida por hash do schema; sourcemap apontando para o JSON."],
+  ["Modo AOT (build) para páginas estáveis","Pré-gera bundles por rota; fallback para JIT."],
+  ["Streaming SSR + code splitting por bloco","Carregar só os blocos usados na página."],
+  ["Estado, dados e efeitos declarativos","Data sources (query/mutation), estado local/global, formulários, validação espelhando o backend."],
+  ["Roteamento declarativo (rotas definidas por schema)","Rotas, layouts aninhados, guardas, i18n de rota."],
+  ["Sandbox para código customizado (escape hatch)","JS/HTML específico por componente roda isolado e com permissões declaradas."],
+  ["Segurança do runtime","Sem eval de strings do usuário, CSP, sanitização, allowlist de expressões."]]},
+
+ {"epic":"E3 · Blocos e composição (inspirado na arquitetura VTEX, 100% declarativo)","desc":"Equivalente a store-blocks/interfaces/blocks.json da VTEX, mas descrito por schema.","stories":[
+  ["Modelo de bloco: interface, props, slots, filhos permitidos","Interfaces abstratas + implementações trocáveis por tenant (composable)."],
+  ["Resolução de blocos: extends, override por tenant/segmento","Cascata: core → segmento → tenant → página."],
+  ["Biblioteca base de blocos (layout, texto, mídia, lista, form, tabela, nav)","Primeiros ~20 blocos com schema, preview e testes."],
+  ["Blocos de commerce (vitrine, PDP, carrinho, checkout, busca)","Contratos de dados com os serviços de E4/E5."],
+  ["Tema e design tokens declarativos","Tokens → CSS vars; modos claro/escuro; reaproveitar theme do tiffany-erp."],
+  ["Catálogo de blocos (docs vivas geradas do schema)","Página gerada automaticamente com exemplos e props."]]},
+
+ {"epic":"E4 · Microsserviços declarativos","desc":"Serviço descrito por schema (entidades, rotas, eventos, políticas); o código é gerado.","stories":[
+  ["Schema de serviço: entidades, operações, eventos, permissões","kind=servico; inclui multi-tenant por padrão (tenantId obrigatório)."],
+  ["Gerador schema → serviço (Node/Fastify ou NestJS) com OpenAPI","CRUD + operações custom; DTOs e validação derivados do schema."],
+  ["Persistência: schema → migrações SQL (Postgres, RLS por tenant)","Aproveitar os contratos de banco do Tiffany (monetário, temporal, RLS, UUID)."],
+  ["Event bus e contratos de evento (outbox, idempotência)","Entre serviços; replays; versionamento de eventos."],
+  ["Gateway/BFF: composição de dados para páginas","REST + GraphQL gerados dos schemas; cache por tenant."],
+  ["Autenticação, autorização (CASL) e papéis declarativos","Reaproveitar tiffany-erp/erp-api/access."],
+  ["Observabilidade (logs, métricas, traces) por padrão","Injetada pelo gerador."]]},
+
+ {"epic":"E5 · Domínios verticais (varejo, serviços, alimentos)","desc":"Packs de módulos por segmento, reaproveitando o que já existe no tiffany-erp/erp-api.","stories":[
+  ["Pack Catálogo e Produto (SKU, variantes, preço, mídia)","Portar product/catalog do erp-api para schemas."],
+  ["Pack Carrinho, Checkout e Pedidos","Orquestração (saga) entre estoque, pagamento e pedido."],
+  ["Pack Pagamentos e Caixa (PIX, cartão, carteira)","Portar payment/cash/wallet; provedores plugáveis."],
+  ["Pack Estoque e Depósitos","Portar stock/warehouse."],
+  ["Pack Serviços (agenda, ordem de serviço, orçamento, garantia)","Portar service-order/budget/warranty-term."],
+  ["Pack Alimentos (cardápio, modificadores, comanda/KDS, delivery)","Novo; pedido por mesa e entrega."],
+  ["ModulePack por segmento + onboarding self-service","Portar signup/segments e landing por segmento para schema."]]},
+
+ {"epic":"E6 · Backends de computação (WebGL/GLSL, PTX, WASM)","desc":"Não só páginas: kernels declarados em schema e emitidos para vários alvos. Base: tiffany/conecthus/backends (glsl, ptx, wasm, js, html).","stories":[
+  ["Estudo dos backends do Tiffany (manifesto.json, claim IR, celula.erg, emitir.c)","Decidir o que reaproveitar como está (C→wasm) e o que reescrever em TS."],
+  ["Schema de kernel (kind=kernel): entradas, saídas, domínio, restrições","Independente de alvo."],
+  ["Backend WebGL/GLSL: schema → shader + pipeline no cliente","Bloco `canvas-gl` declarativo; fallback quando não houver GPU."],
+  ["Backend WASM: schema/C → .wasm executado no browser e no servidor","Reaproveitar tools/traduz e sobe_backends_wasm."],
+  ["Backend PTX: schema → PTX/CUDA em serviço com GPU","Serviço `compute` com fila e quotas; execução via driver CUDA; sem GPU no CI (mock)."],
+  ["Roteador de alvo (cpu/wasm/webgl/ptx) por capacidade e custo","Decide onde o kernel roda; mesmo contrato, resultados equivalentes."],
+  ["Testes de paridade entre backends","Mesma entrada → saídas dentro de tolerância; roda em CI."]]},
+
+ {"epic":"E7 · Multi-tenant, packs e temas","desc":"Tenant como composição de schemas (blocos + temas + serviços + módulos).","stories":[
+  ["Modelo de tenant e resolução por domínio/subdomínio","Header/alias → tenant; isolamento transitivo (contratos RLS do Tiffany)."],
+  ["Overrides por tenant (schemas de página, tema, módulos)","Armazenamento versionado, com rascunho e publicação."],
+  ["Publicação: rascunho → preview → produção, com rollback","Cada publicação é um snapshot imutável de schemas."]]},
+
+ {"epic":"E8 · Studio (editor visual por schema)","desc":"Editar páginas e blocos visualmente; saída é sempre schema.","stories":[
+  ["Editor de páginas (árvore + propriedades + preview ao vivo)","Reaproveitar ideias do SiteEditorPage; formulário de props gerado do JSON Schema."],
+  ["Editor de tema e tokens","Preview instantâneo."],
+  ["Histórico, diff de schema e comentários","Diff semântico por nó."]]},
+
+ {"epic":"E9 · Documentos declarativos (PDF/impressão)","desc":"Migrar o engine doc/ do tiffany-erp/erp-app para o contrato Polaris.","stories":[
+  ["Portar DocumentSpec (blocos) para kind=documento","Reaproveitar engine/ e render/ (pdf-lib + fontkit)."],
+  ["Renderizar o mesmo documento em HTML e PDF","Um schema, duas saídas; paridade visual testada."],
+  ["Templates (ordem de serviço, pedido, recibo)","Dados vinculados por interpolação segura."]]},
+
+ {"epic":"E10 · Deploy, segurança e qualidade","desc":"Colocar no ar com segurança.","stories":[
+  ["Imagens Docker e deploy por ambiente (dev/homolog/prod)","Compose na VPS; nginx; TLS."],
+  ["Gestão de segredos e hook de segredos no CI","Nada de segredo no git."],
+  ["Testes E2E (Playwright) a partir dos schemas","Gerar cenários dos exemplos dos blocos."],
+  ["Orçamento de performance (LCP/TTFB) e benchmarks do runtime","Metas por página; regressão bloqueia o PR."]]},
+
+ {"epic":"E11 · Decisões em aberto","desc":"Decisões a tomar antes das épicas dependentes.","stories":[
+  ["Runtime interpretador vs AOT como padrão","Impacta E2; proposta: interpretador primeiro, AOT como otimização."],
+  ["Linguagem de expressões (JSONata, CEL ou própria)","Para bindings e condicionais seguros."],
+  ["Quanto do 'Schema U' teórico do Tiffany entra no Polaris","Manter o canônico e deixar a teoria de fora?"],
+  ["Gerar NestJS ou Fastify","Impacta E4."]]}
+]
