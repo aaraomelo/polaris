@@ -1,4 +1,6 @@
-import { avalia, FUNCOES_PADRAO, type Escopo, type Funcoes } from '../expr/index'
+import { avalia, type Escopo } from '../expr/avalia'
+import { funcoesPadrao } from '../expr/padrao'
+import type { Funcoes } from '../expr/tipos'
 import type { IRAcao } from '../ir/tipos'
 import { urlSegura } from './url'
 import type { Programa } from './programa'
@@ -36,7 +38,7 @@ function aplica(cx: ContextoAcoes, a: AcaoStore): void {
 
 /** Executa a lista de ações em sequência. `extra` traz evento / resultado / erro. Nunca lança. */
 export async function executaAcoes(acoes: IRAcao[], capturado: Escopo, extra: Record<string, unknown>, cx: ContextoAcoes): Promise<void> {
-  const funcoes = cx.funcoes ?? FUNCOES_PADRAO
+  const funcoes = cx.funcoes ?? funcoesPadrao()
   const escopo = (): Escopo => ({ ...capturado, ...escopoDaStore(cx.programa, cx.store.atual, capturado), ...extra })
   for (const a of acoes) {
     if (!cx.vivo.atual) return
@@ -59,7 +61,7 @@ export async function executaAcoes(acoes: IRAcao[], capturado: Escopo, extra: Re
 }
 
 async function executa(a: Extract<IRAcao, { acao: 'executar' }>, escopo: Escopo, extra: Record<string, unknown>, cx: ContextoAcoes, capturado: Escopo): Promise<void> {
-  const funcoes = cx.funcoes ?? FUNCOES_PADRAO
+  const funcoes = cx.funcoes ?? funcoesPadrao()
   const args: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(a.args)) args[k] = valorDe(v, escopo, funcoes)
   const n = (cx.sequencia[a.dados] = (cx.sequencia[a.dados] ?? 0) + 1)

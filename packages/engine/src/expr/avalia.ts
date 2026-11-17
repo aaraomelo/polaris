@@ -1,5 +1,4 @@
 import { LIMITES_EXPR, type Expr, type Funcoes } from './tipos'
-import { ORDEM_SUPERIOR, ehOrdemSuperior } from './ordem-superior'
 import { verdadeiro } from './verdade'
 
 export { verdadeiro }
@@ -88,8 +87,9 @@ function av(e: Expr, escopo: Escopo, funcoes: Funcoes, lig: Lig, orc: Orc): unkn
       return binario(e.op, a_(e.a), a_(e.b))
     }
     case 'call': {
-      if (ehOrdemSuperior(e.fn)) {
-        const os = ORDEM_SUPERIOR[e.fn]!
+      const f = Object.prototype.hasOwnProperty.call(funcoes, e.fn) ? funcoes[e.fn] : undefined
+      if (f?.os) {
+        const os = f.os
         const fn = e.args[os.fnPos]
         if (!fn || fn.t !== 'fn' || fn.params.length < 1 || fn.params.length > os.paramsMax || e.args.length !== os.fnPos + 1) return undefined
         const args = e.args.map((x, i) => (i === os.fnPos ? undefined : a_(x)))
@@ -100,7 +100,6 @@ function av(e: Expr, escopo: Escopo, funcoes: Funcoes, lig: Lig, orc: Orc): unkn
         }
         return os.impl(args, aplica)
       }
-      const f = Object.prototype.hasOwnProperty.call(funcoes, e.fn) ? funcoes[e.fn] : undefined
       if (!f || e.args.length < f.min || e.args.length > f.max) return undefined
       const vals = e.args.map(a_)
       try { return f.fn(...vals) } catch { return undefined }

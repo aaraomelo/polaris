@@ -1,5 +1,5 @@
 import { verdadeiro } from '../expr/avalia'
-import { FUNCOES_PADRAO } from '../expr/funcoes'
+import { FUNCOES_PADRAO } from '../expr/biblioteca'
 import type { Funcoes } from '../expr/tipos'
 import type { IRElemento, IRNo, Valor } from '../ir/tipos'
 import type { Programa } from '../render/programa'

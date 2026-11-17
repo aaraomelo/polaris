@@ -19,10 +19,10 @@ async function empacota(entrada: string) {
 const PROIBIDOS = [/node_modules\/\.pnpm\/ajv@/, /fast-uri/, /ajv-formats/, /packages\/schema\/schemas\//, /quickjs/, /node:/]
 
 describe('orçamento do bundle do cliente', () => {
-  it('o avaliador de expressões (parser + avalia + funções) não arrasta nada do servidor e cabe em 8 KB gz', async () => {
+  it('o avaliador de expressões com a biblioteca INTEIRA (parser + avalia + todas as funções) não arrasta nada do servidor e cabe em 10 KB gz', async () => {
     const b = await empacota(`import { parseExpr, avalia, FUNCOES_PADRAO } from './src/expr/index'; console.log(avalia(parseExpr(document.title), {}, FUNCOES_PADRAO))`)
     for (const re of PROIBIDOS) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
-    expect(b.gz).toBeLessThan(8 * 1024)
+    expect(b.gz).toBeLessThan(10 * 1024) // a biblioteca completa cresceu (listas, aritmética exata, caminhos); a página real carrega só o que usa (aot.test.ts)
   })
 
   it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 160 KB gz', async () => {

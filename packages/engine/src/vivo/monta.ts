@@ -1,12 +1,14 @@
-import { avalia, verdadeiro, type Escopo, type Funcoes } from '../expr/index'
+import { avalia, verdadeiro, type Escopo } from '../expr/avalia'
+import type { Funcoes } from '../expr/tipos'
 import type { IRElemento, IRNo } from '../ir/tipos'
-import { criaModelo, type Modelo, type OpcoesModelo } from '../modelo/index'
+import { criaModeloNucleo, type ModeloNucleo, type OpcoesNucleo } from '../modelo/nucleo'
 import { executaAcoes } from '../render/acoes'
 import type { Programa } from '../render/programa'
 import type { AcaoStore, Store } from '../render/store'
 import { LIMITES_RUNTIME, type ErroRuntime } from '../render/tipos'
 import { valorDe } from '../render/valor'
-import { DESCRITORES_BASE, type DescritoresDom } from './blocos'
+import type { DescritoresDom } from './blocos'
+import { descritoresPadrao } from '../expr/padrao'
 import { caminhosMudados } from '../estado/caminho'
 import { chavesDeCaminhos, cruza, depsCabeca, depsValor, MARCA, raizDe, usaTotal } from './dep'
 import { aplicaLista, planoLista } from './lista'
@@ -32,7 +34,7 @@ type Amb = {
   programa: Programa
   desc: DescritoresDom
   funcoes: Funcoes
-  modelo: Modelo
+  modelo: ModeloNucleo
   handlers: WeakMap<Node, Entrada>
   stats: { controladores: number }
   onErro?: (e: ErroRuntime) => void
@@ -339,7 +341,7 @@ function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos):
 
 // ---- raiz ------------------------------------------------------------------
 
-export type OpcoesVivo = Omit<OpcoesModelo, 'programa'> & {
+export type OpcoesVivo = Omit<OpcoesNucleo, 'programa'> & {
   programa: Programa
   container: Element
   descritores?: DescritoresDom
@@ -348,8 +350,8 @@ export type OpcoesVivo = Omit<OpcoesModelo, 'programa'> & {
 }
 
 export type Vivo = {
-  /** o modelo (store imutável, ações, histórico). O DOM é só o espelho dele. */
-  modelo: Modelo
+  /** o modelo (store imutável, ações). O DOM é só o espelho dele. Histórico/desfazer: `montaVivo` (completo) ou `anexaHistorico(modelo, n)`. */
+  modelo: ModeloNucleo
   store(): Store
   despacha(a: AcaoStore): void
   flush(): void
@@ -359,16 +361,16 @@ export type Vivo = {
   destroi(): void
 }
 
-/** Monta (ou hidrata) a página DENTRO de `container` e a mantém viva. Não usa React. */
-export function montaVivo(o: OpcoesVivo): Vivo {
+/** Monta (ou hidrata) a página DENTRO de `container` e a mantém viva. Não usa React. Núcleo: sem histórico (ver `montaVivo` em vivo/index). */
+export function montaVivoNucleo(o: OpcoesVivo): Vivo {
   const programa = o.programa
-  const modelo = criaModelo(o)
+  const modelo = criaModeloNucleo(o)
   const handlers = new WeakMap<Node, Entrada>()
   const funcoes = modelo.cx.funcoes!
   let stats = { controladores: 0 }
   let raiz: Dono = { nos: [] }
   let hidratou = false
-  const amb = (): Amb => ({ programa, desc: o.descritores ?? DESCRITORES_BASE, funcoes, modelo, handlers, stats, ...(o.onErro ? { onErro: o.onErro } : {}) })
+  const amb = (): Amb => ({ programa, desc: o.descritores ?? descritoresPadrao(), funcoes, modelo, handlers, stats, ...(o.onErro ? { onErro: o.onErro } : {}) })
   const cx: Cx = { esc: modelo.escopo as Esc, host: null, mut: modelo.mutaveis, prof: 0 }
 
   const constroiTudo = (adota: boolean) => {
@@ -406,7 +408,7 @@ export function montaVivo(o: OpcoesVivo): Vivo {
 }
 
 /** A página pode rodar no runtime vivo? (sem streaming, esqueleto, blocos de código nem blocos sem descritor) */
-export function elegivelVivo(programa: Programa, descritores: DescritoresDom = DESCRITORES_BASE): { ok: true } | { ok: false; motivos: Array<{ caminho: string; motivo: string }> } {
+export function elegivelVivo(programa: Programa, descritores: DescritoresDom = descritoresPadrao()): { ok: true } | { ok: false; motivos: Array<{ caminho: string; motivo: string }> } {
   const motivos: Array<{ caminho: string; motivo: string }> = []
   for (const [n, d] of Object.entries(programa.pagina.dados)) if (d.stream) motivos.push({ caminho: `/spec/dados/${n}`, motivo: 'dado em streaming' })
   const anda = (no: IRNo, visitados: Set<string>) => {

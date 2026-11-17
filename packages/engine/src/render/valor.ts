@@ -1,4 +1,6 @@
-import { avalia, FUNCOES_PADRAO, type Escopo, type Funcoes } from '../expr/index'
+import { avalia, type Escopo } from '../expr/avalia'
+import { funcoesPadrao } from '../expr/padrao'
+import type { Funcoes } from '../expr/tipos'
 import type { Valor } from '../ir/tipos'
 
 /** Texto de um valor dentro de um template: ausente e objetos viram vazio (nunca "[object Object]" nem "undefined"). */
@@ -8,7 +10,7 @@ export function paraTexto(v: unknown): string {
 }
 
 /** Avalia um Valor do IR no escopo. `expr` mantém o tipo; `tpl` sempre devolve texto. */
-export function valorDe(v: Valor, escopo: Escopo, funcoes: Funcoes = FUNCOES_PADRAO): unknown {
+export function valorDe(v: Valor, escopo: Escopo, funcoes: Funcoes = funcoesPadrao()): unknown {
   switch (v.t) {
     case 'lit': return v.v
     case 'expr': return avalia(v.ast, escopo, funcoes)

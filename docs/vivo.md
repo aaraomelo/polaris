@@ -23,7 +23,7 @@ estado (`test/vivo.test.tsx`: cenários, fuzz de sequências de ações, identid
 `test/vivo-lista.test.ts` prova o mínimo de movimentos por fuzz contra uma referência O(n²).
 
 ## Medido
-- Bundle: **~13,6 KB gz** (avaliador com listas e aritmética exata, modelo, ações, blocos base e o runtime), contra ~135 KB gz do `react-dom`. Guarda: `test/bundle.test.ts` (< 16 KB gz, sem React/Ajv/QuickJS). Era 7,5 KB no protótipo; o próximo corte é incluir só as funções que o programa usa.
+- Bundle: **~8,7 a ~9,6 KB gz por página** (veja “Bundle por página” abaixo; o runtime completo com toda a biblioteca é ~13,6 KB: avaliador com listas e aritmética exata, modelo, ações, blocos base e o runtime), contra ~135 KB gz do `react-dom`. Guarda: `test/bundle.test.ts` (< 16 KB gz, sem React/Ajv/QuickJS). Era 7,5 KB no protótipo; o próximo corte é incluir só as funções que o programa usa.
 - `pnpm bench:vivo` (jsdom; números absolutos são pessimistas): mudar chave fora da lista ≈ 0,01–0,03 ms (independe do
   tamanho); alterar 1 item de 1000 ≈ 1,7 ms; inserir 1 no meio de 1000 cria 1 nó.
 
@@ -56,3 +56,24 @@ mudar (ações `definir`/`executar`, inclusive em `depois`/`emErro`, e dados em 
   nada muda → a mesma referência. `difere`/`aplica`/`inverso` geram e aplicam patches reversíveis (JSON Patch com o valor antigo).
 - **Histórico**: `criaModelo({ historico: N })` guarda as últimas N mudanças (`patches()` preguiçoso); `desfaz()`/`refaz()` revertem o ESTADO da
   página (dados do servidor não voltam). Valor igual no `despacha` não muda o store (mesma referência: nada notificado, nada no histórico).
+
+## Bundle por página (AOT) — `@polaris/engine/aot`
+`empacotaCliente(programa)` gera, para UMA página, a entrada do cliente que importa as funções e os descritores de bloco **um a um** (só os que
+a página usa) e deixa o esbuild descartar o resto. Medido (`bench/medida-aot.ts`), gz:
+
+| página | gz |
+|---|---|
+| estática (um parágrafo) | 8,7 KB |
+| contador (evento + estado) | 9,0 KB |
+| lista com `filtra`/`ordena`/formatadores | 9,4 KB |
+| aritmética exata (`qbrl`, `qmul`, BigInt) | 9,6 KB |
+| loja (listas, combinadores, exata, input; teste) | < 12 KB |
+| `react-dom` sozinho | ~135 KB |
+
+O que torna isso possível: cada função é um export nomeado (`f_*`, `fq_*`, combinadores em `ordem-superior.ts`, descritores `d_*`); as tabelas
+agregadas (`FUNCOES_PADRAO`, `DESCRITORES_BASE`) vivem fora dos módulos que o cliente importa; a biblioteca padrão é **registrada** (`expr/padrao.ts`)
+por quem importa a entrada do servidor, não importada pelo núcleo; o histórico/desfazer é um plugin (`modelo/historico.ts`). O pacote é recusado
+(com os motivos) se a página usa streaming, blocos de código etc. Os testes executam o bundle gerado num DOM isolado (sem React) e comparam com o React.
+
+Ainda pesa no núcleo (~8,7 KB): `monta.ts`, `dep.ts` (análise de dependências, que pode ser pré-calculada no build), `avalia.ts`, `nucleo.ts`, ações, store e
+listas com chave (só necessárias se a página tem `repetir`). Próximos cortes: dependências pré-calculadas no Programa e módulos por recurso.

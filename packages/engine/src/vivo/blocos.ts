@@ -34,34 +34,43 @@ const caixa = (direcao: 'column' | 'row'): Descritor => ({
 })
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))
 
-export const DESCRITORES_BASE: DescritoresDom = {
-  'layout/pilha': caixa('column'),
-  'layout/linha': caixa('row'),
-  'texto/titulo': { chave: (p) => `h${nivel(p)}`, tag: (p) => `h${nivel(p)}`, attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) },
-  'texto/paragrafo': { chave: () => 'p', tag: () => 'p', attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) },
-  'midia/imagem': {
+export const d_layout_pilha: Descritor = /* @__PURE__ */ caixa('column')
+export const d_layout_linha: Descritor = /* @__PURE__ */ caixa('row')
+export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}`, tag: (p) => `h${nivel(p)}`, attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
+export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
+export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
       const w = num(p.largura), h = num(p.altura)
       return { ...comId(id), src: urlSegura(p.src) ?? '', alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy' }
     },
-  },
-  'nav/link': {
+  }
+export const d_nav_link: Descritor = {
     chave: (p) => (p.texto !== undefined ? 'a:t' : 'a:f'), tag: () => 'a', filhos: true,
     attrs: (p, id) => {
       const href = urlSegura(p.href)
       return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}) }
     },
     texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
-  },
-  'nav/botao': {
+  }
+export const d_nav_botao: Descritor = {
     chave: () => 'button', tag: () => 'button', texto: (p) => txt(p.texto),
     attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}) }),
     eventos: { aoClicar: { dom: 'click' } },
-  },
-  'entrada/texto': {
+  }
+export const d_entrada_texto: Descritor = {
     chave: () => 'input', tag: () => 'input', valor: (p) => txt(p.valor),
     attrs: (p, id) => ({ ...comId(id), type: 'text', placeholder: txt(p.placeholder), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
     eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLInputElement).value } },
-  },
+  }
+
+export const DESCRITORES_BASE: DescritoresDom = {
+  'layout/pilha': d_layout_pilha,
+  'layout/linha': d_layout_linha,
+  'texto/titulo': d_texto_titulo,
+  'texto/paragrafo': d_texto_paragrafo,
+  'midia/imagem': d_midia_imagem,
+  'nav/link': d_nav_link,
+  'nav/botao': d_nav_botao,
+  'entrada/texto': d_entrada_texto,
 }

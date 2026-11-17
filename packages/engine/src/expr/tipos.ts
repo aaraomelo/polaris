@@ -21,7 +21,9 @@ export class ExprErro extends Error {
   }
 }
 
-export type Funcao = { min: number; max: number; fn: (...args: unknown[]) => unknown }
+import type { OrdemSuperior } from './ordem-superior'
+/** `os`: combinador (recebe função anônima na posição `os.fnPos`; o avaliador o executa com orçamento de passos) */
+export type Funcao = { min: number; max: number; fn: (...args: unknown[]) => unknown; os?: OrdemSuperior }
 export type Funcoes = Record<string, Funcao>
 
 /** passos = nós avaliados por avaliação (o orçamento que garante que sempre termina rápido); lista = tamanho máximo de uma lista construída */

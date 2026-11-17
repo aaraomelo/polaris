@@ -1,6 +1,5 @@
 import { sugere } from '@polaris/schema/sugere'
-import { FUNCOES_PADRAO } from './funcoes'
-import { ORDEM_SUPERIOR, ehOrdemSuperior } from './ordem-superior'
+import { FUNCOES_PADRAO } from './biblioteca'
 import type { Expr, Funcoes } from './tipos'
 
 export type ProblemaExpr = { pos: number; mensagem: string; dica?: string; regra: 'variavel' | 'funcao' | 'aridade' | 'funcao-anonima' }
@@ -33,6 +32,7 @@ const PARAMS_PROIBIDOS = new Set(['__proto__', 'constructor', 'prototype', 'true
 export function validaExpr(e: Expr, escopo: readonly string[], funcoes: Funcoes = FUNCOES_PADRAO): ProblemaExpr[] {
   const out: ProblemaExpr[] = []
   const nomes = (extra: readonly string[]) => [...escopo, ...extra]
+  const combinadores = Object.keys(funcoes).filter((k) => funcoes[k]!.os)
   const anda = (x: Expr, ligadas: readonly string[], emArgFn: boolean): void => {
     switch (x.t) {
       case 'var':
@@ -52,14 +52,15 @@ export function validaExpr(e: Expr, escopo: readonly string[], funcoes: Funcoes 
       case 'lista': x.itens.forEach((i) => anda(i, ligadas, false)); break
       case 'lit': break
       case 'fn':
-        if (!emArgFn) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: 'função anônima só pode ser argumento de um combinador', dica: `use dentro de ${Object.keys(ORDEM_SUPERIOR).join(', ')}` })
+        if (!emArgFn) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: 'função anônima só pode ser argumento de um combinador', dica: `use dentro de ${combinadores.join(', ')}` })
         for (const p of x.params) if (PARAMS_PROIBIDOS.has(p)) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: `nome de parâmetro inválido '${p}'` })
         if (new Set(x.params).size !== x.params.length) out.push({ pos: x.pos, regra: 'funcao-anonima', mensagem: 'parâmetros repetidos' })
         anda(x.corpo, [...ligadas, ...x.params], false)
         break
       case 'call': {
-        if (ehOrdemSuperior(x.fn)) {
-          const os = ORDEM_SUPERIOR[x.fn]!
+        const f = Object.prototype.hasOwnProperty.call(funcoes, x.fn) ? funcoes[x.fn] : undefined
+        if (f?.os) {
+          const os = f.os
           if (x.args.length !== os.fnPos + 1) out.push({ pos: x.pos, regra: 'aridade', mensagem: `'${x.fn}' recebe ${os.fnPos + 1} argumentos, recebeu ${x.args.length}` })
           x.args.forEach((a, i) => {
             if (i === os.fnPos) {
@@ -70,10 +71,9 @@ export function validaExpr(e: Expr, escopo: readonly string[], funcoes: Funcoes 
           })
           break
         }
-        const f = Object.prototype.hasOwnProperty.call(funcoes, x.fn) ? funcoes[x.fn] : undefined
         if (!f) {
-          const s = sugere(x.fn, [...Object.keys(funcoes), ...Object.keys(ORDEM_SUPERIOR)])
-          out.push({ pos: x.pos, regra: 'funcao', mensagem: `a função '${x.fn}' não existe`, dica: s ? `quis dizer '${s}'?` : `funções: ${[...Object.keys(funcoes), ...Object.keys(ORDEM_SUPERIOR)].join(', ')}` })
+          const s = sugere(x.fn, Object.keys(funcoes))
+          out.push({ pos: x.pos, regra: 'funcao', mensagem: `a função '${x.fn}' não existe`, dica: s ? `quis dizer '${s}'?` : `funções: ${Object.keys(funcoes).join(', ')}` })
         } else if (x.args.length < f.min || x.args.length > f.max) {
           const esp = f.min === f.max ? `${f.min}` : `${f.min} a ${f.max === Infinity ? 'N' : f.max}`
           out.push({ pos: x.pos, regra: 'aridade', mensagem: `'${x.fn}' recebe ${esp} argumento(s), recebeu ${x.args.length}` })

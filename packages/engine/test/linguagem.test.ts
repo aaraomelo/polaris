@@ -14,7 +14,8 @@ const pick = <T,>(xs: readonly T[]): T => xs[ri(xs.length)]!
 describe('registro: a documentação é a fonte e não mente', () => {
   it('toda função padrão está documentada, e todo documentado como função existe', () => {
     const doc = REGISTRO.filter((d) => d.tipo === 'funcao').map((d) => d.nome).sort()
-    expect(doc).toEqual([...Object.keys(FUNCOES_PADRAO), ...Object.keys(ORDEM_SUPERIOR)].sort())
+    expect(doc).toEqual(Object.keys(FUNCOES_PADRAO).sort())
+    for (const k of Object.keys(ORDEM_SUPERIOR)) expect(FUNCOES_PADRAO[k]!.os, k).toBe(ORDEM_SUPERIOR[k])
   })
   it('todo operador do AST está documentado (e vice-versa); as formas também', () => {
     expect(REGISTRO.filter((d) => d.tipo === 'operador').map((d) => d.nome).sort()).toEqual([...OPERADORES].sort())
