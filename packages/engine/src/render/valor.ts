@@ -1,13 +1,10 @@
 import { avalia, type Escopo } from '../expr/avalia'
 import { funcoesPadrao } from '../expr/padrao'
+import { paraTexto } from '../expr/texto'
 import type { Funcoes } from '../expr/tipos'
 import type { Valor } from '../ir/tipos'
 
-/** Texto de um valor dentro de um template: ausente e objetos viram vazio (nunca "[object Object]" nem "undefined"). */
-export function paraTexto(v: unknown): string {
-  if (v === null || v === undefined || typeof v === 'object') return ''
-  return String(v)
-}
+export { paraTexto }
 
 /** Avalia um Valor do IR no escopo. `expr` mantém o tipo; `tpl` sempre devolve texto. */
 export function valorDe(v: Valor, escopo: Escopo, funcoes: Funcoes = funcoesPadrao()): unknown {

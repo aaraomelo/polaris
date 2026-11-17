@@ -1,4 +1,5 @@
-import { avalia, type Escopo } from '../expr/avalia'
+import type { Escopo } from '../expr/avalia'
+import { avaliaC, valorDeC } from '../expr/compila'
 import { funcoesPadrao } from '../expr/padrao'
 import type { Funcoes } from '../expr/tipos'
 import type { IRAcao } from '../ir/tipos'
@@ -6,7 +7,6 @@ import { urlSegura } from './url'
 import type { Programa } from './programa'
 import { escopoDaStore, reduz, type AcaoStore, type Store } from './store'
 import type { ErroRuntime } from './tipos'
-import { valorDe } from './valor'
 
 // ---------------------------------------------------------------------------
 // Executor de ações declarativas (definir / executar / navegar). Roda no cliente, em resposta a eventos.
@@ -44,9 +44,9 @@ export async function executaAcoes(acoes: IRAcao[], capturado: Escopo, extra: Re
     if (!cx.vivo.atual) return
     try {
       if (a.acao === 'definir') {
-        aplica(cx, { t: 'estado', nome: a.estado, valor: avalia(a.valor, escopo(), funcoes) })
+        aplica(cx, { t: 'estado', nome: a.estado, valor: avaliaC(a.valor, escopo(), funcoes) })
       } else if (a.acao === 'navegar') {
-        const v = valorDe(a.para, escopo(), funcoes)
+        const v = valorDeC(a.para, escopo(), funcoes)
         const url = typeof v === 'string' ? urlSegura(v) : undefined
         if (!url) { cx.onErro?.({ caminho: a.caminho, regra: 'navegacao', mensagem: 'destino de navegação ausente ou inseguro' }); continue }
         if (cx.navegar) cx.navegar(url)
@@ -63,7 +63,7 @@ export async function executaAcoes(acoes: IRAcao[], capturado: Escopo, extra: Re
 async function executa(a: Extract<IRAcao, { acao: 'executar' }>, escopo: Escopo, extra: Record<string, unknown>, cx: ContextoAcoes, capturado: Escopo): Promise<void> {
   const funcoes = cx.funcoes ?? funcoesPadrao()
   const args: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(a.args)) args[k] = valorDe(v, escopo, funcoes)
+  for (const [k, v] of Object.entries(a.args)) args[k] = valorDeC(v, escopo, funcoes)
   const n = (cx.sequencia[a.dados] = (cx.sequencia[a.dados] ?? 0) + 1)
   if (!cx.carregador) {
     cx.onErro?.({ caminho: a.caminho, regra: 'dados', mensagem: 'não há carregador configurado para executar chamadas de dados' })

@@ -25,7 +25,7 @@ export function indice(base: unknown, i: unknown): unknown {
   return undefined
 }
 
-const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+export const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const texto = (v: unknown) => (v === null || v === undefined ? '' : typeof v === 'object' ? '' : String(v))
 
 function igual(a: unknown, b: unknown): boolean {
@@ -33,7 +33,7 @@ function igual(a: unknown, b: unknown): boolean {
   return typeof a === typeof b && typeof a !== 'object' && a === b
 }
 
-function binario(op: string, a: unknown, b: unknown): unknown {
+export function binario(op: string, a: unknown, b: unknown): unknown {
   switch (op) {
     case '==': return igual(a, b)
     case '!=': return !igual(a, b)

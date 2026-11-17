@@ -88,7 +88,7 @@ Mesma página de loja (`packages/engine/bench/navegador/`: `gera.ts` gera as dua
 | alterar 1 item no meio | 9–13 ms | 4,6–5,8 ms | ~2× |
 | inserir / remover 1 | ~9,5 ms | 5,4–6,2 / 2,3–6,1 ms | ~1,6× |
 | inverter a lista | 8,7–10,2 ms | 5,1–5,8 ms | ~1,8× |
-| digitar no filtro (reavalia `filtra` com lambda em 900 itens) | 4,8–6,1 ms | 4,9–8,9 ms | **sem ganho**: o custo é a avaliação da expressão, que os dois pagam |
+| digitar no filtro (reavalia `filtra` com lambda em 900 itens e cria/remove ~450 cartões) | 4,8–6,1 ms | 4,9–8,9 ms | **sem ganho** (ver abaixo: o gargalo é o DOM, não a expressão) |
 
 Com 200 itens as proporções se mantêm (contador 5,5 ms × 0,2 ms; JS 143,5 × 10,5 KB), e o filtro é um pouco pior no vivo (3,2 × 1,3 ms).
 
@@ -99,10 +99,26 @@ alterar 1: 48 × 88 ms; inverter: 96 × 104 ms. Amostra pequena e a frio: indica
 - O ganho robusto é **bytes** (13,5× menos JS) e **interações que não tocam a lista** (60×): o vivo só reavalia o que depende da chave que mudou. Em rede lenta os bytes
   dominam (conta, não medida: 143,5 KB ≈ 0,7 s e 10,6 KB ≈ 0,05 s a 1,6 Mbps).
 - Operações de lista: ~2× melhores no handler, mas o tempo de pintura de 900 nós domina o INP real e é igual nos dois.
-- **Sem ganho** quando o custo é a avaliação de expressões pesadas (o filtro). Próximo corte: compilar as expressões do vivo para closures (o caminho estático já faz) em vez de interpretar a AST.
+- **Sem ganho** no filtro. Primeiro achei que era a avaliação da expressão; **estava errado** (ver a seção seguinte).
 - Memória (`performance.memory`): inconclusiva (varia de 50 a 146 MB entre cargas da mesma variante); não use para decidir.
 - Limites da medição: localhost, sem throttling de CPU/rede, aba de automação (os quadros de pintura nem sempre disparam), INP real com 1 amostra.
   Repetir em dispositivo lento e rede real antes de afirmar números de campo.
 
 A medição apontou e corrigiu um ponto quente real: a reconciliação alocava uma cópia do escopo e um `Set` por item a cada atualização (agora a chave é avaliada no escopo vivo
-e o conjunto de chaves de fora é calculado uma vez). Ganho pequeno (≤ 10%) — confirma que o gargalo é a avaliação da expressão.
+e o conjunto de chaves de fora é calculado uma vez). Ganho pequeno (≤ 10%).
+
+## Expressões compiladas em closures (e um diagnóstico corrigido)
+O runtime vivo e as ações passaram a avaliar expressões por **closures** (`src/expr/compila.ts`: a AST é percorrida uma vez; função resolvida e aridade checada na compilação;
+combinadores com orçamento de passos por invocação), em vez de interpretar a AST a cada chamada. O caminho estático usa o mesmo compilador. Equivalência: teste diferencial
+com 6000 expressões aleatórias (combinadores e funções anônimas incluídos) × escopos hostis; o interpretador continua sendo a referência (`avalia`) no servidor e na análise.
+
+Microbenchmark (`bench/expr.ts`, Node, 900 itens): `filtra` com lambda 467 → 159 µs (2,9×); `mapeia` 189 → 109 µs (1,7×); `dobra` 171 → 103 µs (1,7×); expressão simples 0,5 → 0,2 µs;
+template com `brl` 1,1 → 0,6 µs.
+
+**Correção:** a hipótese "o filtro de 900 itens custa o que custa por causa da avaliação da expressão" estava ERRADA. A expressão toda custa 0,16–0,47 ms; o filtro no navegador leva ~5–12 ms.
+O resto é construir/remover ~450 cartões no DOM (os dois caminhos pagam isso: React 12,1 ms × vivo 11,7 ms, na mesma janela). É uma hipótese coerente com os números, **ainda não perfilada**.
+
+Chrome real depois da mudança (vivo, 900 itens, 2 cargas; React na mesma janela entre parênteses): contador 0,2–0,3 ms (12,8); alterar 1 item 3,6–4,2 ms (13,4; antes da mudança 4,6–5,8);
+inserir 5,5–5,9 (19,6); remover 5,2–5,4 (9,6); inverter 4,5 (9,1); filtro ~11,7 (12,1). Ganho de ~20% em "alterar 1"; as demais operações não mudaram de forma distinguível do ruído.
+Uma carga isolada deu "alterar 1" = 0,9 ms e outra janela mostrou o dobro em tudo: **só compare números da mesma sessão** (este navegador de automação varia entre janelas).
+Custo em tamanho: +0,6 KB gz no cliente (o compilador é maior que o interpretador que ele tirou do bundle).

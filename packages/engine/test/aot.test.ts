@@ -77,7 +77,7 @@ describe('bundle por página: tree-shaking real', () => {
     const arqs = Object.keys(r.pacote.contribuicao)
     for (const proibido of ['expr/biblioteca.ts', 'expr/funcoes.ts', 'expr/exato.ts', 'num/racional.ts', 'modelo/historico.ts', 'expr/ordem-superior.ts', 'expr/parser.ts', 'expr/analise.ts', 'ir/compila.ts']) expect(arqs, proibido).not.toContain(proibido)
     expect(r.pacote.contribuicao['vivo/monta.ts']).toBeGreaterThan(5000)
-    expect(r.pacote.gz).toBeLessThan(9.5 * 1024)
+    expect(r.pacote.gz).toBeLessThan(10.5 * 1024)
     expect(r.pacote.codigo).not.toMatch(/react/i)
   })
   it('cada capacidade só custa quando usada: BigInt só com q*, combinadores só com mapeia/filtra…', async () => {
@@ -92,9 +92,9 @@ describe('bundle por página: tree-shaking real', () => {
     expect(exata.pacote.gz).toBeGreaterThan(base.pacote.gz)
     expect(exata.pacote.gz).toBeLessThan(base.pacote.gz + 2.5 * 1024) // a aritmética exata inteira custa pouco
   })
-  it('a loja completa (listas, combinadores, aritmética exata, eventos) fica abaixo de 12 KB gz — o react-dom sozinho tem ~135 KB', async () => {
+  it('a loja completa (listas, combinadores, aritmética exata, eventos) fica abaixo de 13 KB gz — o react-dom sozinho tem ~135 KB', async () => {
     const r = await empacotaCliente(loja())
-    expect(r.ok && r.pacote.gz).toBeLessThan(12 * 1024)
+    expect(r.ok && r.pacote.gz).toBeLessThan(13 * 1024)
   })
   it('páginas que o runtime vivo não suporta são recusadas com os motivos (nenhum bundle)', async () => {
     const r = new Registry(); registraBase(r)

@@ -1,4 +1,6 @@
-import { avalia, verdadeiro, type Escopo } from '../expr/avalia'
+import type { Escopo } from '../expr/avalia'
+import { avaliaC, valorDeC } from '../expr/compila'
+import { verdadeiro } from '../expr/verdade'
 import type { Funcoes } from '../expr/tipos'
 import type { IRElemento, IRNo } from '../ir/tipos'
 import { criaModeloNucleo, type ModeloNucleo, type OpcoesNucleo } from '../modelo/nucleo'
@@ -6,7 +8,6 @@ import { executaAcoes } from '../render/acoes'
 import type { Programa } from '../render/programa'
 import type { AcaoStore, Store } from '../render/store'
 import { LIMITES_RUNTIME, type ErroRuntime } from '../render/tipos'
-import { valorDe } from '../render/valor'
 import type { DescritoresDom } from './blocos'
 import { descritoresPadrao } from '../expr/padrao'
 import { caminhosMudados } from '../estado/caminho'
@@ -65,7 +66,7 @@ function igual(a: unknown, b: unknown, prof = 0): boolean {
 
 function avaliaProps(no: IRElemento, esc: Esc, f: Funcoes): Record<string, unknown> {
   const out: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(no.props)) out[k] = valorDe(v, esc, f)
+  for (const [k, v] of Object.entries(no.props)) out[k] = valorDeC(v, esc, f)
   return out
 }
 function depsProps(no: IRElemento): Set<string> { const s = new Set<string>(); for (const v of Object.values(no.props)) depsValor(v, s); return s }
@@ -130,14 +131,14 @@ function constroiSe(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
   let fim!: Comment
   const ini = pos.com(); pos.coloca(ini)
   const monta = (p: Pos) => { sub = { nos: [] }; constroiRep(no, cx, sub, amb, p) }
-  if (verdadeiro(avalia(no.se!, esc as Escopo, amb.funcoes))) monta(pos)
+  if (verdadeiro(avaliaC(no.se!, esc as Escopo, amb.funcoes))) monta(pos)
   fim = pos.com(); pos.coloca(fim)
   if (estatico(no, cx)) { sub = null; return }
   regista(amb, dono, {
     usa: usaTotal(no), morto: false,
     atualiza(m) {
       if (cruza(se, m)) {
-        const c = verdadeiro(avalia(no.se!, esc as Escopo, amb.funcoes))
+        const c = verdadeiro(avaliaC(no.se!, esc as Escopo, amb.funcoes))
         if (c && !sub) return monta(new Pos(fim.parentNode!, fim, false))
         if (!c && sub) { destroiNos(sub.nos); limpaEntre(ini, fim); sub = null; return }
       }
@@ -194,7 +195,7 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
     if (mi.size) atualizaNos(it.dono.nos, mi)
   }
   const calcula = (): Array<{ chave: string; item: unknown; i: number }> => {
-    const l = avalia(cada, esc as Escopo, amb.funcoes)
+    const l = avaliaC(cada, esc as Escopo, amb.funcoes)
     if (!Array.isArray(l)) return []
     if (l.length > LIMITES_RUNTIME.iteracoes) amb.onErro?.({ caminho: no.caminho, regra: 'limite', mensagem: `repetir com ${l.length} itens; renderizando os primeiros ${LIMITES_RUNTIME.iteracoes}` })
     const vistos = new Set<string>()
@@ -208,7 +209,7 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
         let c: string
         if (exprChave) {
           esc[como] = item; esc.indice = i
-          const v = avalia(exprChave, esc as Escopo, amb.funcoes)
+          const v = avaliaC(exprChave, esc as Escopo, amb.funcoes)
           c = typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : `\u0001${i}`
         } else c = String(i)
         while (vistos.has(c)) c += '\u0000'
@@ -454,7 +455,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
   return {
     modelo, store: modelo.store, despacha: modelo.despacha, flush: modelo.flush,
     chega(dados) { for (const [nome, ok, v] of dados) modelo.despacha(ok ? { t: 'dado', nome, valor: v } : { t: 'erro', nome, erro: String(v) }) },
-    titulo: () => { const t = programa.pagina.titulo; if (!t) return ''; const v = valorDe(t, modelo.escopo, funcoes); return v === null || v === undefined || typeof v === 'object' ? '' : String(v) },
+    titulo: () => { const t = programa.pagina.titulo; if (!t) return ''; const v = valorDeC(t, modelo.escopo, funcoes); return v === null || v === undefined || typeof v === 'object' ? '' : String(v) },
     diagnostico: () => ({ controladores: stats.controladores, hidratou }),
     destroi() { desassina(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
   }
