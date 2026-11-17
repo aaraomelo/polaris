@@ -129,3 +129,20 @@ Custo em tamanho: +0,6 KB gz no cliente (o compilador é maior que o interpretad
 **Correção do diagnóstico (microbenchmark em Chrome real, 450 cartões de ~5 nós, mediana de 15):** criar nó a nó num fragmento único 3,1 ms; item a item 2,1 ms; `cloneNode` de um modelo 2,5 ms; remover um a um 0,3 ms. Ou seja, o DOM cru custa 2–3 ms e clonar modelo NÃO ajuda (descartado). Os ~7–15 ms do filtro vêm do JavaScript do próprio runtime por item (escopo do item, controladores, dependências, `Pos`), mais estilo/layout depois do handler. Próximo passo: perfil de CPU do `criaItem` (alocações por item), não mais DOM.
 
 **Fechamento do diagnóstico do filtro (card 1dff4uhedyp).** Perfil de CPU (`bench/perfil-lista.ts`, `pnpm perfil:lista`): o tempo próprio do runtime por item é pequeno (`criaItem` ~2%, `depsExpr` ~1%, formatadores já em cache); o resto, em jsdom, é o próprio jsdom. Em Chrome real, para 450 cartões: criar + inserir ≈ 1,5 ms; **estilo + layout forçado ≈ 5,9 ms**. Esse é o piso do navegador para a operação (o React paga o mesmo, por isso o empate), e não está no nosso código. Ganho adicional só reduzindo o que o navegador precisa recalcular (virtualização de lista, `content-visibility: auto`), que é decisão de produto/bloco, não do runtime.
+
+## Com limitação de CPU e rede, cliques reais, INP (card 1dff4uhedun)
+`bench/navegador/cdp.mjs` (Chrome headless via CDP direto, sem dependências): `Emulation.setCPUThrottlingRate`, `Network.emulateNetworkConditions` (4G lenta: 1,6 Mbps, 150 ms), cache desligado, cliques de verdade (`Input.dispatchMouseEvent`) e Event Timing (`click`, resolução de 8 ms, só registra eventos ≥ 16 ms). 900 itens, 3 cargas por célula (medianas de carga); INP-like = **pior** duração entre 12–24 cliques por botão (≈ p98).
+
+| | sem limite | CPU 4× + 4G lenta | CPU 6× + 4G lenta |
+|---|---|---|---|
+| 1º clique que funciona (TTI) — React | 124 ms | 1411 ms | 1561 ms |
+| 1º clique que funciona (TTI) — vivo | 76 ms | **578 ms** | **703 ms** |
+| long tasks na carga (excesso >50 ms) — React / vivo | 0 / 0 | 140 / 86 ms | 276 / 144 ms |
+| FCP (igual: o HTML é o mesmo) | 44 / 40 ms | 432 / 424 ms | 448 / 448 ms |
+| INP, contador +1 — React / vivo | 56 / 24 ms | 64 / **24** ms | 96 / **24** ms |
+| INP, alterar 1 item — React / vivo | 40 / 24 ms | 56 / 24 ms | 88 / 32 ms |
+| INP, inserir 1 — React / vivo | 56 / 16 ms | 80 / 24 ms | 120 / 48 ms |
+| INP, remover 1 — React / vivo | 48 / 24 ms | 80 / 24 ms | 112 / 32 ms |
+| INP, inverter a lista — React / vivo | 40 / 56 ms | 104 / 96 ms | 144 / **136** ms |
+
+**Leitura honesta.** Com CPU e rede limitadas, o ganho que antes era "indistinguível em localhost" aparece: o vivo fica interativo **2,4× mais cedo** (578 × 1411 ms) e todas as interações pequenas ficam abaixo de 50 ms de INP (limite "bom" é 200 ms) mesmo a 6×. O React já passa de 100 ms a 6× em inserir/remover. **Inverter a lista inteira é empate** (e no sem-limite o vivo é pior: 56 × 40 ms): é a operação limitada por estilo/layout do navegador, como no card do filtro. Limites: headless; throttling de CPU é emulado (não é um telefone); Event Timing só enxerga eventos ≥ 16 ms e tem resolução de 8 ms; sem o quadro de pintura final real. Repetir em aparelho físico continua sendo a medição definitiva.
