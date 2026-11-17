@@ -87,7 +87,7 @@ describe('4. allowlist de expressões: só funções registradas, sem alcançar 
     let valor: unknown, caiu = false
     try { const p = parseExpr(src); if (p) valor = avalia(p, ESC as never, funcoes) } catch { caiu = true }
     let compilado: unknown; let caiu2 = false
-    try { const f = compilaExpr(src, funcoes); compilado = f(ESC as never) } catch { caiu2 = true }
+    try { const f = compilaExpr(parseExpr(src), funcoes); compilado = f(ESC as never) } catch { caiu2 = true }
     for (const v of [valor, compilado]) {
       expect(typeof v).not.toBe('function')
       expect(v === Object.prototype || v === Function.prototype || v === Array.prototype || v === String.prototype).toBe(false)

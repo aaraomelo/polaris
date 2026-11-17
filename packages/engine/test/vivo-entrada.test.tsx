@@ -13,10 +13,11 @@ const res = compilaPrograma(r, r.registra(no('pagina', 'entrada', { rota: '/', e
   P('nav/botao', { id: 'limpa', props: { texto: 'l' }, eventos: { aoClicar: [{ acao: 'definir', estado: 'q', valor: '""' }] } }),
 ] } }) })))
 if (!res.ok) throw new Error(JSON.stringify(res.erros))
+const programa = res.programa
 
 function monta() {
   const c = document.createElement('div'); document.body.appendChild(c)
-  montaVivo({ programa: res.programa, container: c })
+  montaVivo({ programa, container: c })
   const campo = c.querySelector('#campo') as HTMLInputElement
   let escritas = 0
   const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!
