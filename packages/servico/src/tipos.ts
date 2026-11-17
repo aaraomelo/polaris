@@ -18,8 +18,8 @@ export type EntradaOperacao = {
   ctx: Contexto
   /** consulta dentro da transação, com a RLS do tenant */
   q: Consulta
-  /** agenda um evento declarado em `publica`; só é emitido DEPOIS do commit */
-  publica(evento: string, payload: unknown): void
+  /** publica um evento declarado em `publica`: é gravado no OUTBOX, na mesma transação do dado (commit junto, rollback junto); o relay o leva ao barramento */
+  publica(evento: string, payload: Record<string, unknown>): Promise<void>
 }
 export type OpcoesServico = {
   db: Db
@@ -29,7 +29,8 @@ export type OpcoesServico = {
   autoriza?(ctx: Contexto, permissao: string): boolean
   /** implementação das operações declaradas que não são CRUD; sem implementação a rota responde 501 */
   operacoes?: Record<string, (e: EntradaOperacao) => Promise<unknown>>
-  aoPublicar?(evento: string, payload: unknown, ctx: Contexto): Promise<void> | void
+  /** os nós `evento` dos eventos que o serviço publica (contrato do payload, versão e chave de idempotência). Obrigatório se alguma operação declara `publica` */
+  eventos?: Record<string, import('@polaris/schema').No>
   /** limite do corpo em bytes (padrão 100 KB) */
   limiteCorpoBytes?: number
   /** recebe erros inesperados (500); o cliente nunca vê a mensagem */

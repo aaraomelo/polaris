@@ -12,7 +12,8 @@
     "@polaris/schema": "workspace:*",
     "fastify": "^5.2.0",
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "@polaris/eventos": "workspace:*"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",

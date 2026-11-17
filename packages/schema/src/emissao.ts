@@ -204,6 +204,56 @@ export function validaReferencia(servico: string, entidade: string, campo: strin
   if (!(c.referencia in entidades)) throw new EmissaoErro(`servico ${servico}: '${entidade}.${campo}' referencia a entidade inexistente '${c.referencia}'`)
 }
 
+/** RLS por tenant (ENABLE + FORCE + política com USING e WITH CHECK); `base` nomeia a política. */
+export function sqlRls(tab: string, base: string): string[] {
+  // `current_setting(…, true)` não falha se o parâmetro nunca foi definido e `nullif` trata o vazio (sobra de um RESET numa conexão reutilizada):
+  // sem tenant, a comparação dá NULL e NENHUMA linha passa (falha fechada), em vez de erro de configuração.
+  const cond = `"tenant_id" = nullif(current_setting('app.tenant_id', true), '')::uuid`
+  // USING cobre SELECT/UPDATE/DELETE e WITH CHECK cobre INSERT/UPDATE: o tenant não escreve linha de outro.
+  return [`ALTER TABLE ${tab} ENABLE ROW LEVEL SECURITY;`, `ALTER TABLE ${tab} FORCE ROW LEVEL SECURITY;`,
+    `DROP POLICY IF EXISTS ${identSql(`${base}_tenant`)} ON ${tab};`, `CREATE POLICY ${identSql(`${base}_tenant`)} ON ${tab}\n  USING (${cond})\n  WITH CHECK (${cond});`]
+}
+
+/** Infraestrutura de eventos de um serviço: `outbox` (quem PUBLICA: o evento é gravado na MESMA transação do dado) e `inbox` (quem CONSOME: deduplica entregas repetidas). */
+export function ddlEventos(servico: string, publica: boolean, consome: boolean): string[] {
+  const esq = identSql(servico), out: string[] = []
+  if (publica) {
+    const t = `${esq}."outbox"`
+    out.push('', `CREATE TABLE IF NOT EXISTS ${t} (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "tenant_id" uuid NOT NULL,
+  "tipo" text NOT NULL,
+  "versao" text NOT NULL,
+  "chave" text,
+  "payload" jsonb NOT NULL,
+  "ocorrido_em" timestamptz NOT NULL DEFAULT now(),
+  "publicado_em" timestamptz,
+  "tentativas" integer NOT NULL DEFAULT 0,
+  "proxima_em" timestamptz NOT NULL DEFAULT now(),
+  "erro" text,
+  "morto_em" timestamptz
+);`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "outbox_chave_uidx" ON ${t} ("tenant_id", "tipo", "chave") WHERE "chave" IS NOT NULL;`, // o MESMO fato publicado duas vezes vira um evento só
+      `CREATE INDEX IF NOT EXISTS "outbox_pendentes_idx" ON ${t} ("proxima_em", "ocorrido_em", "id") WHERE "publicado_em" IS NULL AND "morto_em" IS NULL;`,
+      ...sqlRls(t, 'outbox'))
+  }
+  if (consome) {
+    const t = `${esq}."inbox"`
+    out.push('', `CREATE TABLE IF NOT EXISTS ${t} (
+  "consumidor" text NOT NULL,
+  "evento_id" uuid NOT NULL,
+  "tenant_id" uuid NOT NULL,
+  "processado_em" timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY ("consumidor", "evento_id")
+);`, ...sqlRls(t, 'inbox'))
+  }
+  return out
+}
+
+export const eventosDoServico = (spec: { operacoes?: Record<string, { publica?: string[] }>; consome?: string[] }) => ({
+  publica: Object.values(spec.operacoes ?? {}).some((o) => (o.publica ?? []).length > 0), consome: (spec.consome ?? []).length > 0,
+})
+
 /** DDL de UMA entidade (tabela, índices, RLS) e as FKs dela, separadas porque só podem ser criadas depois de todas as tabelas. */
 export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, entidades: Record<string, unknown>): { tabela: string[]; fks: string[] } {
   const esq = identSql(servico), tab = `${esq}.${identSql(snake(nome))}`
@@ -227,12 +277,7 @@ export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, ent
     for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: índice de '${nome}' usa campo inexistente '${c}'`)
     tabela.push(sqlIndice(servico, nome, cols))
   }
-  tabela.push(`ALTER TABLE ${tab} ENABLE ROW LEVEL SECURITY;`, `ALTER TABLE ${tab} FORCE ROW LEVEL SECURITY;`)
-  // `current_setting(…, true)` não falha se o parâmetro nunca foi definido e `nullif` trata o vazio (sobra de um RESET numa conexão reutilizada):
-  // sem tenant, a comparação dá NULL e NENHUMA linha passa (falha fechada), em vez de erro de configuração.
-  const cond = `"tenant_id" = nullif(current_setting('app.tenant_id', true), '')::uuid`
-  // USING cobre SELECT/UPDATE/DELETE e WITH CHECK cobre INSERT/UPDATE: o tenant não escreve linha de outro.
-  tabela.push(`DROP POLICY IF EXISTS ${identSql(`${snake(nome)}_tenant`)} ON ${tab};`, `CREATE POLICY ${identSql(`${snake(nome)}_tenant`)} ON ${tab}\n  USING (${cond})\n  WITH CHECK (${cond});`)
+  tabela.push(...sqlRls(tab, snake(nome)))
   return { tabela, fks }
 }
 
@@ -240,7 +285,7 @@ export const sqlIndice = (servico: string, entidade: string, cols: string[]): st
   `CREATE INDEX IF NOT EXISTS ${identSql(nomeIndice(entidade, cols))} ON ${identSql(servico)}.${identSql(snake(entidade))} ("tenant_id", ${cols.map(snake).map(identSql).join(', ')});`
 
 function emiteSql(no: No): string {
-  const spec = no.spec as { entidades: Record<string, EntidadeSql> }
+  const spec = no.spec as { entidades: Record<string, EntidadeSql>; operacoes?: Record<string, { publica?: string[] }>; consome?: string[] }
   const out: string[] = [`-- polaris: servico ${no.id}@${no.versao}`, `CREATE SCHEMA IF NOT EXISTS ${identSql(no.id)};`]
   const fks: string[] = [] // FKs vão DEPOIS de todas as tabelas (ordem e ciclos deixam de importar)
   for (const nome of Object.keys(spec.entidades).sort()) {
@@ -248,6 +293,8 @@ function emiteSql(no: No): string {
     out.push(...d.tabela); fks.push(...d.fks)
   }
   if (fks.length) out.push('', ...fks)
+  const ev = eventosDoServico(spec)
+  out.push(...ddlEventos(no.id, ev.publica, ev.consome))
   return out.join('\n') + '\n'
 }
 

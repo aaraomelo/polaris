@@ -1,4 +1,4 @@
-import { EmissaoErro, colunaSql, ddlEntidade, identSql, literalSql, nomeFk, nomeIndice, snake, sqlFk, sqlIndice, TIPO_SQL, validaReferencia, type Campo } from './emissao'
+import { EmissaoErro, colunaSql, ddlEntidade, ddlEventos, eventosDoServico, identSql, literalSql, nomeFk, nomeIndice, snake, sqlFk, sqlIndice, TIPO_SQL, validaReferencia, type Campo } from './emissao'
 import type { No } from './index'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,7 +127,11 @@ export function migraSql(anterior: No, atual: No, opcoes: OpcoesMigracao = {}): 
     destrutivas.push(`entidade ${nome} removida: apaga a tabela e TODOS os dados dela`); mudancas.push(`entidade removida: ${nome}`)
   }
 
-  const corpo = [...novas, ...alteracoes, ...indices, ...(opcoes.destrutivo ? perigosas : []), ...fks]
+  // o serviço passou a publicar/consumir eventos: cria `outbox`/`inbox` (idempotente)
+  const evA = eventosDoServico(anterior.spec as never), evB = eventosDoServico(atual.spec as never)
+  const infra = ddlEventos(atual.id, evB.publica && !evA.publica, evB.consome && !evA.consome)
+  if (infra.length) mudancas.push(`infraestrutura de eventos: ${[evB.publica && !evA.publica ? 'outbox' : '', evB.consome && !evA.consome ? 'inbox' : ''].filter(Boolean).join(' + ')}`)
+  const corpo = [...novas, ...alteracoes, ...indices, ...(opcoes.destrutivo ? perigosas : []), ...infra, ...fks]
   const ok = bloqueios.length === 0
   const up = corpo.length ? [`-- polaris: migração servico ${atual.id} ${anterior.versao} → ${atual.versao}`, 'BEGIN;', 'SET LOCAL row_security = off;', `CREATE SCHEMA IF NOT EXISTS ${esq};`, ...corpo, 'COMMIT;'].join('\n') + '\n' : ''
   return { up, mudancas, destrutivas, bloqueios, avisos, ok }

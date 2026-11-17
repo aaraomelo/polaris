@@ -2,6 +2,7 @@ import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify'
 import { codigoSucesso, esquemaDeEntidade, esquemaDoCampo, rotasDe, snake, type Campo, type No, type Rota } from '@polaris/schema'
+import { criaPublicador } from '@polaris/eventos'
 import { ErroApi, corpoErro, erroDoBanco } from './erros'
 import { colunas, ident, linhaParaApi, tabela, type Ent } from './sql'
 import type { Contexto, OpcoesServico } from './tipos'
@@ -57,6 +58,12 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
   app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); reply.header('cache-control', 'no-store') })
   app.get('/saude', async () => ({ ok: true, servico: no.id, versao: no.versao }))
 
+  // eventos: todo evento declarado em `publica` precisa de contrato (nó `evento`), senão o serviço nem sobe
+  const declarados = [...new Set(rotas.flatMap((r) => r.publica))]
+  const faltam = declarados.filter((e) => !o.eventos?.[e])
+  if (faltam.length) throw new Error(`serviço '${no.id}': faltam os nós evento de ${faltam.join(', ')} (opção 'eventos')`)
+  const publicador = declarados.length ? criaPublicador(no.id, o.eventos!) : null
+
   const autoriza = o.autoriza ?? ((ctx, p) => p === 'autenticada' || (ctx.permissoes ?? []).includes(p))
 
   for (const r of rotas) {
@@ -92,14 +99,12 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
     const ctx = req.ctx!
     const params = (req.params ?? {}) as Record<string, string>
     const entrada = ((r.metodo === 'get' || r.metodo === 'delete' ? req.query : req.body) ?? {}) as Record<string, unknown>
-    const eventos: Array<[string, unknown]> = []
     const resultado = await o.db.transacao(ctx.tenantId, async (q) => {
       if (r.origem.tipo === 'crud') return crud(r.origem.crud, r.origem.entidade, { params, entrada, ctx, q })
       const impl = o.operacoes?.[r.id]
       if (!impl) throw new ErroApi(501, 'nao_implementado', `a operação '${r.id}' ainda não tem implementação`)
-      return impl({ params, entrada, ctx, q, publica: (e, p) => { if (!r.publica.includes(e)) throw new Error(`a operação '${r.id}' não declara o evento '${e}' em 'publica'`); eventos.push([e, p]) } })
+      return impl({ params, entrada, ctx, q, publica: async (e, p) => { if (!r.publica.includes(e)) throw new Error(`a operação '${r.id}' não declara o evento '${e}' em 'publica'`); await publicador!.publicar(q, ctx.tenantId, e, p) } })
     })
-    for (const [e, p] of eventos) { try { await o.aoPublicar?.(e, p, ctx) } catch (err) { o.aoErro?.(err, `evento ${e}`) } } // só depois do commit
     if (r.saida === undefined) { ;(reply.status(204) as { send(): void }).send(); return }
     if (codigoSucesso(r) === '201') reply.status(201)
     return resultado

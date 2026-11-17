@@ -59,9 +59,9 @@ export const SERVICOS = [
     },
     operacoes: {
       obterCarrinho: { metodo: 'GET', caminho: '/carrinho', saida: 'carrinho', permissao: 'publica' },
-      adicionarItem: { metodo: 'POST', caminho: '/carrinho/itens', entrada: { produtoId: { tipo: 'uuid', obrigatorio: true }, varianteId: { tipo: 'uuid' }, quantidade: { tipo: 'inteiro', padrao: 1 } }, saida: 'carrinho', permissao: 'publica', publica: ['carrinhoAlterado'] },
-      alterarQuantidade: { metodo: 'PATCH', caminho: '/carrinho/itens/:id', entrada: { id: { tipo: 'uuid', obrigatorio: true }, quantidade: { tipo: 'inteiro', obrigatorio: true } }, saida: 'carrinho', permissao: 'publica', publica: ['carrinhoAlterado'] },
-      removerItem: { metodo: 'DELETE', caminho: '/carrinho/itens/:id', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'carrinho', permissao: 'publica', publica: ['carrinhoAlterado'] },
+      adicionarItem: { metodo: 'POST', caminho: '/carrinho/itens', entrada: { produtoId: { tipo: 'uuid', obrigatorio: true }, varianteId: { tipo: 'uuid' }, quantidade: { tipo: 'inteiro', padrao: 1 } }, saida: 'carrinho', permissao: 'publica', publica: ['carrinho.alterado'] },
+      alterarQuantidade: { metodo: 'PATCH', caminho: '/carrinho/itens/:id', entrada: { id: { tipo: 'uuid', obrigatorio: true }, quantidade: { tipo: 'inteiro', obrigatorio: true } }, saida: 'carrinho', permissao: 'publica', publica: ['carrinho.alterado'] },
+      removerItem: { metodo: 'DELETE', caminho: '/carrinho/itens/:id', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'carrinho', permissao: 'publica', publica: ['carrinho.alterado'] },
     },
   }),
   no('servico', 'pedidos', {
@@ -74,12 +74,21 @@ export const SERVICOS = [
       pagamentoPix: { campos: { pedidoId: { tipo: 'uuid', obrigatorio: true }, valor: { tipo: 'dinheiro', obrigatorio: true }, copiaECola: { tipo: 'texto', obrigatorio: true }, expiraEm: { tipo: 'dataHora', obrigatorio: true } } },
     },
     operacoes: {
-      criarPedido: { metodo: 'POST', caminho: '/pedidos', entrada: { carrinhoId: { tipo: 'uuid', obrigatorio: true }, observacoes: { tipo: 'texto' } }, saida: 'pedido', permissao: 'cliente', publica: ['pedidoCriado'] },
+      criarPedido: { metodo: 'POST', caminho: '/pedidos', entrada: { carrinhoId: { tipo: 'uuid', obrigatorio: true }, observacoes: { tipo: 'texto' } }, saida: 'pedido', permissao: 'cliente', publica: ['pedido.criado'] },
       obterPedido: { metodo: 'GET', caminho: '/pedidos/:id', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'pedido', permissao: 'cliente' },
-      criarPagamentoPix: { metodo: 'POST', caminho: '/pedidos/:id/pix', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'pagamentoPix', permissao: 'cliente', publica: ['pagamentoCriado'] },
+      criarPagamentoPix: { metodo: 'POST', caminho: '/pedidos/:id/pix', entrada: { id: { tipo: 'uuid', obrigatorio: true } }, saida: 'pagamentoPix', permissao: 'cliente', publica: ['pagamento.criado'] },
     },
-    consome: ['pagamentoConfirmado'],
+    consome: ['pagamento.confirmado'],
   }),
+]
+
+// ---- eventos (contratos do que os serviços publicam e consomem) -------------------------------------------------------------------------------
+// O id do nó é o nome do evento. `idempotencia` é o campo que identifica o FATO: publicar o mesmo fato duas vezes gera um evento só.
+export const EVENTOS = [
+  no('evento', 'carrinho.alterado', { nome: 'carrinho.alterado', produtor: 'carrinho', payload: { carrinhoId: { tipo: 'uuid', obrigatorio: true }, itens: { tipo: 'inteiro', obrigatorio: true }, total: { tipo: 'dinheiro', obrigatorio: true } } }),
+  no('evento', 'pedido.criado', { nome: 'pedido.criado', produtor: 'pedidos', payload: { pedidoId: { tipo: 'uuid', obrigatorio: true }, numero: { tipo: 'inteiro', obrigatorio: true }, total: { tipo: 'dinheiro', obrigatorio: true } }, idempotencia: 'pedidoId' }),
+  no('evento', 'pagamento.criado', { nome: 'pagamento.criado', produtor: 'pedidos', payload: { pedidoId: { tipo: 'uuid', obrigatorio: true }, valor: { tipo: 'dinheiro', obrigatorio: true } }, idempotencia: 'pedidoId' }),
+  no('evento', 'pagamento.confirmado', { nome: 'pagamento.confirmado', produtor: 'pagamentos', payload: { pedidoId: { tipo: 'uuid', obrigatorio: true }, valor: { tipo: 'dinheiro', obrigatorio: true }, confirmadoEm: { tipo: 'dataHora', obrigatorio: true } }, idempotencia: 'pedidoId' }),
 ]
 
 // ---- blocos de exibição ---------------------------------------------------------------------------------------------------------------------
@@ -178,7 +187,7 @@ export const BLOCOS_COMMERCE = [
   }),
 ]
 
-/** Registra os contratos (`servico`) e os blocos de exibição do pack Commerce no core. */
+/** Registra os eventos, os contratos (`servico`) e os blocos de exibição do pack Commerce no core. */
 export function registraCommerce(reg: Registry): void {
-  for (const n of [...SERVICOS, ...BLOCOS_COMMERCE]) reg.registra(structuredClone(n) as never)
+  for (const n of [...EVENTOS, ...SERVICOS, ...BLOCOS_COMMERCE]) reg.registra(structuredClone(n) as never)
 }

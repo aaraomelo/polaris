@@ -30,7 +30,7 @@ const app = criaServico(no, {
   contexto: (req) => /* token/host → { tenantId, usuario, permissoes } | null */,
   autoriza,                             // opcional; padrão: autenticada basta estar autenticado; senão ∈ permissoes
   operacoes: { cancelar: async ({ params, entrada, ctx, q, publica }) => { … publica('pedidoCancelado', {…}); return pedido } },
-  aoPublicar,                           // eventos declarados, DEPOIS do commit (o outbox vem no card de eventos)
+  eventos: { "pedido.cancelado": nodeEvento },  // contratos do que as operações publicam (obrigatório se houver `publica`)
 })
 await app.listen({ port: 3000 })
 ```
@@ -46,4 +46,4 @@ Sem implementação, uma operação declarada responde **501**. `dbDePglite` é 
 - **SQL só com identificadores do schema** e valores por parâmetro. Só `application/json`. Cabeçalhos `nosniff` e `no-store`. O serviço serve exatamente as rotas do OpenAPI.
 
 ## Fora desta entrega
-Persistir os eventos (outbox, idempotência, replay) e o gateway/BFF são cards seguintes; autorização por papéis (CASL) idem (aqui `autoriza` é um gancho); GraphQL; geração do serviço como **arquivos** de código (aqui o servidor é montado do schema em runtime, o equivalente do interpretador; o AOT do serviço seria emitir esse mesmo código especializado).
+O gateway/BFF são cards seguintes; autorização por papéis (CASL) idem (aqui `autoriza` é um gancho); GraphQL; geração do serviço como **arquivos** de código (aqui o servidor é montado do schema em runtime, o equivalente do interpretador; o AOT do serviço seria emitir esse mesmo código especializado).

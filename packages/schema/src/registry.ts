@@ -186,6 +186,11 @@ export class Registry {
         }
         instancias(s.modelo, '/spec/modelo')
         break
+      case 'servico':
+        // eventos publicados e consumidos são CONTRATOS: precisam existir como nós `evento` (o id é o nome: pedido.criado)
+        for (const [op, o] of Object.entries<any>(s.operacoes ?? {})) (o.publica ?? []).forEach((id: string, n: number) => refs.push({ kind: 'evento', id, caminho: `/spec/operacoes/${op}/publica/${n}` }))
+        ;(s.consome ?? []).forEach((id: string, n: number) => refs.push({ kind: 'evento', id, caminho: `/spec/consome/${n}` }))
+        break
       case 'dados':
         if (s.fonte?.tipo === 'servico') refs.push({ kind: 'servico', id: s.fonte.servico, caminho: '/spec/fonte/servico' })
         break

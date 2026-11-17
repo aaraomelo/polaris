@@ -130,6 +130,22 @@ describe('renomear preserva o dado (RENAME COLUMN), e é a única forma', () => 
   })
 })
 
+describe('eventos: serviço que passa a publicar e a consumir', () => {
+  const base = { cliente: { campos: { nome: { tipo: 'texto', obrigatorio: true } } } }
+  const v1 = svc('1', base)
+  const v2: No = { ...svc('2', base), spec: { entidades: base, operacoes: { criar: { metodo: 'POST', caminho: '/c', saida: 'cliente', publica: ['cliente.criado'] } }, consome: ['pagamento.confirmado'] } } as never
+  it('a migração cria outbox + inbox (com RLS) e o catálogo fica IGUAL ao de v2 do zero; reaplicar é inofensivo', async () => {
+    const db = await banco(emite(v1, 'sql'))
+    const m = migraSql(v1, v2)
+    expect(m.mudancas).toContain('infraestrutura de eventos: outbox + inbox'); expect(m.ok).toBe(true)
+    await aplica(db, m.up)
+    await mesmoCatalogo(db, v2)
+    expect((await db.query(`SELECT count(*)::int AS n FROM pg_policies WHERE schemaname = 'loja' AND tablename IN ('outbox', 'inbox')`)).rows[0]).toEqual({ n: 2 })
+    await aplica(db, m.up) // idempotente
+    expect(migraSql(v2, v2).up).toBe('') // já tem a infraestrutura: nada a fazer
+  })
+})
+
 describe('erros', () => {
   it('serviços diferentes ou kind errado são recusados', () => {
     expect(() => migraSql(svc('1', {}, 'a'), svc('2', {}, 'b'))).toThrow(/outro schema/)

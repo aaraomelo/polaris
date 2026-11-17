@@ -15,17 +15,17 @@ const LOJA: No = { kind: 'servico', id: 'loja', versao: '1.0.0', estatuto: 'publ
     vitrine: { campos: { titulo: { tipo: 'texto' } }, crud: { caminho: '/vitrines', operacoes: ['listar'], permissao: 'publica' } },
   },
   operacoes: {
-    cancelar: { metodo: 'POST', caminho: '/pedidos/:id/cancelar', entrada: { id: { tipo: 'uuid', obrigatorio: true }, motivo: { tipo: 'texto' } }, saida: 'pedido', permissao: 'vendas', publica: ['pedidoCancelado'] },
+    cancelar: { metodo: 'POST', caminho: '/pedidos/:id/cancelar', entrada: { id: { tipo: 'uuid', obrigatorio: true }, motivo: { tipo: 'texto' } }, saida: 'pedido', permissao: 'vendas', publica: ['pedido.cancelado'] },
     semImpl: { metodo: 'GET', caminho: '/nada', saida: 'cliente', lista: true },
     vaza: { metodo: 'GET', caminho: '/vaza', saida: 'cliente' },
-    quebra: { metodo: 'POST', caminho: '/quebra', entrada: {}, permissao: 'vendas' },
+    quebra: { metodo: 'POST', caminho: '/quebra', entrada: {}, permissao: 'vendas', publica: ['pedido.cancelado'] },
   },
 } } as never
 // (um pedido: pega o id e devolve com a situação alterada; "vaza" devolve campos que a API NÃO promete)
 
 const TOKENS: Record<string, Contexto> = { tA: { tenantId: A, usuario: 'ana', permissoes: ['catalogo', 'vendas'] }, tB: { tenantId: B, usuario: 'bia', permissoes: ['catalogo', 'vendas'] }, tSemPerm: { tenantId: A, usuario: 'cadu', permissoes: [] } }
 const HOSTS: Record<string, string> = { 'a.loja.test': A, 'b.loja.test': B }
-const eventos: Array<{ e: string; p: unknown; ctx: Contexto }> = []
+const PEDIDO_CANCELADO = { kind: 'evento', id: 'pedido.cancelado', versao: '1.0.0', estatuto: 'publicado', spec: { nome: 'pedido.cancelado', produtor: 'loja', payload: { id: { tipo: 'uuid', obrigatorio: true }, motivo: { tipo: 'texto' } }, idempotencia: 'id' } } as never
 const erros: unknown[] = []
 
 let pg: PGlite, app: FastifyInstance
@@ -41,17 +41,19 @@ beforeAll(async () => {
   app = criaServico(LOJA, {
     db: dbDePglite(pg),
     contexto: (r) => { const a = String(r.headers.authorization ?? ''); if (a.startsWith('Bearer ')) return TOKENS[a.slice(7)] ?? null; const t = HOSTS[r.hostname]; return t ? { tenantId: t } : null },
-    aoPublicar: (e, p, ctx) => { eventos.push({ e, p, ctx }) },
+    eventos: { 'pedido.cancelado': PEDIDO_CANCELADO },
     aoErro: (e) => { erros.push(e) },
     operacoes: {
       cancelar: async ({ params, entrada, q, publica }) => {
         const r = await q(`UPDATE loja.pedido SET situacao = 'cancelado' WHERE id = $1 RETURNING id::text AS "id", cliente_id::text AS "clienteId", total::text AS "total", situacao, criado_em::text AS "criadoEm", atualizado_em::text AS "atualizadoEm"`, [params.id])
         if (!r.rows[0]) { const { ErroApi } = await import('../src/index'); throw new ErroApi(404, 'nao_encontrado', 'pedido não encontrado') }
-        publica('pedidoCancelado', { id: params.id, motivo: entrada.motivo })
+        await publica('pedido.cancelado', { id: params.id, ...(entrada.motivo ? { motivo: String(entrada.motivo) } : {}) })
         return { ...r.rows[0], criadoEm: '2026-01-01T00:00:00.000Z', atualizadoEm: '2026-01-01T00:00:00.000Z' }
       },
       vaza: async () => ({ id: A, nome: 'x', criadoEm: '2026-01-01T00:00:00.000Z', atualizadoEm: '2026-01-01T00:00:00.000Z', tenant_id: A, senhaHash: 'segredo', tenantId: A }),
-      quebra: async ({ q }) => { await q(`INSERT INTO loja.cliente (tenant_id, nome) VALUES ('${A}', 'fantasma')`); throw new Error('bug interno: SELECT secret FROM x') },
+      quebra: async ({ q, publica }) => {
+        await publica('pedido.cancelado', { id: A }) // publicado, e a operação falha logo depois: o evento NÃO pode sobrar
+  await q(`INSERT INTO loja.cliente (tenant_id, nome) VALUES ('${A}', 'fantasma')`); throw new Error('bug interno: SELECT secret FROM x') },
     },
   })
   await app.ready()
@@ -156,15 +158,18 @@ describe('isolamento entre tenants (a RLS é a barreira final)', () => {
 })
 
 describe('operações declaradas, eventos e erros', () => {
-  it('operação implementada: roda na transação do tenant; o evento declarado sai DEPOIS do commit, com o contexto', async () => {
+  it('operação implementada: roda na transação do tenant; o evento vai para o OUTBOX na mesma transação (versão, tenant e chave de idempotência)', async () => {
     const c = json(await req('tA', 'POST', '/clientes', { nome: 'Comprador' }))
     const p = json(await req('tA', 'POST', '/pedidos', { clienteId: c.id, total: '10' }))
-    eventos.length = 0
+    const outbox = async () => { await pg.exec('RESET ROLE; SET ROLE migrador'); const r = (await pg.query(`SELECT tipo, versao, tenant_id::text AS t, chave, payload, publicado_em FROM loja.outbox ORDER BY ocorrido_em`)).rows; await pg.exec('RESET ROLE; SET ROLE app'); return r }
+    const antes = (await outbox()).length
     const r = await req('tA', 'POST', `/pedidos/${p.id}/cancelar`, { motivo: 'desistiu' })
     expect(r.statusCode).toBe(200); expect(json(r).situacao).toBe('cancelado')
-    expect(eventos).toEqual([{ e: 'pedidoCancelado', p: { id: p.id, motivo: 'desistiu' }, ctx: TOKENS.tA }])
+    const depois = await outbox()
+    expect(depois.length).toBe(antes + 1)
+    expect(depois.at(-1)).toEqual({ tipo: 'pedido.cancelado', versao: '1.0.0', t: A, chave: p.id, payload: { id: p.id, motivo: 'desistiu' }, publicado_em: null })
     expect((await req('tB', 'POST', `/pedidos/${p.id}/cancelar`, {})).statusCode).toBe(404) // outro tenant: a RLS esconde
-    expect(eventos.length).toBe(1) // e a falha não publicou nada
+    expect((await outbox()).length).toBe(antes + 1) // e a falha não publicou nada
   })
   it('sem implementação → 501; sem a permissão → 403', async () => {
     const r = await req('tA', 'GET', '/nada'); expect(r.statusCode).toBe(501); expect(json(r).erro.codigo).toBe('nao_implementado')
@@ -182,6 +187,24 @@ describe('operações declaradas, eventos e erros', () => {
     expect(String((erros[0] as Error).message)).toContain('bug interno')
     await pg.exec('RESET ROLE; SET ROLE migrador')
     expect((await pg.query(`SELECT count(*)::int AS n FROM loja.cliente WHERE nome = 'fantasma'`)).rows[0]).toEqual({ n: 0 }) // rollback
+    expect((await pg.query(`SELECT count(*)::int AS n FROM loja.outbox WHERE chave = $1`, [A])).rows[0]).toEqual({ n: 0 }) // …e o evento publicado antes da falha também foi desfeito
+    await pg.exec('RESET ROLE; SET ROLE app')
+  })
+})
+
+describe('contratos de evento', () => {
+  it('serviço que declara `publica` sem o nó evento nem sobe (falha rápida, com o nome do evento)', () => {
+    expect(() => criaServico(LOJA, { db: dbDePglite(pg), contexto: () => null })).toThrow(/faltam os nós evento de pedido\.cancelado/)
+  })
+  it('publicar um evento não declarado na operação, ou com payload fora do contrato, é erro de programação: 500 e NADA no outbox', async () => {
+    const mk = (impl: (e: any) => Promise<unknown>) => criaServico(LOJA, { db: dbDePglite(pg), contexto: () => TOKENS.tA!, eventos: { 'pedido.cancelado': PEDIDO_CANCELADO }, operacoes: { quebra: impl as never } })
+    for (const impl of [
+      async ({ publica }: any) => { await publica('pedido.outro', { id: A }) },
+      async ({ publica }: any) => { await publica('pedido.cancelado', { id: 'x' }) },
+      async ({ publica }: any) => { await publica('pedido.cancelado', { id: A, nada: 1 }) },
+    ]) { const a = mk(impl); const r = await a.inject({ method: 'POST', url: '/quebra', headers: { 'content-type': 'application/json' }, payload: '{}' }); expect(r.statusCode).toBe(500); await a.close() }
+    await pg.exec('RESET ROLE; SET ROLE migrador')
+    expect((await pg.query(`SELECT count(*)::int AS n FROM loja.outbox WHERE chave = $1`, [A])).rows[0]).toEqual({ n: 0 })
     await pg.exec('RESET ROLE; SET ROLE app')
   })
 })

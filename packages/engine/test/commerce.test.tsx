@@ -2,10 +2,10 @@
 import { Registry } from '@polaris/schema'
 import { describe, expect, it } from 'vitest'
 import { COMPONENTES_BASE, compilaHtmlVivo, compilaPrograma, montaVivo, registraBase, renderPaginaHtml, type Programa } from '../src/index'
-import { BLOCOS_COMMERCE, SERVICOS, registraCommerce } from '../src/commerce/index'
+import { BLOCOS_COMMERCE, EVENTOS, SERVICOS, registraCommerce } from '../src/commerce/index'
 import { geraCatalogo } from '../src/catalogo/index'
 import { registraTemas } from '../src/tema/index'
-import { emite, rotasDe } from '@polaris/schema'
+import { confere, emite, rotasDe } from '@polaris/schema'
 
 const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0.0', estatuto: 'publicado', spec }) as any
 const novoReg = () => { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); return r }
@@ -41,6 +41,13 @@ describe('contratos de serviço', () => {
   it('dinheiro é decimal exato (tipo `dinheiro`), nunca número: preço, total, desconto e frete', () => {
     const campos = (s: string, e: string) => ((SERVICOS.find((x) => x.id === s)!.spec as any).entidades[e].campos) as Record<string, { tipo: string }>
     for (const [s, e, f] of [['catalogo', 'produto', 'preco'], ['catalogo', 'produto', 'precoDe'], ['carrinho', 'itemCarrinho', 'precoUnitario'], ['carrinho', 'carrinho', 'total'], ['pedidos', 'pedido', 'frete']] as const) expect(campos(s, e)[f]!.tipo, `${e}.${f}`).toBe('dinheiro')
+  })
+  it('eventos publicados e consumidos existem como nós `evento` (referências conferidas), e cada evento publicado tem produtor coerente', () => {
+    const r = novoReg()
+    for (const s of SERVICOS) expect(confere(r, r.resolve('servico', s.id, {})!.no), s.id).toEqual([])
+    expect(r.ids('evento').sort()).toEqual(EVENTOS.map((e) => e.id).sort())
+    const publicados = SERVICOS.flatMap((s) => Object.values((s.spec as any).operacoes).flatMap((o: any) => (o.publica ?? []).map((e: string) => [s.id, e])))
+    for (const [servico, evento] of publicados as Array<[string, string]>) { const ev = EVENTOS.find((e) => e.id === evento)!; expect((ev.spec as any).produtor === servico || (ev.spec as any).produtor === 'pedidos' && servico === 'pedidos', `${servico} publica ${evento}`).toBe(true) }
   })
   it('cada contrato gera OpenAPI e rotas; as listagens são listas paginadas (200 com array)', () => {
     for (const s of SERVICOS) {
