@@ -102,6 +102,14 @@
    [
     "Segurança do runtime",
     "Sem eval de strings do usuário, CSP, sanitização, allowlist de expressões."
+   ],
+   [
+    "Re-render localizado por dependência (store imutável + seletores)",
+    "Dependências por nó no IR (caminhos como estado.termo, prods), elementos memoizados que assinam só a sua fatia (useSyncExternalStore com seletor), invalidação do escopo capturado (alias do repetir, slots, eventos). Benchmark de contagem de renders antes e depois, com ganho mínimo definido; só entra se medir. Depois do streaming."
+   ],
+   [
+    "Histórico e diff de estado entre eventos (time-travel)",
+    "Aproveita o reducer puro: log das AcaoStore (evento, caminho de origem, ação) + snapshots por referência; diff estrutural por comparação de ponteiros (só desce na fatia que mudou); voltar/avançar para depuração e para o Studio (E8). Opt-in, com anel de tamanho fixo, redação de campos sensíveis (texto digitado e dados podem ter PII) e nunca persistido por padrão."
    ]
   ]
  },
