@@ -36,3 +36,10 @@ Sem laços nem recursão: sempre termina. Limites: 2000 caracteres, 500 nós, 32
 - **Página**: `params`, `consulta`, `tenant` + um nome por entrada de `spec.dados`.
 - **`repetir`**: dentro do elemento, `{como}` e `indice`. `se` e `cada` enxergam só o escopo de fora (o `se` guarda o elemento inteiro, antes do laço). Sobrescrever um nome existente é erro.
 - **Bloco (modelo)**: só `props` e `tenant` (encapsulamento). `core/slot` com `props.nome` projeta os filhos que a instância recebeu naquele slot.
+
+## AST canônico e referência gerada
+A forma de referência da linguagem é o AST em JSON (sete formas: `lit`, `var`, `campo`, `indice`, `lista`, `se`, `chama`);
+o texto é açúcar e `formata` o reconstrói de forma canônica. Onde o schema pede uma expressão (`se`, `repetir.cada`,
+`repetir.chave`, `definir.valor`) vale texto OU AST; em props, `{ "$expr": <AST> }` avalia no lugar. Os erros do AST
+apontam o caminho JSON dentro do próprio nó. A referência completa (formas, operadores, funções, exemplos executáveis e
+leis testadas) é gerada por `pnpm docs:funcoes` em [funcoes.md](funcoes.md).

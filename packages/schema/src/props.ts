@@ -38,11 +38,22 @@ function compila(props: Schema): ValidateFunction {
   return v
 }
 
+/** `{ "$expr": <AST> }` é um binding: para o schema do bloco vale como o texto "{…}" (o tipo só se conhece em runtime). */
+function trocaExpr(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(trocaExpr)
+  if (v && typeof v === 'object') {
+    const ks = Object.keys(v)
+    if (ks.length === 1 && ks[0] === '$expr') return '{$expr}'
+    return Object.fromEntries(ks.map((k) => [k, trocaExpr((v as Record<string, unknown>)[k])]))
+  }
+  return v
+}
+
 /** Erros de props da instância; `base` é o caminho JSON da instância (ex.: /spec/raiz). */
 export function validaProps(props: unknown, esquemaProps: Schema | undefined, base: string): Erro[] {
   if (!esquemaProps) return []
   const v = compila(esquemaProps)
-  const alvo = props ?? {}
+  const alvo = trocaExpr(props ?? {})
   if (v(alvo)) return []
   // O anyOf que acrescentamos (aceitar binding) não deve virar ruído: fica só o erro do schema original.
   const brutos = v.errors ?? []

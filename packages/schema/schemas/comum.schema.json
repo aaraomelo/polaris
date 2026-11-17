@@ -13,9 +13,20 @@
       "description": "id de interface de bloco, ex.: commerce/vitrine"
     },
     "expressao": {
-      "type": "string",
-      "minLength": 1,
-      "description": "expressão pura (sem chaves), ex.: produtos.length > 0. Usada em se e repetir.cada"
+      "type": [
+        "string",
+        "object"
+      ],
+      "description": "expressão pura (sem chaves): texto (ex.: produtos.length > 0) OU o AST canônico em JSON (ex.: {\"chama\":\">\",\"args\":[…]}). Usada em se, repetir.cada, repetir.chave e definir.valor",
+      "if": {
+        "type": "string"
+      },
+      "then": {
+        "minLength": 1
+      },
+      "else": {
+        "$ref": "#/$defs/exprAst"
+      }
     },
     "tipoDado": {
       "enum": [
@@ -276,6 +287,52 @@
         }
       ],
       "unevaluatedProperties": false
+    },
+    "exprAst": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 3,
+      "additionalProperties": false,
+      "description": "nó do AST canônico: lit | var | campo+de | indice+de | lista | se+entao+senao | chama+args (validação completa na compilação; ver docs/funcoes.md)",
+      "properties": {
+        "lit": {},
+        "var": {
+          "type": "string"
+        },
+        "campo": {
+          "type": "string"
+        },
+        "de": {
+          "$ref": "#/$defs/exprAst"
+        },
+        "indice": {
+          "$ref": "#/$defs/exprAst"
+        },
+        "lista": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exprAst"
+          }
+        },
+        "se": {
+          "$ref": "#/$defs/exprAst"
+        },
+        "entao": {
+          "$ref": "#/$defs/exprAst"
+        },
+        "senao": {
+          "$ref": "#/$defs/exprAst"
+        },
+        "chama": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exprAst"
+          }
+        }
+      }
     }
   }
 }

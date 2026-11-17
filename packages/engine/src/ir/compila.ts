@@ -1,6 +1,6 @@
 import { confere, sugere, type Contexto, type Erro, type No, type Registry } from '@polaris/schema'
 import { confereValor } from '../dados/args'
-import { ExprErro, parseExpr, validaExpr, type Expr, FUNCOES_PADRAO, analisa } from '../expr/index'
+import { ExprErro, parseExpr, validaExpr, type Expr, FUNCOES_PADRAO, analisa, deAst, formata } from '../expr/index'
 import { parseTemplate, TemplateErro, type Template } from '../template'
 import {
   ESCOPO_ARGS, ESCOPO_BLOCO, ESCOPO_PAGINA, RESERVADOS, SLOT_CONTEUDO, SLOT_NATIVO,
@@ -10,10 +10,12 @@ import {
 // Compila nós `pagina` e `bloco` do registry para IR. Nunca lança por erro de conteúdo:
 // devolve { ok: false, erros } com caminho JSON, regra e dica (mesmo formato dos outros validadores).
 
-type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar'; estado?: string; valor?: string; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
+/** expressão como o autor escreveu: texto (açúcar) ou AST canônico em JSON */
+type ExprSrc = string | Record<string, unknown>
+type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar'; estado?: string; valor?: ExprSrc; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
 type Inst = {
   bloco: string; id?: string; props?: unknown; slots?: Record<string, Inst[]>
-  se?: string; repetir?: { cada: string; como: string; chave?: string }; eventos?: Record<string, AcaoSrc[]>; esqueleto?: Inst
+  se?: ExprSrc; repetir?: { cada: ExprSrc; como: string; chave?: ExprSrc }; eventos?: Record<string, AcaoSrc[]>; esqueleto?: Inst
 }
 
 export type Resultado<T> = { ok: true; ir: T } | { ok: false; erros: Erro[] }
@@ -38,11 +40,18 @@ class Cx {
 function checaExpr(cx: Cx, ast: Expr, escopo: readonly string[], caminho: string, fonte: string, base: number): void {
   for (const v of analisa(ast).variaveis) if (escopo.includes(v)) { cx.usa.add(v); cx.proprio?.add(v) }
   for (const p of validaExpr(ast, escopo, FUNCOES_PADRAO)) {
-    cx.erro(caminho, 'binding', `${p.mensagem} (em '${fonte}', posição ${base + p.pos})`, p.dica, fonte)
+    cx.erro(caminho, 'binding', `${p.mensagem} (em '${fonte}'${base < 0 ? '' : `, posição ${base + p.pos}`})`, p.dica, fonte)
   }
 }
 
-function exprPura(cx: Cx, src: string, escopo: readonly string[], caminho: string): Expr | undefined {
+function exprPura(cx: Cx, src: ExprSrc, escopo: readonly string[], caminho: string): Expr | undefined {
+  if (typeof src !== 'string') {
+    // AST canônico: os erros apontam o caminho JSON dentro do próprio nó
+    const r = deAst(src)
+    if (!r.ok) { for (const e of r.erros) cx.erro(`${caminho}${e.caminho}`, 'expressao', e.mensagem, e.dica); return undefined }
+    checaExpr(cx, r.expr, escopo, caminho, formata(r.expr), -1)
+    return r.expr
+  }
   try {
     const ast = parseExpr(src)
     checaExpr(cx, ast, escopo, caminho, src, 0)
@@ -73,6 +82,12 @@ function compilaValor(cx: Cx, v: unknown, escopo: readonly string[], caminho: st
   if (v === null || typeof v === 'number' || typeof v === 'boolean') return { t: 'lit', v }
   if (Array.isArray(v)) return { t: 'arr', itens: v.map((x, i) => compilaValor(cx, x, escopo, `${caminho}/${i}`)) }
   if (typeof v === 'object') {
+    // { "$expr": <AST canônico> }: expressão avaliada no lugar (o resto dos objetos é literal)
+    const chaves = Object.keys(v as object)
+    if (chaves.length === 1 && chaves[0] === '$expr') {
+      const e = exprPura(cx, (v as { $expr: ExprSrc }).$expr, escopo, `${caminho}/$expr`)
+      return e ? { t: 'expr', ast: e, fonte: formata(e) } : { t: 'lit', v: null }
+    }
     return { t: 'obj', campos: Object.fromEntries(Object.entries(v as object).map(([k, x]) => [k, compilaValor(cx, x, escopo, `${caminho}/${k}`)])) }
   }
   return { t: 'lit', v: null }
@@ -134,7 +149,7 @@ function compilaAcoes(cx: Cx, lista: AcaoSrc[], caminho: string, escopo: readonl
         cx.erro(`${c}/estado`, 'acao', `o estado '${a.estado}' não foi declarado em spec.estado`, s ? `quis dizer '${s}'?` : `estados declarados: ${Object.keys(pg.estado).join(', ') || 'nenhum'}`)
       }
       const valor = exprPura(cx, a.valor!, escopo, `${c}/valor`)
-      if (valor) out.push({ acao: 'definir', estado: a.estado!, valor, fonte: a.valor!, caminho: c })
+      if (valor) out.push({ acao: 'definir', estado: a.estado!, valor, fonte: typeof a.valor === 'string' ? a.valor : formata(valor), caminho: c })
     } else if (a.acao === 'executar') {
       const nome = a.dados!
       const dado = pg.dados[nome]

@@ -17,6 +17,11 @@ function lex(src: string): Tok[] {
       let j = i
       while (/[0-9]/.test(src[j] ?? '')) j++
       if (src[j] === '.' && /[0-9]/.test(src[j + 1] ?? '')) { j++; while (/[0-9]/.test(src[j] ?? '')) j++ }
+      // notação científica (1e3, 2.5e-7): o que `String(n)` produz para qualquer número, para o texto canônico ler de volta
+      if ((src[j] === 'e' || src[j] === 'E') && /[0-9]/.test(src[j + 1] === '+' || src[j + 1] === '-' ? (src[j + 2] ?? '') : (src[j + 1] ?? ''))) {
+        j += src[j + 1] === '+' || src[j + 1] === '-' ? 2 : 1
+        while (/[0-9]/.test(src[j] ?? '')) j++
+      }
       toks.push({ k: 'num', v: src.slice(i, j), pos }); i = j; continue
     }
     if (c === '"' || c === "'") {
@@ -159,7 +164,11 @@ class Parser {
 
   private primario(): Expr {
     const t = this.tok
-    if (t.k === 'num') { this.i++; return this.no({ t: 'lit', v: Number(t.v), pos: t.pos }) }
+    if (t.k === 'num') {
+      const v = Number(t.v)
+      if (!Number.isFinite(v)) throw new ExprErro(`número grande demais (${t.v})`, t.pos)
+      this.i++; return this.no({ t: 'lit', v, pos: t.pos })
+    }
     if (t.k === 'str') { this.i++; return this.no({ t: 'lit', v: t.v, pos: t.pos }) }
     if (t.k === 'id') {
       this.i++
