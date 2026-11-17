@@ -72,3 +72,37 @@ closures: nenhum texto do usuário vira código (teste de veneno). `fonte` pode 
 Achado de segurança no caminho: `urlSegura` usava `trim()` (remove NBSP, U+2028, BOM), que transformava a URL relativa
 inofensiva `" javascript:x"` em `javascript:x`. Agora só se apara o que o navegador apara (U+0000–U+0020); teste de
 regressão e fuzz em `test/url.test.ts`.
+
+## Navegador real: React (SSR + hidratação) × runtime vivo (AOT)
+Mesma página de loja (`packages/engine/bench/navegador/`: `gera.ts` gera as duas variantes a partir do MESMO programa, `servidor.mjs` serve com gzip nível 9,
+`medir.js` é o harness). Chrome real, localhost, sem limitação de CPU nem de rede, 3 cargas por variante; interações medidas como "clique → o DOM já reflete"
+(o mesmo critério para os dois: o React atualiza em microtask, o vivo na hora). Lista de 900 itens (o `repetir` corta em 1000), cada um um bloco composto.
+
+| | React | vivo | |
+|---|---|---|---|
+| JavaScript enviado (gz) | **143,5 KB** | **10,6 KB** | 13,5× menor |
+| JavaScript (descomprimido) | 460 KB | 28 KB | 16× menor |
+| HTML (gz, 900 itens) | 10,7 KB | 10,7 KB | igual |
+| 1º clique que funciona (TTI) | 154–233 ms | 135–206 ms | indistinguível em localhost (variância > diferença) |
+| contador +1, fora da lista | 11–35 ms | **0,2 ms** | ~60× (o React reavalia a página inteira) |
+| alterar 1 item no meio | 9–13 ms | 4,6–5,8 ms | ~2× |
+| inserir / remover 1 | ~9,5 ms | 5,4–6,2 / 2,3–6,1 ms | ~1,6× |
+| inverter a lista | 8,7–10,2 ms | 5,1–5,8 ms | ~1,8× |
+| digitar no filtro (reavalia `filtra` com lambda em 900 itens) | 4,8–6,1 ms | 4,9–8,9 ms | **sem ganho**: o custo é a avaliação da expressão, que os dois pagam |
+
+Com 200 itens as proporções se mantêm (contador 5,5 ms × 0,2 ms; JS 143,5 × 10,5 KB), e o filtro é um pouco pior no vivo (3,2 × 1,3 ms).
+
+**Event Timing com cliques REAIS** (inclui o quadro seguinte; 1 amostra por botão, resolução de 8 ms): contador +1: React 104 ms (handler 39,6) × vivo 32 ms (handler 0,1);
+alterar 1: 48 × 88 ms; inverter: 96 × 104 ms. Amostra pequena e a frio: indicativo, não conclusivo; o contador é o único ganho nítido.
+
+**O que isto diz**
+- O ganho robusto é **bytes** (13,5× menos JS) e **interações que não tocam a lista** (60×): o vivo só reavalia o que depende da chave que mudou. Em rede lenta os bytes
+  dominam (conta, não medida: 143,5 KB ≈ 0,7 s e 10,6 KB ≈ 0,05 s a 1,6 Mbps).
+- Operações de lista: ~2× melhores no handler, mas o tempo de pintura de 900 nós domina o INP real e é igual nos dois.
+- **Sem ganho** quando o custo é a avaliação de expressões pesadas (o filtro). Próximo corte: compilar as expressões do vivo para closures (o caminho estático já faz) em vez de interpretar a AST.
+- Memória (`performance.memory`): inconclusiva (varia de 50 a 146 MB entre cargas da mesma variante); não use para decidir.
+- Limites da medição: localhost, sem throttling de CPU/rede, aba de automação (os quadros de pintura nem sempre disparam), INP real com 1 amostra.
+  Repetir em dispositivo lento e rede real antes de afirmar números de campo.
+
+A medição apontou e corrigiu um ponto quente real: a reconciliação alocava uma cópia do escopo e um `Set` por item a cada atualização (agora a chave é avaliada no escopo vivo
+e o conjunto de chaves de fora é calculado uma vez). Ganho pequeno (≤ 10%) — confirma que o gargalo é a avaliação da expressão.

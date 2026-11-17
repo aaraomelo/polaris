@@ -173,18 +173,23 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
     insertBefore(it: Item, r: Item | null) { moveFaixa(it.ini, it.fim, fim.parentNode!, r ? r.ini : fim) },
     removeChild(it: Item) { removeFaixa(it.ini, it.fim); destroiNos(it.dono.nos) },
   }
-  const atualizaItem = (it: Item, m: ReadonlySet<string>, novo?: { item: unknown; i: number }) => {
-    const mi = new Set<string>()
-    for (const k of m) {
-      const r = raizDe(k)
-      if (r === como || r === 'indice') continue
-      mi.add(k)
-      if (tem(esc, r)) it.esc[r] = esc[r]; else delete it.esc[r]
-    }
+  /** O que mudou FORA do item (calculado UMA vez por atualização, não por item): as chaves e as variáveis de fora cujo valor o item precisa recopiar. */
+  const base = (m: ReadonlySet<string>) => {
+    const ks = new Set<string>(), raizes = new Set<string>()
+    for (const k of m) { const r = raizDe(k); if (r === como || r === 'indice') continue; ks.add(k); raizes.add(r) }
+    return { ks, raizes: [...raizes] }
+  }
+  const atualizaItem = (it: Item, b: { ks: ReadonlySet<string>; raizes: string[] }, novo?: { item: unknown; i: number }) => {
+    for (const r of b.raizes) { if (tem(esc, r)) it.esc[r] = esc[r]; else delete it.esc[r] }
+    let mi = b.ks
     if (novo) {
-      // o item mudou: só os CAMINHOS dele que mudaram (p.preco, não p inteiro) acordam as expressões do item
-      if (!Object.is(it.item, novo.item)) { chavesDeCaminhos(como, caminhosMudados(it.item, novo.item), mi); it.item = novo.item; it.esc[como] = novo.item }
-      if (it.i !== novo.i) { it.i = novo.i; it.esc.indice = novo.i; mi.add('indice'); mi.add(`indice${MARCA}`) }
+      const itemMudou = !Object.is(it.item, novo.item), indiceMudou = it.i !== novo.i
+      if (itemMudou || indiceMudou) { // só aqui há o que somar às chaves de fora: o caso comum (item igual, mesma posição) não aloca nada
+        const s = new Set(b.ks); mi = s
+        // o item mudou: só os CAMINHOS dele que mudaram (p.preco, não p inteiro) acordam as expressões do item
+        if (itemMudou) { chavesDeCaminhos(como, caminhosMudados(it.item, novo.item), s); it.item = novo.item; it.esc[como] = novo.item }
+        if (indiceMudou) { it.i = novo.i; it.esc.indice = novo.i; s.add('indice'); s.add(`indice${MARCA}`) }
+      }
     }
     if (mi.size) atualizaNos(it.dono.nos, mi)
   }
@@ -195,16 +200,24 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
     const vistos = new Set<string>()
     const out: Array<{ chave: string; item: unknown; i: number }> = []
     const n = Math.min(l.length, LIMITES_RUNTIME.iteracoes)
-    for (let i = 0; i < n; i++) {
-      const item = l[i]
-      let c: string
-      if (exprChave) {
-        const v = avalia(exprChave, { ...esc, [como]: item, indice: i } as Escopo, amb.funcoes)
-        c = typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : `\u0001${i}`
-      } else c = String(i)
-      while (vistos.has(c)) c += '\u0000'
-      vistos.add(c)
-      out.push({ chave: c, item, i })
+    // a chave é avaliada com o item DENTRO do escopo vivo (e restaurado depois): nada de copiar o escopo inteiro por item
+    const tinhaC = tem(esc, como), velhoC = esc[como], tinhaI = tem(esc, 'indice'), velhoI = esc.indice
+    try {
+      for (let i = 0; i < n; i++) {
+        const item = l[i]
+        let c: string
+        if (exprChave) {
+          esc[como] = item; esc.indice = i
+          const v = avalia(exprChave, esc as Escopo, amb.funcoes)
+          c = typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : `\u0001${i}`
+        } else c = String(i)
+        while (vistos.has(c)) c += '\u0000'
+        vistos.add(c)
+        out.push({ chave: c, item, i })
+      }
+    } finally {
+      if (tinhaC) esc[como] = velhoC; else delete esc[como]
+      if (tinhaI) esc.indice = velhoI; else delete esc.indice
     }
     return out
   }
@@ -215,7 +228,8 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
     const criados = new Set<string>()
     aplicaLista<Item>(paiLista, itens, plano, (c) => { criados.add(c); const d = dados.get(c)!; return criaItem(c, d.item, d.i, new Pos(document.createDocumentFragment(), null, false)) })
     ordem = novos.map((x) => itens.get(x.chave)!)
-    for (const x of novos) if (!criados.has(x.chave)) atualizaItem(itens.get(x.chave)!, m, x)
+    const b = base(m)
+    for (const x of novos) if (!criados.has(x.chave)) atualizaItem(itens.get(x.chave)!, b, x)
   }
 
   const ini = pos.com(); pos.coloca(ini)
@@ -226,7 +240,7 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
     usa: usaTotal(no), morto: false,
     atualiza(m) {
       if (cruza(cabeca, m)) reconcilia(m)
-      else for (const it of ordem) atualizaItem(it, m)
+      else { const b = base(m); for (const it of ordem) atualizaItem(it, b) }
     },
     destroi() { this.morto = true; for (const it of ordem) destroiNos(it.dono.nos) },
   })

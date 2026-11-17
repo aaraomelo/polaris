@@ -21,3 +21,4 @@ dist/
 coverage/
 .turbo/
 .perfil/
+packages/engine/bench/navegador/saida/
