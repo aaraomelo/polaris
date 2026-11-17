@@ -206,7 +206,12 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
   }
   let fim!: Comment
   const paiLista = {
-    insertBefore(it: Item, r: Item | null) { moveFaixa(it.ini, it.fim, fim.parentNode!, r ? r.ini : fim) },
+    insertBefore(it: Item, r: Item | null) {
+      const pai = it.ini.parentNode
+      // item recém-criado: mora sozinho num fragmento, então entra no DOM com UMA inserção em vez de uma por nó
+      if (pai && pai.nodeType === 11) fim.parentNode!.insertBefore(pai, r ? r.ini : fim)
+      else moveFaixa(it.ini, it.fim, fim.parentNode!, r ? r.ini : fim)
+    },
     removeChild(it: Item) { removeFaixa(it.ini, it.fim); destroiNos(it.dono.nos) },
   }
   /** O que mudou FORA do item (calculado UMA vez por atualização, não por item): as chaves e as variáveis de fora cujo valor o item precisa recopiar. */
@@ -259,6 +264,19 @@ function constroiRep(no: IRNo, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
   }
   const reconcilia = (m: ReadonlySet<string>) => {
     const novos = calcula()
+    // caminhos em massa: esvaziar ou encher a lista inteira vira UMA operação no DOM (não uma por nó)
+    if (novos.length === 0 && ordem.length > 0) {
+      for (const it of ordem) destroiNos(it.dono.nos)
+      limpaEntre(ini, fim); itens.clear(); ordem = []
+      return
+    }
+    if (ordem.length === 0 && novos.length > 0) {
+      const frag = document.createDocumentFragment(), p = new Pos(frag, null, false)
+      const novosItens = novos.map((x) => { const it = criaItem(x.chave, x.item, x.i, p); itens.set(x.chave, it); return it })
+      fim.parentNode!.insertBefore(frag, fim)
+      ordem = novosItens
+      return
+    }
     const plano = planoLista(ordem.map((x) => x.chave), novos.map((x) => x.chave))
     const dados = new Map(novos.map((x) => [x.chave, x]))
     const criados = new Set<string>()

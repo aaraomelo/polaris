@@ -122,3 +122,7 @@ Chrome real depois da mudança (vivo, 900 itens, 2 cargas; React na mesma janela
 inserir 5,5–5,9 (19,6); remover 5,2–5,4 (9,6); inverter 4,5 (9,1); filtro ~11,7 (12,1). Ganho de ~20% em "alterar 1"; as demais operações não mudaram de forma distinguível do ruído.
 Uma carga isolada deu "alterar 1" = 0,9 ms e outra janela mostrou o dobro em tudo: **só compare números da mesma sessão** (este navegador de automação varia entre janelas).
 Custo em tamanho: +0,6 KB gz no cliente (o compilador é maior que o interpretador que ele tirou do bundle).
+
+### Listas: esvaziar/encher em massa e inserção por fragmento (card 1dff4uhedyp)
+`repetir` agora (a) esvazia a lista inteira com uma varredura única e (b) enche uma lista vazia em um único fragmento inserido uma vez; itens novos criados no meio entram com UMA inserção (o fragmento do item) em vez de uma por nó. Testado contra o oráculo (`test/vivo-lista-massa.test.tsx`).
+**Resultado medido em Chrome real: inconclusivo.** Filtro com 900 itens, 4 rodadas por versão na mesma sessão: antes 3,6–15,5 ms, depois 6,9–13,2 ms (variância dentro da versão maior que a diferença). O filtro parcial ("a"→"ab") mistura remoção e criação, então os caminhos em massa quase não disparam; o custo restante é criar ~8 nós por cartão. Próximo passo, se valer a pena: clonar um modelo pré-construído do item (`cloneNode`) em vez de montar nó a nó, e medir com perfil de CPU, não por mediana.
