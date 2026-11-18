@@ -41,4 +41,4 @@ O conteúdo da página continua sendo avaliado no escopo **da página**. Só o l
 `{idioma}` está disponível em props, título, args de dados e `layoutProps`, e vira o `lang` do documento. É nome reservado.
 
 ## Fora do escopo (por ora)
-Navegação no cliente (history API / transições sem recarregar), (o `servidor` que cola tabela + programa + render já existe: `docs/paginas.md`) e a autenticação em si (a sessão e as permissões chegam prontas em `Pedido.sessao`).
+Pré-busca e transições animadas entre páginas (a navegação no cliente já existe: `docs/paginas.md`), (o `servidor` que cola tabela + programa + render já existe: `docs/paginas.md`) e a autenticação em si (a sessão e as permissões chegam prontas em `Pedido.sessao`).

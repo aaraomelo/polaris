@@ -97,7 +97,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
     return reply.status(500).send(corpoErro(new ErroGw(500, 'erro_interno', 'erro interno'), rid))
   })
   app.setNotFoundHandler((req, reply) => reply.status(404).send(corpoErro(new ErroGw(404, 'rota_inexistente', 'rota inexistente'), obsDe(req)?.reqId)))
-  app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); if (!reply.getHeader('cache-control')) reply.header('cache-control', 'private, no-store'); reply.header('vary', 'Authorization, Cookie') })
+  app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); if (!reply.getHeader('cache-control')) reply.header('cache-control', 'private, no-store'); if (!reply.getHeader('vary')) reply.header('vary', 'Authorization, Cookie') })
   app.get('/saude', async () => ({ ok: true, servico: 'gateway' }))
 
   // --- quem chama: o token é verificado AQUI; o tenant nunca vem do cliente -----------------------------------------------------------------------

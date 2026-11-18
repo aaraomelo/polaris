@@ -144,6 +144,29 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('navegação no cliente: clicar num link troca a página SEM recarregar; voltar/avançar funcionam; clique com Ctrl e link externo seguem o normal', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = [], pedidos: string[] = []
+      p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) }); p.on('request', (r) => { if (r.resourceType() === 'document') pedidos.push(r.url()) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.getByRole('heading', { name: 'Bem-vindo à loja' }).waitFor()
+      await p.waitForFunction(() => (window as any).Polaris?.inicia) // o cliente carregou
+      await p.evaluate(() => { (window as any).__marca = 'mesma-pagina' }); const docs0 = pedidos.length
+      await p.getByRole('link', { name: 'Sobre' }).click(); await p.getByRole('heading', { name: 'Sobre' }).waitFor(); await p.waitForURL(/\/sobre$/)
+      expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma-pagina') // o documento NÃO foi recarregado
+      expect(pedidos.length).toBe(docs0); expect(await p.title()).toBe('Sobre')
+      await p.getByRole('link', { name: 'Início' }).click(); await p.getByText('Café de Loja Demo').waitFor() // a página com dados volta hidratada
+      expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma-pagina'); expect(pedidos.length).toBe(docs0)
+      await p.goBack(); await p.getByRole('heading', { name: 'Sobre' }).waitFor(); expect(p.url()).toMatch(/\/sobre$/)
+      await p.goForward(); await p.getByText('Café de Loja Demo').waitFor(); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma-pagina')
+      // a página nova continua interativa (hidratada): o link do menu segue funcionando depois de várias trocas
+      await p.getByRole('link', { name: 'Sobre' }).click(); await p.getByRole('heading', { name: 'Sobre' }).waitFor()
+      // tecla modificadora: navegação normal (o handler não intercepta)
+      const href = await p.getByRole('link', { name: 'Início' }).evaluate((a: HTMLAnchorElement) => { let desviou = false; a.addEventListener('click', (e) => { desviou = e.defaultPrevented }, { once: true }); a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true })); return desviou })
+      expect(href).toBe(false)
+      expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('clicar em "entrar" abre o Studio do tenant, já autenticado: lista os temas e abre o padrão', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

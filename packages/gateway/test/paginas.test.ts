@@ -33,6 +33,14 @@ describe('servidor de páginas', () => {
     const src = /<script[^>]* src="(\/_polaris\/a\/[\w.-]+\.js)"/.exec(r.body)![1]!
     const js = await e.req('GET', src, { host: 'a.loja.test' }); expect(js.statusCode).toBe(200); expect(js.headers['content-type']).toContain('javascript'); expect(js.headers['cache-control']).toContain('immutable')
   })
+  it('navegação no cliente: o documento leva o roteador (com nonce), servido do gateway; pedido de navegação vem completo e varia por cabeçalho', async () => {
+    const r = await e.req('GET', '/', { host: 'a.loja.test' }), nonce = /nonce-([^']+)'/.exec(String(r.headers['content-security-policy']))![1]!
+    const tag = /<script nonce="([^"]+)" src="(\/_polaris\/a\/[\w.-]+\.js)" data-pl-router async><\/script><\/body><\/html>$/.exec(r.body)!; expect(tag[1]).toBe(nonce)
+    const js = await e.req('GET', tag[2]!, { host: 'a.loja.test' }); expect(js.statusCode).toBe(200); expect(js.body).toContain('x-polaris-nav'); expect(js.body).toContain('history.pushState'); expect(js.body).not.toContain('eval(')
+    const nav = await e.req('GET', '/', { host: 'a.loja.test', headers: { 'x-polaris-nav': '1' } }); expect(nav.statusCode).toBe(200); expect(String(nav.headers.vary)).toContain('x-polaris-nav'); expect(nav.body).toContain('Vitrine: Vitrine A'); expect(nav.body).not.toContain('<script type="application/json" data-pl-c>') // completo, sem pedaços tardios
+    // o roteador não deixa a página nova sem o próprio roteador: ele vem em toda resposta HTML (inclusive a de 404 do tenant)
+    expect((await e.req('GET', '/nada', { host: 'a.loja.test' })).body).toContain('data-pl-router')
+  })
   it('o outro tenant vê a página dele, com os dados dele', async () => {
     const r = await e.req('GET', '/', { host: 'b.loja.test' }); expect(r.statusCode).toBe(200); expect(r.body).toContain('Vitrine: Vitrine B'); expect(r.body).not.toContain('Vitrine A')
     expect((await e.req('GET', '/sobre', { host: 'b.loja.test' })).statusCode).toBe(404) // a página /sobre é só do A

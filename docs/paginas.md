@@ -18,6 +18,10 @@ host/token → tenant → nó `tenant` (paginas, idiomas, login, 404…) → tab
 - **CSP por resposta**, com nonce: `default-src 'none'`, scripts só com o nonce ou `'self'`, `frame-ancestors 'none'`, sem `unsafe-eval`.
 - Prefixos reservados (`/api`, `/bff`, `/studio`, `/graphql`, `/_polaris`, `/metricas`, `/saude`) nunca viram página: seguem JSON.
 
+## Navegação no cliente
+Clicar num link do próprio site troca a página **sem recarregar o navegador**: o roteador (`packages/gateway/src/navegacao.ts`, ES2017 puro, servido de `/_polaris/a/<hash>.js` e incluído no fim de toda página) intercepta o clique, busca a URL com `x-polaris-nav: 1` (o servidor responde a página inteira, sem pedaços em streaming), troca o conteúdo de `#polaris`, o título, o tema e os dados embutidos, carrega o pacote da página nova só se ainda não estiver carregado e a hidrata de novo (a anterior é destruída). `history.pushState`, voltar/avançar e rolagem funcionam.
+É melhoria progressiva: tecla modificadora, `target`, `download`, outra origem, `/api` `/bff` `/studio` `/graphql` `/entrar`, resposta que não é HTML, falha de rede ou cliente ainda não carregado caem na navegação normal do navegador. Só mudou a âncora (`#x`): o navegador resolve. Não há pré-busca (prefetch) nem transição animada.
+
 ## Sessão por cookie
 O navegador não manda `Authorization` ao navegar, então a sessão do site é um **cookie com o próprio JWT** do provedor de identidade:
 - `POST /_polaris/sessao` com `{"token": "…"}` (só `application/json`, o que um formulário de outro site não consegue enviar) valida o token **no host do tenant** e responde 204 com `Set-Cookie: polaris_sessao=…; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800; Secure`. Sem `Domain`: vale só para aquele host. `POST /_polaris/sair` apaga.

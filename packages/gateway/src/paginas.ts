@@ -7,6 +7,7 @@ import { cssDoTema } from '@polaris/engine/tema'
 import type { Registry } from '@polaris/schema'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import type { CtxGw } from './gateway'
+import { CABECALHO_NAV, ROTEADOR_JS } from './navegacao'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // SERVIDOR DE PÁGINAS: o que faltava entre o roteamento declarativo e o navegador. `tenant` + `pagina` → tabela de rotas (compilada UMA vez por release) → página →
@@ -58,6 +59,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     return reply.header('cache-control', 'public, max-age=31536000, immutable').type(a.tipo).send(a.corpo) // o nome é o hash do conteúdo
   })
 
+  const roteadorSrc = guarda(`${sha(ROTEADOR_JS)}.js`, 'text/javascript; charset=utf-8', ROTEADOR_JS)
   const clienteDe = (programa: Programa): Promise<string | null> => {
     let p = bundles.get(programa)
     if (!p) { p = empacotaCliente(programa).then((r) => (r.ok ? guarda(`${sha(r.pacote.codigo)}.js`, 'text/javascript; charset=utf-8', r.pacote.codigo) : null)); bundles.set(programa, p) }
@@ -96,12 +98,17 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     for (const [k, v] of new URLSearchParams(String(req.url.split('?')[1] ?? '').slice(0, 4096))) { if (k.length <= 60 && v.length <= 500 && Object.keys(consulta).length < 50 && !['__proto__', 'constructor', 'prototype'].includes(k)) consulta[k] = v }
     const nonce = randomBytes(16).toString('base64')
     const falhas: unknown[] = []
-    const g = streamVivo(programa, { ...(d.opcoesCarga(ctx, programa, req, { params, consulta }, falhas) as object), clienteSrc, nonce, estilos: temaDe(reg, ctx, tenantNo), ...(idioma ? { lang: idioma } : {}) } as never)
+    const navegando = req.headers[CABECALHO_NAV] === '1' // clique num link do site: a página inteira de uma vez (sem pedaços em streaming), para o cliente trocar o conteúdo
+    const g = streamVivo(programa, { ...(d.opcoesCarga(ctx, programa, req, { params, consulta }, falhas) as object), clienteSrc, nonce, ...(navegando ? { esperaTudo: true } : {}), estilos: temaDe(reg, ctx, tenantNo), ...(idioma ? { lang: idioma } : {}) } as never)
     const it = g[Symbol.asyncIterator]()
     let primeiro: IteratorResult<string>
     try { primeiro = await it.next() } catch (e) { d.log.warn('página fora do runtime', { pagina: paginaId, erro: (e as Error).message }); return texto(reply, 501, 'a página usa recursos que o navegador ainda não suporta') }
-    async function* resto() { if (!primeiro.done) yield primeiro.value; for (;;) { const n = await it.next(); if (n.done) return; yield n.value } }
-    return reply.status(status).header('content-security-policy', CSP(nonce)).type('text/html; charset=utf-8').send(Readable.from(resto()))
+    async function* resto() {
+      const solta = (c: string) => c.endsWith('</body></html>') ? c.slice(0, -'</body></html>'.length) + `<script nonce="${nonce}" src="${roteadorSrc}" data-pl-router async></script></body></html>` : c // o roteador entra no fim do documento
+      if (!primeiro.done) yield solta(primeiro.value)
+      for (;;) { const n = await it.next(); if (n.done) return; yield solta(n.value) }
+    }
+    return reply.status(status).header('vary', `Authorization, Cookie, ${CABECALHO_NAV}`).header('content-security-policy', CSP(nonce)).type('text/html; charset=utf-8').send(Readable.from(resto()))
   }
 
   const seguro = o.cookieSeguro !== false
