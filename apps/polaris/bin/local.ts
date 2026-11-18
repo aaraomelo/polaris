@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { TENANTS_LOCAIS, sobeLocal } from '../src/local'
+import { SENHA_LOCAL, TENANTS_LOCAIS, emailLocal, sobeLocal } from '../src/local'
 
 // pnpm local            sobe o ambiente (dados persistem em .polaris-local/)
 // pnpm local --limpa    apaga os dados antes de subir
@@ -26,6 +26,8 @@ Polaris local no ar${dados ? ` (dados em ${dados})` : ' (em memória)'}
   Studio                              ${l.urlTenant('loja-demo')}/studio        (precisa do token: use o /entrar)
   API REST da loja (gerada)           ${l.urlTenant('loja-demo')}/api/loja/produtos
   GraphQL                             ${l.urlTenant('loja-demo')}/graphql
+  login real (e-mail e senha)         ${l.urlTenant('loja-demo')}/entrar   →  ${emailLocal('loja-demo')} / ${SENHA_LOCAL}
+  e-mails de desenvolvimento          ${l.urlTenant('loja-demo')}/_dev/emails
   Postgres (psql)                     ${l.pgUrl}
 
 Tenants: ${TENANTS_LOCAIS.map((t) => `${t.alias} (${t.nome})`).join(', ')}.  Ctrl+C para parar.`)

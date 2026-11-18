@@ -1,0 +1,22 @@
+{
+  "kind": "formulario",
+  "id": "f11",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "email",
+        "tipo": "email"
+      },
+      {
+        "nome": "senha",
+        "tipo": "senha"
+      }
+    ],
+    "envio": {
+      "sistema": "entrar",
+      "servico": "loja",
+      "operacao": "x"
+    }
+  }
+}

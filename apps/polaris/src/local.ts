@@ -6,17 +6,20 @@ import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
 import { registraBase, voltaSegura } from '@polaris/engine'
 import { cookieDeSessao } from '@polaris/gateway'
 import { registraTemas } from '@polaris/engine/tema'
-import { SignJWT } from 'jose'
+import { SignJWT, exportJWK, generateKeyPair, importJWK } from 'jose'
 import { configGateway, configServico } from './config'
-import { montaGateway } from './gateway'
+import { montaGatewayComChave } from './gateway'
 import { migraPlataforma } from './migra'
 import { carregaNos } from './nos'
+import { criaIdentidade } from '@polaris/packs'
 import { montaServico } from './servico'
 
 // AMBIENTE LOCAL: o mesmo gateway, o mesmo serviço e o mesmo Studio da produção, com o Postgres em PGlite (sem Docker), dados persistentes em disco, tenants de demonstração e um LOGIN DE
 // DESENVOLVIMENTO que emite o JWT (HS256) que o provedor de identidade emitiria. Só roda em loopback e RECUSA produção: nada daqui é um modelo de segurança de produção.
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
-export const SEGREDO_LOCAL = 'polaris-local-segredo-de-desenvolvimento-0123456789'
+/** a senha dos usuários de demonstração (SÓ do ambiente local) */
+export const SENHA_LOCAL = 'senha-dev-polaris'
+export const emailLocal = (alias: string) => `ana@${alias}.test`
 export const EMISSOR_LOCAL = 'https://id.polaris.local', AUDIENCIA_LOCAL = 'polaris'
 export const TENANTS_LOCAIS = [
   { id: '11111111-1111-1111-1111-111111111111', alias: 'loja-demo', nome: 'Loja Demo', modulos: ['loja'] },
@@ -79,9 +82,18 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       await db.query(`INSERT INTO plataforma.tenant (id, alias, nome, segmento, packs, dono_email, status, chave) VALUES ($1, $2, $3, 'varejo', '{varejo}', $4, 'ativo', $5) ON CONFLICT (id) DO NOTHING`, [t.id, t.alias, t.nome, `${t.alias}@exemplo.local`, `chave-local-${t.alias}-xxxxxxxxxxxx`])
       for (const m of t.modulos) await db.query(`INSERT INTO plataforma.modulo (tenant_id, servico) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [t.id, m])
     }
+    // usuários de DEMONSTRAÇÃO (idempotente): o login real do site e do Studio no ambiente local. A senha vale só aqui.
+    const ident = criaIdentidade({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } } })
+    for (const t of TENANTS_LOCAIS) await ident.criaUsuario({ tenantId: t.id, email: emailLocal(t.alias), nome: 'Ana (demonstração)', papeis: ['studio.editor', 'gerente'], senha: SENHA_LOCAL })
     // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
     const reg = carregaNos(nosDir)
-    const jwt = { JWT_EMISSOR: EMISSOR_LOCAL, JWT_AUDIENCIA: AUDIENCIA_LOCAL, JWT_SEGREDO: SEGREDO_LOCAL, NODE_ENV: 'development' }
+    // chave de ASSINATURA da sessão: ES256, como em produção (quem verifica só tem a pública). Persiste em .polaris-local/ para os logins sobreviverem a reinícios; em memória, uma nova a cada subida.
+    const arquivoChave = o.dados ? join(dirname(o.dados), 'chave-jwt.json') : null
+    let privada: Record<string, unknown>
+    if (arquivoChave && existsSync(arquivoChave)) privada = JSON.parse(readFileSync(arquivoChave, 'utf8')) as Record<string, unknown>
+    else { const kp = await generateKeyPair('ES256', { extractable: true }); privada = { ...(await exportJWK(kp.privateKey)), alg: 'ES256', kid: 'local' }; if (arquivoChave) writeFileSync(arquivoChave, JSON.stringify(privada), { mode: 0o600 }) }
+    const { d: _d, ...publica } = privada
+    const jwt = { JWT_EMISSOR: EMISSOR_LOCAL, JWT_AUDIENCIA: AUDIENCIA_LOCAL, JWT_CHAVE_PUBLICA_JWK: JSON.stringify(publica), NODE_ENV: 'development' }
     const servico = await montaServico(configServico({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICO: 'loja', POLARIS_HOSTS: JSON.stringify(Object.fromEntries(TENANTS_LOCAIS.map((t) => [`${t.alias}.polaris.localhost`, t.id]))), DATABASE_URL: pg('polaris_app'), POLARIS_DB_PAPEL: 'polaris_app', POLARIS_MIGRAR: '1', DATABASE_URL_MIGRADOR: pg('polaris_migrador') }), reg); fecham.push(async () => { servico.app.server.closeAllConnections(); await servico.fecha() })
     await servico.app.listen({ port: 0, host: '127.0.0.1' }); const urlServico = `http://127.0.0.1:${(servico.app.server.address() as { port: number }).port}`
     if ((await db.query(`SELECT 1 FROM information_schema.tables WHERE table_schema = 'loja' AND table_name = 'destaque'`)).rows.length) {
@@ -91,11 +103,12 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw)
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)
-    const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_PREVIEW_SEGREDO: 'polaris-local-preview-segredo-de-desenvolvimento-0123', POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
-    const chave = new TextEncoder().encode(SEGREDO_LOCAL)
+    const { gw, verifica } = montaGatewayComChave(configGateway({ ...jwt, POLARIS_IDENTIDADE_CHAVE_PRIVADA_JWK: JSON.stringify(privada), POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_PREVIEW_SEGREDO: 'polaris-local-preview-segredo-de-desenvolvimento-0123', POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
+    await verifica() // a privada tem de combinar com a pública que serviço e gateway usam
+    const chavePrivada = await importJWK(privada as never, 'ES256')
     const token = async (alias: string, papeis: readonly string[], usuario = 'dev') => {
       const t = TENANTS_LOCAIS.find((x) => x.alias === alias); if (!t) throw new Error(`tenant desconhecido: ${alias}`)
-      return new SignJWT({ tid: t.id, papeis: [...papeis] }).setProtectedHeader({ alg: 'HS256' }).setSubject(usuario).setIssuer(EMISSOR_LOCAL).setAudience(AUDIENCIA_LOCAL).setExpirationTime('12h').sign(chave)
+      return new SignJWT({ tid: t.id, papeis: [...papeis] }).setProtectedHeader({ alg: 'ES256', kid: 'local' }).setSubject(usuario).setIssuer(EMISSOR_LOCAL).setAudience(AUDIENCIA_LOCAL).setExpirationTime('12h').sign(chavePrivada)
     }
     // 4. login de DESENVOLVIMENTO: emite o JWT e leva ao Studio do tenant (o token vai no fragmento da URL, que não chega a servidor nenhum)
     let porta = o.porta ?? 3000
@@ -119,6 +132,14 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
         return reply.header('set-cookie', cookieDeSessao(t, false)).redirect(`http://${tenant}.polaris.localhost:${porta}${voltaSegura(req.query.volta)}`, 302)
       }
       return reply.redirect(`http://${tenant}.polaris.localhost:${porta}/studio#token=${await token(tenant, [papel], usuario)}`, 302)
+    })
+    // caixa de e-mails de DESENVOLVIMENTO: o que o sistema "enviou" (link de redefinição de senha) aparece aqui, já que não há SMTP no ambiente local
+    gw.get<{ Querystring: { tenant?: string } }>('/_dev/emails', async (req, reply) => {
+      const alias = req.query.tenant ?? HOST_TENANT.exec(String(req.headers.host ?? ''))?.[1], t = TENANTS_LOCAIS.find((x) => x.alias === alias)
+      cab(reply); if (!t) return reply.status(400).type('text/plain').send('use /_dev/emails?tenant=loja-demo (ou abra no endereço de um tenant)')
+      const lista = await ident.emails(t.id, 20)
+      const linka = (txt: string) => esc(txt).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}">${u}</a>`)
+      return reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>E-mails de desenvolvimento</title><body><h1>E-mails — ${esc(t.nome)}</h1><p>Só o ambiente local: aqui aparece o que o sistema enviaria por e-mail.</p>${lista.length ? lista.map((m) => `<article><h2>${esc(m.assunto)}</h2><p>Para: ${esc(m.para)} · ${esc(m.criadoEm)}</p><pre>${linka(m.corpo)}</pre></article>`).join('') : '<p>Nenhum e-mail ainda.</p>'}</body></html>`)
     })
     await gw.listen({ port: porta, host: '127.0.0.1' }); porta = (gw.server.address() as { port: number }).port
     if (!o.silencioso) console.log(`gateway em http://127.0.0.1:${porta}`)

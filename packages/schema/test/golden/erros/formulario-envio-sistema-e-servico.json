@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/envio/sistema",
+    "regra": "false schema",
+    "mensagem": "o campo 'sistema' não pode ser usado junto com os outros campos desta forma",
+    "dica": "escolha UMA das formas permitidas e remova o que sobra (aqui: 'sistema')"
+  }
+]

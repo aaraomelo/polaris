@@ -12,8 +12,9 @@ import { FalhaServico } from './cliente'
 import { instalaGraphql, type OpcoesGraphql } from './graphql'
 import type { InfoTenant, PreviewDeRelease, RegistrosDeTenant, ResolvedorTenant } from './tenants'
 import { LimiteTaxa } from './taxa'
-import { instalaPaginas, type OpcoesPaginas } from './paginas'
+import { instalaPaginas, lerCookie, type OpcoesPaginas } from './paginas'
 import { instalaFormularios } from './formularios'
+import type { PortaIdentidade } from './identidade'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // Gateway/BFF: a borda. Compõe os dados de uma PÁGINA (um pedido, vários serviços, em paralelo, com cache escopado), expõe o REST e o GraphQL GERADOS
@@ -47,6 +48,10 @@ export type OpcoesGateway = {
   /** padrão: 120 fichas, reposição de 20/s. `false` desliga. */
   limiteTaxa?: { capacidade: number; porSegundo: number } | false
   graphql?: OpcoesGraphql | false
+  /** as chaves PÚBLICAS de verificação (JWKS) publicadas em `/.well-known/jwks.json`: quem verifica a sessão (os serviços) pode usar a URL como `JWT_JWKS_URL` */
+  jwks?: { keys: Array<Record<string, unknown>> }
+  /** login e senha: com ele, `envio.sistema` dos formulários (entrar, esqueci, redefinir) funciona e a sessão vira o cookie. Sem ele, 501. */
+  identidade?: PortaIdentidade
   /** serve as PÁGINAS dos tenants (GET fora de /api, /bff, /studio, /graphql): rotas declarativas + HTML em streaming + hidratação. Sem isto, só a API. */
   paginas?: OpcoesPaginas
   timeoutPadraoMs?: number
@@ -100,6 +105,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
   app.setNotFoundHandler((req, reply) => reply.status(404).send(corpoErro(new ErroGw(404, 'rota_inexistente', 'rota inexistente'), obsDe(req)?.reqId)))
   app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); if (!reply.getHeader('cache-control')) reply.header('cache-control', 'private, no-store'); if (!reply.getHeader('vary')) reply.header('vary', 'Authorization, Cookie') })
   app.get('/saude', async () => ({ ok: true, servico: 'gateway' }))
+  if (o.jwks) app.get('/.well-known/jwks.json', async (_req, reply) => reply.header('cache-control', 'public, max-age=300').send(o.jwks)) // só a parte pública: o JWK não leva `d`
 
   // --- quem chama: o token é verificado AQUI; o tenant nunca vem do cliente -----------------------------------------------------------------------
   async function autentica(req: Req, opcoes: { exigeUsuario?: boolean } = {}): Promise<CtxGw> {
@@ -277,9 +283,13 @@ export function criaGateway(o: OpcoesGateway): Gateway {
 
   // --- GraphQL gerado -----------------------------------------------------------------------------------------------------------------------------
   if (o.graphql !== false) instalaGraphql(app, { servicos: o.servicos, chamador, entra: (req, c) => entra(req, c), obs, traduz, opcoes: o.graphql ?? {}, cobraTaxa: (req, ctx, custo) => limita(req as Req, ctx, custo), cache, publicaDaFonte })
-  instalaFormularios(app, { entra: (r) => entra(r), limita: (r, c, custo) => limita(r as Req, c, custo), chamador, registroDe: (c, f) => c.registro ?? f, registro: o.registry, log })
+  instalaFormularios(app, { entra: (r) => entra(r), limita: (r, c, custo) => limita(r as Req, c, custo), chamador, registroDe: (c, f) => c.registro ?? f, registro: o.registry, ...(o.identidade ? { identidade: o.identidade } : {}), cookieSeguro: o.paginas?.cookieSeguro !== false, log })
   if (o.paginas) instalaPaginas(app, o.paginas, { entra, programaDe: (c, id) => programaDe(c, id), opcoesCarga: (c, p, r, e, f) => opcoesCarga(c, p, r, e, f), registroDe: (c, f) => c.registro ?? f, registro: o.registry, ...(o.preview ? { preview: o.preview } : {}), log })
-  o.estende?.(app, { sessao: async (req) => { try { const c = await autentica(req as Req); return c.anonimo ? null : c } catch { return null } } })
+  o.estende?.(app, { sessao: async (req) => {
+    // o Studio (HTML do próprio site) usa a sessão do cookie, mas só com o cabeçalho `x-polaris-studio` (outra origem não o manda sem preflight) e o cookie é SameSite=Lax: a API do Studio não vira alvo de CSRF
+    if (req.headers.authorization === undefined && req.headers['x-polaris-studio'] === '1') { const tk = lerCookie(req.headers.cookie); if (tk) req.headers.authorization = `Bearer ${tk}` }
+    try { const c = await autentica(req as Req); return c.anonimo ? null : c } catch { return null }
+  } })
   return app
 }
 

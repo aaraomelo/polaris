@@ -31,6 +31,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const NOME_PAPEL = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/
 const ASSIMETRICOS = ['RS256', 'RS384', 'RS512', 'PS256', 'PS384', 'PS512', 'ES256', 'ES384', 'ES512', 'EdDSA']
 
+/** o algoritmo para importar uma chave pública em JWK: o `alg` dela, ou o da família (RSA → RS256, EC → ES256/384/512 pela curva, OKP → EdDSA); nunca o primeiro da lista, que servia só a RSA */
+const algDaChave = (k: JWK, padrao: string): string => k.alg ?? (k.kty === 'EC' ? ({ 'P-256': 'ES256', 'P-384': 'ES384', 'P-521': 'ES512' } as Record<string, string>)[String(k.crv)] ?? 'ES256' : k.kty === 'OKP' ? 'EdDSA' : k.kty === 'RSA' ? 'RS256' : padrao)
+
 export function criaAutenticadorJwt(o: OpcoesJwt): (cabecalho: string | undefined) => Promise<ResultadoAuth> {
   const claimTenant = o.claims?.tenant ?? 'tid', claimPapeis = o.claims?.papeis ?? 'papeis'
   const simetrica = 'segredo' in o.chave
@@ -41,7 +44,7 @@ export function criaAutenticadorJwt(o: OpcoesJwt): (cabecalho: string | undefine
 
   let chavePronta: Promise<KeyLike | Uint8Array | JWTVerifyGetKey>
   if ('segredo' in o.chave) chavePronta = Promise.resolve(typeof o.chave.segredo === 'string' ? new TextEncoder().encode(o.chave.segredo) : o.chave.segredo)
-  else if ('publica' in o.chave) { const k = o.chave.publica; chavePronta = 'kty' in (k as object) ? importJWK(k as JWK, algoritmos[0]!) as Promise<KeyLike> : Promise.resolve(k as KeyLike) }
+  else if ('publica' in o.chave) { const k = o.chave.publica; chavePronta = 'kty' in (k as object) ? importJWK(k as JWK, algDaChave(k as JWK, algoritmos[0]!)) as Promise<KeyLike> : Promise.resolve(k as KeyLike) }
   else if ('jwks' in o.chave) chavePronta = Promise.resolve(createLocalJWKSet(o.chave.jwks))
   else chavePronta = Promise.resolve(createRemoteJWKSet(o.chave.jwksUrl))
   const max = o.maxBytes ?? 8192

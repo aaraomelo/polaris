@@ -53,7 +53,7 @@ const lerPreview = (h: string | undefined): string | null => {
   return null
 }
 const faixaPreview = (n: number) => `<div id="pl-preview" style="position:sticky;top:0;z-index:2147483647;background:#f59e0b;color:#111;padding:6px 12px;font:14px system-ui,sans-serif">Pré-visualização da release ${n} (não é o site publicado) · <a href="/_polaris/preview/sair" style="color:#111">sair</a></div>`
-const RESERVADO = /^\/(api|bff|studio|graphql|_polaris|metricas|saude)(\/|$)/
+const RESERVADO = /^\/(api|bff|studio|graphql|_polaris|_dev|metricas|saude|\.well-known)(\/|$)/
 const sha = (s: string) => createHash('sha256').update(s).digest('hex').slice(0, 16)
 const CSP = (nonce: string) => `default-src 'none'; script-src 'nonce-${nonce}' 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`
 const NEGADO_TXT = (c: number) => (c === 404 ? 'Página não encontrada' : c === 403 ? 'Acesso negado' : c === 401 ? 'Autenticação necessária' : 'Erro')
@@ -91,12 +91,20 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     if (!no) return null
     const chave = `${ctx.tenantId}|${chaveRelease}|${no.id}|${no.versao}`
     if (tabelas.has(chave)) return tabelas.get(chave)!
-    // as páginas que o PRÓPRIO tenant criou (Studio) e têm rota entram sozinhas: não precisam estar em `paginas` do nó `tenant`. Se alguma colide com as demais (mesma rota), a tabela volta a ser só a declarada.
-    const proprias = reg.ids('pagina').filter((id) => !(no.spec as { paginas?: string[] }).paginas?.includes(id) && reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.escopo === 'tenant' && typeof (reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.no.spec as { rota?: unknown }).rota === 'string')
+    // além das declaradas entram, uma a uma e só se a tabela continua compilando: as páginas de SISTEMA (`identidade.*`: entrar, esqueci, nova senha) e as que o PRÓPRIO tenant criou (Studio) com rota.
+    // Uma que colide com as outras (mesma rota) é deixada de fora com um aviso, sem derrubar o site; o tenant pode trocar uma página de sistema pela dele (mesmo id, no escopo dele).
+    const spec0 = no.spec as { paginas?: string[]; rotaLogin?: string }, declaradas = spec0.paginas ?? []
+    const sistema = reg.ids('pagina').filter((id) => id.startsWith('identidade.') && !declaradas.includes(id))
+    const proprias = reg.ids('pagina').filter((id) => !id.startsWith('identidade.') && !declaradas.includes(id) && reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.escopo === 'tenant' && typeof (reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.no.spec as { rota?: unknown }).rota === 'string')
+    const monta = (extras: string[]) => ({ ...no, spec: { ...(no.spec as object), paginas: [...declaradas, ...extras], ...(!spec0.rotaLogin && extras.includes('identidade.entrar') ? { rotaLogin: '/entrar' } : {}) } }) as typeof no
     const tenta = (n: typeof no) => compilaTabela(reg, n, { tenantId: ctx.tenantId })
-    let r = proprias.length ? tenta({ ...no, spec: { ...(no.spec as object), paginas: [...((no.spec as { paginas?: string[] }).paginas ?? []), ...proprias] } } as typeof no) : tenta(no)
-    if (!r.ok && proprias.length) { d.log.warn('páginas do tenant colidem com as declaradas; só as declaradas são servidas', { tenant: ctx.tenantId, erros: r.erros.length }); r = tenta(no) }
+    let r = tenta(no), extras: string[] = []
+    if (!r.ok && sistema.length) { const t = tenta(monta(sistema)); if (t.ok) { r = t; extras = [...sistema] } } // o tenant aponta `rotaLogin` para uma página que só as de sistema trazem
     if (!r.ok) d.log.warn('as rotas do tenant não compilam', { tenant: ctx.tenantId, erros: r.erros.length })
+    else for (const id of [...(extras.length ? [] : sistema), ...proprias]) {
+      const t = tenta(monta([...extras, id]))
+      if (t.ok) { extras = [...extras, id]; r = t } else d.log.warn('página deixada de fora das rotas (colide com outra)', { tenant: ctx.tenantId, pagina: id })
+    }
     tabelas.set(chave, r.ok ? r.tabela : null)
     while (tabelas.size > 200) tabelas.delete(tabelas.keys().next().value as string)
     return r.ok ? r.tabela : null
@@ -123,7 +131,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
       if (!primeiro.done) yield solta(primeiro.value)
       for (;;) { const n = await it.next(); if (n.done) return; yield solta(n.value) }
     }
-    return reply.status(status).header('vary', `Authorization, Cookie, ${CABECALHO_NAV}`).header('content-security-policy', CSP(nonce)).type('text/html; charset=utf-8').send(Readable.from(resto()))
+    return reply.status(status).header('referrer-policy', 'no-referrer').header('vary', `Authorization, Cookie, ${CABECALHO_NAV}`).header('content-security-policy', CSP(nonce)).type('text/html; charset=utf-8').send(Readable.from(resto()))
   }
 
   const seguro = o.cookieSeguro !== false

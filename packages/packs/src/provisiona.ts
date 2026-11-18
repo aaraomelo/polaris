@@ -16,7 +16,7 @@ export type Diretorio = {
 }
 export type Portas = {
   diretorio: Diretorio
-  identidade: { /** convida o dono no provedor de identidade (a plataforma NUNCA guarda senha); idempotente por tenant+e-mail */ convida(c: { tenantId: string; email: string; nome: string; papeis: string[] }): Promise<void> }
+  identidade: { /** convida o dono (`criaConviteDoDono`): cria a conta SEM senha e manda o link para ele definir a sua; o convite nunca leva senha; idempotente por tenant+e-mail */ convida(c: { tenantId: string; email: string; nome: string; papeis: string[] }): Promise<void> }
   /** cria a semente no tenant, com as permissões do DONO; devolve o id. Se já existe, devolve o id existente (idempotente) */
   semeia(c: { tenantId: string; servico: string; entidade: string; dados: Record<string, unknown>; papeis: string[] }): Promise<{ id: string | null }>
   landing: { publica(tenantId: string, landing: Landing): Promise<void> }

@@ -123,9 +123,9 @@ describe('servidor de páginas', () => {
       const r = await e.req('GET', '/minha', { host: 'a.loja.test' }); expect(r.statusCode).toBe(200); expect(r.body).toContain('Conteúdo p.minha'); expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200)
       // outro tenant (B) não enxerga a página do A
       modo.id = 'proprio'; const b = await e.req('GET', '/minha', { host: 'b.loja.test', tok: await e.token('b', B, ['x']) }); expect(b.statusCode).toBe(404)
-      // colisão: nova release (nó tenant em outra versão) com página própria na MESMA rota de uma declarada → volta a só as declaradas
+      // colisão: nova release (nó tenant em outra versão) com página própria na MESMA rota de uma declarada → só a que colide fica de fora
       e.reg.registra({ ...tenant('proprio'), versao: '1.0.1' } as never); e.reg.registra(no('p.colide', '/sobre') as never)
-      expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/minha', { host: 'a.loja.test' })).statusCode).toBe(404)
+      expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/minha', { host: 'a.loja.test' })).statusCode).toBe(200) // só a que colide fica de fora; as outras continuam
     } finally { modo.id = undefined }
   })
   it('pré-visualização assinada: o link vira cookie HttpOnly, o site mostra a release do link com faixa e noindex, só para o tenant do link', async () => {

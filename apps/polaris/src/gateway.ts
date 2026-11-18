@@ -4,10 +4,16 @@ import { previsualiza, rotasEstaticasStudio } from '@polaris/studio-app'
 import { criaPool } from '@polaris/pg'
 import type { Registry } from '@polaris/schema'
 import { autenticadorDe } from './auth'
+import { criaPortaIdentidade } from './identidade'
 import type { ConfigGateway } from './config'
 
 /** Com `plataforma`, o gateway consulta o diretório (status, módulos, domínios); sem ela, só o mapa estático de desenvolvimento. */
 export function montaGateway(c: ConfigGateway, reg: Registry) {
+  const g = montaGatewayInterno(c, reg); return g.gw
+}
+/** como `montaGateway`, mas também devolve `verifica()`: a conferência de partida da chave de assinatura (quem sobe o processo a espera antes de escutar) */
+export function montaGatewayComChave(c: ConfigGateway, reg: Registry) { return montaGatewayInterno(c, reg) }
+function montaGatewayInterno(c: ConfigGateway, reg: Registry) {
   const pool = c.plataforma ? criaPool({ url: c.plataforma.url, max: 5 }) : null
   const tenants = c.plataforma && pool ? criaResolvedorTenant({ bases: c.plataforma.bases, q: async (sql, params) => { const r = await pool.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.rowCount ?? 0 } } }) : null
   // releases: o registro de cada tenant = core + a release de PRODUÇÃO dele; o preview é um link assinado de uma release ainda não promovida
@@ -50,7 +56,11 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
       })
     }
   })() : null
+  // login próprio: usuários do diretório + sessão assinada com a chave privada deste processo; as páginas e formulários de sistema (`identidade.*`) entram nos registros
+  const idn = c.identidade && qp ? criaPortaIdentidade({ q: qp, jwt: c.jwt, chavePrivada: c.identidade.chavePrivada, horas: c.identidade.horas }) : null
+  if (idn) for (const n of nosDoPack('identidade')) { try { reg.registra(n) } catch { /* já registrado (nós carregados do diretório) */ } }
   const gw = criaGateway({
+    ...(idn ? { identidade: idn.porta, jwks: { keys: [(({ d: _d, p: _p, q: _q, dp: _dp, dq: _dq, qi: _qi, ...pub }) => pub)(c.identidade!.chavePrivada as Record<string, unknown>)] } } : {}),
     ...(paginas ? { paginas } : {}),
     ...(studio ? { estende: studio as never } : {}),
     registry: reg, servicos, autenticador: autenticadorDe(c.jwt), ...(tenants ? { tenants } : {}), ...(releases ? { registros: { producao: (t: string, r: number | null) => releases.registroDeProducao(t, r) } } : {}), ...(releases && prev ? { preview: { verifica: (t: string) => prev.verifica(t), registro: (t: string, r: number) => releases.registroDe(t, r) } } : {}), tenantPorHost: (h) => hosts.get(h.toLowerCase()) ?? null,
@@ -58,5 +68,5 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     ...(c.metricasToken ? { metricasToken: c.metricasToken } : {}),
   })
   if (pool) gw.addHook('onClose', async () => { await pool.end() })
-  return gw
+  return { gw, verifica: async () => { await idn?.verifica() }, identidade: idn?.id ?? null }
 }

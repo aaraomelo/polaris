@@ -70,3 +70,6 @@ A prévia tem seletor **claro/escuro** (`modo` em `POST /studio/previa`); o padr
 
 ## Formulários
 O Studio também edita `kind: formulario` (campos, máscaras, validação, mensagens, prévia, problemas e teste com valores): veja `docs/formularios.md#editor-no-studio`.
+
+## Login
+O Studio usa a **sessão do cookie** do site (o cabeçalho `x-polaris-studio: 1` autoriza o cookie na API do Studio, que continua aceitando o token no fragmento em desenvolvimento). Sem sessão, manda ao `/entrar` e volta. As permissões vêm dos papéis `studio.*` do usuário (`docs/identidade.md`).

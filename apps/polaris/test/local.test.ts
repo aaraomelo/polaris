@@ -8,7 +8,7 @@ import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { chromium } from 'playwright-core'
 import { afterAll, describe, expect, it } from 'vitest'
-import { PAPEIS_LOCAIS, sobeLocal, type Local } from '../src/local'
+import { PAPEIS_LOCAIS, SENHA_LOCAL, emailLocal, sobeLocal, type Local } from '../src/local'
 
 // O ambiente local de ponta a ponta: Postgres (PGlite com protocolo), serviço migrado, gateway, Studio e o login de desenvolvimento.
 const dir = mkdtempSync(join(tmpdir(), 'polaris-local-')); const abertos: Local[] = []
@@ -25,8 +25,9 @@ const get = (l: Local, alias: string, caminho: string, token?: string) => req(l,
 describe('ambiente local', () => {
   it('login de desenvolvimento → token → Studio e API da loja pelo gateway, isolados por tenant', async () => {
     const l = await sobe(null)
+    const jwks = await get(l, 'loja-demo', '/.well-known/jwks.json'); expect(jwks.status).toBe(200); const ks = ((await jwks.json()) as { keys: Array<Record<string, unknown>> }).keys; expect(ks).toHaveLength(1); expect(ks[0]).toMatchObject({ kty: 'EC', alg: 'ES256' }); expect(ks[0]).not.toHaveProperty('d') // só a pública
     const pagina = await (await get(l, 'apex', '/entrar')).text(); expect(pagina).toContain('Loja Demo'); expect(pagina).toContain('studio.editor') // o índice só no endereço SEM tenant
-    const doSite = await (await get(l, 'loja-demo', '/entrar?volta=%2Fprodutos')).text(); expect(doSite).toContain('Entrar como gerente'); expect(doSite).toContain('volta=/produtos'); expect(doSite).not.toContain('Outra Loja') // no do tenant, é a PÁGINA do site
+    const doSite = await (await get(l, 'loja-demo', '/entrar?volta=%2Fprodutos')).text(); expect(doSite).toContain('data-polaris-formulario="identidade.entrar"'); expect(doSite).not.toContain('Outra Loja') // no endereço do tenant, é a PÁGINA de login do sistema (o formulário)
     const ir = await get(l, 'loja-demo', '/entrar/ir?tenant=loja-demo&papel=studio.editor&usuario=ana'); expect(ir.status).toBe(302)
     const loc = ir.headers.get('location')!; expect(loc).toMatch(new RegExp(`^http://loja-demo\\.polaris\\.localhost:${l.porta}/studio#token=[\\w.-]+$`))
     const tk = /#token=(.+)$/.exec(loc)![1]!
@@ -180,7 +181,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.waitForFunction(() => (window as any).Polaris?.inicia); await p.evaluate(() => { (window as any).__marca = 'mesma' }); const n0 = docs.length
       await p.getByRole('link', { name: /Produtos/ }).click() // visitante: a guarda manda ao login, que é uma PÁGINA do site: troca no cliente, sem recarregar
       await p.getByRole('heading', { name: 'Entrar' }).waitFor(); expect(p.url()).toContain('/entrar?volta=%2Fprodutos'); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma'); expect(docs.length).toBe(n0)
-      await p.getByRole('link', { name: 'Entrar como gerente' }).click() // grava o cookie e volta: aqui a navegação é normal (muda a sessão)
+      await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click() // login REAL: grava o cookie e volta para onde a guarda mandou (navegação normal: muda a sessão)
       await p.waitForURL(/\/produtos$/); await p.getByRole('heading', { name: 'Produtos' }).waitFor()
       expect(await p.evaluate(() => document.cookie)).not.toContain('polaris_sessao') // HttpOnly: o JavaScript não enxerga
       await p.evaluate(() => fetch('/_polaris/sair', { method: 'POST' })); await p.reload(); await p.waitForURL(/\/entrar\?volta=/)
@@ -264,12 +265,56 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(await p.locator('[data-polaris-formulario] form').count()).toBe(1); expect(erros.join(' | ')).toBe('')
     } finally { await nav.close() }
   })
-  it('clicar em "entrar" abre o Studio do tenant, já autenticado: lista os temas e abre o padrão', async () => {
+  it('login real no Chrome: senha errada diz a mesma coisa para qualquer e-mail; 5 erros bloqueiam; a sessão emitida (ES256) é aceita pelos SERVIÇOS', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const ctx = await nav.newContext(), p = await ctx.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/status of (401|429)/.test(m.text())) erros.push(`${m.text()} ${m.location().url}`) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar`); const email = p.getByLabel('E-mail'), senha = p.getByLabel('Senha'), entrar = p.getByRole('button', { name: 'Entrar' })
+      await email.fill(emailLocal('loja-demo')); await senha.fill('senha-errada-12'); await entrar.click(); await p.getByText('E-mail ou senha incorretos.').waitFor()
+      await email.fill('quem-e-esse@loja-demo.test'); await entrar.click(); await p.getByText('E-mail ou senha incorretos.').waitFor() // e-mail que não existe: a MESMA mensagem
+      expect((await ctx.cookies()).filter((c) => c.name === 'polaris_sessao')).toHaveLength(0) // nada de sessão em falha
+      await email.fill(emailLocal('loja-demo')); for (let i = 0; i < 4; i++) await entrar.click(); await p.getByText(/Muitas tentativas\. Tente de novo em \d+ minuto/).waitFor() // 1 antes + 4 aqui = 5 do MESMO e-mail: bloqueia (o e-mail inexistente contou à parte)
+      await senha.fill(SENHA_LOCAL); await entrar.click(); await p.getByText(/Muitas tentativas/).waitFor() // bloqueado até a senha certa é recusada
+      expect((await ctx.cookies()).filter((c) => c.name === 'polaris_sessao')).toHaveLength(0)
+      // outro e-mail do mesmo tenant não é afetado; o login certo grava o cookie HttpOnly e a sessão vale nos serviços
+      await p.goto(`http://loja-outra.polaris.localhost:${l.porta}/entrar`); await p.getByLabel('E-mail').fill(emailLocal('loja-outra')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click(); await p.waitForURL(/loja-outra\.polaris\.localhost:\d+\/$/)
+      const ck = (await ctx.cookies()).find((c) => c.name === 'polaris_sessao')!; expect(ck).toMatchObject({ httpOnly: true, sameSite: 'Lax' }); expect(ck.value.split('.').length).toBe(3)
+      const api = await req(l, 'loja-outra', 'GET', '/api/loja/produtos', ck.value); expect(api.status, await api.text()).toBe(200) // o serviço verificou o JWT com a chave PÚBLICA
+      expect((await req(l, 'loja-demo', 'GET', '/api/loja/produtos', ck.value)).status).toBeGreaterThanOrEqual(401) // o token da Outra Loja não vale no host da Demo
+      expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('esqueci a senha: o link vai para a caixa de e-mails, define a nova senha (uma vez só) e a antiga deixa de valer', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), base = `http://loja-demo.polaris.localhost:${l.porta}`, erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/status of (401|422)/.test(m.text())) erros.push(`${m.text()} ${m.location().url}`) })
+      await p.goto(`${base}/entrar`); await p.getByRole('link', { name: 'Esqueci minha senha' }).click(); await p.getByRole('heading', { name: 'Esqueci minha senha' }).first().waitFor()
+      const aviso = /Se o e-mail estiver cadastrado/; await p.getByLabel('E-mail').fill('ninguem@loja-demo.test'); await p.getByRole('button', { name: 'Enviar o link' }).click(); await p.getByText(aviso).waitFor()
+      await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByRole('button', { name: 'Enviar o link' }).click(); await p.getByText(aviso).first().waitFor() // a MESMA resposta para conta que existe e que não existe
+      await expect.poll(async () => (await (await get(l, 'loja-demo', '/_dev/emails')).text()).includes('/senha/redefinir?token=')).toBe(true)
+      const caixa = await (await get(l, 'loja-demo', '/_dev/emails')).text(); expect(caixa).toContain(emailLocal('loja-demo')); expect(caixa).not.toContain('ninguem@') // só quem tem conta recebe
+      const link = /href="(http:\/\/loja-demo\.polaris\.localhost:\d+\/senha\/redefinir\?token=[\w-]+)"/.exec(caixa)![1]!
+      await p.goto(link); await p.locator('input[name=senha]').fill('cavalo-bateria-novo'); await p.locator('input[name=confirma]').fill('diferente-do-outro'); await p.getByRole('button', { name: 'Salvar a nova senha' }).click(); await p.getByText('As senhas não conferem.').waitFor()
+      await p.locator('input[name=confirma]').fill('cavalo-bateria-novo'); await p.getByRole('button', { name: 'Salvar a nova senha' }).click(); await p.waitForURL(/\/entrar$/) // a ação `navegar` leva ao login
+      await p.goto(link); await p.locator('input[name=senha]').fill('cavalo-bateria-novo'); await p.locator('input[name=confirma]').fill('cavalo-bateria-novo'); await p.getByRole('button', { name: 'Salvar a nova senha' }).click(); await p.getByText(/não vale mais/).waitFor() // uso único
+      await p.goto(`${base}/entrar`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click(); await p.getByText('E-mail ou senha incorretos.').waitFor() // a antiga morreu
+      await p.getByLabel('Senha').fill('cavalo-bateria-novo'); await p.getByRole('button', { name: 'Entrar' }).click(); await p.waitForURL(`${base}/`)
+      expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('o Studio sem sessão manda ao login e volta para ele depois de entrar', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(); await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/studio`); await p.waitForURL(/\/entrar\?volta=%2Fstudio$/)
+      await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click(); await p.waitForURL(/\/studio$/); await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByText('site.home (padrão)').waitFor()
+    } finally { await nav.close() }
+  })
+  it('login real no site abre o Studio do tenant pela sessão (cookie): lista os temas e abre o padrão', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
-      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar`); await p.getByRole('link', { name: /Studio como editor/ }).click()
-      await p.waitForURL(/\/studio$/); expect(p.url()).not.toContain('token') // o token sai da barra de endereço
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
+      await p.waitForURL(/\/studio$/); expect(p.url()).not.toContain('token') // o Studio usa a sessão do cookie: sem token na barra de endereço
       await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'padrao (padrão)' }).click(); await p.getByText('Tokens do tema padrao').waitFor()
       await p.getByRole('button', { name: 'Salvar' }).click(); await p.getByText('Salvo como versão 1').waitFor()
       await p.getByRole('button', { name: 'Publicar' }).click(); await p.getByText(/Publicado: release 1/).waitFor() // o botão do Studio põe os rascunhos em produção

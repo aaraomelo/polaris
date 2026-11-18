@@ -87,4 +87,18 @@ describe('JWT: tokens FORJADOS e abusos (todos recusados)', () => {
     await recusa(`Bearer ${'a'.repeat(9000)}.b.c`, 'grande demais')
   })
   it('segredo curto demais é recusado na configuração', () => { expect(() => criaAutenticadorJwt({ emissor: ISS, audiencia: AUD, chave: { segredo: 'curto' } })).toThrow('32 bytes') })
+
+  it('chave pública em JWK de EC (ES256) e OKP (EdDSA): o algoritmo vem da chave, não do primeiro da lista (que servia só a RSA)', async () => {
+    for (const [alg, tipo] of [['ES256', 'EC'], ['EdDSA', 'OKP']] as const) {
+      const kp = await generateKeyPair(alg, { extractable: true }), jwk = { ...(await exportJWK(kp.publicKey)), alg }
+      const a = criaAutenticadorJwt({ emissor: ISS, audiencia: AUD, chave: { publica: jwk as never } })
+      const t = await new SignJWT({ tid: T, papeis: ['x'] }).setProtectedHeader({ alg }).setSubject('u').setIssuer(ISS).setAudience(AUD).setExpirationTime('1h').sign(kp.privateKey)
+      expect(await a(`Bearer ${t}`), tipo).toMatchObject({ ok: true, contexto: { tenantId: T, usuario: 'u' } })
+      const outra = await generateKeyPair(alg, { extractable: true }), falso = await new SignJWT({ tid: T }).setProtectedHeader({ alg }).setSubject('u').setIssuer(ISS).setAudience(AUD).setExpirationTime('1h').sign(outra.privateKey)
+      expect((await a(`Bearer ${falso}`)).ok, `${tipo}: assinatura de outra chave`).toBe(false)
+    }
+    const kp = await generateKeyPair('ES256', { extractable: true }), semAlg = await exportJWK(kp.publicKey) // sem `alg` no JWK: pela curva P-256 → ES256
+    const a = criaAutenticadorJwt({ emissor: ISS, audiencia: AUD, chave: { publica: semAlg as never } }), t = await new SignJWT({ tid: T }).setProtectedHeader({ alg: 'ES256' }).setSubject('u').setIssuer(ISS).setAudience(AUD).setExpirationTime('1h').sign(kp.privateKey)
+    expect((await a(`Bearer ${t}`)).ok).toBe(true)
+  })
 })

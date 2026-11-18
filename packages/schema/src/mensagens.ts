@@ -78,6 +78,10 @@ export function traduz(e: ErrorObject, base = ''): Erro | null {
       return out('a lista não pode ter itens repetidos', `os itens ${p.j} e ${p.i} são iguais`)
     case 'propertyNames':
       return out(`nome de campo inválido: ${JSON.stringify(p.propertyName)}`)
+    case 'false schema': { // `propriedade: false` dentro de uma alternativa (oneOf): a combinação não é permitida
+      const campo = (e.instancePath || '').split('/').filter(Boolean).pop() ?? 'campo'
+      return out(`o campo '${campo}' não pode ser usado junto com os outros campos desta forma`, `escolha UMA das formas permitidas e remova o que sobra (aqui: '${campo}')`)
+    }
     case 'oneOf':
     case 'anyOf':
       return out('não corresponde a nenhuma das formas permitidas', 'confira o campo que distingue a forma (op, acao…) e os campos exigidos por ela')

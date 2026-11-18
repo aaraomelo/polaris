@@ -44,8 +44,9 @@ export async function chama(operacao: string, args: Record<string, unknown>, o: 
   const monta = Object.hasOwn(OPERACOES, operacao) ? OPERACOES[operacao] : undefined
   if (!monta) throw new ErroStudio(0, 'operacao_desconhecida', `operação desconhecida: ${operacao}`)
   const r = monta(args), tk = o.token ?? tokenDaSessao()
-  const res = await (o.fetch ?? fetch)(r.url, { method: r.metodo, headers: { ...(r.corpo === undefined ? {} : { 'content-type': 'application/json' }), ...(tk ? { authorization: `Bearer ${tk}` } : {}) }, ...(r.corpo === undefined ? {} : { body: JSON.stringify(r.corpo) }), credentials: 'same-origin' })
+  const res = await (o.fetch ?? fetch)(r.url, { method: r.metodo, headers: { ...(r.corpo === undefined ? {} : { 'content-type': 'application/json' }), ...(tk ? { authorization: `Bearer ${tk}` } : { 'x-polaris-studio': '1' }) }, ...(r.corpo === undefined ? {} : { body: JSON.stringify(r.corpo) }), credentials: 'same-origin' })
   const t = await res.text(); let j: any = null; try { j = t ? JSON.parse(t) : null } catch { /* não-JSON */ }
+  if (res.status === 401 && !tk && o.fetch === undefined && typeof location !== 'undefined') { location.assign(`/entrar?volta=${encodeURIComponent('/studio')}`); throw new ErroStudio(401, 'nao_autenticado', 'entre para usar o Studio') } // sem token e sem sessão: o login do site, e volta para cá
   if (!res.ok) { const x = j?.erro ?? {}; const det = Array.isArray(x.erros) && x.erros.length ? `: ${x.erros.slice(0, 3).join('; ')}` : ''; throw new ErroStudio(res.status, x.codigo ?? 'erro', `${x.mensagem ?? `erro ${res.status}`}${det}`, x) }
   return j
 }

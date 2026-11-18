@@ -1,0 +1,138 @@
+[
+  {
+    "kind": "formulario",
+    "id": "identidade.entrar",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "titulo": "Entrar",
+      "mensagens": {
+        "obrigatorio": "{rotulo} é obrigatório.",
+        "formato": "{rotulo} está em um formato inválido."
+      },
+      "campos": [
+        {
+          "nome": "email",
+          "tipo": "email",
+          "rotulo": "E-mail",
+          "obrigatorio": true,
+          "autocompletar": "username"
+        },
+        {
+          "nome": "senha",
+          "tipo": "senha",
+          "rotulo": "Senha",
+          "obrigatorio": true,
+          "autocompletar": "current-password"
+        },
+        {
+          "nome": "volta",
+          "tipo": "oculto"
+        }
+      ],
+      "envio": {
+        "sistema": "entrar"
+      },
+      "acoes": [
+        {
+          "id": "entrar",
+          "rotulo": "Entrar",
+          "tipo": "enviar",
+          "estilo": "primario"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "formulario",
+    "id": "identidade.esqueci",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "titulo": "Esqueci minha senha",
+      "descricao": "Informe o e-mail da sua conta: enviaremos um link para criar uma nova senha.",
+      "mensagens": {
+        "obrigatorio": "{rotulo} é obrigatório.",
+        "formato": "{rotulo} está em um formato inválido."
+      },
+      "campos": [
+        {
+          "nome": "email",
+          "tipo": "email",
+          "rotulo": "E-mail",
+          "obrigatorio": true,
+          "autocompletar": "username"
+        }
+      ],
+      "envio": {
+        "sistema": "esqueci"
+      },
+      "acoes": [
+        {
+          "id": "enviar",
+          "rotulo": "Enviar o link",
+          "tipo": "enviar",
+          "estilo": "primario"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "formulario",
+    "id": "identidade.redefinir",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "titulo": "Nova senha",
+      "descricao": "Escolha uma senha com pelo menos 10 caracteres.",
+      "mensagens": {
+        "obrigatorio": "{rotulo} é obrigatório.",
+        "formato": "{rotulo} está em um formato inválido."
+      },
+      "campos": [
+        {
+          "nome": "token",
+          "tipo": "oculto"
+        },
+        {
+          "nome": "senha",
+          "tipo": "senha",
+          "rotulo": "Nova senha",
+          "obrigatorio": true,
+          "autocompletar": "new-password",
+          "validacao": {
+            "tamanhoMinimo": 10,
+            "tamanhoMaximo": 128
+          },
+          "mensagens": {
+            "tamanhoMinimo": "A senha precisa de pelo menos {min} caracteres."
+          }
+        },
+        {
+          "nome": "confirma",
+          "tipo": "senha",
+          "rotulo": "Repita a nova senha",
+          "obrigatorio": true,
+          "autocompletar": "new-password",
+          "validacao": {
+            "igualA": "senha"
+          },
+          "mensagens": {
+            "igualA": "As senhas não conferem."
+          }
+        }
+      ],
+      "envio": {
+        "sistema": "redefinir"
+      },
+      "acoes": [
+        {
+          "id": "salvar",
+          "rotulo": "Salvar a nova senha",
+          "tipo": "enviar",
+          "estilo": "primario"
+        }
+      ]
+    }
+  }
+]

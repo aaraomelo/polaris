@@ -1,0 +1,101 @@
+[
+  {
+    "kind": "pagina",
+    "id": "identidade.entrar",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/entrar",
+      "titulo": "Entrar",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "form/formulario",
+              "props": {
+                "formulario": "identidade.entrar"
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/senha/esqueci",
+                "texto": "Esqueci minha senha"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "identidade.esqueci",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/senha/esqueci",
+      "titulo": "Esqueci minha senha",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "form/formulario",
+              "props": {
+                "formulario": "identidade.esqueci"
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/entrar",
+                "texto": "Voltar para entrar"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "identidade.redefinir",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/senha/redefinir",
+      "titulo": "Nova senha",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "form/formulario",
+              "props": {
+                "formulario": "identidade.redefinir"
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/entrar",
+                "texto": "Voltar para entrar"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+]

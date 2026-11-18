@@ -17,7 +17,7 @@ type Spec = {
   secoes?: Array<{ id: string; campos: string[] }>
   passos?: Array<{ id: string; campos?: string[]; secoes?: string[] }>
   validacoes?: Array<{ id: string; campos?: string[] }>
-  envio?: { servico: string; operacao: string; args?: Record<string, unknown> }
+  envio?: { servico?: string; operacao?: string; sistema?: 'entrar' | 'esqueci' | 'redefinir'; args?: Record<string, unknown> }
   acoes?: Array<{ id: string; tipo: string }>
 }
 
@@ -156,8 +156,14 @@ export function validaFormulario(reg: Registry, no: No, ctx: Contexto = {}): Err
     if (a.tipo === 'enviar' && !spec.envio) out.push(erro(`${base}/acoes/${i}`, 'acao', `a ação '${a.id}' envia o formulário, mas ele não declara \`envio\``, 'declare envio: { servico, operacao }'))
     if ((a.tipo === 'voltar' || a.tipo === 'avancar') && !spec.passos) out.push(erro(`${base}/acoes/${i}`, 'acao', `a ação '${a.id}' (${a.tipo}) só existe em formulário com \`passos\``))
   })
+  // envio de SISTEMA (login etc.): os campos que a ação exige precisam existir, com o tipo certo
+  if (spec.envio?.sistema) {
+    const exige: Record<string, Record<string, string[]>> = { entrar: { email: ['email', 'texto'], senha: ['senha'] }, esqueci: { email: ['email', 'texto'] }, redefinir: { token: ['oculto', 'texto'], senha: ['senha'] } }
+    const mapa = exige[spec.envio.sistema]!, porNomeTipo = new Map(spec.campos.map((c) => [c.nome, c.tipo]))
+    for (const [campo, tipos] of Object.entries(mapa)) { const t = porNomeTipo.get(campo); if (!t) out.push(erro(`${base}/envio/sistema`, 'sistema', `a ação '${spec.envio.sistema}' precisa de um campo '${campo}' (${tipos.join(' ou ')})`, `adicione { "nome": "${campo}", "tipo": "${tipos[0]}" }`)); else if (!tipos.includes(t)) out.push(erro(`${base}/envio/sistema`, 'sistema', `na ação '${spec.envio.sistema}', o campo '${campo}' deve ser do tipo ${tipos.join(' ou ')} (este é '${t}')`)) }
+  }
   // envio contra o contrato do serviço
-  if (spec.envio) {
+  if (spec.envio?.servico && spec.envio.operacao) {
     const sv = reg.resolve('servico', spec.envio.servico, ctx)
     if (sv) {
       const rotas = rotasDe(sv.no), rota = rotas.find((r) => r.id === spec.envio!.operacao)

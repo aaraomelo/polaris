@@ -121,6 +121,19 @@ describe('formulario: expressão regular segura', () => {
   it('vira erro no campo, com o caminho', () => { expect(erros({ campos: [campo('t', { validacao: { padrao: '(a+)+$' } })] }).join()).toMatch(/\/spec\/campos\/0\/validacao\/padrao: a expressão regular tem repetição aninhada/) })
 })
 
+describe('formulario: envio de sistema (login e senha)', () => {
+  const c = (...cs: Array<[string, string]>) => cs.map(([nome, tipo]) => ({ nome, tipo }))
+  it('o exemplo de login é coerente', () => { const r = reg(), no = r.registra(require('./exemplos/validos/formulario-login.json')); expect(r.verifica(no)).toEqual([]); expect(validaFormulario(r, no)).toEqual([]) })
+  it('cada ação de sistema exige os campos certos, com o tipo certo, e diz como corrigir', () => {
+    expect(erros({ campos: c(['email', 'email'], ['senha', 'senha']), envio: { sistema: 'entrar' } })).toEqual([]); expect(erros({ campos: c(['email', 'texto'], ['senha', 'senha']), envio: { sistema: 'entrar' } })).toEqual([])
+    expect(erros({ campos: c(['email', 'email']), envio: { sistema: 'entrar' } }).join()).toMatch(/precisa de um campo 'senha' \(senha\)/)
+    expect(erros({ campos: c(['email', 'email'], ['senha', 'texto']), envio: { sistema: 'entrar' } }).join()).toMatch(/o campo 'senha' deve ser do tipo senha \(este é 'texto'\)/)
+    expect(erros({ campos: c(['email', 'email']), envio: { sistema: 'esqueci' } })).toEqual([]); expect(erros({ campos: c(['nome', 'texto']), envio: { sistema: 'esqueci' } }).join()).toMatch(/precisa de um campo 'email'/)
+    expect(erros({ campos: c(['token', 'oculto'], ['senha', 'senha']), envio: { sistema: 'redefinir' } })).toEqual([]); expect(erros({ campos: c(['senha', 'senha']), envio: { sistema: 'redefinir' } }).join()).toMatch(/precisa de um campo 'token'/)
+  })
+  it('uma ação `enviar` com envio de sistema não precisa de serviço registrado', () => { expect(erros({ campos: c(['email', 'email'], ['senha', 'senha']), envio: { sistema: 'entrar' }, acoes: [{ id: 'e', rotulo: 'Entrar', tipo: 'enviar' }] })).toEqual([]) })
+})
+
 describe('formulario: ações e envio contra o serviço', () => {
   const c = [campo('nome'), campo('email'), campo('mensagem')]
   it('enviar exige `envio`; voltar/avançar exigem passos; ids únicos', () => {

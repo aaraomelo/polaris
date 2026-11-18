@@ -1,10 +1,11 @@
-import { avaliaExpressao, textoI18n, validaValores, type FormularioSpec } from '@polaris/engine'
+import { avaliaExpressao, textoI18n, validaValores, voltaSegura, type FormularioSpec } from '@polaris/engine'
 import type { Registry } from '@polaris/schema'
-import type { FastifyInstance, FastifyRequest } from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import type { ChamadorCompleto } from './chamador'
 import { FalhaServico } from './cliente'
 import { ErroGw, traduz, type CtxGw } from './gateway'
-import { lerCookie } from './paginas'
+import type { PortaIdentidade } from './identidade'
+import { cookieDeSessao, lerCookie } from './paginas'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // FORMULÁRIOS: `GET /bff/formularios/:id` entrega a definição (o navegador monta e valida com o MESMO motor); `POST /bff/formularios/:id` é onde a validação VALE:
@@ -18,10 +19,14 @@ export type DepsFormularios = {
   chamador: ChamadorCompleto
   registroDe(ctx: CtxGw, fallback: Registry): Registry
   registro: Registry
+  /** login e senha (`envio.sistema`); sem isto, essas ações respondem 501 */
+  identidade?: PortaIdentidade
+  /** o cookie de sessão leva `Secure` (padrão sim) e o link do e-mail usa https */
+  cookieSeguro?: boolean
   log: { warn(m: string, c?: Record<string, unknown>): void }
 }
 type NoForm = { id: string; versao: string; spec: FormularioSpec & { titulo?: unknown; descricao?: unknown; envio?: Envio; mensagens?: Record<string, unknown> } }
-type Envio = { servico: string; operacao: string; args?: Record<string, string | object>; idempotencia?: boolean; sucesso?: { mensagem?: unknown; limpar?: boolean; acoes?: unknown[] }; erro?: { mensagem?: unknown; mapeiaCampos?: boolean; acoes?: unknown[] } }
+type Envio = { sistema?: 'entrar' | 'esqueci' | 'redefinir'; servico: string; operacao: string; args?: Record<string, string | object>; idempotencia?: boolean; sucesso?: { mensagem?: unknown; limpar?: boolean; acoes?: unknown[] }; erro?: { mensagem?: unknown; mapeiaCampos?: boolean; acoes?: unknown[] } }
 
 const ID_FORM = /^[a-z0-9][a-z0-9._-]{0,127}$/
 const CHAVE = /^[A-Za-z0-9_.:-]{8,100}$/
@@ -30,6 +35,7 @@ const CORPO_MAX = 256 * 1024
 type Cache = Map<string, { ate: number; p: Promise<{ corpo: unknown }> }>
 
 export function instalaFormularios(app: FastifyInstance, d: DepsFormularios): void {
+  const sistema = sistemaDeps(d)
   const feitos: Cache = new Map()
   const achaForm = (ctx: CtxGw, id: string): NoForm => {
     if (!ID_FORM.test(id)) throw new ErroGw(404, 'formulario_inexistente', 'formulário inexistente')
@@ -67,6 +73,7 @@ export function instalaFormularios(app: FastifyInstance, d: DepsFormularios): vo
     if (passo) return { ok: true, passo: true, valores: r.valores }
     const envio = spec.envio
     if (!envio) return { ok: true, valores: r.valores } // formulário sem envio: o navegador usa o resultado validado
+    if (envio.sistema) return sistema(envio.sistema, r.valores, ctx, req, reply, idioma ?? 'pt-BR', spec)
 
     // chave de idempotência: o mesmo envio (duplo clique, retentativa) devolve o MESMO resultado, sem chamar o serviço de novo
     const chaveCab = req.headers['idempotency-key']
@@ -95,6 +102,43 @@ export function instalaFormularios(app: FastifyInstance, d: DepsFormularios): vo
       const t = traduz(e); throw new ErroGw(t.status, t.codigo, textoI18n((envio.erro?.mensagem ?? spec.mensagens?.envio) as never, idioma ?? 'pt-BR') ?? t.message)
     }
   })
+}
+
+/** AÇÕES DA PLATAFORMA (`envio.sistema`): login, "esqueci a senha" e nova senha. Valem as regras de segurança do login: só com o cabeçalho `x-polaris-form` (nada de CSRF), taxa bem mais apertada que a de um formulário comum,
+ * falha de credencial sempre igual (a identidade já garante), "esqueci" responde SEMPRE o mesmo e trabalha em segundo plano (o tempo não diz se a conta existe), nada de senha nem token em log. */
+function sistemaDeps(d: DepsFormularios) {
+  const en = (idioma: string) => idioma.startsWith('en')
+  return async function sistema(nome: 'entrar' | 'esqueci' | 'redefinir', valores: Record<string, unknown>, ctx: CtxGw, req: FastifyRequest, reply: FastifyReply, idioma: string, spec: NoForm['spec']): Promise<unknown> {
+    const id = d.identidade; if (!id) throw new ErroGw(501, 'identidade_indisponivel', 'o login não está habilitado neste ambiente')
+    if (req.headers['x-polaris-form'] !== '1') throw new ErroGw(400, 'cabecalho_ausente', 'requisição inválida')
+    d.limita(req, ctx, 10)
+    const seguro = d.cookieSeguro !== false, txt = (t: unknown, pt: string, e: string) => textoI18n(t as never, idioma) ?? (en(idioma) ? e : pt)
+    const email = String(valores.email ?? ''), senha = String(valores.senha ?? '')
+    reply.header('cache-control', 'no-store')
+    if (nome === 'entrar') {
+      const r = await id.entra({ tenantId: ctx.tenantId, email, senha })
+      if (!r.ok && r.motivo === 'bloqueado') { const min = Math.max(1, Math.ceil((r.ate.getTime() - Date.now()) / 60_000)); reply.header('retry-after', String(min * 60)); return reply.status(429).send({ erro: { codigo: 'muitas_tentativas', mensagem: en(idioma) ? `Too many attempts. Try again in ${min} minute(s).` : `Muitas tentativas. Tente de novo em ${min} minuto(s).` } }) }
+      if (!r.ok) return reply.status(401).send({ erro: { codigo: 'credenciais_invalidas', mensagem: txt(spec.envio?.erro?.mensagem, 'E-mail ou senha incorretos.', 'Wrong e-mail or password.') } })
+      const token = await id.emite(r.usuario)
+      reply.header('set-cookie', cookieDeSessao(token, seguro))
+      return { ok: true, resultado: { nome: r.usuario.nome }, sucesso: { mensagem: txt(spec.envio?.sucesso?.mensagem, 'Bem-vindo!', 'Welcome!'), limpar: true, acoes: [{ acao: 'navegar', para: voltaSegura(typeof valores.volta === 'string' ? valores.volta : null) }] } }
+    }
+    if (nome === 'esqueci') {
+      const base = `${seguro ? 'https' : 'http'}://${String(req.headers.host ?? '')}`
+      void (async () => { // em segundo plano: a resposta sai igual e na mesma hora, exista a conta ou não
+        try {
+          const p = await id.pedeRedefinicao({ tenantId: ctx.tenantId, email }); if (!p) return
+          const link = `${base}/senha/redefinir?token=${p.token}`
+          await id.enviaEmail({ tenantId: ctx.tenantId, para: p.usuario.email, assunto: en(idioma) ? 'Reset your password' : 'Redefinir a sua senha', corpo: en(idioma) ? `Hello, ${p.usuario.nome}.\n\nTo choose a new password, open this link (valid for 1 hour):\n${link}\n\nIf you did not ask for this, ignore this e-mail.` : `Olá, ${p.usuario.nome}.\n\nPara criar uma nova senha, abra este link (vale por 1 hora):\n${link}\n\nSe você não pediu, ignore este e-mail.` })
+        } catch { d.log.warn('falha no "esqueci a senha"', { tenant: ctx.tenantId }) }
+      })()
+      return { ok: true, sucesso: { mensagem: txt(spec.envio?.sucesso?.mensagem, 'Se o e-mail estiver cadastrado, enviamos um link para criar uma nova senha.', 'If the e-mail is registered, we sent a link to choose a new password.'), limpar: true, acoes: [] } }
+    }
+    const r = await id.redefine({ tenantId: ctx.tenantId, token: String(valores.token ?? ''), senha })
+    if (!r.ok && r.motivo === 'token_invalido') { const m = en(idioma) ? 'This link is no longer valid. Ask for a new one under "Forgot my password".' : 'Este link não vale mais. Peça um novo em "Esqueci minha senha".'; return reply.status(422).send({ erro: { codigo: 'token_invalido', mensagem: m }, erros: [{ campo: '_formulario', regra: 'token', mensagem: m }] }) }
+    if (!r.ok) { const m = r.erros?.[0] ?? (en(idioma) ? 'Choose a stronger password.' : 'Escolha uma senha mais forte.'); return reply.status(422).send({ erro: { codigo: 'senha_fraca', mensagem: m }, erros: [{ campo: 'senha', regra: 'politica', mensagem: m }] }) }
+    return { ok: true, sucesso: { mensagem: txt(spec.envio?.sucesso?.mensagem, 'Senha alterada! Entre com a nova senha.', 'Password changed! Sign in with the new password.'), limpar: true, acoes: [{ acao: 'navegar', para: '/entrar' }] } }
+  }
 }
 
 /** argumentos da operação: `envio.args` (expressões sobre `valores`) ou, sem ele, cada campo com o próprio nome; `undefined` e nulos saem */

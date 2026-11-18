@@ -57,6 +57,16 @@ describe('ilha: montagem e acessibilidade', () => {
   })
 })
 
+describe('ilha: campo oculto vindo da URL', () => {
+  it('o oculto sem padrão pega o parâmetro de mesmo nome (link de e-mail, volta do login); o padrão do autor vence; valores longos e ausentes são ignorados', async () => {
+    window.history.pushState({}, '', `/senha/redefinir?token=abc123&volta=%2Fprodutos&longo=${'x'.repeat(3000)}`)
+    try {
+      const spec = { campos: [{ nome: 'token', tipo: 'oculto' }, { nome: 'volta', tipo: 'oculto', padrao: '/fixo' }, { nome: 'longo', tipo: 'oculto' }, { nome: 'ausente', tipo: 'oculto' }, { nome: 'x', tipo: 'texto' }] }
+      const e = await monta(spec); expect(e.ilha.le()).toMatchObject({ token: 'abc123', volta: '/fixo', longo: '', ausente: '' })
+    } finally { window.history.pushState({}, '', '/') }
+  })
+})
+
 describe('ilha: máscaras na digitação', () => {
   it('telefone troca de 10 para 11 dígitos; o cursor fica depois do que foi digitado', async () => {
     const e = await monta(contato), t = ent(e, 'telefone')

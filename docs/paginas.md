@@ -28,6 +28,9 @@ Com `preview` no gateway (`POLARIS_PREVIEW_SEGREDO`, no `pnpm local` já vem um 
 ## Formulários nas páginas
 Página com o bloco `form/formulario` leva, antes do roteador, o pacote da ilha (`data-pl-ilha`): um para todas as páginas, endereçado pelo conteúdo, só para quem usa o bloco. Detalhes em `docs/formularios.md`.
 
+## Login
+O login do site é `/entrar` (página de sistema, formulário `identidade.entrar`): veja `docs/identidade.md`. A sessão é o cookie abaixo, agora emitido pelo próprio gateway.
+
 ## Sessão por cookie
 O navegador não manda `Authorization` ao navegar, então a sessão do site é um **cookie com o próprio JWT** do provedor de identidade:
 - `POST /_polaris/sessao` com `{"token": "…"}` (só `application/json`, o que um formulário de outro site não consegue enviar) valida o token **no host do tenant** e responde 204 com `Set-Cookie: polaris_sessao=…; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800; Secure`. Sem `Domain`: vale só para aquele host. `POST /_polaris/sair` apaga.

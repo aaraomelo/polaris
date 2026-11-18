@@ -12,7 +12,7 @@ export { KINDS_DO_TENANT, criaArmazemDeNos, type KindDoTenant, type Limites as L
 export { rotasStudio, sessaoDeToken, type OpcoesStudio, type Sessao } from './studio-http'
 export { criaGestorDominios, criaResolvedorTenant, mudaStatusTenant, normalizaHost, validaDominio, type Dns, type InfoTenant, type OpcoesResolvedor, type Reivindicacao } from './dominios'
 export { DDL_DIRETORIO, diretorioSql } from './diretorio'
-export { DDL_IDENTIDADE, criaIdentidade, normalizaEmail, type Identidade, type OpcoesIdentidade, type Usuario } from './identidade'
+export { DDL_IDENTIDADE, criaConviteDoDono, criaIdentidade, normalizaEmail, type Identidade, type OpcoesIdentidade, type Usuario } from './identidade'
 export { CUSTO_PADRAO, confereSenha, hashSenha, politicaDeSenha, type CustoSenha } from './senha'
 export { registroDaPlataforma } from './plataforma'
 export { criaAlimentos } from './alimentos'
@@ -22,7 +22,7 @@ export { criaPagamentos, portaPagamento, provedorInterno, type ClientePagamentos
 export { criaVendas, type Cotacao, type ItemSaga, type OpcoesVendas, type PedidoSaga, type Portas, type Resultado } from './vendas'
 
 /** Os nós (JSON) de um pack, prontos para `registry.registra`. */
-export function nosDoPack(pack: 'catalogo' | 'vendas' | 'pagamentos' | 'estoque' | 'servicos' | 'alimentos' | 'studio' | 'segmentos'): unknown[] {
+export function nosDoPack(pack: 'catalogo' | 'vendas' | 'pagamentos' | 'estoque' | 'servicos' | 'alimentos' | 'studio' | 'segmentos' | 'identidade'): unknown[] {
   const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'nos', pack)
   return readdirSync(dir).filter((f) => f.endsWith('.json')).sort().flatMap((f) => { const j = JSON.parse(readFileSync(join(dir, f), 'utf8')) as unknown; return Array.isArray(j) ? j : [j] })
 }

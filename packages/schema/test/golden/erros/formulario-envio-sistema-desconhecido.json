@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/envio/sistema",
+    "regra": "enum",
+    "mensagem": "valor \"apagar-tudo\" não é permitido; aceitos: 'entrar', 'esqueci', 'redefinir'"
+  }
+]

@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { DDL_DIRETORIO, criaIdentidade, confereSenha, diretorioSql, hashSenha, normalizaEmail, politicaDeSenha, type Identidade } from '../src/index'
+import { DDL_DIRETORIO, criaConviteDoDono, criaIdentidade, confereSenha, diretorioSql, hashSenha, normalizaEmail, politicaDeSenha, type Identidade } from '../src/index'
 
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222'
 const CUSTO = { N: 16, r: 8, p: 1 } // barato para os testes; o padrão de produção é N=2^15
@@ -125,5 +125,17 @@ describe('identidade: redefinição de senha e convite', () => {
   it('caixa de saída: guarda o e-mail por tenant e lista só o do tenant', async () => {
     await id.enfileiraEmail({ tenantId: A, para: 'ana@exemplo.com', assunto: 'Redefinir', corpo: 'link' }); await id.enfileiraEmail({ tenantId: B, para: 'b@exemplo.com', assunto: 'Outro', corpo: 'x' })
     const a = await id.emails(A); expect(a.map((e) => e.assunto)).toEqual(['Redefinir']); expect((await id.emails(B)).map((e) => e.assunto)).toEqual(['Outro']); expect(await id.emails('nao-uuid-aqui-xxxxxxxx-xxxxxxxxxxxx')).toEqual([])
+  })
+})
+
+describe('convite do dono (porta do cadastro)', () => {
+  it('cria a conta sem senha, manda UM e-mail com o link de definir a senha (vale 7 dias) e o link funciona; repetir não manda outro', async () => {
+    const convite = criaConviteDoDono({ identidade: id, urlDe: async (t) => `https://${t === A ? 'loja-a' : 'loja-b'}.polaris.app/` })
+    await convite.convida({ tenantId: A, email: 'dono@padaria.com', nome: 'Dona Padaria', papeis: ['studio.editor', 'gerente'] })
+    const e1 = (await id.emails(A)).filter((m) => m.para === 'dono@padaria.com'); expect(e1.length).toBe(1); expect(e1[0]!.assunto).toMatch(/Defina a sua senha/); expect(e1[0]!.corpo).toMatch(/https:\/\/loja-a\.polaris\.app\/senha\/redefinir\?token=[\w-]{43}/); expect(e1[0]!.corpo).not.toMatch(/senha[:=]/i)
+    expect(await id.entra({ tenantId: A, email: 'dono@padaria.com', senha: 'qualquer-coisa-1' })).toEqual({ ok: false, motivo: 'credenciais' }) // ainda sem senha
+    const token = /token=([\w-]+)/.exec(e1[0]!.corpo)![1]!; expect(await id.redefine({ tenantId: A, token, senha: 'cavalo-bateria-grampo' })).toMatchObject({ ok: true, usuario: { papeis: ['studio.editor', 'gerente'], status: 'ativo' } })
+    await convite.convida({ tenantId: A, email: 'dono@padaria.com', nome: 'Dona Padaria', papeis: ['gerente'] }); expect((await id.emails(A)).filter((m) => m.para === 'dono@padaria.com').length).toBe(1) // cadastro retomado: sem e-mail repetido
+    await expect(convite.convida({ tenantId: A, email: 'ruim', nome: 'x', papeis: [] })).rejects.toThrow(/dados_invalidos/)
   })
 })

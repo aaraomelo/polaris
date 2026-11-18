@@ -1,0 +1,40 @@
+{
+  "kind": "formulario",
+  "id": "identidade.entrar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "titulo": "Entrar",
+    "campos": [
+      {
+        "nome": "email",
+        "tipo": "email",
+        "rotulo": "E-mail",
+        "obrigatorio": true,
+        "autocompletar": "username"
+      },
+      {
+        "nome": "senha",
+        "tipo": "senha",
+        "rotulo": "Senha",
+        "obrigatorio": true,
+        "autocompletar": "current-password"
+      },
+      {
+        "nome": "volta",
+        "tipo": "oculto"
+      }
+    ],
+    "envio": {
+      "sistema": "entrar"
+    },
+    "acoes": [
+      {
+        "id": "entrar",
+        "rotulo": "Entrar",
+        "tipo": "enviar",
+        "estilo": "primario"
+      }
+    ]
+  }
+}

@@ -1,4 +1,5 @@
 import { contextoPorJwt, criaServico, regrasDoRegistry } from '@polaris/servico'
+import { nosDoPack } from '@polaris/packs'
 import { criaPool, dbTenantDePg, dbSistemaDePg } from '@polaris/pg'
 import { emite, type Registry } from '@polaris/schema'
 import type { FastifyInstance } from 'fastify'
@@ -9,6 +10,9 @@ const sqlIdent = (s: string) => `"${s.replace(/"/g, '""')}"`
 
 /** Migra (opcional, com o papel migrador) e devolve o serviço pronto para `listen`. A aplicação usa só DATABASE_URL (sem BYPASSRLS). */
 export async function montaServico(c: ConfigServico, reg: Registry): Promise<{ app: FastifyInstance; fecha(): Promise<void> }> {
+  // os papéis DA PLATAFORMA (studio.*) valem em todo serviço: o login emite um token só, com todos os papéis do usuário, e papel que o serviço não conhece é negado (falha fechada, por desenho).
+  // Eles não concedem nada num serviço de domínio (as regras são sobre sujeitos do Studio); só impedem que um editor do Studio perca o acesso à loja por causa disso.
+  for (const n of nosDoPack('studio')) if ((n as { kind?: string }).kind === 'papel') { try { reg.registra(n) } catch { /* já registrado */ } }
   const no = reg.resolve('servico', c.servico)?.no
   if (!no) throw new Error(`serviço '${c.servico}' não existe nos nós carregados`)
   if (c.migrar) {

@@ -122,7 +122,9 @@ export async function montaFormulario(el: HTMLElement, opc: OpcoesIlha = {}): Pr
     const aoMexer = (e: HTMLElement) => { e.addEventListener('input', () => { chaveEnvio = chaveAleatoria(); atualiza(caminho, 'alterar') }); e.addEventListener('change', () => { chaveEnvio = chaveAleatoria(); atualiza(caminho, 'alterar') }); e.addEventListener('blur', () => atualiza(caminho, 'sair')) }
 
     if (c.tipo === 'oculto') {
-      const e = mk('input', { type: 'hidden', name: c.nome }); if (c.padrao !== undefined) e.value = String(c.padrao); raiz.appendChild(e); reg(() => e.value, (v) => { e.value = v == null ? '' : String(v) }, [e]); return
+      const e = mk('input', { type: 'hidden', name: c.nome }); if (c.padrao !== undefined) e.value = String(c.padrao)
+      else { const doUrl = new URLSearchParams(doc.defaultView?.location.search ?? '').get(c.nome); if (doUrl !== null && doUrl.length <= 2000) e.value = doUrl } // campo oculto sem padrão: vale o parâmetro de mesmo nome da URL (`?token=…`, `?volta=/produtos`); o servidor valida de novo
+      raiz.appendChild(e); reg(() => e.value, (v) => { e.value = v == null ? '' : String(v) }, [e]); return
     }
     if (c.tipo === 'booleano') {
       const e = mk('input', { type: 'checkbox', id: `${base}-c`, name: c.nome }); marca(e, c.obrigatorio === true); e.checked = c.padrao === true

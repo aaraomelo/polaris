@@ -158,3 +158,16 @@ export function criaIdentidade(o: OpcoesIdentidade) {
   }
 }
 export type Identidade = ReturnType<typeof criaIdentidade>
+
+/** A porta `identidade.convida` do CADASTRO (`provisiona`): o dono do tenant novo vira usuário convidado e recebe um e-mail com o link para DEFINIR a senha (o convite nunca leva senha).
+ * `urlDe(tenantId)` devolve o endereço do tenant (ex.: https://padaria.polaris.app). Repetir (cadastro retomado) não manda outro e-mail. */
+export function criaConviteDoDono(o: { identidade: Identidade; urlDe: (tenantId: string) => Promise<string> }) {
+  return {
+    async convida(c: { tenantId: string; email: string; nome: string; papeis: string[] }): Promise<void> {
+      const r = await o.identidade.convida(c)
+      if (!r.ok) { if (r.motivo === 'ja_existe') return; throw new Error(`não foi possível convidar o dono (${r.motivo})`) }
+      const base = (await o.urlDe(c.tenantId)).replace(/\/+$/, '')
+      await o.identidade.enfileiraEmail({ tenantId: c.tenantId, para: r.usuario.email, assunto: 'Bem-vindo! Defina a sua senha', corpo: `Olá, ${r.usuario.nome}.\n\nA sua conta foi criada. Para definir a sua senha e entrar, abra este link (vale por 7 dias):\n${base}/senha/redefinir?token=${r.token}\n\nSe você não esperava este e-mail, ignore-o.` })
+    },
+  }
+}

@@ -863,10 +863,6 @@
     },
     "envio": {
       "type": "object",
-      "required": [
-        "servico",
-        "operacao"
-      ],
       "additionalProperties": false,
       "properties": {
         "servico": {
@@ -936,8 +932,41 @@
               }
             }
           }
+        },
+        "sistema": {
+          "enum": [
+            "entrar",
+            "esqueci",
+            "redefinir"
+          ],
+          "description": "ação DA PLATAFORMA (login, \"esqueci a senha\", definir nova senha) no lugar de uma operação de serviço: `entrar` exige os campos `email` e `senha`; `esqueci`, `email`; `redefinir`, `token` (oculto, vem do link) e `senha`"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "servico",
+            "operacao"
+          ],
+          "properties": {
+            "servico": true,
+            "operacao": true,
+            "sistema": false
+          }
+        },
+        {
+          "required": [
+            "sistema"
+          ],
+          "properties": {
+            "sistema": true,
+            "servico": false,
+            "operacao": false,
+            "args": false
+          }
+        }
+      ],
+      "description": "para onde o formulário vai: uma operação de serviço (`servico` + `operacao`) OU uma ação da plataforma (`sistema`)"
     },
     "acaoForm": {
       "type": "object",

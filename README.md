@@ -27,11 +27,12 @@ O mesmo vale para um serviço (entidades, CRUD, operações → API HTTP, tabela
 | Gateway/BFF (JWT, tenant só do token, REST + GraphQL, cache, taxa) | `packages/gateway` | pronto |
 | Packs de domínio: catálogo, vendas, pagamentos, estoque, serviços, alimentos, cadastro self-service | `packages/packs` | pronto, com limites (veja `docs/packs.md`) |
 | Multi-tenant: domínio próprio, módulos, overrides, releases, preview | `packages/packs`, `packages/gateway` | pronto |
-| Páginas dos tenants servidas pelo gateway (rotas declarativas, streaming, tema, hidratação) | `packages/gateway` | funcional, com sessão por cookie; **falta o formulário de login do provedor** (`docs/paginas.md`) |
+| Páginas dos tenants servidas pelo gateway (rotas declarativas, streaming, tema, hidratação) | `packages/gateway` | funcional, com sessão por cookie e login próprio (`docs/paginas.md`) |
+| **Login real** (e-mail e senha por tenant, scrypt, bloqueio, "esqueci a senha", sessão em cookie e JWT assinado por chave privada) | `packages/packs`, `packages/gateway`, `apps/polaris` | pronto; **sem envio real de e-mail** e sem MFA (`docs/identidade.md`) |
 | Formulários declarativos: campos, **máscaras**, validação, mensagens e envio (o mesmo motor no navegador e no servidor) | `packages/schema`, `packages/engine`, `packages/gateway` | JSON, motor, envio, o bloco `form/formulario` e o editor no Studio prontos (`docs/formularios.md`) |
 | Documentos declarativos (HTML e PDF com paridade testada) | `packages/documentos` | pronto |
 | Kernels (JS, WebAssembly, GLSL, PTX) com paridade entre backends | `packages/computacao` | pronto; **PTX nunca rodou em GPU real** |
-| Studio: editor de páginas e temas, histórico, diff semântico, comentários; **ele próprio é uma página da plataforma** | `apps/studio`, `packages/packs/nos/studio` | funcional; **falta o fluxo de login** e alguns recursos da versão anterior (veja `docs/studio.md`) |
+| Studio: editor de páginas e temas, histórico, diff semântico, comentários; **ele próprio é uma página da plataforma** | `apps/studio`, `packages/packs/nos/studio` | funcional, com login pela sessão; **faltam** alguns recursos da versão anterior (veja `docs/studio.md`) |
 | Deploy (compose por ambiente, nginx/TLS, segredos por arquivo) | `docker/`, `scripts/deploy.sh` | escrito e testado em análise estática; **sem VPS real** e sem `nginx -t` real |
 
 O exemplo mínimo de ponta a ponta está em `exemplos/loja`.
@@ -53,7 +54,7 @@ Os testes de paridade (documentos e kernels) usam Chrome e `poppler-utils` quand
 
 ## Documentação
 
-Por tema em [`docs/`](docs/): [fluxo de trabalho](docs/fluxo.md), [serviços](docs/servicos.md), [gateway](docs/gateway.md), [páginas](docs/paginas.md), [formulários](docs/formularios.md), [multi-tenant](docs/multitenancy.md), [packs](docs/packs.md), [documentos](docs/documentos.md), [computação](docs/computacao.md), [Studio](docs/studio.md), [deploy](docs/deploy.md), [segurança](docs/seguranca.md), [qualidade](docs/qualidade.md).
+Por tema em [`docs/`](docs/): [fluxo de trabalho](docs/fluxo.md), [serviços](docs/servicos.md), [gateway](docs/gateway.md), [páginas](docs/paginas.md), [formulários](docs/formularios.md), [identidade](docs/identidade.md), [multi-tenant](docs/multitenancy.md), [packs](docs/packs.md), [documentos](docs/documentos.md), [computação](docs/computacao.md), [Studio](docs/studio.md), [deploy](docs/deploy.md), [segurança](docs/seguranca.md), [qualidade](docs/qualidade.md).
 As decisões de arquitetura estão em [`docs/adr/`](docs/adr/README.md) (formato curto: contexto, decisão, consequências, evidência).
 
 ## Segurança e qualidade

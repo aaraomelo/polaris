@@ -10,7 +10,7 @@ export const ROTEADOR_JS = `(function (w, d) {
   'use strict';
   if (w.__PL_NAV) return; w.__PL_NAV = true;
   var q = w.__PL = w.__PL || { fila: [], montado: null };
-  var RESERVADO = /^\\/(api|bff|studio|graphql|_polaris|metricas|saude)(\\/|$)|^\\/entrar\\/ir(\\/|$)/;
+  var RESERVADO = /^\\/(api|bff|studio|graphql|_polaris|metricas|saude|_dev)(\\/|$)|^\\/entrar\\/ir(\\/|$)/;
   var mods = {}, n = 0, ult = w.location.pathname + w.location.search;
   function bundleDe(doc) {
     var l = doc.querySelectorAll('script[src^="/_polaris/a/"]');
