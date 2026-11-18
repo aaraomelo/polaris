@@ -51,6 +51,8 @@ describe('configGateway: plataforma (status, módulos e domínios dos tenants)',
   const plat = { ...gw, DATABASE_URL_PLATAFORMA: 'postgres://plat:SENHA-SECRETA@db/polaris', POLARIS_BASES_DOMINIO: 'Polaris.app, outra.com.br' }
   it('válida: bases normalizadas; a senha nunca aparece nas mensagens', () => {
     expect(configGateway(plat).plataforma).toEqual({ url: 'postgres://plat:SENHA-SECRETA@db/polaris', bases: ['polaris.app', 'outra.com.br'] })
+    expect(configGateway({ ...plat, POLARIS_PLATAFORMA_POOL_MAX: '1' }).plataforma?.poolMax).toBe(1); expect(configGateway(plat).plataforma).not.toHaveProperty('poolMax') // padrão 5 no gateway
+    expect(problemas(() => configGateway({ ...plat, POLARIS_PLATAFORMA_POOL_MAX: '0' })).join()).toMatch(/POLARIS_PLATAFORMA_POOL_MAX/)
     const p = problemas(() => configGateway({ ...plat, POLARIS_BASES_DOMINIO: 'não é domínio,x' })).join(); expect(p).toMatch(/POLARIS_BASES_DOMINIO/); expect(p).not.toContain('SENHA-SECRETA')
   })
   it('as duas variáveis andam juntas; em produção a plataforma é obrigatória (o mapa estático é só de desenvolvimento)', () => {

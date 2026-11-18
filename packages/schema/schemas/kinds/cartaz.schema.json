@@ -1223,6 +1223,10 @@
         }
       },
       "description": "valores derivados, em decimal exato; ficam em {calculo.nome}. diferenca(a,b)=a−b; diferencaPercentual(a,b)=piso de (a−b)/a em %; percentual (2 casas); desconto(preço, %); parcela(preço, n)=piso em centavos; arredonda"
+    },
+    "exemplo": {
+      "type": "object",
+      "description": "dados de EXEMPLO da peça (prévia do Studio e testes); nunca usados na geração real"
     }
   }
 }

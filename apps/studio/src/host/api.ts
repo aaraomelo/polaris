@@ -27,7 +27,7 @@ export const OPERACOES: Record<string, (a: Record<string, unknown>) => Req> = {
   voltarRelease: (a) => ({ metodo: 'POST', url: '/studio/releases/voltar', corpo: sem({ para: typeof a.para === 'number' ? a.para : undefined, nota: a.nota || undefined }) }),
   compararReleases: (a) => ({ metodo: 'GET', url: `/studio/releases/diff?de=${e(String(a.de))}&para=${e(String(a.para))}` }),
   diagramar: (a) => ({ metodo: 'POST', url: '/studio/diagrama', corpo: sem({ tipo: a.tipo, no: a.no ?? undefined, selecionado: a.selecionado || undefined }) }),
-  previsualizar: (a) => ({ metodo: 'POST', url: '/studio/previa', corpo: sem({ no: a.no, tema: a.tema ?? undefined, selecionado: a.selecionado || undefined, modo: a.modo || undefined }) }),
+  previsualizar: (a) => ({ metodo: 'POST', url: '/studio/previa', corpo: sem({ no: a.no, tema: a.tema ?? undefined, selecionado: a.selecionado || undefined, modo: a.modo || undefined, dados: a.dados ?? undefined }) }),
 }
 
 /** o token do gateway chega no fragmento (`/studio#token=…`), vive só em `sessionStorage` e o fragmento some da barra de endereço; sem token vale a sessão por cookie (dev) */

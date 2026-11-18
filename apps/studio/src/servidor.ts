@@ -9,7 +9,7 @@ import { geraPreview } from './preview'
 
 /** a pré-visualização do servidor: o mesmo `geraPreview` do cliente */
 export const previsualiza: NonNullable<OpcoesStudio['previsualiza']> = (a) => {
-  const r = geraPreview(a.no, a.blocosDoTenant, a.selecionado, a.tema, a.modo)
+  const r = geraPreview(a.no, a.blocosDoTenant, a.selecionado, a.tema, a.modo, a.dados)
   const tema = (a.tema as { spec?: { tokens?: unknown } } | undefined)?.spec
   return r.ok && !r.problemas && tema?.tokens && typeof tema.tokens === 'object' ? { ...r, avisos: auditaContraste(tema as never) } : r // tema: junto da prévia vão os avisos de contraste (WCAG)
 }
@@ -19,7 +19,7 @@ export const DIST_PADRAO = join(dirname(fileURLToPath(import.meta.url)), '..', '
 const ARQUIVOS: Record<string, string> = { 'studio.js': 'application/javascript; charset=utf-8', 'studio.css': 'text/css; charset=utf-8', 'studio.programa.json': 'application/json; charset=utf-8' }
 // CSP do Studio: scripts só 'self' e SEM `unsafe-eval` (as expressões da plataforma viram closures; não há Ajv no navegador). `unsafe-inline` só em estilo: o runtime usa `style` em atributos
 // e o iframe da pré-visualização (`sandbox=""`, sem scripts) herda esta política e precisa do <style> do tema.
-export const CSP_STUDIO = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'self' about:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+export const CSP_STUDIO = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src data:; connect-src 'self'; frame-src 'self' about:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 
 /** `/studio` (a página) e `/studio/ativos/*` (JS e CSS), lidos UMA vez de `dir`. Falha ao subir se o cliente não foi empacotado (melhor que um 404 em produção). */
 export function rotasEstaticasStudio(app: FastifyInstance, dir: string = DIST_PADRAO): void {

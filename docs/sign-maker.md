@@ -21,6 +21,13 @@ Elementos (por enquanto): **`texto`**, **`faixa`**, **`preco`**, **`validade`**,
 - `codigoBarras`: `valor` (modelo), `formato` (`code128`, o mesmo padrão do jsbarcode do legado, ou `ean13`, com dígito verificador conferido), `numero` (`cima` | `baixo` | `nenhum`: o número legível, ajustado como todo texto), `rotulo`, `cor`, `fundo`, `raio` e `margem`. As barras são **um só caminho vetorial** (corridas de módulos escuros, sem pixel) e o valor inválido para o formato é recusado antes de gerar.
 - `qrcode`: `valor`, `nivel` (L/M/Q/H), `cor`, `fundo`, `margem`; a matriz vem do `qrcode-generator` e vira um caminho vetorial por corridas.
 
+## No Studio
+O kind `cartaz` é editável como página, tema e formulário (`KINDS_DO_TENANT`). **Cartazes → Novo cartaz** cria uma peça; o editor tem três abas:
+- **Elementos**: lista (adicionar `texto`, `faixa`, `preco`, `codigoBarras`, `qrcode`, `validade`; remover, subir, descer, duplicar), peça (tamanho, orientação, cor de fundo, título), propriedades do elemento selecionado (posição em fração, rotação, condição, conteúdo, alinhamento, cor, fonte) e a **prévia ao vivo**: o HTML do MESMO layout que gera o PDF, num `<iframe sandbox="">`, com a lista de **problemas** (dado não declarado, texto que não cabe, schema).
+- **Dados de exemplo**: o JSON `exemplo` do nó, que alimenta a prévia (e nunca a geração real).
+- **JSON**: a `spec` inteira, para `dados`, `calculos`, `cores`, `tamanhos` e fundo em imagem.
+Salvar, histórico, comentários, releases e desfazer valem como nos outros kinds. A prévia é gerada no servidor (`POST /studio/previa` com `dados`); o CSP do Studio ganhou `font-src data:` (a fonte vai embutida no HTML da prévia).
+
 ## Lote
 `layoutLote(itens)` / `geraLote(itens)`: vários cartazes num só HTML e PDF, **uma página por cópia**, na ordem dos itens. Cada item tem `no`, `dados`, `quantidade` (1 a 200), `tamanho` (sobrescreve o do nó) e `semFundo` (tira a imagem de fundo, a cor fica). Peças de tamanhos diferentes convivem: o PDF dá a cada página o seu tamanho e o HTML usa uma `@page` nomeada por tamanho. Limites: 200 itens, 500 páginas. Fail-closed: um item ruim recusa o lote inteiro e a mensagem diz **qual** (`item 2: dado obrigatório ausente…`); avisos de ajuste de fonte também levam o número do item. `test/lote.test.ts` confere a paridade Chrome × PDF de um lote com três tamanhos.
 Ainda não há: várias peças pequenas na MESMA folha (imposição) nem marcas de corte.
@@ -48,4 +55,4 @@ Montserrat (OFL) e Roboto (Apache 2.0) estão no repositório. As fontes `Primar
 - Código de barras e QR: os testes provam que o desenho **é** a matriz de módulos do gerador (e a paridade Chrome × PDF), mas **nenhum leitor real** (zbar, OpenCV, câmera) foi usado para decodificar: não há decodificador instalado aqui. Antes de imprimir em produção, leia uma amostra com um leitor físico.
 - Os fundos do legado (`filename`) vêm do backend e não estão no repositório: o fundo aqui é cor ou data URL.
 - A semântica de caixa/rotação/ajuste é a **deste** motor, mais limpa que a do legado (que usava fatores empíricos como 0,93 e 1,045); o conversor das configurações (S2) traduz as geometrias e o resultado será conferido visualmente.
-- Não há editor no Studio ainda (S12); o kind já valida pelo schema.
+- O editor do Studio não baixa o PDF (a prévia é o HTML, que o teste prova igual ao PDF); o PDF vem da API/biblioteca (`geraCartaz`, `geraLote`). Não há arrastar-e-soltar na prévia.

@@ -318,6 +318,30 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('Studio: editor de cartazes — criar, adicionar elemento, prévia (HTML do mesmo layout do PDF), problemas, dados de exemplo, salvar e reabrir', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      const srcdoc = () => p.evaluate(() => document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '')
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
+      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByLabel('Identificador do novo nó').fill('cartaz-teste'); await p.getByRole('button', { name: 'Criar' }).click()
+      await p.getByRole('heading', { name: 'Cartaz cartaz-teste' }).waitFor(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Novo cartaz'))
+      expect(await srcdoc()).toContain('<svg'); expect(await p.locator('iframe[title="Pré-visualização do cartaz"]').getAttribute('sandbox')).toBe('') // isolado, sem scripts
+      await p.getByRole('button', { name: '+ preco' }).click(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes(',99'))
+      await p.getByLabel('Escala dos centavos (0,2 a 1)').fill('1'); await p.waitForFunction(() => /font-size="([\d.]+)"[^>]*>,99/.test(document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? ''))
+      await p.getByRole('button', { name: '1. texto titulo' }).click(); await p.getByLabel('Texto (dado entre chaves: produto.nome)').fill('Oferta {produto.nome}')
+      await p.getByText(/o texto usa o dado "produto", não declarado em spec\.dados/).waitFor() // problema mostrado, sem quebrar a prévia
+      await p.getByRole('button', { name: 'JSON', exact: true }).click()
+      const spec = JSON.parse(await p.getByLabel('spec do cartaz').inputValue()); spec.dados = { produto: { tipo: 'json' } }; spec.exemplo = { produto: { nome: 'Feijão Carioca' } }
+      await p.getByLabel('spec do cartaz').fill(JSON.stringify(spec)); await p.getByRole('button', { name: 'Aplicar' }).click(); await p.getByRole('button', { name: 'Elementos', exact: true }).click()
+      await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Feijão'))
+      await p.getByRole('button', { name: 'A6' }).click(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('size:419.528pt'))
+      await p.getByRole('button', { name: 'Salvar' }).click(); await p.getByText('Salvo como versão 1').waitFor()
+      await p.reload(); await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'cartaz-teste (personalizado)' }).click()
+      await p.getByRole('heading', { name: 'Cartaz cartaz-teste' }).waitFor(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Feijão'))
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('o Studio sem sessão manda ao login e volta para ele depois de entrar', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

@@ -100,7 +100,7 @@ export function configServico(env: Env): ConfigServico {
   return { ...(c as ConfigComum), servico: servico!, bancoUrl: bancoUrl!, ...(bancoPapel ? { bancoPapel } : {}), ...(migrar ? { migrar: { url: migrar, papelApp } } : {}) }
 }
 
-export type ConfigGateway = ConfigComum & { /** diretório do cliente do Studio empacotado; presente = o gateway serve `/studio` (exige a plataforma) */ studioDir?: string; previewSegredo?: string; previewAnteriores?: string[]; plataforma?: { url: string; bases: string[] }; /** login próprio: a chave PRIVADA que assina a sessão (só este processo a tem) e a validade da sessão em horas */ identidade?: { chavePrivada: Record<string, unknown>; horas: number }; servicos: Record<string, string>; taxa: { capacidade: number; porSegundo: number } | false; introspeccao: boolean }
+export type ConfigGateway = ConfigComum & { /** diretório do cliente do Studio empacotado; presente = o gateway serve `/studio` (exige a plataforma) */ studioDir?: string; previewSegredo?: string; previewAnteriores?: string[]; plataforma?: { url: string; bases: string[]; /** conexões do pool (padrão 5; o ambiente local usa 1: o PGlite é de uma sessão só e consultas concorrentes se misturam) */ poolMax?: number }; /** login próprio: a chave PRIVADA que assina a sessão (só este processo a tem) e a validade da sessão em horas */ identidade?: { chavePrivada: Record<string, unknown>; horas: number }; servicos: Record<string, string>; taxa: { capacidade: number; porSegundo: number } | false; introspeccao: boolean }
 export function configGateway(env: Env): ConfigGateway {
   const l = new Leitor(env); const c = comum(l)
   const servicos = l.json<Record<string, string>>('POLARIS_SERVICOS', (v) => {
@@ -122,10 +122,11 @@ export function configGateway(env: Env): ConfigGateway {
   if (previewSegredo !== undefined && !plataformaUrl) l.problemas.push('POLARIS_PREVIEW_SEGREDO só vale com DATABASE_URL_PLATAFORMA')
   const privada = l.json<Record<string, unknown>>('POLARIS_IDENTIDADE_CHAVE_PRIVADA_JWK', (v) => (v && typeof v === 'object' && !Array.isArray(v) && typeof (v as { d?: unknown }).d === 'string' && typeof (v as { kty?: unknown }).kty === 'string' && ['EC', 'OKP', 'RSA'].includes((v as { kty: string }).kty) ? null : 'deve ser uma chave PRIVADA em JWK (kty EC, OKP ou RSA, com `d`)'))
   const horas = l.inteiro('POLARIS_IDENTIDADE_SESSAO_HORAS', 8, 1, 24)
+  const poolMax = l.env.POLARIS_PLATAFORMA_POOL_MAX !== undefined ? l.inteiro('POLARIS_PLATAFORMA_POOL_MAX', 5, 1, 50) : undefined
   if (privada !== undefined && !plataformaUrl) l.problemas.push('POLARIS_IDENTIDADE_CHAVE_PRIVADA_JWK só vale com DATABASE_URL_PLATAFORMA (os usuários ficam no diretório da plataforma)')
   if (privada !== undefined && !('jwk' in c.jwt!.chave)) l.problemas.push('com o login próprio, a verificação deve usar a chave PÚBLICA correspondente (JWT_CHAVE_PUBLICA_JWK): quem assina e quem verifica não compartilham segredo')
   const taxaDesligada = l.env.POLARIS_LIMITE_TAXA === 'desligado'
   const taxa = taxaDesligada ? false as const : { capacidade: l.inteiro('POLARIS_TAXA_CAPACIDADE', 120, 1, 100_000), porSegundo: l.inteiro('POLARIS_TAXA_POR_SEGUNDO', 20, 1, 100_000) }
   if (l.problemas.length) throw new ErroConfig(l.problemas)
-  return { ...(c as ConfigComum), ...(plataformaUrl ? { plataforma: { url: plataformaUrl, bases } } : {}), ...(studioDir ? { studioDir } : {}), ...(previewSegredo ? { previewSegredo } : {}), ...(privada ? { identidade: { chavePrivada: privada, horas } } : {}), ...(anterior ? { previewAnteriores: [anterior] } : {}), servicos: servicos!, taxa, introspeccao: l.env.POLARIS_GRAPHQL_INTROSPECCAO === '1' && !(c.producao) }
+  return { ...(c as ConfigComum), ...(plataformaUrl ? { plataforma: { url: plataformaUrl, bases, ...(poolMax !== undefined ? { poolMax } : {}) } } : {}), ...(studioDir ? { studioDir } : {}), ...(previewSegredo ? { previewSegredo } : {}), ...(privada ? { identidade: { chavePrivada: privada, horas } } : {}), ...(anterior ? { previewAnteriores: [anterior] } : {}), servicos: servicos!, taxa, introspeccao: l.env.POLARIS_GRAPHQL_INTROSPECCAO === '1' && !(c.producao) }
 }

@@ -63,3 +63,4 @@ Imagem multi-etapa, usuário não-root, sistema de arquivos somente leitura, `ca
 
 ## Sem Docker
 `pnpm ci` roda segredos + workflows + tipos + testes (Postgres em memória). Os runners também rodam direto: `pnpm --filter @polaris/apps empacota` e `node apps/polaris/dist/servico.mjs`.
+- **PGlite é de uma sessão só**: consultas concorrentes de conexões diferentes podem se misturar (resultado de uma consulta chegando noutra: apareceu como `Invalid time value` ao listar nós com a tela fazendo várias chamadas juntas). Por isso o ambiente local usa `POLARIS_PLATAFORMA_POOL_MAX=1` no gateway. Os pools do serviço de exemplo ainda são separados; em Postgres real não há esse problema.

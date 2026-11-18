@@ -248,6 +248,9 @@ importers:
       '@polaris/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@polaris/signmaker':
+        specifier: workspace:*
+        version: link:../../packages/signmaker
       '@polaris/studio':
         specifier: workspace:*
         version: link:../../packages/studio

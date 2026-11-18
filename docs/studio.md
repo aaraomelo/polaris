@@ -21,6 +21,9 @@ packages/studio       diff semântico, auditoria/validação de tema, âncoras d
 - **Histórico e diff**: lista de versões (quem, quando, nota), **diff semântico** entre duas versões ou contra o padrão, restaurar uma versão no editor (vira edição desfazível; só grava ao salvar). Criar página ou tema novo (rascunho que só existe no servidor depois de salvar).
 - **Comentários**: do nó ou **ancorados no bloco selecionado** (pelo id), com respostas e "resolvido". Se o bloco some, o comentário continua legível (nunca é reancorado por posição).
 
+## Cartazes (Sign Maker)
+O Studio edita o kind `cartaz` com prévia ao vivo: veja a seção "No Studio" de `docs/sign-maker.md`.
+
 ## Diagramas
 O botão **Diagramas** abre um painel (abaixo dos seletores) com dois desenhos gerados do JSON **no servidor** (`POST /studio/diagrama`, permissão `studio.ver`) e mostrados no mesmo quadro isolado da prévia (`<iframe sandbox="">`, sem script):
 - **Fluxo da aplicação**: colunas *Páginas → Formulários → Dados → Serviços*. As ligações vêm do que os nós declaram: `href` dos links e ações `navegar` (a rota com parâmetro, como `/produtos/:id`, casa), o bloco `form/formulario` da página, os `dados` da página, o `envio` do formulário (serviço e operação), as ações `navegar` do formulário, a `fonte` dos dados e a `guarda` da página (tracejada, para a rota de login do tenant). Link para rota que **nenhuma página tem** vira um nó vermelho tracejado "sem página" e um aviso. Link externo e destino calculado (`{…}`) ficam fora. Vale o que o tenant tem (cabeças sobre a base); o de outro tenant nunca aparece.

@@ -1,14 +1,28 @@
 import { COMPONENTES_BASE, compilaPrograma, registraBase, renderPaginaHtml } from '@polaris/engine'
 import { registraCommerce } from '@polaris/engine/commerce'
 import { cssDoTema, registraTemas, TEMA_PADRAO } from '@polaris/engine/tema'
-import { Registry, validaFormulario } from '@polaris/schema'
+import { Registry, criaValidador, validaFormulario } from '@polaris/schema'
+import { htmlDe, layoutCartaz, validaNoCartaz } from '@polaris/signmaker'
 import { CSS_FORMULARIO, confereExpressoes, renderizaFormularioHtml } from '@polaris/engine'
 
 // Pré-visualização: o mesmo compilador e renderizador da produção sobre o RASCUNHO. Serve ao cliente (SPA) e ao servidor (`/studio/previa`).
 // Preview AO VIVO: o mesmo compilador e o mesmo renderizador da produção, no navegador, sobre o RASCUNHO (não sobre o salvo). Roda num iframe `sandbox=""` (sem scripts, origem opaca):
 // o HTML vem do engine (texto escapado), então mesmo um nó malicioso não executa nada. Dados externos (spec.dados) não são buscados no editor: os blocos ligados a eles aparecem vazios.
 const BASE = (() => { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); return r })()
+const VALIDA_NO = criaValidador()
 const ID_SEGURO = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
+
+/** prévia de um `cartaz`: o MESMO layout e o MESMO desenhador de HTML que a geração real (e que o PDF), sobre o rascunho e os dados de exemplo. Dado faltando ou texto que não cabe vira PROBLEMA, não erro. */
+function geraPreviewCartaz(no: any, dados: unknown): ResultadoPreview {
+  const fmt = (e: { caminho: string; mensagem: string }) => `${e.caminho} ${e.mensagem}`
+  const problemas: string[] = []
+  const valido = VALIDA_NO(no); if (!valido.ok) return { ok: true, titulo: '', html: '', problemas: valido.erros.slice(0, 20).map(fmt) }
+  const incoerente = validaNoCartaz(no); problemas.push(...incoerente)
+  if (incoerente.length) return { ok: true, titulo: String(no.spec?.titulo ?? ''), html: '', problemas } // incoerente: a geração recusaria; a lista de problemas é o que o editor mostra
+  let html = '', titulo = String(no.spec?.titulo ?? '')
+  try { const l = layoutCartaz(no.spec, dados ?? no.spec?.exemplo ?? {}); html = htmlDe(l); titulo = l.titulo; problemas.push(...l.avisos) } catch (e) { problemas.push((e as Error).message.slice(0, 200)) }
+  return { ok: true, titulo, html, problemas: problemas.slice(0, 50) }
+}
 
 export type ResultadoPreview = { ok: true; html: string; titulo: string; problemas?: string[] } | { ok: false; erros: string[] }
 /** prévia de um `formulario`: o HTML estático (sem comportamento) e os problemas da definição (schema, referências, estrutura contra o serviço, expressões) */
@@ -27,7 +41,8 @@ function geraPreviewFormulario(no: any, extras: any[], selecionadoId: string | u
   return { ok: true, titulo: String((spec as { titulo?: unknown }).titulo ?? ''), problemas: problemas.slice(0, 50), html: `<!doctype html><html lang="pt-BR" data-modo="${modo === 'escuro' ? 'escuro' : 'claro'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}${CSS_FORMULARIO}</style></head><body><div id="polaris">${corpo}</div></body></html>` }
 }
 
-export function geraPreview(no: any, blocosDoTenant: any[], selecionadoId: string | undefined, temaNo?: any, modo: 'claro' | 'escuro' = 'claro'): ResultadoPreview {
+export function geraPreview(no: any, blocosDoTenant: any[], selecionadoId: string | undefined, temaNo?: any, modo: 'claro' | 'escuro' = 'claro', dados?: unknown): ResultadoPreview {
+  if (no?.kind === 'cartaz') return geraPreviewCartaz(no, dados)
   if (no?.kind === 'formulario') { try { return geraPreviewFormulario(no, blocosDoTenant, selecionadoId, temaNo, modo) } catch (e) { return { ok: false, erros: [(e as Error).message.slice(0, 300)] } } }
   try {
     const reg = BASE.derivado()

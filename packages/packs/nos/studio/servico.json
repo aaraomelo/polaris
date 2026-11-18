@@ -434,6 +434,9 @@
           },
           "modo": {
             "tipo": "texto"
+          },
+          "dados": {
+            "tipo": "json"
           }
         },
         "saida": "previa",

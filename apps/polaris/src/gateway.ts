@@ -14,7 +14,7 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
 /** como `montaGateway`, mas também devolve `verifica()`: a conferência de partida da chave de assinatura (quem sobe o processo a espera antes de escutar) */
 export function montaGatewayComChave(c: ConfigGateway, reg: Registry) { return montaGatewayInterno(c, reg) }
 function montaGatewayInterno(c: ConfigGateway, reg: Registry) {
-  const pool = c.plataforma ? criaPool({ url: c.plataforma.url, max: 5 }) : null
+  const pool = c.plataforma ? criaPool({ url: c.plataforma.url, max: c.plataforma.poolMax ?? 5 }) : null
   const tenants = c.plataforma && pool ? criaResolvedorTenant({ bases: c.plataforma.bases, q: async (sql, params) => { const r = await pool.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.rowCount ?? 0 } } }) : null
   // releases: o registro de cada tenant = core + a release de PRODUÇÃO dele; o preview é um link assinado de uma release ainda não promovida
   const qp = pool ? async (sql: string, params?: unknown[]) => { const r = await pool.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.rowCount ?? 0 } } : null

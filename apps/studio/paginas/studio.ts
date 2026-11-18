@@ -26,7 +26,7 @@ export const DADOS = [
   dado('diffrel', 'compararReleases', { de: campo('inteiro', { obrigatorio: true }), para: campo('inteiro', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
   dado('diagrama', 'diagramar', { tipo: campo('texto', { obrigatorio: true }), no: campo('json'), selecionado: campo('texto') }),
-  dado('previa', 'previsualizar', { no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto'), modo: campo('texto') }),
+  dado('previa', 'previsualizar', { dados: campo('json'), no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto'), modo: campo('texto') }),
   dado('restaurar', 'restaurarPadrao', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }) }),
 ]
 
@@ -38,14 +38,14 @@ const AMOSTRA = { kind: 'pagina', id: 'amostra', versao: '1.0.0', spec: { rota: 
 ] } } } }
 
 // ---- pedaços de expressão que se repetem --------------------------------------------------------------------------------------------------------
-const EH_PAGINA = 'estado.aberto.kind == "pagina"', EH_TEMA = 'estado.aberto.kind == "tema"', EH_FORM = 'estado.aberto.kind == "formulario"'
+const EH_PAGINA = 'estado.aberto.kind == "pagina"', EH_TEMA = 'estado.aberto.kind == "tema"', EH_FORM = 'estado.aberto.kind == "formulario"', EH_CARTAZ = 'estado.aberto.kind == "cartaz"'
 const RAIZ = 'estado.no.spec.raiz', SELNO = `obter(${RAIZ}, estado.sel)`, DOCSEL = 'concat(["spec", "raiz"], estado.sel)'
 const DEFBLOCO = `acha(blocos.blocos, b => b.id == ${SELNO}.bloco)`
 
 const aviso = (tipo: 'sucesso' | 'erro' | 'neutro', msg: string): Acao[] => [def('tipoAviso', q(tipo)), def('aviso', msg)]
 /** a prévia: de uma página, o RASCUNHO (com o bloco selecionado destacado); de um tema, a página de amostra com o tema aplicado */
 const atualizaPrevia: Acao = exe('previa', {
-  no: `{(${EH_PAGINA} || ${EH_FORM}) ? estado.no : estado.amostra}`, tema: `{${EH_TEMA} ? estado.no : null}`, selecionado: `{${EH_PAGINA} ? (${SELNO}.id ?? "") : ${EH_FORM} ? estado.passoPrevia : ""}`, modo: '{estado.modoPrevia}',
+  no: `{(${EH_PAGINA} || ${EH_FORM} || ${EH_CARTAZ}) ? estado.no : estado.amostra}`, dados: `{${EH_CARTAZ} ? (estado.no.spec.exemplo ?? objeto([])) : null}`, tema: `{${EH_TEMA} ? estado.no : null}`, selecionado: `{${EH_PAGINA} ? (${SELNO}.id ?? "") : ${EH_FORM} ? estado.passoPrevia : ""}`, modo: '{estado.modoPrevia}',
 })
 /** toda edição do rascunho passa por aqui: guarda o anterior para desfazer (edições seguidas do MESMO campo, `chave`, viram um passo só), limpa o refazer e atualiza a prévia */
 const edita = (novo: string, chave = '""'): Acao[] => [
@@ -59,7 +59,7 @@ const carregaLateral = (kind: string, id: string): Acao[] => [exe('versoes', { k
 /** abrir um nó: carrega, guarda o rascunho e a cópia salva (para saber se há alteração) e gera a prévia */
 const abrirX = (kindExpr: string, id: string): Acao => exe('abrir', { kind: `{${kindExpr}}`, id: `{${id}}` }, [
   def('aberto', `objeto([["kind", ${kindExpr}], ["id", ${id}], ["origem", resultado.origem], ["seq", resultado.seq]])`), def('no', 'resultado.no'), def('noSalvo', 'resultado.no'),
-  def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('de', '""'), def('para', '""'), def('pendente', 'null'), def('confirmaRestaurar', 'false'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('passoPrevia', '""'), def('jsonTexto', '""'), def('jsonErro', '""'), atualizaPrevia, ...carregaLateral(`{${kindExpr}}`, id),
+  def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('de', '""'), def('para', '""'), def('pendente', 'null'), def('confirmaRestaurar', 'false'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('abaCartaz', '"elementos"'), def('selEl', '-1'), def('passoPrevia', '""'), def('jsonTexto', '""'), def('jsonErro', '""'), atualizaPrevia, ...carregaLateral(`{${kindExpr}}`, id),
 ], aviso('erro', 'erro'))
 const abrir = (kind: string, id: string): Acao => abrirX(q(kind), id)
 const SUJO = 'estado.no && !igual(estado.no, estado.noSalvo)'
@@ -70,8 +70,8 @@ const barraPendente = (): Inst => linha([
   texto('Há alterações não salvas em {estado.aberto.id}. Descartar e abrir {estado.pendente.id}?'),
   botao('Descartar e abrir', [abrirX('estado.pendente.kind', 'estado.pendente.id')]), botao('Continuar editando', [def('pendente', 'null')]),
 ], { se: 'estado.pendente && ' + SUJO, props: { gap: 8 } })
-const seletorDeNos = (kind: 'tema' | 'pagina' | 'formulario'): Inst => pilha([
-  titulo(kind === 'tema' ? 'Temas' : kind === 'pagina' ? 'Páginas' : 'Formulários', 3),
+const seletorDeNos = (kind: 'tema' | 'pagina' | 'formulario' | 'cartaz'): Inst => pilha([
+  titulo(kind === 'tema' ? 'Temas' : kind === 'pagina' ? 'Páginas' : kind === 'cartaz' ? 'Cartazes' : 'Formulários', 3),
   linha([
     P('layout/linha', { repetir: { cada: `filtra(nos.nos, n => n.kind == ${q(kind)})`, como: 'n', chave: 'n.id' }, props: { gap: 4 }, filhos: [botao('{n.id} (personalizado)', [abrir(kind, 'n.id')], { se: `!(${SUJO})` }), botao('{n.id} (personalizado)', [pede(kind, 'n.id')], { se: SUJO })] }),
     P('layout/linha', { repetir: { cada: `filtra(nos.base.${kind}, b => !comeca(b, "studio.") && tamanho(filtra(nos.nos, n => n.kind == ${q(kind)} && n.id == b)) == 0)`, como: 'b', chave: 'b' }, props: { gap: 4 }, filhos: [botao('{b} (padrão)', [abrir(kind, 'b')], { se: `!(${SUJO})` }), botao('{b} (padrão)', [pede(kind, 'b')], { se: SUJO })] }),
@@ -310,6 +310,129 @@ const editorDeFormularios = (): Inst => pilha([
   pilha([abaJson()], { se: 'estado.abaForm == "json"' }),
 ], { se: `estado.no && ${EH_FORM} && estado.aba == "editor"`, gap: 8 })
 
+
+// ---- editor de cartazes (Sign Maker) --------------------------------------------------------------------------------------------------------
+const ELSEL = 'obter(estado.no.spec, ["elementos", estado.selEl])', DOCEL = '["spec", "elementos", estado.selEl]', TIPO_EL = `(${ELSEL}).tipo`
+const COM_SEL = 'estado.selEl >= 0 && tamanho(estado.no.spec.elementos ?? []) > estado.selEl'
+const NOVO_EL: Record<string, string> = {
+  texto: 'objeto([["tipo", "texto"], ["id", "el" + estado.contador], ["texto", "Texto"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
+  faixa: 'objeto([["tipo", "faixa"], ["id", "el" + estado.contador], ["cor", [200, 16, 46]], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
+  preco: 'objeto([["tipo", "preco"], ["id", "el" + estado.contador], ["valor", "9.99"], ["caixa", objeto([["topo", 0.3], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.4]])]])',
+  codigoBarras: 'objeto([["tipo", "codigoBarras"], ["id", "el" + estado.contador], ["valor", "7891000100103"], ["formato", "ean13"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.1], ["largura", 0.4], ["altura", 0.3]])]])',
+  qrcode: 'objeto([["tipo", "qrcode"], ["id", "el" + estado.contador], ["valor", "https://exemplo.com.br"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.6], ["largura", 0.25], ["altura", 0.35]])]])',
+  validade: 'objeto([["tipo", "validade"], ["id", "el" + estado.contador], ["caixa", objeto([["topo", 0.85], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.1]])]])',
+}
+const guarda: Acao[] = [def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""')]
+/** entrada de texto/número do elemento selecionado (caminho relativo ao elemento); vazio remove */
+const propEl = (rotulo: string, caminho: string[], opc: { numero?: boolean; se?: string } = {}): Inst => P('entrada/texto', {
+  ...(opc.se ? { se: opc.se } : {}), props: { valor: `{texto(obter(${ELSEL}, ${lit(caminho)}) ?? "")}`, rotulo },
+  eventos: { aoMudar: edita(`evento == "" ? sem(estado.no, concat(${DOCEL}, ${lit(caminho)})) : com(estado.no, concat(${DOCEL}, ${lit(caminho)}), ${opc.numero ? '(paraNumero(evento) ?? evento)' : 'evento'})`, `"ce:" + estado.selEl + ".${caminho.join('.')}"`) },
+})
+const propCorEl = (rotulo: string, caminho: string[], opc: { se?: string } = {}): Inst => P('entrada/texto', {
+  ...(opc.se ? { se: opc.se } : {}), props: { valor: `{junta(obter(${ELSEL}, ${lit(caminho)}) ?? [], ",")}`, rotulo: `${rotulo} (R,G,B)` },
+  eventos: { aoMudar: edita(`tamanho(divide(evento, ",")) == 3 ? com(estado.no, concat(${DOCEL}, ${lit(caminho)}), mapeia(divide(evento, ","), t => paraNumero(aparar(t)) ?? 0)) : (aparar(evento) == "" ? sem(estado.no, concat(${DOCEL}, ${lit(caminho)})) : estado.no)`, `"cc:" + estado.selEl + ".${caminho.join('.')}"`) },
+})
+const escolhaEl = (rotulo: string, caminho: string[], opcoes: string[], padrao: string, opc: { se?: string } = {}): Inst => linha([
+  texto(`${rotulo}:`),
+  ...opcoes.map((o) => botao(`{(obter(${ELSEL}, ${lit(caminho)}) ?? ${q(padrao)}) == ${q(o)} ? "● " : ""}${o}`, edita(`com(estado.no, concat(${DOCEL}, ${lit(caminho)}), ${q(o)})`))),
+], { ...(opc.se ? { se: opc.se } : {}), props: { gap: 4 } })
+const eh = (...tipos: string[]) => `(${tipos.map((t) => `${TIPO_EL} == ${q(t)}`).join(' || ')})`
+
+const listaDeElementos = (): Inst => pilha([
+  titulo('Elementos', 4),
+  pilha([botao('{(x.i == estado.selEl ? "▶ " : "") + (x.i + 1) + ". " + x.e.tipo + " " + (x.e.id ?? "")}', [def('selEl', 'x.i')])],
+    { repetir: { cada: 'mapeia(estado.no.spec.elementos ?? [], (e, i) => objeto([["i", i], ["e", e]]))', como: 'x', chave: 'texto(x.i)' }, gap: 2 }),
+  titulo('Adicionar', 5),
+  P('layout/grade', { props: { colunas: 2, gap: 4 }, filhos: Object.keys(NOVO_EL).map((t) => botao(`+ ${t}`, [...guarda,
+    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [${NOVO_EL[t]}]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia])) }),
+  titulo('Peça', 5),
+  linha(['A4', 'A5', 'A6', 'A7'].map((t) => botao(`{estado.no.spec.tamanho == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "tamanho"], ${q(t)})`))), { props: { gap: 4 } }),
+  linha(['retrato', 'paisagem'].map((t) => botao(`{(estado.no.spec.orientacao ?? "retrato") == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "orientacao"], ${q(t)})`))), { props: { gap: 4 } }),
+  P('entrada/texto', { props: { valor: '{junta(obter(estado.no.spec, ["fundo", "cor"]) ?? [], ",")}', rotulo: 'Cor de fundo (R,G,B)' },
+    eventos: { aoMudar: edita('tamanho(divide(evento, ",")) == 3 ? com(estado.no, ["spec", "fundo", "cor"], mapeia(divide(evento, ","), t => paraNumero(aparar(t)) ?? 0)) : (aparar(evento) == "" ? sem(estado.no, ["spec", "fundo", "cor"]) : estado.no)', '"cp:fundo"') } }),
+  P('entrada/texto', { props: { valor: '{texto(estado.no.spec.titulo ?? "")}', rotulo: 'Título' }, eventos: { aoMudar: edita('evento == "" ? sem(estado.no, ["spec", "titulo"]) : com(estado.no, ["spec", "titulo"], evento)', '"cp:titulo"') } }),
+], { gap: 4 })
+
+const barraDeElemento = (): Inst => linha([
+  botao('Remover', [...guarda, def('no', `sem(estado.no, ${DOCEL})`), def('selEl', '-1'), atualizaPrevia], { se: COM_SEL }),
+  botao('Subir', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], move(estado.no.spec.elementos, estado.selEl, estado.selEl - 1))'), def('selEl', 'estado.selEl - 1'), atualizaPrevia], { se: `${COM_SEL} && estado.selEl > 0` }),
+  botao('Descer', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], move(estado.no.spec.elementos, estado.selEl, estado.selEl + 1))'), def('selEl', 'estado.selEl + 1'), atualizaPrevia], { se: `${COM_SEL} && estado.selEl < tamanho(estado.no.spec.elementos) - 1` }),
+  botao('Duplicar', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos, [com(com(' + ELSEL + ', ["id"], "el" + estado.contador), ["se"], null)]))'), def('selEl', 'tamanho(estado.no.spec.elementos) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { se: COM_SEL }),
+], { se: 'estado.no', props: { gap: 4 } })
+
+const propriedadesDoElemento = (): Inst => pilha([
+  titulo('{(' + ELSEL + ').tipo} {(' + ELSEL + ').id}', 4),
+  propEl('Identificador', ['id']), propEl('Condição para aparecer (ex.: preco.de)', ['se']),
+  titulo('Posição e tamanho (fração da peça, 0 a 1)', 5),
+  propEl('Topo', ['caixa', 'topo'], { numero: true }), propEl('Esquerda', ['caixa', 'esquerda'], { numero: true }), propEl('Direita (use esquerda OU direita)', ['caixa', 'direita'], { numero: true }),
+  propEl('Largura', ['caixa', 'largura'], { numero: true }), propEl('Altura', ['caixa', 'altura'], { numero: true }), propEl('Rotação (graus, anti-horário)', ['rotacao'], { numero: true }),
+  titulo('Conteúdo', 5),
+  P('entrada/area', { se: eh('texto'), props: { valor: `{texto(obter(${ELSEL}, ["texto"]) ?? "")}`, rotulo: 'Texto (dado entre chaves: produto.nome)', linhas: 3 }, eventos: { aoMudar: edita(`com(estado.no, concat(${DOCEL}, ["texto"]), evento)`, '"ce:t"') } }),
+  propEl('Valor (dado entre chaves: produto.nome)', ['valor'], { se: eh('preco', 'codigoBarras', 'qrcode') }), propEl('Rótulo do número', ['rotulo'], { se: eh('codigoBarras', 'validade') }), propEl('Data (dado entre chaves: produto.nome)', ['data'], { se: eh('validade') }),
+  propEl('Unidade (dado entre chaves: produto.nome)', ['unidade', 'texto'], { se: eh('preco') }), propEl('Escala dos centavos (0,2 a 1)', ['centavos', 'escala'], { numero: true, se: eh('preco') }),
+  escolhaEl('Centavos', ['centavos', 'posicao'], ['alto', 'base'], 'alto', { se: eh('preco') }),
+  propEl('Riscado: espessura (vazio = sem traço)', ['riscado', 'espessura'], { numero: true, se: eh('preco') }),
+  escolhaEl('Formato', ['formato'], ['code128', 'ean13'], 'code128', { se: eh('codigoBarras') }), escolhaEl('Número', ['numero'], ['cima', 'baixo', 'nenhum'], 'cima', { se: eh('codigoBarras') }),
+  escolhaEl('Correção', ['nivel'], ['L', 'M', 'Q', 'H'], 'L', { se: eh('qrcode') }),
+  escolhaEl('Alinhamento', ['alinhaH'], ['esquerda', 'centro', 'direita'], 'centro', { se: eh('texto', 'preco', 'validade') }), escolhaEl('Vertical', ['alinhaV'], ['topo', 'meio', 'base'], 'topo', { se: eh('texto', 'preco', 'validade') }),
+  titulo('Aparência', 5),
+  propCorEl('Cor', ['cor']), propCorEl('Fundo do código/QR', ['fundo'], { se: eh('codigoBarras', 'qrcode') }),
+  propEl('Opacidade (0 a 1)', ['opacidade'], { numero: true, se: eh('faixa') }), propEl('Canto arredondado (0 a 0,5)', ['raio'], { numero: true, se: eh('faixa', 'codigoBarras', 'qrcode') }),
+  propEl('Fonte (Montserrat ou Roboto)', ['fonte', 'familia'], { se: eh('texto', 'preco', 'codigoBarras', 'validade') }), escolhaEl('Peso', ['fonte', 'peso'], ['normal', 'negrito'], 'normal', { se: eh('texto', 'preco', 'codigoBarras', 'validade') }),
+], { se: `estado.no && ${EH_CARTAZ} && ${COM_SEL}`, gap: 4 })
+
+const abaElementos = (): Inst => pilha([
+  barraDeElemento(),
+  P('layout/grade', { props: { colunas: 3, gap: 12 }, filhos: [
+    listaDeElementos(),
+    pilha([
+      titulo('Pré-visualização (o mesmo desenho do HTML e do PDF)', 4),
+      P('midia/quadro', { props: { titulo: 'Pré-visualização do cartaz', html: '{previa.html}', altura: 560 }, se: 'previa && previa.ok && previa.html' }),
+      pilha([
+        texto('{tamanho(previa.problemas ?? []) == 0 ? "Sem problemas." : tamanho(previa.problemas) + " problema(s):"}'),
+        texto('• {p}', { repetir: { cada: 'previa.problemas ?? []', como: 'p', chave: 'p' } }),
+      ], { se: 'previa && previa.ok', gap: 2 }),
+      texto('A prévia não pôde ser gerada: {e}', { repetir: { cada: 'previa.erros ?? []', como: 'e', chave: 'e' }, se: 'previa && previa.ok == false' }),
+    ], { gap: 4 }),
+    propriedadesDoElemento(),
+  ] }),
+], { gap: 8 })
+
+const abaExemplo = (): Inst => pilha([
+  titulo('Dados de exemplo', 4),
+  texto('Os dados que a prévia usa (ficam no nó, em `exemplo`, e nunca entram na geração real). Dinheiro como decimal em texto, ex.: "9.99". Declare os nomes em `dados` na aba JSON.'),
+  P('entrada/area', { props: { valor: '{estado.jsonTexto}', rotulo: 'exemplo (JSON)', linhas: 16 }, eventos: { aoMudar: [def('jsonTexto', 'evento'), def('jsonErro', '""')] } }),
+  linha([
+    botao('Aplicar', [def('jsonErro', 'tamanho(chaves(analisaJson(estado.jsonTexto) ?? objeto([["x", 1]]))) == 0 && estado.jsonTexto != "{}" ? "JSON inválido (use um objeto)." : ""'), ...guarda,
+      def('no', 'estado.jsonErro == "" ? com(estado.no, ["spec", "exemplo"], analisaJson(estado.jsonTexto) ?? objeto([])) : estado.no'), atualizaPrevia]),
+    botao('Recarregar do rascunho', [def('jsonTexto', 'paraJson(estado.no.spec.exemplo ?? objeto([]), 2)'), def('jsonErro', '""')]),
+  ], { props: { gap: 8 } }),
+  texto('{estado.jsonErro}', { se: 'estado.jsonErro != ""' }),
+], { gap: 6 })
+
+const abaJsonCartaz = (): Inst => pilha([
+  titulo('JSON da peça', 4),
+  texto('Para o que a tela não cobre: `dados` (nomes e tipos), `calculos`, `cores` condicionais, `tamanhos`, fundo em imagem. Edite e clique em Aplicar.'),
+  P('entrada/area', { props: { valor: '{estado.jsonTexto}', rotulo: 'spec do cartaz', linhas: 24 }, eventos: { aoMudar: [def('jsonTexto', 'evento'), def('jsonErro', '""')] } }),
+  linha([
+    botao('Aplicar', [def('jsonErro', 'tamanho(chaves(analisaJson(estado.jsonTexto) ?? objeto([]))) == 0 ? "JSON inválido (use um objeto)." : (obter(analisaJson(estado.jsonTexto), ["elementos"]) ? "" : "A peça precisa de `elementos`.")'), ...guarda,
+      def('no', 'estado.jsonErro == "" ? com(estado.no, ["spec"], analisaJson(estado.jsonTexto)) : estado.no'), def('selEl', '-1'), atualizaPrevia]),
+    botao('Recarregar do rascunho', [def('jsonTexto', 'paraJson(estado.no.spec, 2)'), def('jsonErro', '""')]),
+  ], { props: { gap: 8 } }),
+  texto('{estado.jsonErro}', { se: 'estado.jsonErro != ""' }),
+], { gap: 6 })
+
+const editorDeCartazes = (): Inst => pilha([
+  titulo('Cartaz {estado.aberto.id}', 3),
+  linha([
+    botao('Elementos', [def('abaCartaz', '"elementos"')]), botao('Dados de exemplo', [def('abaCartaz', '"exemplo"'), def('jsonTexto', 'paraJson(estado.no.spec.exemplo ?? objeto([]), 2)'), def('jsonErro', '""')]),
+    botao('JSON', [def('abaCartaz', '"json"'), def('jsonTexto', 'paraJson(estado.no.spec, 2)'), def('jsonErro', '""')]), texto('({estado.abaCartaz})'),
+  ], { props: { gap: 8 } }),
+  pilha([abaElementos()], { se: 'estado.abaCartaz == "elementos"' }),
+  pilha([abaExemplo()], { se: 'estado.abaCartaz == "exemplo"' }),
+  pilha([abaJsonCartaz()], { se: 'estado.abaCartaz == "json"' }),
+], { se: `estado.no && ${EH_CARTAZ} && estado.aba == "editor"`, gap: 8 })
+
 // ---- histórico, diff e comentários -------------------------------------------------------------------------------------------------------------
 const KI = { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}' }
 const releasesVista = (): Inst => pilha([
@@ -386,13 +509,13 @@ const historicoVista = (): Inst => pilha([
 ], { se: 'estado.no && estado.aberto.origem != "novo" && estado.aba == "historico"', gap: 8 })
 
 // ---- criar nós novos ----------------------------------------------------------------------------------------------------------------------------
-const criar = (kind: 'pagina' | 'tema' | 'formulario'): Inst => linha([
-  botao(kind === 'pagina' ? 'Nova página' : kind === 'tema' ? 'Novo tema' : 'Novo formulário', [def('criando', q(kind))]),
+const criar = (kind: 'pagina' | 'tema' | 'formulario' | 'cartaz'): Inst => linha([
+  botao(kind === 'pagina' ? 'Nova página' : kind === 'tema' ? 'Novo tema' : kind === 'cartaz' ? 'Novo cartaz' : 'Novo formulário', [def('criando', q(kind))]),
 ], { props: { gap: 4 } })
 const ACOES_CRIAR: Acao[] = [
     def('aberto', 'objeto([["kind", estado.criando], ["id", estado.novoId], ["origem", "novo"], ["seq", null]])'),
-    def('no', 'estado.criando == "formulario" ? objeto([["kind", "formulario"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["titulo", estado.novoId], ["campos", [objeto([["nome", "nome"], ["tipo", "texto"], ["rotulo", "Nome"], ["obrigatorio", true]])]]])]]) : estado.criando == "pagina" ? objeto([["kind", "pagina"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["rota", estado.novaRota], ["raiz", objeto([["bloco", "layout/pilha"], ["id", "raiz"]])]])]]) : objeto([["kind", "tema"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tokens", objeto([["cor", objeto([["fundo", "#ffffff"], ["texto", "#111111"], ["primaria", "#1d4ed8"]])]])]])]])'),
-    def('noSalvo', 'null'), def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('passoPrevia', '""'), def('criando', '""'), atualizaPrevia, def('confirmaCriar', 'false')]
+    def('no', 'estado.criando == "cartaz" ? objeto([["kind", "cartaz"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tamanho", "A5"], ["orientacao", "paisagem"], ["titulo", estado.novoId], ["fundo", objeto([["cor", [255, 255, 255]]])], ["fonte", objeto([["familia", "Montserrat"], ["peso", "negrito"]])], ["exemplo", objeto([])], ["elementos", [objeto([["tipo", "texto"], ["id", "titulo"], ["texto", "Novo cartaz"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.3]])], ["alinhaV", "meio"]])]]])]]) : estado.criando == "formulario" ? objeto([["kind", "formulario"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["titulo", estado.novoId], ["campos", [objeto([["nome", "nome"], ["tipo", "texto"], ["rotulo", "Nome"], ["obrigatorio", true]])]]])]]) : estado.criando == "pagina" ? objeto([["kind", "pagina"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["rota", estado.novaRota], ["raiz", objeto([["bloco", "layout/pilha"], ["id", "raiz"]])]])]]) : objeto([["kind", "tema"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tokens", objeto([["cor", objeto([["fundo", "#ffffff"], ["texto", "#111111"], ["primaria", "#1d4ed8"]])]])]])]])'),
+    def('noSalvo', 'null'), def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('abaCartaz', '"elementos"'), def('selEl', '-1'), def('passoPrevia', '""'), def('criando', '""'), atualizaPrevia, def('confirmaCriar', 'false')]
 const formCriar = (): Inst => linha([
   P('entrada/texto', { props: { valor: '{estado.novoId}', rotulo: 'Identificador do novo nó', placeholder: 'identificador' }, eventos: { aoMudar: [def('novoId', 'evento')] } }),
   P('entrada/texto', { se: 'estado.criando == "pagina"', props: { valor: '{estado.novaRota}', rotulo: 'Rota da nova página', placeholder: '/rota' }, eventos: { aoMudar: [def('novaRota', 'evento')] } }),
@@ -408,7 +531,7 @@ export const PAGINA = no('pagina', 'studio.app', {
   dados: { diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
@@ -427,11 +550,12 @@ export const PAGINA = no('pagina', 'studio.app', {
     ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),
     linha([texto('Prévia:'), botao('claro', [def('modoPrevia', '"claro"'), atualizaPrevia], { se: 'estado.modoPrevia != "claro"' }), botao('escuro', [def('modoPrevia', '"escuro"'), atualizaPrevia], { se: 'estado.modoPrevia != "escuro"' }), texto('({estado.modoPrevia})')], { se: 'estado.no', props: { gap: 8 } }),
     releasesVista(),
-    linha([criar('pagina'), criar('tema'), criar('formulario')]), formCriar(),
+    linha([criar('pagina'), criar('tema'), criar('formulario'), criar('cartaz')]), formCriar(),
     barraPendente(),
     seletorDeNos('pagina'),
     seletorDeNos('tema'),
     seletorDeNos('formulario'),
+    seletorDeNos('cartaz'),
     diagramasVista(),
     linha([
       botao('Restaurar o padrão', [def('confirmaRestaurar', 'true')], { se: 'estado.no && estado.aberto.origem == "tenant" && !estado.confirmaRestaurar' }),
@@ -443,6 +567,7 @@ export const PAGINA = no('pagina', 'studio.app', {
     editorDePaginas(),
     editorDeTema(),
     editorDeFormularios(),
+    editorDeCartazes(),
     historicoVista(),
   ], { gap: 12 }),
 })
