@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
@@ -59,6 +59,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
   const fechaTudo = async () => { for (const f of fecham.reverse()) await f().catch(() => {}) }
   try {
     // 1. Postgres: PGlite com servidor de protocolo, para os pools `pg` de verdade se conectarem (papéis separados: migrador com BYPASSRLS e aplicação sem)
+    if (o.dados) mkdirSync(dirname(o.dados), { recursive: true }) // o PGlite só cria a última pasta
     const db = new PGlite(o.dados ?? undefined); await db.waitReady; fecham.push(() => db.close())
     await db.exec(`DO $$ BEGIN
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_app') THEN CREATE ROLE polaris_app LOGIN; END IF;
