@@ -1,4 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { regrasDePapeis, resolve } from '@polaris/acesso'
+import type { Registry } from '@polaris/schema'
 import { diffNo, validaTexto } from '@polaris/studio'
 import type { criaArmazemDeNos, KindDoTenant } from './overrides'
 import { KINDS_DO_TENANT } from './overrides'
@@ -6,6 +8,14 @@ import { KINDS_DO_TENANT } from './overrides'
 // API de AUTORIA do Studio. O tenant e o autor vêm SEMPRE da sessão (`autentica`), nunca do corpo: não há como gravar, ler ou comentar em nome de outro tenant ou outra pessoa.
 // Tudo é gravado como versão imutável (E7); aqui só há leitura, gravação com controle de concorrência (409 se alguém salvou antes), histórico, diff e comentários.
 export type Sessao = { tenantId: string; usuario: string; pode(permissao: 'studio.ver' | 'studio.comentar' | 'studio.editar'): boolean }
+const ACAO: Record<Parameters<Sessao['pode']>[0], string> = { 'studio.ver': 'ver', 'studio.comentar': 'comentar', 'studio.editar': 'editar' }
+/** a sessão do Studio a partir do token do gateway: as permissões vêm dos PAPÉIS (`studio.leitor` ⊂ `studio.comentarista` ⊂ `studio.editor`), com a mesma semântica de acesso dos serviços (negar vence, falha fechada). Papel desconhecido = sem nenhuma permissão. */
+export function sessaoDeToken(reg: Registry, c: { tenantId: string; usuario: string; papeis: readonly string[] }): Sessao {
+  let regras: ReturnType<typeof regrasDePapeis> = []
+  try { regras = regrasDePapeis(reg, c.papeis.filter((p) => p.startsWith('studio.'))) } catch { regras = [] }
+  return { tenantId: c.tenantId, usuario: c.usuario, pode: (p) => { try { return resolve(regras, ACAO[p], 'studio.no', {}, {}).tipo !== 'nada' } catch { return false } } }
+}
+
 export type OpcoesStudio = {
   armazem: ReturnType<typeof criaArmazemDeNos>
   /** o registro BASE (core + segmento) do tenant: de onde vêm blocos do catálogo e nós que o tenant ainda não sobrescreveu */

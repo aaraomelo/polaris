@@ -27,11 +27,18 @@ Tenant e autor vêm **sempre da sessão** (`autentica` é injetado); corpo com `
 - CSP do Studio: `default-src 'none'`, `frame-ancestors 'none'`, scripts só `'self'` **e `'unsafe-eval'`** (o Ajv compila validadores com `new Function` para validar as props no navegador). É uma ferramenta de autoria autenticada, sem conteúdo de terceiros na origem; o preview, que mostra conteúdo do tenant, fica isolado no sandbox. `style-src 'unsafe-inline'` existe porque o `srcdoc` herda a política e precisa do `<style>` do tema.
 - Comentários e textos são guardados como texto e exibidos como texto (React escapa); o `CHECK` do banco limita o tamanho.
 
+## Atrás do gateway (produção)
+`POLARIS_STUDIO_DIR` (no compose: `/app/dist/studio`, que o `empacota` preenche) liga `/studio` (página e ativos) e `/studio/*` (API) **no próprio gateway**, que exige `DATABASE_URL_PLATAFORMA`. Sem a variável, `/studio` é 404.
+- **Identidade**: o JWT do gateway. Tenant e usuário (o `sub`, que vira o **autor** das versões e comentários) vêm só do token; tenant suspenso ou host de outro tenant = 401. Corpo com `autor`/`tenantId` é 400.
+- **Permissão** por papéis do pack `studio`: `studio.leitor` ⊂ `studio.comentarista` ⊂ `studio.editor` (mesma semântica de acesso dos serviços: papel desconhecido não dá nada; papéis de outros domínios, como `gerente`, também não).
+- **nginx**: `location /studio` repete os cabeçalhos de transporte e **não** a CSP genérica (que quebraria o Studio); a CSP é a do próprio Studio. Mesmo limite de taxa da API.
+- Testado em `apps/polaris/test/e2e.test.ts` (gateway real, JWT, Postgres) e `tools/ferramentas/test/deploy.test.ts`. O nginx continua sem `nginx -t` real (ver `docs/deploy.md`).
+
 ## Rodar
 `pnpm --filter @polaris/studio-app dev` → http://127.0.0.1:4300/studio (banco em memória, um tenant de demonstração, usuário de desenvolvimento com todas as permissões; **recusa rodar com NODE_ENV=production**).
 
 ## Limites assumidos
-- **Não está ligado ao gateway nem ao deploy**: o servidor do Studio é independente (`criaServidorStudio`); falta mapear o JWT do gateway para `Sessao`/permissões e montar `/studio` atrás do nginx. Em produção quem autentica é esse mapeamento; a autenticação do `bin/dev.ts` é um stub.
+- **O login não existe aqui**: o gateway valida o JWT, mas quem o emite é o provedor de identidade. O Studio recebe o token no fragmento da URL (`/studio#token=…`), guarda em `sessionStorage` e apaga o fragmento; **falta o fluxo de login do provedor que redireciona para lá**. A autenticação do `bin/dev.ts` (cookie) é um stub e recusa produção.
 - Salvar é **rascunho**: o nó vira a "cabeça" do tenant. Publicar (release, promoção, preview assinado) continua pela API de releases do E7; o Studio ainda não tem botão de publicar. Salvar com erro de compilação é permitido e **avisado** (não deve ser publicado).
 - O preview não busca `spec.dados`: blocos ligados a dados externos aparecem vazios. Clicar no preview não seleciona o bloco (a seleção é pela árvore; o bloco selecionado, se tem id, é contornado).
 - Reordenar é por botões (subir, descer, recuar, avançar); **não há arrastar e soltar**. Só páginas e temas (documentos, blocos compostos e papéis não têm editor).

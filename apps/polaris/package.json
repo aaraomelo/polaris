@@ -18,7 +18,8 @@
     "@polaris/engine": "workspace:*",
     "fastify": "^5.2.0",
     "@polaris/packs": "workspace:*",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "@polaris/studio-app": "workspace:*"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",

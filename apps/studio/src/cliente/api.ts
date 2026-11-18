@@ -2,8 +2,17 @@
 export class ErroApi extends Error {
   constructor(readonly status: number, readonly codigo: string, mensagem: string, readonly extra: Record<string, unknown> = {}) { super(mensagem); this.name = 'ErroApi' }
 }
+/** O token do gateway (JWT do provedor de identidade) chega no fragmento da URL (`/studio#token=…`: o fragmento NÃO vai ao servidor nem a logs), é guardado só em `sessionStorage` (some ao fechar a aba) e o fragmento é apagado da barra de endereço na hora. Sem token, vale a sessão por cookie (dev). */
+export function tokenDaSessao(): string | undefined {
+  try {
+    const m = /(?:^#|&)token=([A-Za-z0-9._~-]{20,4096})(?:&|$)/.exec(location.hash)
+    if (m) { sessionStorage.setItem('polaris.token', m[1]!); history.replaceState(null, '', location.pathname + location.search) }
+    return sessionStorage.getItem('polaris.token') ?? undefined
+  } catch { return undefined }
+}
 async function chama<T>(metodo: string, url: string, corpo?: unknown): Promise<T> {
-  const r = await fetch(url, { method: metodo, headers: corpo === undefined ? {} : { 'content-type': 'application/json' }, ...(corpo === undefined ? {} : { body: JSON.stringify(corpo) }), credentials: 'same-origin' })
+  const tk = tokenDaSessao()
+  const r = await fetch(url, { method: metodo, headers: { ...(corpo === undefined ? {} : { 'content-type': 'application/json' }), ...(tk ? { authorization: `Bearer ${tk}` } : {}) }, ...(corpo === undefined ? {} : { body: JSON.stringify(corpo) }), credentials: 'same-origin' })
   const t = await r.text(); let j: any = null; try { j = t ? JSON.parse(t) : null } catch { /* corpo não-JSON */ }
   if (!r.ok) { const e = j?.erro ?? {}; throw new ErroApi(r.status, e.codigo ?? 'erro', e.mensagem ?? `erro ${r.status}`, e) }
   return j as T

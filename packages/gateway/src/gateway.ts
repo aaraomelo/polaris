@@ -26,6 +26,8 @@ const corpoErro = (e: ErroGw, requisicaoId?: string) => ({ erro: { codigo: e.cod
 
 export type OpcoesGateway = {
   registry: Registry
+  /** extensões: rotas próprias montadas no MESMO servidor, com a autenticação do gateway (o tenant vem só do token; token inválido, tenant suspenso ou host de outro tenant = `null`). Use `app.register` para isolar hooks. */
+  estende?: (app: FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<CtxGw | null> }) => void
   servicos: Servicos
   /** valida o JWT (`criaAutenticadorJwt`); sem ele só se aceita requisição sem Authorization (rotas públicas, tenant pelo host) */
   autenticador?: (cabecalho: string | undefined) => Promise<ResultadoAuth>
@@ -271,6 +273,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
 
   // --- GraphQL gerado -----------------------------------------------------------------------------------------------------------------------------
   if (o.graphql !== false) instalaGraphql(app, { servicos: o.servicos, chamador, entra: (req, c) => entra(req, c), obs, traduz, opcoes: o.graphql ?? {}, cobraTaxa: (req, ctx, custo) => limita(req as Req, ctx, custo), cache, publicaDaFonte })
+  o.estende?.(app, { sessao: async (req) => { try { const c = await autentica(req as Req); return c.anonimo ? null : c } catch { return null } } })
   return app
 }
 

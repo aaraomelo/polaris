@@ -1,7 +1,7 @@
 import { Registry } from '@polaris/schema'
 import { nosDoPack } from './index'
 
-const PACKS = ['catalogo', 'vendas', 'pagamentos', 'estoque', 'servicos', 'alimentos', 'segmentos'] as const
+const PACKS = ['catalogo', 'vendas', 'pagamentos', 'estoque', 'servicos', 'alimentos', 'studio', 'segmentos'] as const
 
 /** O registro com TODOS os nós dos packs de domínio e dos segmentos (o que a plataforma entrega "de fábrica", escopo core). */
 export function registroDaPlataforma(): Registry {

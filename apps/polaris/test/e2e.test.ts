@@ -108,6 +108,47 @@ describe('publicação de ponta a ponta: override → release → produção →
   })
 })
 
+describe('Studio atrás do gateway', () => {
+  it('serve /studio e a API com a autenticação do gateway: tenant e papéis do token, 401 sem token, 403 sem papel, isolamento entre tenants, e o host de outro tenant é recusado', async () => {
+    await db.exec('RESET ROLE'); await db.exec(DDL_DIRETORIO)
+    const T1 = '44444444-4444-4444-4444-444444444444', T2 = '55555555-5555-5555-5555-555555555555'
+    for (const [id, alias] of [[T1, 'studio-um'], [T2, 'studio-dois']] as const) await db.query(`INSERT INTO plataforma.tenant (id, alias, nome, segmento, packs, dono_email, status, chave) VALUES ($1, $2, $2, 'varejo', '{varejo}', 'a@b.com', 'ativo', $3)`, [id, alias, `chave-studio-gw-${alias}-xxxx`])
+    const reg = new Registry(); registraBase(reg); carregaNos(dir, reg); const porta = /:(\d+)/.exec(srv.getServerConn())![1]
+    const estaticos = mkdtempSync(join(tmpdir(), 'studio-dist-')); writeFileSync(join(estaticos, 'index.html'), '<!doctype html><title>Studio</title>'); writeFileSync(join(estaticos, 'studio.js'), '//js'); writeFileSync(join(estaticos, 'studio.css'), '/*css*/')
+    const env = { POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, DATABASE_URL_PLATAFORMA: `postgres://postgres@127.0.0.1:${porta}/postgres`, POLARIS_BASES_DOMINIO: 'polaris.test' }
+    expect(() => configGateway({ ...env, POLARIS_STUDIO_DIR: 'relativo/x' })).toThrow(/caminho absoluto/); expect(() => configGateway({ POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, POLARIS_STUDIO_DIR: estaticos })).toThrow(/DATABASE_URL_PLATAFORMA/)
+    const gw = montaGateway(configGateway({ ...env, POLARIS_STUDIO_DIR: estaticos }), reg)
+    try {
+      const tok = (tid: string, papeis: string[], sub = 'ana') => new SignJWT({ tid, papeis }).setProtectedHeader({ alg: 'HS256' }).setSubject(sub).setIssuer(ISS).setAudience(AUD).setExpirationTime('5m').sign(new TextEncoder().encode(SEG))
+      const req = async (metodo: 'GET' | 'PUT' | 'POST', url: string, t?: string, corpo?: object, host = 'studio-um.polaris.test') => gw.inject({ method: metodo, url, headers: { host, ...(t ? { authorization: `Bearer ${t}` } : {}) }, ...(corpo ? { payload: corpo } : {}) })
+      const pagina = (id: string, texto: string) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'rascunho', spec: { rota: `/${id}`, raiz: { bloco: 'texto/paragrafo', id: 'p', props: { texto } } } })
+      // a página e os ativos
+      const pg = await req('GET', '/studio'); expect(pg.statusCode).toBe(200); expect(pg.headers['content-security-policy']).toContain("frame-ancestors 'none'"); expect(pg.payload).toContain('Studio')
+      expect((await req('GET', '/studio/ativos/studio.js')).statusCode).toBe(200); expect((await req('GET', '/studio/ativos/outro.js')).statusCode).toBe(404)
+      // autenticação e permissão
+      expect((await req('GET', '/studio/nos')).statusCode).toBe(401); expect((await req('GET', '/studio/nos', 'lixo')).statusCode).toBe(401)
+      expect((await req('GET', '/studio/nos', await tok(T1, ['gerente']))).statusCode).toBe(403) // papel de outro domínio não dá acesso ao Studio
+      expect((await req('GET', '/studio/nos', await tok(T1, ['studio.leitor']))).statusCode).toBe(200)
+      const leitor = await tok(T1, ['studio.leitor']), editor = await tok(T1, ['studio.editor'], 'beto')
+      expect((await req('PUT', '/studio/nos/pagina/home', leitor, { no: pagina('home', 'oi') })).statusCode).toBe(403)
+      const gravou = await req('PUT', '/studio/nos/pagina/home', editor, { no: pagina('home', 'oi'), baseSeq: null }); expect(gravou.statusCode).toBe(201); expect(gravou.json().versao).toMatchObject({ seq: 1, autor: 'beto' }) // autor = `sub` do token
+      expect((await req('POST', '/studio/comentarios', leitor, { kind: 'pagina', id: 'home', texto: 'x' })).statusCode).toBe(403); expect((await req('POST', '/studio/comentarios', await tok(T1, ['studio.comentarista'], 'cris'), { kind: 'pagina', id: 'home', texto: 'ok' })).json().comentario.autor).toBe('cris')
+      // isolamento: o outro tenant não vê, e o token de um tenant não vale no host do outro
+      const t2 = await tok(T2, ['studio.editor'], 'dina')
+      expect((await req('GET', '/studio/nos/pagina/home', t2, undefined, 'studio-dois.polaris.test')).statusCode).toBe(404)
+      expect((await req('GET', '/studio/nos', t2, undefined, 'studio-um.polaris.test')).statusCode).toBe(401) // host do tenant 1 com token do 2: recusado pela regra do gateway
+      expect((await req('GET', '/studio/nos', t2, undefined, 'studio-dois.polaris.test')).json().nos.map((n: any) => n.id)).not.toContain('home')
+      // o corpo não manda no tenant nem no autor
+      expect((await req('PUT', '/studio/nos/pagina/x', editor, { no: pagina('x', 'a'), autor: 'zé', tenantId: T2 })).statusCode).toBe(400)
+    } finally { await gw.close(); rmSync(estaticos, { recursive: true, force: true }) }
+  })
+  it('sem POLARIS_STUDIO_DIR o gateway NÃO expõe /studio (404)', async () => {
+    const reg = new Registry(); registraBase(reg); carregaNos(dir, reg); const porta = /:(\d+)/.exec(srv.getServerConn())![1]
+    const gw = montaGateway(configGateway({ POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, DATABASE_URL_PLATAFORMA: `postgres://postgres@127.0.0.1:${porta}/postgres`, POLARIS_BASES_DOMINIO: 'polaris.test' }), reg)
+    try { expect((await gw.inject({ method: 'GET', url: '/studio', headers: { host: 'studio-um.polaris.test' } })).statusCode).toBe(404) } finally { await gw.close() }
+  })
+})
+
 describe('migração do esquema `plataforma`', () => {
   it('aplica, é idempotente (rodar de novo não muda nada) e concede só o necessário ao papel da plataforma', async () => {
     await db.exec('RESET ROLE; DROP SCHEMA IF EXISTS plataforma CASCADE'); const porta = /:(\d+)/.exec(srv.getServerConn())![1]; const url = `postgres://postgres@127.0.0.1:${porta}/postgres`

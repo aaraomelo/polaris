@@ -3,7 +3,7 @@ import { registraBase } from '@polaris/engine'
 import { registraTemas } from '@polaris/engine/tema'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { DDL_DIRETORIO, criaArmazemDeNos, diretorioSql, registroDaPlataforma, rotasStudio, type Sessao } from '../src/index'
+import { DDL_DIRETORIO, criaArmazemDeNos, diretorioSql, registroDaPlataforma, rotasStudio, sessaoDeToken, type Sessao } from '../src/index'
 
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222'
 let pg: PGlite
@@ -103,5 +103,11 @@ describe('API de autoria do Studio', () => {
     let fichas = 2; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, limite: { tenta: (_k, c = 1) => (fichas >= c ? ((fichas -= c), { ok: true as const }) : { ok: false as const, esperaSeg: 9 }) } })
     expect((await a2.inject({ url: '/studio/nos', headers: h(A, 'a') })).statusCode).toBe(200); expect((await a2.inject({ url: '/studio/nos', headers: h(A, 'a') })).statusCode).toBe(200)
     const r = await a2.inject({ url: '/studio/nos', headers: h(A, 'a') }); expect(r.statusCode).toBe(429); expect(r.headers['retry-after']).toBe('9'); await a2.close()
+  })
+  it('sessaoDeToken: as permissões vêm dos papéis (leitor ⊂ comentarista ⊂ editor); papel desconhecido e papéis de outros domínios não dão nada', () => {
+    const pode = (papeis: string[]) => { const s = sessaoDeToken(base, { tenantId: A, usuario: 'u', papeis }); return (['studio.ver', 'studio.comentar', 'studio.editar'] as const).map((p) => s.pode(p)) }
+    expect(pode(['studio.leitor'])).toEqual([true, false, false]); expect(pode(['studio.comentarista'])).toEqual([true, true, false]); expect(pode(['studio.editor'])).toEqual([true, true, true])
+    expect(pode([])).toEqual([false, false, false]); expect(pode(['gerente', 'catalogo.gerente'])).toEqual([false, false, false]); expect(pode(['studio.inexistente'])).toEqual([false, false, false]); expect(pode(['studio.leitor', 'studio.inexistente'])).toEqual([false, false, false])
+    expect(sessaoDeToken(base, { tenantId: A, usuario: 'u', papeis: ['studio.editor'] })).toMatchObject({ tenantId: A, usuario: 'u' })
   })
 })

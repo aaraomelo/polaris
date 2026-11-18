@@ -196,6 +196,9 @@ importers:
       '@polaris/servico':
         specifier: workspace:*
         version: link:../../packages/servico
+      '@polaris/studio-app':
+        specifier: workspace:*
+        version: link:../studio
       fastify:
         specifier: ^5.2.0
         version: 5.12.8

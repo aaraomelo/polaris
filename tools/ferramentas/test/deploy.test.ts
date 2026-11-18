@@ -113,3 +113,12 @@ describe('o compose resolve de verdade (precisa do docker; pulado sem ele)', () 
     } finally { rmSync(dir, { recursive: true, force: true }) }
   })
 })
+
+describe('Studio no deploy', () => {
+  it('o nginx dá ao /studio os cabeçalhos de transporte e NÃO a CSP genérica (que o quebraria); o compose liga o diretório do cliente', () => {
+    const nginx = readFileSync(join(RAIZ, 'docker/nginx/nginx.conf'), 'utf8'), compose = readFileSync(join(RAIZ, 'docker/compose.deploy.yml'), 'utf8')
+    const bloco = /location \/studio \{([\s\S]*?)\n    \}/.exec(nginx)![1]!
+    expect(bloco).toMatch(/limit_req zone=api/); expect(bloco).toMatch(/Strict-Transport-Security/); expect(bloco).not.toMatch(/Content-Security-Policy/i); expect(bloco).toMatch(/include \/etc\/nginx\/proxy\.conf/)
+    expect(compose).toMatch(/POLARIS_STUDIO_DIR: \$\{POLARIS_STUDIO_DIR:-\/app\/dist\/studio\}/)
+  })
+})

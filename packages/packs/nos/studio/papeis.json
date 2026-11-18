@@ -1,0 +1,8 @@
+[
+  { "kind": "papel", "id": "studio.leitor", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [ { "acoes": ["ver"], "sujeitos": ["studio.no"] } ] } },
+  { "kind": "papel", "id": "studio.comentarista", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "herda": ["studio.leitor"], "regras": [ { "acoes": ["comentar"], "sujeitos": ["studio.no"] } ] } },
+  { "kind": "papel", "id": "studio.editor", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "herda": ["studio.comentarista"], "regras": [ { "acoes": ["editar"], "sujeitos": ["studio.no"] } ] } }
+]

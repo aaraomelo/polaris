@@ -1,5 +1,6 @@
 import { clienteHttp, criaGateway } from '@polaris/gateway'
-import { criaArmazemDeNos, criaPreview, criaReleases, criaResolvedorTenant } from '@polaris/packs'
+import { criaArmazemDeNos, criaPreview, criaReleases, criaResolvedorTenant, nosDoPack, rotasStudio, sessaoDeToken } from '@polaris/packs'
+import { rotasEstaticasStudio } from '@polaris/studio-app'
 import { criaPool } from '@polaris/pg'
 import type { Registry } from '@polaris/schema'
 import { autenticadorDe } from './auth'
@@ -22,7 +23,19 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     return [id, { no, cliente: clienteHttp({ baseUrl: url }) }]
   }))
   const hosts = new Map(Object.entries(c.hosts).map(([h, t]) => [h.toLowerCase(), t.toLowerCase()]))
+  // Studio: `/studio` (cliente) e `/studio/*` (API de autoria) no MESMO servidor, com a autenticação do gateway: o tenant e o usuário vêm só do token, e a permissão dos papéis `studio.*`
+  if (c.studioDir) for (const n of nosDoPack('studio')) { try { reg.registra(n) } catch { /* já registrado (nós carregados do diretório) */ } }
+  const studio = c.studioDir && qp ? (() => {
+    const armazem = criaArmazemDeNos({ q: qp, base: reg }), dir = c.studioDir
+    return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
+      void app.register(async (inst) => {
+        rotasEstaticasStudio(inst, dir)
+        rotasStudio(inst, { armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
+      })
+    }
+  })() : null
   const gw = criaGateway({
+    ...(studio ? { estende: studio as never } : {}),
     registry: reg, servicos, autenticador: autenticadorDe(c.jwt), ...(tenants ? { tenants } : {}), ...(releases ? { registros: { producao: (t: string, r: number | null) => releases.registroDeProducao(t, r) } } : {}), ...(releases && prev ? { preview: { verifica: (t: string) => prev.verifica(t), registro: (t: string, r: number) => releases.registroDe(t, r) } } : {}), tenantPorHost: (h) => hosts.get(h.toLowerCase()) ?? null,
     limiteTaxa: c.taxa, graphql: { introspeccao: c.introspeccao } as never,
     ...(c.metricasToken ? { metricasToken: c.metricasToken } : {}),
