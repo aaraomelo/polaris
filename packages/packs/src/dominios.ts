@@ -6,7 +6,7 @@ import { ALIAS_RESERVADOS } from './onboarding'
 
 type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
 export type StatusTenant = 'provisionando' | 'ativo' | 'falhou' | 'suspenso' | 'cancelado'
-export type InfoTenant = { id: string; status: StatusTenant; modulos: string[] }
+export type InfoTenant = { id: string; status: StatusTenant; modulos: string[]; /** release de PRODUÇÃO (null = só core/segmento) */ release: number | null }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const LABEL = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)$/
@@ -90,8 +90,8 @@ export function criaResolvedorTenant(o: OpcoesResolvedor) {
   const ttl = o.ttlMs ?? 30_000, ttlNeg = o.ttlNegativoMs ?? 5_000, max = o.maxEntradas ?? 5_000, agora = o.agora ?? Date.now
   const bases = o.bases.map((b) => b.toLowerCase())
   const cache = new Map<string, { v: InfoTenant | null; ate: number }>(), voo = new Map<string, Promise<InfoTenant | null>>()
-  const INFO = `SELECT t.id::text AS id, t.status, coalesce((SELECT array_agg(m.servico ORDER BY m.servico) FROM plataforma.modulo m WHERE m.tenant_id = t.id), '{}') AS modulos FROM plataforma.tenant t`
-  const info = (r: Record<string, unknown> | undefined): InfoTenant | null => (r ? { id: r.id as string, status: r.status as StatusTenant, modulos: [...(r.modulos as string[])] } : null)
+  const INFO = `SELECT t.id::text AS id, t.status, coalesce((SELECT array_agg(m.servico ORDER BY m.servico) FROM plataforma.modulo m WHERE m.tenant_id = t.id), '{}') AS modulos, (SELECT p.producao FROM plataforma.release_ponteiro p WHERE p.tenant_id = t.id) AS release FROM plataforma.tenant t`
+  const info = (r: Record<string, unknown> | undefined): InfoTenant | null => (r ? { id: r.id as string, status: r.status as StatusTenant, modulos: [...(r.modulos as string[])], release: r.release === null || r.release === undefined ? null : Number(r.release) } : null)
   async function busca(chave: string): Promise<InfoTenant | null> {
     if (chave.startsWith('id:')) { const id = chave.slice(3); return UUID.test(id) ? info((await o.q(`${INFO} WHERE t.id = $1`, [id])).rows[0]) : null }
     const host = chave.slice(5)

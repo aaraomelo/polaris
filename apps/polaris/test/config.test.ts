@@ -76,3 +76,10 @@ describe('configGateway', () => {
     expect(problemas(() => configGateway({ ...gw, POLARIS_TAXA_CAPACIDADE: '0' })).join()).toMatch(/POLARIS_TAXA_CAPACIDADE/)
   })
 })
+
+describe('configGateway: preview', () => {
+  it('segredo de preview: mínimo de 32 caracteres e só com a plataforma', () => {
+    const plat = { ...gw, DATABASE_URL_PLATAFORMA: 'postgres://u:p@db/x', POLARIS_BASES_DOMINIO: 'polaris.app' }
+    expect(configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO: 'x'.repeat(40) }).previewSegredo).toBe('x'.repeat(40)); expect(problemas(() => configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO: 'curto' })).join()).toMatch(/ao menos 32/); expect(problemas(() => configGateway({ ...gw, POLARIS_PREVIEW_SEGREDO: 'x'.repeat(40) })).join()).toMatch(/só vale com DATABASE_URL_PLATAFORMA/)
+  })
+})

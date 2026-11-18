@@ -69,3 +69,42 @@ O nó entra num **registro derivado** (`Registry.derivado()`: cópia isolada de 
 - O diretório de versões **só cresce** (imutável); a poda/arquivo de versões antigas não existe.
 - O `bloco` de composição só é validado pelo schema e pelas referências; o **comportamento visual** (CSS/acessibilidade) de um override não é auditado (o tema tem auditoria de contraste própria no engine, que o armazém ainda não chama).
 - Um `papel` do tenant pode ser **mais permissivo** que o do core, de propósito (a cascata é do tenant sobre os dados dele); não há "teto" imposto pela plataforma.
+
+---
+
+# Publicação: rascunho → release → preview → produção, com rollback
+
+```
+salva (versão imutável)  →  cria release (snapshot)  →  preview (link assinado)  →  promove  →  rollback
+      rascunho                  conjunto exato              só leitura, 1 release      ponteiro      ponteiro
+```
+
+## Release
+`criaReleases` (`cria`, `promove`, `rollback`, `producao`, `lista`, `diario`, `diferenca`, `registroDe`). Uma **release** é o conjunto EXATO de versões de nós que o tenant serve (`{ "pagina:home": 7, … }`), numerada por tenant, **imutável** (gatilho no banco) e com `hash`.
+- **Só nasce se o conjunto fecha**: o registro montado com aquelas versões passa por integridade referencial e validação estrutural **como um todo** (apagar um `dados` de que uma página depende impede a release; nada é criado pela metade).
+- Idêntica à última (mesmo `hash`): devolve a mesma, não cria outra. Criações simultâneas viram uma só.
+- Editar o rascunho **depois** de criar a release não a altera; cada release reconstrói o tenant exatamente como estava.
+
+## Produção e rollback
+A produção é **um ponteiro** (`release_ponteiro`) trocado numa transação com o tenant travado. `promove(n)` e `rollback()` são a mesma troca; o **diário** (`release_evento`, também imutável) registra de quê, para quê, quem e por quê.
+- `rollback()` volta à release que estava em produção **antes** da atual; de novo, desfaz o rollback. `rollback(para=n)` vai a uma específica. Número inexistente, de outro tenant ou não inteiro é recusado.
+- **Promover e voltar reconferem contra o core de HOJE**: se o core mudou e a release deixou de fechar (um bloco sumiu), a troca é recusada e a produção segue como estava.
+- Tenant que nunca publicou serve só core/segmento: **o rascunho nunca vai ao ar**.
+
+## O gateway
+`registros.producao(tenant, release)` dá o registro do tenant; páginas, dados e temas saem **da release de produção**. O cache de programas compilados inclui a release (duas releases com a MESMA `versao` de página e conteúdo diferente não se confundem). O registro de uma release é imutável: fica em cache (LRU) para sempre.
+
+## Preview
+Link assinado `v1.<payload>.<HMAC-SHA256>` com **tenant + release + expiração** (mínimo 60 s, máximo 7 dias). Enviado em `x-polaris-preview` na rota de **página** (BFF GET): mostra aquela release e só ela; a produção segue intacta.
+- assinatura conferida em tempo constante; adulterado, expirado, de outro segredo, malformado ou longo → **401 `preview_invalido`**;
+- link de **outro tenant** → **403 `preview_de_outra_conta`**; release inexistente → 404;
+- não vale para REST nem ações (que seguem em produção); sem a opção ligada o cabeçalho é **recusado** (400), nunca ignorado em silêncio;
+- configuração: `POLARIS_PREVIEW_SEGREDO` (≥ 32 caracteres, só com a plataforma).
+
+## Limites conhecidos
+- **A troca de produção demora até o TTL do resolvedor (30 s) para chegar às instâncias do gateway.** No mesmo processo, `invalida()` é imediato; não há barramento de invalidação entre instâncias. Um rollback de emergência leva até 30 s.
+- A **trava do tenant** (`FOR UPDATE`) que serializa `cria`/`promove` está no desenho, mas o PGlite (uma sessão) **não consegue provar** seu efeito: falta um teste com Postgres real e conexões concorrentes.
+- Releases e versões **só crescem**; não há poda nem arquivamento.
+- O preview mostra **páginas**; dados vêm dos serviços de produção (um preview de página nova que depende de um serviço novo mostra o dado real).
+- Não há **agendamento** de publicação nem **aprovação** em duas etapas (quem pode promover é decisão da API administrativa, do Studio/E8).
+- Não há **console/API** de publicação ainda (as funções existem; E8).

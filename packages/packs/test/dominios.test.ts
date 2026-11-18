@@ -31,7 +31,7 @@ afterAll(async () => { await pg.close() })
 describe('resolução por subdomínio da plataforma', () => {
   it('<alias>.<base> → o tenant, com status e módulos; um nível só; reservados, apex, estranhos e desconhecidos não resolvem', async () => {
     const id = await tenant('padaria', 'ativo', ['catalogo', 'vendas']); const r = criaResolvedorTenant({ q, bases: BASES })
-    expect(await r.porHost('padaria.polaris.app')).toEqual({ id, status: 'ativo', modulos: ['catalogo', 'vendas'] }); expect((await r.porHost('PADARIA.Polaris.App:443'))?.id).toBe(id)
+    expect(await r.porHost('padaria.polaris.app')).toEqual({ id, status: 'ativo', modulos: ['catalogo', 'vendas'], release: null }); expect((await r.porHost('PADARIA.Polaris.App:443'))?.id).toBe(id)
     // defesa em profundidade: mesmo que uma linha com alias reservado ou com ponto chegasse ao diretório (SQL direto, bug), o host nunca resolve para ela
     await tenant('www'); await tenant('x.y'); await tenant('admin')
     for (const h of ['x.y.polaris.app', 'a.padaria.polaris.app', 'polaris.app', 'www.polaris.app', 'api.polaris.app', 'fantasma.polaris.app', 'padaria.polaris.app.evil.com', 'padariapolaris.app', 'padaria.evil.com', 'padaria', '', '1.2.3.4']) expect(await r.porHost(h), h).toBeNull()
@@ -51,7 +51,7 @@ describe('domínio próprio: só vale VERIFICADO por DNS', () => {
     expect(await g.adiciona(id, 'flor.com.br')).toEqual(a); expect(await g.verifica(id, 'flor.com.br')).toBe('pendente'); expect(await r.porHost('flor.com.br')).toBeNull()
     tabela['_polaris-verificacao.flor.com.br'] = ['outra-coisa', 'polaris-verificacao=tok-errado']; expect(await g.verifica(id, 'flor.com.br')).toBe('pendente')
     tabela['_polaris-verificacao.flor.com.br'] = ['polaris-verificacao=tok-flor-1']; expect(await g.verifica(id, 'flor.com.br')).toBe('verificado'); expect(await g.verifica(id, 'flor.com.br')).toBe('verificado')
-    expect(await r.porHost('flor.com.br')).toEqual({ id, status: 'ativo', modulos: ['vendas'] }); expect((await g.lista(id))[0]).toMatchObject({ dominio: 'flor.com.br', verificado: true })
+    expect(await r.porHost('flor.com.br')).toEqual({ id, status: 'ativo', modulos: ['vendas'], release: null }); expect((await g.lista(id))[0]).toMatchObject({ dominio: 'flor.com.br', verificado: true })
     expect(await g.verifica(id, 'nao-reivindicado.com')).toBe('inexistente'); expect(await g.verifica(id, 'lixo!')).toBe('inexistente')
   })
   it('SEQUESTRO: quem só reivindica não resolve; quem PROVA a posse leva o domínio e derruba a reivindicação falsa; com dono verificado, o outro recebe `em_uso`', async () => {

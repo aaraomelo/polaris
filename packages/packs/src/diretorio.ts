@@ -54,6 +54,38 @@ CREATE TABLE IF NOT EXISTS plataforma.no_versao (
 CREATE OR REPLACE FUNCTION plataforma.imutavel() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'versões de nó são imutáveis (%)', TG_OP; END $$;
 DROP TRIGGER IF EXISTS no_versao_imutavel ON plataforma.no_versao;
 CREATE TRIGGER no_versao_imutavel BEFORE UPDATE OR DELETE ON plataforma.no_versao FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
+-- release = SNAPSHOT imutável: o conjunto exato de versões de nós que vai a produção. release_ponteiro aponta a de produção; release_evento é o diário (promoções e rollbacks).
+CREATE TABLE IF NOT EXISTS plataforma.release (
+  tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
+  numero integer NOT NULL,
+  manifesto jsonb NOT NULL,
+  hash text NOT NULL,
+  autor text NOT NULL,
+  nota text,
+  criado_em timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, numero)
+);
+DROP TRIGGER IF EXISTS release_imutavel ON plataforma.release;
+CREATE TRIGGER release_imutavel BEFORE UPDATE OR DELETE ON plataforma.release FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
+CREATE TABLE IF NOT EXISTS plataforma.release_ponteiro (
+  tenant_id uuid PRIMARY KEY REFERENCES plataforma.tenant (id),
+  producao integer,
+  anterior integer,
+  atualizado_em timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS plataforma.release_evento (
+  tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
+  n integer NOT NULL,
+  tipo text NOT NULL CHECK (tipo IN ('promocao', 'rollback')),
+  de integer,
+  para integer NOT NULL,
+  autor text NOT NULL,
+  nota text,
+  em timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, n)
+);
+DROP TRIGGER IF EXISTS release_evento_imutavel ON plataforma.release_evento;
+CREATE TRIGGER release_evento_imutavel BEFORE UPDATE OR DELETE ON plataforma.release_evento FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
 CREATE TABLE IF NOT EXISTS plataforma.modulo (
   tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
   servico text NOT NULL,

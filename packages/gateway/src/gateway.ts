@@ -10,7 +10,7 @@ import { criaChamador, indiceDeRotas, type ContextoChamada, type Servicos } from
 import { CacheDoGateway, VisaoDeCache } from './cache'
 import { FalhaServico } from './cliente'
 import { instalaGraphql, type OpcoesGraphql } from './graphql'
-import type { InfoTenant, ResolvedorTenant } from './tenants'
+import type { InfoTenant, PreviewDeRelease, RegistrosDeTenant, ResolvedorTenant } from './tenants'
 import { LimiteTaxa } from './taxa'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,6 +33,10 @@ export type OpcoesGateway = {
   tenantPorHost?: (host: string) => string | null | undefined
   /** o diretório de tenants: status (suspenso não opera), módulos habilitados e amarração host ↔ tenant. Se informado, SUBSTITUI `tenantPorHost`. */
   tenants?: ResolvedorTenant
+  /** o registro de cada tenant (core + a release de produção dele). Sem isto, todos usam `registry`. */
+  registros?: RegistrosDeTenant
+  /** liga o cabeçalho `x-polaris-preview` nas páginas (BFF GET): ver a release ANTES de promover */
+  preview?: PreviewDeRelease
   obs?: Observabilidade
   metricasToken?: string
   cache?: CacheDoGateway
@@ -44,7 +48,7 @@ export type OpcoesGateway = {
 }
 
 /** Quem está chamando o gateway (já verificado). */
-export type CtxGw = { modulos?: readonly string[]; tenantId: string; usuario?: string; papeis?: string[]; authorization?: string; anonimo: boolean; chamada: ContextoChamada }
+export type CtxGw = { registro?: Registry; releaseChave?: string; modulos?: readonly string[]; tenantId: string; usuario?: string; papeis?: string[]; authorization?: string; anonimo: boolean; chamada: ContextoChamada }
 type Req = FastifyRequest & ReqComObs & { gw?: CtxGw }
 
 const IDIOMA = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/
@@ -107,21 +111,23 @@ export function criaGateway(o: OpcoesGateway): Gateway {
       const h = Array.isArray(cab) ? cab[0]! : cab
       const r = o.autenticador ? await o.autenticador(h) : ({ ok: false, motivo: 'sem autenticador' } as const)
       if (!r.ok) throw new ErroGw(401, 'credencial_invalida', 'credencial inválida')
-      let modulos: readonly string[] | undefined
+      let modulos: readonly string[] | undefined, registro: Registry | undefined, releaseChave: string | undefined
       if (o.tenants) {
         const t = await o.tenants.porId(r.contexto.tenantId)
         if (!t) throw new ErroGw(403, 'tenant_desconhecido', 'a conta deste token não existe')
         exigeAtivo(t); modulos = t.modulos
+        if (o.registros) { registro = await o.registros.producao(t.id, t.release ?? null); releaseChave = `p${t.release ?? 'base'}` }
         // o token de um tenant NÃO vale na vitrine de outro: host de tenant com tenant diferente do token é recusado (host genérico da plataforma não tem dono e passa)
         const doHost = await o.tenants.porHost(req.hostname)
         if (doHost && doHost.id !== t.id) throw new ErroGw(403, 'tenant_divergente', 'este endereço pertence a outra conta')
       }
-      ctx = { tenantId: r.contexto.tenantId, usuario: r.contexto.usuario, papeis: r.contexto.papeis, authorization: h, anonimo: false, chamada: { ...base, authorization: h, ...(modulos ? { modulos } : {}) }, ...(modulos ? { modulos } : {}) }
+      ctx = { tenantId: r.contexto.tenantId, usuario: r.contexto.usuario, papeis: r.contexto.papeis, authorization: h, anonimo: false, chamada: { ...base, authorization: h, ...(modulos ? { modulos } : {}) }, ...(modulos ? { modulos } : {}), ...(registro ? { registro, releaseChave: releaseChave! } : {}) }
     } else if (o.tenants) {
       const t = await o.tenants.porHost(req.hostname)
       if (!t) throw new ErroGw(400, 'tenant_nao_resolvido', 'não foi possível resolver o tenant desta requisição')
       exigeAtivo(t)
-      ctx = { tenantId: t.id, anonimo: true, chamada: { ...base, modulos: t.modulos }, modulos: t.modulos }
+      const registro = o.registros ? await o.registros.producao(t.id, t.release ?? null) : undefined
+      ctx = { tenantId: t.id, anonimo: true, chamada: { ...base, modulos: t.modulos }, modulos: t.modulos, ...(registro ? { registro, releaseChave: `p${t.release ?? 'base'}` } : {}) }
     } else {
       const t = o.tenantPorHost?.(req.hostname)
       if (!t) throw new ErroGw(400, 'tenant_nao_resolvido', 'não foi possível resolver o tenant desta requisição')
@@ -144,12 +150,13 @@ export function criaGateway(o: OpcoesGateway): Gateway {
   const contextoRegistry = (tenantId: string) => ({ tenantId })
   function programaDe(ctx: CtxGw, id: string): { programa: Programa; params: Record<string, Campo>; obrigatorios: Set<string> } {
     if (!NOME.test(id) && !/^[A-Za-z0-9._-]{1,100}$/.test(id)) throw new ErroGw(404, 'pagina_inexistente', 'página inexistente')
-    const r = o.registry.resolve('pagina', id, contextoRegistry(ctx.tenantId))
+    const reg = ctx.registro ?? o.registry
+    const r = reg.resolve('pagina', id, contextoRegistry(ctx.tenantId))
     if (!r) throw new ErroGw(404, 'pagina_inexistente', 'página inexistente') // inexistente OU de outro tenant: indistinguível
-    const chave = `${ctx.tenantId}|${id}|${r.no.versao}`
+    const chave = `${ctx.tenantId}|${ctx.releaseChave ?? 'unico'}|${id}|${r.no.versao}`
     let p = programas.get(chave)
     if (!p) {
-      const c = compilaPrograma(o.registry, r.no, contextoRegistry(ctx.tenantId))
+      const c = compilaPrograma(reg, r.no, contextoRegistry(ctx.tenantId))
       if (!c.ok) { log.error('página não compila', { pagina: id, erros: c.erros.length }); throw new ErroGw(500, 'pagina_invalida', 'a página tem erros e não pode ser carregada') }
       p = c.programa; programas.set(chave, p)
       while (programas.size > 500) programas.delete(programas.keys().next().value as string)
@@ -196,7 +203,17 @@ export function criaGateway(o: OpcoesGateway): Gateway {
   }
 
   app.get('/bff/paginas/:id', async (req, reply) => {
-    const ctx = await entra(req)
+    let ctx = await entra(req)
+    const pv = req.headers['x-polaris-preview']
+    if (pv !== undefined) { // ver uma release ANTES de promover: link assinado, de um tenant, de uma release; nunca vale para outro tenant nem para mutação
+      if (!o.preview) throw new ErroGw(400, 'preview_indisponivel', 'a pré-visualização não está habilitada')
+      const v = typeof pv === 'string' && pv.length <= 2048 ? o.preview.verifica(pv) : null
+      if (!v) throw new ErroGw(401, 'preview_invalido', 'o link de pré-visualização é inválido ou expirou')
+      if (v.tenantId !== ctx.tenantId) throw new ErroGw(403, 'preview_de_outra_conta', 'este link de pré-visualização é de outra conta')
+      const reg = await o.preview.registro(v.tenantId, v.release)
+      if (!reg) throw new ErroGw(404, 'release_inexistente', 'a release não existe')
+      ctx = { ...ctx, registro: reg, releaseChave: `v${v.release}` }
+    }
     const { id } = req.params as { id: string }
     const { programa, params: declarados, obrigatorios } = programaDe(ctx, id)
     const { params, consulta } = leQuery(req.query as Record<string, unknown>, declarados, obrigatorios)

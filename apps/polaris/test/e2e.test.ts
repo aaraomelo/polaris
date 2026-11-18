@@ -13,7 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { configGateway, configServico } from '../src/config'
 import { montaGateway } from '../src/gateway'
 import { carregaNos } from '../src/nos'
-import { DDL_DIRETORIO } from '@polaris/packs'
+import { DDL_DIRETORIO, criaArmazemDeNos, criaPreview, criaReleases } from '@polaris/packs'
 import { montaServico } from '../src/servico'
 
 // Os runners de produção ponta a ponta: config por ambiente → nós do disco → migração com o papel migrador → serviço com o driver `pg` (papel sem BYPASSRLS) → gateway por HTTP.
@@ -83,3 +83,27 @@ describe('gateway de produção com o diretório de tenants (plataforma)', () =>
     } finally { await gw.close() }
   })
 })
+
+describe('publicação de ponta a ponta: override → release → produção → preview', () => {
+  it('o gateway serve a release de PRODUÇÃO do tenant (a release nova só existe como release) e o preview, assinado, mostra a que ainda não foi promovida', async () => {
+    await db.exec('RESET ROLE')
+    const T = '66666666-6666-6666-6666-666666666666', porta = /:(\d+)/.exec(srv.getServerConn())![1]
+    await db.query(`INSERT INTO plataforma.tenant (id, alias, nome, segmento, packs, dono_email, status, chave) VALUES ($1, 'pub-e2e', 'pub', 'varejo', '{varejo}', 'a@b.com', 'ativo', 'chave-pub-e2e-xxxxxxxxx')`, [T]); await db.query(`INSERT INTO plataforma.modulo (tenant_id, servico) VALUES ($1, 'loja')`, [T])
+    const reg = new Registry(); registraBase(reg); carregaNos(dir, reg)
+    const q = async (s: string, p: unknown[] = []) => { const r = await db.query(s, p); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } }
+    const arm = criaArmazemDeNos({ q, base: reg }), rel = criaReleases({ armazemDe: (qq) => criaArmazemDeNos({ q: qq, base: reg }), db: { transacao: (fn) => db.transaction(async (tx) => fn(async (s, p = []) => { const r = await tx.query(s, p); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } })) } })
+    const pagina = (v: string) => ({ kind: 'pagina', id: 'home', versao: v, estatuto: 'publicado', spec: { rota: '/', raiz: { bloco: 'texto/paragrafo', props: { texto: v } } } })
+    await arm.salva(T, 'ana', pagina('1.0.0')); const n1 = ((await rel.cria(T, 'ana')) as any).release.numero; await rel.promove(T, n1, 'ana')
+    await arm.salva(T, 'ana', pagina('2.0.0')); const n2 = ((await rel.cria(T, 'ana')) as any).release.numero
+    const segredo = 'segredo-de-preview-com-mais-de-32-caracteres!'
+    const gw = montaGateway(configGateway({ POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, DATABASE_URL_PLATAFORMA: `postgres://postgres@127.0.0.1:${porta}/postgres`, POLARIS_BASES_DOMINIO: 'polaris.test', POLARIS_PREVIEW_SEGREDO: segredo }), reg)
+    try {
+      const get = (h: Record<string, string> = {}) => gw.inject({ method: 'GET', url: '/bff/paginas/home', headers: { host: 'pub-e2e.polaris.test', ...h } })
+      expect((await get()).json().versao).toBe('1.0.0') // produção = release 1; a 2 só existe como release
+      const link = criaPreview({ segredo }).emite(T, n2); expect((await get({ 'x-polaris-preview': link })).json().versao).toBe('2.0.0'); expect((await get()).json().versao).toBe('1.0.0')
+      expect((await get({ 'x-polaris-preview': criaPreview({ segredo: 'outro-segredo-diferente-com-mais-de-32-bytes' }).emite(T, n2) })).statusCode).toBe(401) // assinado com outro segredo
+    } finally { await gw.close() }
+    expect(() => configGateway({ POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, POLARIS_PREVIEW_SEGREDO: segredo })).toThrow(/só vale com DATABASE_URL_PLATAFORMA/)
+  })
+})
+
