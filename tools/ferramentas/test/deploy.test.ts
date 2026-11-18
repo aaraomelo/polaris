@@ -60,7 +60,7 @@ describe('compose de deploy: o que NÃO pode faltar', () => {
 
 describe('scripts/deploy.sh: recusa o inseguro ANTES de subir, e nunca mostra um segredo', () => {
   const dir = mkdtempSync(join(tmpdir(), 'polaris-deploy-')), D = join(dir, 'docker'), SEG = join(D, 'segredos'), CERT = join(dir, 'certs')
-  const run = (amb: string, acao: string, env: Record<string, string> = {}) => spawnSync('bash', [join(RAIZ, 'scripts/deploy.sh'), amb, acao], { encoding: 'utf8', env: { PATH: process.env.PATH!, HOME: process.env.HOME!, POLARIS_DOCKER_DIR: D, POLARIS_SEM_DOCKER: '1', ...env } })
+  const run = (amb: string, acao: string, env: Record<string, string> = {}) => spawnSync('bash', [join(RAIZ, 'scripts/deploy.sh'), amb, acao], { encoding: 'utf8', env: { PATH: process.env.PATH!, HOME: process.env.HOME!, POLARIS_UID: String(process.getuid!()), POLARIS_GID: String(process.getgid!()), POLARIS_DOCKER_DIR: D, POLARIS_SEM_DOCKER: '1', ...env } })
   const uid = process.getuid!()
   const prepara = () => {
     rmSync(D, { recursive: true, force: true }); mkdirSync(SEG, { recursive: true }); mkdirSync(CERT, { recursive: true })

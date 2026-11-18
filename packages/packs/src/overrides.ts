@@ -75,7 +75,8 @@ export function criaArmazemDeNos(o: { q: Q; base: Registry; /** m처dulos (servi�
     if (cab && cab.hash === hash && cab.conteudo !== null) return { ok: true, versao: versaoDe(cab), novo: false }
     if (!cab || cab.conteudo === null) { const n = Number((await q(`SELECT count(*)::int AS n FROM (SELECT DISTINCT ON (kind, id) conteudo FROM plataforma.no_versao WHERE tenant_id = $1 ORDER BY kind, id, seq DESC) x WHERE conteudo IS NOT NULL`, [tenantId])).rows[0]!.n); if (n >= lim.maxNos) return { ok: false, erros: [`limite de ${lim.maxNos} overrides por tenant`] } }
     if (cab && Number(cab.seq) >= lim.maxVersoesPorNo) return { ok: false, erros: [`limite de ${lim.maxVersoesPorNo} vers천es deste n처`] }
-    for (let tentativa = 0; tentativa < 5; tentativa++) {
+    for (let tentativa = 0; tentativa < 40; tentativa++) { // cada rodada, pelo menos UM dos concorrentes ganha o seq: com N escritores simult창neos bastam N rodadas (atraso aleat처rio curto desfaz a sincronia)
+      if (tentativa > 0) await new Promise((r) => setTimeout(r, Math.random() * 4))
       const r = await q(`INSERT INTO plataforma.no_versao (tenant_id, kind, id, seq, conteudo, hash, autor, nota) SELECT $1, $2, $3, coalesce(max(seq), 0) + 1, $4::jsonb, $5, $6, $7 FROM plataforma.no_versao WHERE tenant_id = $1 AND kind = $2 AND id = $3 ON CONFLICT DO NOTHING RETURNING kind, id, seq, hash, autor, nota, criado_em, conteudo`, [tenantId, kind, id, JSON.stringify(conteudo), hash, autor.slice(0, 120), nota?.slice(0, 300) ?? null])
       if (r.rows[0]) return { ok: true, versao: versaoDe(r.rows[0]), novo: true } // (uma corrida pelo mesmo `seq` perde o ON CONFLICT e tenta de novo com o pr처ximo)
     }
