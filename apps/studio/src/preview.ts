@@ -22,7 +22,7 @@ export function geraPreview(no: any, blocosDoTenant: any[], selecionadoId: strin
     const r = renderPaginaHtml({ programa: c.programa, componentes: COMPONENTES_BASE, dados: {} })
     const css = cssDoTema(tema)
     const destaque = selecionadoId && ID_SEGURO.test(selecionadoId) ? `#${selecionadoId}{outline:2px solid #f59e0b!important;outline-offset:2px}` : ''
-    return { ok: true, titulo: r.titulo, html: `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}${destaque}</style></head><body><div id="polaris">${r.corpo}</div></body></html>` }
+    return { ok: true, titulo: r.titulo, html: `<!doctype html><html lang="pt-BR" data-modo="claro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}${destaque}</style></head><body><div id="polaris">${r.corpo}</div></body></html>` }
   } catch (e) { return { ok: false, erros: [(e as Error).message.slice(0, 300)] } }
 }
 

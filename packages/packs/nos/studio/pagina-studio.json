@@ -266,6 +266,26 @@
  },
  {
   "kind": "dados",
+  "id": "studio.publicar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "publicarSite"
+   },
+   "parametros": {
+    "nota": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.previa",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -310,7 +330,8 @@
     "diff": "studio.diff",
     "comentarios": "studio.comentarios",
     "comentar": "studio.comentar",
-    "resolver": "studio.resolver"
+    "resolver": "studio.resolver",
+    "publicar": "studio.publicar"
    },
    "estado": {
     "criando": {
@@ -636,6 +657,45 @@
           }
          },
          {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Publicar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "executar",
+             "dados": "publicar",
+             "args": {},
+             "depois": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"sucesso\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "\"Publicado: release \" + resultado.release + \". O site já usa as versões salvas.\""
+              }
+             ],
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
           "bloco": "texto/paragrafo",
           "props": {
            "texto": "{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == \"base\" ? \"padrão da plataforma\" : \"salvo (v\" + estado.aberto.seq + \")\") : \"● alterações não salvas\") : \"\"}"
@@ -927,7 +987,7 @@
                {
                 "bloco": "nav/botao",
                 "props": {
-                 "texto": "{n.id} ●"
+                 "texto": "{n.id} (personalizado)"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1042,7 +1102,7 @@
             {
              "bloco": "layout/linha",
              "repetir": {
-              "cada": "filtra(nos.base.pagina, b => !comeca(b, \"studio.\"))",
+              "cada": "filtra(nos.base.pagina, b => !comeca(b, \"studio.\") && tamanho(filtra(nos.nos, n => n.kind == \"pagina\" && n.id == b)) == 0)",
               "como": "b",
               "chave": "b"
              },
@@ -1209,7 +1269,7 @@
                {
                 "bloco": "nav/botao",
                 "props": {
-                 "texto": "{n.id} ●"
+                 "texto": "{n.id} (personalizado)"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1324,7 +1384,7 @@
             {
              "bloco": "layout/linha",
              "repetir": {
-              "cada": "filtra(nos.base.tema, b => !comeca(b, \"studio.\"))",
+              "cada": "filtra(nos.base.tema, b => !comeca(b, \"studio.\") && tamanho(filtra(nos.nos, n => n.kind == \"tema\" && n.id == b)) == 0)",
               "como": "b",
               "chave": "b"
              },
@@ -2581,7 +2641,7 @@
           "bloco": "texto/paragrafo",
           "se": "estado.de != \"\" || estado.para != \"\"",
           "props": {
-           "texto": "Comparar: de v{estado.de} até v{estado.para}"
+           "texto": "Comparar: {estado.de == \"base\" ? \"o padrão\" : \"v\" + estado.de} → {estado.para == \"base\" ? \"o padrão\" : \"v\" + estado.para}"
           }
          },
          {
@@ -2629,6 +2689,11 @@
              "acao": "definir",
              "estado": "de",
              "valor": "\"base\""
+            },
+            {
+             "acao": "definir",
+             "estado": "para",
+             "valor": "texto(estado.aberto.seq)"
             },
             {
              "acao": "executar",

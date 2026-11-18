@@ -1,7 +1,7 @@
 process.env.POLARIS_LOG_NIVEL = 'silencio'
 import { vi } from 'vitest'
 vi.setConfig({ testTimeout: 120_000, hookTimeout: 120_000 })
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { request as httpRequest } from 'node:http'
 import { join } from 'node:path'
@@ -60,6 +60,21 @@ describe('ambiente local', () => {
     const outro = await ir.headers.get('location')!; expect(outro).not.toContain('token') // nada de token na URL
     expect((await get(l, 'loja-demo', '/entrar/ir?tenant=loja-demo&papel=gerente&para=site&volta=%2F%2Fmal.com')).headers.get('location')).toMatch(/polaris\.localhost:\d+\/$/) // volta externa vira /
   })
+  it('Studio → Publicar → site: a edição salva só aparece depois de publicada, no tenant certo; página nova ganha rota sozinha', async () => {
+    const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
+    const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no
+    home.spec.raiz.slots.filhos[1].props.texto = 'Título vindo do Studio'
+    expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home })).status).toBe(201)
+    const nova = { kind: 'pagina', id: 'site.contato', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/contato', titulo: 'Contato', raiz: { bloco: 'texto/titulo', props: { texto: 'Fale conosco', nivel: 1 } } } }
+    expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.contato', ed, { no: nova })).status).toBe(201)
+    expect(await (await get(l, 'loja-demo', '/')).text()).not.toContain('Título vindo do Studio') // salvo, mas ainda não publicado
+    expect((await get(l, 'loja-demo', '/contato')).status).toBe(404)
+    const pub = await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}); expect(pub.status).toBe(200); expect(((await pub.json()) as any).release).toBe(1)
+    expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Título vindo do Studio')
+    const c = await get(l, 'loja-demo', '/contato'); expect(c.status).toBe(200); expect(await c.text()).toContain('Fale conosco')
+    expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Título vindo do Studio'); expect((await get(l, 'loja-outra', '/contato')).status).toBe(404) // o outro tenant não muda
+    const leitor = await l.token('loja-demo', ['studio.leitor']); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', leitor, {})).status).toBe(403)
+  })
   it('o login recusa tenant, papel e usuário inválidos; papel sem permissão no Studio dá 403', async () => {
     const l = await sobe(null)
     for (const q of ['tenant=nao-existe&papel=studio.editor', 'tenant=loja-demo&papel=admin', 'tenant=loja-demo&papel=studio.editor&usuario=A%20B', 'tenant=loja-demo', 'papel=studio.editor', 'tenant=loja-demo&papel=studio.editor&usuario=%3Cscript%3E']) expect((await get(l, 'loja-demo', `/entrar/ir?${q}`)).status, q).toBe(400)
@@ -74,6 +89,17 @@ describe('ambiente local', () => {
     await a.fecha(); abertos.splice(abertos.indexOf(a), 1)
     const b = await sobe(pasta); const lido = await get(b, 'loja-demo', '/studio/nos/tema/persistido', await b.token('loja-demo', ['studio.leitor']))
     expect(lido.status).toBe(200); expect(((await lido.json()) as any)).toMatchObject({ origem: 'tenant', seq: 1 })
+  })
+  it('duas instâncias na MESMA pasta de dados é erro (o PGlite é de um processo só); encerra mesmo com conexão keep-alive aberta', async () => {
+    const pasta = join(dir, 'pg-trava'); mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, 'ambiente.pid'), String(process.ppid)) // outro processo vivo usando a pasta
+    await expect(sobeLocal({ dados: pasta, porta: 0, silencioso: true })).rejects.toThrow(/já há um ambiente local usando estes dados/)
+    writeFileSync(join(dir, 'ambiente.pid'), '999999999') // trava velha (processo morto): é ignorada
+    const a = await sobe(pasta)
+    const { Agent, request } = await import('node:http'), agente = new Agent({ keepAlive: true })
+    await new Promise<void>((ok, falha) => { const r = request({ host: '127.0.0.1', port: a.porta, path: '/entrar', agent: agente, headers: { host: `x.polaris.localhost:${a.porta}` } }, (res) => { res.resume(); res.on('end', ok) }); r.on('error', falha); r.end() })
+    const t0 = Date.now(); await a.fecha(); abertos.splice(abertos.indexOf(a), 1); agente.destroy()
+    expect(Date.now() - t0).toBeLessThan(5000) // com uma conexão ociosa aberta, o fechamento não pode ficar esperando por ela
+    const b = await sobe(pasta); expect(b.porta).toBeGreaterThan(0) // e a trava foi liberada
   })
   it('recusa produção e recusa subir sem o Studio empacotado', async () => {
     await expect(sobeLocal({ dados: null, studioDir: join(dir, 'nao-existe'), silencioso: true })).rejects.toThrow(/Studio não foi empacotado/)
@@ -115,6 +141,8 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.waitForURL(/\/studio$/); expect(p.url()).not.toContain('token') // o token sai da barra de endereço
       await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'padrao (padrão)' }).click(); await p.getByText('Tokens do tema padrao').waitFor()
       await p.getByRole('button', { name: 'Salvar' }).click(); await p.getByText('Salvo como versão 1').waitFor()
+      await p.getByRole('button', { name: 'Publicar' }).click(); await p.getByText(/Publicado: release 1/).waitFor() // o botão do Studio põe os rascunhos em produção
+      await p.getByRole('button', { name: 'site.home (padrão)' }).click(); await p.locator('iframe').waitFor(); await p.waitForFunction(() => (document.querySelector('iframe')?.getAttribute('srcdoc') ?? '').includes('Bem-vindo à loja')) // a prévia de página com dados (sem isso ficava em branco)
       expect(erros.join(' | ')).toBe('')
     } finally { await nav.close() }
   })

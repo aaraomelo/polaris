@@ -30,7 +30,12 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
       void app.register(async (inst) => {
         rotasEstaticasStudio(inst, dir)
-        rotasStudio(inst, { previsualiza, armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
+        rotasStudio(inst, { previsualiza, ...(releases ? { publicar: async (a: { tenantId: string; autor: string; nota?: string }) => {
+          const c = await releases.cria(a.tenantId, a.autor, a.nota); if (!c.ok) return c
+          const p = await releases.promove(a.tenantId, c.release.numero, a.autor, a.nota); if (!p.ok) return p
+          tenants?.invalida() // o diretório guarda a release de produção em cache: sem isto o site só mudaria quando o cache vencesse
+          return { ok: true as const, release: c.release.numero }
+        } } : {}), armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
       })
     }
   })() : null

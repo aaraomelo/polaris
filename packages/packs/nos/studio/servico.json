@@ -5,32 +5,351 @@
   "estatuto": "publicado",
   "spec": {
     "entidades": {
-      "catalogoNos": { "campos": { "nos": { "tipo": "json", "lista": false, "descricao": "versões das cabeças do tenant: kind, id, seq, autor, nota, criadoEm" }, "base": { "tipo": "json", "descricao": "ids do core/segmento por kind" } } },
-      "catalogoBlocos": { "campos": { "blocos": { "tipo": "json", "descricao": "cada bloco: id, titulo, props (JSON Schema) e slots" } } },
-      "noAberto": { "campos": { "origem": { "tipo": "texto" }, "seq": { "tipo": "inteiro" }, "no": { "tipo": "json" } } },
-      "versaoSalva": { "campos": { "versao": { "tipo": "json" }, "novo": { "tipo": "booleano" } } },
-      "restaurado": { "campos": { "ok": { "tipo": "booleano" } } },
-      "historicoNo": { "campos": { "versoes": { "tipo": "json" } } },
-      "versaoDoNo": { "campos": { "meta": { "tipo": "json" }, "no": { "tipo": "json" } } },
-      "comparacao": { "campos": { "diff": { "tipo": "json" } } },
-      "listaComentarios": { "campos": { "comentarios": { "tipo": "json" } } },
-      "comentarioCriado": { "campos": { "comentario": { "tipo": "json" } } },
-      "comentarioResolvido": { "campos": { "ok": { "tipo": "booleano" } } },
-      "previa": { "campos": { "ok": { "tipo": "booleano" }, "html": { "tipo": "texto" }, "erros": { "tipo": "json" }, "avisos": { "tipo": "json", "descricao": "contraste baixo no tema (par, modo, razão, mínimo)" } } }
+      "catalogoNos": {
+        "campos": {
+          "nos": {
+            "tipo": "json",
+            "lista": false,
+            "descricao": "versões das cabeças do tenant: kind, id, seq, autor, nota, criadoEm"
+          },
+          "base": {
+            "tipo": "json",
+            "descricao": "ids do core/segmento por kind"
+          }
+        }
+      },
+      "catalogoBlocos": {
+        "campos": {
+          "blocos": {
+            "tipo": "json",
+            "descricao": "cada bloco: id, titulo, props (JSON Schema) e slots"
+          }
+        }
+      },
+      "noAberto": {
+        "campos": {
+          "origem": {
+            "tipo": "texto"
+          },
+          "seq": {
+            "tipo": "inteiro"
+          },
+          "no": {
+            "tipo": "json"
+          }
+        }
+      },
+      "versaoSalva": {
+        "campos": {
+          "versao": {
+            "tipo": "json"
+          },
+          "novo": {
+            "tipo": "booleano"
+          }
+        }
+      },
+      "restaurado": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          }
+        }
+      },
+      "historicoNo": {
+        "campos": {
+          "versoes": {
+            "tipo": "json"
+          }
+        }
+      },
+      "versaoDoNo": {
+        "campos": {
+          "meta": {
+            "tipo": "json"
+          },
+          "no": {
+            "tipo": "json"
+          }
+        }
+      },
+      "comparacao": {
+        "campos": {
+          "diff": {
+            "tipo": "json"
+          }
+        }
+      },
+      "listaComentarios": {
+        "campos": {
+          "comentarios": {
+            "tipo": "json"
+          }
+        }
+      },
+      "comentarioCriado": {
+        "campos": {
+          "comentario": {
+            "tipo": "json"
+          }
+        }
+      },
+      "comentarioResolvido": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          }
+        }
+      },
+      "previa": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          },
+          "html": {
+            "tipo": "texto"
+          },
+          "erros": {
+            "tipo": "json"
+          },
+          "avisos": {
+            "tipo": "json",
+            "descricao": "contraste baixo no tema (par, modo, razão, mínimo)"
+          }
+        }
+      },
+      "publicado": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          },
+          "release": {
+            "tipo": "inteiro"
+          }
+        }
+      }
     },
     "operacoes": {
-      "listarNos": { "metodo": "GET", "caminho": "/nos", "saida": "catalogoNos", "permissao": "studio" },
-      "listarBlocos": { "metodo": "GET", "caminho": "/blocos", "saida": "catalogoBlocos", "permissao": "studio" },
-      "abrirNo": { "metodo": "GET", "caminho": "/nos/:kind/:id", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true } }, "saida": "noAberto", "permissao": "studio" },
-      "salvarNo": { "metodo": "PUT", "caminho": "/nos/:kind/:id", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true }, "no": { "tipo": "json", "obrigatorio": true }, "baseSeq": { "tipo": "json" }, "nota": { "tipo": "texto" } }, "saida": "versaoSalva", "permissao": "studio" },
-      "restaurarPadrao": { "metodo": "DELETE", "caminho": "/nos/:kind/:id", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true } }, "saida": "restaurado", "permissao": "studio" },
-      "listarVersoes": { "metodo": "GET", "caminho": "/historico/:kind/:id", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true } }, "saida": "historicoNo", "permissao": "studio" },
-      "abrirVersao": { "metodo": "GET", "caminho": "/versao/:kind/:id", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true }, "seq": { "tipo": "inteiro", "obrigatorio": true } }, "saida": "versaoDoNo", "permissao": "studio" },
-      "compararVersoes": { "metodo": "GET", "caminho": "/diff/:kind/:id", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true }, "de": { "tipo": "texto", "obrigatorio": true }, "para": { "tipo": "texto", "obrigatorio": true } }, "saida": "comparacao", "permissao": "studio" },
-      "listarComentarios": { "metodo": "GET", "caminho": "/comentarios", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true } }, "saida": "listaComentarios", "permissao": "studio" },
-      "comentar": { "metodo": "POST", "caminho": "/comentarios", "entrada": { "kind": { "tipo": "texto", "obrigatorio": true }, "id": { "tipo": "texto", "obrigatorio": true }, "texto": { "tipo": "texto", "obrigatorio": true }, "ancora": { "tipo": "texto" }, "versao": { "tipo": "inteiro" }, "respondeA": { "tipo": "uuid" } }, "saida": "comentarioCriado", "permissao": "studio" },
-      "resolverComentario": { "metodo": "POST", "caminho": "/comentarios/:cid/resolver", "entrada": { "cid": { "tipo": "uuid", "obrigatorio": true }, "resolvido": { "tipo": "booleano", "obrigatorio": true } }, "saida": "comentarioResolvido", "permissao": "studio" },
-      "previsualizar": { "metodo": "POST", "caminho": "/previa", "entrada": { "no": { "tipo": "json", "obrigatorio": true }, "tema": { "tipo": "json" }, "selecionado": { "tipo": "texto" } }, "saida": "previa", "permissao": "studio" }
+      "listarNos": {
+        "metodo": "GET",
+        "caminho": "/nos",
+        "saida": "catalogoNos",
+        "permissao": "studio"
+      },
+      "listarBlocos": {
+        "metodo": "GET",
+        "caminho": "/blocos",
+        "saida": "catalogoBlocos",
+        "permissao": "studio"
+      },
+      "abrirNo": {
+        "metodo": "GET",
+        "caminho": "/nos/:kind/:id",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "noAberto",
+        "permissao": "studio"
+      },
+      "salvarNo": {
+        "metodo": "PUT",
+        "caminho": "/nos/:kind/:id",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "no": {
+            "tipo": "json",
+            "obrigatorio": true
+          },
+          "baseSeq": {
+            "tipo": "json"
+          },
+          "nota": {
+            "tipo": "texto"
+          }
+        },
+        "saida": "versaoSalva",
+        "permissao": "studio"
+      },
+      "restaurarPadrao": {
+        "metodo": "DELETE",
+        "caminho": "/nos/:kind/:id",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "restaurado",
+        "permissao": "studio"
+      },
+      "listarVersoes": {
+        "metodo": "GET",
+        "caminho": "/historico/:kind/:id",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "historicoNo",
+        "permissao": "studio"
+      },
+      "abrirVersao": {
+        "metodo": "GET",
+        "caminho": "/versao/:kind/:id",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "seq": {
+            "tipo": "inteiro",
+            "obrigatorio": true
+          }
+        },
+        "saida": "versaoDoNo",
+        "permissao": "studio"
+      },
+      "compararVersoes": {
+        "metodo": "GET",
+        "caminho": "/diff/:kind/:id",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "de": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "para": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "comparacao",
+        "permissao": "studio"
+      },
+      "listarComentarios": {
+        "metodo": "GET",
+        "caminho": "/comentarios",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "listaComentarios",
+        "permissao": "studio"
+      },
+      "comentar": {
+        "metodo": "POST",
+        "caminho": "/comentarios",
+        "entrada": {
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "texto": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "ancora": {
+            "tipo": "texto"
+          },
+          "versao": {
+            "tipo": "inteiro"
+          },
+          "respondeA": {
+            "tipo": "uuid"
+          }
+        },
+        "saida": "comentarioCriado",
+        "permissao": "studio"
+      },
+      "resolverComentario": {
+        "metodo": "POST",
+        "caminho": "/comentarios/:cid/resolver",
+        "entrada": {
+          "cid": {
+            "tipo": "uuid",
+            "obrigatorio": true
+          },
+          "resolvido": {
+            "tipo": "booleano",
+            "obrigatorio": true
+          }
+        },
+        "saida": "comentarioResolvido",
+        "permissao": "studio"
+      },
+      "previsualizar": {
+        "metodo": "POST",
+        "caminho": "/previa",
+        "entrada": {
+          "no": {
+            "tipo": "json",
+            "obrigatorio": true
+          },
+          "tema": {
+            "tipo": "json"
+          },
+          "selecionado": {
+            "tipo": "texto"
+          }
+        },
+        "saida": "previa",
+        "permissao": "studio"
+      },
+      "publicarSite": {
+        "metodo": "POST",
+        "caminho": "/publicar",
+        "entrada": {
+          "nota": {
+            "tipo": "texto"
+          }
+        },
+        "saida": "publicado",
+        "permissao": "studio"
+      }
     }
   }
 }

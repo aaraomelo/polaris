@@ -23,6 +23,8 @@ export type OpcoesStudio = {
   q: (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
   autentica: (req: FastifyRequest) => Promise<Sessao | null>
   /** gera o HTML de pré-visualização de uma página (compilador e renderizador do engine); injetado porque o pacote não depende do engine. Sem ele, `/studio/previa` é 501. */
+  /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
+  publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
   previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
 }
@@ -43,6 +45,7 @@ export function errosDeTema(no: Record<string, unknown>): string[] {
   return out.slice(0, 20)
 }
 
+const ANCORA_NO = /^[A-Za-z0-9._-]{1,100}$/
 export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.addHook('onSend', async (_req, reply) => { reply.header('cache-control', 'no-store'); reply.header('x-content-type-options', 'nosniff') })
   async function sessao(req: FastifyRequest, reply: FastifyReply, p: Parameters<Sessao['pode']>[0], custo = 1): Promise<Sessao | null> {
@@ -166,6 +169,15 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   })
 
   /** pré-visualização no servidor: o rascunho (e o tema) vão no corpo; devolve o HTML pronto para um iframe `sandbox=""` ou os erros do compilador */
+  app.post('/studio/publicar', { bodyLimit: 4 * 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 5); if (!s) return reply
+    if (!o.publicar) return erro(reply, 501, 'nao_implementado', 'este servidor não publica releases')
+    const b = req.body ?? {}; if (!so(b, ['nota'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { nota? }')
+    const nota = (b as { nota?: unknown }).nota; if (nota !== undefined && (typeof nota !== 'string' || nota.length > 300)) return erro(reply, 400, 'requisicao_invalida', 'nota: texto de até 300 caracteres')
+    const r = await o.publicar({ tenantId: s.tenantId, autor: s.usuario, ...(nota ? { nota } : {}) })
+    return r.ok ? { ok: true, release: r.release } : erro(reply, 422, 'publicacao_recusada', r.erros.slice(0, 5).join('; '))
+  })
+
   app.post('/studio/previa', { bodyLimit: 512 * 1024 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver', 3); if (!s) return reply
     if (!o.previsualiza) return erro(reply, 501, 'nao_implementado', 'este servidor não gera pré-visualização')
@@ -174,7 +186,16 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     if (!x.no || typeof x.no !== 'object' || Array.isArray(x.no)) return erro(reply, 400, 'requisicao_invalida', 'no: objeto esperado')
     if (x.selecionado !== undefined && (typeof x.selecionado !== 'string' || !ANCORA.test(x.selecionado))) return erro(reply, 400, 'requisicao_invalida', 'selecionado inválido')
     const blocos = (await o.armazem.cabecas(s.tenantId)).filter((c) => c.kind === 'bloco').map((c) => ({ ...(c.conteudo as object), tenantId: s.tenantId }))
-    const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), blocosDoTenant: blocos })
+    // os nós `dados` que a página referencia (o rascunho do tenant, ou o da base): sem eles a página não compila na prévia (os dados em si não são buscados no editor)
+    const cabecas = await o.armazem.cabecas(s.tenantId), base = await o.baseDe(s.tenantId), dados: object[] = []
+    const ref = (x.no as { spec?: { dados?: Record<string, unknown> } }).spec?.dados
+    for (const v of ref && typeof ref === 'object' ? Object.values(ref).slice(0, 100) : []) {
+      const id = typeof v === 'string' ? v : (v as { dados?: unknown } | null)?.dados
+      if (typeof id !== 'string' || !ANCORA_NO.test(id)) continue
+      const h = cabecas.find((c) => c.kind === 'dados' && c.id === id)?.conteudo ?? base.resolve('dados', id, { tenantId: s.tenantId })?.no
+      if (h) dados.push({ ...(h as object), tenantId: null })
+    }
+    const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), blocosDoTenant: [...blocos, ...dados] })
     return r.ok ? { ok: true, html: r.html, erros: [], avisos: r.avisos ?? [] } : { ok: false, html: '', erros: r.erros, avisos: [] }
   })
 

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
@@ -59,7 +59,13 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
   const fechaTudo = async () => { for (const f of fecham.reverse()) await f().catch(() => {}) }
   try {
     // 1. Postgres: PGlite com servidor de protocolo, para os pools `pg` de verdade se conectarem (papéis separados: migrador com BYPASSRLS e aplicação sem)
-    if (o.dados) mkdirSync(dirname(o.dados), { recursive: true }) // o PGlite só cria a última pasta
+    if (o.dados) {
+      mkdirSync(dirname(o.dados), { recursive: true }) // o PGlite só cria a última pasta
+      // o PGlite é de UM processo só: dois abrindo a mesma pasta se sobrescrevem em silêncio (um perde o que o outro gravou). A trava é um arquivo com o pid de quem está usando.
+      const trava = join(dirname(o.dados), 'ambiente.pid')
+      if (existsSync(trava)) { const pid = Number(readFileSync(trava, 'utf8')); let vivo = false; try { process.kill(pid, 0); vivo = pid !== process.pid } catch { /* processo morto: trava velha */ } if (vivo) throw new Error(`já há um ambiente local usando estes dados (pid ${pid}); encerre-o antes`) }
+      writeFileSync(trava, String(process.pid)); fecham.push(async () => { rmSync(trava, { force: true }) })
+    }
     const db = new PGlite(o.dados ?? undefined); await db.waitReady; fecham.push(() => db.close())
     await db.exec(`DO $$ BEGIN
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_app') THEN CREATE ROLE polaris_app LOGIN; END IF;
@@ -76,7 +82,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
     const reg = carregaNos(nosDir)
     const jwt = { JWT_EMISSOR: EMISSOR_LOCAL, JWT_AUDIENCIA: AUDIENCIA_LOCAL, JWT_SEGREDO: SEGREDO_LOCAL, NODE_ENV: 'development' }
-    const servico = await montaServico(configServico({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICO: 'loja', POLARIS_HOSTS: JSON.stringify(Object.fromEntries(TENANTS_LOCAIS.map((t) => [`${t.alias}.polaris.localhost`, t.id]))), DATABASE_URL: pg('polaris_app'), POLARIS_DB_PAPEL: 'polaris_app', POLARIS_MIGRAR: '1', DATABASE_URL_MIGRADOR: pg('polaris_migrador') }), reg); fecham.push(servico.fecha)
+    const servico = await montaServico(configServico({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICO: 'loja', POLARIS_HOSTS: JSON.stringify(Object.fromEntries(TENANTS_LOCAIS.map((t) => [`${t.alias}.polaris.localhost`, t.id]))), DATABASE_URL: pg('polaris_app'), POLARIS_DB_PAPEL: 'polaris_app', POLARIS_MIGRAR: '1', DATABASE_URL_MIGRADOR: pg('polaris_migrador') }), reg); fecham.push(async () => { servico.app.server.closeAllConnections(); await servico.fecha() })
     await servico.app.listen({ port: 0, host: '127.0.0.1' }); const urlServico = `http://127.0.0.1:${(servico.app.server.address() as { port: number }).port}`
     if ((await db.query(`SELECT 1 FROM information_schema.tables WHERE table_schema = 'loja' AND table_name = 'destaque'`)).rows.length) {
       await db.exec('RESET ROLE')
@@ -85,7 +91,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw)
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)
-    const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(() => gw.close())
+    const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
     const chave = new TextEncoder().encode(SEGREDO_LOCAL)
     const token = async (alias: string, papeis: readonly string[], usuario = 'dev') => {
       const t = TENANTS_LOCAIS.find((x) => x.alias === alias); if (!t) throw new Error(`tenant desconhecido: ${alias}`)

@@ -8,6 +8,7 @@ import { TENANTS_LOCAIS, sobeLocal } from '../src/local'
 // pnpm local --memoria  não grava nada em disco
 // pnpm local --porta 3100
 process.env.NODE_ENV = 'development'
+process.env.POLARIS_LOG_NIVEL ??= 'warn' // sem uma linha de log por requisição no terminal; `POLARIS_LOG_NIVEL=info pnpm local` volta a mostrar
 const args = process.argv.slice(2), tem = (f: string) => args.includes(f), valor = (f: string) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined }
 const raiz = resolve(import.meta.dirname, '..', '..', '..'), dados = tem('--memoria') ? null : join(raiz, '.polaris-local', 'pg')
 if (tem('--limpa') && dados) { rmSync(join(raiz, '.polaris-local'), { recursive: true, force: true }); console.log('dados locais apagados') }
@@ -28,5 +29,5 @@ Polaris local no ar${dados ? ` (dados em ${dados})` : ' (em memória)'}
   Postgres (psql)                     ${l.pgUrl}
 
 Tenants: ${TENANTS_LOCAIS.map((t) => `${t.alias} (${t.nome})`).join(', ')}.  Ctrl+C para parar.`)
-  for (const s of ['SIGTERM', 'SIGINT'] as const) process.once(s, () => { void l.fecha().finally(() => process.exit(0)) })
+  for (const s of ['SIGTERM', 'SIGINT'] as const) process.once(s, () => { setTimeout(() => { console.error('o encerramento travou; saindo à força'); process.exit(1) }, 10_000).unref(); void l.fecha().finally(() => process.exit(0)) })
 } catch (e) { console.error(`falha ao subir o ambiente local: ${(e as Error).message}`); process.exit(1) }

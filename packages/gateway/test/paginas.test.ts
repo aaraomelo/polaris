@@ -3,11 +3,11 @@ import { A, B, criaAmbiente, type Ambiente } from './ambiente'
 
 // O servidor de páginas: tenant (host/token) → rotas declarativas → página → HTML em streaming com dados do serviço, tema, CSP com nonce e hidratação.
 let e: Ambiente
-const modo = { comum: false }
+const modo: { id: string | undefined } = { id: undefined }
 const P = (bloco: string, props: Record<string, unknown> = {}) => ({ bloco, props })
 const pag = (id: string, spec: Record<string, unknown>) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec })
 beforeAll(async () => {
-  e = await criaAmbiente({ gateway: { paginas: { tenantNo: (c: { tenantId: string }) => (modo.comum ? 'comum' : c.tenantId === A ? 'lojaa' : c.tenantId === B ? 'lojab' : undefined) } } })
+  e = await criaAmbiente({ gateway: { paginas: { tenantNo: (c: { tenantId: string }) => (modo.id ? modo.id : c.tenantId === A ? 'lojaa' : c.tenantId === B ? 'lojab' : undefined) } } })
   await e.semear()
   const lista = { bloco: 'texto/paragrafo', props: { texto: 'Vitrine: {v.titulo}' }, repetir: { cada: 'vitrine', como: 'v' } }
   const nos = [
@@ -83,11 +83,24 @@ describe('servidor de páginas', () => {
   })
   it('a tabela de rotas é POR tenant, mesmo que dois tenants tenham nós `tenant` com o mesmo id e a mesma versão', async () => {
     const cria = (t: string, paginas: string[]) => ({ kind: 'tenant', id: 'comum', tenantId: t, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'comum', segmento: 'varejo', modulos: ['loja'], paginas } })
-    e.reg.registra(cria(A, ['p.sobre']) as never); e.reg.registra(cria(B, ['p.home']) as never); modo.comum = true
+    e.reg.registra(cria(A, ['p.sobre']) as never); e.reg.registra(cria(B, ['p.home']) as never); modo.id = 'comum'
     try {
       expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/sobre', { host: 'b.loja.test' })).statusCode).toBe(404)
       expect((await e.req('GET', '/', { host: 'b.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/', { host: 'a.loja.test' })).statusCode).toBe(404)
-    } finally { modo.comum = false }
+    } finally { modo.id = undefined }
+  })
+  it('páginas que o PRÓPRIO tenant criou (Studio) são servidas sem constar em `paginas`; se colidem, só as declaradas', async () => {
+    const no = (id: string, rota: string) => ({ kind: 'pagina', id, tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo: id, raiz: P('texto/paragrafo', { texto: `Conteúdo ${id}` }) } })
+    const tenant = (id: string) => ({ kind: 'tenant', id, tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, segmento: 'varejo', modulos: ['loja'], paginas: ['p.sobre'] } })
+    e.reg.registra(tenant('proprio') as never); e.reg.registra(no('p.minha', '/minha') as never); modo.id = 'proprio'
+    try {
+      const r = await e.req('GET', '/minha', { host: 'a.loja.test' }); expect(r.statusCode).toBe(200); expect(r.body).toContain('Conteúdo p.minha'); expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200)
+      // outro tenant (B) não enxerga a página do A
+      modo.id = 'proprio'; const b = await e.req('GET', '/minha', { host: 'b.loja.test', tok: await e.token('b', B, ['x']) }); expect(b.statusCode).toBe(404)
+      // colisão: nova release (nó tenant em outra versão) com página própria na MESMA rota de uma declarada → volta a só as declaradas
+      e.reg.registra({ ...tenant('proprio'), versao: '1.0.1' } as never); e.reg.registra(no('p.colide', '/sobre') as never)
+      expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/minha', { host: 'a.loja.test' })).statusCode).toBe(404)
+    } finally { modo.id = undefined }
   })
   it('o favicon não vira 404 nem página', async () => { expect((await e.req('GET', '/favicon.ico', { host: 'a.loja.test' })).statusCode).toBe(204) })
   it('um tenant sem nó `tenant` não publica páginas (404) e host desconhecido é 400', async () => {

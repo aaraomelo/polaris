@@ -121,6 +121,26 @@ describe('API de autoria do Studio', () => {
     for (const ruim of [{}, { no: 5 }, { no: [] }, { no: pagina('p'), extra: 1 }, { no: pagina('p'), selecionado: "x'; --" }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim).slice(0, 40)).toBe(400)
     expect((await a2.inject({ method: 'POST', url: '/studio/previa', payload: { no: pagina('p') } })).statusCode).toBe(401); await a2.close()
   })
+  it('previa: os nós `dados` que a página referencia (da base ou rascunho do tenant) vão junto, sem vazar os de outros', async () => {
+    base.registra({ kind: 'dados', id: 'd.vitrine', versao: '1.0.0', estatuto: 'publicado', spec: { fonte: { tipo: 'estatico', valor: 1 } } })
+    const chamadas: any[] = []; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, previsualiza: (x) => { chamadas.push(x); return { ok: true, html: '', titulo: 't' } } })
+    const comDados = { ...pagina('p'), spec: { ...(pagina('p') as any).spec, dados: { v: 'd.vitrine', w: { dados: 'd.vitrine' }, z: 'd.nao-existe', m: "../../x'; --" } } }
+    expect((await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: comDados } })).statusCode).toBe(200)
+    const dd = chamadas[0].blocosDoTenant.filter((n: any) => n.kind === 'dados'); expect(dd.map((n: any) => n.id)).toEqual(['d.vitrine', 'd.vitrine']); expect(dd.every((n: any) => n.tenantId === null)).toBe(true)
+    await put(A, { kind: 'dados', id: 'd.vitrine', versao: '1.0.0', estatuto: 'publicado', spec: { fonte: { tipo: 'estatico', valor: 'rascunho do A' } } })
+    await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: comDados } }); expect(JSON.stringify(chamadas.at(-1).blocosDoTenant)).toContain('rascunho do A')
+    await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(B, 'bia'), payload: { no: comDados } }); expect(JSON.stringify(chamadas.at(-1).blocosDoTenant)).not.toContain('rascunho do A'); await a2.close()
+  })
+  it('publicar: 501 sem a função; exige editar; chama com tenant/autor/nota da SESSÃO; falha vira 422', async () => {
+    expect((await app.inject({ method: 'POST', url: '/studio/publicar', headers: h(A, 'ana'), payload: {} })).statusCode).toBe(501)
+    const chamadas: any[] = []; let falha = false; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, publicar: async (x) => { chamadas.push(x); return falha ? { ok: false, erros: ['não fecha'] } : { ok: true, release: 7 } } })
+    const post = (corpo: unknown, t = h(A, 'ana')) => a2.inject({ method: 'POST', url: '/studio/publicar', headers: t, payload: corpo as never })
+    const ok = await post({ nota: 'v1' }); expect([ok.statusCode, ok.json()]).toEqual([200, { ok: true, release: 7 }]); expect(chamadas[0]).toEqual({ tenantId: A, autor: 'ana', nota: 'v1' })
+    expect((await post({}, h(A, 'ana'))).statusCode).toBe(200); expect(chamadas[1]).toEqual({ tenantId: A, autor: 'ana' })
+    expect((await post({ tenantId: B })).statusCode).toBe(400); expect((await post({ nota: 5 })).statusCode).toBe(400); expect((await post({ nota: 'x'.repeat(301) })).statusCode).toBe(400) // o tenant nunca vem do corpo
+    expect((await post({}, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'POST', url: '/studio/publicar', payload: {} })).statusCode).toBe(401)
+    falha = true; const r = await post({}); expect([r.statusCode, r.json().erro.codigo]).toEqual([422, 'publicacao_recusada']); await a2.close()
+  })
   it('tema: valor de token que o CSS não aceita é 422 ANTES de gravar (cor, medida, modos); válidos passam', async () => {
     const tema = (cor: object, extra: object = {}) => ({ kind: 'tema', id: 'validado', versao: '1.0.0', estatuto: 'publicado', spec: { tokens: { cor, ...extra } } })
     const r = await put(A, tema({ primaria: 'azul', fundo: '#fff; } body { display:none' }, { espacamento: { m: '8 8' } })); expect(r.statusCode).toBe(422)

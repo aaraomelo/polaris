@@ -18,6 +18,7 @@ export const DADOS = [
   dado('comentarios', 'listarComentarios', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }) }),
   dado('comentar', 'comentar', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }), texto: campo('texto', { obrigatorio: true }), ancora: campo('texto'), versao: campo('inteiro'), respondeA: campo('texto') }),
   dado('resolver', 'resolverComentario', { cid: campo('texto', { obrigatorio: true }), resolvido: campo('booleano', { obrigatorio: true }) }),
+  dado('publicar', 'publicarSite', { nota: campo('texto') }),
   dado('previa', 'previsualizar', { no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto') }),
 ]
 
@@ -56,8 +57,8 @@ const abrir = (kind: string, id: string): Acao => exe('abrir', { kind, id: `{${i
 const seletorDeNos = (kind: 'tema' | 'pagina'): Inst => pilha([
   titulo(kind === 'tema' ? 'Temas' : 'Páginas', 3),
   linha([
-    P('layout/linha', { repetir: { cada: `filtra(nos.nos, n => n.kind == ${q(kind)})`, como: 'n', chave: 'n.id' }, props: { gap: 4 }, filhos: [botao('{n.id} ●', [abrir(kind, 'n.id')])] }),
-    P('layout/linha', { repetir: { cada: `filtra(nos.base.${kind}, b => !comeca(b, "studio."))`, como: 'b', chave: 'b' }, props: { gap: 4 }, filhos: [botao('{b} (padrão)', [abrir(kind, 'b')])] }),
+    P('layout/linha', { repetir: { cada: `filtra(nos.nos, n => n.kind == ${q(kind)})`, como: 'n', chave: 'n.id' }, props: { gap: 4 }, filhos: [botao('{n.id} (personalizado)', [abrir(kind, 'n.id')])] }),
+    P('layout/linha', { repetir: { cada: `filtra(nos.base.${kind}, b => !comeca(b, "studio.") && tamanho(filtra(nos.nos, n => n.kind == ${q(kind)} && n.id == b)) == 0)`, como: 'b', chave: 'b' }, props: { gap: 4 }, filhos: [botao('{b} (padrão)', [abrir(kind, 'b')])] }),
   ], { props: { gap: 8 } }),
 ], { gap: 4 })
 
@@ -180,9 +181,9 @@ const historicoVista = (): Inst => pilha([
     botao('De', [def('de', 'texto(v.seq)')]), botao('Para', [def('para', 'texto(v.seq)')]),
     botao('Restaurar no editor', [exe('versao', { ...KI, seq: '{v.seq}' }, [...edita('com(resultado.no, ["versao"], estado.no.versao)'), def('aba', '"editor"')], aviso('erro', 'erro'))], { se: '!v.removido' }),
   ], { repetir: { cada: 'versoes.versoes ?? []', como: 'v', chave: 'texto(v.seq)' } }),
-  texto('Comparar: de v{estado.de} até v{estado.para}', { se: 'estado.de != "" || estado.para != ""' }),
+  texto('Comparar: {estado.de == "base" ? "o padrão" : "v" + estado.de} → {estado.para == "base" ? "o padrão" : "v" + estado.para}', { se: 'estado.de != "" || estado.para != ""' }),
   botao('Comparar versões', [exe('diff', { ...KI, de: '{estado.de}', para: '{estado.para}' }, undefined, aviso('erro', 'erro'))], { se: 'estado.de != "" && estado.para != ""' }),
-  botao('Comparar com o padrão', [def('de', '"base"'), exe('diff', { ...KI, de: 'base', para: '{estado.aberto.seq}' }, undefined, aviso('erro', 'erro'))], { se: 'estado.aberto.origem == "tenant"' }),
+  botao('Comparar com o padrão', [def('de', '"base"'), def('para', 'texto(estado.aberto.seq)'), exe('diff', { ...KI, de: 'base', para: '{estado.aberto.seq}' }, undefined, aviso('erro', 'erro'))], { se: 'estado.aberto.origem == "tenant"' }),
   diffVista(),
   comentariosVista(),
 ], { se: 'estado.no && estado.aberto.origem != "novo" && estado.aba == "historico"', gap: 8 })
@@ -204,7 +205,7 @@ const formCriar = (): Inst => linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver' },
+  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', publicar: 'studio.publicar' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
     aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
@@ -218,6 +219,7 @@ export const PAGINA = no('pagina', 'studio.app', {
       botao('Salvar', [exe('salvar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}', no: '{estado.no}', baseSeq: '{estado.aberto.seq}' }, [
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
       ], aviso('erro', 'erro'))], { se: 'estado.no' }),
+      botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))]),
       texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
     ]),
     ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),

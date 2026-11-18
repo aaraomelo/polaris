@@ -50,10 +50,13 @@ Tenant e autor vêm **sempre da sessão** (`autentica` é injetado); corpo com `
 - **O login não existe aqui**: o gateway valida o JWT, mas quem o emite é o provedor de identidade. O Studio recebe o token no fragmento da URL (`/studio#token=…`), guarda em `sessionStorage` e apaga o fragmento; **falta o fluxo de login do provedor que redireciona para lá**. O login de desenvolvimento (`pnpm local`) emite o JWT localmente e recusa produção; os testes usam um stub por cookie.
 - **Menos recursos que a SPA React que ele substituiu**: sem duplicar bloco, sem recuar/avançar (mover para dentro/fora de outro bloco), sem **modos** de tema (escuro…), sem editar props de tipo estruturado (objeto/lista: aparece "edite no JSON do nó"), sem atalhos de teclado (Ctrl+S/Z), sem selo de comentários na árvore, comentários em lista plana (respostas com `↳`, sem fios agrupados), e sem validação de slot no cliente (aceita/máx/mín só aparecem como erro de compilação na prévia).
 - Desfazer guarda **snapshots** do nó (até 60); a linguagem tem `difere`/`inverso` para patches, mas o Studio ainda não os usa.
-- Salvar é **rascunho**: o nó vira a "cabeça" do tenant. Publicar (release, promoção, preview assinado) continua pela API de releases do E7; o Studio não tem botão de publicar. Salvar com erro de compilação é permitido (a prévia lista os erros).
+- Salvar é **rascunho**: o nó vira a "cabeça" do tenant. O botão **Publicar** (`POST /studio/publicar`, permissão de editor) cria uma release com as cabeças de hoje e a promove: é só então que o site do tenant muda. Páginas criadas pelo tenant e com rota são servidas sozinhas, sem constar em `paginas` do nó `tenant` (se colidirem com uma rota declarada, vale só o declarado). Rollback, preview assinado e a lista de releases seguem pela API de releases do E7 (sem tela ainda); o Studio não tem botão de publicar. Salvar com erro de compilação é permitido (a prévia lista os erros).
 - A prévia não busca `spec.dados`: blocos ligados a dados externos aparecem vazios. Clicar na prévia não seleciona o bloco (a seleção é pela árvore).
 - Só páginas e temas (documentos, blocos compostos e papéis não têm editor). Sem arrastar e soltar.
 - Dois editores no mesmo nó **não** se fundem: o segundo a salvar recebe o conflito (sem merge de três vias).
 - Comentários não podem ser editados nem apagados; só resolvidos. Sem notificações.
 - Acessibilidade: nome acessível dos campos e do quadro e foco por teclado são verificados por teste; **não** houve auditoria com leitor de tela, e a árvore de blocos é uma lista de botões (sem navegação por setas).
 - O hospedeiro carrega o runtime inteiro (~450 KiB, sem divisão de código) e o **programa** compilado da página (~190 KiB). Cada edição chama o servidor para a prévia (sem debounce).
+
+## Prévia
+A prévia segue o modo **claro** do tema (o modo escuro ainda não tem seletor). Os nós `dados` que a página referencia vão junto, mas os dados em si não são buscados no editor.

@@ -16,6 +16,6 @@ describe('as páginas do Studio (nós da plataforma)', () => {
   it('renderiza no servidor (SSR) com dados de exemplo e o estado inicial vazio', () => {
     const r = compilaPrograma(reg, reg.resolve('pagina', 'studio.app')!.no); if (!r.ok) throw new Error('compila')
     const h = renderPaginaHtml({ programa: r.programa, componentes: COMPONENTES_BASE, dados: { nos: { nos: [{ kind: 'tema', id: 'meu', seq: 2 }], base: { tema: ['padrao'], pagina: [] } } } }).corpo
-    expect(h).toContain('Polaris Studio'); expect(h).toContain('meu ●'); expect(h).toContain('padrao (padrão)'); expect(h).not.toContain('Tokens do tema')
+    expect(h).toContain('Polaris Studio'); expect(h).toContain('meu (personalizado)'); expect(h).toContain('padrao (padrão)'); expect(h).not.toContain('Tokens do tema')
   })
 })

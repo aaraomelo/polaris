@@ -75,7 +75,11 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     if (!no) return null
     const chave = `${ctx.tenantId}|${chaveRelease}|${no.id}|${no.versao}`
     if (tabelas.has(chave)) return tabelas.get(chave)!
-    const r = compilaTabela(reg, no, { tenantId: ctx.tenantId })
+    // as páginas que o PRÓPRIO tenant criou (Studio) e têm rota entram sozinhas: não precisam estar em `paginas` do nó `tenant`. Se alguma colide com as demais (mesma rota), a tabela volta a ser só a declarada.
+    const proprias = reg.ids('pagina').filter((id) => !(no.spec as { paginas?: string[] }).paginas?.includes(id) && reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.escopo === 'tenant' && typeof (reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.no.spec as { rota?: unknown }).rota === 'string')
+    const tenta = (n: typeof no) => compilaTabela(reg, n, { tenantId: ctx.tenantId })
+    let r = proprias.length ? tenta({ ...no, spec: { ...(no.spec as object), paginas: [...((no.spec as { paginas?: string[] }).paginas ?? []), ...proprias] } } as typeof no) : tenta(no)
+    if (!r.ok && proprias.length) { d.log.warn('páginas do tenant colidem com as declaradas; só as declaradas são servidas', { tenant: ctx.tenantId, erros: r.erros.length }); r = tenta(no) }
     if (!r.ok) d.log.warn('as rotas do tenant não compilam', { tenant: ctx.tenantId, erros: r.erros.length })
     tabelas.set(chave, r.ok ? r.tabela : null)
     while (tabelas.size > 200) tabelas.delete(tabelas.keys().next().value as string)

@@ -19,6 +19,7 @@ Sobe, **num só processo e sem Docker**: o Postgres (PGlite com servidor de prot
 - O tenant sai do **host**: `*.polaris.localhost` resolve para o próprio computador no Chrome e no Firefox (em outro navegador, ou com `curl`, mande o cabeçalho `Host`). O token de um tenant **não vale** no host de outro (401).
 - Papéis do login: `studio.editor`, `studio.comentarista`, `studio.leitor` (o Studio) e `gerente` (a loja). `?usuario=ana` na URL do login muda o nome (vira o autor das versões e comentários).
 - Outro domínio de dados: `POLARIS_NOS=/caminho pnpm local` (a pasta com os nós `*.json` do serviço); o padrão é `exemplos/loja`.
+- Os dados ficam em `.polaris-local/`; **só uma instância por vez** usa essa pasta (há trava por pid: o PGlite é de um processo só). Log: `POLARIS_LOG_NIVEL=info` mostra cada requisição.
 - **Só desenvolvimento**: o login emite o JWT (HS256, segredo fixo conhecido) que o provedor de identidade emitiria, escuta só em `127.0.0.1` e **recusa `NODE_ENV=production`**. Nada daqui é modelo de segurança de produção.
 - Testado de ponta a ponta (`apps/polaris/test/local.test.ts`): login → token → Studio e API pelo gateway, isolamento por tenant, persistência entre execuções, recusa de produção, e no Chrome real (clicar em "entrar", abrir o tema padrão, salvar).
 - O site dos tenants vem de `exemplos/loja-site` (nós `tenant` e `pagina`; o id do nó `tenant` é o alias). Limites do servidor de páginas (sem login por cookie etc.): `docs/paginas.md`.
