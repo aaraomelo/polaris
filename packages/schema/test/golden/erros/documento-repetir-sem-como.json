@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/blocos/0/repetir",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'como'",
+    "dica": "adicione \"como\" em /spec/blocos/0/repetir"
+  }
+]

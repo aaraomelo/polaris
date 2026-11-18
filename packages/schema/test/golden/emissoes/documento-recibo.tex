@@ -1,0 +1,42 @@
+\subsection*{documento: recibo-simples}
+\begin{tabular}{@{}ll@{}}
+versão & 1.0.0 \\
+estatuto & rascunho \\
+escopo & core \\
+\end{tabular}
+
+\begin{tabular}{@{}p{0.35\linewidth}p{0.6\linewidth}@{}}
+\texttt{spec.blocos[0].texto} & Recibo \{pagamento.numero\} \\
+\texttt{spec.blocos[0].tipo} & barraSecao \\
+\texttt{spec.blocos[0].variante} & titulo \\
+\texttt{spec.blocos[1].estiloValor.peso} & negrito \\
+\texttt{spec.blocos[1].estiloValor.tamanho} & 14 \\
+\texttt{spec.blocos[1].rotulo} & Valor \\
+\texttt{spec.blocos[1].tipo} & campo \\
+\texttt{spec.blocos[1].valor} & \{pagamento.valor | brl\} \\
+\texttt{spec.blocos[2].colunas[0].cabecalho} & Item \\
+\texttt{spec.blocos[2].colunas[0].flex} & 4 \\
+\texttt{spec.blocos[2].colunas[1].alinhamento} & direita \\
+\texttt{spec.blocos[2].colunas[1].cabecalho} & Total \\
+\texttt{spec.blocos[2].colunas[1].flex} & 1 \\
+\texttt{spec.blocos[2].linhasDe.cada} & itens \\
+\texttt{spec.blocos[2].linhasDe.celulas[0]} & \{i.nome\} \\
+\texttt{spec.blocos[2].linhasDe.celulas[1]} & \{i.total | brl\} \\
+\texttt{spec.blocos[2].linhasDe.como} & i \\
+\texttt{spec.blocos[2].tipo} & tabela \\
+\texttt{spec.blocos[3].se} & pagamento.numero \\
+\texttt{spec.blocos[3].texto} & Obrigado! \\
+\texttt{spec.blocos[3].tipo} & paragrafo \\
+\texttt{spec.blocos[4].itens[0].rotulo} & Emitente \\
+\texttt{spec.blocos[4].tipo} & assinaturas \\
+\texttt{spec.dados.itens.tipo} & lista \\
+\texttt{spec.dados.pagamento.tipo} & json \\
+\texttt{spec.margem.baixo} & 12 \\
+\texttt{spec.margem.direita} & 12 \\
+\texttt{spec.margem.esquerda} & 12 \\
+\texttt{spec.margem.topo} & 10 \\
+\texttt{spec.orientacao} & paisagem \\
+\texttt{spec.rodape} & Página \{pagina\}/\{paginas\} \\
+\texttt{spec.tamanho} & A5 \\
+\texttt{spec.titulo} & Recibo \{pagamento.numero\} \\
+\end{tabular}

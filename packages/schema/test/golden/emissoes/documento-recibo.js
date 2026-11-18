@@ -1,0 +1,80 @@
+// polaris: documento recibo-simples@1.0.0
+export const kind = "documento";
+export const id = "recibo-simples";
+export const versao = "1.0.0";
+export default {
+  "id": "recibo-simples",
+  "kind": "documento",
+  "spec": {
+    "blocos": [
+      {
+        "texto": "Recibo {pagamento.numero}",
+        "tipo": "barraSecao",
+        "variante": "titulo"
+      },
+      {
+        "estiloValor": {
+          "peso": "negrito",
+          "tamanho": 14
+        },
+        "rotulo": "Valor",
+        "tipo": "campo",
+        "valor": "{pagamento.valor | brl}"
+      },
+      {
+        "colunas": [
+          {
+            "cabecalho": "Item",
+            "flex": 4
+          },
+          {
+            "alinhamento": "direita",
+            "cabecalho": "Total",
+            "flex": 1
+          }
+        ],
+        "linhasDe": {
+          "cada": "itens",
+          "celulas": [
+            "{i.nome}",
+            "{i.total | brl}"
+          ],
+          "como": "i"
+        },
+        "tipo": "tabela"
+      },
+      {
+        "se": "pagamento.numero",
+        "texto": "Obrigado!",
+        "tipo": "paragrafo"
+      },
+      {
+        "itens": [
+          {
+            "rotulo": "Emitente"
+          }
+        ],
+        "tipo": "assinaturas"
+      }
+    ],
+    "dados": {
+      "itens": {
+        "tipo": "lista"
+      },
+      "pagamento": {
+        "tipo": "json"
+      }
+    },
+    "margem": {
+      "baixo": 12,
+      "direita": 12,
+      "esquerda": 12,
+      "topo": 10
+    },
+    "orientacao": "paisagem",
+    "rodape": "Página {pagina}/{paginas}",
+    "tamanho": "A5",
+    "titulo": "Recibo {pagamento.numero}"
+  },
+  "versao": "1.0.0"
+};

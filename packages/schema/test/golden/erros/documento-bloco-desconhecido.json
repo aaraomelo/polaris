@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/blocos/0/tipo",
+    "regra": "enum",
+    "mensagem": "valor \"foguete\" não é permitido; aceitos: 'espaco', 'barraSecao', 'paragrafo', 'campo', 'colunas', 'tabela', 'resumo', 'assinaturas', 'imagem'"
+  }
+]

@@ -4,5 +4,11 @@
     "regra": "required",
     "mensagem": "falta o campo obrigatório 'tipo'",
     "dica": "adicione \"tipo\" em /spec/blocos/0"
+  },
+  {
+    "caminho": "/spec/blocos/0/texto",
+    "regra": "unevaluatedProperties",
+    "mensagem": "o campo 'texto' não existe aqui",
+    "dica": "campos válidos: tipo, se, repetir"
   }
 ]

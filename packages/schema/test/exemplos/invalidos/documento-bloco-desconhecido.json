@@ -1,0 +1,6 @@
+{
+  "kind": "documento",
+  "id": "documento-bloco-desconhecido",
+  "versao": "1.0.0",
+  "spec": { "tamanho": "A4", "blocos": [{"tipo":"foguete"}] }
+}

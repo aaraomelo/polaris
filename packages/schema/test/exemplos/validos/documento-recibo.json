@@ -1,0 +1,21 @@
+{
+  "kind": "documento",
+  "id": "recibo-simples",
+  "versao": "1.0.0",
+  "spec": {
+    "tamanho": "A5",
+    "orientacao": "paisagem",
+    "margem": { "topo": 10, "direita": 12, "baixo": 12, "esquerda": 12 },
+    "titulo": "Recibo {pagamento.numero}",
+    "rodape": "Página {pagina}/{paginas}",
+    "dados": { "pagamento": { "tipo": "json" }, "itens": { "tipo": "lista" } },
+    "blocos": [
+      { "tipo": "barraSecao", "variante": "titulo", "texto": "Recibo {pagamento.numero}" },
+      { "tipo": "campo", "rotulo": "Valor", "valor": "{pagamento.valor | brl}", "estiloValor": { "peso": "negrito", "tamanho": 14 } },
+      { "tipo": "tabela", "colunas": [{ "cabecalho": "Item", "flex": 4 }, { "cabecalho": "Total", "flex": 1, "alinhamento": "direita" }],
+        "linhasDe": { "cada": "itens", "como": "i", "celulas": ["{i.nome}", "{i.total | brl}"] } },
+      { "tipo": "paragrafo", "texto": "Obrigado!", "se": "pagamento.numero" },
+      { "tipo": "assinaturas", "itens": [{ "rotulo": "Emitente" }] }
+    ]
+  }
+}

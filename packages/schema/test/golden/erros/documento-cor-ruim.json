@@ -1,0 +1,20 @@
+[
+  {
+    "caminho": "/spec/blocos/0/cor",
+    "regra": "pattern",
+    "mensagem": "\"vermelho\" não segue o formato esperado",
+    "dica": "deve casar com ^#[0-9a-fA-F]{6}$"
+  },
+  {
+    "caminho": "/spec/blocos/0/texto",
+    "regra": "unevaluatedProperties",
+    "mensagem": "o campo 'texto' não existe aqui",
+    "dica": "campos válidos: tipo, se, repetir"
+  },
+  {
+    "caminho": "/spec/blocos/0/cor",
+    "regra": "unevaluatedProperties",
+    "mensagem": "o campo 'cor' não existe aqui",
+    "dica": "campos válidos: tipo, se, repetir"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/blocos/0/script",
+    "regra": "unevaluatedProperties",
+    "mensagem": "o campo 'script' não existe aqui",
+    "dica": "campos válidos: tipo, se, repetir"
+  }
+]

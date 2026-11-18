@@ -1,0 +1,6 @@
+{
+  "kind": "documento",
+  "id": "documento-campo-estranho",
+  "versao": "1.0.0",
+  "spec": { "tamanho": "A4", "blocos": [{"tipo":"espaco","script":"alert(1)"}] }
+}
