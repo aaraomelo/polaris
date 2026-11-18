@@ -1,0 +1,5 @@
+export * from './ir'
+export * from './contrato'
+export * from './js'
+export * from './wasm'
+export { KernelErro } from './erro'

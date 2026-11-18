@@ -22,6 +22,11 @@
           "minimum": 1,
           "maximum": 16777216,
           "description": "maior n aceito (padrão 1048576)"
+        },
+        "larguraDe": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "description": "nome de uma entrada inteira escalar que é a LARGURA da grade: habilita as variáveis x = i mod max(w,1) e y = i div max(w,1)"
         }
       }
     },
