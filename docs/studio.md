@@ -44,10 +44,10 @@ Tenant e autor vêm **sempre da sessão** (`autentica` é injetado); corpo com `
 - Testado em `apps/polaris/test/e2e.test.ts` (gateway real, JWT, Postgres) e `tools/ferramentas/test/deploy.test.ts`. O nginx continua sem `nginx -t` real (ver `docs/deploy.md`).
 
 ## Rodar
-`pnpm --filter @polaris/studio-app dev` → http://127.0.0.1:4300/studio (banco em memória, um tenant de demonstração, usuário de desenvolvimento com todas as permissões; **recusa rodar com NODE_ENV=production**).
+`pnpm local` e abra http://localhost:3000/entrar (veja `docs/ambiente-dev.md`): sobe o gateway com o Studio, tenants de demonstração e um login de desenvolvimento.
 
 ## Limites assumidos
-- **O login não existe aqui**: o gateway valida o JWT, mas quem o emite é o provedor de identidade. O Studio recebe o token no fragmento da URL (`/studio#token=…`), guarda em `sessionStorage` e apaga o fragmento; **falta o fluxo de login do provedor que redireciona para lá**. A autenticação do `bin/dev.ts` (cookie) é um stub e recusa produção.
+- **O login não existe aqui**: o gateway valida o JWT, mas quem o emite é o provedor de identidade. O Studio recebe o token no fragmento da URL (`/studio#token=…`), guarda em `sessionStorage` e apaga o fragmento; **falta o fluxo de login do provedor que redireciona para lá**. O login de desenvolvimento (`pnpm local`) emite o JWT localmente e recusa produção; os testes usam um stub por cookie.
 - **Menos recursos que a SPA React que ele substituiu**: sem duplicar bloco, sem recuar/avançar (mover para dentro/fora de outro bloco), sem **modos** de tema (escuro…), sem editar props de tipo estruturado (objeto/lista: aparece "edite no JSON do nó"), sem atalhos de teclado (Ctrl+S/Z), sem selo de comentários na árvore, comentários em lista plana (respostas com `↳`, sem fios agrupados), e sem validação de slot no cliente (aceita/máx/mín só aparecem como erro de compilação na prévia).
 - Desfazer guarda **snapshots** do nó (até 60); a linguagem tem `difere`/`inverso` para patches, mas o Studio ainda não os usa.
 - Salvar é **rascunho**: o nó vira a "cabeça" do tenant. Publicar (release, promoção, preview assinado) continua pela API de releases do E7; o Studio não tem botão de publicar. Salvar com erro de compilação é permitido (a prévia lista os erros).

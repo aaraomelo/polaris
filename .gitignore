@@ -30,3 +30,4 @@ docker/segredos/*
 !docker/segredos/LEIA-ME.md
 docker/*.env
 !docker/*.env.exemplo
+.polaris-local/

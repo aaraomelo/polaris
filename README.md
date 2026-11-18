@@ -44,8 +44,7 @@ pnpm tipos          # TypeScript estrito em todos os pacotes
 pnpm test           # toda a suíte (Postgres em memória; sem credenciais)
 ```
 
-- **Ambiente de desenvolvimento** (gateway + serviço + Postgres): `docs/ambiente-dev.md`
-- **Studio local**: `pnpm --filter @polaris/studio-app dev` e abra http://127.0.0.1:4300/studio
+- **Ambiente local completo, sem Docker** (Postgres, serviço, gateway, Studio e login de desenvolvimento): `pnpm local` e abra http://localhost:3000/entrar (`docs/ambiente-dev.md`)
 - **Postgres real** (concorrência, locks, timeouts): `pnpm test:pgreal` (exige uma imagem `postgres:16` local)
 
 Os testes de paridade (documentos e kernels) usam Chrome e `poppler-utils` quando disponíveis; no CI a falta deles é falha.

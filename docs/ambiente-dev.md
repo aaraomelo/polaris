@@ -1,5 +1,29 @@
 # Ambiente de desenvolvimento
 
+## Local sem Docker (o caminho curto)
+```
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm local                  # dados persistem em .polaris-local/ ; --limpa apaga ; --memoria não grava ; --porta 3100
+```
+Sobe, **num só processo e sem Docker**: o Postgres (PGlite com servidor de protocolo, papéis `polaris_app` sem BYPASSRLS e `polaris_migrador`), o esquema da plataforma, o serviço `loja` (de `exemplos/loja`, migrado com o papel migrador), o **gateway** de verdade na frente, o **Studio** (empacotado na primeira vez) e dois tenants de demonstração (`demo` e `outra`).
+
+| O quê | Onde |
+|---|---|
+| **entrar** (login de desenvolvimento) | `http://localhost:3000/entrar`: escolha o tenant e o papel; emite um JWT de 12 h e abre o Studio do tenant |
+| Studio | `http://demo.polaris.localhost:3000/studio` |
+| API REST gerada da loja | `http://demo.polaris.localhost:3000/api/loja/produtos` (com `Authorization: Bearer <token>`) |
+| GraphQL (com introspecção) | `http://demo.polaris.localhost:3000/graphql` |
+| Postgres (`psql`) | a URL é impressa na partida (`POLARIS_LOCAL_PG_PORTA` fixa a porta) |
+
+- O tenant sai do **host**: `*.polaris.localhost` resolve para o próprio computador no Chrome e no Firefox (em outro navegador, ou com `curl`, mande o cabeçalho `Host`). O token de um tenant **não vale** no host de outro (401).
+- Papéis do login: `studio.editor`, `studio.comentarista`, `studio.leitor` (o Studio) e `gerente` (a loja). `?usuario=ana` na URL do login muda o nome (vira o autor das versões e comentários).
+- Outro domínio de dados: `POLARIS_NOS=/caminho pnpm local` (a pasta com os nós `*.json` do serviço); o padrão é `exemplos/loja`.
+- **Só desenvolvimento**: o login emite o JWT (HS256, segredo fixo conhecido) que o provedor de identidade emitiria, escuta só em `127.0.0.1` e **recusa `NODE_ENV=production`**. Nada daqui é modelo de segurança de produção.
+- Testado de ponta a ponta (`apps/polaris/test/local.test.ts`): login → token → Studio e API pelo gateway, isolamento por tenant, persistência entre execuções, recusa de produção, e no Chrome real (clicar em "entrar", abrir o tema padrão, salvar).
+- **Ainda não serve as páginas dos tenants**: o gateway compõe dados e expõe REST/GraphQL, mas não há um servidor que renderize as páginas (`kind: pagina`) de um tenant. Hoje a única página servida é a do Studio.
+
+## Com Docker (Postgres 16 real, imagem de produção)
+
 ```
 cp .env.exemplo docker/dev.env   # valores de DEV; fora do git (o .env da raiz NÃO é usado: ele guarda segredos pessoais do projeto)
 pnpm dev                          # = docker compose --env-file docker/dev.env up --build   (porta do gateway: POLARIS_PORTA, padrão 3000)

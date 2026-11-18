@@ -1,0 +1,101 @@
+import { existsSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { PGlite } from '@electric-sql/pglite'
+import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
+import { registraBase } from '@polaris/engine'
+import { registraTemas } from '@polaris/engine/tema'
+import { SignJWT } from 'jose'
+import { configGateway, configServico } from './config'
+import { montaGateway } from './gateway'
+import { migraPlataforma } from './migra'
+import { carregaNos } from './nos'
+import { montaServico } from './servico'
+
+// AMBIENTE LOCAL: o mesmo gateway, o mesmo serviço e o mesmo Studio da produção, com o Postgres em PGlite (sem Docker), dados persistentes em disco, tenants de demonstração e um LOGIN DE
+// DESENVOLVIMENTO que emite o JWT (HS256) que o provedor de identidade emitiria. Só roda em loopback e RECUSA produção: nada daqui é um modelo de segurança de produção.
+const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
+export const SEGREDO_LOCAL = 'polaris-local-segredo-de-desenvolvimento-0123456789'
+export const EMISSOR_LOCAL = 'https://id.polaris.local', AUDIENCIA_LOCAL = 'polaris'
+export const TENANTS_LOCAIS = [
+  { id: '11111111-1111-1111-1111-111111111111', alias: 'demo', nome: 'Loja Demo', modulos: ['loja'] },
+  { id: '22222222-2222-2222-2222-222222222222', alias: 'outra', nome: 'Outra Loja', modulos: ['loja'] },
+] as const
+/** os papéis que o login de desenvolvimento oferece */
+export const PAPEIS_LOCAIS = ['studio.editor', 'studio.comentarista', 'studio.leitor', 'gerente'] as const
+const ALIAS = /^[a-z][a-z0-9-]{1,30}$/, USUARIO = /^[a-z][a-z0-9-]{0,30}$/
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
+
+export type OpcoesLocal = {
+  /** pasta dos dados do Postgres (persistem entre execuções); `null` = em memória (testes) */
+  dados?: string | null
+  /** porta do gateway (padrão 3000; 0 = qualquer) */
+  porta?: number
+  /** pasta dos nós do serviço (padrão: exemplos/loja) */
+  nos?: string
+  /** o Studio empacotado (padrão: apps/studio/dist) */
+  studioDir?: string
+  /** porta do Postgres para `psql` (padrão: qualquer) */
+  pgPorta?: number
+  silencioso?: boolean
+}
+export type Local = {
+  porta: number
+  /** a URL de um tenant: `http://<alias>.localhost:<porta>` (o navegador resolve *.localhost para o próprio computador) */
+  urlTenant(alias: string): string
+  pgUrl: string
+  token(alias: string, papeis: readonly string[], usuario?: string): Promise<string>
+  fecha(): Promise<void>
+}
+
+export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
+  if (process.env.NODE_ENV === 'production') throw new Error('o ambiente local não roda com NODE_ENV=production (a autenticação aqui é de desenvolvimento)')
+  const studioDir = o.studioDir ?? join(RAIZ, 'apps', 'studio', 'dist'), nosDir = o.nos ?? join(RAIZ, 'exemplos', 'loja')
+  if (!existsSync(join(studioDir, 'index.html'))) throw new Error(`o Studio não foi empacotado (falta ${join(studioDir, 'index.html')}): rode \`pnpm --filter @polaris/studio-app build\``)
+  const fecham: Array<() => Promise<void>> = []
+  const fechaTudo = async () => { for (const f of fecham.reverse()) await f().catch(() => {}) }
+  try {
+    // 1. Postgres: PGlite com servidor de protocolo, para os pools `pg` de verdade se conectarem (papéis separados: migrador com BYPASSRLS e aplicação sem)
+    const db = new PGlite(o.dados ?? undefined); await db.waitReady; fecham.push(() => db.close())
+    await db.exec(`DO $$ BEGIN
+      IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_app') THEN CREATE ROLE polaris_app LOGIN; END IF;
+      IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_migrador') THEN CREATE ROLE polaris_migrador LOGIN BYPASSRLS; END IF;
+    END $$; GRANT CREATE ON DATABASE postgres TO polaris_migrador;`)
+    const srv = new PGLiteSocketServer({ db, port: o.pgPorta ?? 0, host: '127.0.0.1', maxConnections: 20 }); await srv.start(); fecham.push(() => srv.stop())
+    const pgPorta = /:(\d+)/.exec(srv.getServerConn())![1]!, pg = (papel: string) => `postgres://${papel}@127.0.0.1:${pgPorta}/postgres`
+    // 2. esquema da plataforma (diretório de tenants, versões, releases, comentários) e os tenants de demonstração
+    await migraPlataforma({ urlMigrador: pg('polaris_migrador'), papelPlataforma: 'polaris_app' })
+    for (const t of TENANTS_LOCAIS) {
+      await db.query(`INSERT INTO plataforma.tenant (id, alias, nome, segmento, packs, dono_email, status, chave) VALUES ($1, $2, $3, 'varejo', '{varejo}', $4, 'ativo', $5) ON CONFLICT (id) DO NOTHING`, [t.id, t.alias, t.nome, `${t.alias}@exemplo.local`, `chave-local-${t.alias}-xxxxxxxxxxxx`])
+      for (const m of t.modulos) await db.query(`INSERT INTO plataforma.modulo (tenant_id, servico) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [t.id, m])
+    }
+    // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
+    const reg = carregaNos(nosDir)
+    const jwt = { JWT_EMISSOR: EMISSOR_LOCAL, JWT_AUDIENCIA: AUDIENCIA_LOCAL, JWT_SEGREDO: SEGREDO_LOCAL, NODE_ENV: 'development' }
+    const servico = await montaServico(configServico({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICO: 'loja', DATABASE_URL: pg('polaris_app'), POLARIS_DB_PAPEL: 'polaris_app', POLARIS_MIGRAR: '1', DATABASE_URL_MIGRADOR: pg('polaris_migrador') }), reg); fecham.push(servico.fecha)
+    await servico.app.listen({ port: 0, host: '127.0.0.1' }); const urlServico = `http://127.0.0.1:${(servico.app.server.address() as { port: number }).port}`
+    const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw)
+    const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(() => gw.close())
+    const chave = new TextEncoder().encode(SEGREDO_LOCAL)
+    const token = async (alias: string, papeis: readonly string[], usuario = 'dev') => {
+      const t = TENANTS_LOCAIS.find((x) => x.alias === alias); if (!t) throw new Error(`tenant desconhecido: ${alias}`)
+      return new SignJWT({ tid: t.id, papeis: [...papeis] }).setProtectedHeader({ alg: 'HS256' }).setSubject(usuario).setIssuer(EMISSOR_LOCAL).setAudience(AUDIENCIA_LOCAL).setExpirationTime('12h').sign(chave)
+    }
+    // 4. login de DESENVOLVIMENTO: emite o JWT e leva ao Studio do tenant (o token vai no fragmento da URL, que não chega a servidor nenhum)
+    let porta = o.porta ?? 3000
+    const cab = (reply: { header(k: string, v: string): unknown }) => { reply.header('content-security-policy', "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"); reply.header('cache-control', 'no-store') }
+    gw.get('/entrar', async (_req, reply) => {
+      cab(reply)
+      const linhas = TENANTS_LOCAIS.map((t) => `<h2>${esc(t.nome)} <small>(${esc(t.alias)}.polaris.localhost)</small></h2><ul>${PAPEIS_LOCAIS.map((p) => `<li><a href="/entrar/ir?tenant=${esc(t.alias)}&amp;papel=${esc(p)}">entrar como <code>${esc(p)}</code></a></li>`).join('')}</ul>`).join('')
+      return reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Polaris local: entrar</title><body><h1>Polaris — ambiente local</h1><p>Login de <strong>desenvolvimento</strong>: emite um JWT de 12 h para o papel escolhido e abre o Studio.</p>${linhas}<p>Usuário: <code>?usuario=ana</code> na URL (padrão <code>dev</code>).</p></body></html>`)
+    })
+    gw.get<{ Querystring: { tenant?: string; papel?: string; usuario?: string } }>('/entrar/ir', async (req, reply) => {
+      const { tenant, papel, usuario = 'dev' } = req.query
+      if (!tenant || !ALIAS.test(tenant) || !TENANTS_LOCAIS.some((t) => t.alias === tenant) || !papel || !(PAPEIS_LOCAIS as readonly string[]).includes(papel) || !USUARIO.test(usuario)) { cab(reply); return reply.status(400).type('text/plain').send('tenant, papel ou usuário inválido') }
+      return reply.redirect(`http://${tenant}.polaris.localhost:${porta}/studio#token=${await token(tenant, [papel], usuario)}`, 302)
+    })
+    await gw.listen({ port: porta, host: '127.0.0.1' }); porta = (gw.server.address() as { port: number }).port
+    if (!o.silencioso) console.log(`gateway em http://127.0.0.1:${porta}`)
+    return { porta, urlTenant: (alias) => `http://${alias}.polaris.localhost:${porta}`, pgUrl: pg('polaris_app'), token, fecha: fechaTudo }
+  } catch (e) { await fechaTudo(); throw e }
+}

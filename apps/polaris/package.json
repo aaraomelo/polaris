@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "tipos": "tsc --noEmit",
-    "test": "vitest run",
-    "empacota": "node scripts/empacota.mjs"
+    "test": "node ../studio/scripts/build.mjs && vitest run",
+    "empacota": "node scripts/empacota.mjs",
+    "local": "tsx bin/local.ts"
   },
   "dependencies": {
     "@polaris/acesso": "workspace:*",
@@ -29,6 +30,8 @@
     "jose": "^6.2.17",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0",
-    "@types/pg": "^8.11.10"
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.21.0",
+    "playwright-core": "^1.49.1"
   }
 }

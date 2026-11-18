@@ -1,6 +1,6 @@
 import { clienteHttp, criaGateway } from '@polaris/gateway'
 import { criaArmazemDeNos, criaPreview, criaReleases, criaResolvedorTenant, nosDoPack, rotasStudio, sessaoDeToken } from '@polaris/packs'
-import { rotasEstaticasStudio } from '@polaris/studio-app'
+import { previsualiza, rotasEstaticasStudio } from '@polaris/studio-app'
 import { criaPool } from '@polaris/pg'
 import type { Registry } from '@polaris/schema'
 import { autenticadorDe } from './auth'
@@ -30,7 +30,7 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
       void app.register(async (inst) => {
         rotasEstaticasStudio(inst, dir)
-        rotasStudio(inst, { armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
+        rotasStudio(inst, { previsualiza, armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
       })
     }
   })() : null
