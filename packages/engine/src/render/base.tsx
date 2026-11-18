@@ -3,6 +3,7 @@ import type { Registry } from '@polaris/schema'
 import { registraNativos } from '../ir/nativos'
 import type { Componentes } from './tipos'
 import { DOCS_BASE } from './base-doc'
+import { dimensao, entradasJson, ident } from '../vivo/blocos'
 
 // Biblioteca nativa mínima (layout, texto, mídia, link). Serve de base e de prova do contrato;
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
@@ -37,6 +38,7 @@ export const COMPONENTES_BASE: Componentes = {
     if (!src) return null
     return createElement('img', { ...(id ? { id } : {}), src, alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto' } })
   },
+  'computacao/canvas-gl': ({ props, id }) => (ident(props.kernel) ? createElement('canvas', { ...(id ? { id } : {}), width: dimensao(props.largura), height: dimensao(props.altura), role: 'img', 'aria-label': txt(props.alt), 'data-polaris-kernel': ident(props.kernel), 'data-polaris-entradas': entradasJson(props.entradas) }, txt(props.alt)) : null),
   'nav/botao': ({ props, on, id }) =>
     createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, onClick: () => on.aoClicar?.() }, txt(props.texto)),
   'entrada/texto': ({ props, on, id }) =>
@@ -93,6 +95,7 @@ export const BLOCOS_BASE = [
   bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6, default: 1 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 } }, required: ['src'] } }),
+  bloco('computacao/canvas-gl', { props: { type: 'object', properties: { kernel: { type: 'string', pattern: '^[a-z][A-Za-z0-9._-]{0,63}$', description: 'id do nó kernel (o artefato é servido em /kernels/<id>.json)' }, largura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, altura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, alt: { type: 'string' }, entradas: { type: 'object', description: 'valores das entradas escalares do kernel (número ou booleano)' } }, required: ['kernel', 'alt'] } }),
   bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),

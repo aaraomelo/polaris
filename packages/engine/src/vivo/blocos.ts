@@ -107,6 +107,20 @@ export const d_entrada_caixa: Descritor = {
   attrs: (p, id) => ({ ...comId(id), type: 'checkbox', ...rotulo(p), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
   eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLInputElement).checked } },
 }
+export const ident = (v: unknown): string => (typeof v === 'string' && /^[a-z][A-Za-z0-9._-]{0,63}$/.test(v) ? v : '')
+export const dimensao = (v: unknown): string => String(Math.min(2048, Math.max(1, Math.trunc(num(v) ?? 300))))
+/** só números, booleanos e textos curtos viram `data-polaris-entradas` (o carregador valida contra o kernel; aqui é só transporte) */
+export const entradasJson = (v: unknown): string => {
+  if (v === null || typeof v !== 'object' || Array.isArray(v)) return '{}'
+  const o: Record<string, number | boolean> = {}
+  for (const [k, x] of Object.entries(v as Record<string, unknown>)) if (/^[a-z][A-Za-z0-9]*$/.test(k) && (typeof x === 'boolean' || (typeof x === 'number' && Number.isFinite(x)))) o[k] = x
+  return JSON.stringify(o)
+}
+/** Canvas de um kernel de computação (WebGL2, com queda para wasm e depois para o interpretador). O carregador `@polaris/computacao/cliente` o pinta; sem ele, ou sem JS, fica o texto alternativo. */
+export const d_computacao_canvas_gl: Descritor = {
+  chave: (p) => (ident(p.kernel) ? 'canvas' : null), tag: () => 'canvas', texto: (p) => txt(p.alt),
+  attrs: (p, id) => ({ ...comId(id), width: dimensao(p.largura), height: dimensao(p.altura), role: 'img', 'aria-label': txt(p.alt), 'data-polaris-kernel': ident(p.kernel), 'data-polaris-entradas': entradasJson(p.entradas) }),
+}
 export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'span', attrs: (p, id) => ({ ...comId(id), ...tom(p) }), texto: (p) => txt(p.texto) }
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
@@ -122,6 +136,7 @@ export const DESCRITORES_BASE: DescritoresDom = {
   'texto/titulo': d_texto_titulo,
   'texto/paragrafo': d_texto_paragrafo,
   'midia/imagem': d_midia_imagem,
+  'computacao/canvas-gl': d_computacao_canvas_gl,
   'nav/link': d_nav_link,
   'nav/botao': d_nav_botao,
   'entrada/texto': d_entrada_texto,

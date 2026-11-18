@@ -88,6 +88,9 @@ export const DOCS_BASE: Record<string, DocBloco> = {
     { titulo: 'Externo', instancia: { bloco: 'nav/link', props: { href: 'https://exemplo.com', texto: 'Site do fabricante' } } },
     { titulo: 'Com blocos dentro', instancia: { bloco: 'nav/link', props: { href: '/carrinho' }, slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Ver carrinho' } }] } } },
   ] },
+  'computacao/canvas-gl': { titulo: 'Canvas de kernel', descricao: 'Pinta, num canvas, o resultado de um kernel de computação (saídas r, g, b e opcional a, de 0 a 1; `x` e `y` pela `larguraDe`). Usa WebGL2 e cai para wasm e depois para o interpretador; sem JavaScript fica o texto alternativo. O artefato do kernel é servido em /kernels/<id>.json e o carregador é `@polaris/computacao/cliente`.', exemplos: [
+    { titulo: 'Gradiente', instancia: { bloco: 'computacao/canvas-gl', props: { kernel: 'gradiente', largura: 64, altura: 64, alt: 'Gradiente vermelho e verde', entradas: { w: 64 } } } },
+  ] },
   'feedback/selo': { titulo: 'Selo', descricao: 'Etiqueta curta de estado. `tom`: neutro, sucesso, alerta ou erro (a cor vem do tema, e o contraste é auditado).', exemplos: [
     { titulo: 'Sucesso', instancia: { bloco: 'feedback/selo', props: { texto: 'Pago', tom: 'sucesso' } } },
     { titulo: 'Erro', instancia: { bloco: 'feedback/selo', props: { texto: 'Recusado', tom: 'erro' } } },

@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-33 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+34 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -311,6 +311,39 @@ Grade de cartões de produto a partir de uma lista (`produtos`, do contrato `cat
   "bloco": "commerce/vitrine",
   "props": {
     "produtos": []
+  }
+}
+```
+
+## computacao
+
+### Canvas de kernel (`computacao/canvas-gl`)
+
+Pinta, num canvas, o resultado de um kernel de computação (saídas r, g, b e opcional a, de 0 a 1; `x` e `y` pela `larguraDe`). Usa WebGL2 e cai para wasm e depois para o interpretador; sem JavaScript fica o texto alternativo. O artefato do kernel é servido em /kernels/<id>.json e o carregador é `@polaris/computacao/cliente`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `alt` | texto | sim |  |  |
+| `altura` | inteiro ≥ 1 ≤ 2048 | não | 300 |  |
+| `entradas` | objeto | não |  | valores das entradas escalares do kernel (número ou booleano) |
+| `kernel` | texto | sim |  | id do nó kernel (o artefato é servido em /kernels/<id>.json) |
+| `largura` | inteiro ≥ 1 ≤ 2048 | não | 300 |  |
+
+**Exemplo: Gradiente**
+
+```json
+{
+  "bloco": "computacao/canvas-gl",
+  "props": {
+    "kernel": "gradiente",
+    "largura": 64,
+    "altura": 64,
+    "alt": "Gradiente vermelho e verde",
+    "entradas": {
+      "w": 64
+    }
   }
 }
 ```

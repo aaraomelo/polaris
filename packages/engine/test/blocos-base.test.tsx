@@ -63,6 +63,8 @@ const CASOS: Array<[string, object]> = [
   ['entrada/caixa (desmarcada, desabilitada)', P('entrada/caixa', { id: 'b', props: { marcado: false, desabilitado: true } })],
   ['feedback/selo', P('feedback/selo', { id: 'b', props: { texto: 'novo', tom: 'sucesso' } })],
   ['feedback/selo (tom padrão)', P('feedback/selo', { id: 'b', props: { texto: 'x' } })],
+  ['computacao/canvas-gl', P('computacao/canvas-gl', { id: 'b', props: { kernel: 'gradiente', largura: 64, altura: 32, alt: 'Gradiente <b>', entradas: { w: 64, ligado: true, ruim: 'x', Nome: 1 } } })],
+  ['computacao/canvas-gl (padrões, sem entradas)', P('computacao/canvas-gl', { id: 'b', props: { kernel: 'k.v1', alt: 'x' } })],
   ['feedback/alerta', P('feedback/alerta', { id: 'b', props: { tom: 'erro' }, slots: { filhos: [par('falhou')] } })],
 ]
 
@@ -74,7 +76,7 @@ describe('biblioteca base: todo bloco tem schema, componente React e descritor',
     expect(schema.length).toBeGreaterThanOrEqual(26)
   })
   it('cada interface aparece em pelo menos um caso de paridade', () => {
-    const usadas = new Set(JSON.stringify(CASOS).match(/"bloco":"([a-z]+\/[a-z]+)"/g)!.map((s) => s.slice(9, -1)))
+    const usadas = new Set(JSON.stringify(CASOS).match(/"bloco":"([a-z]+\/[a-z-]+)"/g)!.map((s) => s.slice(9, -1)))
     for (const i of Object.keys(DESCRITORES_BASE)) expect(usadas.has(i), i).toBe(true)
   })
 })
