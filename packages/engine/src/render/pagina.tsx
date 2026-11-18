@@ -2,7 +2,7 @@ import { createElement, Fragment, useEffect, useReducer, useRef, type ReactNode 
 import { FUNCOES_PADRAO, type Escopo } from '../expr/index'
 import type { ResultadoUm, StatusDado } from '../dados/carrega'
 import { SessaoCodigo, type ConfigCodigo } from '../codigo/sessao'
-import { executaAcoes, type Carregador, type ContextoAcoes } from './acoes'
+import type { Carregador, ContextoAcoes } from './acoes'
 import { renderiza, type Ambiente } from './interpreta'
 import type { Programa } from './programa'
 import { escopoDaStore, iniciaStore, reduz } from './store'
@@ -13,25 +13,25 @@ export type EntradaPagina = {
   programa: Programa
   componentes: Componentes
   /** valor de cada variável declarada em spec.dados (resolvido por quem chama: carregador, cache, mock) */
-  dados?: Record<string, unknown>
-  status?: Record<string, StatusDado>
-  erros?: Record<string, string>
+  dados?: Record<string, unknown> | undefined
+  status?: Record<string, StatusDado> | undefined
+  erros?: Record<string, string> | undefined
   /** sobrescreve os valores iniciais de spec.estado (ex.: vindos do servidor) */
-  estado?: Record<string, unknown>
-  params?: Record<string, unknown>
-  consulta?: Record<string, unknown>
-  tenant?: Record<string, unknown>
+  estado?: Record<string, unknown> | undefined
+  params?: Record<string, unknown> | undefined
+  consulta?: Record<string, unknown> | undefined
+  tenant?: Record<string, unknown> | undefined
   /** idioma da requisição (variável `idioma`) */
-  idioma?: string
-  onErro?: (e: ErroRuntime) => void
+  idioma?: string | undefined
+  onErro?: ((e: ErroRuntime) => void) | undefined
   /** cliente: como executar uma variável de dados (ação `executar`) */
-  carregador?: Carregador
+  carregador?: Carregador | undefined
   /** cliente: como navegar (padrão: window.location.assign, só para URLs seguras) */
-  navegar?: (url: string) => void
+  navegar?: ((url: string) => void) | undefined
   /** SERVIDOR (streaming): cargas já em andamento que o Suspense consome */
-  stream?: Record<string, Promise<ResultadoUm>>
+  stream?: Record<string, Promise<ResultadoUm>> | undefined
   /** executor isolado de blocos de código (ver docs/sandbox.md) */
-  codigo?: ConfigCodigo
+  codigo?: ConfigCodigo | undefined
 }
 
 export { escopoDaStore }

@@ -134,7 +134,7 @@ describe('FUZZ: estado aninhado com muitos caminhos lidos — o DOM bate com o R
         else if (k === 4) v.despacha({ t: 'estado', nome: 'l', valor: insere(e.l, ri(e.l.length + 1), { id: prox++, n: ri(9), tags: ri(2) ? ['z'] : [] }) as unknown[] })
         else if (k === 5 && e.l.length) v.despacha({ t: 'estado', nome: 'l', valor: sem(e.l, [ri(e.l.length)]) })
         else if (k === 6 && e.l.length) v.despacha({ t: 'estado', nome: 'l', valor: com(e.l, [ri(e.l.length), 'tags'], ri(2) ? [] : ['q', 'w']) })
-        else if (k === 7 && e.l.length > 1) { const a = ri(e.l.length), b = ri(e.l.length); v.despacha({ t: 'estado', nome: 'l', valor: aplica(e.l, [{ op: 'remove', caminho: [a], antes: e.l[a] }]) && [...e.l].sort(() => rnd() - 0.5) }) }
+        else if (k === 7 && e.l.length > 1) { const a = ri(e.l.length); ri(e.l.length); v.despacha({ t: 'estado', nome: 'l', valor: aplica(e.l, [{ op: 'remove', caminho: [a], antes: e.l[a] }]) && [...e.l].sort(() => rnd() - 0.5) }) }
         else if (k === 8) v.despacha({ t: 'estado', nome: 'a', valor: { b: { c: `n${ri(3)}` }, arr: Array.from({ length: ri(4) }, () => ri(9)) } })
         else continue
         expect(texto(c), `rodada ${rodada} passo ${passo} (ação ${k})`).toBe(oraculo(pg, v))

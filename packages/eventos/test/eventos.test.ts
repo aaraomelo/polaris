@@ -8,7 +8,6 @@ import { EventoInvalido, criaBarramentoMemoria, criaConsumidor, criaPublicador, 
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222'
 const no = (kind: string, id: string, versao: string, spec: object): No => ({ kind, id, versao, estatuto: 'publicado', spec }) as never
 const PEDIDO_CRIADO = no('evento', 'pedido.criado', '1.2.0', { nome: 'pedido.criado', produtor: 'pedidos', payload: { pedidoId: { tipo: 'uuid', obrigatorio: true }, total: { tipo: 'dinheiro', obrigatorio: true }, nota: { tipo: 'texto' } }, idempotencia: 'pedidoId' })
-const PAGAMENTO = no('evento', 'pagamento.confirmado', '2.0.0', { nome: 'pagamento.confirmado', payload: { pedidoId: { tipo: 'uuid', obrigatorio: true } } })
 const PEDIDOS = no('servico', 'pedidos', '1.0.0', { entidades: { pedido: { campos: { total: { tipo: 'dinheiro', obrigatorio: true } } } }, operacoes: { criar: { metodo: 'POST', caminho: '/p', saida: 'pedido', publica: ['pedido.criado'] } }, consome: ['pagamento.confirmado'] })
 const FATURAMENTO = no('servico', 'faturamento', '1.0.0', { entidades: { fatura: { campos: { pedidoId: { tipo: 'uuid', obrigatorio: true }, valor: { tipo: 'dinheiro', obrigatorio: true } } } }, operacoes: {}, consome: ['pedido.criado'] })
 

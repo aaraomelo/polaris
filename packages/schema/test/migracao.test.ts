@@ -42,7 +42,7 @@ describe('aplicaMigracao', () => {
   })
 
   it('define não sobrescreve por padrão, mas sobrescreve quando pedido', () => {
-    const mk = (sobrescreve?: boolean): Migracao => ({ kind: 'tema', de: 1, para: 2, ops: [{ op: 'define', caminho: '/spec/k', valor: 'novo', sobrescreve }] })
+    const mk = (sobrescreve?: boolean): Migracao => ({ kind: 'tema', de: 1, para: 2, ops: [{ op: 'define', caminho: '/spec/k', valor: 'novo', ...(sobrescreve !== undefined ? { sobrescreve } : {}) }] })
     expect((aplicaMigracao({ spec: { k: 'velho' } }, mk()) as any).spec.k).toBe('velho')
     expect((aplicaMigracao({ spec: { k: 'velho' } }, mk(true)) as any).spec.k).toBe('novo')
     expect((aplicaMigracao({ spec: {} }, mk()) as any).spec.k).toBe('novo')

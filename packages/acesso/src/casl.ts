@@ -6,8 +6,8 @@ import type { Regra } from './tipos'
 // O matcher do CASL com os operadores lógicos que a nossa linguagem de condição tem. O CASL padrão não os conhece: `{ $or: [...] }` simplesmente nunca casa.
 const mongo = u as unknown as Record<string, never>
 const conditionsMatcher = buildMongoQueryMatcher(
-  { $and: mongo.$and, $or: mongo.$or, $nor: mongo.$nor, $not: mongo.$not },
-  { and: mongo.and, or: mongo.or, nor: mongo.nor, not: mongo.not },
+  { $and: mongo.$and!, $or: mongo.$or!, $nor: mongo.$nor!, $not: mongo.$not! },
+  { and: mongo.and!, or: mongo.or!, nor: mongo.nor!, not: mongo.not! },
 )
 
 /**

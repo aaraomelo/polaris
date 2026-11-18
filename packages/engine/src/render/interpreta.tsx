@@ -34,12 +34,12 @@ type SlotsDoHost = Record<string, () => ReactNode>
 
 /** Isola falhas de render de um bloco no cliente (no servidor o erro propaga ao chamador). */
 export class Isola extends Component<{ caminho: string; onErro?: (e: ErroRuntime) => void; children?: ReactNode }, { falhou: boolean }> {
-  state = { falhou: false }
+  override state = { falhou: false }
   static getDerivedStateFromError() { return { falhou: true } }
-  componentDidCatch(erro: Error) {
+  override componentDidCatch(erro: Error) {
     this.props.onErro?.({ caminho: this.props.caminho, regra: 'render', mensagem: erro.message })
   }
-  render() {
+  override render() {
     return this.state.falhou ? createElement('span', { 'data-pl-erro': this.props.caminho, hidden: true }) : this.props.children
   }
 }
@@ -109,7 +109,7 @@ function um(no: IRNo, escopo: Escopo, amb: Ambiente, host: SlotsDoHost | null, c
       Object.entries(no.slots).map(([nome, lista]) => [nome, () => lista.flatMap((f, i) => renderiza(f, escopo, amb, host, `${chave}/${nome}/${i}`, prof + 1))]),
     )
     const filhos = renderiza(m.modelo, { props, tenant: escopo.tenant }, amb, doHost, `${chave}>`, prof + 1)
-    return [createElement(Isola, { key: chave, caminho: no.caminho, onErro: amb.onErro }, ...filhos)]
+    return [createElement(Isola, { key: chave, caminho: no.caminho, ...(amb.onErro ? { onErro: amb.onErro } : {}) }, ...filhos)]
   }
 
   if (impl === 'codigo') {
@@ -123,7 +123,7 @@ function um(no: IRNo, escopo: Escopo, amb: Ambiente, host: SlotsDoHost | null, c
       ...(typeof escopo.idioma === 'string' && escopo.idioma ? { idioma: escopo.idioma } : {}),
       relata: (e) => relata(amb, e),
     })
-    return n === null ? [] : [createElement(Isola, { key: chave, caminho: no.caminho, onErro: amb.onErro }, n)]
+    return n === null ? [] : [createElement(Isola, { key: chave, caminho: no.caminho, ...(amb.onErro ? { onErro: amb.onErro } : {}) }, n)]
   }
 
   const alvo = cadeia.find((c) => amb.componentes[c])
@@ -147,7 +147,7 @@ function um(no: IRNo, escopo: Escopo, amb: Ambiente, host: SlotsDoHost | null, c
   const conteudo = comp
     ? createElement(Fragment, null, comp(pc))
     : createElement(Suspense, { fallback: null }, createElement(envoltorioLazy(entrada as import('./tipos').ComponenteLazy), pc))
-  return [createElement(Isola, { key: chave, caminho: no.caminho, onErro: amb.onErro }, conteudo)]
+  return [createElement(Isola, { key: chave, caminho: no.caminho, ...(amb.onErro ? { onErro: amb.onErro } : {}) }, conteudo)]
 }
 
 // ---------------------------------------------------------------------------

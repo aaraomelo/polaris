@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { geraDocFuncoes } from '../src/expr/docs'
 import { ORDEM_SUPERIOR } from '../src/expr/ordem-superior'
-import { FUNCOES_PADRAO, OPERADORES, avalia, deAst, formata, paraAst, parseExpr, semPos, validaAst, verdadeiro, type Ast, type Expr } from '../src/expr/index'
+import { FUNCOES_PADRAO, OPERADORES, avalia, deAst, formata, paraAst, parseExpr, semPos, validaAst, type Ast, type Expr } from '../src/expr/index'
 import { REGISTRO, type Gerador } from '../src/expr/registro'
 
 let seed = 31

@@ -104,7 +104,7 @@ describe('ORÁCULO: o CASL decide igual (MongoQuery completo; negações DEPOIS,
   })
   it('`resolve` e `permite` concordam linha a linha: a condição do WHERE é exatamente o conjunto permitido', () => {
     for (let i = 0; i < 500; i++) {
-      const regras = [...Array.from({ length: 1 + Math.floor(rnd() * 3) }, () => geraRegra(false)), ...Array.from({ length: Math.floor(rnd() * 3) }, () => geraRegra(true))].map((r) => ({ ...r, campos: undefined })) as Regra[]
+      const regras = [...Array.from({ length: 1 + Math.floor(rnd() * 3) }, () => geraRegra(false)), ...Array.from({ length: Math.floor(rnd() * 3) }, () => geraRegra(true))].map(({ campos: _c, ...r }) => r)
       const r = resolve(regras, 'listar', S, { usuario: 'u' }, TIPOS)
       for (let j = 0; j < 8; j++) {
         const linha = linhaAleatoria()

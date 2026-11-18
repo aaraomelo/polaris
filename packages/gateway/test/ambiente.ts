@@ -5,7 +5,7 @@ import { COMPONENTES_BASE, registraBase } from '@polaris/engine'
 import { criaObservabilidade, exportadorMemoria } from '@polaris/observabilidade'
 import { Registry, emite, type No } from '@polaris/schema'
 import { contextoPorJwt, criaServico, dbDePglite, regrasDoRegistry } from '@polaris/servico'
-import { SignJWT, generateKeyPair, type KeyLike } from 'jose'
+import { SignJWT, generateKeyPair } from 'jose'
 import { FalhaServico, clienteEmProcesso, criaGateway, type ClienteServico, type PedidoServico, type Servicos } from '../src/index'
 
 void COMPONENTES_BASE

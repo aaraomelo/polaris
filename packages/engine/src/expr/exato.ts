@@ -1,5 +1,5 @@
 import * as Q from '../num/racional'
-import type { Funcao, Funcoes } from './tipos'
+import type { Funcao } from './tipos'
 
 // Funções de aritmética EXATA (prefixo `q`, de ℚ). Os valores viajam como TEXTO canônico ("12", "-3/4"), então cabem em
 // JSON, em banco e em estado sem perda; entradas aceitas: inteiro, decimal ("12.34", "1e3"), fração ("3/4") ou número JS.

@@ -42,7 +42,7 @@ export type No = {
 }
 
 export function criaAjv(opcoes: { verbose?: boolean } = {}): Ajv2020 {
-  const ajv = new Ajv2020({ strict: true, allErrors: true, allowUnionTypes: true, verbose: opcoes.verbose })
+  const ajv = new Ajv2020({ strict: true, allErrors: true, allowUnionTypes: true, ...(opcoes.verbose !== undefined ? { verbose: opcoes.verbose } : {}) })
   addFormats(ajv)
   for (const s of Object.values(SCHEMAS)) ajv.addSchema(s)
   return ajv

@@ -15,7 +15,6 @@ const oplus = (t: T, u: T): T => (t === null ? u : [t[0], oplus(t[1], u)])
 /** • ⊠ U = •;  (L,R) ⊠ U = ((L ⊠ U) ⊕ U) ⊕ (R ⊠ U) */
 const otimes = (t: T, u: T): T => (t === null ? FOLHA : oplus(oplus(otimes(t[0], u), u), otimes(t[1], u)))
 const internos = (t: T): number => (t === null ? 0 : 1 + internos(t[0]) + internos(t[1]))
-const folhas = (t: T) => internos(t) + 1
 const chave = (t: T): string => (t === null ? '•' : `(${chave(t[0])},${chave(t[1])})`)
 const igual = (a: T, b: T) => chave(a) === chave(b)
 

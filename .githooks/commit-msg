@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Ativado com: git config core.hooksPath .githooks
+# Valida PL-<id> tipo(escopo): mensagem e recusa trailer de IA (mesma regra do CI).
+exec node "$(git rev-parse --show-toplevel)/tools/ferramentas/bin/valida-mensagem.ts" "$1"

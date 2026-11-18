@@ -4,7 +4,18 @@
   "type": "module",
   "packageManager": "pnpm@12.16.1",
   "scripts": {
-    "test": "pnpm -r test",
-    "tipos": "pnpm -r tipos"
+    "tipos": "turbo run tipos",
+    "test": "turbo run test --concurrency=2",
+    "ci": "pnpm segredos && pnpm valida-ci && pnpm tipos && pnpm test",
+    "segredos": "bash scripts/check-no-secrets.sh --all",
+    "afetados": "turbo run tipos test --concurrency=2 --filter='...[origin/main]'",
+    "valida-ci": "node tools/ferramentas/bin/valida-ci.ts",
+    "commits": "node tools/ferramentas/bin/check-commits.ts"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.11"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

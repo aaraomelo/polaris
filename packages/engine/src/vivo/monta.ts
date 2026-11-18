@@ -381,7 +381,7 @@ function poeAttr(el: Element, k: string, v: string): void { if (el.getAttribute(
 function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos): void {
   const nome = no.bloco.cadeia.find((c) => tem(amb.desc, c))
   if (!nome) { amb.onErro?.({ caminho: no.caminho, regra: 'componente-ausente', mensagem: `não há descritor para '${no.bloco.interface}' (cadeia: ${no.bloco.cadeia.join(' → ')})` }); return }
-  const { esc, host } = cx
+  const { esc } = cx
   const d = amb.desc[nome]!
   const deps = depsProps(no)
   let props = avaliaProps(no, esc, amb.funcoes)

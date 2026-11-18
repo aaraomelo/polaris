@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { Registry } from '@polaris/schema'
 import { JSDOM } from 'jsdom'
 import { afterAll, describe, expect, it } from 'vitest'
-import { construirAot, nosDoDiretorio, type Manifesto, type Resultado } from '../src/aot/index'
+import { construirAot, nosDoDiretorio, type Resultado } from '../src/aot/index'
 import { registraBase } from '../src/index'
 
 const no = (kind: string, id: string, spec: object, extra: object = {}) => ({ kind, id, versao: '1.0.0', estatuto: 'publicado', spec, ...extra })

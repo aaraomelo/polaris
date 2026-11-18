@@ -64,7 +64,7 @@ describe('hidratação no cliente (jsdom)', () => {
 
   it('o detector funciona: dado diferente no cliente é reportado como divergência', async () => {
     const pg = programa(P('texto/titulo', { props: { texto: 'Olá, {loja.nome}!' } }))
-    const doc = injeta(renderPaginaHtml({ programa: pg, componentes, dados }).html)
+    injeta(renderPaginaHtml({ programa: pg, componentes, dados }).html)
     const recuperaveis: ErroRuntime[] = []
     const erro = vi.spyOn(console, 'error').mockImplementation(() => {})
     let raiz!: ReturnType<typeof hidrata>

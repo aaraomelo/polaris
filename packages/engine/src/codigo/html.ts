@@ -1,4 +1,4 @@
-import { ExprErro, parseExpr, validaExpr, type Expr } from '../expr/index'
+import { ExprErro, parseExpr, validaExpr } from '../expr/index'
 
 // Template de HTML de bloco em iframe: {{ expressão }}, com `props` e `tenant` no escopo.
 // (Chaves duplas porque HTML/CSS/JS usam { } o tempo todo.) O valor é SEMPRE escapado.

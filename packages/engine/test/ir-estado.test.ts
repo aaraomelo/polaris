@@ -111,7 +111,7 @@ describe('eventos e ações', () => {
     const [def, exe] = b.eventos!.aoClicar!
     expect(def).toMatchObject({ acao: 'definir', estado: 'pagina', caminho: '/spec/raiz/slots/filhos/0/eventos/aoClicar/0' })
     expect(exe).toMatchObject({ acao: 'executar', dados: 'prods' })
-    if (exe!.acao === 'executar') { expect(exe.depois).toHaveLength(2); expect(exe.emErro).toHaveLength(1) }
+    if (exe?.acao === 'executar') { expect(exe.depois).toHaveLength(2); expect(exe.emErro).toHaveLength(1) }
   })
 
   it('evento aceito sem estado nem dados declarados só vale se as ações não os referenciarem', () => {

@@ -418,7 +418,7 @@ describe('urlDe (roteamento reverso)', () => {
       if (!u.ok) continue
       aceitos++
       const [caminho, consulta] = u.url.split('?')
-      const r = resolveRota(tt, { caminho: caminho!, consulta })
+      const r = resolveRota(tt, { caminho: caminho!, ...(consulta !== undefined ? { consulta } : {}) })
       expect(r, `${u.url} ← ${JSON.stringify(params)}`).toMatchObject({ tipo: 'pagina', pagina, idioma })
       if (r.tipo === 'pagina') expect(r.params).toEqual(params)
     }

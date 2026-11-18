@@ -21,7 +21,7 @@ export function hidrata(componentes: Componentes, opcoes: { doc?: Document; esta
   if (!raiz) throw new Error(`contêiner #${ID_RAIZ} não encontrado`)
   const estado = opcoes.estado ?? leEstado(doc)
   const entrada: EntradaPagina = { ...estado, componentes, ...(opcoes.onErro ? { onErro: opcoes.onErro } : {}), ...(opcoes.carregador ? { carregador: opcoes.carregador } : {}), ...(opcoes.navegar ? { navegar: opcoes.navegar } : {}),
-    ...(opcoes.codigo ? { codigo: { ...opcoes.codigo, agora: estado.agora ?? opcoes.codigo.agora } } : {}) }
+    ...(opcoes.codigo ? { codigo: { ...opcoes.codigo, ...((estado.agora ?? opcoes.codigo.agora) !== undefined ? { agora: (estado.agora ?? opcoes.codigo.agora)! } : {}) } } : {}) }
   return hydrateRoot(raiz, createElement(Pagina as never, entrada as never), { onRecoverableError: (e) => opcoes.onErro?.({ caminho: '/', regra: 'render', mensagem: String((e as Error).message) }) })
 }
 

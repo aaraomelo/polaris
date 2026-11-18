@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aplica, caminhosMudados, com, difere, insere, inverso, mescla, move, obter, sem, type Caminho, type Patch, type V } from '../src/estado/caminho'
+import { aplica, caminhosMudados, com, difere, insere, inverso, mescla, move, obter, sem, type V } from '../src/estado/caminho'
 import { igualProfundo } from '../src/expr/funcoes'
 
 let seed = 5

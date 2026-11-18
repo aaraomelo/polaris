@@ -92,7 +92,6 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
     seguro(() => permite(a.regras, acao, sujeito, a.v, tiposDoSujeito(sujeito), (c, l) => avalia(c, l, tiposDoSujeito(sujeito)), linha, campo), false, `pode ${acao} ${sujeito}`)
 
   for (const r of rotas) {
-    const emQuery = r.metodo === 'get' || r.metodo === 'delete'
     // a resposta pode OMITIR campos (restrição por papel): só o id é obrigatório no serializador; o OpenAPI continua descrevendo o contrato completo
     const saida = r.saida ? { ...esquemaDeEntidade(spec.entidades[r.saida]!, 'saida'), required: ['id'] } : undefined
     const schema: Record<string, unknown> = {

@@ -12,13 +12,13 @@ export { escHtml } from './escape'
 export type { Motivo, Estatico } from './gera'
 
 export type EntradaEstatica = SementeStore & {
-  params?: Record<string, unknown>
-  consulta?: Record<string, unknown>
-  tenant?: Record<string, unknown>
-  idioma?: string
-  onErro?: (e: ErroRuntime) => void
+  params?: Record<string, unknown> | undefined
+  consulta?: Record<string, unknown> | undefined
+  tenant?: Record<string, unknown> | undefined
+  idioma?: string | undefined
+  onErro?: ((e: ErroRuntime) => void) | undefined
   /** sandbox e orçamento dos blocos de código (só no HTML do runtime vivo); sem isso, bloco de código sai vazio e é reportado */
-  codigo?: ConfigCodigo
+  codigo?: ConfigCodigo | undefined
 }
 
 export type PaginaEstatica = {

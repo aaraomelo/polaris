@@ -1,5 +1,4 @@
 import { iniciaCargas, type OpcoesCarga } from '../dados/carrega'
-import { codificaChave } from '../estatico/gera'
 import { compilaHtmlVivo } from '../estatico/index'
 import { jsonSeguro } from '../render/json'
 import type { ConfigCodigo } from '../codigo/sessao'

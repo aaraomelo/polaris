@@ -1,5 +1,5 @@
 import * as E from '../estado/caminho'
-import { LIMITES_EXPR, type Funcao, type Funcoes } from './tipos'
+import { LIMITES_EXPR, type Funcao } from './tipos'
 
 // Biblioteca padrão: funções puras e totais (nunca lançam; entrada inválida → undefined ou texto vazio).
 // Formatadores em pt-BR com fuso fixo para a saída ser idêntica no servidor (SSR) e no cliente.

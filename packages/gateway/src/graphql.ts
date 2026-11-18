@@ -4,7 +4,7 @@ import {
   type DocumentNode, type FieldNode, type FragmentDefinitionNode, type GraphQLInputType, type GraphQLOutputType, type SelectionSetNode, type ValidationRule, type ValueNode,
 } from 'graphql'
 import type { Observabilidade } from '@polaris/observabilidade'
-import { PADRAO_DINHEIRO, rotasDe, type Campo, type Rota } from '@polaris/schema'
+import { PADRAO_DINHEIRO, rotasDe, type Campo } from '@polaris/schema'
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 import type { ChamadorCompleto, Servicos } from './chamador'
 import type { CacheDoGateway } from './cache'

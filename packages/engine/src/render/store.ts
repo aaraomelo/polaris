@@ -30,7 +30,7 @@ export function reduz(s: Store, a: AcaoStore): Store {
   }
 }
 
-export type SementeStore = { estado?: Record<string, unknown>; dados?: Record<string, unknown>; status?: Record<string, StatusDado>; erros?: Record<string, string> }
+export type SementeStore = { estado?: Record<string, unknown> | undefined; dados?: Record<string, unknown> | undefined; status?: Record<string, StatusDado> | undefined; erros?: Record<string, string> | undefined }
 
 const tem = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 

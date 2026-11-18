@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "tipos": {
+      "dependsOn": ["^tipos"],
+      "inputs": ["src/**", "test/**", "tsconfig.json", "../../tsconfig.base.json", "package.json", "schemas/**"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^tipos"],
+      "inputs": ["src/**", "test/**", "schemas/**", "orcamento.json", "package.json", "tsconfig.json"],
+      "outputs": []
+    }
+  }
+}

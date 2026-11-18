@@ -1,4 +1,4 @@
-import { rotasDe, type CrudOp } from './servico-api'
+import { rotasDe } from './servico-api'
 import { sugere } from './sugere'
 import type { Erro } from './mensagens'
 import type { Contexto, Registry } from './registry'
@@ -7,7 +7,6 @@ import type { No } from './index'
 // Um papel referencia sujeitos (`servico.entidade`), ações e campos DOS SERVIÇOS registrados. Erro de digitação aqui seria uma regra que nunca casa
 // (ou, pior, uma negação que não nega): por isso é conferido contra o catálogo de acesso de cada serviço.
 
-const CRUD: CrudOp[] = ['listar', 'obter', 'criar', 'atualizar', 'remover']
 const AUDITORIA = ['id', 'criadoEm', 'atualizadoEm']
 type Entrada = { acoes: Set<string>; campos: Set<string> }
 

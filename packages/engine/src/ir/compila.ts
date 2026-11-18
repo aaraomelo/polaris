@@ -181,7 +181,7 @@ function compilaInst(cx: Cx, inst: Inst, caminho: string, escopo: readonly strin
   const anterior = cx.proprio
   cx.proprio = proprio
   // `se` e `repetir.cada` veem só o escopo de fora; `como` e `indice` valem para props, filhos, slots e eventos.
-  if (inst.se !== undefined) base.se = exprPura(cx, inst.se, escopo, `${caminho}/se`)
+  if (inst.se !== undefined) { const se = exprPura(cx, inst.se, escopo, `${caminho}/se`); if (se !== undefined) base.se = se }
   let interno = escopo
   if (inst.repetir) {
     const cada = exprPura(cx, inst.repetir.cada, escopo, `${caminho}/repetir/cada`)
@@ -276,7 +276,7 @@ function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
     if ((RESERVADOS as readonly string[]).includes(nome)) cx.erro(`/spec/estado/${nome}`, 'estado', `'${nome}' é um nome reservado`, `reservados: ${RESERVADOS.join(', ')}`)
     const inicial = d.inicial === undefined ? null : d.inicial
     if (inicial !== null) {
-      const r = confereValor({ tipo: d.tipo, lista: d.lista }, inicial)
+      const r = confereValor({ tipo: d.tipo, ...(d.lista !== undefined ? { lista: d.lista } : {}) }, inicial)
       if (!r.ok) cx.erro(`/spec/estado/${nome}/inicial`, 'estado', `o valor inicial de '${nome}' deveria ser ${r.esperado}`, undefined, inicial)
     }
     out[nome] = { tipo: d.tipo, inicial, ...(d.lista ? { lista: true } : {}) }
