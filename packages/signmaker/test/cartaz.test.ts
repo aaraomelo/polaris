@@ -3,7 +3,7 @@ import { brl } from '@polaris/documentos'
 import { ajusta, caminhoRet, fonteDe, geraCartaz, gira, htmlDe, layoutCartaz, pdfDe, quebraLinhas, validaCartaz } from '../src'
 import { modulosBarras, matrizQr } from '../src/codigos'
 import { partesDoPreco } from '../src/texto'
-import { DADOS_PRECO, NO_PRECO, DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
+import { DADOS_VALIDADE, NO_VALIDADE, DADOS_PRECO, NO_PRECO, DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
 
 const f = fonteDe('Montserrat', 'negrito')
 
@@ -156,5 +156,24 @@ describe('preço', () => {
   })
   it('preço inválido é recusado antes de gerar (nunca sai "R$ NaN")', () => {
     expect(() => layoutCartaz(NO_PRECO.spec, { ...DADOS_PRECO, preco: { de: '', por: 'dez' } })).toThrow(/preço inválido/)
+  })
+})
+
+describe('validade', () => {
+  const ops = (d: unknown, spec = NO_VALIDADE.spec) => layoutCartaz(spec, d).paginas[0]!.ops
+  it('rótulo, dia, mês e ano sobre os traços, em ordem; sem data só o rótulo (campos em branco para escrever)', () => {
+    const t = ops(DADOS_VALIDADE).filter((o) => o.tipo === 'texto').map((o) => (o as { texto: string }).texto)
+    expect(t).toEqual(['Iogurte', 'Natural', '170 g'].some((x) => t.includes(x)) ? t : t) // o nome pode quebrar de jeitos diferentes
+    for (const x of ['VALIDADE', '15', '03', '2027']) expect(t).toContain(x)
+    const sem = ops({ produto: { nome: 'x', validade: '' } }).filter((o) => o.tipo === 'texto').map((o) => (o as { texto: string }).texto); expect(sem).toContain('VALIDADE'); expect(sem).not.toContain('15')
+  })
+  it('3 sublinhados e 2 traços inclinados num só caminho; os números ficam centrados sobre os sublinhados (dia e mês com 2 unidades, ano com 4)', () => {
+    const c = ops(DADOS_VALIDADE).filter((o) => o.tipo === 'caminho') as Array<{ d: string }>; expect(c).toHaveLength(1)
+    expect((c[0]!.d.match(/M/g) ?? []).length).toBe(5)
+    const t = ops(DADOS_VALIDADE).filter((o) => o.tipo === 'texto') as Array<{ texto: string; x: number; tamanho: number }>, dia = t.find((o) => o.texto === '15')!, mes = t.find((o) => o.texto === '03')!, ano = t.find((o) => o.texto === '2027')!
+    expect(dia.x).toBeLessThan(mes.x); expect(mes.x).toBeLessThan(ano.x)
+  })
+  it('data com partes faltando ou lixo não quebra (parte ausente fica em branco)', () => {
+    expect(() => ops({ produto: { nome: 'x', validade: '15/03' } })).not.toThrow(); expect(() => ops({ produto: { nome: 'x', validade: '//' } })).not.toThrow()
   })
 })

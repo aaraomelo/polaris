@@ -18,6 +18,7 @@ export function validaCartaz(spec: Obj): string[] {
     if (e.fonte?.familia !== undefined && !Object.hasOwn(FONTES, e.fonte.familia)) erros.push(`${onde}: fonte desconhecida: ${e.fonte.familia}`)
     if (e.tamanho && e.tamanho.min !== undefined && e.tamanho.max !== undefined && e.tamanho.min > e.tamanho.max) erros.push(`${onde}: tamanho.min maior que tamanho.max`)
     if (e.se !== undefined) { if (!CAMINHO_SE.test(e.se)) erros.push(`${onde}: condição inválida: ${String(e.se).slice(0, 40)}`); else if (!dados.has(e.se.replace(/^!/, '').split('.')[0]!)) erros.push(`${onde}: a condição usa um dado não declarado em spec.dados`) }
+    if (e.tipo === 'validade') { try { for (const r of [...(e.rotulo ? raizesDe(e.rotulo) : []), ...(e.data ? raizesDe(e.data) : [])]) if (!dados.has(r)) erros.push(`${onde}: a validade usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'preco') { try { for (const r of [...raizesDe(e.valor), ...(e.unidade?.texto ? raizesDe(e.unidade.texto) : [])]) if (!dados.has(r)) erros.push(`${onde}: o preço usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'codigoBarras' || e.tipo === 'qrcode') { try { for (const r of [...raizesDe(e.valor), ...(e.rotulo ? raizesDe(e.rotulo) : [])]) if (!dados.has(r)) erros.push(`${onde}: o valor usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'texto') { try { for (const r of raizesDe(e.texto)) if (!dados.has(r)) erros.push(`${onde}: o texto usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
@@ -59,6 +60,31 @@ export function layoutCartaz(spec: Obj, dadosEntrada: unknown = {}): Layout {
     if (e.tipo === 'faixa') {
       const cor = (e.cor ?? [0, 0, 0]) as Rgb, opacidade = e.opacidade ?? 1, raio = (e.raio ?? 0) * Math.min(w, h)
       ops.push(raio > 0 || graus !== 0 ? { tipo: 'caminho', d: caminhoRet(x, y, w, h, raio, graus, ox, oy), cor, opacidade } : { tipo: 'ret', x, y, l: w, a: h, cor, opacidade })
+      continue
+    }
+    if (e.tipo === 'validade') {
+      // "VALIDADE __/__/____": o rótulo e três campos sublinhados (dia, mês, ano) separados por traços inclinados; com `data`, os números ficam sobre os traços; sem ela, o campo fica em branco para escrever à mão
+      const rotulo = e.rotulo !== undefined ? interpola(e.rotulo, dados).trim() : 'VALIDADE', partes = (e.data ? interpola(e.data, dados).trim() : '').split('/')
+      if (!rotulo) continue
+      const familia = e.fonte?.familia ?? spec.fonte?.familia ?? FONTE_PADRAO, peso = (e.fonte?.peso ?? spec.fonte?.peso ?? 'negrito') as Peso, f = fonteDe(familia, peso), m = metricas(f), cor = (e.cor ?? [0, 0, 0]) as Rgb
+      const ESP = 0.26, UND = 0.72, esp = e.espessura ?? 2, larg = (t: number) => largura(f, rotulo, t) + t * (3 * ESP + 8 * UND)
+      const cabe = (t: number) => larg(t) <= w + 1e-6 && m.alturaNatural * t <= h + 1e-6
+      let lo = Math.round((e.tamanho?.min ?? 4) * 4), hi = Math.round((e.tamanho?.max ?? 300) * 4)
+      if (!cabe(lo / 4)) avisos.push(`${e.id ?? 'validade'}: a validade não cabe nem no tamanho mínimo`); else while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); if (cabe(mid / 4)) lo = mid; else hi = mid - 1 }
+      const t = lo / 4, bw = larg(t), sp = ESP * t, u = UND * t
+      const bx = x + ((e.alinhaH ?? 'esquerda') === 'centro' ? (w - bw) / 2 : e.alinhaH === 'direita' ? w - bw : 0), topo = y + ((e.alinhaV ?? 'topo') === 'meio' ? (h - m.alturaNatural * t) / 2 : e.alinhaV === 'base' ? h - m.alturaNatural * t : 0)
+      const base = topo + m.ascender * t, yLinha = base + 0.15 * t
+      const pos = (px: number, py: number): [number, number] => (graus === 0 ? [px, py] : gira(px, py, ox, oy, graus))
+      const texto = (txt: string, tx: number) => { if (!txt) return; const [px, py] = pos(tx, topo); ops.push({ tipo: 'texto', x: n(px), yTopo: n(py), texto: txt, familia, peso, tamanho: t, cor, ascender: m.ascender, alturaLinha: n(m.alturaNatural * t), graus }) }
+      const wl = largura(f, rotulo, t), campos = [{ x: bx + wl + sp, c: 2 * u }, { x: bx + wl + sp + 2 * u + sp, c: 2 * u }, { x: bx + wl + 2 * sp + 4 * u + sp, c: 4 * u }]
+      texto(rotulo, bx)
+      const tracos: string[] = []
+      campos.forEach((c, i) => {
+        const txt = partes[i]?.trim() ?? ''; if (txt) texto(txt, c.x + (c.c - largura(f, txt, t)) / 2)
+        tracos.push(caminhoRet(c.x, yLinha - esp / 2, c.c, esp, 0, graus, ox, oy))
+        if (i < 2) { const [px, py] = pos(c.x + c.c, yLinha), L = 1.15 * t; tracos.push(caminhoRet(px - esp / 2, py - L, esp, L, 0, graus - 15, px, py)) } // o traço sobe do fim do sublinhado, inclinado 15° para a direita
+      })
+      ops.push({ tipo: 'caminho', d: tracos.join(''), cor, opacidade: 1 })
       continue
     }
     if (e.tipo === 'preco') {

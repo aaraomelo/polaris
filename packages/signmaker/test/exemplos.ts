@@ -23,3 +23,6 @@ export const DADOS_ETIQUETA = { produto: { nome: 'Café Torrado e Moído 500 g',
 
 export const NO_PRECO = JSON.parse(readFileSync(new URL('../../schema/test/exemplos/validos/cartaz-preco.json', import.meta.url), 'utf8')) as { kind: string; id: string; spec: Record<string, any> }
 export const DADOS_PRECO = { produto: { nome: 'Feijão Carioca Tipo 1 1kg', unidade: 'KG' }, preco: { de: '12.9', por: '1234.5' } }
+
+export const NO_VALIDADE = JSON.parse(readFileSync(new URL('../../schema/test/exemplos/validos/cartaz-validade.json', import.meta.url), 'utf8')) as { kind: string; id: string; spec: Record<string, any> }
+export const DADOS_VALIDADE = { produto: { nome: 'Iogurte Natural 170 g', validade: '15/03/2027' } }

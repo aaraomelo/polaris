@@ -6,7 +6,7 @@ import { PNG } from 'pngjs'
 import { chromium, type Browser } from 'playwright-core'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { fonteDe, htmlDe, largura, layoutCartaz, pdfDe, type Layout } from '../src'
-import { DADOS_PRECO, NO_PRECO, DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
+import { DADOS_VALIDADE, NO_VALIDADE, DADOS_PRECO, NO_PRECO, DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
 
 // PARIDADE: o MESMO cartaz sai em HTML e PDF; o HTML é aberto num Chrome de verdade e o PDF é rasterizado/lido pelo poppler, e os dois são comparados
 // (1) palavra a palavra, por posição (só texto SEM rotação: o poppler dá a caixa do texto girado de outro jeito) e (2) por pixel, que cobre o texto girado e as formas.
@@ -108,6 +108,9 @@ const CASOS: Array<[string, Record<string, any>, unknown]> = [
   ['preço A4 retrato com milhar', { ...NO_PRECO.spec, tamanho: 'A4', orientacao: 'retrato' }, { ...DADOS_PRECO, preco: { de: '1999.9', por: '1499.99' } }],
   ['preço girado em 90° (sem texto por perto)', { ...NO_PRECO.spec, elementos: NO_PRECO.spec.elementos.filter((e: any) => e.tipo === 'preco').map((e: any) => ({ ...e, rotacao: 90 })) }, DADOS_PRECO],
   ['preço antigo girado em 20°', { ...NO_PRECO.spec, elementos: NO_PRECO.spec.elementos.map((e: any) => (e.id === 'antigo' ? { ...e, rotacao: 20 } : e)) }, DADOS_PRECO],
+  ['validade preenchida', NO_VALIDADE.spec, DADOS_VALIDADE],
+  ['validade em branco, A4 retrato', { ...NO_VALIDADE.spec, tamanho: 'A4', orientacao: 'retrato' }, { produto: { nome: 'Iogurte', validade: '' } }],
+  ['validade girada em 90° (sem texto por perto)', { ...NO_VALIDADE.spec, elementos: NO_VALIDADE.spec.elementos.filter((e: any) => e.tipo === 'validade').map((e: any) => ({ ...e, rotacao: 90 })) }, DADOS_VALIDADE],
   ['variado: girado, translúcido, arredondado, alinhamentos, Roboto', SPEC_VARIADO, { nome: 'Promoção da Semana' }],
 ]
 

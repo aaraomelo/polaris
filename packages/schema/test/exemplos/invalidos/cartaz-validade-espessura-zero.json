@@ -1,0 +1,53 @@
+{
+  "kind": "cartaz",
+  "id": "etiqueta-validade",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A6",
+    "orientacao": "paisagem",
+    "titulo": "Etiqueta com validade",
+    "fundo": {
+      "cor": [
+        255,
+        255,
+        255
+      ]
+    },
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "dados": {
+      "produto": {
+        "tipo": "json"
+      }
+    },
+    "elementos": [
+      {
+        "tipo": "texto",
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "caixa": {
+          "topo": 0.06,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "altura": 0.4
+        },
+        "alinhaV": "meio"
+      },
+      {
+        "tipo": "validade",
+        "id": "val",
+        "data": "{produto.validade}",
+        "caixa": {
+          "topo": 0.62,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "altura": 0.2
+        },
+        "espessura": 0
+      }
+    ]
+  }
+}

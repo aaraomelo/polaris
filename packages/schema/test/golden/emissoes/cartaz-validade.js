@@ -1,0 +1,56 @@
+// polaris: cartaz etiqueta-validade@1.0.0
+export const kind = "cartaz";
+export const id = "etiqueta-validade";
+export const versao = "1.0.0";
+export default {
+  "estatuto": "publicado",
+  "id": "etiqueta-validade",
+  "kind": "cartaz",
+  "spec": {
+    "dados": {
+      "produto": {
+        "tipo": "json"
+      }
+    },
+    "elementos": [
+      {
+        "alinhaV": "meio",
+        "caixa": {
+          "altura": 0.4,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "topo": 0.06
+        },
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "tipo": "texto"
+      },
+      {
+        "caixa": {
+          "altura": 0.2,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "topo": 0.62
+        },
+        "data": "{produto.validade}",
+        "id": "val",
+        "tipo": "validade"
+      }
+    ],
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "fundo": {
+      "cor": [
+        255,
+        255,
+        255
+      ]
+    },
+    "orientacao": "paisagem",
+    "tamanho": "A6",
+    "titulo": "Etiqueta com validade"
+  },
+  "versao": "1.0.0"
+};
