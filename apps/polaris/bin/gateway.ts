@@ -1,4 +1,5 @@
 import { registraBase } from '@polaris/engine'
+import { registraSite } from '@polaris/engine/site'
 import { registraTemas } from '@polaris/engine/tema'
 import { carregaNos } from '../src/nos'
 import { configGateway, ErroConfig } from '../src/config'
@@ -7,7 +8,7 @@ import { Registry } from '@polaris/schema'
 
 try {
   const c = configGateway(process.env)
-  const reg = new Registry(); registraBase(reg); registraTemas(reg); carregaNos(c.nos, reg)
+  const reg = new Registry(); registraBase(reg); registraTemas(reg); registraSite(reg); carregaNos(c.nos, reg)
   const { gw, verifica } = montaGatewayComChave(c, reg)
   await verifica() // a chave de assinatura tem de combinar com a de verificação: senão nenhuma sessão valeria
   await gw.listen({ port: c.porta, host: c.host })

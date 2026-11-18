@@ -38,7 +38,7 @@ const MAO: Emissores = {
   'nav/link': ({ props, filhos, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
-    return `<a${idAttr(id)}${href ? ` href="${escHtml(href)}"` : ''}${externo ? ' rel="noopener noreferrer"' : ''}>${props.texto !== undefined ? escHtml(txt(props.texto)) : (filhos.filhos ?? '')}</a>`
+    return `<a${idAttr(id)}${href ? ` href="${escHtml(href)}"` : ''}${externo ? ' rel="noopener noreferrer"' : ''}${props.atual === true ? ' aria-current="page"' : ''}>${props.texto !== undefined ? escHtml(txt(props.texto)) : (filhos.filhos ?? '')}</a>`
   },
 }
 

@@ -11,16 +11,17 @@
   },
   "dependencies": {
     "@polaris/acesso": "workspace:*",
+    "@polaris/engine": "workspace:*",
     "@polaris/gateway": "workspace:*",
     "@polaris/observabilidade": "workspace:*",
+    "@polaris/packs": "workspace:*",
     "@polaris/pg": "workspace:*",
     "@polaris/schema": "workspace:*",
     "@polaris/servico": "workspace:*",
-    "@polaris/engine": "workspace:*",
+    "@polaris/signmaker": "workspace:*",
+    "@polaris/studio-app": "workspace:*",
     "fastify": "^5.2.0",
-    "@polaris/packs": "workspace:*",
-    "pg": "^8.13.1",
-    "@polaris/studio-app": "workspace:*"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",

@@ -342,6 +342,20 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('cabeçalho do site (site/cabecalho): <header> com marca, menu com a página atual marcada e a ação de entrar; navegar troca o atual sem recarregar', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.waitForFunction(() => (window as any).Polaris?.inicia)
+      const h = p.locator('header'); expect(await h.count()).toBe(1); expect(await h.locator(':scope > a').first().innerText()).toBe('Minha loja')
+      expect(await p.locator('header nav').getAttribute('aria-label')).toBe('Principal'); expect(await p.locator('header nav a').allInnerTexts()).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
+      expect(await p.locator('header nav a[aria-current=page]').allInnerTexts()).toEqual(['Início']); expect(await h.locator(':scope > a').last().getAttribute('href')).toBe('/entrar')
+      await p.evaluate(() => { (window as any).__marca = 'mesma' }); await p.getByRole('link', { name: 'Sobre' }).click(); await p.waitForURL(/\/sobre$/)
+      await p.waitForFunction(() => document.querySelector('header nav a[aria-current=page]')?.textContent === 'Sobre'); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma') // trocou no cliente, o atual acompanhou
+      const css = await p.evaluate(() => { const e = document.querySelector('header')!, c = getComputedStyle(e); return { display: c.display, borda: c.borderBottomWidth } }); expect(css).toEqual({ display: 'flex', borda: '1px' }) // o tema estiliza o cabeçalho
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('o Studio sem sessão manda ao login e volta para ele depois de entrar', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

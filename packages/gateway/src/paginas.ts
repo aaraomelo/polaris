@@ -96,10 +96,15 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     const spec0 = no.spec as { paginas?: string[]; rotaLogin?: string }, declaradas = spec0.paginas ?? []
     const sistema = reg.ids('pagina').filter((id) => id.startsWith('identidade.') && !declaradas.includes(id))
     const proprias = reg.ids('pagina').filter((id) => !id.startsWith('identidade.') && !declaradas.includes(id) && reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.escopo === 'tenant' && typeof (reg.resolve('pagina', id, { tenantId: ctx.tenantId })?.no.spec as { rota?: unknown }).rota === 'string')
-    const monta = (extras: string[]) => ({ ...no, spec: { ...(no.spec as object), paginas: [...declaradas, ...extras], ...(!spec0.rotaLogin && extras.includes('identidade.entrar') ? { rotaLogin: '/entrar' } : {}) } }) as typeof no
+    let lista = declaradas // as páginas declaradas que continuam existindo (uma removida da base não derruba o site inteiro)
+    const monta = (extras: string[]) => ({ ...no, spec: { ...(no.spec as object), paginas: [...lista, ...extras], ...(!spec0.rotaLogin && extras.includes('identidade.entrar') ? { rotaLogin: '/entrar' } : {}) } }) as typeof no
     const tenta = (n: typeof no) => compilaTabela(reg, n, { tenantId: ctx.tenantId })
     let r = tenta(no), extras: string[] = []
     if (!r.ok && sistema.length) { const t = tenta(monta(sistema)); if (t.ok) { r = t; extras = [...sistema] } } // o tenant aponta `rotaLogin` para uma página que só as de sistema trazem
+    if (!r.ok) {
+      const faltam = declaradas.filter((id) => !reg.resolve('pagina', id, { tenantId: ctx.tenantId })), validas = declaradas.filter((id) => !faltam.includes(id))
+      if (faltam.length) for (const cand of [[...sistema], []]) { lista = validas; const t = tenta(monta(cand)); if (t.ok) { r = t; extras = cand; d.log.warn('páginas declaradas pelo tenant não existem mais e foram ignoradas', { tenant: ctx.tenantId, paginas: faltam.slice(0, 10) }); break } lista = declaradas }
+    }
     if (!r.ok) d.log.warn('as rotas do tenant não compilam', { tenant: ctx.tenantId, erros: r.erros.length })
     else for (const id of [...(extras.length ? [] : sistema), ...proprias]) {
       const t = tenta(monta([...extras, id]))

@@ -94,6 +94,12 @@ export const DOCS_BASE: Record<string, DocBloco> = {
     { titulo: 'Padrão', instancia: { bloco: 'nav/botao', props: { texto: 'Comprar' } } },
     { titulo: 'Desabilitado', instancia: { bloco: 'nav/botao', props: { texto: 'Esgotado', desabilitado: true } } },
   ] },
+  'layout/cabecalho': { titulo: 'Cabeçalho', descricao: 'Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.', exemplos: [
+    { titulo: 'Com título e menu', instancia: { bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Minha loja' } }, { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início' } }] } }] } } },
+  ] },
+  'nav/menu': { titulo: 'Menu', descricao: 'Grupo de links de navegação (`<nav>`), com nome acessível em `rotulo` (padrão "Principal"). Use `atual` no link da página aberta.', exemplos: [
+    { titulo: 'Dois links', instancia: { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início', atual: true } }, { bloco: 'nav/link', props: { href: '/sobre', texto: 'Sobre' } }] } } },
+  ] },
   'nav/link': { titulo: 'Link', descricao: 'Link para uma URL segura (javascript:, data: e similares são recusados). Links externos levam `rel="noopener noreferrer"`.', exemplos: [
     { titulo: 'Externo', instancia: { bloco: 'nav/link', props: { href: 'https://exemplo.com', texto: 'Site do fabricante' } } },
     { titulo: 'Com blocos dentro', instancia: { bloco: 'nav/link', props: { href: '/carrinho' }, slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Ver carrinho' } }] } } },

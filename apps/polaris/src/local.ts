@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
 import { registraBase, voltaSegura } from '@polaris/engine'
+import { registraSite } from '@polaris/engine/site'
 import { cookieDeSessao } from '@polaris/gateway'
 import { registraTemas } from '@polaris/engine/tema'
 import { SignJWT, exportJWK, generateKeyPair, importJWK } from 'jose'
@@ -12,6 +13,7 @@ import { montaGatewayComChave } from './gateway'
 import { migraPlataforma } from './migra'
 import { carregaNos } from './nos'
 import { criaIdentidade } from '@polaris/packs'
+import { geraCartaz } from '@polaris/signmaker'
 import { montaServico } from './servico'
 
 // AMBIENTE LOCAL: o mesmo gateway, o mesmo serviço e o mesmo Studio da produção, com o Postgres em PGlite (sem Docker), dados persistentes em disco, tenants de demonstração e um LOGIN DE
@@ -101,7 +103,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       for (const t of TENANTS_LOCAIS) if (!(await db.query(`SELECT 1 FROM loja.destaque WHERE tenant_id = $1`, [t.id])).rows.length)
         await db.query(`INSERT INTO loja.destaque (tenant_id, titulo, descricao) VALUES ($1, $2, $3), ($1, $4, $5)`, [t.id, `Café de ${t.nome}`, 'Torra média, 250 g', `Pão de ${t.nome}`, 'Fermentação natural'])
     }
-    const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw)
+    const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw); registraSite(regGw)
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)
     const { gw, verifica } = montaGatewayComChave(configGateway({ ...jwt, POLARIS_PLATAFORMA_POOL_MAX: '1', POLARIS_IDENTIDADE_CHAVE_PRIVADA_JWK: JSON.stringify(privada), POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_PREVIEW_SEGREDO: 'polaris-local-preview-segredo-de-desenvolvimento-0123', POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
     await verifica() // a privada tem de combinar com a pública que serviço e gateway usam
@@ -140,6 +142,23 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       const lista = await ident.emails(t.id, 20)
       const linka = (txt: string) => esc(txt).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}">${u}</a>`)
       return reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>E-mails de desenvolvimento</title><body><h1>E-mails — ${esc(t.nome)}</h1><p>Só o ambiente local: aqui aparece o que o sistema enviaria por e-mail.</p>${lista.length ? lista.map((m) => `<article><h2>${esc(m.assunto)}</h2><p>Para: ${esc(m.para)} · ${esc(m.criadoEm)}</p><pre>${linka(m.corpo)}</pre></article>`).join('') : '<p>Nenhum e-mail ainda.</p>'}</body></html>`)
+    })
+    // cartazes do Sign Maker, só no ambiente local: a lista, e cada um em HTML e em PDF (do MESMO layout, com os dados de `exemplo` do nó) lado a lado
+    const cartazes = () => regGw.ids('cartaz' as never).map((id) => ({ id, no: regGw.resolve('cartaz' as never, id)!.no as { kind: string; spec: Record<string, any> } }))
+    const quadro = (reply: { header(k: string, v: string): unknown }) => { reply.header('content-security-policy', "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; frame-ancestors 'self'"); reply.header('x-frame-options', 'SAMEORIGIN'); reply.header('cache-control', 'no-store') }
+    gw.get('/_dev/cartazes', async (_req, reply) => {
+      reply.header('content-security-policy', "default-src 'none'; frame-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'"); reply.header('cache-control', 'no-store')
+      const lista = cartazes()
+      return reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Sign Maker — cartazes</title><style>body{font:14px system-ui,sans-serif;margin:20px;background:#f4f5f7;color:#1b2430}h1{margin:0 0 4px}section{background:#fff;border-radius:10px;padding:14px;margin:18px 0;box-shadow:0 1px 3px rgba(0,0,0,.15)}h2{margin:0 0 8px;font-size:16px}.par{display:grid;grid-template-columns:1fr 1fr;gap:14px}iframe{width:100%;height:520px;border:1px solid #ccd;border-radius:6px;background:#fff}small{color:#667}@media(max-width:900px){.par{grid-template-columns:1fr}}</style><body><h1>Sign Maker</h1><p>Do MESMO layout calculado saem o <b>HTML</b> (esquerda) e o <b>PDF</b> (direita). Só o ambiente local. Edite em <a href="/studio">/studio</a> (aba Cartazes).</p>${lista.map((c) => `<section><h2>${esc(c.id)} <small>${esc(String(c.no.spec.tamanho))} ${esc(String(c.no.spec.orientacao ?? 'retrato'))} · <a href="/_dev/cartazes/${esc(c.id)}.html">HTML</a> · <a href="/_dev/cartazes/${esc(c.id)}.pdf">PDF</a></small></h2><div class="par"><iframe title="HTML de ${esc(c.id)}" src="/_dev/cartazes/${esc(c.id)}.html"></iframe><iframe title="PDF de ${esc(c.id)}" src="/_dev/cartazes/${esc(c.id)}.pdf"></iframe></div></section>`).join('') || '<p>Nenhum cartaz no site de exemplo.</p>'}</body></html>`)
+    })
+    gw.get<{ Params: { arq: string } }>('/_dev/cartazes/:arq', async (req, reply) => {
+      const m = /^([a-z][A-Za-z0-9._-]{0,80})\.(html|pdf)$/.exec(req.params.arq), c = m && cartazes().find((x) => x.id === m[1])
+      if (!m || !c) return reply.status(404).type('text/plain').send('cartaz inexistente')
+      quadro(reply)
+      try {
+        const r = await geraCartaz(c.no, c.no.spec.exemplo ?? {}, { agora: new Date(0) })
+        return m[2] === 'html' ? reply.type('text/html; charset=utf-8').send(r.html) : reply.type('application/pdf').header('content-disposition', `inline; filename="${m[1]}.pdf"`).send(Buffer.from(r.pdf))
+      } catch (e) { return reply.status(422).type('text/plain').send(`não foi possível gerar: ${(e as Error).message}`) }
     })
     await gw.listen({ port: porta, host: '127.0.0.1' }); porta = (gw.server.address() as { port: number }).port
     if (!o.silencioso) console.log(`gateway em http://127.0.0.1:${porta}`)

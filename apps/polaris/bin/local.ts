@@ -27,6 +27,7 @@ Polaris local no ar${dados ? ` (dados em ${dados})` : ' (em memória)'}
   API REST da loja (gerada)           ${l.urlTenant('loja-demo')}/api/loja/produtos
   GraphQL                             ${l.urlTenant('loja-demo')}/graphql
   login real (e-mail e senha)         ${l.urlTenant('loja-demo')}/entrar   →  ${emailLocal('loja-demo')} / ${SENHA_LOCAL}
+  Sign Maker (cartazes, HTML ≡ PDF)    ${l.urlTenant('loja-demo')}/_dev/cartazes
   e-mails de desenvolvimento          ${l.urlTenant('loja-demo')}/_dev/emails
   Postgres (psql)                     ${l.pgUrl}
 

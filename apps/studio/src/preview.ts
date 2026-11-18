@@ -1,5 +1,6 @@
 import { COMPONENTES_BASE, compilaPrograma, registraBase, renderPaginaHtml } from '@polaris/engine'
 import { registraCommerce } from '@polaris/engine/commerce'
+import { registraSite } from '@polaris/engine/site'
 import { cssDoTema, registraTemas, TEMA_PADRAO } from '@polaris/engine/tema'
 import { Registry, criaValidador, validaFormulario } from '@polaris/schema'
 import { htmlDe, layoutCartaz, validaNoCartaz } from '@polaris/signmaker'
@@ -8,7 +9,7 @@ import { CSS_FORMULARIO, confereExpressoes, renderizaFormularioHtml } from '@pol
 // Pré-visualização: o mesmo compilador e renderizador da produção sobre o RASCUNHO. Serve ao cliente (SPA) e ao servidor (`/studio/previa`).
 // Preview AO VIVO: o mesmo compilador e o mesmo renderizador da produção, no navegador, sobre o RASCUNHO (não sobre o salvo). Roda num iframe `sandbox=""` (sem scripts, origem opaca):
 // o HTML vem do engine (texto escapado), então mesmo um nó malicioso não executa nada. Dados externos (spec.dados) não são buscados no editor: os blocos ligados a eles aparecem vazios.
-const BASE = (() => { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); return r })()
+const BASE = (() => { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); registraSite(r); return r })()
 const VALIDA_NO = criaValidador()
 const ID_SEGURO = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
 

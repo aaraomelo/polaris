@@ -17,6 +17,13 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris label{display:inline-block}
 #polaris small{color:var(--cor-texto-suave)}
 #polaris code{background:var(--cor-superficie-alt);border-radius:var(--raio-pequeno);padding:.1em .4em;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#polaris header{display:flex;align-items:center;gap:calc(var(--espacamento-base) * 2);padding:var(--espacamento-base) calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border-bottom:var(--espacamento-borda) solid var(--cor-borda)}
+#polaris header[data-fixo]{position:sticky;top:0;z-index:10}
+#polaris header>a{display:flex;align-items:center;gap:var(--espacamento-base);color:var(--cor-texto);text-decoration:none}
+#polaris nav{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--espacamento-base) * 2)}
+#polaris header>nav{flex:1}
+#polaris nav a{text-decoration:none}
+#polaris nav a[aria-current=page]{color:var(--cor-texto);font-weight:600;text-decoration:underline}
 #polaris hr{border:0;border-top:var(--espacamento-borda) solid var(--cor-borda);width:100%}
 #polaris table{border-collapse:collapse;width:100%}
 #polaris th,#polaris td{padding:var(--espacamento-base);border-bottom:var(--espacamento-borda) solid var(--cor-borda);text-align:left}

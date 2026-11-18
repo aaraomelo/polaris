@@ -44,6 +44,7 @@
     "./commerce": "./src/commerce/index.ts",
     "./tema": "./src/tema/index.ts",
     "./expr": "./src/expr/index.ts",
-    "./formulario": "./src/formulario/index.ts"
+    "./formulario": "./src/formulario/index.ts",
+    "./site": "./src/site/index.ts"
   }
 }

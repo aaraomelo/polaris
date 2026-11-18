@@ -196,6 +196,9 @@ importers:
       '@polaris/servico':
         specifier: workspace:*
         version: link:../../packages/servico
+      '@polaris/signmaker':
+        specifier: workspace:*
+        version: link:../../packages/signmaker
       '@polaris/studio-app':
         specifier: workspace:*
         version: link:../studio

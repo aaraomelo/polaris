@@ -54,6 +54,17 @@ describe('tenant que aponta rotaLogin para a página de sistema', () => {
   })
 })
 
+describe('tenant que ainda declara uma página que sumiu da base', () => {
+  it('o site NÃO cai: a página que não existe é ignorada (com aviso), as outras e o login de sistema seguem servindo', async () => {
+    e.reg.registra({ kind: 'tenant', id: 'velho', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'velho', segmento: 'varejo', modulos: ['loja'], paginas: ['p.home', 'p.privada', 'site.entrar'], rotaLogin: '/entrar' } } as never)
+    modo.id = 'velho'
+    try {
+      expect((await e.req('GET', '/', { host: 'a.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/entrar', { host: 'a.loja.test' })).statusCode).toBe(200)
+      expect((await e.req('GET', '/privada', { host: 'a.loja.test' })).headers.location).toBe('/entrar?volta=%2Fprivada')
+    } finally { modo.id = undefined }
+  })
+})
+
 describe('entrar', () => {
   it('só com o cabeçalho x-polaris-form; sem identidade configurada seria 501', async () => {
     const r = await e.req('POST', '/bff/formularios/identidade.entrar', { corpo: { valores: { email: 'ana@x.test', senha: 'cavalo-bateria-grampo' } }, host: 'a.loja.test' }); expect(r.statusCode).toBe(400); expect(e.json(r).erro.codigo).toBe('cabecalho_ausente')

@@ -62,6 +62,8 @@ export const COMPONENTES_BASE: Componentes = {
     const cols = n === undefined ? 2 : Math.min(12, Math.max(1, Math.trunc(n)))
     return createElement('div', { ...(id ? { id } : {}), style: { display: 'grid', gridTemplateColumns: `repeat(${cols},minmax(0,1fr))`, ...(gap !== undefined ? { gap } : {}) } }, slots.filhos)
   },
+  'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}) }, slots.filhos),
+  'nav/menu': ({ props, slots, id }) => createElement('nav', { ...(id ? { id } : {}), 'aria-label': typeof props.rotulo === 'string' && props.rotulo ? props.rotulo : 'Principal' }, slots.filhos),
   'layout/divisor': ({ id }) => createElement('hr', id ? { id } : null),
   'layout/espacador': ({ props, id }) => createElement('div', { ...(id ? { id } : {}), 'aria-hidden': 'true', style: { height: num(props.tamanho) ?? 8 } }),
   'texto/rotulo': ({ props, id }) => createElement('label', { ...(id ? { id } : {}), ...(typeof props.para === 'string' && props.para ? { htmlFor: props.para } : {}) }, txt(props.texto)),
@@ -94,7 +96,7 @@ export const COMPONENTES_BASE: Componentes = {
   'nav/link': ({ props, slots, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
-    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
+    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
   },
 }
 
@@ -113,6 +115,8 @@ export const BLOCOS_BASE = [
   bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
+  bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
+  bloco('nav/menu', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80 } } } }),
   bloco('layout/divisor'),
   bloco('layout/espacador', { props: { type: 'object', properties: { tamanho: { type: 'number', minimum: 0, default: 8 } } } }),
   bloco('texto/rotulo', { props: { type: 'object', properties: { texto: { type: 'string' }, para: { type: 'string' } }, required: ['texto'] } }),
@@ -130,7 +134,7 @@ export const BLOCOS_BASE = [
   bloco('entrada/caixa', { props: { type: 'object', properties: { marcado: { type: 'boolean' }, rotulo: ROTULO, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'booleano' } } }),
   bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } }, required: ['texto'] } }),
   bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } } } }),
-  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' } }, required: ['href'] } }),
+  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' } }, required: ['href'] } }),
 ]
 
 /** Registra no Registry o core/slot e os blocos base. */

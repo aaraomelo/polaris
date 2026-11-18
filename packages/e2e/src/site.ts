@@ -5,6 +5,7 @@ import { join, normalize } from 'node:path'
 import { registraBase } from '@polaris/engine'
 import { construirAot, type Manifesto } from '@polaris/engine/aot'
 import { registraCommerce } from '@polaris/engine/commerce'
+import { registraSite } from '@polaris/engine/site'
 import { registraTemas } from '@polaris/engine/tema'
 import { Registry } from '@polaris/schema'
 
@@ -15,7 +16,7 @@ export type Cenario = { id: string; interface: string; titulo: string; descricao
 export type Site = { url: string; cenarios: Cenario[]; registry: Registry; dir: string; fecha(): Promise<void> }
 const slug = (s: string) => s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase()
 
-export function registryDosBlocos(): Registry { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); return r }
+export function registryDosBlocos(): Registry { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); registraSite(r); return r }
 
 /** os exemplos dos blocos como páginas do registry (o mesmo que o catálogo faz para a documentação) */
 export function paginasDeExemplo(reg: Registry): Array<{ id: string; interface: string; titulo: string; descricao: string; rota: string }> {

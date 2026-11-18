@@ -35,38 +35,36 @@
         "slots": {
           "filhos": [
             {
-              "bloco": "layout/linha",
+              "bloco": "site/cabecalho",
               "props": {
-                "gap": 16
+                "titulo": "Minha loja",
+                "links": [
+                  {
+                    "texto": "Início",
+                    "href": "/",
+                    "atual": true
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  },
+                  {
+                    "texto": "Contato",
+                    "href": "/contato"
+                  },
+                  {
+                    "texto": "Produtos (gerente)",
+                    "href": "/produtos"
+                  }
+                ]
               },
               "slots": {
-                "filhos": [
+                "acoes": [
                   {
                     "bloco": "nav/link",
                     "props": {
-                      "href": "/",
-                      "texto": "Início"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/sobre",
-                      "texto": "Sobre"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/contato",
-                      "texto": "Contato"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/produtos",
-                      "texto": "Produtos (gerente)"
+                      "href": "/entrar",
+                      "texto": "Entrar"
                     }
                   }
                 ]
@@ -116,38 +114,36 @@
         "slots": {
           "filhos": [
             {
-              "bloco": "layout/linha",
+              "bloco": "site/cabecalho",
               "props": {
-                "gap": 16
+                "titulo": "Minha loja",
+                "links": [
+                  {
+                    "texto": "Início",
+                    "href": "/"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre",
+                    "atual": true
+                  },
+                  {
+                    "texto": "Contato",
+                    "href": "/contato"
+                  },
+                  {
+                    "texto": "Produtos (gerente)",
+                    "href": "/produtos"
+                  }
+                ]
               },
               "slots": {
-                "filhos": [
+                "acoes": [
                   {
                     "bloco": "nav/link",
                     "props": {
-                      "href": "/",
-                      "texto": "Início"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/sobre",
-                      "texto": "Sobre"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/contato",
-                      "texto": "Contato"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/produtos",
-                      "texto": "Produtos (gerente)"
+                      "href": "/entrar",
+                      "texto": "Entrar"
                     }
                   }
                 ]
@@ -187,38 +183,35 @@
         "slots": {
           "filhos": [
             {
-              "bloco": "layout/linha",
+              "bloco": "site/cabecalho",
               "props": {
-                "gap": 16
+                "titulo": "Minha loja",
+                "links": [
+                  {
+                    "texto": "Início",
+                    "href": "/"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  },
+                  {
+                    "texto": "Contato",
+                    "href": "/contato"
+                  },
+                  {
+                    "texto": "Produtos (gerente)",
+                    "href": "/produtos"
+                  }
+                ]
               },
               "slots": {
-                "filhos": [
+                "acoes": [
                   {
                     "bloco": "nav/link",
                     "props": {
-                      "href": "/",
-                      "texto": "Início"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/sobre",
-                      "texto": "Sobre"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/contato",
-                      "texto": "Contato"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/produtos",
-                      "texto": "Produtos (gerente)"
+                      "href": "/entrar",
+                      "texto": "Entrar"
                     }
                   }
                 ]
@@ -318,38 +311,36 @@
         "slots": {
           "filhos": [
             {
-              "bloco": "layout/linha",
+              "bloco": "site/cabecalho",
               "props": {
-                "gap": 16
+                "titulo": "Minha loja",
+                "links": [
+                  {
+                    "texto": "Início",
+                    "href": "/"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  },
+                  {
+                    "texto": "Contato",
+                    "href": "/contato"
+                  },
+                  {
+                    "texto": "Produtos (gerente)",
+                    "href": "/produtos",
+                    "atual": true
+                  }
+                ]
               },
               "slots": {
-                "filhos": [
+                "acoes": [
                   {
                     "bloco": "nav/link",
                     "props": {
-                      "href": "/",
-                      "texto": "Início"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/sobre",
-                      "texto": "Sobre"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/contato",
-                      "texto": "Contato"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/produtos",
-                      "texto": "Produtos (gerente)"
+                      "href": "/entrar",
+                      "texto": "Entrar"
                     }
                   }
                 ]
@@ -491,38 +482,36 @@
         "slots": {
           "filhos": [
             {
-              "bloco": "layout/linha",
+              "bloco": "site/cabecalho",
               "props": {
-                "gap": 16
+                "titulo": "Minha loja",
+                "links": [
+                  {
+                    "texto": "Início",
+                    "href": "/"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  },
+                  {
+                    "texto": "Contato",
+                    "href": "/contato",
+                    "atual": true
+                  },
+                  {
+                    "texto": "Produtos (gerente)",
+                    "href": "/produtos"
+                  }
+                ]
               },
               "slots": {
-                "filhos": [
+                "acoes": [
                   {
                     "bloco": "nav/link",
                     "props": {
-                      "href": "/",
-                      "texto": "Início"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/sobre",
-                      "texto": "Sobre"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/contato",
-                      "texto": "Contato"
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "/produtos",
-                      "texto": "Produtos (gerente)"
+                      "href": "/entrar",
+                      "texto": "Entrar"
                     }
                   }
                 ]
@@ -544,6 +533,406 @@
           ]
         }
       }
+    }
+  },
+  {
+    "kind": "cartaz",
+    "id": "sm.oferta-de-por",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "tamanho": "A5",
+      "orientacao": "paisagem",
+      "titulo": "Oferta de/por",
+      "fundo": {
+        "cor": [
+          255,
+          244,
+          214
+        ]
+      },
+      "fonte": {
+        "familia": "Montserrat",
+        "peso": "negrito"
+      },
+      "dados": {
+        "produto": {
+          "tipo": "json"
+        },
+        "preco": {
+          "tipo": "json"
+        }
+      },
+      "elementos": [
+        {
+          "tipo": "faixa",
+          "id": "topo",
+          "caixa": {
+            "topo": 0,
+            "esquerda": 0,
+            "largura": 1,
+            "altura": 0.22
+          },
+          "cor": [
+            200,
+            16,
+            46
+          ]
+        },
+        {
+          "tipo": "texto",
+          "id": "nome",
+          "texto": "{produto.nome}",
+          "caixa": {
+            "topo": 0.03,
+            "esquerda": 0.04,
+            "largura": 0.92,
+            "altura": 0.16
+          },
+          "cor": [
+            255,
+            255,
+            255
+          ],
+          "alinhaV": "meio"
+        },
+        {
+          "tipo": "texto",
+          "id": "de",
+          "texto": "DE {preco.de | brl}",
+          "caixa": {
+            "topo": 0.3,
+            "esquerda": 0.06,
+            "largura": 0.4,
+            "altura": 0.1
+          },
+          "alinhaH": "esquerda",
+          "se": "preco.de"
+        },
+        {
+          "tipo": "faixa",
+          "id": "selo",
+          "caixa": {
+            "topo": 0.5,
+            "esquerda": 0.05,
+            "largura": 0.9,
+            "altura": 0.3
+          },
+          "cor": [
+            255,
+            214,
+            0
+          ],
+          "raio": 0.2
+        },
+        {
+          "tipo": "texto",
+          "id": "por",
+          "texto": "POR {preco.por | brl}",
+          "caixa": {
+            "topo": 0.52,
+            "esquerda": 0.07,
+            "largura": 0.86,
+            "altura": 0.26
+          },
+          "cor": [
+            200,
+            16,
+            46
+          ],
+          "alinhaV": "meio"
+        },
+        {
+          "tipo": "texto",
+          "id": "lateral",
+          "texto": "OFERTA",
+          "caixa": {
+            "topo": 0.95,
+            "esquerda": 0.02,
+            "largura": 0.3,
+            "altura": 0.04
+          },
+          "rotacao": 90,
+          "alinhaH": "esquerda",
+          "cor": [
+            120,
+            120,
+            120
+          ]
+        }
+      ],
+      "exemplo": {
+        "produto": {
+          "nome": "Arroz Tipo 1 Camil 5kg"
+        },
+        "preco": {
+          "de": "12.90",
+          "por": "9.99"
+        }
+      },
+      "tamanhos": [
+        "A4",
+        "A5",
+        "A6",
+        "A7"
+      ]
+    }
+  },
+  {
+    "kind": "cartaz",
+    "id": "sm.preco-com-unidade",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "tamanho": "A5",
+      "orientacao": "paisagem",
+      "titulo": "Oferta com preço",
+      "fundo": {
+        "cor": [
+          255,
+          255,
+          255
+        ]
+      },
+      "fonte": {
+        "familia": "Montserrat",
+        "peso": "negrito"
+      },
+      "dados": {
+        "produto": {
+          "tipo": "json"
+        },
+        "preco": {
+          "tipo": "json"
+        }
+      },
+      "elementos": [
+        {
+          "tipo": "texto",
+          "id": "nome",
+          "texto": "{produto.nome}",
+          "caixa": {
+            "topo": 0.04,
+            "esquerda": 0.05,
+            "largura": 0.9,
+            "altura": 0.2
+          },
+          "alinhaV": "meio"
+        },
+        {
+          "tipo": "preco",
+          "id": "antigo",
+          "valor": "{preco.de}",
+          "se": "preco.de",
+          "caixa": {
+            "topo": 0.3,
+            "esquerda": 0.05,
+            "largura": 0.4,
+            "altura": 0.14
+          },
+          "alinhaH": "esquerda",
+          "centavos": {
+            "escala": 1,
+            "posicao": "base"
+          },
+          "riscado": {
+            "espessura": 2
+          },
+          "cor": [
+            120,
+            120,
+            120
+          ]
+        },
+        {
+          "tipo": "preco",
+          "id": "atual",
+          "valor": "{preco.por}",
+          "caixa": {
+            "topo": 0.48,
+            "esquerda": 0.05,
+            "largura": 0.9,
+            "altura": 0.42
+          },
+          "cor": [
+            200,
+            16,
+            46
+          ],
+          "unidade": {
+            "texto": "{produto.unidade}"
+          }
+        }
+      ],
+      "exemplo": {
+        "produto": {
+          "nome": "Feijão Carioca Tipo 1 1kg",
+          "unidade": "KG"
+        },
+        "preco": {
+          "de": "12.9",
+          "por": "1234.5"
+        }
+      },
+      "tamanhos": [
+        "A4",
+        "A5",
+        "A6",
+        "A7"
+      ]
+    }
+  },
+  {
+    "kind": "cartaz",
+    "id": "sm.etiqueta-codigos",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "tamanho": "A6",
+      "orientacao": "paisagem",
+      "titulo": "Etiqueta com códigos",
+      "fundo": {
+        "cor": [
+          255,
+          255,
+          255
+        ]
+      },
+      "fonte": {
+        "familia": "Montserrat",
+        "peso": "negrito"
+      },
+      "dados": {
+        "produto": {
+          "tipo": "json"
+        },
+        "link": {
+          "tipo": "texto"
+        }
+      },
+      "elementos": [
+        {
+          "tipo": "texto",
+          "id": "nome",
+          "texto": "{produto.nome}",
+          "caixa": {
+            "topo": 0.05,
+            "esquerda": 0.05,
+            "largura": 0.9,
+            "altura": 0.25
+          },
+          "alinhaH": "esquerda",
+          "alinhaV": "meio"
+        },
+        {
+          "tipo": "codigoBarras",
+          "id": "barras",
+          "valor": "{produto.ean}",
+          "formato": "ean13",
+          "caixa": {
+            "topo": 0.45,
+            "esquerda": 0.05,
+            "largura": 0.55,
+            "altura": 0.45
+          },
+          "fundo": [
+            255,
+            255,
+            255
+          ],
+          "raio": 0.1,
+          "numero": "cima"
+        },
+        {
+          "tipo": "qrcode",
+          "id": "qr",
+          "valor": "{link}",
+          "nivel": "M",
+          "caixa": {
+            "topo": 0.4,
+            "direita": 0.05,
+            "largura": 0.3,
+            "altura": 0.5
+          }
+        }
+      ],
+      "exemplo": {
+        "produto": {
+          "nome": "Café Torrado e Moído 500 g",
+          "ean": "7891000100103"
+        },
+        "link": "https://exemplo.com.br/p/7891000100103"
+      },
+      "tamanhos": [
+        "A4",
+        "A5",
+        "A6",
+        "A7"
+      ]
+    }
+  },
+  {
+    "kind": "cartaz",
+    "id": "sm.etiqueta-validade",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "tamanho": "A6",
+      "orientacao": "paisagem",
+      "titulo": "Etiqueta com validade",
+      "fundo": {
+        "cor": [
+          255,
+          255,
+          255
+        ]
+      },
+      "fonte": {
+        "familia": "Montserrat",
+        "peso": "negrito"
+      },
+      "dados": {
+        "produto": {
+          "tipo": "json"
+        }
+      },
+      "elementos": [
+        {
+          "tipo": "texto",
+          "id": "nome",
+          "texto": "{produto.nome}",
+          "caixa": {
+            "topo": 0.06,
+            "esquerda": 0.05,
+            "largura": 0.9,
+            "altura": 0.4
+          },
+          "alinhaV": "meio"
+        },
+        {
+          "tipo": "validade",
+          "id": "val",
+          "data": "{produto.validade}",
+          "caixa": {
+            "topo": 0.62,
+            "esquerda": 0.05,
+            "largura": 0.9,
+            "altura": 0.2
+          }
+        }
+      ],
+      "exemplo": {
+        "produto": {
+          "nome": "Iogurte Natural 170 g",
+          "validade": "15/03/2027"
+        }
+      },
+      "tamanhos": [
+        "A4",
+        "A5",
+        "A6",
+        "A7"
+      ]
     }
   }
 ]

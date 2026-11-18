@@ -53,7 +53,7 @@ export const d_nav_link: Descritor = {
     chave: (p) => (p.texto !== undefined ? 'a:t' : 'a:f'), tag: () => 'a', filhos: true,
     attrs: (p, id) => {
       const href = urlSegura(p.href)
-      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}) }
+      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}) }
     },
     texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
   }
@@ -82,6 +82,8 @@ export const d_layout_grade: Descritor = {
   chave: () => 'div', tag: () => 'div', filhos: true,
   attrs: (p, id) => { const gap = num(p.gap); return { ...comId(id), style: `display:grid;grid-template-columns:repeat(${inteiro(p.colunas, 1, 12, 2)},minmax(0,1fr))${gap !== undefined ? `;gap:${px(gap)}` : ''}` } },
 }
+export const d_layout_cabecalho: Descritor = { chave: () => 'header', tag: () => 'header', filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.fixo === true ? { 'data-fixo': '' } : {}) }) }
+export const d_nav_menu: Descritor = { chave: () => 'nav', tag: () => 'nav', filhos: true, attrs: (p, id) => ({ ...comId(id), 'aria-label': typeof p.rotulo === 'string' && p.rotulo ? p.rotulo : 'Principal' }) }
 export const d_layout_divisor: Descritor = { chave: () => 'hr', tag: () => 'hr', attrs: (_, id) => comId(id) }
 export const d_layout_espacador: Descritor = { chave: () => 'div', tag: () => 'div', attrs: (p, id) => ({ ...comId(id), 'aria-hidden': 'true', style: `height:${px(num(p.tamanho) ?? 8)}` }) }
 export const d_texto_rotulo: Descritor = { chave: () => 'label', tag: () => 'label', attrs: (p, id) => ({ ...comId(id), ...(typeof p.para === 'string' && p.para ? { for: p.para } : {}) }), texto: (p) => txt(p.texto) }
@@ -160,6 +162,7 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
+  'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
   'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,
