@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/.turbo
+.env
+.env.*
+!.env.exemplo
+segredo
+*.pem
+*.key
+docs
+backlog

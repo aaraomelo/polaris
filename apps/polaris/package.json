@@ -1,0 +1,30 @@
+{
+  "name": "@polaris/apps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "tipos": "tsc --noEmit",
+    "test": "vitest run",
+    "empacota": "node scripts/empacota.mjs"
+  },
+  "dependencies": {
+    "@polaris/acesso": "workspace:*",
+    "@polaris/gateway": "workspace:*",
+    "@polaris/observabilidade": "workspace:*",
+    "@polaris/pg": "workspace:*",
+    "@polaris/schema": "workspace:*",
+    "@polaris/servico": "workspace:*",
+    "@polaris/engine": "workspace:*",
+    "fastify": "^5.2.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@electric-sql/pglite-socket": "^0.1.0",
+    "@types/node": "^22.10.5",
+    "esbuild": "^0.24.2",
+    "jose": "^5.9.6",
+    "typescript": "~5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

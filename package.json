@@ -10,7 +10,9 @@
     "segredos": "bash scripts/check-no-secrets.sh --all",
     "afetados": "turbo run tipos test --concurrency=2 --filter='...[origin/main]'",
     "valida-ci": "node tools/ferramentas/bin/valida-ci.ts",
-    "commits": "node tools/ferramentas/bin/check-commits.ts"
+    "commits": "node tools/ferramentas/bin/check-commits.ts",
+    "dev": "docker compose up --build",
+    "dev:config": "docker compose --env-file .env.exemplo config -q"
   },
   "devDependencies": {
     "turbo": "^2.11.11"

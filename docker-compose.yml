@@ -1,0 +1,64 @@
+# Ambiente de desenvolvimento: `docker compose up --build`  (antes: cp .env.exemplo .env)
+#   gateway   http://localhost:3000   (única porta aberta para a aplicação)
+#   loja      interno (só o gateway chega nele), migra o esquema na partida
+#   postgres  interno, volume `pgdados`
+# Nada daqui é produção: HS256 e senhas de exemplo só existem para o dev.
+name: polaris
+
+x-polaris: &polaris
+  build: { context: ., dockerfile: docker/Dockerfile }
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  volumes: ["./exemplos/loja:/nos:ro"]
+  environment: &env
+    POLARIS_NOS: /nos
+    HOST: 0.0.0.0
+    JWT_EMISSOR: ${JWT_EMISSOR:-https://id.polaris.local}
+    JWT_AUDIENCIA: ${JWT_AUDIENCIA:-polaris}
+    JWT_SEGREDO: ${JWT_SEGREDO:?copie .env.exemplo para .env}
+    POLARIS_METRICAS_TOKEN: ${POLARIS_METRICAS_TOKEN:?copie .env.exemplo para .env}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: polaris
+      POSTGRES_PASSWORD: ${POSTGRES_SENHA:?copie .env.exemplo para .env}
+      POLARIS_MIGRADOR_SENHA: ${POLARIS_MIGRADOR_SENHA:?copie .env.exemplo para .env}
+      POLARIS_APP_SENHA: ${POLARIS_APP_SENHA:?copie .env.exemplo para .env}
+    volumes:
+      - pgdados:/var/lib/postgresql/data
+      - ./docker/01-papeis.sh:/docker-entrypoint-initdb.d/01-papeis.sh:ro
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U postgres -d polaris"], interval: 3s, timeout: 3s, retries: 20 }
+
+  loja:
+    <<: *polaris
+    command: ["node", "dist/servico.mjs"]
+    depends_on: { postgres: { condition: service_healthy } }
+    environment:
+      <<: *env
+      POLARIS_SERVICO: loja
+      PORT: "3001"
+      POLARIS_MIGRAR: "1"
+      DATABASE_URL: postgres://polaris_app:${POLARIS_APP_SENHA}@postgres:5432/polaris
+      DATABASE_URL_MIGRADOR: postgres://polaris_migrador:${POLARIS_MIGRADOR_SENHA}@postgres:5432/polaris
+    healthcheck: { test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/pronto').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 5s, timeout: 3s, retries: 20 }
+
+  gateway:
+    <<: *polaris
+    command: ["node", "dist/gateway.mjs"]
+    depends_on: { loja: { condition: service_healthy } }
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      <<: *env
+      PORT: "3000"
+      POLARIS_SERVICOS: '{"loja":"http://loja:3001"}'
+      POLARIS_HOSTS: ${POLARIS_HOSTS:-{"localhost":"11111111-1111-1111-1111-111111111111"}}
+      POLARIS_GRAPHQL_INTROSPECCAO: "1"
+
+volumes:
+  pgdados:
