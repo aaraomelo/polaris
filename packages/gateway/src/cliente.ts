@@ -7,7 +7,7 @@ export type ClienteServico = { chama(p: PedidoServico, signal?: AbortSignal): Pr
 
 /** Falha ao chamar um serviço. `mensagem` e `codigo` só existem para 4xx (texto que o PRÓPRIO serviço escreveu para o cliente); 5xx e falhas de rede são opacas. */
 export class FalhaServico extends Error {
-  constructor(readonly motivo: string, readonly status?: number, readonly codigo?: string, readonly mensagemServico?: string) { super(motivo); this.name = 'FalhaServico' }
+  constructor(readonly motivo: string, readonly status?: number, readonly codigo?: string, readonly mensagemServico?: string, readonly detalhes?: unknown) { super(motivo); this.name = 'FalhaServico' }
 }
 
 const CAMINHO_SEGURO = /^\/[A-Za-z0-9._~\-/%:@!$&'()*+,;=]*$/

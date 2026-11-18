@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/campos/0/mascara",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'padrao'",
+    "dica": "adicione \"padrao\" em /spec/campos/0/mascara"
+  }
+]

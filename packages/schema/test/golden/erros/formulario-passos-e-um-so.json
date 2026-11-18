@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/passos",
+    "regra": "minItems",
+    "mensagem": "a lista precisa de pelo menos 2 item(ns)"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "kind": "formulario",
+  "id": "f7",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "a",
+        "tipo": "texto",
+        "campos": [
+          {
+            "nome": "b",
+            "tipo": "texto"
+          }
+        ]
+      }
+    ]
+  }
+}

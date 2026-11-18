@@ -1,0 +1,16 @@
+{
+  "kind": "formulario",
+  "id": "f10",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "a",
+        "tipo": "texto"
+      }
+    ],
+    "envio": {
+      "servico": "loja"
+    }
+  }
+}

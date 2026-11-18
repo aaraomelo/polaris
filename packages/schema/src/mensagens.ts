@@ -81,8 +81,12 @@ export function traduz(e: ErrorObject, base = ''): Erro | null {
     case 'oneOf':
     case 'anyOf':
       return out('não corresponde a nenhuma das formas permitidas', 'confira o campo que distingue a forma (op, acao…) e os campos exigidos por ela')
-    case 'not':
+    case 'not': {
+      // proibição condicional (`if … then/else: { not: { required: [x] } }`): diz QUAL campo não cabe, em vez da regra do tenant/segmento
+      const req = (e.schema as { required?: string[] } | undefined)?.required
+      if (req?.length === 1 && /\/(then|else)\/not$/.test(e.schema ? e.schemaPath : '')) return out(`o campo '${req[0]}' não é permitido aqui`, `remova "${req[0]}" ou mude o tipo do campo (só alguns tipos aceitam "${req[0]}")`)
       return out('combinação de campos não permitida', 'um nó tem escopo de tenant (tenantId) OU de segmento (segmento), nunca os dois')
+    }
     default:
       return out(e.message ?? 'inválido')
   }

@@ -196,6 +196,16 @@ export class Registry {
         }
         instancias(s.modelo, '/spec/modelo')
         break
+      case 'formulario': {
+        if (s.valoresIniciais?.dados) refs.push({ kind: 'dados', id: s.valoresIniciais.dados, caminho: '/spec/valoresIniciais/dados' })
+        if (s.envio?.servico) refs.push({ kind: 'servico', id: s.envio.servico, caminho: '/spec/envio/servico' })
+        const campos = (lista: any[], caminho: string) => lista.forEach((c, i) => {
+          if (c.opcoes && !Array.isArray(c.opcoes) && c.opcoes.dados) refs.push({ kind: 'dados', id: c.opcoes.dados, caminho: `${caminho}/${i}/opcoes/dados` })
+          if (Array.isArray(c.campos)) campos(c.campos, `${caminho}/${i}/campos`)
+        })
+        campos(s.campos ?? [], '/spec/campos')
+        break
+      }
       case 'servico':
         // eventos publicados e consumidos são CONTRATOS: precisam existir como nós `evento` (o id é o nome: pedido.criado)
         for (const [op, o] of Object.entries<any>(s.operacoes ?? {})) (o.publica ?? []).forEach((id: string, n: number) => refs.push({ kind: 'evento', id, caminho: `/spec/operacoes/${op}/publica/${n}` }))

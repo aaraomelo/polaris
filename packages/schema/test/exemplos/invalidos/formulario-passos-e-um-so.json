@@ -1,0 +1,22 @@
+{
+  "kind": "formulario",
+  "id": "f6",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "a",
+        "tipo": "texto"
+      }
+    ],
+    "passos": [
+      {
+        "id": "p1",
+        "titulo": "Único",
+        "campos": [
+          "a"
+        ]
+      }
+    ]
+  }
+}

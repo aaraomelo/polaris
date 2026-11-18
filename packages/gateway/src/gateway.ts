@@ -13,6 +13,7 @@ import { instalaGraphql, type OpcoesGraphql } from './graphql'
 import type { InfoTenant, PreviewDeRelease, RegistrosDeTenant, ResolvedorTenant } from './tenants'
 import { LimiteTaxa } from './taxa'
 import { instalaPaginas, type OpcoesPaginas } from './paginas'
+import { instalaFormularios } from './formularios'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // Gateway/BFF: a borda. Compõe os dados de uma PÁGINA (um pedido, vários serviços, em paralelo, com cache escopado), expõe o REST e o GraphQL GERADOS
@@ -276,6 +277,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
 
   // --- GraphQL gerado -----------------------------------------------------------------------------------------------------------------------------
   if (o.graphql !== false) instalaGraphql(app, { servicos: o.servicos, chamador, entra: (req, c) => entra(req, c), obs, traduz, opcoes: o.graphql ?? {}, cobraTaxa: (req, ctx, custo) => limita(req as Req, ctx, custo), cache, publicaDaFonte })
+  instalaFormularios(app, { entra: (r) => entra(r), limita: (r, c, custo) => limita(r as Req, c, custo), chamador, registroDe: (c, f) => c.registro ?? f, registro: o.registry, log })
   if (o.paginas) instalaPaginas(app, o.paginas, { entra, programaDe: (c, id) => programaDe(c, id), opcoesCarga: (c, p, r, e, f) => opcoesCarga(c, p, r, e, f), registroDe: (c, f) => c.registro ?? f, registro: o.registry, ...(o.preview ? { preview: o.preview } : {}), log })
   o.estende?.(app, { sessao: async (req) => { try { const c = await autentica(req as Req); return c.anonimo ? null : c } catch { return null } } })
   return app

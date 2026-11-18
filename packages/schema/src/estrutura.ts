@@ -1,6 +1,7 @@
 import type { Erro, No } from './index'
 import { validaPapel } from './acesso'
 import { validaDados } from './dados'
+import { validaFormulario } from './formulario'
 import { validaPack } from './pack'
 import type { Contexto, Registry } from './registry'
 import { validaProps } from './props'
@@ -135,6 +136,7 @@ function conferePasta(reg: Registry, raiz: Inst, base: string, ctx: Contexto, li
 export function validaEstrutura(reg: Registry, no: No, ctx: Contexto = {}, limites: Partial<Limites> = {}): Erro[] {
   if (no.kind === 'papel') return validaPapel(reg, no, ctx) // papel: sujeitos, ações e campos contra os serviços registrados
   if (no.kind === 'pack') return validaPack(reg, no, ctx) // pack: sementes contra os serviços, guardas e ciclos
+  if (no.kind === 'formulario') return validaFormulario(reg, no, ctx) // formulário: nomes, seções/passos, máscaras por tipo, regex segura e envio contra o serviço
   if (no.kind === 'dados') return validaDados(reg, no, ctx) // dados: operação e parâmetros contra o contrato do serviço
   const lim = { ...LIMITES_PADRAO, ...limites }
   const out: Erro[] = []

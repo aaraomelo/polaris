@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/campos/0",
+    "regra": "not",
+    "mensagem": "o campo 'campos' não é permitido aqui",
+    "dica": "remova \"campos\" ou mude o tipo do campo (só alguns tipos aceitam \"campos\")"
+  }
+]

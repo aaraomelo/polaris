@@ -1,0 +1,16 @@
+{
+  "kind": "formulario",
+  "id": "f5",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "s",
+        "tipo": "senha",
+        "mascara": {
+          "padrao": "000000"
+        }
+      }
+    ]
+  }
+}

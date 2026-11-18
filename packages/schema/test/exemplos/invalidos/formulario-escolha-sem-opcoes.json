@@ -1,0 +1,13 @@
+{
+  "kind": "formulario",
+  "id": "f1",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "cor",
+        "tipo": "escolha"
+      }
+    ]
+  }
+}

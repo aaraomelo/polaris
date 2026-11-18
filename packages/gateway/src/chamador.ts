@@ -64,10 +64,10 @@ export function criaChamador(servicos: Servicos, obs?: Observabilidade): Chamado
     try {
       const r = await (obs ? obs.tracer.emSpan('servico.chama', { tipo: 'cliente', atributos: { servico, operacao } }, (s) => executa(s.traceparent())) : executa())
       if (r.status >= 200 && r.status < 300) return { status: r.status, corpo: r.status === 204 ? null : (r.corpo ?? null) }
-      const erro = (r.corpo as { erro?: { codigo?: unknown; mensagem?: unknown } } | undefined)?.erro
+      const erro = (r.corpo as { erro?: { codigo?: unknown; mensagem?: unknown; detalhes?: unknown } } | undefined)?.erro
       resultado = r.status >= 500 ? '5xx' : '4xx'
       // só o 4xx carrega o texto do serviço (escrito para o cliente); 5xx fica opaco
-      throw new FalhaServico(`o serviço respondeu ${r.status}`, r.status, typeof erro?.codigo === 'string' ? erro.codigo : undefined, r.status < 500 && typeof erro?.mensagem === 'string' ? erro.mensagem : undefined)
+      throw new FalhaServico(`o serviço respondeu ${r.status}`, r.status, typeof erro?.codigo === 'string' ? erro.codigo : undefined, r.status < 500 && typeof erro?.mensagem === 'string' ? erro.mensagem : undefined, r.status < 500 ? erro?.detalhes : undefined)
     } catch (e) {
       if (resultado === 'ok') resultado = 'erro'
       throw e

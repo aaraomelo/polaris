@@ -7,7 +7,7 @@ import { Registry, jsonCanonico, validaEstrutura, type Erro, type No } from '@po
 
 type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
 /** o que um tenant PODE sobrescrever. `servico` (muda banco), `evento`, `kernel`/`backend` (executam código), `pack` e `tenant` (são da plataforma) NUNCA. */
-export const KINDS_DO_TENANT = ['pagina', 'tema', 'dados', 'papel', 'documento', 'bloco'] as const
+export const KINDS_DO_TENANT = ['pagina', 'tema', 'dados', 'papel', 'documento', 'bloco', 'formulario'] as const
 export type KindDoTenant = (typeof KINDS_DO_TENANT)[number]
 /** com `configDoSite` (só `PUT /studio/site`), o armazém grava também o nó `tenant`; por padrão e na rota genérica de nós vale só KINDS_DO_TENANT */
 const KINDS_NO_ARMAZEM = [...KINDS_DO_TENANT, 'tenant'] as const

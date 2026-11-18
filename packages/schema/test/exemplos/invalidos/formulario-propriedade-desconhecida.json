@@ -1,0 +1,14 @@
+{
+  "kind": "formulario",
+  "id": "f8",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "a",
+        "tipo": "texto",
+        "obrigatoria": true
+      }
+    ]
+  }
+}

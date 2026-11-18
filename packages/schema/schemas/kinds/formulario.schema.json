@@ -1,0 +1,1040 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/formulario/v1",
+  "title": "Formulário",
+  "type": "object",
+  "description": "Formulário declarativo: campos tipados, formato e MÁSCARA, validação (por campo e entre campos), mensagens de erro (com i18n) e ações (enviar, limpar, voltar…). O mesmo JSON valida no navegador e no servidor (a validação do servidor é a que vale).",
+  "required": [
+    "campos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "titulo": {
+      "$ref": "#/$defs/texto"
+    },
+    "descricao": {
+      "$ref": "#/$defs/texto"
+    },
+    "idioma": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$",
+      "description": "idioma das mensagens quando o visitante não tem preferência"
+    },
+    "campos": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/campo"
+      }
+    },
+    "secoes": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/secao"
+      },
+      "description": "agrupa campos para exibição; um campo em no máximo uma seção"
+    },
+    "passos": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/passo"
+      },
+      "description": "assistente em passos (cada passo valida os seus campos antes de avançar); exclui `secoes`"
+    },
+    "validacoes": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/regraForm"
+      },
+      "description": "regras ENTRE campos (ex.: fim depois do início)"
+    },
+    "mensagens": {
+      "$ref": "#/$defs/mensagens"
+    },
+    "validar": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "quando": {
+          "enum": [
+            "alterar",
+            "sair",
+            "enviar"
+          ],
+          "default": "sair",
+          "description": "quando o campo mostra o erro: a cada alteração, ao sair do campo (padrão) ou só ao enviar"
+        },
+        "mostrarTodos": {
+          "type": "boolean",
+          "default": false,
+          "description": "mostra todos os erros do campo (padrão: só o primeiro)"
+        },
+        "focaPrimeiroErro": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "valoresIniciais": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dados": {
+          "$ref": "polaris://comum/v1#/$defs/identificador"
+        },
+        "valores": {
+          "type": "object",
+          "description": "valor por campo; expressões não: use `padrao` do campo para isso"
+        }
+      },
+      "description": "edição: o nó `dados` cujo resultado preenche o formulário (campo → mesmo nome no resultado)"
+    },
+    "envio": {
+      "$ref": "#/$defs/envio"
+    },
+    "acoes": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/acaoForm"
+      }
+    }
+  },
+  "$defs": {
+    "texto": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "texto com bindings {expr}; nas mensagens: {rotulo} {valor} {min} {max} {tamanho}"
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 20,
+          "propertyNames": {
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "description": "por idioma: {\"pt-BR\":\"…\",\"en\":\"…\"}"
+        }
+      ]
+    },
+    "nomeCampo": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*$",
+      "maxLength": 64
+    },
+    "tipoCampo": {
+      "enum": [
+        "texto",
+        "textoLongo",
+        "senha",
+        "email",
+        "telefone",
+        "url",
+        "numero",
+        "inteiro",
+        "dinheiro",
+        "percentual",
+        "booleano",
+        "escolha",
+        "multiescolha",
+        "data",
+        "hora",
+        "dataHora",
+        "cpf",
+        "cnpj",
+        "cep",
+        "arquivo",
+        "oculto",
+        "grupo",
+        "lista"
+      ]
+    },
+    "normaliza": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 8,
+      "items": {
+        "enum": [
+          "aparar",
+          "colapsaEspacos",
+          "minusculas",
+          "maiusculas",
+          "capitaliza",
+          "semAcentos",
+          "apenasDigitos",
+          "apenasLetras"
+        ]
+      },
+      "description": "transformações aplicadas ao valor (em ordem) antes de validar"
+    },
+    "mascara": {
+      "type": "object",
+      "required": [
+        "padrao"
+      ],
+      "additionalProperties": false,
+      "description": "MÁSCARA de digitação. Símbolos: 0 dígito (obrigatório), 9 dígito (opcional), A letra, a letra ou dígito, * qualquer caractere; todo o resto é literal (use \\\\ para escapar um símbolo). Com uma LISTA de padrões vale o primeiro que comporta o que foi digitado (telefone de 8 ou 9 dígitos).",
+      "properties": {
+        "padrao": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/padraoMascara"
+            },
+            {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 4,
+              "items": {
+                "$ref": "#/$defs/padraoMascara"
+              }
+            }
+          ]
+        },
+        "substituto": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1,
+          "default": "_",
+          "description": "caractere mostrado nas posições ainda vazias"
+        },
+        "mostraLiterais": {
+          "type": "boolean",
+          "default": true,
+          "description": "mostra os literais enquanto digita (padrão) ou só ao completar"
+        },
+        "enviaComLiterais": {
+          "type": "boolean",
+          "default": false,
+          "description": "false (padrão): o valor guardado e enviado é SEM os literais (12345678901); true: com (123.456.789-01)"
+        },
+        "maiusculas": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "padraoMascara": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[^\\u0000-\\u001f]*$"
+    },
+    "formato": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "casasDecimais": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "moeda": {
+          "enum": [
+            "BRL",
+            "USD",
+            "EUR"
+          ]
+        },
+        "prefixo": {
+          "type": "string",
+          "maxLength": 8
+        },
+        "sufixo": {
+          "type": "string",
+          "maxLength": 8
+        },
+        "separadorDecimal": {
+          "enum": [
+            ",",
+            "."
+          ]
+        },
+        "agrupaMilhar": {
+          "type": "boolean"
+        },
+        "formatoData": {
+          "enum": [
+            "dd/MM/yyyy",
+            "yyyy-MM-dd",
+            "MM/dd/yyyy"
+          ],
+          "description": "como a data é exibida e digitada (o valor guardado é sempre ISO yyyy-MM-dd)"
+        }
+      }
+    },
+    "regraCampo": {
+      "type": "object",
+      "required": [
+        "expr",
+        "mensagem"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "expr": {
+          "$ref": "polaris://comum/v1#/$defs/expressao",
+          "description": "verdadeira = válido; vê `valor` (este campo) e `valores` (todos)"
+        },
+        "mensagem": {
+          "$ref": "#/$defs/texto"
+        }
+      }
+    },
+    "validacaoCampo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimo": {
+          "type": [
+            "number",
+            "string"
+          ],
+          "description": "número (ou decimal exato em texto, para dinheiro)"
+        },
+        "maximo": {
+          "type": [
+            "number",
+            "string"
+          ]
+        },
+        "tamanhoMinimo": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "tamanhoMaximo": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "padrao": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "expressão regular (subconjunto seguro: a compilação recusa repetição aninhada); casa com o valor INTEIRO"
+        },
+        "itensMinimo": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "itensMaximo": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "igualA": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "maxLength": 64
+        },
+        "diferenteDe": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "maxLength": 64
+        },
+        "dataMinima": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "data ISO (2026-01-31) ou `hoje`, `hoje+30d`, `hoje-18a`"
+        },
+        "dataMaxima": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "extensoes": {
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^\\.[a-z0-9]{1,10}$"
+          }
+        },
+        "tamanhoMaximoBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 104857600
+        },
+        "regras": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/regraCampo"
+          }
+        }
+      }
+    },
+    "mensagens": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "textos de erro: neste nível (formulário) valem para todos os campos; no campo, só para ele. Placeholders: {rotulo} {valor} {min} {max} {tamanho}",
+      "properties": {
+        "obrigatorio": {
+          "$ref": "#/$defs/texto"
+        },
+        "minimo": {
+          "$ref": "#/$defs/texto"
+        },
+        "maximo": {
+          "$ref": "#/$defs/texto"
+        },
+        "tamanhoMinimo": {
+          "$ref": "#/$defs/texto"
+        },
+        "tamanhoMaximo": {
+          "$ref": "#/$defs/texto"
+        },
+        "padrao": {
+          "$ref": "#/$defs/texto"
+        },
+        "formato": {
+          "$ref": "#/$defs/texto"
+        },
+        "tipo": {
+          "$ref": "#/$defs/texto"
+        },
+        "igualA": {
+          "$ref": "#/$defs/texto"
+        },
+        "diferenteDe": {
+          "$ref": "#/$defs/texto"
+        },
+        "opcao": {
+          "$ref": "#/$defs/texto"
+        },
+        "itensMinimo": {
+          "$ref": "#/$defs/texto"
+        },
+        "itensMaximo": {
+          "$ref": "#/$defs/texto"
+        },
+        "dataMinima": {
+          "$ref": "#/$defs/texto"
+        },
+        "dataMaxima": {
+          "$ref": "#/$defs/texto"
+        },
+        "extensao": {
+          "$ref": "#/$defs/texto"
+        },
+        "tamanhoArquivo": {
+          "$ref": "#/$defs/texto"
+        },
+        "envio": {
+          "$ref": "#/$defs/texto"
+        },
+        "sucesso": {
+          "$ref": "#/$defs/texto"
+        }
+      }
+    },
+    "opcao": {
+      "type": "object",
+      "required": [
+        "valor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "valor": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        },
+        "rotulo": {
+          "$ref": "#/$defs/texto"
+        },
+        "desabilitado": {
+          "type": "boolean"
+        },
+        "se": {
+          "$ref": "polaris://comum/v1#/$defs/expressao"
+        },
+        "grupo": {
+          "type": "string",
+          "maxLength": 80
+        }
+      }
+    },
+    "opcoes": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {
+            "$ref": "#/$defs/opcao"
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "dados"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "dados": {
+              "$ref": "polaris://comum/v1#/$defs/identificador"
+            },
+            "valor": {
+              "$ref": "polaris://comum/v1#/$defs/expressao",
+              "description": "de cada item do resultado: o valor (padrão: item.valor)"
+            },
+            "rotulo": {
+              "$ref": "polaris://comum/v1#/$defs/expressao"
+            }
+          },
+          "description": "opções vindas de um nó `dados`"
+        }
+      ]
+    },
+    "campo": {
+      "type": "object",
+      "required": [
+        "nome",
+        "tipo"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "nome": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "maxLength": 64
+        },
+        "tipo": {
+          "$ref": "#/$defs/tipoCampo"
+        },
+        "rotulo": {
+          "$ref": "#/$defs/texto"
+        },
+        "ajuda": {
+          "$ref": "#/$defs/texto"
+        },
+        "placeholder": {
+          "$ref": "#/$defs/texto"
+        },
+        "rotuloAria": {
+          "$ref": "#/$defs/texto"
+        },
+        "obrigatorio": {
+          "type": "boolean",
+          "default": false
+        },
+        "obrigatorioSe": {
+          "$ref": "polaris://comum/v1#/$defs/expressao",
+          "description": "obrigatório quando a expressão é verdadeira (vê `valores`)"
+        },
+        "padrao": {},
+        "somenteLeitura": {
+          "type": "boolean"
+        },
+        "desabilitado": {
+          "type": "boolean"
+        },
+        "desabilitadoSe": {
+          "$ref": "polaris://comum/v1#/$defs/expressao"
+        },
+        "se": {
+          "$ref": "polaris://comum/v1#/$defs/expressao",
+          "description": "o campo só aparece (e só valida) quando verdadeira"
+        },
+        "limpaSeOculto": {
+          "type": "boolean",
+          "default": true
+        },
+        "calculado": {
+          "$ref": "polaris://comum/v1#/$defs/expressao",
+          "description": "valor derivado dos outros (somente leitura); vê `valores`"
+        },
+        "normaliza": {
+          "$ref": "#/$defs/normaliza"
+        },
+        "formato": {
+          "$ref": "#/$defs/formato"
+        },
+        "mascara": {
+          "$ref": "#/$defs/mascara"
+        },
+        "validacao": {
+          "$ref": "#/$defs/validacaoCampo"
+        },
+        "mensagens": {
+          "$ref": "#/$defs/mensagens"
+        },
+        "opcoes": {
+          "$ref": "#/$defs/opcoes"
+        },
+        "campos": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/campo"
+          },
+          "description": "grupo/lista: os campos de cada item"
+        },
+        "autocompletar": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+( [a-z0-9-]+)*$",
+          "maxLength": 60
+        },
+        "teclado": {
+          "enum": [
+            "texto",
+            "numerico",
+            "decimal",
+            "telefone",
+            "email",
+            "url",
+            "busca"
+          ]
+        },
+        "colunas": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tipo": {
+                "enum": [
+                  "escolha",
+                  "multiescolha"
+                ]
+              }
+            },
+            "required": [
+              "tipo"
+            ]
+          },
+          "then": {
+            "properties": {
+              "opcoes": true
+            },
+            "required": [
+              "opcoes"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tipo": {
+                "enum": [
+                  "grupo",
+                  "lista"
+                ]
+              }
+            },
+            "required": [
+              "tipo"
+            ]
+          },
+          "then": {
+            "properties": {
+              "campos": true
+            },
+            "required": [
+              "campos"
+            ]
+          },
+          "else": {
+            "not": {
+              "properties": {
+                "campos": true
+              },
+              "required": [
+                "campos"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tipo": {
+                "enum": [
+                  "escolha",
+                  "multiescolha"
+                ]
+              }
+            },
+            "required": [
+              "tipo"
+            ]
+          },
+          "else": {
+            "not": {
+              "properties": {
+                "opcoes": true
+              },
+              "required": [
+                "opcoes"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tipo": {
+                "const": "senha"
+              }
+            },
+            "required": [
+              "tipo"
+            ]
+          },
+          "then": {
+            "not": {
+              "properties": {
+                "mascara": true
+              },
+              "required": [
+                "mascara"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "secao": {
+      "type": "object",
+      "required": [
+        "id",
+        "campos"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "titulo": {
+          "$ref": "#/$defs/texto"
+        },
+        "descricao": {
+          "$ref": "#/$defs/texto"
+        },
+        "campos": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9]*$",
+            "maxLength": 64
+          }
+        },
+        "se": {
+          "$ref": "polaris://comum/v1#/$defs/expressao"
+        },
+        "colapsavel": {
+          "type": "boolean"
+        },
+        "colunas": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        }
+      }
+    },
+    "passo": {
+      "type": "object",
+      "required": [
+        "id",
+        "titulo"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "titulo": {
+          "$ref": "#/$defs/texto"
+        },
+        "descricao": {
+          "$ref": "#/$defs/texto"
+        },
+        "campos": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9]*$",
+            "maxLength": 64
+          }
+        },
+        "secoes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9]*$"
+          }
+        },
+        "se": {
+          "$ref": "polaris://comum/v1#/$defs/expressao"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "campos": true
+          },
+          "required": [
+            "campos"
+          ]
+        },
+        {
+          "properties": {
+            "secoes": true
+          },
+          "required": [
+            "secoes"
+          ]
+        }
+      ]
+    },
+    "regraForm": {
+      "type": "object",
+      "required": [
+        "id",
+        "regra",
+        "mensagem"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "regra": {
+          "$ref": "polaris://comum/v1#/$defs/expressao",
+          "description": "verdadeira = válido; vê `valores`"
+        },
+        "mensagem": {
+          "$ref": "#/$defs/texto"
+        },
+        "campos": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9]*$",
+            "maxLength": 64
+          },
+          "description": "campos que mostram o erro"
+        },
+        "quando": {
+          "enum": [
+            "alterar",
+            "sair",
+            "enviar"
+          ],
+          "default": "enviar"
+        }
+      }
+    },
+    "envio": {
+      "type": "object",
+      "required": [
+        "servico",
+        "operacao"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "servico": {
+          "$ref": "polaris://comum/v1#/$defs/identificador"
+        },
+        "operacao": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "args": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][A-Za-z0-9]*$"
+          },
+          "additionalProperties": {
+            "$ref": "polaris://comum/v1#/$defs/expressao"
+          },
+          "description": "argumento da operação → expressão sobre `valores` (sem `args`, cada campo vai com o próprio nome)"
+        },
+        "idempotencia": {
+          "type": "boolean",
+          "default": true,
+          "description": "uma chave por tentativa evita duplicar o envio num duplo clique"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000
+        },
+        "sucesso": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mensagem": {
+              "$ref": "#/$defs/texto"
+            },
+            "limpar": {
+              "type": "boolean",
+              "default": false
+            },
+            "acoes": {
+              "type": "array",
+              "maxItems": 10,
+              "items": {
+                "$ref": "polaris://comum/v1#/$defs/acao"
+              }
+            }
+          }
+        },
+        "erro": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mensagem": {
+              "$ref": "#/$defs/texto"
+            },
+            "mapeiaCampos": {
+              "type": "boolean",
+              "default": true,
+              "description": "erro de validação do serviço aparece no campo de mesmo nome"
+            },
+            "acoes": {
+              "type": "array",
+              "maxItems": 10,
+              "items": {
+                "$ref": "polaris://comum/v1#/$defs/acao"
+              }
+            }
+          }
+        }
+      }
+    },
+    "acaoForm": {
+      "type": "object",
+      "required": [
+        "id",
+        "rotulo",
+        "tipo"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "rotulo": {
+          "$ref": "#/$defs/texto"
+        },
+        "tipo": {
+          "enum": [
+            "enviar",
+            "limpar",
+            "cancelar",
+            "voltar",
+            "avancar",
+            "personalizada"
+          ]
+        },
+        "estilo": {
+          "enum": [
+            "primario",
+            "secundario",
+            "perigo",
+            "link"
+          ]
+        },
+        "se": {
+          "$ref": "polaris://comum/v1#/$defs/expressao"
+        },
+        "desabilitadoSe": {
+          "$ref": "polaris://comum/v1#/$defs/expressao"
+        },
+        "validar": {
+          "type": "boolean",
+          "description": "valida antes de agir (padrão: sim em enviar e avancar)"
+        },
+        "confirmar": {
+          "type": "object",
+          "required": [
+            "mensagem"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "titulo": {
+              "$ref": "#/$defs/texto"
+            },
+            "mensagem": {
+              "$ref": "#/$defs/texto"
+            },
+            "rotuloConfirmar": {
+              "$ref": "#/$defs/texto"
+            },
+            "rotuloCancelar": {
+              "$ref": "#/$defs/texto"
+            }
+          }
+        },
+        "acoes": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "polaris://comum/v1#/$defs/acao"
+          },
+          "description": "o que fazer (cancelar, personalizada); em `enviar` roda depois do envio, ao lado de envio.sucesso.acoes"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tipo": {
+                "const": "personalizada"
+              }
+            },
+            "required": [
+              "tipo"
+            ]
+          },
+          "then": {
+            "properties": {
+              "acoes": true
+            },
+            "required": [
+              "acoes"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

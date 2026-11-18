@@ -1,0 +1,159 @@
+\subsection*{formulario: contato}
+\begin{tabular}{@{}ll@{}}
+versão & 1.0.0 \\
+estatuto & publicado \\
+escopo & core \\
+\end{tabular}
+
+\begin{tabular}{@{}p{0.35\linewidth}p{0.6\linewidth}@{}}
+\texttt{spec.acoes[0].estilo} & primario \\
+\texttt{spec.acoes[0].id} & enviar \\
+\texttt{spec.acoes[0].rotulo} & Enviar mensagem \\
+\texttt{spec.acoes[0].tipo} & enviar \\
+\texttt{spec.acoes[1].confirmar.mensagem} & Apagar tudo o que você digitou? \\
+\texttt{spec.acoes[1].confirmar.rotuloCancelar} & Voltar \\
+\texttt{spec.acoes[1].confirmar.rotuloConfirmar} & Apagar \\
+\texttt{spec.acoes[1].estilo} & secundario \\
+\texttt{spec.acoes[1].id} & limpar \\
+\texttt{spec.acoes[1].rotulo} & Limpar \\
+\texttt{spec.acoes[1].tipo} & limpar \\
+\texttt{spec.acoes[2].acoes[0].acao} & navegar \\
+\texttt{spec.acoes[2].acoes[0].para} & / \\
+\texttt{spec.acoes[2].estilo} & link \\
+\texttt{spec.acoes[2].id} & cancelar \\
+\texttt{spec.acoes[2].rotulo} & Cancelar \\
+\texttt{spec.acoes[2].tipo} & cancelar \\
+\texttt{spec.campos[0].autocompletar} & name \\
+\texttt{spec.campos[0].mensagens.obrigatorio} & Diga como podemos chamar você. \\
+\texttt{spec.campos[0].mensagens.tamanhoMinimo} & O nome precisa de pelo menos \{min\} letras. \\
+\texttt{spec.campos[0].nome} & nome \\
+\texttt{spec.campos[0].normaliza[0]} & aparar \\
+\texttt{spec.campos[0].normaliza[1]} & colapsaEspacos \\
+\texttt{spec.campos[0].obrigatorio} & true \\
+\texttt{spec.campos[0].rotulo} & Nome completo \\
+\texttt{spec.campos[0].tipo} & texto \\
+\texttt{spec.campos[0].validacao.tamanhoMaximo} & 120 \\
+\texttt{spec.campos[0].validacao.tamanhoMinimo} & 3 \\
+\texttt{spec.campos[1].autocompletar} & email \\
+\texttt{spec.campos[1].nome} & email \\
+\texttt{spec.campos[1].normaliza[0]} & aparar \\
+\texttt{spec.campos[1].normaliza[1]} & minusculas \\
+\texttt{spec.campos[1].obrigatorio} & true \\
+\texttt{spec.campos[1].rotulo} & E-mail \\
+\texttt{spec.campos[1].teclado} & email \\
+\texttt{spec.campos[1].tipo} & email \\
+\texttt{spec.campos[2].mascara.enviaComLiterais} & false \\
+\texttt{spec.campos[2].mascara.padrao[0]} & (00) 0000-0000 \\
+\texttt{spec.campos[2].mascara.padrao[1]} & (00) 00000-0000 \\
+\texttt{spec.campos[2].mascara.substituto} & \_ \\
+\texttt{spec.campos[2].mensagens.formato} & Informe o telefone com DDD. \\
+\texttt{spec.campos[2].nome} & telefone \\
+\texttt{spec.campos[2].placeholder} & (11) 99999-0000 \\
+\texttt{spec.campos[2].rotulo} & Telefone \\
+\texttt{spec.campos[2].teclado} & telefone \\
+\texttt{spec.campos[2].tipo} & telefone \\
+\texttt{spec.campos[3].mascara.padrao} & 000.000.000-00 \\
+\texttt{spec.campos[3].nome} & cpf \\
+\texttt{spec.campos[3].obrigatorioSe} & valores.retorno == true \\
+\texttt{spec.campos[3].rotulo} & CPF \\
+\texttt{spec.campos[3].se} & valores.retorno == true \\
+\texttt{spec.campos[3].tipo} & cpf \\
+\texttt{spec.campos[4].nome} & assunto \\
+\texttt{spec.campos[4].obrigatorio} & true \\
+\texttt{spec.campos[4].opcoes[0].rotulo} & Dúvida \\
+\texttt{spec.campos[4].opcoes[0].valor} & duvida \\
+\texttt{spec.campos[4].opcoes[1].rotulo} & Sobre um pedido \\
+\texttt{spec.campos[4].opcoes[1].valor} & pedido \\
+\texttt{spec.campos[4].opcoes[2].rotulo.en} & Something else \\
+\texttt{spec.campos[4].opcoes[2].rotulo.pt-BR} & Outro assunto \\
+\texttt{spec.campos[4].opcoes[2].valor} & outro \\
+\texttt{spec.campos[4].rotulo} & Assunto \\
+\texttt{spec.campos[4].tipo} & escolha \\
+\texttt{spec.campos[5].mascara.maiusculas} & true \\
+\texttt{spec.campos[5].mascara.padrao} & AAA-000000 \\
+\texttt{spec.campos[5].mensagens.padrao} & Use o formato ABC-123456. \\
+\texttt{spec.campos[5].nome} & pedido \\
+\texttt{spec.campos[5].obrigatorioSe} & valores.assunto == "pedido" \\
+\texttt{spec.campos[5].rotulo} & Número do pedido \\
+\texttt{spec.campos[5].se} & valores.assunto == "pedido" \\
+\texttt{spec.campos[5].tipo} & texto \\
+\texttt{spec.campos[5].validacao.padrao} & [A-Z]\{3\}[0-9]\{6\} \\
+\texttt{spec.campos[6].formato.agrupaMilhar} & true \\
+\texttt{spec.campos[6].formato.casasDecimais} & 2 \\
+\texttt{spec.campos[6].formato.moeda} & BRL \\
+\texttt{spec.campos[6].nome} & valorCompra \\
+\texttt{spec.campos[6].rotulo} & Valor da compra \\
+\texttt{spec.campos[6].tipo} & dinheiro \\
+\texttt{spec.campos[6].validacao.maximo} & 100000 \\
+\texttt{spec.campos[6].validacao.minimo} & 0.01 \\
+\texttt{spec.campos[7].formato.formatoData} & dd/MM/yyyy \\
+\texttt{spec.campos[7].mensagens.dataMaxima} & A data não pode ser no futuro. \\
+\texttt{spec.campos[7].nome} & dataCompra \\
+\texttt{spec.campos[7].rotulo} & Data da compra \\
+\texttt{spec.campos[7].tipo} & data \\
+\texttt{spec.campos[7].validacao.dataMaxima} & hoje \\
+\texttt{spec.campos[7].validacao.dataMinima} & hoje-5a \\
+\texttt{spec.campos[8].nome} & mensagem \\
+\texttt{spec.campos[8].obrigatorio} & true \\
+\texttt{spec.campos[8].rotulo} & Mensagem \\
+\texttt{spec.campos[8].tipo} & textoLongo \\
+\texttt{spec.campos[8].validacao.regras[0].expr} & !contem(valor, "http") \\
+\texttt{spec.campos[8].validacao.regras[0].id} & semLinks \\
+\texttt{spec.campos[8].validacao.regras[0].mensagem} & Por segurança, não aceitamos links na mensagem. \\
+\texttt{spec.campos[8].validacao.tamanhoMaximo} & 2000 \\
+\texttt{spec.campos[8].validacao.tamanhoMinimo} & 10 \\
+\texttt{spec.campos[9].nome} & retorno \\
+\texttt{spec.campos[9].padrao} & false \\
+\texttt{spec.campos[9].rotulo} & Quero retorno por telefone \\
+\texttt{spec.campos[9].tipo} & booleano \\
+\texttt{spec.campos[10].mensagens.obrigatorio} & Precisamos do seu aceite para responder. \\
+\texttt{spec.campos[10].nome} & aceite \\
+\texttt{spec.campos[10].obrigatorio} & true \\
+\texttt{spec.campos[10].rotulo} & Concordo com o uso dos dados para contato \\
+\texttt{spec.campos[10].tipo} & booleano \\
+\texttt{spec.descricao} & Respondemos em até 1 dia útil. \\
+\texttt{spec.envio.args.email} & valores.email \\
+\texttt{spec.envio.args.mensagem} & valores.mensagem \\
+\texttt{spec.envio.args.nome} & valores.nome \\
+\texttt{spec.envio.erro.mapeiaCampos} & true \\
+\texttt{spec.envio.idempotencia} & true \\
+\texttt{spec.envio.operacao} & criarContato \\
+\texttt{spec.envio.servico} & loja \\
+\texttt{spec.envio.sucesso.acoes[0].acao} & navegar \\
+\texttt{spec.envio.sucesso.acoes[0].para} & /obrigado \\
+\texttt{spec.envio.sucesso.limpar} & true \\
+\texttt{spec.envio.sucesso.mensagem} & Recebemos sua mensagem. \\
+\texttt{spec.envio.timeoutMs} & 15000 \\
+\texttt{spec.idioma} & pt-BR \\
+\texttt{spec.mensagens.envio} & Não foi possível enviar agora. Tente de novo em instantes. \\
+\texttt{spec.mensagens.formato} & \{rotulo\} está em um formato inválido. \\
+\texttt{spec.mensagens.obrigatorio} & \{rotulo\} é obrigatório. \\
+\texttt{spec.mensagens.sucesso} & Mensagem enviada! Obrigado. \\
+\texttt{spec.mensagens.tamanhoMaximo} & \{rotulo\} aceita até \{max\} caracteres. \\
+\texttt{spec.secoes[0].campos[0]} & nome \\
+\texttt{spec.secoes[0].campos[1]} & email \\
+\texttt{spec.secoes[0].campos[2]} & telefone \\
+\texttt{spec.secoes[0].campos[3]} & cpf \\
+\texttt{spec.secoes[0].colunas} & 2 \\
+\texttt{spec.secoes[0].id} & quem \\
+\texttt{spec.secoes[0].titulo} & Quem é você \\
+\texttt{spec.secoes[1].campos[0]} & assunto \\
+\texttt{spec.secoes[1].campos[1]} & pedido \\
+\texttt{spec.secoes[1].campos[2]} & valorCompra \\
+\texttt{spec.secoes[1].campos[3]} & dataCompra \\
+\texttt{spec.secoes[1].id} & sobre \\
+\texttt{spec.secoes[1].titulo} & Sobre o que \\
+\texttt{spec.secoes[2].campos[0]} & mensagem \\
+\texttt{spec.secoes[2].campos[1]} & retorno \\
+\texttt{spec.secoes[2].campos[2]} & aceite \\
+\texttt{spec.secoes[2].id} & fim \\
+\texttt{spec.titulo} & Fale conosco \\
+\texttt{spec.validacoes[0].campos[0]} & telefone \\
+\texttt{spec.validacoes[0].campos[1]} & retorno \\
+\texttt{spec.validacoes[0].id} & retornoComTelefone \\
+\texttt{spec.validacoes[0].mensagem} & Para retorno por telefone, informe o telefone. \\
+\texttt{spec.validacoes[0].quando} & enviar \\
+\texttt{spec.validacoes[0].regra} & !(valores.retorno == true) || tamanho(valores.telefone ?? "") > 0 \\
+\texttt{spec.validar.focaPrimeiroErro} & true \\
+\texttt{spec.validar.quando} & sair \\
+\end{tabular}

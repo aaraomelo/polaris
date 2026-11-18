@@ -1,0 +1,77 @@
+\subsection*{formulario: cadastro-passos}
+\begin{tabular}{@{}ll@{}}
+versão & 1.0.0 \\
+estatuto & rascunho \\
+escopo & core \\
+\end{tabular}
+
+\begin{tabular}{@{}p{0.35\linewidth}p{0.6\linewidth}@{}}
+\texttt{spec.acoes[0].id} & voltar \\
+\texttt{spec.acoes[0].rotulo} & Voltar \\
+\texttt{spec.acoes[0].tipo} & voltar \\
+\texttt{spec.acoes[1].estilo} & primario \\
+\texttt{spec.acoes[1].id} & avancar \\
+\texttt{spec.acoes[1].rotulo} & Avançar \\
+\texttt{spec.acoes[1].tipo} & avancar \\
+\texttt{spec.acoes[2].estilo} & primario \\
+\texttt{spec.acoes[2].id} & enviar \\
+\texttt{spec.acoes[2].rotulo} & Concluir \\
+\texttt{spec.acoes[2].tipo} & enviar \\
+\texttt{spec.campos[0].nome} & nome \\
+\texttt{spec.campos[0].obrigatorio} & true \\
+\texttt{spec.campos[0].tipo} & texto \\
+\texttt{spec.campos[1].nome} & senha \\
+\texttt{spec.campos[1].obrigatorio} & true \\
+\texttt{spec.campos[1].tipo} & senha \\
+\texttt{spec.campos[1].validacao.tamanhoMinimo} & 8 \\
+\texttt{spec.campos[2].mensagens.igualA} & As senhas não conferem. \\
+\texttt{spec.campos[2].nome} & confirma \\
+\texttt{spec.campos[2].obrigatorio} & true \\
+\texttt{spec.campos[2].tipo} & senha \\
+\texttt{spec.campos[2].validacao.igualA} & senha \\
+\texttt{spec.campos[3].mascara.enviaComLiterais} & true \\
+\texttt{spec.campos[3].mascara.padrao} & 00.000.000/0000-00 \\
+\texttt{spec.campos[3].nome} & cnpj \\
+\texttt{spec.campos[3].tipo} & cnpj \\
+\texttt{spec.campos[4].mascara.padrao} & 00000-000 \\
+\texttt{spec.campos[4].nome} & cep \\
+\texttt{spec.campos[4].tipo} & cep \\
+\texttt{spec.campos[5].campos[0].nome} & rua \\
+\texttt{spec.campos[5].campos[0].obrigatorio} & true \\
+\texttt{spec.campos[5].campos[0].tipo} & texto \\
+\texttt{spec.campos[5].campos[1].nome} & numero \\
+\texttt{spec.campos[5].campos[1].tipo} & inteiro \\
+\texttt{spec.campos[5].nome} & enderecos \\
+\texttt{spec.campos[5].rotulo} & Endereços \\
+\texttt{spec.campos[5].tipo} & lista \\
+\texttt{spec.campos[5].validacao.itensMaximo} & 3 \\
+\texttt{spec.campos[5].validacao.itensMinimo} & 1 \\
+\texttt{spec.campos[6].nome} & pais \\
+\texttt{spec.campos[6].opcoes.dados} & dados.paises \\
+\texttt{spec.campos[6].opcoes.rotulo} & item.nome \\
+\texttt{spec.campos[6].opcoes.valor} & item.codigo \\
+\texttt{spec.campos[6].tipo} & escolha \\
+\texttt{spec.envio.args.cep} & valores.cep \\
+\texttt{spec.envio.args.cnpj} & valores.cnpj \\
+\texttt{spec.envio.args.nome} & valores.nome \\
+\texttt{spec.envio.args.senha} & valores.senha \\
+\texttt{spec.envio.erro.mapeiaCampos} & true \\
+\texttt{spec.envio.operacao} & criarConta \\
+\texttt{spec.envio.servico} & contas \\
+\texttt{spec.envio.sucesso.acoes[0].acao} & navegar \\
+\texttt{spec.envio.sucesso.acoes[0].para} & /bem-vindo \\
+\texttt{spec.envio.sucesso.mensagem} & Conta criada! \\
+\texttt{spec.passos[0].campos[0]} & nome \\
+\texttt{spec.passos[0].campos[1]} & senha \\
+\texttt{spec.passos[0].campos[2]} & confirma \\
+\texttt{spec.passos[0].id} & acesso \\
+\texttt{spec.passos[0].titulo} & Acesso \\
+\texttt{spec.passos[1].campos[0]} & cnpj \\
+\texttt{spec.passos[1].campos[1]} & cep \\
+\texttt{spec.passos[1].campos[2]} & enderecos \\
+\texttt{spec.passos[1].campos[3]} & pais \\
+\texttt{spec.passos[1].id} & empresa \\
+\texttt{spec.passos[1].titulo} & Empresa \\
+\texttt{spec.titulo} & Cadastro \\
+\texttt{spec.valoresIniciais.dados} & dados.cadastro \\
+\end{tabular}

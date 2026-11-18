@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/campos/0/obrigatoria",
+    "regra": "additionalProperties",
+    "mensagem": "o campo 'obrigatoria' não existe aqui",
+    "dica": "quis dizer 'obrigatorio'?"
+  }
+]

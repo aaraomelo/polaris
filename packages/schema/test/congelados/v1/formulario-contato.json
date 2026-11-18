@@ -1,0 +1,282 @@
+{
+  "kind": "formulario",
+  "id": "contato",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "titulo": "Fale conosco",
+    "descricao": "Respondemos em até 1 dia útil.",
+    "idioma": "pt-BR",
+    "validar": {
+      "quando": "sair",
+      "focaPrimeiroErro": true
+    },
+    "campos": [
+      {
+        "nome": "nome",
+        "tipo": "texto",
+        "rotulo": "Nome completo",
+        "obrigatorio": true,
+        "normaliza": [
+          "aparar",
+          "colapsaEspacos"
+        ],
+        "autocompletar": "name",
+        "validacao": {
+          "tamanhoMinimo": 3,
+          "tamanhoMaximo": 120
+        },
+        "mensagens": {
+          "obrigatorio": "Diga como podemos chamar você.",
+          "tamanhoMinimo": "O nome precisa de pelo menos {min} letras."
+        }
+      },
+      {
+        "nome": "email",
+        "tipo": "email",
+        "rotulo": "E-mail",
+        "obrigatorio": true,
+        "normaliza": [
+          "aparar",
+          "minusculas"
+        ],
+        "autocompletar": "email",
+        "teclado": "email"
+      },
+      {
+        "nome": "telefone",
+        "tipo": "telefone",
+        "rotulo": "Telefone",
+        "placeholder": "(11) 99999-0000",
+        "teclado": "telefone",
+        "mascara": {
+          "padrao": [
+            "(00) 0000-0000",
+            "(00) 00000-0000"
+          ],
+          "substituto": "_",
+          "enviaComLiterais": false
+        },
+        "mensagens": {
+          "formato": "Informe o telefone com DDD."
+        }
+      },
+      {
+        "nome": "cpf",
+        "tipo": "cpf",
+        "rotulo": "CPF",
+        "mascara": {
+          "padrao": "000.000.000-00"
+        },
+        "se": "valores.retorno == true",
+        "obrigatorioSe": "valores.retorno == true"
+      },
+      {
+        "nome": "assunto",
+        "tipo": "escolha",
+        "rotulo": "Assunto",
+        "obrigatorio": true,
+        "opcoes": [
+          {
+            "valor": "duvida",
+            "rotulo": "Dúvida"
+          },
+          {
+            "valor": "pedido",
+            "rotulo": "Sobre um pedido"
+          },
+          {
+            "valor": "outro",
+            "rotulo": {
+              "pt-BR": "Outro assunto",
+              "en": "Something else"
+            }
+          }
+        ]
+      },
+      {
+        "nome": "pedido",
+        "tipo": "texto",
+        "rotulo": "Número do pedido",
+        "se": "valores.assunto == \"pedido\"",
+        "obrigatorioSe": "valores.assunto == \"pedido\"",
+        "mascara": {
+          "padrao": "AAA-000000",
+          "maiusculas": true
+        },
+        "validacao": {
+          "padrao": "[A-Z]{3}[0-9]{6}"
+        },
+        "mensagens": {
+          "padrao": "Use o formato ABC-123456."
+        }
+      },
+      {
+        "nome": "valorCompra",
+        "tipo": "dinheiro",
+        "rotulo": "Valor da compra",
+        "formato": {
+          "moeda": "BRL",
+          "casasDecimais": 2,
+          "agrupaMilhar": true
+        },
+        "validacao": {
+          "minimo": "0.01",
+          "maximo": "100000"
+        }
+      },
+      {
+        "nome": "dataCompra",
+        "tipo": "data",
+        "rotulo": "Data da compra",
+        "formato": {
+          "formatoData": "dd/MM/yyyy"
+        },
+        "validacao": {
+          "dataMaxima": "hoje",
+          "dataMinima": "hoje-5a"
+        },
+        "mensagens": {
+          "dataMaxima": "A data não pode ser no futuro."
+        }
+      },
+      {
+        "nome": "mensagem",
+        "tipo": "textoLongo",
+        "rotulo": "Mensagem",
+        "obrigatorio": true,
+        "validacao": {
+          "tamanhoMinimo": 10,
+          "tamanhoMaximo": 2000,
+          "regras": [
+            {
+              "id": "semLinks",
+              "expr": "!contem(valor, \"http\")",
+              "mensagem": "Por segurança, não aceitamos links na mensagem."
+            }
+          ]
+        }
+      },
+      {
+        "nome": "retorno",
+        "tipo": "booleano",
+        "rotulo": "Quero retorno por telefone",
+        "padrao": false
+      },
+      {
+        "nome": "aceite",
+        "tipo": "booleano",
+        "rotulo": "Concordo com o uso dos dados para contato",
+        "obrigatorio": true,
+        "mensagens": {
+          "obrigatorio": "Precisamos do seu aceite para responder."
+        }
+      }
+    ],
+    "secoes": [
+      {
+        "id": "quem",
+        "titulo": "Quem é você",
+        "campos": [
+          "nome",
+          "email",
+          "telefone",
+          "cpf"
+        ],
+        "colunas": 2
+      },
+      {
+        "id": "sobre",
+        "titulo": "Sobre o que",
+        "campos": [
+          "assunto",
+          "pedido",
+          "valorCompra",
+          "dataCompra"
+        ]
+      },
+      {
+        "id": "fim",
+        "campos": [
+          "mensagem",
+          "retorno",
+          "aceite"
+        ]
+      }
+    ],
+    "validacoes": [
+      {
+        "id": "retornoComTelefone",
+        "regra": "!(valores.retorno == true) || tamanho(valores.telefone ?? \"\") > 0",
+        "mensagem": "Para retorno por telefone, informe o telefone.",
+        "campos": [
+          "telefone",
+          "retorno"
+        ],
+        "quando": "enviar"
+      }
+    ],
+    "mensagens": {
+      "obrigatorio": "{rotulo} é obrigatório.",
+      "formato": "{rotulo} está em um formato inválido.",
+      "tamanhoMaximo": "{rotulo} aceita até {max} caracteres.",
+      "envio": "Não foi possível enviar agora. Tente de novo em instantes.",
+      "sucesso": "Mensagem enviada! Obrigado."
+    },
+    "envio": {
+      "servico": "loja",
+      "operacao": "criarContato",
+      "args": {
+        "nome": "valores.nome",
+        "email": "valores.email",
+        "mensagem": "valores.mensagem"
+      },
+      "idempotencia": true,
+      "timeoutMs": 15000,
+      "sucesso": {
+        "mensagem": "Recebemos sua mensagem.",
+        "limpar": true,
+        "acoes": [
+          {
+            "acao": "navegar",
+            "para": "/obrigado"
+          }
+        ]
+      },
+      "erro": {
+        "mapeiaCampos": true
+      }
+    },
+    "acoes": [
+      {
+        "id": "enviar",
+        "rotulo": "Enviar mensagem",
+        "tipo": "enviar",
+        "estilo": "primario"
+      },
+      {
+        "id": "limpar",
+        "rotulo": "Limpar",
+        "tipo": "limpar",
+        "estilo": "secundario",
+        "confirmar": {
+          "mensagem": "Apagar tudo o que você digitou?",
+          "rotuloConfirmar": "Apagar",
+          "rotuloCancelar": "Voltar"
+        }
+      },
+      {
+        "id": "cancelar",
+        "rotulo": "Cancelar",
+        "tipo": "cancelar",
+        "estilo": "link",
+        "acoes": [
+          {
+            "acao": "navegar",
+            "para": "/"
+          }
+        ]
+      }
+    ]
+  }
+}

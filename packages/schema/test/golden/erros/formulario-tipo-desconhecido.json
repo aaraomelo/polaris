@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/campos/0/tipo",
+    "regra": "enum",
+    "mensagem": "valor \"colorpicker\" não é permitido; aceitos: 'texto', 'textoLongo', 'senha', 'email', 'telefone', 'url', 'numero', 'inteiro', 'dinheiro', 'percentual', 'booleano', 'escolha', 'multiescolha', 'data', 'hora', 'dataHora', 'cpf', 'cnpj', 'cep', 'arquivo', 'oculto', 'grupo', 'lista'"
+  }
+]

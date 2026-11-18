@@ -1,0 +1,143 @@
+{
+  "kind": "formulario",
+  "id": "cadastro-passos",
+  "versao": "1.0.0",
+  "spec": {
+    "titulo": "Cadastro",
+    "campos": [
+      {
+        "nome": "nome",
+        "tipo": "texto",
+        "obrigatorio": true
+      },
+      {
+        "nome": "senha",
+        "tipo": "senha",
+        "obrigatorio": true,
+        "validacao": {
+          "tamanhoMinimo": 8
+        }
+      },
+      {
+        "nome": "confirma",
+        "tipo": "senha",
+        "obrigatorio": true,
+        "validacao": {
+          "igualA": "senha"
+        },
+        "mensagens": {
+          "igualA": "As senhas não conferem."
+        }
+      },
+      {
+        "nome": "cnpj",
+        "tipo": "cnpj",
+        "mascara": {
+          "padrao": "00.000.000/0000-00",
+          "enviaComLiterais": true
+        }
+      },
+      {
+        "nome": "cep",
+        "tipo": "cep",
+        "mascara": {
+          "padrao": "00000-000"
+        }
+      },
+      {
+        "nome": "enderecos",
+        "tipo": "lista",
+        "rotulo": "Endereços",
+        "validacao": {
+          "itensMinimo": 1,
+          "itensMaximo": 3
+        },
+        "campos": [
+          {
+            "nome": "rua",
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          {
+            "nome": "numero",
+            "tipo": "inteiro"
+          }
+        ]
+      },
+      {
+        "nome": "pais",
+        "tipo": "escolha",
+        "opcoes": {
+          "dados": "dados.paises",
+          "valor": "item.codigo",
+          "rotulo": "item.nome"
+        }
+      }
+    ],
+    "passos": [
+      {
+        "id": "acesso",
+        "titulo": "Acesso",
+        "campos": [
+          "nome",
+          "senha",
+          "confirma"
+        ]
+      },
+      {
+        "id": "empresa",
+        "titulo": "Empresa",
+        "campos": [
+          "cnpj",
+          "cep",
+          "enderecos",
+          "pais"
+        ]
+      }
+    ],
+    "valoresIniciais": {
+      "dados": "dados.cadastro"
+    },
+    "acoes": [
+      {
+        "id": "voltar",
+        "rotulo": "Voltar",
+        "tipo": "voltar"
+      },
+      {
+        "id": "avancar",
+        "rotulo": "Avançar",
+        "tipo": "avancar",
+        "estilo": "primario"
+      },
+      {
+        "id": "enviar",
+        "rotulo": "Concluir",
+        "tipo": "enviar",
+        "estilo": "primario"
+      }
+    ],
+    "envio": {
+      "servico": "contas",
+      "operacao": "criarConta",
+      "args": {
+        "nome": "valores.nome",
+        "senha": "valores.senha",
+        "cnpj": "valores.cnpj",
+        "cep": "valores.cep"
+      },
+      "sucesso": {
+        "mensagem": "Conta criada!",
+        "acoes": [
+          {
+            "acao": "navegar",
+            "para": "/bem-vindo"
+          }
+        ]
+      },
+      "erro": {
+        "mapeiaCampos": true
+      }
+    }
+  }
+}

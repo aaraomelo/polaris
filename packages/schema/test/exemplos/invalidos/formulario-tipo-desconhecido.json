@@ -1,0 +1,13 @@
+{
+  "kind": "formulario",
+  "id": "f3",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "x",
+        "tipo": "colorpicker"
+      }
+    ]
+  }
+}

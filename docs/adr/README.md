@@ -16,3 +16,4 @@ Formato curto: **Contexto**, **Decisão**, **Consequências** (inclusive o que s
 | [0010](0010-linguagem-de-expressoes.md) | Linguagem de expressões própria, da família do CEL, total | aceito |
 | [0011](0011-schema-u-do-tiffany.md) | Do Schema U do Tiffany entra o canônico; a teoria fica lá | aceito |
 | [0012](0012-fastify-nao-nestjs.md) | Serviços gerados em Fastify, sem NestJS | aceito |
+| [0013](0013-formulario-declarativo.md) | Formulários declarativos, com o mesmo motor no navegador e no servidor | aceito |

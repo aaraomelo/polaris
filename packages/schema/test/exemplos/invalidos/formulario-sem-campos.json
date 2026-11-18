@@ -1,0 +1,9 @@
+{
+  "kind": "formulario",
+  "id": "vazio",
+  "versao": "1.0.0",
+  "spec": {
+    "titulo": "x",
+    "campos": []
+  }
+}

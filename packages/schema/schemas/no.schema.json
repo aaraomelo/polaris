@@ -24,7 +24,8 @@
         "tenant",
         "backend",
         "papel",
-        "pack"
+        "pack",
+        "formulario"
       ]
     },
     "id": {
@@ -338,6 +339,25 @@
         "properties": {
           "spec": {
             "$ref": "polaris://kind/pack/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "formulario"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/formulario/v1"
           }
         }
       }

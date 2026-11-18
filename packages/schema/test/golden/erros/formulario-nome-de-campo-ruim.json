@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/campos/0/nome",
+    "regra": "pattern",
+    "mensagem": "\"Nome Completo\" não segue o formato esperado",
+    "dica": "use camelCase começando por minúscula (ex.: precoUnitario)"
+  }
+]

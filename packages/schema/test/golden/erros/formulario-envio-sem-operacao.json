@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/envio",
+    "regra": "required",
+    "mensagem": "falta o campo obrigatório 'operacao'",
+    "dica": "adicione \"operacao\" em /spec/envio"
+  }
+]

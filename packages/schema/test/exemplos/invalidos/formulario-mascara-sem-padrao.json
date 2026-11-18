@@ -1,0 +1,16 @@
+{
+  "kind": "formulario",
+  "id": "f4",
+  "versao": "1.0.0",
+  "spec": {
+    "campos": [
+      {
+        "nome": "x",
+        "tipo": "texto",
+        "mascara": {
+          "substituto": "_"
+        }
+      }
+    ]
+  }
+}
