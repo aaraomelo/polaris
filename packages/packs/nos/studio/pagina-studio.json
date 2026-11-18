@@ -266,6 +266,42 @@
  },
  {
   "kind": "dados",
+  "id": "studio.site",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "obterSite"
+   },
+   "carregar": "auto",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.definetema",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "definirTemaDoSite"
+   },
+   "parametros": {
+    "tema": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.publicar",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -331,7 +367,9 @@
     "comentarios": "studio.comentarios",
     "comentar": "studio.comentar",
     "resolver": "studio.resolver",
-    "publicar": "studio.publicar"
+    "publicar": "studio.publicar",
+    "site": "studio.site",
+    "definetema": "studio.definetema"
    },
    "estado": {
     "criando": {
@@ -2205,6 +2243,69 @@
           "props": {
            "texto": "Tokens do tema {estado.aberto.id}",
            "nivel": 3
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "props": {
+           "gap": 12,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/paragrafo",
+             "props": {
+              "texto": "Tema do site: {site.tema ?? \"padrao (o padrão da plataforma)\"}"
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "igual(estado.no, estado.noSalvo) && estado.aberto.origem != \"novo\" && site.tema != estado.aberto.id",
+             "props": {
+              "texto": "Usar este tema no site"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "definetema",
+                "args": {
+                 "tema": "{estado.aberto.id}"
+                },
+                "depois": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"sucesso\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "\"Tema do site: \" + resultado.tema + \". Publique para o site mudar.\""
+                 },
+                 {
+                  "acao": "executar",
+                  "dados": "site"
+                 }
+                ],
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            }
+           ]
           }
          },
          {

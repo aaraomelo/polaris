@@ -18,6 +18,8 @@ export const DADOS = [
   dado('comentarios', 'listarComentarios', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }) }),
   dado('comentar', 'comentar', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }), texto: campo('texto', { obrigatorio: true }), ancora: campo('texto'), versao: campo('inteiro'), respondeA: campo('texto') }),
   dado('resolver', 'resolverComentario', { cid: campo('texto', { obrigatorio: true }), resolvido: campo('booleano', { obrigatorio: true }) }),
+  dado('site', 'obterSite', {}, 'auto'),
+  dado('definetema', 'definirTemaDoSite', { tema: campo('texto', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
   dado('previa', 'previsualizar', { no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto') }),
 ]
@@ -78,6 +80,11 @@ const novoToken = (): Inst => linha([
 
 const editorDeTema = (): Inst => pilha([
   titulo('Tokens do tema {estado.aberto.id}', 3),
+  linha([
+    texto('Tema do site: {site.tema ?? "padrao (o padrão da plataforma)"}'),
+    botao('Usar este tema no site', [exe('definetema', { tema: '{estado.aberto.id}' }, [...aviso('sucesso', '"Tema do site: " + resultado.tema + ". Publique para o site mudar."'), exe('site')], aviso('erro', 'erro'))],
+      { se: 'igual(estado.no, estado.noSalvo) && estado.aberto.origem != "novo" && site.tema != estado.aberto.id' }),
+  ], { props: { gap: 12 } }),
   P('layout/grade', { props: { colunas: 2, gap: 16 }, filhos: [
     pilha([pilha([titulo('{g}', 4), linhaToken(), novoToken()], { repetir: { cada: 'filtra(["cor", "espacamento", "raio"], g => estado.no.spec.tokens[g])', como: 'g', chave: 'g' }, gap: 4 })], { gap: 12 }),
     pilha([titulo('Amostra', 4), P('midia/quadro', { props: { titulo: 'Amostra do tema', html: '{previa.html}', altura: 420 } }),
@@ -205,7 +212,7 @@ const formCriar = (): Inst => linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', publicar: 'studio.publicar' },
+  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', publicar: 'studio.publicar', site: 'studio.site', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
     aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },

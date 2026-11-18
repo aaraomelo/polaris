@@ -127,6 +127,29 @@
             "tipo": "inteiro"
           }
         }
+      },
+      "siteConfig": {
+        "campos": {
+          "tema": {
+            "tipo": "texto"
+          },
+          "temas": {
+            "tipo": "json"
+          }
+        }
+      },
+      "siteSalvo": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          },
+          "tema": {
+            "tipo": "texto"
+          },
+          "versao": {
+            "tipo": "inteiro"
+          }
+        }
       }
     },
     "operacoes": {
@@ -348,6 +371,24 @@
           }
         },
         "saida": "publicado",
+        "permissao": "studio"
+      },
+      "obterSite": {
+        "metodo": "GET",
+        "caminho": "/site",
+        "saida": "siteConfig",
+        "permissao": "studio"
+      },
+      "definirTemaDoSite": {
+        "metodo": "PUT",
+        "caminho": "/site",
+        "entrada": {
+          "tema": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "siteSalvo",
         "permissao": "studio"
       }
     }

@@ -20,6 +20,8 @@ export const OPERACOES: Record<string, (a: Record<string, unknown>) => Req> = {
   comentar: (a) => ({ metodo: 'POST', url: '/studio/comentarios', corpo: sem({ kind: a.kind, id: a.id, texto: a.texto, ancora: a.ancora || undefined, versao: typeof a.versao === 'number' ? a.versao : undefined, respondeA: a.respondeA || undefined }) }),
   resolverComentario: (a) => ({ metodo: 'POST', url: `/studio/comentarios/${e(String(a.cid))}/resolver`, corpo: { resolvido: a.resolvido } }),
   publicarSite: (a) => ({ metodo: 'POST', url: '/studio/publicar', corpo: sem({ nota: a.nota || undefined }) }),
+  obterSite: () => ({ metodo: 'GET', url: '/studio/site' }),
+  definirTemaDoSite: (a) => ({ metodo: 'PUT', url: '/studio/site', corpo: { tema: a.tema } }),
   previsualizar: (a) => ({ metodo: 'POST', url: '/studio/previa', corpo: sem({ no: a.no, tema: a.tema ?? undefined, selecionado: a.selecionado || undefined }) }),
 }
 

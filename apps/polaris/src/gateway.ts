@@ -23,22 +23,6 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     return [id, { no, cliente: clienteHttp({ baseUrl: url }) }]
   }))
   const hosts = new Map(Object.entries(c.hosts).map(([h, t]) => [h.toLowerCase(), t.toLowerCase()]))
-  // Studio: `/studio` (cliente) e `/studio/*` (API de autoria) no MESMO servidor, com a autenticação do gateway: o tenant e o usuário vêm só do token, e a permissão dos papéis `studio.*`
-  if (c.studioDir) for (const n of nosDoPack('studio')) { try { reg.registra(n) } catch { /* já registrado (nós carregados do diretório) */ } }
-  const studio = c.studioDir && qp ? (() => {
-    const armazem = criaArmazemDeNos({ q: qp, base: reg }), dir = c.studioDir
-    return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
-      void app.register(async (inst) => {
-        rotasEstaticasStudio(inst, dir)
-        rotasStudio(inst, { previsualiza, ...(releases ? { publicar: async (a: { tenantId: string; autor: string; nota?: string }) => {
-          const c = await releases.cria(a.tenantId, a.autor, a.nota); if (!c.ok) return c
-          const p = await releases.promove(a.tenantId, c.release.numero, a.autor, a.nota); if (!p.ok) return p
-          tenants?.invalida() // o diretório guarda a release de produção em cache: sem isto o site só mudaria quando o cache vencesse
-          return { ok: true as const, release: c.release.numero }
-        } } : {}), armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
-      })
-    }
-  })() : null
   // páginas dos tenants (`GET /…`): o nó `tenant` de cada um tem como id o ALIAS do diretório; o alias de um tenant não muda, então fica em cache
   const aliases = new Map<string, string>()
   const paginas = qp ? { cookieSeguro: c.producao, tenantNo: async (c: { tenantId: string }) => {
@@ -47,6 +31,22 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     if (typeof r === 'string') { aliases.set(c.tenantId, r); while (aliases.size > 5000) aliases.delete(aliases.keys().next().value as string); return r }
     return undefined
   } } : null
+  // Studio: `/studio` (cliente) e `/studio/*` (API de autoria) no MESMO servidor, com a autenticação do gateway: o tenant e o usuário vêm só do token, e a permissão dos papéis `studio.*`
+  if (c.studioDir) for (const n of nosDoPack('studio')) { try { reg.registra(n) } catch { /* já registrado (nós carregados do diretório) */ } }
+  const studio = c.studioDir && qp ? (() => {
+    const armazem = criaArmazemDeNos({ q: qp, base: reg }), dir = c.studioDir
+    return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
+      void app.register(async (inst) => {
+        rotasEstaticasStudio(inst, dir)
+        rotasStudio(inst, { previsualiza, ...(paginas ? { tenantNo: (t: string) => paginas.tenantNo({ tenantId: t }) } : {}), ...(releases ? { publicar: async (a: { tenantId: string; autor: string; nota?: string }) => {
+          const c = await releases.cria(a.tenantId, a.autor, a.nota); if (!c.ok) return c
+          const p = await releases.promove(a.tenantId, c.release.numero, a.autor, a.nota); if (!p.ok) return p
+          tenants?.invalida() // o diretório guarda a release de produção em cache: sem isto o site só mudaria quando o cache vencesse
+          return { ok: true as const, release: c.release.numero }
+        } } : {}), armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
+      })
+    }
+  })() : null
   const gw = criaGateway({
     ...(paginas ? { paginas } : {}),
     ...(studio ? { estende: studio as never } : {}),

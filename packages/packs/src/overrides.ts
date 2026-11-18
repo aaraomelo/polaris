@@ -9,6 +9,8 @@ type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<strin
 /** o que um tenant PODE sobrescrever. `servico` (muda banco), `evento`, `kernel`/`backend` (executam código), `pack` e `tenant` (são da plataforma) NUNCA. */
 export const KINDS_DO_TENANT = ['pagina', 'tema', 'dados', 'papel', 'documento', 'bloco'] as const
 export type KindDoTenant = (typeof KINDS_DO_TENANT)[number]
+/** com `configDoSite` (só `PUT /studio/site`), o armazém grava também o nó `tenant`; por padrão e na rota genérica de nós vale só KINDS_DO_TENANT */
+const KINDS_NO_ARMAZEM = [...KINDS_DO_TENANT, 'tenant'] as const
 export type VersaoNo = { kind: string; id: string; seq: number; hash: string; autor: string; nota: string | null; criadoEm: string; removido: boolean }
 export type Limites = { maxBytes: number; maxNos: number; maxVersoesPorNo: number }
 const LIMITES: Limites = { maxBytes: 256 * 1024, maxNos: 500, maxVersoesPorNo: 1000 }
@@ -41,13 +43,13 @@ export function criaArmazemDeNos(o: { q: Q; base: Registry; /** módulos (servi�
     return { registro: reg, ignorados }
   }
 
-  async function salva(tenantId: string, autor: string, dado: unknown, nota?: string): Promise<ResultadoSalvar> {
+  async function salva(tenantId: string, autor: string, dado: unknown, nota?: string, opc: { configDoSite?: boolean } = {}): Promise<ResultadoSalvar> {
     const erros: string[] = []
     if (!UUID.test(tenantId)) return { ok: false, erros: ['tenant inválido'] }
     if (!dado || typeof dado !== 'object' || Array.isArray(dado)) return { ok: false, erros: ['o nó deve ser um objeto'] }
     const d = dado as Record<string, unknown>
     if (JSON.stringify(d).length > lim.maxBytes) return { ok: false, erros: [`o nó excede ${lim.maxBytes} bytes`] }
-    if (!(KINDS_DO_TENANT as readonly string[]).includes(String(d.kind))) erros.push(`um tenant não sobrescreve '${String(d.kind).slice(0, 30)}' (permitidos: ${KINDS_DO_TENANT.join(', ')})`)
+    if (!((opc.configDoSite ? KINDS_NO_ARMAZEM : KINDS_DO_TENANT) as readonly string[]).includes(String(d.kind))) erros.push(`um tenant não sobrescreve '${String(d.kind).slice(0, 30)}' (permitidos: ${KINDS_DO_TENANT.join(', ')})`)
     if (typeof d.id !== 'string' || !ID.test(d.id)) erros.push('id inválido')
     if (d.segmento !== undefined && d.segmento !== null) erros.push('um tenant não publica em escopo de segmento')
     if (d.tenantId !== undefined && d.tenantId !== null && d.tenantId !== tenantId) erros.push('o nó declara outro tenant')

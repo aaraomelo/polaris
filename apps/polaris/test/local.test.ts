@@ -75,6 +75,17 @@ describe('ambiente local', () => {
     expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Título vindo do Studio'); expect((await get(l, 'loja-outra', '/contato')).status).toBe(404) // o outro tenant não muda
     const leitor = await l.token('loja-demo', ['studio.leitor']); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', leitor, {})).status).toBe(403)
   })
+  it('tema do site: escolher no Studio, publicar e o site passa a usar o CSS do tema (só neste tenant)', async () => {
+    const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
+    const css = async (alias: string) => { const h = await (await get(l, alias, '/')).text(); const href = /href="(\/_polaris\/a\/[\w.-]+\.css)"/.exec(h)![1]!; return (await get(l, alias, href)).text() }
+    const site = (await (await req(l, 'loja-demo', 'GET', '/studio/site', ed)).json()) as { tema: string | null; temas: string[] }; expect(site.tema).toBeNull(); expect(site.temas).toContain('graphite')
+    const antes = await css('loja-demo'); const pu = await req(l, 'loja-demo', 'PUT', '/studio/site', ed, { tema: 'graphite' }); expect(pu.status, await pu.text()).toBe(200)
+    expect(await css('loja-demo')).toBe(antes) // escolhido, mas ainda não publicado
+    expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {})).status).toBe(200)
+    const depois = await css('loja-demo'); expect(depois).not.toBe(antes); expect(await css('loja-outra')).toBe(antes)
+    expect(((await (await req(l, 'loja-demo', 'GET', '/studio/site', ed)).json()) as { tema: string }).tema).toBe('graphite')
+    expect((await req(l, 'loja-demo', 'PUT', '/studio/site', ed, { tema: 'inexistente' })).status).toBe(422)
+  })
   it('o login recusa tenant, papel e usuário inválidos; papel sem permissão no Studio dá 403', async () => {
     const l = await sobe(null)
     for (const q of ['tenant=nao-existe&papel=studio.editor', 'tenant=loja-demo&papel=admin', 'tenant=loja-demo&papel=studio.editor&usuario=A%20B', 'tenant=loja-demo', 'papel=studio.editor', 'tenant=loja-demo&papel=studio.editor&usuario=%3Cscript%3E']) expect((await get(l, 'loja-demo', `/entrar/ir?${q}`)).status, q).toBe(400)

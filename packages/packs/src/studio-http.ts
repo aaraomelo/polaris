@@ -23,6 +23,8 @@ export type OpcoesStudio = {
   q: (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
   autentica: (req: FastifyRequest) => Promise<Sessao | null>
   /** gera o HTML de pré-visualização de uma página (compilador e renderizador do engine); injetado porque o pacote não depende do engine. Sem ele, `/studio/previa` é 501. */
+  /** id do nó `tenant` do site deste tenant (o alias); sem ele, `/studio/site` é 501 */
+  tenantNo?: (tenantId: string) => string | undefined | Promise<string | undefined>
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
   previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
@@ -45,6 +47,8 @@ export function errosDeTema(no: Record<string, unknown>): string[] {
   return out.slice(0, 20)
 }
 
+/** o nó `tenant` do site já existe no MESMO escopo (o do tenant): o override precisa de uma versão maior para valer (versões são imutáveis) */
+const proxima = (v: string) => { const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(v); return m ? `${m[1]}.${m[2]}.${Number(m[3]) + 1}` : '1.0.1' }
 const ANCORA_NO = /^[A-Za-z0-9._-]{1,100}$/
 export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.addHook('onSend', async (_req, reply) => { reply.header('cache-control', 'no-store'); reply.header('x-content-type-options', 'nosniff') })
@@ -169,6 +173,33 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   })
 
   /** pré-visualização no servidor: o rascunho (e o tema) vão no corpo; devolve o HTML pronto para um iframe `sandbox=""` ou os erros do compilador */
+  // configuração do SITE: hoje, o tema. Grava um override do nó `tenant` copiando o que ele já declara e trocando só `tema` (páginas, módulos e idiomas não passam por aqui).
+  const noDoSite = async (tenantId: string) => {
+    const id = await o.tenantNo?.(tenantId); if (!id) return null
+    const base = await o.baseDe(tenantId), cab = (await o.armazem.cabecas(tenantId)).find((c) => c.kind === 'tenant' && c.id === id)
+    const no = (cab?.conteudo ?? base.resolve('tenant', id, { tenantId })?.no) as Record<string, unknown> | undefined
+    return no ? { id, no } : null
+  }
+  app.get('/studio/site', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    const site = await noDoSite(s.tenantId); if (!site) return erro(reply, 501, 'nao_implementado', 'este tenant não tem site configurável')
+    const base = await o.baseDe(s.tenantId), cabs = await o.armazem.cabecas(s.tenantId)
+    const temas = [...new Set([...base.ids('tema' as never), ...cabs.filter((c) => c.kind === 'tema').map((c) => c.id)])].filter((t) => !t.startsWith('studio.')).sort()
+    return { tema: ((site.no.spec as { tema?: string } | undefined)?.tema) ?? null, temas }
+  })
+  app.put('/studio/site', { bodyLimit: 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply
+    const b = req.body; if (!so(b, ['tema'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { tema }')
+    const tema = (b as { tema?: unknown }).tema
+    if (typeof tema !== 'string' || !ANCORA_NO.test(tema)) return erro(reply, 400, 'requisicao_invalida', 'tema: id inválido')
+    const base = await o.baseDe(s.tenantId)
+    if (!base.resolve('tema', tema, { tenantId: s.tenantId }) && !(await o.armazem.cabecas(s.tenantId)).some((c) => c.kind === 'tema' && c.id === tema)) return erro(reply, 422, 'no_invalido', `o tema '${tema}' não existe`)
+    const site = await noDoSite(s.tenantId); if (!site) return erro(reply, 501, 'nao_implementado', 'este tenant não tem site configurável')
+    const { tenantId: _t, segmento: _g, ...resto } = site.no
+    const r = await o.armazem.salva(s.tenantId, s.usuario, { ...resto, versao: proxima(String(site.no.versao ?? '1.0.0')), spec: { ...(site.no.spec as object), tema } }, `tema do site: ${tema}`, { configDoSite: true })
+    return r.ok ? { ok: true, tema, versao: r.versao.seq } : erro(reply, 422, 'no_invalido', 'a configuração do site não passou na validação', { erros: r.erros })
+  })
+
   app.post('/studio/publicar', { bodyLimit: 4 * 1024 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.editar', 5); if (!s) return reply
     if (!o.publicar) return erro(reply, 501, 'nao_implementado', 'este servidor não publica releases')
