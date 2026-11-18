@@ -38,7 +38,10 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
       void app.register(async (inst) => {
         rotasEstaticasStudio(inst, dir)
-        rotasStudio(inst, { previsualiza, ...(paginas ? { tenantNo: (t: string) => paginas.tenantNo({ tenantId: t }) } : {}), ...(releases ? { publicar: async (a: { tenantId: string; autor: string; nota?: string }) => {
+        rotasStudio(inst, { previsualiza, ...(releases ? { releases: {
+          lista: (t: string, n?: number) => releases.lista(t, n), producao: (t: string) => releases.producao(t), diferenca: (t: string, de: number, para: number) => releases.diferenca(t, de, para),
+          rollback: async (t: string, autor: string, para?: number, nota?: string) => { const r = await releases.rollback(t, autor, para, nota); if (r.ok) tenants?.invalida(); return r }, // o diretório guarda a release de produção em cache
+        } } : {}), ...(paginas ? { tenantNo: (t: string) => paginas.tenantNo({ tenantId: t }) } : {}), ...(releases ? { publicar: async (a: { tenantId: string; autor: string; nota?: string }) => {
           const c = await releases.cria(a.tenantId, a.autor, a.nota); if (!c.ok) return c
           const p = await releases.promove(a.tenantId, c.release.numero, a.autor, a.nota); if (!p.ok) return p
           tenants?.invalida() // o diretório guarda a release de produção em cache: sem isto o site só mudaria quando o cache vencesse

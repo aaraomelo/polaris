@@ -302,6 +302,69 @@
  },
  {
   "kind": "dados",
+  "id": "studio.releases",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarReleases"
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.voltar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "voltarRelease"
+   },
+   "parametros": {
+    "para": {
+     "tipo": "inteiro"
+    },
+    "nota": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.diffrel",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "compararReleases"
+   },
+   "parametros": {
+    "de": {
+     "tipo": "inteiro",
+     "obrigatorio": true
+    },
+    "para": {
+     "tipo": "inteiro",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.publicar",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -369,6 +432,9 @@
     "resolver": "studio.resolver",
     "publicar": "studio.publicar",
     "site": "studio.site",
+    "releases": "studio.releases",
+    "voltar": "studio.voltar",
+    "diffrel": "studio.diffrel",
     "definetema": "studio.definetema"
    },
    "estado": {
@@ -389,6 +455,10 @@
      "inicial": ""
     },
     "novoTokenValor": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "painel": {
      "tipo": "texto",
      "inicial": ""
     },
@@ -697,6 +767,38 @@
          {
           "bloco": "nav/botao",
           "props": {
+           "texto": "Releases"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "painel",
+             "valor": "estado.painel == \"releases\" ? \"\" : \"releases\""
+            },
+            {
+             "acao": "executar",
+             "dados": "releases",
+             "args": {},
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
            "texto": "Publicar"
           },
           "eventos": {
@@ -788,6 +890,238 @@
           "bloco": "texto/paragrafo",
           "props": {
            "texto": "{estado.aviso}"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "se": "estado.painel == \"releases\" && releases",
+       "props": {
+        "gap": 8
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Releases",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "Em produção: {releases.producao ? \"release \" + releases.producao : \"nenhuma (o site usa só o padrão da plataforma)\"}"
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "releases.anterior",
+          "props": {
+           "texto": "Voltar para a anterior (release {releases.anterior})"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "executar",
+             "dados": "voltar",
+             "args": {},
+             "depois": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"sucesso\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "\"Em produção: release \" + resultado.producao + \". O site já usa esta versão.\""
+              },
+              {
+               "acao": "executar",
+               "dados": "releases"
+              }
+             ],
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "tamanho(releases.releases ?? []) == 0",
+          "props": {
+           "texto": "Nenhuma release ainda: use Publicar."
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "repetir": {
+           "cada": "releases.releases ?? []",
+           "como": "r",
+           "chave": "texto(r.numero)"
+          },
+          "props": {
+           "gap": 8,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/paragrafo",
+             "props": {
+              "texto": "release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? \" · \" + r.nota : \"\"}{r.numero == releases.producao ? \" · EM PRODUÇÃO\" : \"\"}"
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "releases.producao && r.numero != releases.producao",
+             "props": {
+              "texto": "Diferenças com a produção"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "diffrel",
+                "args": {
+                 "de": "{releases.producao}",
+                 "para": "{r.numero}"
+                },
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "r.numero != releases.producao",
+             "props": {
+              "texto": "Voltar para esta"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "voltar",
+                "args": {
+                 "para": "{r.numero}"
+                },
+                "depois": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"sucesso\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "\"Em produção: release \" + resultado.producao + \". O site já usa esta versão.\""
+                 },
+                 {
+                  "acao": "executar",
+                  "dados": "releases"
+                 }
+                ],
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "layout/pilha",
+          "se": "diffrel",
+          "props": {
+           "gap": 2
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/titulo",
+             "props": {
+              "texto": "Diferenças (produção → esta)",
+              "nivel": 4
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "se": "tamanho(diffrel.adicionados ?? []) + tamanho(diffrel.removidos ?? []) + tamanho(diffrel.alterados ?? []) == 0",
+             "props": {
+              "texto": "Sem diferenças."
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "repetir": {
+              "cada": "diffrel.adicionados ?? []",
+              "como": "n",
+              "chave": "n"
+             },
+             "props": {
+              "texto": "+ {n}"
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "repetir": {
+              "cada": "diffrel.removidos ?? []",
+              "como": "n",
+              "chave": "n"
+             },
+             "props": {
+              "texto": "− {n}"
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "repetir": {
+              "cada": "diffrel.alterados ?? []",
+              "como": "n",
+              "chave": "n"
+             },
+             "props": {
+              "texto": "~ {n}"
+             }
+            }
+           ]
           }
          }
         ]

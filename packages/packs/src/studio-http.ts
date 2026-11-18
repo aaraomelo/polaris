@@ -25,6 +25,13 @@ export type OpcoesStudio = {
   /** gera o HTML de pré-visualização de uma página (compilador e renderizador do engine); injetado porque o pacote não depende do engine. Sem ele, `/studio/previa` é 501. */
   /** id do nó `tenant` do site deste tenant (o alias); sem ele, `/studio/site` é 501 */
   tenantNo?: (tenantId: string) => string | undefined | Promise<string | undefined>
+  /** a lista, o ponteiro de produção, o rollback e a diferença entre releases (`criaReleases`). Sem isto, `/studio/releases*` é 501. */
+  releases?: {
+    lista(tenantId: string, limite?: number): Promise<Array<{ numero: number; autor: string; nota: string | null; criadoEm: string; nos: number }>>
+    producao(tenantId: string): Promise<{ producao: number | null; anterior: number | null }>
+    rollback(tenantId: string, autor: string, para?: number, nota?: string): Promise<{ ok: true; producao: number; anterior: number | null } | { ok: false; erros: string[] }>
+    diferenca(tenantId: string, de: number, para: number): Promise<{ adicionados: string[]; removidos: string[]; alterados: string[] } | null>
+  }
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
   previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
@@ -198,6 +205,31 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const { tenantId: _t, segmento: _g, ...resto } = site.no
     const r = await o.armazem.salva(s.tenantId, s.usuario, { ...resto, versao: proxima(String(site.no.versao ?? '1.0.0')), spec: { ...(site.no.spec as object), tema } }, `tema do site: ${tema}`, { configDoSite: true })
     return r.ok ? { ok: true, tema, versao: r.versao.seq } : erro(reply, 422, 'no_invalido', 'a configuração do site não passou na validação', { erros: r.erros })
+  })
+
+  // releases: o que está em produção, as anteriores, a diferença entre elas e o rollback (voltar é trocar o ponteiro: nada se apaga)
+  app.get('/studio/releases', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.releases) return erro(reply, 501, 'nao_implementado', 'este servidor não tem releases')
+    const [p, lista] = await Promise.all([o.releases.producao(s.tenantId), o.releases.lista(s.tenantId, 50)])
+    return { producao: p.producao, anterior: p.anterior, releases: lista }
+  })
+  app.get<{ Querystring: { de?: string; para?: string } }>('/studio/releases/diff', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.releases) return erro(reply, 501, 'nao_implementado', 'este servidor não tem releases')
+    const de = Number(req.query.de), para = Number(req.query.para)
+    if (!Number.isInteger(de) || !Number.isInteger(para) || de < 1 || para < 1) return erro(reply, 400, 'requisicao_invalida', 'de e para: números de release')
+    const d = await o.releases.diferenca(s.tenantId, de, para); return d ?? erro(reply, 404, 'nao_encontrado', 'release inexistente')
+  })
+  app.post('/studio/releases/voltar', { bodyLimit: 4 * 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 5); if (!s) return reply
+    if (!o.releases) return erro(reply, 501, 'nao_implementado', 'este servidor não tem releases')
+    const b = req.body ?? {}; if (!so(b, ['para', 'nota'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { para?, nota? }')
+    const { para, nota } = b as { para?: unknown; nota?: unknown }
+    if (para !== undefined && (!Number.isInteger(para) || (para as number) < 1)) return erro(reply, 400, 'requisicao_invalida', 'para: número de release')
+    if (nota !== undefined && (typeof nota !== 'string' || nota.length > 300)) return erro(reply, 400, 'requisicao_invalida', 'nota: texto de até 300 caracteres')
+    const r = await o.releases.rollback(s.tenantId, s.usuario, para as number | undefined, nota as string | undefined)
+    return r.ok ? { ok: true, producao: r.producao, anterior: r.anterior } : erro(reply, 422, 'rollback_recusado', r.erros.slice(0, 5).join('; '))
   })
 
   app.post('/studio/publicar', { bodyLimit: 4 * 1024 }, async (req, reply) => {

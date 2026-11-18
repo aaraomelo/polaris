@@ -153,6 +153,45 @@
             "tipo": "inteiro"
           }
         }
+      },
+      "listaReleases": {
+        "campos": {
+          "producao": {
+            "tipo": "inteiro"
+          },
+          "anterior": {
+            "tipo": "inteiro"
+          },
+          "releases": {
+            "tipo": "json"
+          }
+        }
+      },
+      "voltou": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          },
+          "producao": {
+            "tipo": "inteiro"
+          },
+          "anterior": {
+            "tipo": "inteiro"
+          }
+        }
+      },
+      "diffReleases": {
+        "campos": {
+          "adicionados": {
+            "tipo": "json"
+          },
+          "removidos": {
+            "tipo": "json"
+          },
+          "alterados": {
+            "tipo": "json"
+          }
+        }
       }
     },
     "operacoes": {
@@ -392,6 +431,42 @@
           }
         },
         "saida": "siteSalvo",
+        "permissao": "studio"
+      },
+      "listarReleases": {
+        "metodo": "GET",
+        "caminho": "/releases",
+        "saida": "listaReleases",
+        "permissao": "studio"
+      },
+      "voltarRelease": {
+        "metodo": "POST",
+        "caminho": "/releases/voltar",
+        "entrada": {
+          "para": {
+            "tipo": "inteiro"
+          },
+          "nota": {
+            "tipo": "texto"
+          }
+        },
+        "saida": "voltou",
+        "permissao": "studio"
+      },
+      "compararReleases": {
+        "metodo": "GET",
+        "caminho": "/releases/diff",
+        "entrada": {
+          "de": {
+            "tipo": "inteiro",
+            "obrigatorio": true
+          },
+          "para": {
+            "tipo": "inteiro",
+            "obrigatorio": true
+          }
+        },
+        "saida": "diffReleases",
         "permissao": "studio"
       }
     }

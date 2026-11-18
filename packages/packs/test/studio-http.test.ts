@@ -147,6 +147,25 @@ describe('API de autoria do Studio', () => {
     // a rota genérica continua NÃO aceitando sobrescrever o nó `tenant`
     expect((await app.inject({ method: 'PUT', url: '/studio/nos/tenant/lojaa', headers: h(A, 'ana'), payload: { no: { kind: 'tenant', id: 'lojaa' } } })).statusCode).toBe(400); await a2.close()
   })
+  it('releases: lista, diferença e voltar; valida os números; voltar exige editar; o tenant vem da sessão', async () => {
+    expect((await app.inject({ url: '/studio/releases', headers: h(A, 'ana') })).statusCode).toBe(501)
+    const chamadas: any[] = []; let falha = false
+    const rel = { lista: async (t: string, n?: number) => { chamadas.push(['lista', t, n]); return [{ numero: 2, autor: 'ana', nota: null, criadoEm: '2026-01-02T00:00:00.000Z', nos: 3 }, { numero: 1, autor: 'ana', nota: 'v1', criadoEm: '2026-01-01T00:00:00.000Z', nos: 2 }] },
+      producao: async (t: string) => { chamadas.push(['producao', t]); return { producao: 2, anterior: 1 } },
+      rollback: async (t: string, autor: string, para?: number, nota?: string) => { chamadas.push(['rollback', t, autor, para, nota]); return falha ? { ok: false as const, erros: ['não fecha'] } : { ok: true as const, producao: para ?? 1, anterior: 2 } },
+      diferenca: async (t: string, de: number, para: number) => { chamadas.push(['diff', t, de, para]); return de === 9 || para === 9 ? null : { adicionados: ['pagina:a@1.0.0'], removidos: [], alterados: ['tema:t'] } } }
+    const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, releases: rel })
+    const g = (url: string, t = h(A, 'ana', 'ver')) => a2.inject({ url, headers: t }), post = (corpo: unknown, t = h(A, 'ana')) => a2.inject({ method: 'POST', url: '/studio/releases/voltar', headers: t, payload: corpo as never })
+    const l = (await g('/studio/releases')).json(); expect([l.producao, l.anterior, l.releases.map((r: any) => r.numero)]).toEqual([2, 1, [2, 1]]); expect(chamadas).toEqual(expect.arrayContaining([['lista', A, 50], ['producao', A]]))
+    expect((await g('/studio/releases/diff?de=2&para=1')).json()).toEqual({ adicionados: ['pagina:a@1.0.0'], removidos: [], alterados: ['tema:t'] })
+    for (const ruim of ['de=x&para=1', 'de=0&para=1', 'de=1', 'de=1.5&para=2']) expect((await g(`/studio/releases/diff?${ruim}`)).statusCode, ruim).toBe(400)
+    expect((await g('/studio/releases/diff?de=9&para=1')).statusCode).toBe(404)
+    const v = await post({ para: 1, nota: 'voltei' }); expect([v.statusCode, v.json()]).toEqual([200, { ok: true, producao: 1, anterior: 2 }]); expect(chamadas.at(-1)).toEqual(['rollback', A, 'ana', 1, 'voltei'])
+    expect((await post({})).statusCode).toBe(200); expect(chamadas.at(-1)).toEqual(['rollback', A, 'ana', undefined, undefined]) // sem `para`: a anterior
+    for (const ruim of [{ para: 0 }, { para: 'x' }, { para: 1.5 }, { nota: 5 }, { tenantId: B }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim)).toBe(400)
+    expect((await post({}, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'POST', url: '/studio/releases/voltar', payload: {} })).statusCode).toBe(401)
+    falha = true; const r = await post({}); expect([r.statusCode, r.json().erro.codigo]).toEqual([422, 'rollback_recusado']); await a2.close()
+  })
   it('publicar: 501 sem a função; exige editar; chama com tenant/autor/nota da SESSÃO; falha vira 422', async () => {
     expect((await app.inject({ method: 'POST', url: '/studio/publicar', headers: h(A, 'ana'), payload: {} })).statusCode).toBe(501)
     const chamadas: any[] = []; let falha = false; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, publicar: async (x) => { chamadas.push(x); return falha ? { ok: false, erros: ['não fecha'] } : { ok: true, release: 7 } } })

@@ -76,6 +76,22 @@ describe('ambiente local', () => {
     expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Título vindo do Studio'); expect((await get(l, 'loja-outra', '/contato')).status).toBe(404) // o outro tenant não muda
     const leitor = await l.token('loja-demo', ['studio.leitor']); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', leitor, {})).status).toBe(403)
   })
+  it('releases: lista, diferença e rollback; o site volta para a versão anterior e só neste tenant', async () => {
+    const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
+    const titulo = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.texto = v; expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home })).status).toBe(201); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {})).status).toBe(200) }
+    const lista = async () => (await (await req(l, 'loja-demo', 'GET', '/studio/releases', ed)).json()) as { producao: number | null; anterior: number | null; releases: Array<{ numero: number }> }
+    expect(await lista()).toMatchObject({ producao: null, releases: [] })
+    await titulo('Primeira'); await titulo('Segunda')
+    const a = await lista(); expect([a.producao, a.anterior, a.releases.map((r) => r.numero)]).toEqual([2, 1, [2, 1]])
+    expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Segunda')
+    const d = (await (await req(l, 'loja-demo', 'GET', '/studio/releases/diff?de=2&para=1', ed)).json()) as { alterados: string[] }; expect(d.alterados.some((k) => k.includes('site.home'))).toBe(true)
+    const v = await req(l, 'loja-demo', 'POST', '/studio/releases/voltar', ed, {}); expect(v.status).toBe(200); expect(await v.json()).toMatchObject({ ok: true, producao: 1, anterior: 2 })
+    expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Primeira') // o site voltou
+    expect((await req(l, 'loja-demo', 'POST', '/studio/releases/voltar', ed, { para: 2 })).status).toBe(200); expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Segunda') // e avança de novo para uma release específica
+    expect((await req(l, 'loja-demo', 'POST', '/studio/releases/voltar', ed, { para: 99 })).status).toBe(422)
+    expect((await req(l, 'loja-demo', 'POST', '/studio/releases/voltar', await l.token('loja-demo', ['studio.leitor']), {})).status).toBe(403)
+    expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Segunda')
+  })
   it('tema do site: escolher no Studio, publicar e o site passa a usar o CSS do tema (só neste tenant)', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
     const css = async (alias: string) => { const h = await (await get(l, alias, '/')).text(); const href = /href="(\/_polaris\/a\/[\w.-]+\.css)"/.exec(h)![1]!; return (await get(l, alias, href)).text() }
@@ -169,6 +185,23 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       // tecla modificadora: navegação normal (o handler não intercepta)
       const href = await p.getByRole('link', { name: 'Início' }).evaluate((a: HTMLAnchorElement) => { let desviou = false; a.addEventListener('click', (e) => { desviou = e.defaultPrevented }, { once: true }); a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true })); return desviou })
       expect(href).toBe(false)
+      expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('no navegador: painel Releases mostra a produção, as diferenças e volta para a release escolhida', async () => {
+    const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
+    const publica = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.texto = v; await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}) }
+    await publica('Versão um'); await publica('Versão dois')
+    const nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/studio#token=${ed}`); await p.getByRole('button', { name: 'Releases' }).click()
+      await p.getByText('Em produção: release 2').first().waitFor(); await p.getByText(/release 1 · ana/).waitFor()
+      await p.getByRole('button', { name: 'Diferenças com a produção' }).click(); await p.getByText(/~ pagina:site\.home/).waitFor() // a diferença entre a produção e a release 1
+      await p.getByRole('button', { name: 'Voltar para a anterior (release 1)' }).click(); await p.getByText(/Em produção: release 1\. O site já usa/).first().waitFor()
+      expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Versão um') // o site voltou
+      await p.getByRole('button', { name: 'Voltar para esta' }).first().click(); await p.getByText('Em produção: release 2').first().waitFor()
+      expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Versão dois')
       expect(erros.join(' | ')).toBe('')
     } finally { await nav.close() }
   })

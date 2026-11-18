@@ -20,6 +20,9 @@ export const DADOS = [
   dado('resolver', 'resolverComentario', { cid: campo('texto', { obrigatorio: true }), resolvido: campo('booleano', { obrigatorio: true }) }),
   dado('site', 'obterSite', {}, 'auto'),
   dado('definetema', 'definirTemaDoSite', { tema: campo('texto', { obrigatorio: true }) }),
+  dado('releases', 'listarReleases', {}),
+  dado('voltar', 'voltarRelease', { para: campo('inteiro'), nota: campo('texto') }),
+  dado('diffrel', 'compararReleases', { de: campo('inteiro', { obrigatorio: true }), para: campo('inteiro', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
   dado('previa', 'previsualizar', { no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto') }),
 ]
@@ -158,6 +161,23 @@ const editorDePaginas = (): Inst => pilha([
 
 // ---- histórico, diff e comentários -------------------------------------------------------------------------------------------------------------
 const KI = { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}' }
+const releasesVista = (): Inst => pilha([
+  titulo('Releases', 3),
+  texto('Em produção: {releases.producao ? "release " + releases.producao : "nenhuma (o site usa só o padrão da plataforma)"}'),
+  botao('Voltar para a anterior (release {releases.anterior})', [exe('voltar', {}, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { se: 'releases.anterior' }),
+  texto('Nenhuma release ainda: use Publicar.', { se: 'tamanho(releases.releases ?? []) == 0' }),
+  linha([
+    texto('release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? " · " + r.nota : ""}{r.numero == releases.producao ? " · EM PRODUÇÃO" : ""}'),
+    botao('Diferenças com a produção', [exe('diffrel', { de: '{releases.producao}', para: '{r.numero}' }, undefined, aviso('erro', 'erro'))], { se: 'releases.producao && r.numero != releases.producao' }),
+    botao('Voltar para esta', [exe('voltar', { para: '{r.numero}' }, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { se: 'r.numero != releases.producao' }),
+  ], { repetir: { cada: 'releases.releases ?? []', como: 'r', chave: 'texto(r.numero)' } }),
+  pilha([
+    titulo('Diferenças (produção → esta)', 4),
+    texto('Sem diferenças.', { se: 'tamanho(diffrel.adicionados ?? []) + tamanho(diffrel.removidos ?? []) + tamanho(diffrel.alterados ?? []) == 0' }),
+    texto('+ {n}', { repetir: { cada: 'diffrel.adicionados ?? []', como: 'n', chave: 'n' } }), texto('− {n}', { repetir: { cada: 'diffrel.removidos ?? []', como: 'n', chave: 'n' } }), texto('~ {n}', { repetir: { cada: 'diffrel.alterados ?? []', como: 'n', chave: 'n' } }),
+  ], { se: 'diffrel', gap: 2 }),
+], { se: 'estado.painel == "releases" && releases', gap: 8 })
+
 const diffVista = (): Inst => pilha([
   texto('Sem diferenças.', { se: 'diff.diff.igual' }),
   pilha([
@@ -212,10 +232,10 @@ const formCriar = (): Inst => linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', publicar: 'studio.publicar', site: 'studio.site', definetema: 'studio.definetema' },
+  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    painel: { tipo: 'texto', inicial: '' }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
@@ -226,10 +246,12 @@ export const PAGINA = no('pagina', 'studio.app', {
       botao('Salvar', [exe('salvar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}', no: '{estado.no}', baseSeq: '{estado.aberto.seq}' }, [
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
       ], aviso('erro', 'erro'))], { se: 'estado.no' }),
+      botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))]),
       botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))]),
       texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
     ]),
     ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),
+    releasesVista(),
     linha([criar('pagina'), criar('tema')]), formCriar(),
     seletorDeNos('pagina'),
     seletorDeNos('tema'),
