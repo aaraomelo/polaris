@@ -80,6 +80,12 @@ export const DOCS_BASE: Record<string, DocBloco> = {
     { titulo: 'Marcada', instancia: { bloco: 'entrada/caixa', props: { marcado: true, rotulo: 'Aceito os termos' } } },
     { titulo: 'Desabilitada', instancia: { bloco: 'entrada/caixa', props: { marcado: false, rotulo: 'Opção indisponível', desabilitado: true } } },
   ] },
+  'entrada/area': { titulo: 'Área de texto', descricao: 'Texto de várias linhas, controlado pelo estado como o campo de texto: `valor` vem do estado e `aoMudar` recebe o texto inteiro.', exemplos: [
+    { titulo: 'Comentário', instancia: { bloco: 'entrada/area', props: { valor: '', rotulo: 'Comentário', placeholder: 'Escreva aqui', linhas: 3 } } },
+  ] },
+  'midia/quadro': { titulo: 'Quadro', descricao: 'Exibe um documento HTML num iframe **sempre** isolado (`sandbox` vazio: sem scripts, sem formulários, sem navegação, origem opaca), e nenhuma prop altera isso. Serve para pré-visualizações.', exemplos: [
+    { titulo: 'Documento simples', instancia: { bloco: 'midia/quadro', props: { titulo: 'Pré-visualização', html: '<!doctype html><p>Olá do quadro</p>', altura: 120 } } },
+  ] },
   'nav/botao': { titulo: 'Botão', descricao: 'Botão de ação. `aoClicar` executa a lista de ações declarada na instância.', exemplos: [
     { titulo: 'Padrão', instancia: { bloco: 'nav/botao', props: { texto: 'Comprar' } } },
     { titulo: 'Desabilitado', instancia: { bloco: 'nav/botao', props: { texto: 'Esgotado', desabilitado: true } } },

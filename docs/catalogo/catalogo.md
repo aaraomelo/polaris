@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-34 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+36 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -361,6 +361,40 @@ Ponto de inserção dentro do modelo de um bloco composto: o conteúdo que a pá
 | `nome` | texto | sim |  |  |
 
 ## entrada
+
+### Área de texto (`entrada/area`)
+
+Texto de várias linhas, controlado pelo estado como o campo de texto: `valor` vem do estado e `aoMudar` recebe o texto inteiro.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `desabilitado` | booleano | não |  |  |
+| `linhas` | inteiro ≥ 1 ≤ 40 | não | 4 |  |
+| `placeholder` | texto | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
+| `valor` | texto | não |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoMudar` | texto |
+
+**Exemplo: Comentário**
+
+```json
+{
+  "bloco": "entrada/area",
+  "props": {
+    "valor": "",
+    "rotulo": "Comentário",
+    "placeholder": "Escreva aqui",
+    "linhas": 3
+  }
+}
+```
 
 ### Caixa de seleção (`entrada/caixa`)
 
@@ -1009,6 +1043,31 @@ Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas)
     "alt": "Foto do produto",
     "largura": 120,
     "altura": 80
+  }
+}
+```
+
+### Quadro (`midia/quadro`)
+
+Exibe um documento HTML num iframe **sempre** isolado (`sandbox` vazio: sem scripts, sem formulários, sem navegação, origem opaca), e nenhuma prop altera isso. Serve para pré-visualizações.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `altura` | inteiro ≥ 40 ≤ 4000 | não | 320 |  |
+| `html` | texto ≤ 262144 caracteres | sim |  | documento HTML completo a exibir |
+| `titulo` | texto ≤ 200 caracteres | sim |  | nome acessível do quadro (obrigatório) |
+
+**Exemplo: Documento simples**
+
+```json
+{
+  "bloco": "midia/quadro",
+  "props": {
+    "titulo": "Pré-visualização",
+    "html": "<!doctype html><p>Olá do quadro</p>",
+    "altura": 120
   }
 }
 ```

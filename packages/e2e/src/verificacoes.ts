@@ -30,7 +30,7 @@ export async function overflowHorizontal(page: Page): Promise<string[]> {
 
 /** O que a página deixa de dizer sobre si: título, conteúdo visível. */
 export async function conteudo(page: Page): Promise<string[]> {
-  return page.evaluate(() => { const p: string[] = []; if (!document.title.trim()) p.push('página sem <title>'); const r = document.getElementById('polaris') ?? document.body; if (!r.children.length) p.push('o contêiner da página está vazio'); else if (!r.textContent?.trim() && !r.querySelector('img, svg, input, button, canvas, hr, progress')) p.push('a página não mostra nada (sem texto nem elemento visual)'); return p })
+  return page.evaluate(() => { const p: string[] = []; if (!document.title.trim()) p.push('página sem <title>'); const r = document.getElementById('polaris') ?? document.body; if (!r.children.length) p.push('o contêiner da página está vazio'); else if (!r.textContent?.trim() && !r.querySelector('img, svg, input, textarea, select, iframe, button, canvas, hr, progress')) p.push('a página não mostra nada (sem texto nem elemento visual)'); return p })
 }
 
 /** Coletor do que o navegador reclama: erro de console, exceção, requisição que falhou, violação de CSP. */

@@ -15,6 +15,8 @@ export type Descritor = {
   filhos?: boolean
   /** propriedade `value` (campos controlados) */
   valor?(props: Record<string, unknown>): string
+  /** o valor vai no CONTEÚDO do elemento (textarea), não no atributo `value`: o HTML estático e o React o escrevem como texto */
+  valorNoTexto?: true
   /** propriedade `checked` (caixa de seleção controlada) */
   marcado?(props: Record<string, unknown>): boolean
   eventos?: Record<string, EventoDom>
@@ -121,6 +123,17 @@ export const d_computacao_canvas_gl: Descritor = {
   chave: (p) => (ident(p.kernel) ? 'canvas' : null), tag: () => 'canvas', texto: (p) => txt(p.alt),
   attrs: (p, id) => ({ ...comId(id), width: dimensao(p.largura), height: dimensao(p.altura), role: 'img', 'aria-label': txt(p.alt), 'data-polaris-kernel': ident(p.kernel), 'data-polaris-entradas': entradasJson(p.entradas) }),
 }
+export const d_entrada_area: Descritor = {
+  chave: () => 'textarea', tag: () => 'textarea', valor: (p) => txt(p.valor), valorNoTexto: true, texto: (p) => txt(p.valor),
+  attrs: (p, id) => ({ ...comId(id), ...rotulo(p), placeholder: txt(p.placeholder), rows: String(inteiro(p.linhas, 1, 40, 4)), ...(p.desabilitado === true ? { disabled: '' } : {}), spellcheck: 'false' }),
+  eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLTextAreaElement).value } },
+}
+/** Quadro: um documento HTML dentro de um iframe SEMPRE com `sandbox=""` (sem scripts, sem formulários, sem navegação, origem opaca). Nada nas props altera o sandbox. */
+export const QUADRO_MAX = 262_144
+export const d_midia_quadro: Descritor = {
+  chave: () => 'iframe', tag: () => 'iframe',
+  attrs: (p, id) => ({ ...comId(id), sandbox: '', title: txt(p.titulo).slice(0, 200), srcdoc: txt(p.html).slice(0, QUADRO_MAX), referrerpolicy: 'no-referrer', style: `width:100%;height:${px(inteiro(p.altura, 40, 4000, 320))};border:0` }),
+}
 export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'span', attrs: (p, id) => ({ ...comId(id), ...tom(p) }), texto: (p) => txt(p.texto) }
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
@@ -137,6 +150,8 @@ export const DESCRITORES_BASE: DescritoresDom = {
   'texto/paragrafo': d_texto_paragrafo,
   'midia/imagem': d_midia_imagem,
   'computacao/canvas-gl': d_computacao_canvas_gl,
+  'entrada/area': d_entrada_area,
+  'midia/quadro': d_midia_quadro,
   'nav/link': d_nav_link,
   'nav/botao': d_nav_botao,
   'entrada/texto': d_entrada_texto,

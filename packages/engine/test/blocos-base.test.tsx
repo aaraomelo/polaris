@@ -65,6 +65,10 @@ const CASOS: Array<[string, object]> = [
   ['feedback/selo (tom padrão)', P('feedback/selo', { id: 'b', props: { texto: 'x' } })],
   ['computacao/canvas-gl', P('computacao/canvas-gl', { id: 'b', props: { kernel: 'gradiente', largura: 64, altura: 32, alt: 'Gradiente <b>', entradas: { w: 64, ligado: true, ruim: 'x', Nome: 1 } } })],
   ['computacao/canvas-gl (padrões, sem entradas)', P('computacao/canvas-gl', { id: 'b', props: { kernel: 'k.v1', alt: 'x' } })],
+  ['entrada/area', P('entrada/area', { id: 'b', props: { valor: 'linha 1\nlinha <2> & "3"', rotulo: 'Notas', placeholder: 'texto', linhas: 6 } })],
+  ['entrada/area (padrões, desabilitada)', P('entrada/area', { id: 'b', props: { desabilitado: true } })],
+  ['midia/quadro', P('midia/quadro', { id: 'b', props: { titulo: 'Prévia', html: '<!doctype html><p onclick="x()">oi</p><script>1</script>', altura: 200 } })],
+  ['midia/quadro (altura mínima, html vazio)', P('midia/quadro', { id: 'b', props: { titulo: 'x', html: '', altura: 40 } })],
   ['feedback/alerta', P('feedback/alerta', { id: 'b', props: { tom: 'erro' }, slots: { filhos: [par('falhou')] } })],
 ]
 
