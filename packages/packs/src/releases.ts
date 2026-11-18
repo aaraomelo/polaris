@@ -108,11 +108,13 @@ export function criaReleases(o: { db: DbPlataforma; armazemDe: (q: Q) => Armazem
 }
 
 /** Links de pré-visualização: `v1.<payload>.<assinatura>` (HMAC-SHA256). Dão acesso de LEITURA às páginas de UMA release de UM tenant, por pouco tempo, sem login. */
-export function criaPreview(o: { segredo: string | Uint8Array; agora?: () => number; ttlMaxSeg?: number }) {
+export function criaPreview(o: { segredo: string | Uint8Array; /** segredos ANTERIORES, ainda aceitos na verificação (rotação sem derrubar os links em circulação); nunca assinam */ anteriores?: Array<string | Uint8Array>; agora?: () => number; ttlMaxSeg?: number }) {
   const seg = typeof o.segredo === 'string' ? Buffer.from(o.segredo) : Buffer.from(o.segredo)
   if (seg.length < 32) throw new Error('o segredo do preview deve ter ao menos 32 bytes')
+  const antigos = (o.anteriores ?? []).map((a) => Buffer.from(a)); if (antigos.some((a) => a.length < 32)) throw new Error('os segredos anteriores do preview devem ter ao menos 32 bytes')
+  if (antigos.length > 3) throw new Error('no máximo 3 segredos anteriores (rotação gradual, não acúmulo)')
   const agora = o.agora ?? Date.now, ttlMax = o.ttlMaxSeg ?? 7 * 24 * 3600
-  const b64 = (b: Buffer) => b.toString('base64url'), assina = (p: string) => b64(createHmac('sha256', seg).update(`v1.${p}`).digest())
+  const b64 = (b: Buffer) => b.toString('base64url'), assinaCom = (k: Buffer, p: string) => b64(createHmac('sha256', k).update(`v1.${p}`).digest()), assina = (p: string) => assinaCom(seg, p)
   return {
     emite(tenantId: string, release: number, ttlSeg = 24 * 3600): string {
       if (!UUID.test(tenantId) || !Number.isInteger(release) || release < 1) throw new Error('tenant ou release inválidos')
@@ -122,7 +124,9 @@ export function criaPreview(o: { segredo: string | Uint8Array; agora?: () => num
     verifica(token: string): { tenantId: string; release: number } | null {
       if (typeof token !== 'string' || token.length > 2048) return null
       const m = /^v1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(token); if (!m) return null
-      const esperado = Buffer.from(assina(m[1]!)), dado = Buffer.from(m[2]!); if (esperado.length !== dado.length || !timingSafeEqual(esperado, dado)) return null
+      const dado = Buffer.from(m[2]!); let valido = false
+      for (const k of [seg, ...antigos]) { const esperado = Buffer.from(assinaCom(k, m[1]!)); if (esperado.length === dado.length && timingSafeEqual(esperado, dado)) valido = true } // sem `return` antecipado: o tempo não revela QUAL segredo bateu
+      if (!valido) return null
       try { const p = JSON.parse(Buffer.from(m[1]!, 'base64url').toString('utf8')) as { t?: unknown; r?: unknown; e?: unknown }; if (typeof p.t !== 'string' || !UUID.test(p.t) || !Number.isInteger(p.r) || typeof p.e !== 'number' || p.e * 1000 < agora()) return null; return { tenantId: p.t, release: p.r as number } } catch { return null }
     },
   }

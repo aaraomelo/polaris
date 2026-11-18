@@ -108,6 +108,14 @@ describe('preview: link assinado', () => {
     for (const ruim of [`${v}.${outro}.${sig}`, `${v}.${pay}.${sig!.slice(0, -2)}AA`, `${v}.${pay}`, 'v1..', 'x.y.z', '', 'v2.' + pay + '.' + sig, tok + 'x', 'a'.repeat(3000)]) expect(p.verifica(ruim), ruim.slice(0, 30)).toBeNull()
     expect(criaPreview({ segredo: 'outro-segredo-diferente-com-32-bytes!!!!', agora: () => t }).verifica(tok)).toBeNull(); expect(p.verifica(null as never)).toBeNull()
   })
+  it('ROTAÇÃO: o segredo novo assina; os links assinados com o ANTERIOR continuam valendo até expirar; o anterior nunca assina; segredo removido da lista deixa de valer', () => {
+    const t = 1_700_000_000_000, velho = 'segredo-velho-de-preview-com-mais-de-32-bytes!', novo = 'segredo-novo-de-preview-com-mais-de-32-bytes!!'
+    const linkVelho = criaPreview({ segredo: velho, agora: () => t }).emite(A, 4); const rotacionado = criaPreview({ segredo: novo, anteriores: [velho], agora: () => t })
+    expect(rotacionado.verifica(linkVelho)).toEqual({ tenantId: A, release: 4 }); const linkNovo = rotacionado.emite(A, 5); expect(rotacionado.verifica(linkNovo)).toEqual({ tenantId: A, release: 5 })
+    expect(criaPreview({ segredo: velho, agora: () => t }).verifica(linkNovo)).toBeNull() // quem só conhece o velho não valida o que o novo assinou: o novo assina, o velho não
+    expect(criaPreview({ segredo: novo, agora: () => t }).verifica(linkVelho)).toBeNull() // fim da rotação: tirou o anterior, os links antigos morrem
+    expect(() => criaPreview({ segredo: novo, anteriores: ['curto'] })).toThrow(/32 bytes/); expect(() => criaPreview({ segredo: novo, anteriores: [velho, velho + '1', velho + '2', velho + '3'] })).toThrow(/no máximo 3/)
+  })
   it('TTL: mínimo de 60 s, máximo de 7 dias; segredo curto e dados inválidos são recusados', () => {
     const t = 1_700_000_000_000; const p = criaPreview({ segredo: seg, agora: () => t, ttlMaxSeg: 7 * 24 * 3600 })
     const exp = (tok: string) => JSON.parse(Buffer.from(tok.split('.')[1]!, 'base64url').toString()).e - Math.floor(t / 1000); expect(exp(p.emite(A, 1, 1))).toBe(60); expect(exp(p.emite(A, 1, 99 * 24 * 3600))).toBe(7 * 24 * 3600)

@@ -15,7 +15,7 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     armazemDe: (q) => criaArmazemDeNos({ q, base: reg }),
     db: { transacao: async (fn) => { const cx = await pool.connect(); try { await cx.query('BEGIN'); const r = await fn(async (sql, params) => { const x = await cx.query(sql, params as unknown[]); return { rows: x.rows as Array<Record<string, unknown>>, rowCount: x.rowCount ?? 0 } }); await cx.query('COMMIT'); return r } catch (e) { await cx.query('ROLLBACK').catch(() => {}); throw e } finally { cx.release() } } },
   }) : null
-  const prev = c.previewSegredo ? criaPreview({ segredo: c.previewSegredo }) : null
+  const prev = c.previewSegredo ? criaPreview({ segredo: c.previewSegredo, ...(c.previewAnteriores ? { anteriores: c.previewAnteriores } : {}) }) : null
   const servicos = Object.fromEntries(Object.entries(c.servicos).map(([id, url]) => {
     const no = reg.resolve('servico', id)?.no
     if (!no) throw new Error(`serviço '${id}' não existe nos nós carregados`)

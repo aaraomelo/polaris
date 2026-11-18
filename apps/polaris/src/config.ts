@@ -100,7 +100,7 @@ export function configServico(env: Env): ConfigServico {
   return { ...(c as ConfigComum), servico: servico!, bancoUrl: bancoUrl!, ...(bancoPapel ? { bancoPapel } : {}), ...(migrar ? { migrar: { url: migrar, papelApp } } : {}) }
 }
 
-export type ConfigGateway = ConfigComum & { previewSegredo?: string; plataforma?: { url: string; bases: string[] }; servicos: Record<string, string>; taxa: { capacidade: number; porSegundo: number } | false; introspeccao: boolean }
+export type ConfigGateway = ConfigComum & { previewSegredo?: string; previewAnteriores?: string[]; plataforma?: { url: string; bases: string[] }; servicos: Record<string, string>; taxa: { capacidade: number; porSegundo: number } | false; introspeccao: boolean }
 export function configGateway(env: Env): ConfigGateway {
   const l = new Leitor(env); const c = comum(l)
   const servicos = l.json<Record<string, string>>('POLARIS_SERVICOS', (v) => {
@@ -116,9 +116,10 @@ export function configGateway(env: Env): ConfigGateway {
   if (!plataformaUrl && bases.length) l.problemas.push('POLARIS_BASES_DOMINIO só vale com DATABASE_URL_PLATAFORMA')
   if (c.producao && !plataformaUrl) l.problemas.push('em produção o gateway exige DATABASE_URL_PLATAFORMA (status e módulos dos tenants); POLARIS_HOSTS é só para desenvolvimento')
   const previewSegredo = l.texto('POLARIS_PREVIEW_SEGREDO'); if (previewSegredo !== undefined && previewSegredo.length < 32) l.problemas.push('POLARIS_PREVIEW_SEGREDO deve ter ao menos 32 caracteres')
+  const anterior = l.texto('POLARIS_PREVIEW_SEGREDO_ANTERIOR'); if (anterior !== undefined && anterior.length < 32) l.problemas.push('POLARIS_PREVIEW_SEGREDO_ANTERIOR deve ter ao menos 32 caracteres'); if (anterior !== undefined && previewSegredo === undefined) l.problemas.push('POLARIS_PREVIEW_SEGREDO_ANTERIOR exige POLARIS_PREVIEW_SEGREDO (o atual)'); if (anterior !== undefined && anterior === previewSegredo) l.problemas.push('o segredo anterior do preview é igual ao atual: a rotação não trocou nada')
   if (previewSegredo !== undefined && !plataformaUrl) l.problemas.push('POLARIS_PREVIEW_SEGREDO só vale com DATABASE_URL_PLATAFORMA')
   const taxaDesligada = l.env.POLARIS_LIMITE_TAXA === 'desligado'
   const taxa = taxaDesligada ? false as const : { capacidade: l.inteiro('POLARIS_TAXA_CAPACIDADE', 120, 1, 100_000), porSegundo: l.inteiro('POLARIS_TAXA_POR_SEGUNDO', 20, 1, 100_000) }
   if (l.problemas.length) throw new ErroConfig(l.problemas)
-  return { ...(c as ConfigComum), ...(plataformaUrl ? { plataforma: { url: plataformaUrl, bases } } : {}), ...(previewSegredo ? { previewSegredo } : {}), servicos: servicos!, taxa, introspeccao: l.env.POLARIS_GRAPHQL_INTROSPECCAO === '1' && !(c.producao) }
+  return { ...(c as ConfigComum), ...(plataformaUrl ? { plataforma: { url: plataformaUrl, bases } } : {}), ...(previewSegredo ? { previewSegredo } : {}), ...(anterior ? { previewAnteriores: [anterior] } : {}), servicos: servicos!, taxa, introspeccao: l.env.POLARIS_GRAPHQL_INTROSPECCAO === '1' && !(c.producao) }
 }

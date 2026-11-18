@@ -77,6 +77,15 @@ describe('configGateway', () => {
   })
 })
 
+describe('configGateway: rotação do segredo de preview', () => {
+  const plat = { ...gw, DATABASE_URL_PLATAFORMA: 'postgres://u:p@db/x', POLARIS_BASES_DOMINIO: 'polaris.app', POLARIS_PREVIEW_SEGREDO: 'n'.repeat(40) }
+  it('anterior opcional, ≥ 32, exige o atual e não pode ser igual a ele', () => {
+    expect(configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO_ANTERIOR: 'v'.repeat(40) }).previewAnteriores).toEqual(['v'.repeat(40)]); expect(configGateway(plat).previewAnteriores).toBeUndefined()
+    expect(problemas(() => configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO_ANTERIOR: 'curto' })).join()).toMatch(/ao menos 32/); expect(problemas(() => configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO_ANTERIOR: 'n'.repeat(40) })).join()).toMatch(/igual ao atual/)
+    const { POLARIS_PREVIEW_SEGREDO: _p, ...semAtual } = plat; expect(problemas(() => configGateway({ ...semAtual, POLARIS_PREVIEW_SEGREDO_ANTERIOR: 'v'.repeat(40) })).join()).toMatch(/exige POLARIS_PREVIEW_SEGREDO/)
+  })
+})
+
 describe('configGateway: preview', () => {
   it('segredo de preview: mínimo de 32 caracteres e só com a plataforma', () => {
     const plat = { ...gw, DATABASE_URL_PLATAFORMA: 'postgres://u:p@db/x', POLARIS_BASES_DOMINIO: 'polaris.app' }
