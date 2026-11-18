@@ -187,4 +187,17 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect.poll(modo).toContain('data-modo="claro"'); await p.getByRole('button', { name: 'escuro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="escuro"')
     await p.getByRole('button', { name: 'claro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="claro"'); await ctx.close()
   })
+  it('criar nó com alterações não salvas pede confirmação; sem alterações cria direto', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('criada-direto'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
+    await expect(p.getByText('Página criada-direto')).toBeVisible(); await expect(p.getByText(/criar um novo nó as descarta/)).toHaveCount(0) // nada aberto antes: direto
+    await p.getByRole('button', { name: 'Cancelar' }).count() // (o formulário fecha ao criar)
+    // agora há um nó novo, não salvo: criar outro descartaria o primeiro
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('segunda'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
+    await expect(p.getByText('Há alterações não salvas em criada-direto; criar um novo nó as descarta.')).toBeVisible(); await expect(p.getByText('Página criada-direto')).toBeVisible() // ainda no primeiro
+    await p.getByRole('button', { name: 'Cancelar' }).click(); await expect(p.getByText(/criar um novo nó as descarta/)).toHaveCount(0); await expect(p.getByText('Página criada-direto')).toBeVisible()
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('terceira'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
+    await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Página terceira')).toBeVisible(); await expect(p.getByText(/criar um novo nó as descarta/)).toHaveCount(0)
+    await ctx.close()
+  })
 })

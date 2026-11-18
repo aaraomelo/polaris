@@ -530,6 +530,10 @@
      "tipo": "booleano",
      "inicial": false
     },
+    "confirmaCriar": {
+     "tipo": "booleano",
+     "inicial": false
+    },
     "aba": {
      "tipo": "texto",
      "inicial": "editor"
@@ -1448,7 +1452,7 @@
          },
          {
           "bloco": "nav/botao",
-          "se": "estado.novoId != \"\"",
+          "se": "estado.novoId != \"\" && !(estado.no && !igual(estado.no, estado.noSalvo))",
           "props": {
            "texto": "Criar"
           },
@@ -1513,6 +1517,110 @@
               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
               "modo": "{estado.modoPrevia}"
              }
+            },
+            {
+             "acao": "definir",
+             "estado": "confirmaCriar",
+             "valor": "false"
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.novoId != \"\" && (estado.no && !igual(estado.no, estado.noSalvo)) && !estado.confirmaCriar",
+          "props": {
+           "texto": "Criar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "confirmaCriar",
+             "valor": "true"
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "estado.confirmaCriar",
+          "props": {
+           "texto": "Há alterações não salvas em {estado.aberto.id}; criar um novo nó as descarta."
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.novoId != \"\" && estado.confirmaCriar",
+          "props": {
+           "texto": "Descartar e criar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "aberto",
+             "valor": "objeto([[\"kind\", estado.criando], [\"id\", estado.novoId], [\"origem\", \"novo\"], [\"seq\", null]])"
+            },
+            {
+             "acao": "definir",
+             "estado": "no",
+             "valor": "estado.criando == \"pagina\" ? objeto([[\"kind\", \"pagina\"], [\"id\", estado.novoId], [\"versao\", \"1.0.0\"], [\"estatuto\", \"rascunho\"], [\"spec\", objeto([[\"rota\", estado.novaRota], [\"raiz\", objeto([[\"bloco\", \"layout/pilha\"], [\"id\", \"raiz\"]])]])]]) : objeto([[\"kind\", \"tema\"], [\"id\", estado.novoId], [\"versao\", \"1.0.0\"], [\"estatuto\", \"rascunho\"], [\"spec\", objeto([[\"tokens\", objeto([[\"cor\", objeto([[\"fundo\", \"#ffffff\"], [\"texto\", \"#111111\"], [\"primaria\", \"#1d4ed8\"]])]])]])]])"
+            },
+            {
+             "acao": "definir",
+             "estado": "noSalvo",
+             "valor": "null"
+            },
+            {
+             "acao": "definir",
+             "estado": "passado",
+             "valor": "[]"
+            },
+            {
+             "acao": "definir",
+             "estado": "futuro",
+             "valor": "[]"
+            },
+            {
+             "acao": "definir",
+             "estado": "chaveEdicao",
+             "valor": "\"\""
+            },
+            {
+             "acao": "definir",
+             "estado": "sel",
+             "valor": "[]"
+            },
+            {
+             "acao": "definir",
+             "estado": "aviso",
+             "valor": "\"\""
+            },
+            {
+             "acao": "definir",
+             "estado": "aba",
+             "valor": "\"editor\""
+            },
+            {
+             "acao": "definir",
+             "estado": "criando",
+             "valor": "\"\""
+            },
+            {
+             "acao": "executar",
+             "dados": "previa",
+             "args": {
+              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+              "modo": "{estado.modoPrevia}"
+             }
+            },
+            {
+             "acao": "definir",
+             "estado": "confirmaCriar",
+             "valor": "false"
             }
            ]
           }
@@ -1528,6 +1636,11 @@
              "acao": "definir",
              "estado": "criando",
              "valor": "\"\""
+            },
+            {
+             "acao": "definir",
+             "estado": "confirmaCriar",
+             "valor": "false"
             }
            ]
           }

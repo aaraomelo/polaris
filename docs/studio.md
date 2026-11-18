@@ -63,7 +63,7 @@ Ao abrir um tema salvo (ou da plataforma), o botão **Usar este tema no site** c
 
 ## Restaurar o padrão e alterações não salvas
 - **Restaurar o padrão** (nó personalizado): pede confirmação, grava uma lápide (`DELETE /studio/nos/:kind/:id`; o histórico continua) e fecha o editor; o site só muda depois de **Publicar**.
-- Com alterações não salvas, clicar em outro nó **não descarta em silêncio**: aparece "Há alterações não salvas… Descartar e abrir?" (ou "Continuar editando").
+- Com alterações não salvas, clicar em outro nó **não descarta em silêncio**: aparece "Há alterações não salvas… Descartar e abrir?" (ou "Continuar editando"). Criar um nó novo ("Nova página"/"Novo tema" → Criar) também pede confirmação ("Descartar e criar").
 
 ## Prévia
 A prévia tem seletor **claro/escuro** (`modo` em `POST /studio/previa`); o padrão é o claro, para que o que você edita nos tokens apareça. Os nós `dados` que a página referencia vão junto, mas os dados em si não são buscados no editor.
