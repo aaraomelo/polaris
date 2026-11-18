@@ -18,8 +18,8 @@ const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 export const SEGREDO_LOCAL = 'polaris-local-segredo-de-desenvolvimento-0123456789'
 export const EMISSOR_LOCAL = 'https://id.polaris.local', AUDIENCIA_LOCAL = 'polaris'
 export const TENANTS_LOCAIS = [
-  { id: '11111111-1111-1111-1111-111111111111', alias: 'demo', nome: 'Loja Demo', modulos: ['loja'] },
-  { id: '22222222-2222-2222-2222-222222222222', alias: 'outra', nome: 'Outra Loja', modulos: ['loja'] },
+  { id: '11111111-1111-1111-1111-111111111111', alias: 'loja-demo', nome: 'Loja Demo', modulos: ['loja'] },
+  { id: '22222222-2222-2222-2222-222222222222', alias: 'loja-outra', nome: 'Outra Loja', modulos: ['loja'] },
 ] as const
 /** os papéis que o login de desenvolvimento oferece */
 export const PAPEIS_LOCAIS = ['studio.editor', 'studio.comentarista', 'studio.leitor', 'gerente'] as const
@@ -33,6 +33,8 @@ export type OpcoesLocal = {
   porta?: number
   /** pasta dos nós do serviço (padrão: exemplos/loja) */
   nos?: string
+  /** os nós do SITE dos tenants de demonstração: tenants e páginas (padrão: exemplos/loja-site; `null` = sem site) */
+  site?: string | null
   /** o Studio empacotado (padrão: apps/studio/dist) */
   studioDir?: string
   /** porta do Postgres para `psql` (padrão: qualquer) */
@@ -72,9 +74,15 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
     const reg = carregaNos(nosDir)
     const jwt = { JWT_EMISSOR: EMISSOR_LOCAL, JWT_AUDIENCIA: AUDIENCIA_LOCAL, JWT_SEGREDO: SEGREDO_LOCAL, NODE_ENV: 'development' }
-    const servico = await montaServico(configServico({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICO: 'loja', DATABASE_URL: pg('polaris_app'), POLARIS_DB_PAPEL: 'polaris_app', POLARIS_MIGRAR: '1', DATABASE_URL_MIGRADOR: pg('polaris_migrador') }), reg); fecham.push(servico.fecha)
+    const servico = await montaServico(configServico({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICO: 'loja', POLARIS_HOSTS: JSON.stringify(Object.fromEntries(TENANTS_LOCAIS.map((t) => [`${t.alias}.polaris.localhost`, t.id]))), DATABASE_URL: pg('polaris_app'), POLARIS_DB_PAPEL: 'polaris_app', POLARIS_MIGRAR: '1', DATABASE_URL_MIGRADOR: pg('polaris_migrador') }), reg); fecham.push(servico.fecha)
     await servico.app.listen({ port: 0, host: '127.0.0.1' }); const urlServico = `http://127.0.0.1:${(servico.app.server.address() as { port: number }).port}`
+    if ((await db.query(`SELECT 1 FROM information_schema.tables WHERE table_schema = 'loja' AND table_name = 'destaque'`)).rows.length) {
+      await db.exec('RESET ROLE')
+      for (const t of TENANTS_LOCAIS) if (!(await db.query(`SELECT 1 FROM loja.destaque WHERE tenant_id = $1`, [t.id])).rows.length)
+        await db.query(`INSERT INTO loja.destaque (tenant_id, titulo, descricao) VALUES ($1, $2, $3), ($1, $4, $5)`, [t.id, `Café de ${t.nome}`, 'Torra média, 250 g', `Pão de ${t.nome}`, 'Fermentação natural'])
+    }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw)
+    const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)
     const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(() => gw.close())
     const chave = new TextEncoder().encode(SEGREDO_LOCAL)
     const token = async (alias: string, papeis: readonly string[], usuario = 'dev') => {

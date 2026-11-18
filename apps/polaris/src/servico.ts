@@ -23,8 +23,15 @@ export async function montaServico(c: ConfigServico, reg: Registry): Promise<{ a
   }
   const pool = criaPool({ url: c.bancoUrl, ...(c.bancoPapel ? { papel: c.bancoPapel } : {}) })
   const autentica = autenticadorDe(c.jwt)
+  // rotas PÚBLICAS: sem token o serviço resolve o tenant pelo host que o gateway repassa (`x-forwarded-host`). Só o mapa de DESENVOLVIMENTO (POLARIS_HOSTS); em produção o serviço só atende com token
+  const porHost = new Map(Object.entries(c.hosts).map(([h, t]) => [h.toLowerCase(), t]))
+  const anonimo = porHost.size ? (req: { headers: Record<string, string | string[] | undefined> }) => {
+    const h = req.headers['x-forwarded-host'], host = (Array.isArray(h) ? h[0] : h)?.toLowerCase().replace(/:\d{1,5}$/, '')
+    const t = host ? porHost.get(host) : undefined
+    return t ? { tenantId: t } : null
+  } : undefined
   const app = criaServico(no, {
-    db: dbTenantDePg(pool), contexto: contextoPorJwt(autentica), acesso: regrasDoRegistry(reg),
+    db: dbTenantDePg(pool), contexto: contextoPorJwt(autentica, anonimo as never), acesso: regrasDoRegistry(reg),
     ...(c.metricasToken ? { metricasToken: c.metricasToken } : {}),
   })
   return { app, fecha: async () => { await app.close(); await pool.end() } }

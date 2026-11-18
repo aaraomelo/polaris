@@ -34,7 +34,16 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
       })
     }
   })() : null
+  // páginas dos tenants (`GET /…`): o nó `tenant` de cada um tem como id o ALIAS do diretório; o alias de um tenant não muda, então fica em cache
+  const aliases = new Map<string, string>()
+  const paginas = qp ? { tenantNo: async (c: { tenantId: string }) => {
+    const a = aliases.get(c.tenantId); if (a) return a
+    const r = (await qp(`SELECT alias FROM plataforma.tenant WHERE id = $1`, [c.tenantId])).rows[0]?.alias
+    if (typeof r === 'string') { aliases.set(c.tenantId, r); while (aliases.size > 5000) aliases.delete(aliases.keys().next().value as string); return r }
+    return undefined
+  } } : null
   const gw = criaGateway({
+    ...(paginas ? { paginas } : {}),
     ...(studio ? { estende: studio as never } : {}),
     registry: reg, servicos, autenticador: autenticadorDe(c.jwt), ...(tenants ? { tenants } : {}), ...(releases ? { registros: { producao: (t: string, r: number | null) => releases.registroDeProducao(t, r) } } : {}), ...(releases && prev ? { preview: { verifica: (t: string) => prev.verifica(t), registro: (t: string, r: number) => releases.registroDe(t, r) } } : {}), tenantPorHost: (h) => hosts.get(h.toLowerCase()) ?? null,
     limiteTaxa: c.taxa, graphql: { introspeccao: c.introspeccao } as never,

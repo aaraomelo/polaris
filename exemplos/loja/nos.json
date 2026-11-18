@@ -1,9 +1,68 @@
 [
-  { "kind": "servico", "id": "loja", "versao": "1.0.0", "estatuto": "publicado",
+  {
+    "kind": "servico",
+    "id": "loja",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
     "spec": {
-      "entidades": { "produto": { "campos": { "nome": { "tipo": "texto", "obrigatorio": true }, "preco": { "tipo": "dinheiro", "obrigatorio": true } }, "crud": { "caminho": "/produtos" } } },
+      "entidades": {
+        "produto": {
+          "campos": {
+            "nome": {
+              "tipo": "texto",
+              "obrigatorio": true
+            },
+            "preco": {
+              "tipo": "dinheiro",
+              "obrigatorio": true
+            }
+          },
+          "crud": {
+            "caminho": "/produtos"
+          }
+        },
+        "destaque": {
+          "campos": {
+            "titulo": {
+              "tipo": "texto",
+              "obrigatorio": true
+            },
+            "descricao": {
+              "tipo": "texto"
+            }
+          },
+          "crud": {
+            "caminho": "/destaques",
+            "operacoes": [
+              "listar"
+            ],
+            "permissao": "publica"
+          }
+        }
+      },
       "operacoes": {}
-    } },
-  { "kind": "papel", "id": "gerente", "versao": "1.0.0", "estatuto": "publicado",
-    "spec": { "regras": [ { "acoes": ["listar", "obter", "criar", "atualizar", "excluir"], "sujeitos": ["loja.produto"] } ] } }
+    }
+  },
+  {
+    "kind": "papel",
+    "id": "gerente",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "regras": [
+        {
+          "acoes": [
+            "listar",
+            "obter",
+            "criar",
+            "atualizar",
+            "excluir"
+          ],
+          "sujeitos": [
+            "loja.produto"
+          ]
+        }
+      ]
+    }
+  }
 ]

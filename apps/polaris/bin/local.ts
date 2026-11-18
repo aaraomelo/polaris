@@ -21,9 +21,10 @@ try {
 Polaris local no ar${dados ? ` (dados em ${dados})` : ' (em memória)'}
 
   entrar (login de desenvolvimento)   http://localhost:${l.porta}/entrar
-  Studio                              ${l.urlTenant('demo')}/studio        (precisa do token: use o /entrar)
-  API REST da loja (gerada)           ${l.urlTenant('demo')}/api/loja/produtos
-  GraphQL                             ${l.urlTenant('demo')}/graphql
+  site do tenant                      ${l.urlTenant('loja-demo')}/
+  Studio                              ${l.urlTenant('loja-demo')}/studio        (precisa do token: use o /entrar)
+  API REST da loja (gerada)           ${l.urlTenant('loja-demo')}/api/loja/produtos
+  GraphQL                             ${l.urlTenant('loja-demo')}/graphql
   Postgres (psql)                     ${l.pgUrl}
 
 Tenants: ${TENANTS_LOCAIS.map((t) => `${t.alias} (${t.nome})`).join(', ')}.  Ctrl+C para parar.`)

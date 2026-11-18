@@ -12,6 +12,7 @@ import { FalhaServico } from './cliente'
 import { instalaGraphql, type OpcoesGraphql } from './graphql'
 import type { InfoTenant, PreviewDeRelease, RegistrosDeTenant, ResolvedorTenant } from './tenants'
 import { LimiteTaxa } from './taxa'
+import { instalaPaginas, type OpcoesPaginas } from './paginas'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // Gateway/BFF: a borda. Compõe os dados de uma PÁGINA (um pedido, vários serviços, em paralelo, com cache escopado), expõe o REST e o GraphQL GERADOS
@@ -45,6 +46,8 @@ export type OpcoesGateway = {
   /** padrão: 120 fichas, reposição de 20/s. `false` desliga. */
   limiteTaxa?: { capacidade: number; porSegundo: number } | false
   graphql?: OpcoesGraphql | false
+  /** serve as PÁGINAS dos tenants (GET fora de /api, /bff, /studio, /graphql): rotas declarativas + HTML em streaming + hidratação. Sem isto, só a API. */
+  paginas?: OpcoesPaginas
   timeoutPadraoMs?: number
   limiteCorpoBytes?: number
 }
@@ -94,7 +97,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
     return reply.status(500).send(corpoErro(new ErroGw(500, 'erro_interno', 'erro interno'), rid))
   })
   app.setNotFoundHandler((req, reply) => reply.status(404).send(corpoErro(new ErroGw(404, 'rota_inexistente', 'rota inexistente'), obsDe(req)?.reqId)))
-  app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); reply.header('cache-control', 'private, no-store'); reply.header('vary', 'Authorization') })
+  app.addHook('onSend', async (_req, reply) => { reply.header('x-content-type-options', 'nosniff'); if (!reply.getHeader('cache-control')) reply.header('cache-control', 'private, no-store'); reply.header('vary', 'Authorization') })
   app.get('/saude', async () => ({ ok: true, servico: 'gateway' }))
 
   // --- quem chama: o token é verificado AQUI; o tenant nunca vem do cliente -----------------------------------------------------------------------
@@ -159,7 +162,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
     let p = programas.get(chave)
     if (!p) {
       const c = compilaPrograma(reg, r.no, contextoRegistry(ctx.tenantId))
-      if (!c.ok) { log.error('página não compila', { pagina: id, erros: c.erros.length }); throw new ErroGw(500, 'pagina_invalida', 'a página tem erros e não pode ser carregada') }
+      if (!c.ok) { log.error('página não compila', { pagina: id, erros: c.erros.length, primeiro: c.erros[0]?.mensagem }); throw new ErroGw(500, 'pagina_invalida', 'a página tem erros e não pode ser carregada') }
       p = c.programa; programas.set(chave, p)
       while (programas.size > 500) programas.delete(programas.keys().next().value as string)
     }
@@ -273,6 +276,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
 
   // --- GraphQL gerado -----------------------------------------------------------------------------------------------------------------------------
   if (o.graphql !== false) instalaGraphql(app, { servicos: o.servicos, chamador, entra: (req, c) => entra(req, c), obs, traduz, opcoes: o.graphql ?? {}, cobraTaxa: (req, ctx, custo) => limita(req as Req, ctx, custo), cache, publicaDaFonte })
+  if (o.paginas) instalaPaginas(app, o.paginas, { entra, programaDe: (c, id) => programaDe(c, id), opcoesCarga: (c, p, r, e, f) => opcoesCarga(c, p, r, e, f), registroDe: (c, f) => c.registro ?? f, registro: o.registry, log })
   o.estende?.(app, { sessao: async (req) => { try { const c = await autentica(req as Req); return c.anonimo ? null : c } catch { return null } } })
   return app
 }

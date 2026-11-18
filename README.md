@@ -27,6 +27,7 @@ O mesmo vale para um serviço (entidades, CRUD, operações → API HTTP, tabela
 | Gateway/BFF (JWT, tenant só do token, REST + GraphQL, cache, taxa) | `packages/gateway` | pronto |
 | Packs de domínio: catálogo, vendas, pagamentos, estoque, serviços, alimentos, cadastro self-service | `packages/packs` | pronto, com limites (veja `docs/packs.md`) |
 | Multi-tenant: domínio próprio, módulos, overrides, releases, preview | `packages/packs`, `packages/gateway` | pronto |
+| Páginas dos tenants servidas pelo gateway (rotas declarativas, streaming, tema, hidratação) | `packages/gateway` | funcional; **sem login por cookie** (`docs/paginas.md`) |
 | Documentos declarativos (HTML e PDF com paridade testada) | `packages/documentos` | pronto |
 | Kernels (JS, WebAssembly, GLSL, PTX) com paridade entre backends | `packages/computacao` | pronto; **PTX nunca rodou em GPU real** |
 | Studio: editor de páginas e temas, histórico, diff semântico, comentários; **ele próprio é uma página da plataforma** | `apps/studio`, `packages/packs/nos/studio` | funcional; **falta o fluxo de login** e alguns recursos da versão anterior (veja `docs/studio.md`) |
@@ -51,7 +52,7 @@ Os testes de paridade (documentos e kernels) usam Chrome e `poppler-utils` quand
 
 ## Documentação
 
-Por tema em [`docs/`](docs/): [fluxo de trabalho](docs/fluxo.md), [serviços](docs/servicos.md), [gateway](docs/gateway.md), [multi-tenant](docs/multitenancy.md), [packs](docs/packs.md), [documentos](docs/documentos.md), [computação](docs/computacao.md), [Studio](docs/studio.md), [deploy](docs/deploy.md), [segurança](docs/seguranca.md), [qualidade](docs/qualidade.md).
+Por tema em [`docs/`](docs/): [fluxo de trabalho](docs/fluxo.md), [serviços](docs/servicos.md), [gateway](docs/gateway.md), [páginas](docs/paginas.md), [multi-tenant](docs/multitenancy.md), [packs](docs/packs.md), [documentos](docs/documentos.md), [computação](docs/computacao.md), [Studio](docs/studio.md), [deploy](docs/deploy.md), [segurança](docs/seguranca.md), [qualidade](docs/qualidade.md).
 As decisões de arquitetura estão em [`docs/adr/`](docs/adr/README.md) (formato curto: contexto, decisão, consequências, evidência).
 
 ## Segurança e qualidade
