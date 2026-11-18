@@ -1,3 +1,4 @@
+import { DDL_IDENTIDADE } from './identidade'
 import type { Diretorio, Status } from './provisiona'
 
 // O diretório da plataforma (plano de CONTROLE): quais tenants existem, em que estado, e o progresso do cadastro. NÃO tem RLS: não é dado de tenant, é dado DA plataforma;
@@ -106,7 +107,7 @@ CREATE TABLE IF NOT EXISTS plataforma.modulo (
   servico text NOT NULL,
   habilitado_em timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (tenant_id, servico)
-);`
+);` + DDL_IDENTIDADE
 
 type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
 /** Implementação sobre SQL. `q` deve falar com o banco da plataforma (papel com acesso ao schema `plataforma`). */

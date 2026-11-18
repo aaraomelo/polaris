@@ -12,6 +12,8 @@ export { KINDS_DO_TENANT, criaArmazemDeNos, type KindDoTenant, type Limites as L
 export { rotasStudio, sessaoDeToken, type OpcoesStudio, type Sessao } from './studio-http'
 export { criaGestorDominios, criaResolvedorTenant, mudaStatusTenant, normalizaHost, validaDominio, type Dns, type InfoTenant, type OpcoesResolvedor, type Reivindicacao } from './dominios'
 export { DDL_DIRETORIO, diretorioSql } from './diretorio'
+export { DDL_IDENTIDADE, criaIdentidade, normalizaEmail, type Identidade, type OpcoesIdentidade, type Usuario } from './identidade'
+export { CUSTO_PADRAO, confereSenha, hashSenha, politicaDeSenha, type CustoSenha } from './senha'
 export { registroDaPlataforma } from './plataforma'
 export { criaAlimentos } from './alimentos'
 export { criaServicos } from './servicos'
