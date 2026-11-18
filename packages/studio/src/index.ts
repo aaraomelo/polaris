@@ -1,3 +1,6 @@
 export * from './formulario'
 export * from './arvore'
 export * from './historico'
+export * from './tema'
+export * from './diff'
+export * from './comentarios'

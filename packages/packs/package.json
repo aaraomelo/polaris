@@ -14,7 +14,7 @@
   "dependencies": {
     "@polaris/acesso": "workspace:*",
     "@polaris/eventos": "workspace:*",
-    "@polaris/schema": "workspace:*",
+    "@polaris/schema": "workspace:*", "@polaris/studio": "workspace:*",
     "@polaris/servico": "workspace:*"
   },
   "devDependencies": {

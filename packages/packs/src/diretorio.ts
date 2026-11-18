@@ -52,6 +52,21 @@ CREATE TABLE IF NOT EXISTS plataforma.no_versao (
   PRIMARY KEY (tenant_id, kind, id, seq)
 );
 CREATE OR REPLACE FUNCTION plataforma.imutavel() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'versões de nó são imutáveis (%)', TG_OP; END $$;
+CREATE TABLE IF NOT EXISTS plataforma.comentario (
+  tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  kind text NOT NULL,
+  no_id text NOT NULL,
+  ancora text,
+  versao integer,
+  autor text NOT NULL,
+  texto text NOT NULL CHECK (length(texto) BETWEEN 1 AND 4000),
+  resp_a uuid,
+  resolvido boolean NOT NULL DEFAULT false,
+  criado_em timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE INDEX IF NOT EXISTS comentario_no ON plataforma.comentario (tenant_id, kind, no_id, criado_em);
 DROP TRIGGER IF EXISTS no_versao_imutavel ON plataforma.no_versao;
 CREATE TRIGGER no_versao_imutavel BEFORE UPDATE OR DELETE ON plataforma.no_versao FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
 -- release = SNAPSHOT imutável: o conjunto exato de versões de nós que vai a produção. release_ponteiro aponta a de produção; release_evento é o diário (promoções e rollbacks).
