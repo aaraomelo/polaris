@@ -1,4 +1,4 @@
-// Microbenchmark da avaliação de expressões: interpretador (avalia) × closures (avaliaC). Rode: pnpm vite-node bench/expr.ts
+// Microbenchmark da avaliação de expressões: interpretador (avalia) × closures (avaliaC). Rode: pnpm tsx bench/expr.ts
 import { FUNCOES_PADRAO, avalia, parseExpr } from '../src/expr/index'
 import { avaliaC } from '../src/expr/compila'
 

@@ -24,7 +24,7 @@ function layout(k: Kernel) {
   return { escalares, vet, idx, nParams }
 }
 
-export function emiteWasm(k: Kernel): Uint8Array {
+export function emiteWasm(k: Kernel): Uint8Array<ArrayBuffer> {
   const L = layout(k)
   const params = [0x7f, ...L.escalares.map((p) => VT[p.tipo]), ...L.vet.map(() => 0x7f), ...k.saidas.map(() => 0x7f)]
   const I = (n: string): number => L.idx.get(n)!
@@ -88,7 +88,7 @@ export function emiteWasm(k: Kernel): Uint8Array {
 
 export type InstanciaWasm = (entradas: Entradas, n: number) => Saidas
 /** compila (assíncrono, para valer no navegador) e devolve o executor; a memória cresce sob demanda e é reaproveitada */
-export async function compilaWasm(k: Kernel, bytes: Uint8Array = emiteWasm(k)): Promise<InstanciaWasm> {
+export async function compilaWasm(k: Kernel, bytes: Uint8Array<ArrayBuffer> = emiteWasm(k)): Promise<InstanciaWasm> {
   const { instance } = await WebAssembly.instantiate(bytes as BufferSource, {})
   const mem = instance.exports.mem as WebAssembly.Memory, run = instance.exports.run as (...a: number[]) => void
   const L = layout(k)

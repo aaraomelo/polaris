@@ -1,5 +1,5 @@
 // Gera, para a MESMA página de loja, a variante React (SSR + hidratação) e a variante vivo (AOT, sem React) em bench/navegador/saida/.
-//   pnpm vite-node bench/navegador/gera.ts
+//   pnpm tsx bench/navegador/gera.ts
 import { build } from 'esbuild'
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'

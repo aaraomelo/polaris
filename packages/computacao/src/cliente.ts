@@ -11,7 +11,7 @@ export type Artefato = { id: string; kernel: Kernel; pipeline: PipelineGl }
 export type Via = 'webgl2' | 'wasm' | 'interpretador'
 
 /** executa o kernel numa grade w×h (n = w·h) e devolve RGBA 8 bits; saídas `r`, `g`, `b` e opcional `a` em 0..1 */
-export async function renderiza(a: Artefato, w: number, h: number, entradas: Entradas, o: { via?: readonly Via[]; canvas?: () => { getContext(id: string, o?: object): unknown } } = {}): Promise<{ rgba: Uint8ClampedArray; via: Via }> {
+export async function renderiza(a: Artefato, w: number, h: number, entradas: Entradas, o: { via?: readonly Via[]; canvas?: () => { getContext(id: string, o?: object): unknown } } = {}): Promise<{ rgba: Uint8ClampedArray<ArrayBuffer>; via: Via }> {
   const k = a.kernel
   for (const c of ['r', 'g', 'b']) if (!k.saidas.some((s) => s.nome === c && s.tipo === 'f32')) throw new Error(`o kernel ${a.id} precisa das saídas decimais r, g e b para pintar`)
   if (k.entradas.some((p) => p.vetor)) throw new Error('kernel de canvas não aceita entradas lista')
@@ -31,7 +31,7 @@ export async function renderiza(a: Artefato, w: number, h: number, entradas: Ent
     } catch (e) { if (v === 'interpretador' || (e as Error).name === 'KernelErro') throw e }
   }
   if (!saidas || !via) throw new Error('nenhuma via de execução disponível')
-  const rgba = new Uint8ClampedArray(n * 4), q = (x: number) => Math.round(Math.min(1, Math.max(0, Number.isNaN(x) ? 0 : x)) * 255)
+  const rgba: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(new ArrayBuffer(n * 4)), q = (x: number) => Math.round(Math.min(1, Math.max(0, Number.isNaN(x) ? 0 : x)) * 255)
   const A = saidas.a
   for (let i = 0; i < n; i++) { rgba[i * 4] = q(saidas.r![i]!); rgba[i * 4 + 1] = q(saidas.g![i]!); rgba[i * 4 + 2] = q(saidas.b![i]!); rgba[i * 4 + 3] = A ? q(A[i]!) : 255 }
   return { rgba, via }
