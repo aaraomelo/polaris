@@ -24,6 +24,19 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris header>nav{flex:1}
 #polaris nav a{text-decoration:none}
 #polaris nav a[aria-current=page]{color:var(--cor-texto);font-weight:600;text-decoration:underline}
+#polaris section[data-alinha]{display:flex;flex-direction:column;justify-content:center;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 6) calc(var(--espacamento-base) * 3);background-size:cover;background-position:center;border-radius:var(--raio-grande)}
+#polaris section[data-fundo=primaria]{background-color:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
+#polaris section[data-fundo=suave]{background-color:var(--cor-superficie-alt);color:var(--cor-texto)}
+#polaris section[data-alinha=centro]{align-items:center;text-align:center}
+#polaris section[data-alinha=esquerda]{align-items:flex-start;text-align:left}
+#polaris section[data-alinha] h1,#polaris section[data-alinha] h2,#polaris section[data-alinha] p{margin:0}
+#polaris section[data-alinha] a:not([data-botao]){color:inherit}
+#polaris a[data-botao]{display:inline-block;padding:calc(var(--espacamento-base) * 1.25) calc(var(--espacamento-base) * 2.5);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);font-weight:600;text-decoration:none}
+#polaris a[data-botao=primario]{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
+#polaris a[data-botao=primario]:hover{background:var(--cor-primaria-hover);color:var(--cor-texto-sobre-primaria)}
+#polaris a[data-botao=secundario]{background:transparent;color:var(--cor-primaria);border-color:currentColor}
+#polaris section[data-fundo=primaria] a[data-botao=primario]{background:var(--cor-texto-sobre-primaria);color:var(--cor-primaria)}
+#polaris section[data-fundo=primaria] a[data-botao=secundario]{color:var(--cor-texto-sobre-primaria)}
 #polaris footer{display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 3) calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border-top:var(--espacamento-borda) solid var(--cor-borda);color:var(--cor-texto-suave)}
 #polaris footer a{color:var(--cor-texto-suave)}
 #polaris footer a:hover{color:var(--cor-texto)}

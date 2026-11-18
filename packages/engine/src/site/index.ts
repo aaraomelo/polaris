@@ -68,5 +68,34 @@ const BLOCOS_RODAPE = [
   }),
 ]
 
-export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE]
+
+const ctaProp = { type: 'object', properties: { texto: { type: 'string', maxLength: 60 }, href: { type: 'string', maxLength: 500 } }, required: ['texto', 'href'] }
+
+const BLOCOS_HERO = [
+  no('bloco', 'site.hero', {
+    interface: 'site/hero', titulo: 'Hero (banner de destaque)',
+    descricao: 'Faixa de abertura da página: `titulo` (o `<h1>`), `subtitulo`, até dois botões de ação (`cta` primário e `cta2` secundário) e o slot `extra`. O fundo é a cor primária do tema (ou `suave`), ou uma `imagem` do próprio site com véu escuro (`escurece`) para o texto ler. `alinha`: centro (padrão) ou esquerda. O título deve ser o único `<h1>` da página.',
+    props: { type: 'object', properties: {
+      titulo: { type: 'string', maxLength: 140 }, subtitulo: { type: 'string', maxLength: 300 }, cta: ctaProp, cta2: ctaProp,
+      imagem: { type: 'string', maxLength: 500, description: 'URL segura da MESMA origem (o CSP das páginas só carrega imagens do próprio site)' }, altura: { type: 'number', minimum: 120, maximum: 800, default: 320 },
+      escurece: { type: 'number', minimum: 0, maximum: 0.8, default: 0.45 }, alinha: { type: 'string', maxLength: 10, description: 'centro ou esquerda' }, fundo: { type: 'string', maxLength: 10, description: 'sem imagem: primaria ou suave' },
+    }, required: ['titulo'] },
+    slots: { extra: {} },
+    exemplos: [
+      { titulo: 'Título, subtítulo e dois botões', instancia: instancia('site/hero', { titulo: 'Tudo para a sua casa', subtitulo: 'Ofertas novas toda semana, com entrega rápida.', cta: { texto: 'Ver ofertas', href: '/produtos' }, cta2: { texto: 'Falar conosco', href: '/contato' } }) },
+      { titulo: 'À esquerda, fundo suave', instancia: instancia('site/hero', { titulo: 'Frete grátis', subtitulo: 'Em compras acima de R$ 99.', alinha: 'esquerda', fundo: 'suave', altura: 200, cta: { texto: 'Aproveitar', href: '/produtos' } }) },
+    ],
+    modelo: { bloco: 'layout/destaque', props: { imagem: '{props.imagem}', altura: '{props.altura}', escurece: '{props.escurece}', alinha: '{props.alinha}', fundo: '{props.fundo}' }, slots: { filhos: [
+      { bloco: 'texto/titulo', props: { texto: '{props.titulo}', nivel: 1 } },
+      { bloco: 'texto/paragrafo', se: 'props.subtitulo', props: { texto: '{props.subtitulo}' } },
+      { bloco: 'layout/linha', se: 'props.cta || props.cta2', props: { gap: 12 }, slots: { filhos: [
+        { bloco: 'nav/link', se: 'props.cta', props: { href: '{props.cta.href}', texto: '{props.cta.texto}', botao: 'primario' } },
+        { bloco: 'nav/link', se: 'props.cta2', props: { href: '{props.cta2.href}', texto: '{props.cta2.texto}', botao: 'secundario' } },
+      ] } },
+      { bloco: 'core/slot', props: { nome: 'extra' } },
+    ] } },
+  }),
+]
+
+export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO]
 export function registraSite(reg: Registry): void { for (const n of BLOCOS_SITE) reg.registra(n as never) }

@@ -1,12 +1,13 @@
 # Biblioteca base de blocos
 
-29 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+30 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
 | layout | `layout/pilha`, `layout/linha` | `gap`, `alinha` | `filhos` | |
 | layout | `layout/grade` | `colunas` (1–12, padrão 2), `gap` | `filhos` | |
 | layout | `layout/cabecalho` | `fixo` (fica no topo ao rolar) | `filhos` | |
+| layout | `layout/destaque` | `imagem`, `altura` (120–800), `escurece` (0–0,8), `alinha`, `fundo` | `filhos` | |
 | layout | `layout/rodape` | | `filhos` | |
 | layout | `layout/divisor` | | | |
 | layout | `layout/espacador` | `tamanho` (px, padrão 8) | | |
@@ -25,7 +26,7 @@
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
 | nav | `nav/menu` | `rotulo` (nome acessível; padrão "Principal") | `filhos` | |
-| nav | `nav/link` | `href` (só URLs seguras), `texto`, `atual` (`aria-current="page"`) | `filhos` | |
+| nav | `nav/link` | `href` (só URLs seguras), `texto`, `atual` (`aria-current="page"`), `botao` (`primario`/`secundario`: aparência de botão) | `filhos` | |
 | feedback | `feedback/selo` | `texto`, `tom` | | |
 | feedback | `feedback/alerta` | `tom` | `filhos` | |
 
@@ -44,7 +45,7 @@
 - inclui a seção do tema com as amostras de cor e a auditoria de contraste.
 Para documentar um bloco novo (ou de um tenant), basta pôr `titulo`, `descricao` e `exemplos` no nó; `--nos <dir>` inclui nós extras e `--tema <id>` escolhe o tema do preview.
 
-## Cabeçalho e rodapé do site
+## Cabeçalho, rodapé e hero do site
 `layout/cabecalho` emite `<header>` e `nav/menu` emite `<nav aria-label>`: pontos de referência para leitores de tela, estilizados pelo tema só com variáveis (`#polaris header`, `header[data-fixo]` sticky, `nav a[aria-current=page]` em negrito sublinhado). Em cima deles, o bloco **composto** `site/cabecalho` (`registraSite`, `@polaris/engine/site`, 100% declarativo: `modelo` sobre os blocos base):
 - `titulo` e/ou `logo` (URL segura) formam a **marca**, que leva a `href` (padrão `/`);
 - `links` (`[{ texto, href, atual? }]`, até 12) viram o menu; sem links não há `<nav>` vazio; `rotuloMenu` nomeia o menu; `fixo` o mantém no topo;
@@ -57,3 +58,10 @@ Texto vem escapado e link inseguro (`javascript:`) perde o `href`. Há paridade 
 - `contato` (uma linha: telefone, e-mail, endereço), um divisor e o aviso legal `copyright` (só aparecem se informados);
 - o slot `extra` para o que a página quiser (assinatura de e-mail, selos…).
 Mesmas garantias do cabeçalho (texto escapado, link inseguro sem `href`, paridade nas três saídas, exemplos verificados no Chrome). **Limites**: as colunas não se reorganizam por largura de tela (a grade é fixa; no celular ficam estreitas); sem ícones de redes sociais (use o slot `extra`); `contato` é texto simples, sem links automáticos.
+
+**Hero (banner de destaque)**: `layout/destaque` emite `<section data-alinha data-fundo>` e o composto `site/hero` monta, sobre ele:
+- `titulo` (o `<h1>`: deve ser o único da página), `subtitulo`, até dois botões (`cta` primário e `cta2` secundário, links com aparência de botão via `nav/link` `botao`) e o slot `extra`;
+- fundo: a cor primária do tema (`fundo: primaria`, padrão) ou `suave`; ou uma `imagem` com **véu escuro** (`escurece`, 0 a 0,8, padrão 0,45) para o texto ler; `altura` mínima (120 a 800 px, padrão 320); `alinha`: `centro` (padrão) ou `esquerda`. Valor desconhecido de `alinha`/`fundo` vale o padrão; altura e véu fora do limite nem compilam;
+- sobre o fundo primário o botão primário é **invertido** (claro sobre a cor da marca) para ter contraste, e o secundário usa o texto sobre-primária; tudo por variáveis do tema.
+A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas, parênteses e contrabarra viram escapes: nada fecha o `url()` nem a declaração).
+**Limites**: a imagem precisa ser **da mesma origem**: o CSP das páginas (`img-src 'self' data:`) bloqueia as de outros sites, e ainda não há hospedagem de arquivos do tenant; sem imagem de fundo responsiva (um só arquivo, `cover`); sem vídeo nem carrossel; `alinha` e `fundo` são texto (não enum) porque enum não aceita binding no modelo do composto.

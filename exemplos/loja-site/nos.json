@@ -71,10 +71,19 @@
               }
             },
             {
-              "bloco": "texto/titulo",
+              "bloco": "site/hero",
               "props": {
-                "texto": "Bem-vindo à loja",
-                "nivel": 1
+                "titulo": "Bem-vindo à loja",
+                "subtitulo": "Ofertas novas toda semana, com atendimento de gente de verdade.",
+                "altura": 240,
+                "cta": {
+                  "texto": "Conheça a loja",
+                  "href": "/sobre"
+                },
+                "cta2": {
+                  "texto": "Fale com a gente",
+                  "href": "/contato"
+                }
               }
             },
             {

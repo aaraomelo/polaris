@@ -1,5 +1,5 @@
 import { px } from '../estatico/escape'
-import { urlSegura } from '../render/url'
+import { cssUrl, urlSegura } from '../render/url'
 
 // Descritores DOM dos blocos base: dizem ao runtime vivo QUE elemento criar e como atualizá-lo a partir das props.
 // Têm de produzir exatamente o DOM que os componentes React (render/base.tsx) produzem: o oráculo confere.
@@ -53,7 +53,7 @@ export const d_nav_link: Descritor = {
     chave: (p) => (p.texto !== undefined ? 'a:t' : 'a:f'), tag: () => 'a', filhos: true,
     attrs: (p, id) => {
       const href = urlSegura(p.href)
-      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}) }
+      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.botao === 'primario' || p.botao === 'secundario' ? { 'data-botao': p.botao } : {}) }
     },
     texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
   }
@@ -84,6 +84,13 @@ export const d_layout_grade: Descritor = {
 }
 export const d_layout_cabecalho: Descritor = { chave: () => 'header', tag: () => 'header', filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.fixo === true ? { 'data-fixo': '' } : {}) }) }
 export const d_nav_menu: Descritor = { chave: () => 'nav', tag: () => 'nav', filhos: true, attrs: (p, id) => ({ ...comId(id), 'aria-label': typeof p.rotulo === 'string' && p.rotulo ? p.rotulo : 'Principal' }) }
+export const d_layout_destaque: Descritor = {
+  chave: () => 'section', tag: () => 'section', filhos: true,
+  attrs: (p, id) => {
+    const img = urlSegura(p.imagem), a = inteiro(p.altura, 120, 800, 320), e = Math.min(0.8, Math.max(0, num(p.escurece) ?? 0.45))
+    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', style: `min-height:${a}px${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
+  },
+}
 export const d_layout_rodape: Descritor = { chave: () => 'footer', tag: () => 'footer', filhos: true, attrs: (_, id) => comId(id) }
 export const d_layout_divisor: Descritor = { chave: () => 'hr', tag: () => 'hr', attrs: (_, id) => comId(id) }
 export const d_layout_espacador: Descritor = { chave: () => 'div', tag: () => 'div', attrs: (p, id) => ({ ...comId(id), 'aria-hidden': 'true', style: `height:${px(num(p.tamanho) ?? 8)}` }) }
@@ -163,7 +170,7 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
-  'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
+  'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
   'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,

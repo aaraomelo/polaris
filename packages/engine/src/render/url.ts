@@ -19,3 +19,6 @@ export function urlSegura(v: unknown): string | undefined {
   if (m && !SCHEMES_OK.has(m[1]!.toLowerCase())) return undefined
   return v.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '') // exatamente o que o navegador apara
 }
+
+/** uma URL já considerada segura, escrita como `url("…")` de CSS: aspas, parênteses e contrabarra viram escapes de URL (nada fecha o `url(` nem a declaração) */
+export const cssUrl = (u: string): string => `url("${encodeURI(u).replace(/["'()\\]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)}")`

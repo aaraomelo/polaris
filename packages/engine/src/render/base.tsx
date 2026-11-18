@@ -9,7 +9,7 @@ import { QUADRO_MAX, idFormulario, valoresIniciaisJson, dimensao, entradasJson, 
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
 
 export { urlSegura } from './url'
-import { urlSegura } from './url'
+import { cssUrl, urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 /** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
@@ -64,6 +64,10 @@ export const COMPONENTES_BASE: Componentes = {
   },
   'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}) }, slots.filhos),
   'nav/menu': ({ props, slots, id }) => createElement('nav', { ...(id ? { id } : {}), 'aria-label': typeof props.rotulo === 'string' && props.rotulo ? props.rotulo : 'Principal' }, slots.filhos),
+  'layout/destaque': ({ props, slots, id }) => {
+    const img = urlSegura(props.imagem), a = Math.min(800, Math.max(120, Math.trunc(num(props.altura) ?? 320))), e = Math.min(0.8, Math.max(0, num(props.escurece) ?? 0.45))
+    return createElement('section', { ...(id ? { id } : {}), 'data-alinha': props.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': props.fundo === 'suave' ? 'suave' : 'primaria', style: { minHeight: a, ...(img ? { backgroundImage: `linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` } : {}) } }, slots.filhos)
+  },
   'layout/rodape': ({ slots, id }) => createElement('footer', id ? { id } : null, slots.filhos),
   'layout/divisor': ({ id }) => createElement('hr', id ? { id } : null),
   'layout/espacador': ({ props, id }) => createElement('div', { ...(id ? { id } : {}), 'aria-hidden': 'true', style: { height: num(props.tamanho) ?? 8 } }),
@@ -97,7 +101,7 @@ export const COMPONENTES_BASE: Componentes = {
   'nav/link': ({ props, slots, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
-    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
+    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}), ...(props.botao === 'primario' || props.botao === 'secundario' ? { 'data-botao': props.botao } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
   },
 }
 
@@ -118,6 +122,7 @@ export const BLOCOS_BASE = [
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
   bloco('nav/menu', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80 } } } }),
+  bloco('layout/destaque', { slots: { filhos: {} }, props: { type: 'object', properties: { imagem: { type: 'string', maxLength: 500, description: 'URL segura (mesma origem: o CSP das páginas só carrega imagens do próprio site)' }, altura: { type: 'number', minimum: 120, maximum: 800, default: 320, description: 'altura mínima em px' }, escurece: { type: 'number', minimum: 0, maximum: 0.8, default: 0.45, description: 'véu escuro sobre a imagem, para o texto ler' }, alinha: { type: 'string', description: 'centro (padrão) ou esquerda (outro valor vale centro)' }, fundo: { type: 'string', description: 'sem imagem: primaria (padrão) ou suave (outro valor vale primaria)' } } } }),
   bloco('layout/rodape', { slots: { filhos: {} } }),
   bloco('layout/divisor'),
   bloco('layout/espacador', { props: { type: 'object', properties: { tamanho: { type: 'number', minimum: 0, default: 8 } } } }),
@@ -136,7 +141,7 @@ export const BLOCOS_BASE = [
   bloco('entrada/caixa', { props: { type: 'object', properties: { marcado: { type: 'boolean' }, rotulo: ROTULO, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'booleano' } } }),
   bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } }, required: ['texto'] } }),
   bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } } } }),
-  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' } }, required: ['href'] } }),
+  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, botao: { type: 'string', maxLength: 12, description: 'primario ou secundario: o link com aparência de botão' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' } }, required: ['href'] } }),
 ]
 
 /** Registra no Registry o core/slot e os blocos base. */

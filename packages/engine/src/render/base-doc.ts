@@ -97,6 +97,10 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/cabecalho': { titulo: 'Cabeçalho', descricao: 'Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.', exemplos: [
     { titulo: 'Com título e menu', instancia: { bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Minha loja' } }, { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início' } }] } }] } } },
   ] },
+  'layout/destaque': { titulo: 'Destaque', descricao: 'Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou uma `imagem` de fundo com véu escuro (`escurece`) para o texto ler. `alinha`: centro ou esquerda; `altura` mínima em px. O texto e os botões ficam nos filhos; a imagem precisa ser do próprio site (o CSP das páginas só carrega imagens da mesma origem).', exemplos: [
+    { titulo: 'Fundo do tema', instancia: { bloco: 'layout/destaque', props: { altura: 200 }, slots: { filhos: [{ bloco: 'texto/titulo', props: { texto: 'Oferta da semana', nivel: 2 } }] } } },
+    { titulo: 'Suave, à esquerda', instancia: { bloco: 'layout/destaque', props: { fundo: 'suave', alinha: 'esquerda', altura: 160 }, slots: { filhos: [{ bloco: 'texto/paragrafo', props: { texto: 'Entrega grátis acima de R$ 99' } }] } } },
+  ] },
   'layout/rodape': { titulo: 'Rodapé', descricao: 'Faixa do fim da página (`<footer>`): ponto de referência para leitores de tela, com informações do site (contato, links, aviso legal).', exemplos: [
     { titulo: 'Com aviso', instancia: { bloco: 'layout/rodape', slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: '© 2026 Minha loja' } }] } } },
   ] },
@@ -105,6 +109,7 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   ] },
   'nav/link': { titulo: 'Link', descricao: 'Link para uma URL segura (javascript:, data: e similares são recusados). Links externos levam `rel="noopener noreferrer"`.', exemplos: [
     { titulo: 'Externo', instancia: { bloco: 'nav/link', props: { href: 'https://exemplo.com', texto: 'Site do fabricante' } } },
+    { titulo: 'Como botão', instancia: { bloco: 'nav/link', props: { href: '/produtos', texto: 'Ver produtos', botao: 'primario' } } },
     { titulo: 'Com blocos dentro', instancia: { bloco: 'nav/link', props: { href: '/carrinho' }, slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Ver carrinho' } }] } } },
   ] },
   'computacao/canvas-gl': { titulo: 'Canvas de kernel', descricao: 'Pinta, num canvas, o resultado de um kernel de computação (saídas r, g, b e opcional a, de 0 a 1; `x` e `y` pela `larguraDe`). Usa WebGL2 e cai para wasm e depois para o interpretador; sem JavaScript fica o texto alternativo. O artefato do kernel é servido em /kernels/<id>.json e o carregador é `@polaris/computacao/cliente`.', exemplos: [

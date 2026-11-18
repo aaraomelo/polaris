@@ -65,8 +65,8 @@ describe('ambiente local', () => {
   it('Studio → Publicar → site: a edição salva só aparece depois de publicada, no tenant certo; página nova ganha rota sozinha', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
     const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no
-    home.spec.raiz.slots.filhos[1].props.texto = 'Título vindo do Studio'
-    expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home })).status).toBe(201)
+    home.spec.raiz.slots.filhos[1].props.titulo = 'Título vindo do Studio'
+    const put = await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); expect(put.status, await put.text()).toBe(201)
     const nova = { kind: 'pagina', id: 'site.novidades', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/novidades', titulo: 'Contato', raiz: { bloco: 'texto/titulo', props: { texto: 'Novidades da loja', nivel: 1 } } } }
     expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.novidades', ed, { no: nova })).status).toBe(201)
     expect(await (await get(l, 'loja-demo', '/')).text()).not.toContain('Título vindo do Studio') // salvo, mas ainda não publicado
@@ -79,7 +79,7 @@ describe('ambiente local', () => {
   })
   it('releases: lista, diferença e rollback; o site volta para a versão anterior e só neste tenant', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
-    const titulo = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.texto = v; expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home })).status).toBe(201); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {})).status).toBe(200) }
+    const titulo = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.titulo = v; expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home })).status).toBe(201); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {})).status).toBe(200) }
     const lista = async () => (await (await req(l, 'loja-demo', 'GET', '/studio/releases', ed)).json()) as { producao: number | null; anterior: number | null; releases: Array<{ numero: number }> }
     expect(await lista()).toMatchObject({ producao: null, releases: [] })
     await titulo('Primeira'); await titulo('Segunda')
@@ -95,7 +95,7 @@ describe('ambiente local', () => {
   })
   it('preview assinado: o link de uma release antiga mostra aquele site (faixa, noindex) sem mexer na produção, só neste tenant', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana'), com = await l.token('loja-demo', ['studio.comentarista'], 'bia')
-    const publica = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.texto = v; await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}) }
+    const publica = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.titulo = v; await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}) }
     await publica('Versão antiga'); await publica('Versão nova')
     const r = await req(l, 'loja-demo', 'POST', '/studio/releases/preview', com, { release: 1 }); expect(r.status).toBe(200) // quem comenta emite o link
     const { caminho } = (await r.json()) as { caminho: string }; expect(caminho).toMatch(/^\/_polaris\/preview\?t=v1\./)
@@ -213,7 +213,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
   })
   it('no navegador: painel Releases mostra a produção, as diferenças e volta para a release escolhida', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
-    const publica = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.texto = v; await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}) }
+    const publica = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.titulo = v; await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}) }
     await publica('Versão um'); await publica('Versão dois')
     const nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {
@@ -350,6 +350,9 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const h = p.locator('header'); expect(await h.count()).toBe(1); expect(await h.locator(':scope > a').first().innerText()).toBe('Minha loja')
       expect(await p.locator('header nav').getAttribute('aria-label')).toBe('Principal'); expect(await p.locator('header nav a').allInnerTexts()).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
       expect(await p.locator('header nav a[aria-current=page]').allInnerTexts()).toEqual(['Início']); expect(await h.locator(':scope > a').last().getAttribute('href')).toBe('/entrar')
+      const hero = p.locator('section[data-alinha]'); expect(await hero.count()).toBe(1); expect(await hero.locator('h1').innerText()).toBe('Bem-vindo à loja'); expect(await hero.locator('a[data-botao]').allInnerTexts()).toEqual(['Conheça a loja', 'Fale com a gente'])
+      expect(await hero.evaluate((e) => { const c = getComputedStyle(e); return c.display === 'flex' && c.textAlign === 'center' && e.getBoundingClientRect().height >= 240 && c.backgroundColor !== 'rgba(0, 0, 0, 0)' })).toBe(true) // o tema pinta o destaque; a altura mínima vale
+      expect(await hero.locator('a[data-botao=primario]').evaluate((e) => getComputedStyle(e).fontWeight)).toBe('600')
       await p.evaluate(() => { (window as any).__marca = 'mesma' }); await p.getByRole('link', { name: 'Sobre' }).click(); await p.waitForURL(/\/sobre$/)
       await p.waitForFunction(() => document.querySelector('header nav a[aria-current=page]')?.textContent === 'Sobre'); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma') // trocou no cliente, o atual acompanhou
       expect(await p.locator('footer nav').evaluateAll((ns) => ns.map((n) => n.getAttribute('aria-label')))).toEqual(['Loja', 'Ajuda']); expect(await p.locator('footer small').innerText()).toBe('© 2026 Minha loja')

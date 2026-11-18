@@ -39,7 +39,7 @@ describe('blocos nativos do cabeçalho', () => {
 
 describe('site/cabecalho', () => {
   it('é um nó válido; a marca liga ao início, o menu tem um link por item e só o `atual` leva aria-current', () => {
-    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape']))
+    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape', 'site.hero']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape', 'site/hero']))
     const d = ssr(pagina(cab({ titulo: 'Loja Demo', links: LINKS })))
     const h = d.querySelector('header')!; expect(h).toBeTruthy(); const marca = h.querySelector(':scope > a')!; expect(marca.getAttribute('href')).toBe('/'); expect(marca.textContent).toBe('Loja Demo')
     const links = [...h.querySelectorAll('nav a')]; expect(links.map((a) => a.textContent)).toEqual(['Início', 'Produtos', 'Contato']); expect(links.map((a) => a.getAttribute('href'))).toEqual(['/', '/produtos', '/contato'])
@@ -99,4 +99,36 @@ describe('layout/rodape e site/rodape', () => {
     expect(doHtml(h.pagina.render({}).corpo)).toBe(oraculo); const c = document.createElement('div'); montaVivo({ programa: pg, container: c }); expect([...c.childNodes].map(canon).join('')).toBe(oraculo)
   })
   it('o tema estiliza footer só com variáveis', () => { const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/#polaris footer\{[^}]*var\(--cor-superficie\)/); expect(css).toMatch(/#polaris footer a:hover/) })
+})
+
+const hero = (props: object, extra?: object[]) => ({ bloco: 'site/hero', props, ...(extra ? { slots: { extra } } : {}) })
+
+describe('layout/destaque e site/hero', () => {
+  it('hero completo: <section> com o <h1>, o subtítulo e os dois botões (primário e secundário) com os links certos', () => {
+    const d = ssr(pagina(hero({ titulo: 'Tudo para a casa', subtitulo: 'Ofertas toda semana', cta: { texto: 'Ver ofertas', href: '/produtos' }, cta2: { texto: 'Falar conosco', href: '/contato' } })))
+    const s = d.querySelector('section')!; expect(s.getAttribute('data-alinha')).toBe('centro'); expect(s.getAttribute('data-fundo')).toBe('primaria'); expect(s.getAttribute('style')).toBe('min-height:320px')
+    expect(s.querySelector('h1')!.textContent).toBe('Tudo para a casa'); expect(s.querySelector('p')!.textContent).toBe('Ofertas toda semana')
+    const as = [...s.querySelectorAll('a')]; expect(as.map((a) => [a.textContent, a.getAttribute('href'), a.getAttribute('data-botao')])).toEqual([['Ver ofertas', '/produtos', 'primario'], ['Falar conosco', '/contato', 'secundario']])
+  })
+  it('só o que foi dado: sem subtítulo nem botões não há <p> nem linha de botões; um botão só; o slot extra entra', () => {
+    const a = ssr(pagina(hero({ titulo: 'Só título' }))); expect(a.querySelector('p')).toBeNull(); expect(a.querySelector('a')).toBeNull()
+    const b = ssr(pagina(hero({ titulo: 'x', cta2: { texto: 'Só secundário', href: '/s' } }, [{ bloco: 'texto/pequeno', props: { texto: 'extra' } }]))); expect([...b.querySelectorAll('a')].map((l) => l.getAttribute('data-botao'))).toEqual(['secundario']); expect(b.querySelector('small')!.textContent).toBe('extra')
+  })
+  it('imagem: fundo com véu escuro, URL escapada (nada fecha o url() nem a declaração); inseguro some; altura e véu limitados; alinha e fundo desconhecidos caem no padrão', () => {
+    const d = ssr(pagina(hero({ titulo: 'x', imagem: '/img/a b"c)d;e.jpg', altura: 480, escurece: 0.6, alinha: 'esquerda', fundo: 'suave' }))), st = d.querySelector('section')!.getAttribute('style')!
+    expect(st).toBe('min-height:480px;background-image:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),url("/img/a%20b%22c%29d;e.jpg")'); expect(d.querySelector('section')!.getAttribute('data-alinha')).toBe('esquerda')
+    const v = ssr(pagina(hero({ titulo: 'x', imagem: 'javascript:alert(1)', altura: 800, escurece: 0.8, alinha: 'zz', fundo: 'zz' }))).querySelector('section')!; expect(v.getAttribute('style')).toBe('min-height:800px'); expect([v.getAttribute('data-alinha'), v.getAttribute('data-fundo')]).toEqual(['centro', 'primaria'])
+    expect(() => pagina(hero({ titulo: 'x', altura: 5000 }))).toThrow(/must be <= 800/); expect(() => pagina(hero({ titulo: 'x', escurece: 9 }))).toThrow(/must be <= 0.8/) // fora do limite nem compila
+  })
+  it('texto escapado e link inseguro do botão sem href', () => {
+    const d = ssr(pagina(hero({ titulo: '<img src=x onerror=alert(1)>', cta: { texto: 'Ruim', href: 'javascript:alert(1)' } }))); expect(d.querySelector('img')).toBeNull(); expect(d.querySelector('h1')!.textContent).toContain('<img'); expect(d.querySelector('a')!.hasAttribute('href')).toBe(false)
+  })
+  it('paridade React × runtime vivo × estático (com imagem, véu e botões)', () => {
+    const pg = pagina(hero({ titulo: 'Olá', subtitulo: 's', imagem: '/img/a.jpg', altura: 360, escurece: 0.5, alinha: 'esquerda', cta: { texto: 'Ir', href: '/x' }, cta2: { texto: 'Outro', href: '/y' } }, [{ bloco: 'texto/pequeno', props: { texto: 'extra' } }]))
+    const oraculo = [...ssr(pg).childNodes].map(canon).join(''), h = compilaHtmlVivo(pg); if (!h.ok) throw new Error(JSON.stringify(h.motivos))
+    expect(doHtml(h.pagina.render({}).corpo)).toBe(oraculo); const c = document.createElement('div'); montaVivo({ programa: pg, container: c }); expect([...c.childNodes].map(canon).join('')).toBe(oraculo)
+  })
+  it('o tema estiliza section[data-alinha] e a[data-botao] só com variáveis (botão primário invertido sobre o fundo primário)', () => {
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/section\[data-fundo=primaria\]\{background-color:var\(--cor-primaria\)/); expect(css).toMatch(/section\[data-fundo=primaria\] a\[data-botao=primario\]\{background:var\(--cor-texto-sobre-primaria\)/)
+  })
 })
