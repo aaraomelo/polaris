@@ -346,9 +346,71 @@
       "rota": "/entrar",
       "titulo": "Entrar",
       "raiz": {
-        "bloco": "texto/paragrafo",
+        "bloco": "layout/pilha",
         "props": {
-          "texto": "Entrar"
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "layout/linha",
+              "props": {
+                "gap": 16
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/",
+                      "texto": "Início"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/sobre",
+                      "texto": "Sobre"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Produtos (gerente)"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Entrar",
+                "nivel": 1
+              }
+            },
+            {
+              "bloco": "texto/paragrafo",
+              "props": {
+                "texto": "Login de desenvolvimento do ambiente local: escolha o papel."
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/entrar/ir?papel=gerente&para=site&volta={consulta.volta ?? \"/\"}",
+                "texto": "Entrar como gerente"
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/entrar/ir?papel=studio.editor",
+                "texto": "Abrir o Studio como editor"
+              }
+            }
+          ]
         }
       }
     }

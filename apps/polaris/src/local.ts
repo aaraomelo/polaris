@@ -100,14 +100,20 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     // 4. login de DESENVOLVIMENTO: emite o JWT e leva ao Studio do tenant (o token vai no fragmento da URL, que não chega a servidor nenhum)
     let porta = o.porta ?? 3000
     const cab = (reply: { header(k: string, v: string): unknown }) => { reply.header('content-security-policy', "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"); reply.header('cache-control', 'no-store') }
-    gw.get<{ Querystring: { volta?: string } }>('/entrar', async (req, reply) => {
+    const APEX = /^(localhost|127\.0\.0\.1)(:\d+)?$/, HOST_TENANT = /^([a-z][a-z0-9-]{1,30})\.polaris\.localhost(:\d+)?$/
+    // o índice do login só vale no endereço SEM tenant (localhost); no endereço de um tenant, `/entrar` é a PÁGINA de login do site dele (nó `site.entrar`), servida como qualquer outra
+    gw.get<{ Querystring: { volta?: string } }>('/entrar', { constraints: { host: APEX } as never }, async (req, reply) => {
       cab(reply); const volta = voltaSegura(req.query.volta)
       const linhas = TENANTS_LOCAIS.map((t) => `<h2>${esc(t.nome)} <small>(${esc(t.alias)}.polaris.localhost)</small></h2><ul>${PAPEIS_LOCAIS.map((p) => `<li><a href="/entrar/ir?tenant=${esc(t.alias)}&amp;papel=${esc(p)}">Studio como <code>${esc(p)}</code></a> · <a href="/entrar/ir?tenant=${esc(t.alias)}&amp;papel=${esc(p)}&amp;para=site&amp;volta=${encodeURIComponent(volta)}">site como <code>${esc(p)}</code></a></li>`).join('')}</ul>`).join('')
       return reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Polaris local: entrar</title><body><h1>Polaris — ambiente local</h1><p>Login de <strong>desenvolvimento</strong>: emite um JWT de 12 h para o papel escolhido e abre o Studio.</p>${linhas}<p>Usuário: <code>?usuario=ana</code> na URL (padrão <code>dev</code>).</p></body></html>`)
     })
     gw.get<{ Querystring: { tenant?: string; papel?: string; usuario?: string; para?: string; volta?: string } }>('/entrar/ir', async (req, reply) => {
-      const { tenant, papel, usuario = 'dev', para } = req.query
+      const { papel, usuario = 'dev', para } = req.query, tenant = req.query.tenant ?? HOST_TENANT.exec(String(req.headers.host ?? ''))?.[1] // sem `tenant`, vale o do endereço
       if (!tenant || !ALIAS.test(tenant) || !TENANTS_LOCAIS.some((t) => t.alias === tenant) || !papel || !(PAPEIS_LOCAIS as readonly string[]).includes(papel) || !USUARIO.test(usuario)) { cab(reply); return reply.status(400).type('text/plain').send('tenant, papel ou usuário inválido') }
+      if (para === 'site' && String(req.headers.host ?? '') !== `${tenant}.polaris.localhost:${porta}`) { // o cookie é do ENDEREÇO que o grava: vindo de outro (ex.: localhost), refaz o pedido no endereço do tenant
+        const qs = new URLSearchParams({ papel, para, usuario, ...(req.query.volta ? { volta: req.query.volta } : {}) })
+        return reply.redirect(`http://${tenant}.polaris.localhost:${porta}/entrar/ir?${qs}`, 302)
+      }
       if (para === 'site') { // sessão do SITE: cookie HttpOnly só deste host, e volta para onde a guarda mandou
         const t = await token(tenant, [papel], usuario)
         return reply.header('set-cookie', cookieDeSessao(t, false)).redirect(`http://${tenant}.polaris.localhost:${porta}${voltaSegura(req.query.volta)}`, 302)

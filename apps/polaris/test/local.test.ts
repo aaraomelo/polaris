@@ -16,7 +16,7 @@ const sobe = async (dados: string | null) => { const l = await sobeLocal({ dados
 afterAll(async () => { for (const l of abertos) await l.fecha().catch(() => {}); rmSync(dir, { recursive: true, force: true }) })
 // `fetch` não deixa trocar o cabeçalho Host; o tenant sai do Host, então as chamadas usam node:http
 const req = (l: Local, alias: string, metodo: string, caminho: string, token?: string, corpo?: unknown, extra: Record<string, string> = {}): Promise<{ status: number; headers: { get(k: string): string | null }; text(): Promise<string>; json(): Promise<unknown> }> => new Promise((ok, falha) => {
-  const r = httpRequest({ host: '127.0.0.1', port: l.porta, method: metodo, path: caminho, headers: { host: `${alias}.polaris.localhost:${l.porta}`, ...(token ? { authorization: `Bearer ${token}` } : {}), ...(corpo !== undefined ? { 'content-type': 'application/json' } : {}), ...extra } }, (res) => {
+  const r = httpRequest({ host: '127.0.0.1', port: l.porta, method: metodo, path: caminho, headers: { host: alias === 'apex' ? `localhost:${l.porta}` : `${alias}.polaris.localhost:${l.porta}`, ...(token ? { authorization: `Bearer ${token}` } : {}), ...(corpo !== undefined ? { 'content-type': 'application/json' } : {}), ...extra } }, (res) => {
     const partes: Buffer[] = []; res.on('data', (c) => partes.push(c)); res.on('end', () => { const t = Buffer.concat(partes).toString('utf8'); ok({ status: res.statusCode!, headers: { get: (k) => { const v = res.headers[k.toLowerCase()]; return Array.isArray(v) ? v[0]! : (v ?? null) } }, text: async () => t, json: async () => JSON.parse(t) }) })
   }); r.on('error', falha); if (corpo !== undefined) r.write(JSON.stringify(corpo)); r.end()
 })
@@ -25,7 +25,8 @@ const get = (l: Local, alias: string, caminho: string, token?: string) => req(l,
 describe('ambiente local', () => {
   it('login de desenvolvimento → token → Studio e API da loja pelo gateway, isolados por tenant', async () => {
     const l = await sobe(null)
-    const pagina = await (await get(l, 'loja-demo', '/entrar')).text(); expect(pagina).toContain('Loja Demo'); expect(pagina).toContain('studio.editor')
+    const pagina = await (await get(l, 'apex', '/entrar')).text(); expect(pagina).toContain('Loja Demo'); expect(pagina).toContain('studio.editor') // o índice só no endereço SEM tenant
+    const doSite = await (await get(l, 'loja-demo', '/entrar?volta=%2Fprodutos')).text(); expect(doSite).toContain('Entrar como gerente'); expect(doSite).toContain('volta=/produtos'); expect(doSite).not.toContain('Outra Loja') // no do tenant, é a PÁGINA do site
     const ir = await get(l, 'loja-demo', '/entrar/ir?tenant=loja-demo&papel=studio.editor&usuario=ana'); expect(ir.status).toBe(302)
     const loc = ir.headers.get('location')!; expect(loc).toMatch(new RegExp(`^http://loja-demo\\.polaris\\.localhost:${l.porta}/studio#token=[\\w.-]+$`))
     const tk = /#token=(.+)$/.exec(loc)![1]!
@@ -88,9 +89,13 @@ describe('ambiente local', () => {
   })
   it('o login recusa tenant, papel e usuário inválidos; papel sem permissão no Studio dá 403', async () => {
     const l = await sobe(null)
-    for (const q of ['tenant=nao-existe&papel=studio.editor', 'tenant=loja-demo&papel=admin', 'tenant=loja-demo&papel=studio.editor&usuario=A%20B', 'tenant=loja-demo', 'papel=studio.editor', 'tenant=loja-demo&papel=studio.editor&usuario=%3Cscript%3E']) expect((await get(l, 'loja-demo', `/entrar/ir?${q}`)).status, q).toBe(400)
+    for (const q of ['tenant=nao-existe&papel=studio.editor', 'tenant=loja-demo&papel=admin', 'tenant=loja-demo&papel=studio.editor&usuario=A%20B', 'tenant=loja-demo', 'tenant=loja-demo&papel=studio.editor&usuario=%3Cscript%3E']) expect((await get(l, 'loja-demo', `/entrar/ir?${q}`)).status, q).toBe(400)
     expect((await get(l, 'loja-demo', '/studio/nos', await l.token('loja-demo', ['gerente']))).status).toBe(403)
     for (const p of PAPEIS_LOCAIS) expect((await get(l, 'loja-demo', `/entrar/ir?tenant=loja-demo&papel=${p}`)).status).toBe(302)
+    expect((await get(l, 'apex', '/entrar/ir?papel=studio.editor')).status).toBe(400) // sem tenant no endereço nem no pedido
+    expect((await get(l, 'loja-demo', '/entrar/ir?papel=studio.editor')).status).toBe(302) // o tenant vem do endereço
+    const outro = await get(l, 'apex', '/entrar/ir?tenant=loja-demo&papel=gerente&para=site&volta=%2Fprodutos') // cookie é do endereço: do apex, refaz no do tenant
+    expect([outro.status, outro.headers.get('set-cookie')]).toEqual([302, null]); expect(outro.headers.get('location')).toMatch(/^http:\/\/loja-demo\.polaris\.localhost:\d+\/entrar\/ir\?/)
     await expect(l.token('inexistente', [])).rejects.toThrow(/desconhecido/)
   })
   it('os dados persistem entre execuções (reabrir a mesma pasta traz o que foi gravado) e subir de novo é idempotente', async () => {
@@ -130,14 +135,14 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.join(' | ')).toBe('')
     } finally { await nav.close() }
   })
-  it('no navegador: página protegida → login → volta para ela já logado → sair', async () => {
+  it('no navegador: Produtos (protegida) leva ao login SEM recarregar → entrar → volta para ela já logada → sair', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {
-      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
-      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/produtos`) // sem sessão: cai no login com ?volta
-      await p.getByRole('heading', { name: /Polaris/ }).waitFor(); expect(p.url()).toContain('volta=%2Fprodutos')
-      await p.locator('li', { hasText: 'Loja Demo' }).first() // a página lista os dois tenants
-      await p.locator('h2', { hasText: 'Loja Demo' }).locator('xpath=following-sibling::ul[1]').getByRole('link', { name: /site como gerente/ }).click()
+      const p = await nav.newPage(), erros: string[] = [], docs: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) }); p.on('request', (r) => { if (r.resourceType() === 'document') docs.push(r.url()) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.waitForFunction(() => (window as any).Polaris?.inicia); await p.evaluate(() => { (window as any).__marca = 'mesma' }); const n0 = docs.length
+      await p.getByRole('link', { name: /Produtos/ }).click() // visitante: a guarda manda ao login, que é uma PÁGINA do site: troca no cliente, sem recarregar
+      await p.getByRole('heading', { name: 'Entrar' }).waitFor(); expect(p.url()).toContain('/entrar?volta=%2Fprodutos'); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma'); expect(docs.length).toBe(n0)
+      await p.getByRole('link', { name: 'Entrar como gerente' }).click() // grava o cookie e volta: aqui a navegação é normal (muda a sessão)
       await p.waitForURL(/\/produtos$/); await p.getByRole('heading', { name: 'Produtos' }).waitFor()
       expect(await p.evaluate(() => document.cookie)).not.toContain('polaris_sessao') // HttpOnly: o JavaScript não enxerga
       await p.evaluate(() => fetch('/_polaris/sair', { method: 'POST' })); await p.reload(); await p.waitForURL(/\/entrar\?volta=/)
@@ -171,7 +176,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
-      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar`); await p.getByRole('link', { name: /studio\.editor/ }).first().click()
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar`); await p.getByRole('link', { name: /Studio como editor/ }).click()
       await p.waitForURL(/\/studio$/); expect(p.url()).not.toContain('token') // o token sai da barra de endereço
       await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'padrao (padrão)' }).click(); await p.getByText('Tokens do tema padrao').waitFor()
       await p.getByRole('button', { name: 'Salvar' }).click(); await p.getByText('Salvo como versão 1').waitFor()
