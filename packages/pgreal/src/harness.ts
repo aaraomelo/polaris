@@ -49,7 +49,10 @@ export function serviceNo(reg: Registry, id: string): No { const r = reg.resolve
 import { criaAutenticadorJwt } from '@polaris/acesso'
 import { contextoPorJwt, criaServico, regrasDoRegistry } from '@polaris/servico'
 import type { FastifyInstance } from 'fastify'
-import { SignJWT, generateKeyPair, type KeyLike } from 'jose'
+import type { KeyObject } from 'node:crypto'
+import { SignJWT, generateKeyPair } from 'jose'
+
+type KeyLike = CryptoKey | KeyObject
 
 const ISS = 'https://id.teste', AUD = 'polaris'
 export type Cliente = { app: FastifyInstance; req(papeis: string[], tenant: string, m: string, url: string, corpo?: unknown, sub?: string): Promise<{ status: number; corpo: any }>; fecha(): Promise<void> }

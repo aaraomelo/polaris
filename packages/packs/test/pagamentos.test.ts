@@ -6,7 +6,10 @@ import { criaAutenticadorJwt } from '@polaris/acesso'
 import { Registry, emite } from '@polaris/schema'
 import { contextoPorJwt, criaServico, regrasDoRegistry, type Consulta } from '@polaris/servico'
 import type { DbTenant } from '@polaris/eventos'
-import { SignJWT, generateKeyPair, type KeyLike } from 'jose'
+import type { KeyObject } from 'node:crypto'
+import { SignJWT, generateKeyPair } from 'jose'
+
+type KeyLike = CryptoKey | KeyObject
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { criaPagamentos, nosDoPack, percentual, proporcional, provedorInterno, subtrai, type Provedor } from '../src/index'

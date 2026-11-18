@@ -1,4 +1,8 @@
-import { createLocalJWKSet, createRemoteJWKSet, importJWK, jwtVerify, type JWK, type JSONWebKeySet, type JWTVerifyGetKey, type KeyLike } from 'jose'
+import { createLocalJWKSet, createRemoteJWKSet, importJWK, jwtVerify, type JWK, type JSONWebKeySet, type JWTVerifyGetKey } from 'jose'
+import type { KeyObject } from 'node:crypto'
+
+/** a chave do jose 6 (o tipo `KeyLike` foi removido): `CryptoKey` (WebCrypto) ou `KeyObject` (Node) */
+type KeyLike = CryptoKey | KeyObject
 
 // Autenticação por JWT. Defesas (cada uma testada com um token forjado):
 //  - o ALGORITMO sai de uma lista fixa que depende do TIPO de chave: segredo → só HS*; chave pública → só assimétricos. `alg: none` nunca; e um token HS256

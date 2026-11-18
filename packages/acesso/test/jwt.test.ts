@@ -1,4 +1,7 @@
-import { SignJWT, exportJWK, generateKeyPair, type KeyLike } from 'jose'
+import type { KeyObject } from 'node:crypto'
+import { SignJWT, exportJWK, generateKeyPair } from 'jose'
+
+type KeyLike = CryptoKey | KeyObject
 import { beforeAll, describe, expect, it } from 'vitest'
 import { criaAutenticadorJwt } from '../src/index'
 

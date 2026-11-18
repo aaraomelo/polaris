@@ -5,7 +5,10 @@ import { PGlite } from '@electric-sql/pglite'
 import { criaAutenticadorJwt } from '@polaris/acesso'
 import { Registry, emite } from '@polaris/schema'
 import { contextoPorJwt, criaServico, dbDePglite, regrasDoRegistry } from '@polaris/servico'
-import { SignJWT, generateKeyPair, type KeyLike } from 'jose'
+import type { KeyObject } from 'node:crypto'
+import { SignJWT, generateKeyPair } from 'jose'
+
+type KeyLike = CryptoKey | KeyObject
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { compara, nosDoPack, normaliza, operacoesCatalogo, resolvePreco, type Candidato } from '../src/index'
