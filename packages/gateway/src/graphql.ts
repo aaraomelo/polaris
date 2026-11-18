@@ -2,6 +2,7 @@ import {
   GraphQLBoolean, GraphQLError, GraphQLID, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLScalarType, GraphQLSchema, GraphQLString,
   GraphQLFloat, Kind, NoSchemaIntrospectionCustomRule, execute, parse, specifiedRules, validate,
   type DocumentNode, type FieldNode, type FragmentDefinitionNode, type GraphQLInputType, type GraphQLOutputType, type SelectionSetNode, type ValidationRule, type ValueNode,
+  type GraphQLNullableType,
 } from 'graphql'
 import type { Observabilidade } from '@polaris/observabilidade'
 import { PADRAO_DINHEIRO, rotasDe, type Campo } from '@polaris/schema'
@@ -75,12 +76,15 @@ const DataHora = new GraphQLScalarType({ name: 'DataHora', description: 'Data e 
 const Uuid = new GraphQLScalarType({ name: 'Uuid', serialize: (v) => String(v), parseValue: (v) => { if (typeof v === 'string' && UUID.test(v)) return v; throw new GraphQLError('uuid inválido') }, parseLiteral: (a) => { if (a.kind === Kind.STRING && UUID.test(a.value)) return a.value; throw new GraphQLError('uuid inválido') } })
 const Json = new GraphQLScalarType({ name: 'Json', description: 'Qualquer valor JSON (limitado em tamanho e profundidade)', serialize: (v) => v, parseValue: (v) => json(v), parseLiteral: (a, vars) => json(literal(a, vars as Record<string, unknown>)) })
 
+/** graphql 17 tipa `GraphQLNonNull` só com tipos anuláveis; aqui o chamador garante que `t` não é NonNull (envolver duas vezes é erro do schema, não do tipo) */
+const naoNulo = (t: GraphQLInputType | GraphQLOutputType): GraphQLNonNull<GraphQLNullableType> => new GraphQLNonNull(t as GraphQLNullableType)
+
 const ESCALAR: Record<string, GraphQLInputType & GraphQLOutputType> = { texto: GraphQLString, inteiro: GraphQLInt, decimal: GraphQLFloat, booleano: GraphQLBoolean, data: Data, dataHora: DataHora, dinheiro: Dinheiro, uuid: Uuid, json: Json }
 /** o tipo GraphQL de um campo do schema (lista → [T!]) */
 function tipoDe(c: Campo): GraphQLInputType & GraphQLOutputType {
   const t = ESCALAR[c.tipo]
   if (!t) throw new Error(`tipo de campo sem equivalente em GraphQL: ${c.tipo}`)
-  return (c.lista && c.tipo !== 'json' ? new GraphQLList(new GraphQLNonNull(t)) : t) as never
+  return (c.lista && c.tipo !== 'json' ? new GraphQLList(naoNulo(t)) : t) as never
 }
 
 export type Entrada = {
@@ -133,10 +137,10 @@ export function geraSchema(servicos: Servicos, chamador: ChamadorCompleto, tradu
       const emQuery = r.metodo === 'get' || r.metodo === 'delete'
       const obrig = (c: Campo) => !!c.obrigatorio && c.padrao === undefined && !(r.origem.tipo === 'crud' && (r.origem.crud === 'atualizar' || r.origem.crud === 'listar'))
       if (r.metodo === 'get') {
-        for (const [k, c] of Object.entries(r.entrada)) { const t = tipoDe(c) as GraphQLInputType; args[k] = { type: obrig(c) ? new GraphQLNonNull(t) : t } }
+        for (const [k, c] of Object.entries(r.entrada)) { const t = tipoDe(c) as GraphQLInputType; args[k] = { type: (obrig(c) ? naoNulo(t) : t) as GraphQLInputType } }
         if (r.lista) { args.pagina = { type: GraphQLInt }; args.limite = { type: GraphQLInt } }
       } else if (Object.keys(r.entrada).length) {
-        const entrada = new GraphQLInputObjectType({ name: `${cap(limpa(sid))}${cap(limpa(r.id))}Entrada`, fields: Object.fromEntries(Object.entries(r.entrada).map(([k, c]) => { const t = tipoDe(c) as GraphQLInputType; return [k, { type: obrig(c) ? new GraphQLNonNull(t) : t }] })) })
+        const entrada = new GraphQLInputObjectType({ name: `${cap(limpa(sid))}${cap(limpa(r.id))}Entrada`, fields: Object.fromEntries(Object.entries(r.entrada).map(([k, c]) => { const t = tipoDe(c) as GraphQLInputType; return [k, { type: (obrig(c) ? naoNulo(t) : t) as GraphQLInputType }] })) })
         args.entrada = { type: Object.values(r.entrada).some(obrig) ? new GraphQLNonNull(entrada) : entrada }
       }
       void emQuery
