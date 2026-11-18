@@ -25,6 +25,9 @@ Clicar num link do próprio site troca a página **sem recarregar o navegador**:
 ## Pré-visualização de release
 Com `preview` no gateway (`POLARIS_PREVIEW_SEGREDO`, no `pnpm local` já vem um de desenvolvimento), `GET /_polaris/preview?t=<link assinado>` valida o link **neste tenant** e grava o cookie `polaris_preview`; enquanto ele valer, as páginas são as da release do link (registro, tabela de rotas e programas próprios dessa release), com faixa visível e `noindex`. Cookie expirado, de outro tenant ou de release inexistente é descartado e o site volta à produção. O link é de leitura do site, sem login: trate-o como segredo. `GET /_polaris/preview/sair` apaga o cookie.
 
+## Formulários nas páginas
+Página com o bloco `form/formulario` leva, antes do roteador, o pacote da ilha (`data-pl-ilha`): um para todas as páginas, endereçado pelo conteúdo, só para quem usa o bloco. Detalhes em `docs/formularios.md`.
+
 ## Sessão por cookie
 O navegador não manda `Authorization` ao navegar, então a sessão do site é um **cookie com o próprio JWT** do provedor de identidade:
 - `POST /_polaris/sessao` com `{"token": "…"}` (só `application/json`, o que um formulário de outro site não consegue enviar) valida o token **no host do tenant** e responde 204 com `Set-Cookie: polaris_sessao=…; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800; Secure`. Sem `Domain`: vale só para aquele host. `POST /_polaris/sair` apaga.

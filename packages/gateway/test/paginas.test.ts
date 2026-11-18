@@ -45,6 +45,20 @@ describe('servidor de páginas', () => {
     // o roteador não deixa a página nova sem o próprio roteador: ele vem em toda resposta HTML (inclusive a de 404 do tenant)
     expect((await e.req('GET', '/nada', { host: 'a.loja.test' })).body).toContain('data-pl-router')
   })
+  it('página com `form/formulario` leva o ponto de montagem e o pacote da ilha (só ela); a ilha é servida do gateway', async () => {
+    e.reg.registra(pag('p.contato', { rota: '/contato', titulo: 'Contato', raiz: P('form/formulario', { formulario: 'so-valida' }) }) as never)
+    e.reg.registra({ kind: 'tenant', id: 'comform', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'comform', segmento: 'varejo', modulos: ['loja'], paginas: ['p.home', 'p.contato'] } } as never); modo.id = 'comform'
+    try { await verifica() } finally { modo.id = undefined }
+  })
+  const verifica = async () => {
+    const r = await e.req('GET', '/contato', { host: 'a.loja.test' }); expect(r.statusCode, r.body.slice(0, 200)).toBe(200)
+    expect(r.body).toContain('data-polaris-formulario="so-valida"'); expect(r.body).toContain('Carregando formulário…')
+    const nonce = /nonce-([^']+)'/.exec(String(r.headers['content-security-policy']))![1]!
+    const tag = new RegExp(`<script nonce="${nonce.replace(/[+/=]/g, '\\$&')}" src="(/_polaris/a/[\\w.-]+\\.js)" data-pl-ilha async></script>`).exec(r.body); expect(tag).not.toBeNull()
+    const js = await e.req('GET', tag![1]!, { host: 'a.loja.test' }); expect(js.statusCode).toBe(200); expect(js.body).toContain('PolarisFormularios'); expect(js.body).not.toMatch(/\beval\(|new Function/); expect(js.headers['cache-control']).toContain('immutable')
+    expect(r.body.indexOf('data-pl-ilha')).toBeLessThan(r.body.indexOf('data-pl-router')) // a ilha antes do roteador
+    expect((await e.req('GET', '/', { host: 'a.loja.test' })).body).not.toContain('data-pl-ilha') // página sem formulário não paga os 60 KB
+  }
   it('o outro tenant vê a página dele, com os dados dele', async () => {
     const r = await e.req('GET', '/', { host: 'b.loja.test' }); expect(r.statusCode).toBe(200); expect(r.body).toContain('Vitrine: Vitrine B'); expect(r.body).not.toContain('Vitrine A')
     expect((await e.req('GET', '/sobre', { host: 'b.loja.test' })).statusCode).toBe(404) // a página /sobre é só do A

@@ -38,6 +38,33 @@
             ],
             "permissao": "publica"
           }
+        },
+        "contato": {
+          "campos": {
+            "nome": {
+              "tipo": "texto",
+              "obrigatorio": true
+            },
+            "email": {
+              "tipo": "texto",
+              "obrigatorio": true
+            },
+            "telefone": {
+              "tipo": "texto"
+            },
+            "mensagem": {
+              "tipo": "texto",
+              "obrigatorio": true
+            }
+          },
+          "crud": {
+            "caminho": "/contatos",
+            "operacoes": [
+              "criar",
+              "listar"
+            ],
+            "permissao": "publica"
+          }
         }
       },
       "operacoes": {}

@@ -58,6 +58,13 @@
                   {
                     "bloco": "nav/link",
                     "props": {
+                      "href": "/contato",
+                      "texto": "Contato"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
                       "href": "/produtos",
                       "texto": "Produtos (gerente)"
                     }
@@ -128,6 +135,20 @@
                       "href": "/sobre",
                       "texto": "Sobre"
                     }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/contato",
+                      "texto": "Contato"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Produtos (gerente)"
+                    }
                   }
                 ]
               }
@@ -185,6 +206,20 @@
                       "href": "/sobre",
                       "texto": "Sobre"
                     }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/contato",
+                      "texto": "Contato"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Produtos (gerente)"
+                    }
                   }
                 ]
               }
@@ -219,7 +254,8 @@
         "site.sobre",
         "site.nao",
         "site.produtos",
-        "site.entrar"
+        "site.entrar",
+        "site.contato"
       ],
       "paginaNaoEncontrada": "site.nao",
       "rotaLogin": "/entrar"
@@ -243,7 +279,8 @@
         "site.sobre",
         "site.nao",
         "site.produtos",
-        "site.entrar"
+        "site.entrar",
+        "site.contato"
       ],
       "paginaNaoEncontrada": "site.nao",
       "rotaLogin": "/entrar"
@@ -303,6 +340,13 @@
                     "props": {
                       "href": "/sobre",
                       "texto": "Sobre"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/contato",
+                      "texto": "Contato"
                     }
                   },
                   {
@@ -376,6 +420,13 @@
                   {
                     "bloco": "nav/link",
                     "props": {
+                      "href": "/contato",
+                      "texto": "Contato"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
                       "href": "/produtos",
                       "texto": "Produtos (gerente)"
                     }
@@ -408,6 +459,175 @@
               "props": {
                 "href": "/entrar/ir?papel=studio.editor",
                 "texto": "Abrir o Studio como editor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "formulario",
+    "id": "contato",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "titulo": "Fale conosco",
+      "descricao": "Respondemos em até 1 dia útil.",
+      "campos": [
+        {
+          "nome": "nome",
+          "tipo": "texto",
+          "rotulo": "Nome completo",
+          "obrigatorio": true,
+          "normaliza": [
+            "aparar",
+            "colapsaEspacos"
+          ],
+          "autocompletar": "name",
+          "validacao": {
+            "tamanhoMinimo": 3
+          },
+          "mensagens": {
+            "obrigatorio": "Diga como podemos chamar você.",
+            "tamanhoMinimo": "O nome precisa de pelo menos {min} letras."
+          }
+        },
+        {
+          "nome": "email",
+          "tipo": "email",
+          "rotulo": "E-mail",
+          "obrigatorio": true,
+          "autocompletar": "email"
+        },
+        {
+          "nome": "telefone",
+          "tipo": "telefone",
+          "rotulo": "Telefone",
+          "mascara": {
+            "padrao": [
+              "(00) 0000-0000",
+              "(00) 00000-0000"
+            ]
+          },
+          "mensagens": {
+            "formato": "Informe o telefone com DDD."
+          }
+        },
+        {
+          "nome": "mensagem",
+          "tipo": "textoLongo",
+          "rotulo": "Mensagem",
+          "obrigatorio": true,
+          "validacao": {
+            "tamanhoMinimo": 10,
+            "tamanhoMaximo": 2000
+          }
+        },
+        {
+          "nome": "aceite",
+          "tipo": "booleano",
+          "rotulo": "Concordo com o uso dos dados para contato",
+          "obrigatorio": true,
+          "mensagens": {
+            "obrigatorio": "Precisamos do seu aceite para responder."
+          }
+        }
+      ],
+      "envio": {
+        "servico": "loja",
+        "operacao": "criarContato",
+        "args": {
+          "nome": "valores.nome",
+          "email": "valores.email",
+          "telefone": "valores.telefone",
+          "mensagem": "valores.mensagem"
+        },
+        "sucesso": {
+          "mensagem": "Mensagem enviada! Obrigado.",
+          "limpar": true
+        }
+      },
+      "acoes": [
+        {
+          "id": "enviar",
+          "rotulo": "Enviar mensagem",
+          "tipo": "enviar",
+          "estilo": "primario"
+        },
+        {
+          "id": "limpar",
+          "rotulo": "Limpar",
+          "tipo": "limpar",
+          "estilo": "secundario"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "site.contato",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/contato",
+      "titulo": "Contato",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "layout/linha",
+              "props": {
+                "gap": 16
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/",
+                      "texto": "Início"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/sobre",
+                      "texto": "Sobre"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/contato",
+                      "texto": "Contato"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Produtos (gerente)"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Contato",
+                "nivel": 1
+              }
+            },
+            {
+              "bloco": "form/formulario",
+              "props": {
+                "formulario": "contato"
               }
             }
           ]

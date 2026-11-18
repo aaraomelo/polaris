@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-36 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+37 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -591,6 +591,54 @@ Etiqueta curta de estado. `tom`: neutro, sucesso, alerta ou erro (a cor vem do t
   "props": {
     "texto": "Recusado",
     "tom": "erro"
+  }
+}
+```
+
+## form
+
+### Formulário (`form/formulario`)
+
+Monta um formulário declarativo (`kind: formulario`) com máscaras, validação, mensagens e envio (`docs/formularios.md`). O servidor entrega só o ponto de montagem; o carregador do formulário (a "ilha") busca a definição e desenha os campos no navegador, validando com o mesmo motor do servidor. `aoEnviado` recebe `{ resultado, sucesso }` quando o serviço aceita; `aoErro`, `{ erros }`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `formulario` | texto | sim |  | id do nó `formulario` (do tenant ou da plataforma) |
+| `idioma` | texto | não |  | idioma das mensagens (padrão: o do visitante) |
+| `valores` | objeto | não |  | valores iniciais por campo (edição); só primitivos e listas deles |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoEnviado` | json |
+| `aoErro` | json |
+
+**Exemplo: Contato**
+
+```json
+{
+  "bloco": "form/formulario",
+  "props": {
+    "formulario": "contato"
+  }
+}
+```
+
+**Exemplo: Edição com valores iniciais**
+
+```json
+{
+  "bloco": "form/formulario",
+  "props": {
+    "formulario": "contato",
+    "valores": {
+      "nome": "Ana",
+      "email": "ana@exemplo.com"
+    },
+    "idioma": "pt-BR"
   }
 }
 ```

@@ -59,7 +59,14 @@ export const ROTEADOR_JS = `(function (w, d) {
       var u = new URL(x.url, w.location.href), alvo = u.hash && d.getElementById(decodeURIComponent(u.hash.slice(1)));
       if (alvo) alvo.scrollIntoView(); else if (empilha) w.scrollTo(0, 0);
       atual = src; ult = u.pathname + u.search;
-      var ok = function () { var h = d.getElementById('polaris'); if (h && h.setAttribute) { h.setAttribute('tabindex', '-1'); } };
+      var ilha = doc.querySelector('script[data-pl-ilha]'), ilhaSrc = ilha ? ilha.getAttribute('src') : null;
+      var ok = function () {
+        var h = d.getElementById('polaris'); if (h && h.setAttribute) { h.setAttribute('tabindex', '-1'); }
+        if (!ilhaSrc) return;
+        // a página nova tem formulário: o pacote da ilha monta os pontos de montagem (carrega só se ainda não veio)
+        if (w.PolarisFormularios && w.PolarisFormularios.inicia) { w.PolarisFormularios.inicia(); return; }
+        var s2 = d.createElement('script'); s2.src = ilhaSrc; s2.async = true; s2.setAttribute('data-pl-ilha', ''); d.head.appendChild(s2);
+      };
       if (mods[src]) { mods[src].inicia(); ok(); } else carrega(src, function () { w.Polaris.inicia(); ok(); }, falha);
     }).catch(function () { if (minha === n) falha(); });
   }

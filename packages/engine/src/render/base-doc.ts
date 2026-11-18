@@ -86,6 +86,10 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'midia/quadro': { titulo: 'Quadro', descricao: 'Exibe um documento HTML num iframe **sempre** isolado (`sandbox` vazio: sem scripts, sem formulários, sem navegação, origem opaca), e nenhuma prop altera isso. Serve para pré-visualizações.', exemplos: [
     { titulo: 'Documento simples', instancia: { bloco: 'midia/quadro', props: { titulo: 'Pré-visualização', html: '<!doctype html><p>Olá do quadro</p>', altura: 120 } } },
   ] },
+  'form/formulario': { titulo: 'Formulário', descricao: 'Monta um formulário declarativo (`kind: formulario`) com máscaras, validação, mensagens e envio (`docs/formularios.md`). O servidor entrega só o ponto de montagem; o carregador do formulário (a "ilha") busca a definição e desenha os campos no navegador, validando com o mesmo motor do servidor. `aoEnviado` recebe `{ resultado, sucesso }` quando o serviço aceita; `aoErro`, `{ erros }`.', exemplos: [
+    { titulo: 'Contato', instancia: { bloco: 'form/formulario', props: { formulario: 'contato' } } },
+    { titulo: 'Edição com valores iniciais', instancia: { bloco: 'form/formulario', props: { formulario: 'contato', valores: { nome: 'Ana', email: 'ana@exemplo.com' }, idioma: 'pt-BR' } } },
+  ] },
   'nav/botao': { titulo: 'Botão', descricao: 'Botão de ação. `aoClicar` executa a lista de ações declarada na instância.', exemplos: [
     { titulo: 'Padrão', instancia: { bloco: 'nav/botao', props: { texto: 'Comprar' } } },
     { titulo: 'Desabilitado', instancia: { bloco: 'nav/botao', props: { texto: 'Esgotado', desabilitado: true } } },

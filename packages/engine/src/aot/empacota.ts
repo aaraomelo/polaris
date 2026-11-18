@@ -80,3 +80,16 @@ export async function empacotaCliente(programa: Programa, opcoes: Opcoes = {}): 
   for (const [arq, v] of Object.entries(saida.inputs)) if (v.bytesInOutput > 0) contribuicao[arq.replace(/^(?:.*\/)?src\//, '')] = v.bytesInOutput
   return { ok: true, pacote: { codigo, bytes: Buffer.byteLength(codigo), gz: gzipSync(Buffer.from(codigo), { level: 9 }).length, uso, contribuicao } }
 }
+
+let ilhaFormulario: Promise<string> | null = null
+/** O pacote da ILHA do formulário (IIFE `PolarisFormularios`): máscaras, formatos, validador e a montagem dos campos. Independe da página: um só para todas (cache de processo). */
+export function empacotaIlhaFormulario(): Promise<string> {
+  ilhaFormulario ??= import('esbuild').then(async ({ build }) => {
+    const r = await build({
+      entryPoints: [`${RAIZ}formulario/cliente.ts`], bundle: true, minify: true, format: 'iife', globalName: 'PolarisFormularios', platform: 'browser', write: false, logLevel: 'silent',
+      treeShaking: true, define: { 'process.env.NODE_ENV': '"production"' },
+    })
+    return r.outputFiles[0]!.text
+  })
+  return ilhaFormulario
+}

@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { Readable } from 'node:stream'
 import { compilaTabela, resolveRota, type Programa, type TabelaRotas } from '@polaris/engine'
-import { empacotaCliente } from '@polaris/engine/aot'
+import { empacotaCliente, empacotaIlhaFormulario, usoDoPrograma } from '@polaris/engine/aot'
 import { streamVivo } from '@polaris/engine/servidor-vivo'
 import { cssDoTema } from '@polaris/engine/tema'
 import type { Registry } from '@polaris/schema'
@@ -40,7 +40,7 @@ const SESSAO_SEGUNDOS = 8 * 3600
 const TOKEN = /^[A-Za-z0-9_-]{4,3000}(\.[A-Za-z0-9_-]{1,3000}){2}$/
 /** o cookie é `HttpOnly` (o JavaScript da página não o lê), `SameSite=Lax` (não vai em POST de outro site) e SEM `Domain` (vale só para o host do tenant) */
 export const cookieDeSessao = (token: string | null, seguro = true) => `${COOKIE_SESSAO}=${token ?? ''}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${token ? SESSAO_SEGUNDOS : 0}${seguro ? '; Secure' : ''}`
-const lerCookie = (h: string | undefined): string | null => {
+export const lerCookie = (h: string | undefined): string | null => {
   if (!h || h.length > 8192) return null
   for (const par of h.split(';')) { const i = par.indexOf('='); if (i > 0 && par.slice(0, i).trim() === COOKIE_SESSAO) { const v = par.slice(i + 1).trim(); return TOKEN.test(v) ? v : null } }
   return null
@@ -76,6 +76,9 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     if (!p) { p = empacotaCliente(programa).then((r) => (r.ok ? guarda(`${sha(r.pacote.codigo)}.js`, 'text/javascript; charset=utf-8', r.pacote.codigo) : null)); bundles.set(programa, p) }
     return p
   }
+  /** o pacote da ilha de formulário, só para páginas que usam `form/formulario` (um para todas, endereçado pelo conteúdo) */
+  let ilhaSrc: Promise<string> | null = null
+  const ilhaDe = (programa: Programa): Promise<string | null> => (usoDoPrograma(programa).interfaces.includes('form/formulario') ? (ilhaSrc ??= empacotaIlhaFormulario().then((c) => guarda(`${sha(c)}.js`, 'text/javascript; charset=utf-8', c))) : Promise.resolve(null))
   const temaDe = (reg: Registry, ctx: CtxGw, tenantNo: string): string[] => {
     const id = (reg.resolve('tenant', tenantNo, { tenantId: ctx.tenantId })?.no.spec as { tema?: string } | undefined)?.tema ?? 'padrao'
     const t = reg.resolve('tema', id, { tenantId: ctx.tenantId })
@@ -103,7 +106,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
   async function renderiza(reply: FastifyReply, req: FastifyRequest, ctx: CtxGw, tenantNo: string, paginaId: string, status: number, params: Record<string, unknown>, idioma: string | undefined, reg: Registry, previa: number | null = null) {
     let programa: Programa
     try { programa = d.programaDe(ctx, paginaId).programa } catch { return texto(reply, 500, 'a página tem erros e não pode ser exibida') }
-    const clienteSrc = await clienteDe(programa)
+    const clienteSrc = await clienteDe(programa), ilha = await ilhaDe(programa)
     if (!clienteSrc) return texto(reply, 501, 'a página usa recursos que o navegador ainda não suporta')
     const consulta: Record<string, unknown> = Object.create(null)
     for (const [k, v] of new URLSearchParams(String(req.url.split('?')[1] ?? '').slice(0, 4096))) { if (k.length <= 60 && v.length <= 500 && Object.keys(consulta).length < 50 && !['__proto__', 'constructor', 'prototype'].includes(k)) consulta[k] = v }
@@ -116,7 +119,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     try { primeiro = await it.next() } catch (e) { d.log.warn('página fora do runtime', { pagina: paginaId, erro: (e as Error).message }); return texto(reply, 501, 'a página usa recursos que o navegador ainda não suporta') }
     async function* resto() {
       const solta = (c0: string) => { const c = previa === null ? c0 : c0.replace('<div id="polaris">', `${faixaPreview(previa)}<div id="polaris">`); return soltaRoteador(c) }
-      const soltaRoteador = (c: string) => c.endsWith('</body></html>') ? c.slice(0, -'</body></html>'.length) + `<script nonce="${nonce}" src="${roteadorSrc}" data-pl-router async></script></body></html>` : c // o roteador entra no fim do documento
+      const soltaRoteador = (c: string) => c.endsWith('</body></html>') ? c.slice(0, -'</body></html>'.length) + `${ilha ? `<script nonce="${nonce}" src="${ilha}" data-pl-ilha async></script>` : ''}<script nonce="${nonce}" src="${roteadorSrc}" data-pl-router async></script></body></html>` : c // a ilha de formulário (se a página usa) e o roteador entram no fim do documento
       if (!primeiro.done) yield solta(primeiro.value)
       for (;;) { const n = await it.next(); if (n.done) return; yield solta(n.value) }
     }

@@ -128,6 +128,28 @@ export const d_entrada_area: Descritor = {
   attrs: (p, id) => ({ ...comId(id), ...rotulo(p), placeholder: txt(p.placeholder), rows: String(inteiro(p.linhas, 1, 40, 4)), ...(p.desabilitado === true ? { disabled: '' } : {}), spellcheck: 'false' }),
   eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLTextAreaElement).value } },
 }
+/** Formulário declarativo (`kind: formulario`): o servidor entrega só o ponto de montagem; o carregador `@polaris/engine/formulario-cliente` (a "ilha") busca a definição, monta os campos com máscaras e validação e envia. Sem JavaScript fica o texto. */
+export const idFormulario = (v: unknown): string => (typeof v === 'string' && /^[a-z0-9][a-z0-9._-]{0,127}$/.test(v) ? v : '')
+/** valores iniciais: só primitivos (e listas deles) de chaves seguras, até 20 KB: é transporte para o carregador, que valida contra o formulário */
+export const valoresIniciaisJson = (v: unknown): string => {
+  if (v === null || typeof v !== 'object' || Array.isArray(v)) return ''
+  const o: Record<string, unknown> = {}
+  const prim = (x: unknown) => typeof x === 'string' ? x.slice(0, 2000) : typeof x === 'boolean' || (typeof x === 'number' && Number.isFinite(x)) ? x : undefined
+  for (const [k, x] of Object.entries(v as Record<string, unknown>).slice(0, 200)) {
+    if (!/^[a-z][A-Za-z0-9]*$/.test(k)) continue
+    const val = Array.isArray(x) ? x.slice(0, 100).map(prim).filter((y) => y !== undefined) : prim(x)
+    if (val !== undefined) o[k] = val
+  }
+  const j = JSON.stringify(o); return j.length > 20_000 || j === '{}' ? '' : j
+}
+export const d_form_formulario: Descritor = {
+  chave: (p) => (idFormulario(p.formulario) ? `div:${idFormulario(p.formulario)}` : null), tag: () => 'div', texto: () => 'Carregando formulário…',
+  attrs: (p, id) => {
+    const valores = valoresIniciaisJson(p.valores), idioma = typeof p.idioma === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/.test(p.idioma) ? p.idioma : ''
+    return { ...comId(id), 'data-polaris-formulario': idFormulario(p.formulario), ...(valores ? { 'data-polaris-valores': valores } : {}), ...(idioma ? { 'data-polaris-idioma': idioma } : {}), role: 'group', 'aria-busy': 'true' }
+  },
+  eventos: { aoEnviado: { dom: 'polaris-enviado', payload: (e) => (e as CustomEvent).detail }, aoErro: { dom: 'polaris-erro', payload: (e) => (e as CustomEvent).detail } },
+}
 /** Quadro: um documento HTML dentro de um iframe SEMPRE com `sandbox=""` (sem scripts, sem formulários, sem navegação, origem opaca). Nada nas props altera o sandbox. */
 export const QUADRO_MAX = 262_144
 export const d_midia_quadro: Descritor = {
@@ -152,6 +174,7 @@ export const DESCRITORES_BASE: DescritoresDom = {
   'computacao/canvas-gl': d_computacao_canvas_gl,
   'entrada/area': d_entrada_area,
   'midia/quadro': d_midia_quadro,
+  'form/formulario': d_form_formulario,
   'nav/link': d_nav_link,
   'nav/botao': d_nav_botao,
   'entrada/texto': d_entrada_texto,

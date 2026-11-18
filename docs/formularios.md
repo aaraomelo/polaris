@@ -81,9 +81,26 @@ Ações (`acoes[]`): `tipo` `enviar limpar cancelar voltar avancar personalizada
   - **Idempotência**: com `Idempotency-Key` (8–100 caracteres), o duplo clique devolve o mesmo resultado (`idempotent-replay: true`) sem chamar o serviço de novo; vale por tenant+usuário+formulário por 10 min; **falha não fica presa à chave**.
   - Limite de corpo 256 KB e de taxa (custo 3).
 
+## O bloco `form/formulario` nas páginas
+
+```json
+{ "bloco": "form/formulario", "props": { "formulario": "contato" } }
+```
+Props: `formulario` (id do nó; o do tenant vence o da plataforma), `valores` (iniciais, para edição; só primitivos e listas deles) e `idioma`. Eventos: `aoEnviado` (recebe `{ resultado, sucesso }`) e `aoErro` (`{ erros }` ou `{ status }`), que ligam ações da página como qualquer outro bloco.
+
+Como funciona (uma "ilha"): o servidor entrega só o ponto de montagem (`<div data-polaris-formulario="contato" role="group" aria-busy="true">Carregando formulário…</div>`); a página inclui o pacote da ilha (`PolarisFormularios`, ~60 KB, **só nas páginas que usam o bloco**, servido de `/_polaris/a/<hash>.js` com cache imutável), que **espera o runtime da página hidratar**, busca a definição (`GET /bff/formularios/:id`) e desenha os campos com o **mesmo motor** do servidor. A navegação sem recarregar (`docs/paginas.md`) monta a ilha da página nova.
+
+- **Campos**: rótulo ligado (`label for`), ajuda e erro em `aria-describedby`, `aria-required`, `aria-invalid`, erro com `role="alert"`; `type`/`inputmode`/`autocomplete` pelo tipo. Texto do autor entra sempre por `textContent`: **nunca HTML**.
+- **Máscara** a cada tecla, com o cursor no lugar certo (o tipo CPF/CNPJ/CEP/telefone/hora e a data têm máscara padrão); dinheiro é formatado ao sair do campo.
+- **Erros** ao sair do campo (`validar.quando`), a cada tecla ou só no envio; campos condicionais aparecem/somem; `calculado` e `desabilitadoSe` seguem os outros campos; listas com adicionar/remover (os erros caem no item certo).
+- **Passos**: só o passo atual aparece; Avançar valida o passo; Enviar só no último; um erro do servidor leva ao passo do campo.
+- **Envio**: valida na tela (mesmo motor), envia `{ valores, idioma }` com `Idempotency-Key` (a mesma na retentativa, nova quando o visitante muda um valor), desabilita os botões enquanto espera (o duplo clique não duplica), mostra a mensagem de sucesso, executa as ações `navegar` **seguras** (só caminho do próprio site) e avisa a página. Erro 422 do servidor vai para o campo certo e foca o primeiro.
+- **Sessão**: o envio usa o cookie de sessão do site **junto do cabeçalho `x-polaris-form`** (sem o cabeçalho, só o cookie não basta: nada de CSRF); cookie vencido segue como visitante.
+
 ## Limites (conhecidos)
 
-- **Ainda não há bloco que desenhe o formulário** nas páginas nem editor no Studio: hoje o JSON, o motor, a validação no servidor e o envio existem; o cliente monta a tela com o motor (`@polaris/engine`).
+- **Ainda não há editor de formulários no Studio** (o JSON é escrito à mão ou gerado). Sem JavaScript o visitante vê só "Carregando formulário…" (a ilha precisa do navegador).
+- A ilha executa só a ação `navegar`; `definir` e `executar` são da página (use `aoEnviado`).
 - Opções vindas de `dados` **não são conferidas no servidor** (o serviço continua validando o valor que recebe).
 - `arquivo` valida nome, extensão e tamanho declarados; **não há envio de arquivo** pelo gateway ainda.
 - `unico` (valor único por consulta ao serviço) e CAPTCHA/anti-spam não existem.

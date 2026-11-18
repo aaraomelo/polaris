@@ -4,6 +4,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify'
 import type { ChamadorCompleto } from './chamador'
 import { FalhaServico } from './cliente'
 import { ErroGw, traduz, type CtxGw } from './gateway'
+import { lerCookie } from './paginas'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // FORMULÁRIOS: `GET /bff/formularios/:id` entrega a definição (o navegador monta e valida com o MESMO motor); `POST /bff/formularios/:id` é onde a validação VALE:
@@ -44,7 +45,14 @@ export function instalaFormularios(app: FastifyInstance, d: DepsFormularios): vo
   })
 
   app.post<{ Params: { id: string }; Body: { valores?: unknown; campos?: unknown; idioma?: unknown } }>('/bff/formularios/:id', { bodyLimit: CORPO_MAX }, async (req, reply) => {
-    const ctx = await d.entra(req); d.limita(req, ctx, 3)
+    // sessão do site (cookie) só vale aqui com o cabeçalho `x-polaris-form` (um site de outra origem não consegue mandá-lo sem preflight, e o cookie é SameSite=Lax): o navegador envia do próprio site, logado
+    let doCookie = false
+    if (req.headers.authorization === undefined && req.headers['x-polaris-form'] === '1') { const tk = lerCookie(req.headers.cookie); if (tk) { req.headers.authorization = `Bearer ${tk}`; doCookie = true } }
+    let ctx: CtxGw
+    try { ctx = await d.entra(req) } catch (err) {
+      if (!doCookie || !(err instanceof ErroGw) || err.status !== 401) throw err
+      delete req.headers.authorization; ctx = await d.entra(req) // sessão expirada: segue como visitante (o serviço decide se aquela operação aceita)
+    }; d.limita(req, ctx, 3)
     const f = achaForm(ctx, req.params.id), spec = f.spec
     const b = req.body
     if (!b || typeof b !== 'object' || Array.isArray(b) || typeof b.valores !== 'object' || b.valores === null || Array.isArray(b.valores)) throw new ErroGw(400, 'requisicao_invalida', 'corpo: { valores: { … }, campos?, idioma? }')

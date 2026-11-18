@@ -6,7 +6,7 @@ import { aplicaMascara, valorDaMascara, type OpcoesMascara } from './mascara'
 // devolve os valores NORMALIZADOS e TIPADOS (só os campos declarados: o resto é descartado) e os erros por campo, com a mensagem pronta no idioma pedido.
 
 type Texto = string | Record<string, string>
-export type Opcao = { valor: string | number | boolean; rotulo?: Texto; desabilitado?: boolean; se?: string | Ast }
+export type Opcao = { valor: string | number | boolean; rotulo?: Texto; desabilitado?: boolean; se?: string | Ast; grupo?: string }
 export type CampoSpec = {
   nome: string; tipo: string; rotulo?: Texto; obrigatorio?: boolean; obrigatorioSe?: string | Ast; padrao?: unknown; somenteLeitura?: boolean; desabilitado?: boolean; desabilitadoSe?: string | Ast
   se?: string | Ast; limpaSeOculto?: boolean; calculado?: string | Ast; normaliza?: Normaliza[]
@@ -20,7 +20,9 @@ export type FormularioSpec = {
   validacoes?: Array<{ id: string; regra: string | Ast; mensagem: Texto; campos?: string[]; quando?: 'alterar' | 'sair' | 'enviar' }>
 }
 export type ErroCampo = { campo: string; regra: string; mensagem: string }
-export type ResultadoForm = { ok: boolean; valores: Record<string, unknown>; erros: ErroCampo[]; porCampo: Record<string, ErroCampo[]> }
+/** o que a tela precisa saber de cada campo (por caminho: `nome`, `ends.0.rua`): aparece? está desabilitado? é obrigatório agora? */
+export type EstadoCampo = { visivel: boolean; desabilitado: boolean; obrigatorio: boolean }
+export type ResultadoForm = { ok: boolean; valores: Record<string, unknown>; erros: ErroCampo[]; porCampo: Record<string, ErroCampo[]>; estado: Record<string, EstadoCampo> }
 export type OpcoesValida = {
   idioma?: string
   /** a data de HOJE (ISO) segundo o servidor; o relógio do visitante não decide */
@@ -44,7 +46,7 @@ const escolheTexto = (t: Texto | undefined, idioma: string, padrao?: string): st
   const base = idioma.split('-')[0]!
   return t[idioma] ?? t[base] ?? (padrao ? t[padrao] : undefined) ?? t['pt-BR'] ?? Object.values(t)[0]
 }
-const rotuloPadrao = (nome: string) => { const s = nome.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1) }
+export const rotuloPadrao = (nome: string) => { const s = nome.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1) }
 const preenche = (modelo: string, v: Record<string, unknown>) => modelo.replace(/\{(rotulo|valor|min|max|tamanho|outro)\}/g, (_m, k: string) => String(v[k] ?? ''))
 
 // ---- expressões ---------------------------------------------------------------------------------------------------------------------------------
@@ -124,7 +126,7 @@ const igualValor = (a: unknown, b: unknown) => a === b || (typeof a === 'object'
 // ---- o validador --------------------------------------------------------------------------------------------------------------------------------
 export function validaValores(spec: FormularioSpec, brutos: Record<string, unknown>, opc: OpcoesValida = {}): ResultadoForm {
   const idioma = opc.idioma ?? spec.idioma ?? 'pt-BR', hoje = opc.hoje ?? new Date().toISOString().slice(0, 10)
-  const erros: ErroCampo[] = []
+  const erros: ErroCampo[] = [], estado: Record<string, EstadoCampo> = {}
   const msg = (c: CampoSpec, regra: string, p: Record<string, unknown>, textoRegra?: Texto): string => {
     const rotulo = escolheTexto(c.rotulo, idioma, spec.idioma) ?? rotuloPadrao(c.nome)
     const modelo = escolheTexto(textoRegra ?? c.mensagens?.[regra as keyof Mensagens] ?? spec.mensagens?.[regra as keyof Mensagens], idioma, spec.idioma) ?? (PADRAO_MSG[idioma] ?? PADRAO_MSG[idioma.split('-')[0]!] ?? PADRAO_MSG['pt-BR']!)[regra] ?? PADRAO_MSG['pt-BR']![regra]!
@@ -149,11 +151,13 @@ export function validaValores(spec: FormularioSpec, brutos: Record<string, unkno
       const n = norm[c.nome]; if (!n) continue
       const caminho = prefixo + c.nome
       const visivel = c.se === undefined ? true : (() => { const r = roda(c.se!, escopo2); return r === undefined ? true : verdadeiro(r) })()
+      const v = c.validacao ?? {}
+      const obrigatorio = c.obrigatorio === true || (c.obrigatorioSe !== undefined && verdadeiro(roda(c.obrigatorioSe, escopo2)))
+      const desabilitadoAgora = c.desabilitado === true || c.somenteLeitura === true || c.calculado !== undefined || (c.desabilitadoSe !== undefined && verdadeiro(roda(c.desabilitadoSe, escopo2)))
+      estado[caminho] = { visivel, desabilitado: desabilitadoAgora, obrigatorio }
       if (!visivel) { if (c.limpaSeOculto === false) saida[c.nome] = n.valor; continue }
       if (c.desabilitadoSe !== undefined && verdadeiro(roda(c.desabilitadoSe, escopo2))) { saida[c.nome] = c.padrao; continue }
       let valor = n.valor; saida[c.nome] = valor
-      const v = c.validacao ?? {}
-      const obrigatorio = c.obrigatorio === true || (c.obrigatorioSe !== undefined && verdadeiro(roda(c.obrigatorioSe, escopo2)))
       const ehVazio = vazio(valor) || (c.tipo === 'booleano' && valor === false && c.obrigatorio === true)
       if (ehVazio && c.tipo !== 'grupo') {
         if (obrigatorio && !c.somenteLeitura && c.calculado === undefined) falha(caminho, c, 'obrigatorio')
@@ -239,7 +243,7 @@ export function validaValores(spec: FormularioSpec, brutos: Record<string, unkno
   }
   const porCampo: Record<string, ErroCampo[]> = {}
   for (const e of erros) (porCampo[e.campo] ??= []).push(e)
-  return { ok: erros.length === 0, valores, erros, porCampo }
+  return { ok: erros.length === 0, valores, erros, porCampo, estado }
 }
 
 /** a máscara está completa para o valor guardado? (com literais ou sem: a conferência refaz a máscara) */

@@ -28,7 +28,7 @@ O mesmo vale para um serviço (entidades, CRUD, operações → API HTTP, tabela
 | Packs de domínio: catálogo, vendas, pagamentos, estoque, serviços, alimentos, cadastro self-service | `packages/packs` | pronto, com limites (veja `docs/packs.md`) |
 | Multi-tenant: domínio próprio, módulos, overrides, releases, preview | `packages/packs`, `packages/gateway` | pronto |
 | Páginas dos tenants servidas pelo gateway (rotas declarativas, streaming, tema, hidratação) | `packages/gateway` | funcional, com sessão por cookie; **falta o formulário de login do provedor** (`docs/paginas.md`) |
-| Formulários declarativos: campos, **máscaras**, validação, mensagens e envio (o mesmo motor no navegador e no servidor) | `packages/schema`, `packages/engine`, `packages/gateway` | JSON, motor e envio prontos; **sem bloco de tela nem editor ainda** (`docs/formularios.md`) |
+| Formulários declarativos: campos, **máscaras**, validação, mensagens e envio (o mesmo motor no navegador e no servidor) | `packages/schema`, `packages/engine`, `packages/gateway` | JSON, motor, envio e o bloco `form/formulario` prontos; **sem editor no Studio ainda** (`docs/formularios.md`) |
 | Documentos declarativos (HTML e PDF com paridade testada) | `packages/documentos` | pronto |
 | Kernels (JS, WebAssembly, GLSL, PTX) com paridade entre backends | `packages/computacao` | pronto; **PTX nunca rodou em GPU real** |
 | Studio: editor de páginas e temas, histórico, diff semântico, comentários; **ele próprio é uma página da plataforma** | `apps/studio`, `packages/packs/nos/studio` | funcional; **falta o fluxo de login** e alguns recursos da versão anterior (veja `docs/studio.md`) |

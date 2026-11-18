@@ -67,6 +67,15 @@ describe('formulários no gateway', () => {
     expect((await post('retenta', { valores: { nome: 'Pudim', preco: 'abc' } }, vend, h)).statusCode).toBe(422)
     const ok = await post('retenta', { valores: { nome: 'Pudim', preco: '2.00' } }, vend, h); expect(ok.statusCode, ok.body).toBe(200); expect(ok.headers['idempotent-replay']).toBeUndefined()
   })
+  it('sessão do site (cookie): só vale com `x-polaris-form`; sem o cabeçalho ou com cookie vencido o envio segue como visitante', async () => {
+    const cookie = `polaris_sessao=${vend}`
+    const com = await e.req('POST', '/bff/formularios/novo-produto', { corpo: { valores: { nome: 'Via cookie', preco: '3.00' } }, host: 'a.loja.test', headers: { cookie, 'x-polaris-form': '1' } }); expect(com.statusCode, com.body).toBe(200)
+    expect(await produtos()).toContain('Via cookie')
+    const sem = await e.req('POST', '/bff/formularios/novo-produto', { corpo: { valores: { nome: 'Sem cabeçalho', preco: '3.00' } }, host: 'a.loja.test', headers: { cookie } }); expect(sem.statusCode).toBe(401) // CSRF: só o cookie não basta
+    expect(await produtos()).not.toContain('Sem cabeçalho')
+    const vencido = await e.req('POST', '/bff/formularios/novo-produto', { corpo: { valores: { nome: 'Vencido', preco: '3.00' } }, host: 'a.loja.test', headers: { cookie: 'polaris_sessao=aaaa.bbbb.cccc', 'x-polaris-form': '1' } }); expect(vencido.statusCode).toBe(401) // vira visitante; o serviço recusa a operação protegida
+    const publico = await e.req('POST', '/bff/formularios/so-valida', { corpo: { valores: { a: 'x' } }, host: 'a.loja.test', headers: { cookie: 'polaris_sessao=aaaa.bbbb.cccc', 'x-polaris-form': '1' } }); expect(publico.statusCode).toBe(200) // formulário sem envio: o cookie ruim não derruba
+  })
   it('um passo do assistente valida só os campos do passo e não envia; nomes fora do formulário são recusados', async () => {
     const antes = (await produtos()).length
     expect(e.json(await post('dois-passos', { valores: { nome: 'Passo um' }, campos: ['nome'] }))).toMatchObject({ ok: true, passo: true })

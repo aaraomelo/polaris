@@ -66,14 +66,14 @@ describe('ambiente local', () => {
     const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no
     home.spec.raiz.slots.filhos[1].props.texto = 'Título vindo do Studio'
     expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home })).status).toBe(201)
-    const nova = { kind: 'pagina', id: 'site.contato', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/contato', titulo: 'Contato', raiz: { bloco: 'texto/titulo', props: { texto: 'Fale conosco', nivel: 1 } } } }
-    expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.contato', ed, { no: nova })).status).toBe(201)
+    const nova = { kind: 'pagina', id: 'site.novidades', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/novidades', titulo: 'Contato', raiz: { bloco: 'texto/titulo', props: { texto: 'Novidades da loja', nivel: 1 } } } }
+    expect((await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.novidades', ed, { no: nova })).status).toBe(201)
     expect(await (await get(l, 'loja-demo', '/')).text()).not.toContain('Título vindo do Studio') // salvo, mas ainda não publicado
-    expect((await get(l, 'loja-demo', '/contato')).status).toBe(404)
+    expect((await get(l, 'loja-demo', '/novidades')).status).toBe(404)
     const pub = await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}); expect(pub.status).toBe(200); expect(((await pub.json()) as any).release).toBe(1)
     expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Título vindo do Studio')
-    const c = await get(l, 'loja-demo', '/contato'); expect(c.status).toBe(200); expect(await c.text()).toContain('Fale conosco')
-    expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Título vindo do Studio'); expect((await get(l, 'loja-outra', '/contato')).status).toBe(404) // o outro tenant não muda
+    const c = await get(l, 'loja-demo', '/novidades'); expect(c.status).toBe(200); expect(await c.text()).toContain('Novidades da loja')
+    expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Título vindo do Studio'); expect((await get(l, 'loja-outra', '/novidades')).status).toBe(404) // o outro tenant não muda
     const leitor = await l.token('loja-demo', ['studio.leitor']); expect((await req(l, 'loja-demo', 'POST', '/studio/publicar', leitor, {})).status).toBe(403)
   })
   it('releases: lista, diferença e rollback; o site volta para a versão anterior e só neste tenant', async () => {
@@ -226,6 +226,42 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.getByRole('button', { name: 'Voltar para esta' }).first().click(); await p.getByText('Em produção: release 2').first().waitFor()
       expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Versão dois')
       expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('formulário de contato no site: abre sem recarregar, máscara ao digitar, erros por campo, envio, e grava no tenant certo', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = [], docs: string[] = []
+      p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/status of 422/.test(m.text())) erros.push(`${m.text()} ${m.location().url}`) }); p.on('request', (r) => { if (r.resourceType() === 'document') docs.push(r.url()) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.waitForFunction(() => (window as any).Polaris?.inicia); await p.evaluate(() => { (window as any).__marca = 'mesma' }); const n0 = docs.length
+      await p.getByRole('link', { name: 'Contato' }).click() // navegação no cliente + a ilha carrega e monta o formulário
+      await p.getByRole('heading', { name: 'Fale conosco' }).waitFor(); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma'); expect(docs.length).toBe(n0)
+      const nome = p.getByLabel('Nome completo'), email = p.getByLabel('E-mail'), tel = p.getByLabel('Telefone'), msg = p.getByLabel('Mensagem'), aceite = p.getByLabel('Concordo com o uso dos dados')
+      // acessível: rótulos ligados; máscara ao digitar (telefone troca de 10 para 11 dígitos)
+      await tel.pressSequentially('11922223333'); expect(await tel.inputValue()).toBe('(11) 92222-3333')
+      // enviar vazio: erros por campo, na mensagem do autor, foco no primeiro; nada vai ao servidor
+      const envios: string[] = []; p.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/bff/formularios')) envios.push(r.url()) })
+      await p.getByRole('button', { name: 'Enviar mensagem' }).click(); await p.getByText('Diga como podemos chamar você.').waitFor(); await p.getByText('Precisamos do seu aceite para responder.').waitFor()
+      expect(envios.length).toBe(0); await expect.poll(() => p.evaluate(() => document.activeElement?.getAttribute('name'))).toBe('nome'); expect(await nome.getAttribute('aria-invalid')).toBe('true')
+      await nome.fill('Ana Maria'); await email.fill('ana@exemplo.com'); await msg.fill('Gostaria de saber o prazo de entrega.'); await aceite.check()
+      await p.getByRole('button', { name: 'Enviar mensagem' }).click(); await p.getByText('Mensagem enviada! Obrigado.').waitFor(); expect(envios.length).toBe(1)
+      expect(await nome.inputValue()).toBe('') // limpar: true
+      // gravou no tenant CERTO, normalizado (telefone só com dígitos)
+      const gerente = await l.token('loja-demo', ['gerente']), lista = (await (await req(l, 'loja-demo', 'GET', '/api/loja/contatos', gerente)).json()) as Array<{ nome: string; email: string; telefone: string }>
+      expect(lista).toHaveLength(1); expect(lista[0]).toMatchObject({ nome: 'Ana Maria', email: 'ana@exemplo.com', telefone: '11922223333' })
+      expect(((await (await req(l, 'loja-outra', 'GET', '/api/loja/contatos', await l.token('loja-outra', ['gerente']))).json()) as unknown[]).length).toBe(0)
+      expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('formulário aberto direto pela URL (sem navegação no cliente): monta depois da hidratação, sem erro e sem refazer a página', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/contato`); await p.getByLabel('Nome completo').waitFor()
+      expect(await p.locator('[data-polaris-formulario]').getAttribute('aria-busy')).toBe('false'); expect(await p.locator('[data-polaris-formulario] form').count()).toBe(1) // montado UMA vez
+      await p.getByLabel('Nome completo').fill('Al'); await p.getByLabel('Nome completo').blur(); await p.getByText('O nome precisa de pelo menos 3 letras.').waitFor()
+      await p.getByRole('link', { name: 'Sobre' }).click(); await p.getByRole('heading', { name: 'Sobre' }).waitFor(); await p.goBack(); await p.getByLabel('Nome completo').waitFor() // voltar: monta de novo
+      expect(await p.locator('[data-polaris-formulario] form').count()).toBe(1); expect(erros.join(' | ')).toBe('')
     } finally { await nav.close() }
   })
   it('clicar em "entrar" abre o Studio do tenant, já autenticado: lista os temas e abre o padrão', async () => {

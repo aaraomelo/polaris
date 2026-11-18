@@ -3,7 +3,7 @@ import type { Registry } from '@polaris/schema'
 import { registraNativos } from '../ir/nativos'
 import type { Componentes } from './tipos'
 import { DOCS_BASE } from './base-doc'
-import { QUADRO_MAX, dimensao, entradasJson, ident } from '../vivo/blocos'
+import { QUADRO_MAX, idFormulario, valoresIniciaisJson, dimensao, entradasJson, ident } from '../vivo/blocos'
 
 // Biblioteca nativa mínima (layout, texto, mídia, link). Serve de base e de prova do contrato;
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
@@ -45,6 +45,11 @@ export const COMPONENTES_BASE: Componentes = {
       onChange: (e: { target: { value: string } }) => on.aoMudar?.(e.target.value),
     }),
   'midia/quadro': ({ props, id }) => createElement('iframe', { ...(id ? { id } : {}), sandbox: '', title: txt(props.titulo).slice(0, 200), srcDoc: txt(props.html).slice(0, QUADRO_MAX), referrerPolicy: 'no-referrer', style: { width: '100%', height: Math.min(4000, Math.max(40, Math.trunc(num(props.altura) ?? 320))), border: 0 } }),
+  'form/formulario': ({ props, id }) => {
+    const f = idFormulario(props.formulario); if (!f) return null
+    const valores = valoresIniciaisJson(props.valores), idioma = typeof props.idioma === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/.test(props.idioma) ? props.idioma : ''
+    return createElement('div', { ...(id ? { id } : {}), 'data-polaris-formulario': f, ...(valores ? { 'data-polaris-valores': valores } : {}), ...(idioma ? { 'data-polaris-idioma': idioma } : {}), role: 'group', 'aria-busy': 'true' }, 'Carregando formulário…')
+  },
   'nav/botao': ({ props, on, id }) =>
     createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, onClick: () => on.aoClicar?.() }, txt(props.texto)),
   'entrada/texto': ({ props, on, id }) =>
@@ -104,6 +109,7 @@ export const BLOCOS_BASE = [
   bloco('computacao/canvas-gl', { props: { type: 'object', properties: { kernel: { type: 'string', pattern: '^[a-z][A-Za-z0-9._-]{0,63}$', description: 'id do nó kernel (o artefato é servido em /kernels/<id>.json)' }, largura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, altura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, alt: { type: 'string' }, entradas: { type: 'object', description: 'valores das entradas escalares do kernel (número ou booleano)' } }, required: ['kernel', 'alt'] } }),
   bloco('entrada/area', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, linhas: { type: 'integer', minimum: 1, maximum: 40, default: 4 }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('midia/quadro', { props: { type: 'object', properties: { html: { type: 'string', maxLength: 262144, description: 'documento HTML completo a exibir' }, titulo: { type: 'string', maxLength: 200, description: 'nome acessível do quadro (obrigatório)' }, altura: { type: 'integer', minimum: 40, maximum: 4000, default: 320 } }, required: ['html', 'titulo'] } }),
+  bloco('form/formulario', { props: { type: 'object', properties: { formulario: { type: 'string', pattern: '^[a-z0-9][a-z0-9._-]{0,127}$', description: 'id do nó `formulario` (do tenant ou da plataforma)' }, valores: { type: 'object', description: 'valores iniciais por campo (edição); só primitivos e listas deles' }, idioma: { type: 'string', pattern: '^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$', description: 'idioma das mensagens (padrão: o do visitante)' } }, required: ['formulario'] }, eventos: { aoEnviado: { payload: 'json' }, aoErro: { payload: 'json' } } }),
   bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
