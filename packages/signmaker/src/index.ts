@@ -20,3 +20,4 @@ export async function geraCartaz(no: No, dados: unknown, o: { agora?: Date; html
   return { layout: l, html: htmlDe(l, o.html), pdf: await pdfDe(l, o.agora) }
 }
 export const validaNoCartaz = (no: No): string[] => validaCartaz(spec(no))
+export { converteConfiguracao, converteGeometria, type Convertido, type Relatorio } from './legado'

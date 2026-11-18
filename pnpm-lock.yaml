@@ -733,6 +733,9 @@ importers:
         specifier: ^1.5.2
         version: 1.5.2
     devDependencies:
+      '@polaris/schema':
+        specifier: workspace:*
+        version: link:../schema
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
