@@ -109,12 +109,12 @@ describe('tracer', () => {
   it('span filho herda o trace e aponta o pai; o contexto atravessa awaits', async () => {
     const { ex, t } = novo()
     await t.emSpan('pai', { tipo: 'servidor' }, async (pai) => {
-      await new Promise((r) => setTimeout(r, 2))
+      await new Promise((r) => setTimeout(r, 5)) // o timer pode disparar ~1 ms antes do relógio de alta resolução: dormir mais e exigir só um mínimo seguro
       await t.emSpan('filho', {}, async (f) => { await Promise.resolve(); expect(t.atual()).toBe(f); expect(f.traceId).toBe(pai.traceId); expect(f.paiId).toBe(pai.spanId) })
       expect(t.atual()).toBe(pai)
     })
     expect(t.atual()).toBeUndefined()
-    expect(ex.spans.map((s) => s.nome)).toEqual(['filho', 'pai']); expect(ex.spans[0]!.paiId).toBe(ex.spans[1]!.spanId); expect(ex.spans[1]!.duracaoMs).toBeGreaterThanOrEqual(2)
+    expect(ex.spans.map((s) => s.nome)).toEqual(['filho', 'pai']); expect(ex.spans[0]!.paiId).toBe(ex.spans[1]!.spanId); expect(ex.spans[1]!.duracaoMs).toBeGreaterThanOrEqual(3)
   })
   it('continua um trace de FORA; cabeçalho inválido gera trace novo; ids únicos e nunca zerados', () => {
     const { ex, t } = novo()

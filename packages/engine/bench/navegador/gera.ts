@@ -8,9 +8,9 @@ import { construirAot } from '../../src/aot/index'
 import { COMPONENTES_BASE, compilaPrograma, registraBase, renderPaginaHtml } from '../../src/index'
 
 const raiz = resolve(__dirname, '..', '..')
-const saida = join(__dirname, 'saida')
+const saida = join(import.meta.dirname, 'saida')
 rmSync(saida, { recursive: true, force: true }); mkdirSync(saida, { recursive: true })
-copyFileSync(join(__dirname, 'medir.js'), join(saida, 'medir.js'))
+copyFileSync(join(import.meta.dirname, 'medir.js'), join(saida, 'medir.js'))
 
 const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0.0', estatuto: 'publicado', spec }) as any
 const P = (b: string, extra: object = {}) => ({ bloco: b, ...extra })

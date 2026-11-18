@@ -17,5 +17,5 @@ expect.extend({
   async toHaveValue(l: Locator, v: string) { const r = await espera(async () => { const o = await l.first().inputValue({ timeout: 1000 }); return { ok: o === v, obtido: o } }); return resultado(r, 'toHaveValue', v) },
   async toHaveCount(l: Locator, n: number) { const r = await espera(async () => { const o = await l.count(); return { ok: o === n, obtido: o } }); return resultado(r, 'toHaveCount', n) },
 })
-declare module 'vitest' { interface Assertion<T> { toHaveText(t: string | RegExp): Promise<void>; toContainText(t: string | RegExp): Promise<void>; toBeVisible(): Promise<void>; toBeDisabled(): Promise<void>; toHaveAttribute(n: string, v: string): Promise<void>; toHaveValue(v: string): Promise<void>; toHaveCount(n: number): Promise<void> }
+declare module 'vitest' { interface Assertion<R, T> { toHaveText(t: string | RegExp): Promise<void>; toContainText(t: string | RegExp): Promise<void>; toBeVisible(): Promise<void>; toBeDisabled(): Promise<void>; toHaveAttribute(n: string, v: string): Promise<void>; toHaveValue(v: string): Promise<void>; toHaveCount(n: number): Promise<void> }
   interface AsymmetricMatchersContaining { toHaveText(t: string | RegExp): void } }

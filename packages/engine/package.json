@@ -7,12 +7,12 @@
   "scripts": {
     "test": "vitest run",
     "tipos": "tsc --noEmit",
-    "bench": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/ssr.ts",
-    "bench:vivo": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/vivo.ts",
-    "docs:funcoes": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs scripts/docs-funcoes.ts",
-    "aot": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs scripts/aot.ts --",
+    "bench": "tsx bench/ssr.ts",
+    "bench:vivo": "tsx bench/vivo.ts",
+    "docs:funcoes": "tsx scripts/docs-funcoes.ts",
+    "aot": "tsx scripts/aot.ts --",
     "orcamento:navegador": "node bench/navegador/cdp.mjs 3 --verifica",
-    "catalogo": "node ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs scripts/catalogo.ts --",
+    "catalogo": "tsx scripts/catalogo.ts --",
     "perfil:lista": "rm -rf .perfil && node --cpu-prof --cpu-prof-dir=.perfil ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/perfil-lista.ts && node bench/analisa.mjs .perfil",
     "perfil": "rm -rf .perfil && node --cpu-prof --cpu-prof-dir=.perfil ../../node_modules/.pnpm/vite-node@2.1.9_@types+node@22.20.5/node_modules/vite-node/vite-node.mjs bench/perfil.ts && node bench/analisa.mjs .perfil"
   },
@@ -26,11 +26,12 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "typescript": "~5.6.3",
-    "vitest": "^2.1.8",
+    "vitest": "^5.1.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "jsdom": "^31.0.1",
-    "@types/jsdom": "^30.0.0"
+    "@types/jsdom": "^30.0.0",
+    "tsx": "^4.21.0"
   },
   "exports": {
     ".": "./src/index.ts",
