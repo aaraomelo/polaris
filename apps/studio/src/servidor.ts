@@ -4,6 +4,10 @@ import { fileURLToPath } from 'node:url'
 import type { FastifyInstance } from 'fastify'
 import Fastify from 'fastify'
 import { rotasStudio, type OpcoesStudio } from '@polaris/packs'
+import { geraPreview } from './preview'
+
+/** a pré-visualização do servidor: o mesmo `geraPreview` do cliente */
+export const previsualiza: NonNullable<OpcoesStudio['previsualiza']> = (a) => geraPreview(a.no, a.blocosDoTenant, a.selecionado, a.tema)
 
 // O cliente do Studio (dist/) e a API de autoria. Quem AUTENTICA é injetado: no gateway, o JWT dele; em dev/teste, um stub. O servidor nunca decide identidade sozinho.
 export const DIST_PADRAO = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
@@ -25,5 +29,5 @@ export function rotasEstaticasStudio(app: FastifyInstance, dir: string = DIST_PA
 
 /** o Studio num servidor próprio (dev e testes) */
 export function criaServidorStudio(o: OpcoesStudio, dir?: string): FastifyInstance {
-  const app = Fastify({ logger: false }); rotasEstaticasStudio(app, dir); rotasStudio(app, o); return app
+  const app = Fastify({ logger: false }); rotasEstaticasStudio(app, dir); rotasStudio(app, { previsualiza, ...o }); return app
 }

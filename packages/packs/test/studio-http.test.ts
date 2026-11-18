@@ -110,4 +110,15 @@ describe('API de autoria do Studio', () => {
     expect(pode([])).toEqual([false, false, false]); expect(pode(['gerente', 'catalogo.gerente'])).toEqual([false, false, false]); expect(pode(['studio.inexistente'])).toEqual([false, false, false]); expect(pode(['studio.leitor', 'studio.inexistente'])).toEqual([false, false, false])
     expect(sessaoDeToken(base, { tenantId: A, usuario: 'u', papeis: ['studio.editor'] })).toMatchObject({ tenantId: A, usuario: 'u' })
   })
+  it('previa: sem gerador injetado é 501; com ele, valida o corpo, passa os blocos do tenant e devolve o HTML ou os erros', async () => {
+    expect((await app.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: pagina('p') } })).statusCode).toBe(501)
+    const chamadas: any[] = []; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, previsualiza: (x) => { chamadas.push(x); return (x.no as any).spec.rota === '/ruim' ? { ok: false, erros: ['quebrou'] } : { ok: true, html: '<p>oi</p>', titulo: 't' } } })
+    const post = (corpo: object, t = h(A, 'ana', 'ver')) => a2.inject({ method: 'POST', url: '/studio/previa', headers: t, payload: corpo })
+    const pb = await put(A, { kind: 'bloco', id: 'meu.bloco', versao: '1.0.0', estatuto: 'publicado', spec: { interface: 'meu/bloco', modelo: { bloco: 'texto/paragrafo', props: { texto: 'x' } } } }); expect(pb.statusCode, pb.body).toBe(201)
+    const ok = await post({ no: pagina('p'), selecionado: 'p1' }); expect(ok.json()).toEqual({ ok: true, html: '<p>oi</p>', erros: [] }); expect(chamadas[0]).toMatchObject({ selecionado: 'p1' }); expect(chamadas[0].blocosDoTenant.map((b: any) => b.id)).toContain('meu.bloco'); expect(chamadas[0].blocosDoTenant.every((b: any) => b.tenantId === A)).toBe(true)
+    expect((await post({ no: { ...pagina('p'), spec: { rota: '/ruim' } } })).json()).toEqual({ ok: false, html: '', erros: ['quebrou'] })
+    expect((await post({ no: pagina('p') }, h(B, 'bia'))).json().ok).toBe(true); expect(chamadas.at(-1).blocosDoTenant).toEqual([]) // outro tenant: nenhum bloco do A
+    for (const ruim of [{}, { no: 5 }, { no: [] }, { no: pagina('p'), extra: 1 }, { no: pagina('p'), selecionado: "x'; --" }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim).slice(0, 40)).toBe(400)
+    expect((await a2.inject({ method: 'POST', url: '/studio/previa', payload: { no: pagina('p') } })).statusCode).toBe(401); await a2.close()
+  })
 })

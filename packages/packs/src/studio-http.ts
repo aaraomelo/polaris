@@ -22,6 +22,8 @@ export type OpcoesStudio = {
   baseDe: (tenantId: string) => Promise<import('@polaris/schema').Registry>
   q: (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
   autentica: (req: FastifyRequest) => Promise<Sessao | null>
+  /** gera o HTML de pré-visualização de uma página (compilador e renderizador do engine); injetado porque o pacote não depende do engine. Sem ele, `/studio/previa` é 501. */
+  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string } | { ok: false; erros: string[] }
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
 }
 const ID = /^[a-z][A-Za-z0-9._/-]{0,127}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, ANCORA = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
@@ -148,6 +150,19 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const r = await o.q(`INSERT INTO plataforma.comentario (tenant_id, kind, no_id, ancora, versao, autor, texto, resp_a) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, kind, no_id, ancora, versao, autor, texto, resp_a, resolvido, criado_em`,
       [s.tenantId, x.kind, x.id, x.ancora ?? null, x.versao ?? null, s.usuario, x.texto, x.respondeA ?? null])
     return reply.status(201).send({ comentario: comentarioDe(r.rows[0]!) })
+  })
+
+  /** pré-visualização no servidor: o rascunho (e o tema) vão no corpo; devolve o HTML pronto para um iframe `sandbox=""` ou os erros do compilador */
+  app.post('/studio/previa', { bodyLimit: 512 * 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver', 3); if (!s) return reply
+    if (!o.previsualiza) return erro(reply, 501, 'nao_implementado', 'este servidor não gera pré-visualização')
+    const b = req.body; if (!so(b, ['no', 'tema', 'selecionado'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { no, tema?, selecionado? }')
+    const x = b as { no?: unknown; tema?: unknown; selecionado?: unknown }
+    if (!x.no || typeof x.no !== 'object' || Array.isArray(x.no)) return erro(reply, 400, 'requisicao_invalida', 'no: objeto esperado')
+    if (x.selecionado !== undefined && (typeof x.selecionado !== 'string' || !ANCORA.test(x.selecionado))) return erro(reply, 400, 'requisicao_invalida', 'selecionado inválido')
+    const blocos = (await o.armazem.cabecas(s.tenantId)).filter((c) => c.kind === 'bloco').map((c) => ({ ...(c.conteudo as object), tenantId: s.tenantId }))
+    const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), blocosDoTenant: blocos })
+    return r.ok ? { ok: true, html: r.html, erros: [] } : { ok: false, html: '', erros: r.erros }
   })
 
   app.post<{ Params: { cid: string } }>('/studio/comentarios/:cid/resolver', async (req, reply) => {
