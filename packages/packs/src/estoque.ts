@@ -163,8 +163,34 @@ export function criaEstoque(no: No, o: { validadeReservaMinutos?: number } = {})
     await q(`UPDATE ${T('reserva')} SET status = 'confirmada', motivo = $2, atualizado_em = now() WHERE id = $1`, [r.id, ativa ? null : 'reserva expirada: baixa direta'])
   }
 
-  const consumidor = (db: DbTenant) => criaConsumidor({ db, servico: 'estoque', consumidor: 'baixa-pedido', tipos: ['pedido.confirmado'], handler: async (env, q) => { await baixaDoPedido(q, env.tenantId, String(env.payload.pedidoId)) } })
-  return { operacoes, consumidor, baixaDoPedido }
+  /** As peças de uma OS CONCLUÍDA saem do estoque (`consumo`), tudo ou nada, no depósito padrão. Idempotente. Sem estoque suficiente a OS (já feita) NÃO volta atrás: fica uma `divergente` para o time. */
+  async function baixaDaOS(q: Consulta, tenantId: string, osId: string, itens: Array<{ produtoId: string; quantidade: string }>): Promise<void> {
+    if ((await q(`SELECT 1 FROM ${T('movimento')} WHERE ref_tipo = 'ordem_servico' AND ref_id = $1 LIMIT 1`, [osId])).rows.length || (await q(`SELECT 1 FROM ${T('reserva')} WHERE pedido_id = $1`, [osId])).rows.length) return
+    if (!itens.length) return
+    const dep = (await q(`SELECT id::text AS id FROM ${T('deposito')} WHERE padrao AND ativo LIMIT 1`)).rows[0] as { id: string } | undefined
+    const falha = async (motivo: string) => { await q(`INSERT INTO ${T('reserva')} (tenant_id, pedido_id, status, motivo) VALUES ($1, $2, 'divergente', $3)`, [tenantId, osId, motivo.slice(0, 500)]) }
+    if (!dep) return falha('OS concluída sem depósito padrão para baixar as peças')
+    const ordem = [...itens].sort((a, b) => (a.produtoId < b.produtoId ? -1 : 1)); const travados = new Map<string, { id: string; quantidade: string; reservado: string; custo: string }>(); const faltas: string[] = []
+    for (const i of ordem) {
+      const it = { produtoId: i.produtoId, varianteId: null, itemId: i.produtoId }; const s = await saldoTravado(q, tenantId, it, dep.id); travados.set(i.produtoId, s)
+      if (compara(String(i.quantidade), disponivel(s)) > 0) faltas.push(`${i.produtoId} (disponível ${disponivel(s)}, usado ${i.quantidade})`)
+    }
+    if (faltas.length) return falha(`OS concluída sem estoque para as peças: ${faltas.join('; ')}`)
+    for (const i of ordem) {
+      const s = travados.get(i.produtoId)!, n = String(i.quantidade)
+      await q(`UPDATE ${T('saldo')} SET quantidade = $2, atualizado_em = now() WHERE id = $1`, [s.id, subtrai(s.quantidade, n)])
+      await movimenta(q, tenantId, 'sistema', { it: { produtoId: i.produtoId, varianteId: null, itemId: i.produtoId }, depositoId: dep.id, tipo: 'consumo', delta: `-${n}`, custo: s.custo, chave: `os-${osId}`, refTipo: 'ordem_servico', refId: osId })
+    }
+  }
+
+  const consumidor = (db: DbTenant) => criaConsumidor({
+    db, servico: 'estoque', consumidor: 'baixa-estoque', tipos: ['pedido.confirmado', 'os.concluida'],
+    handler: async (env, q) => {
+      if (env.tipo === 'os.concluida') await baixaDaOS(q, env.tenantId, String(env.payload.ordemServicoId), (env.payload.itens as Array<{ produtoId: string; quantidade: string }>) ?? [])
+      else await baixaDoPedido(q, env.tenantId, String(env.payload.pedidoId))
+    },
+  })
+  return { operacoes, consumidor, baixaDoPedido, baixaDaOS }
 }
 
 export type ClienteEstoque = { chama(tenantId: string, metodo: 'POST', caminho: string, corpo: unknown): Promise<{ status: number; corpo: any }> }

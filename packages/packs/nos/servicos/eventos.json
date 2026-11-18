@@ -1,0 +1,27 @@
+[
+ {
+  "kind": "evento",
+  "id": "os.concluida",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "nome": "os.concluida",
+   "payload": {
+    "ordemServicoId": {
+     "tipo": "uuid",
+     "obrigatorio": true
+    },
+    "total": {
+     "tipo": "dinheiro",
+     "obrigatorio": true
+    },
+    "itens": {
+     "tipo": "json",
+     "obrigatorio": true,
+     "descricao": "[{ produtoId, quantidade }] só das peças com produto"
+    }
+   },
+   "idempotencia": "ordemServicoId"
+  }
+ }
+]

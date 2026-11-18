@@ -123,3 +123,32 @@ Sem estoque = recusa (`ok:false`, a saga compensa e o pagamento nem é tentado);
 - Lote/validade/série, endereçamento e inventário cíclico agendado não foram portados.
 - A baixa depende do relay entregar `pedido.confirmado`; se o evento se perder, o pedido fica com reserva `ativa` até expirar (o job a libera, e a venda aparece como estoque que nunca baixou). Monitorar o atraso do outbox (métrica do relay).
 - Quantidades chegam como número JSON (`decimal` da API); mais de 4 casas é recusado.
+
+---
+
+## Serviços (`servicos`): agenda, orçamento, ordem de serviço e garantia
+Portado do `service-order`/`budget`/`warranty-term` do erp-api, **sem acoplar a veículos**: a OS atende um `objeto` (placa, serial, descrição), então serve a oficina, assistência técnica, salão ou qualquer serviço agendado.
+
+| Entidade | Papel |
+|---|---|
+| `recurso`, `servicoOferecido`, `termoGarantia` | cadastros do tenant (profissional/sala; duração e preço; dias e texto da garantia) |
+| `agendamento` | recurso + serviço + início; o **fim vem da duração do serviço** |
+| `orcamento` / `itemOrcamento` | rascunho → enviado → aprovado/rejeitado/expirado → convertido |
+| `ordemServico` / `itemOrdemServico` | aberta → em andamento ⇄ aguardando peça/cliente → concluída → entregue (ou cancelada) |
+| `sequencia` | numeração `orcamento`/`os` por tenant, atômica (`ON CONFLICT … DO UPDATE`) |
+
+### Regras (todas testadas)
+- **Agenda sem conflito**: o recurso é **travado** (`FOR UPDATE`) e a sobreposição `inicio < fim' AND fim > inicio'` é recusada (409); encostar (fim = início) pode; cancelado e faltou liberam o horário; remarcar não conflita consigo mesmo; passado, recurso/serviço inativo ou data inválida são recusados. Duas requisições simultâneas pelo mesmo horário: só uma entra.
+- **Totais exatos**: linha = `preço × quantidade − desconto` (desconto maior que a linha é 422); subtotal/total do orçamento e `totalPecas`/`totalServicos`/`total` da OS recalculados a cada mudança, nunca negativos.
+- **Orçamento**: só se edita em rascunho; vazio não envia; só o enviado se decide; aprovar depois da validade é 422; o job `expirarOrcamentos` expira os vencidos; **converter aprovado em OS é idempotente** (a mesma OS, uma só) e copia itens, desconto e totais.
+- **OS**: transições explícitas (inválida é 409, repetir é no-op); sem itens não conclui; cancelar exige motivo; item só enquanto a OS está aberta; **entregar fixa a garantia** (`garantiaAte = hoje + dias` do termo).
+- **Papéis**: `tecnico` lê tudo mas só altera a OS em que é o `responsavelId` (as dos outros dão 404); `atendente` agenda, orça, abre e converte; `gerente` cadastra recursos, serviços e termos.
+
+### Ligação com o Estoque
+Concluir a OS publica `os.concluida` (mesma transação) com as peças agregadas que têm `produtoId`. O Estoque consome o evento e dá **baixa `consumo`** ao custo médio, tudo ou nada, no depósito padrão, idempotente (também sem o inbox). **Sem estoque suficiente a OS não volta atrás**: vira uma reserva `divergente` com o motivo, para o time resolver.
+
+### Limites conhecidos
+- Não há **horários livres** nem expediente do recurso: o cliente escolhe o início e a API só recusa conflito.
+- Preço de peça e mão de obra são **digitados no balcão** (não vêm de cotação do Catálogo, como no varejo online).
+- OS concluída não reabre (retrabalho = nova OS); concluir exige ao menos um item.
+- Sem anexos/fotos, laudo, checklist, comissão do técnico nem cobrança da OS (a cobrança é pelo pack Pagamentos, ainda não ligada à OS).

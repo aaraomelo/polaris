@@ -1,0 +1,146 @@
+[
+ {
+  "kind": "papel",
+  "id": "servicos.tecnico",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "regras": [
+    {
+     "acoes": [
+      "listar",
+      "obter"
+     ],
+     "sujeitos": [
+      "servicos.ordemServico",
+      "servicos.itemOrdemServico",
+      "servicos.servicoOferecido",
+      "servicos.termoGarantia",
+      "servicos.recurso"
+     ]
+    },
+    {
+     "acoes": [
+      "adicionarItemOS",
+      "mudarStatusOS",
+      "removerItemOS"
+     ],
+     "sujeitos": [
+      "servicos.ordemServico"
+     ],
+     "onde": {
+      "responsavelId": "$usuario"
+     }
+    },
+    {
+     "acoes": [
+      "listar",
+      "obter"
+     ],
+     "sujeitos": [
+      "servicos.agendamento"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "kind": "papel",
+  "id": "servicos.atendente",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "herda": [
+    "servicos.tecnico"
+   ],
+   "regras": [
+    {
+     "acoes": [
+      "listar",
+      "obter"
+     ],
+     "sujeitos": [
+      "servicos.orcamento",
+      "servicos.itemOrcamento"
+     ]
+    },
+    {
+     "acoes": [
+      "agendar",
+      "remarcar",
+      "mudarStatusAgendamento"
+     ],
+     "sujeitos": [
+      "servicos.agendamento"
+     ]
+    },
+    {
+     "acoes": [
+      "abrirOrcamento",
+      "enviarOrcamento",
+      "decidirOrcamento",
+      "converterOrcamento",
+      "expirarOrcamentos"
+     ],
+     "sujeitos": [
+      "servicos.orcamento",
+      "servicos.ordemServico"
+     ]
+    },
+    {
+     "acoes": [
+      "adicionarItemOrcamento"
+     ],
+     "sujeitos": [
+      "servicos.itemOrcamento"
+     ]
+    },
+    {
+     "acoes": [
+      "removerItemOrcamento"
+     ],
+     "sujeitos": [
+      "servicos.orcamento"
+     ]
+    },
+    {
+     "acoes": [
+      "abrirOS",
+      "adicionarItemOS",
+      "removerItemOS",
+      "mudarStatusOS"
+     ],
+     "sujeitos": [
+      "servicos.ordemServico",
+      "servicos.itemOrdemServico"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "kind": "papel",
+  "id": "servicos.gerente",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "herda": [
+    "servicos.atendente"
+   ],
+   "regras": [
+    {
+     "acoes": [
+      "criar",
+      "atualizar",
+      "remover"
+     ],
+     "sujeitos": [
+      "servicos.recurso",
+      "servicos.servicoOferecido",
+      "servicos.termoGarantia"
+     ]
+    }
+   ]
+  }
+ }
+]

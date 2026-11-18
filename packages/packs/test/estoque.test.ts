@@ -25,7 +25,7 @@ describe('custo médio ponderado (exato)', () => {
 })
 
 const reg = new Registry(); for (const n of nosDoPack('estoque')) reg.registra(n)
-for (const n of nosDoPack('vendas')) if ((n as { kind: string }).kind === 'evento') reg.registra(n) // o evento que o Estoque consome
+for (const p of ['vendas', 'servicos'] as const) for (const n of nosDoPack(p)) if ((n as { kind: string }).kind === 'evento') reg.registra(n) // os eventos que o Estoque consome
 const no = reg.resolve('servico', 'estoque')!.no
 it('nós do pack Estoque: registram, referências resolvem, SQL e OpenAPI emitem (inbox incluído)', () => {
   expect(reg.verificaTudo().filter((x) => x.erros.length)).toEqual([]); expect(emite(no, 'sql')).toContain('"inbox"'); expect(() => emite(no, 'openapi')).not.toThrow()

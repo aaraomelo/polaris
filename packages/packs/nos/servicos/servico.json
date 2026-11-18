@@ -1,0 +1,712 @@
+{
+ "kind": "servico",
+ "id": "servicos",
+ "versao": "1.0.0",
+ "estatuto": "publicado",
+ "spec": {
+  "entidades": {
+   "recurso": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "ativo": {
+      "tipo": "booleano",
+      "padrao": true
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ],
+    "crud": {
+     "caminho": "/recursos"
+    }
+   },
+   "servicoOferecido": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "descricao": {
+      "tipo": "texto"
+     },
+     "duracaoMin": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "preco": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "ativo": {
+      "tipo": "booleano",
+      "padrao": true
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ],
+    "crud": {
+     "caminho": "/servicos-oferecidos"
+    }
+   },
+   "termoGarantia": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "dias": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "texto": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "ativo": {
+      "tipo": "booleano",
+      "padrao": true
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ],
+    "crud": {
+     "caminho": "/termos-garantia"
+    }
+   },
+   "sequencia": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "valor": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ]
+   },
+   "agendamento": {
+    "campos": {
+     "clienteId": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "recursoId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "recurso"
+     },
+     "servicoId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "servicoOferecido"
+     },
+     "inicio": {
+      "tipo": "dataHora",
+      "obrigatorio": true
+     },
+     "fim": {
+      "tipo": "dataHora",
+      "obrigatorio": true
+     },
+     "status": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "agendado | confirmado | em_atendimento | concluido | cancelado | faltou"
+     },
+     "criadoPor": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "notas": {
+      "tipo": "texto"
+     }
+    },
+    "indices": [
+     [
+      "recursoId",
+      "inicio"
+     ],
+     [
+      "clienteId"
+     ],
+     [
+      "status"
+     ]
+    ],
+    "crud": {
+     "caminho": "/agendamentos",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   },
+   "orcamento": {
+    "campos": {
+     "numero": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "clienteId": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "status": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "rascunho | enviado | aprovado | rejeitado | expirado | convertido | cancelado"
+     },
+     "validoAte": {
+      "tipo": "data"
+     },
+     "subtotal": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "total": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "notas": {
+      "tipo": "texto"
+     },
+     "ordemServicoId": {
+      "tipo": "uuid"
+     },
+     "criadoPor": {
+      "tipo": "texto",
+      "obrigatorio": true
+     }
+    },
+    "unicos": [
+     [
+      "numero"
+     ]
+    ],
+    "indices": [
+     [
+      "status"
+     ],
+     [
+      "clienteId"
+     ]
+    ],
+    "crud": {
+     "caminho": "/orcamentos",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   },
+   "itemOrcamento": {
+    "campos": {
+     "orcamentoId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "orcamento"
+     },
+     "tipo": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "servico | peca"
+     },
+     "produtoId": {
+      "tipo": "uuid"
+     },
+     "descricao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "quantidade": {
+      "tipo": "decimal",
+      "obrigatorio": true
+     },
+     "precoUnitario": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "total": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     }
+    },
+    "indices": [
+     [
+      "orcamentoId"
+     ]
+    ],
+    "crud": {
+     "caminho": "/itens-orcamento",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   },
+   "ordemServico": {
+    "campos": {
+     "numero": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "clienteId": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "objeto": {
+      "tipo": "texto",
+      "descricao": "o bem atendido: placa, serial, descrição"
+     },
+     "responsavelId": {
+      "tipo": "texto"
+     },
+     "orcamentoId": {
+      "tipo": "uuid"
+     },
+     "termoGarantiaId": {
+      "tipo": "uuid",
+      "referencia": "termoGarantia"
+     },
+     "status": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "aberta | em_andamento | aguardando_peca | aguardando_cliente | concluida | entregue | cancelada"
+     },
+     "descricao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "diagnostico": {
+      "tipo": "texto"
+     },
+     "totalPecas": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "totalServicos": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "total": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "concluidaEm": {
+      "tipo": "dataHora"
+     },
+     "entregueEm": {
+      "tipo": "dataHora"
+     },
+     "garantiaAte": {
+      "tipo": "data"
+     },
+     "motivoCancelamento": {
+      "tipo": "texto"
+     },
+     "criadoPor": {
+      "tipo": "texto",
+      "obrigatorio": true
+     }
+    },
+    "unicos": [
+     [
+      "numero"
+     ],
+     [
+      "orcamentoId"
+     ]
+    ],
+    "indices": [
+     [
+      "status"
+     ],
+     [
+      "responsavelId"
+     ],
+     [
+      "clienteId"
+     ]
+    ],
+    "crud": {
+     "caminho": "/ordens-servico",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   },
+   "itemOrdemServico": {
+    "campos": {
+     "ordemServicoId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "ordemServico"
+     },
+     "tipo": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "servico | peca"
+     },
+     "produtoId": {
+      "tipo": "uuid"
+     },
+     "descricao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "quantidade": {
+      "tipo": "decimal",
+      "obrigatorio": true
+     },
+     "precoUnitario": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "total": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     }
+    },
+    "indices": [
+     [
+      "ordemServicoId"
+     ]
+    ],
+    "crud": {
+     "caminho": "/itens-ordem-servico",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   }
+  },
+  "operacoes": {
+   "agendar": {
+    "metodo": "POST",
+    "caminho": "/agendamentos",
+    "entrada": {
+     "clienteId": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "recursoId": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "servicoId": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "inicio": {
+      "tipo": "dataHora",
+      "obrigatorio": true
+     },
+     "notas": {
+      "tipo": "texto"
+     }
+    },
+    "saida": "agendamento",
+    "permissao": "servicos"
+   },
+   "remarcar": {
+    "metodo": "POST",
+    "caminho": "/agendamentos/:id/remarcar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "inicio": {
+      "tipo": "dataHora",
+      "obrigatorio": true
+     },
+     "recursoId": {
+      "tipo": "uuid"
+     }
+    },
+    "saida": "agendamento",
+    "permissao": "servicos"
+   },
+   "mudarStatusAgendamento": {
+    "metodo": "POST",
+    "caminho": "/agendamentos/:id/status",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "para": {
+      "tipo": "texto",
+      "obrigatorio": true
+     }
+    },
+    "saida": "agendamento",
+    "permissao": "servicos"
+   },
+   "abrirOrcamento": {
+    "metodo": "POST",
+    "caminho": "/orcamentos",
+    "entrada": {
+     "clienteId": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "validoAte": {
+      "tipo": "data"
+     },
+     "desconto": {
+      "tipo": "dinheiro"
+     },
+     "notas": {
+      "tipo": "texto"
+     }
+    },
+    "saida": "orcamento",
+    "permissao": "servicos"
+   },
+   "adicionarItemOrcamento": {
+    "metodo": "POST",
+    "caminho": "/orcamentos/:id/itens",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "descricao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "tipo": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "produtoId": {
+      "tipo": "uuid"
+     },
+     "quantidade": {
+      "tipo": "decimal",
+      "obrigatorio": true
+     },
+     "precoUnitario": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro"
+     }
+    },
+    "saida": "itemOrcamento",
+    "permissao": "servicos"
+   },
+   "removerItemOrcamento": {
+    "metodo": "POST",
+    "caminho": "/orcamentos/:id/itens/:itemId/remover",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "itemId": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "orcamento",
+    "permissao": "servicos"
+   },
+   "enviarOrcamento": {
+    "metodo": "POST",
+    "caminho": "/orcamentos/:id/enviar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "orcamento",
+    "permissao": "servicos"
+   },
+   "decidirOrcamento": {
+    "metodo": "POST",
+    "caminho": "/orcamentos/:id/decidir",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "decisao": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "aprovar | rejeitar"
+     }
+    },
+    "saida": "orcamento",
+    "permissao": "servicos"
+   },
+   "converterOrcamento": {
+    "metodo": "POST",
+    "caminho": "/orcamentos/:id/converter",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "termoGarantiaId": {
+      "tipo": "uuid"
+     },
+     "responsavelId": {
+      "tipo": "texto"
+     },
+     "objeto": {
+      "tipo": "texto"
+     }
+    },
+    "saida": "ordemServico",
+    "permissao": "servicos"
+   },
+   "expirarOrcamentos": {
+    "metodo": "POST",
+    "caminho": "/orcamentos/expirar",
+    "entrada": {},
+    "saida": "orcamento",
+    "permissao": "servicos",
+    "lista": true
+   },
+   "abrirOS": {
+    "metodo": "POST",
+    "caminho": "/ordens-servico",
+    "entrada": {
+     "clienteId": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "descricao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "objeto": {
+      "tipo": "texto"
+     },
+     "responsavelId": {
+      "tipo": "texto"
+     },
+     "termoGarantiaId": {
+      "tipo": "uuid"
+     }
+    },
+    "saida": "ordemServico",
+    "permissao": "servicos"
+   },
+   "adicionarItemOS": {
+    "metodo": "POST",
+    "caminho": "/ordens-servico/:id/itens",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "descricao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "tipo": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "produtoId": {
+      "tipo": "uuid"
+     },
+     "quantidade": {
+      "tipo": "decimal",
+      "obrigatorio": true
+     },
+     "precoUnitario": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro"
+     }
+    },
+    "saida": "ordemServico",
+    "permissao": "servicos"
+   },
+   "removerItemOS": {
+    "metodo": "POST",
+    "caminho": "/ordens-servico/:id/itens/:itemId/remover",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "itemId": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "ordemServico",
+    "permissao": "servicos"
+   },
+   "mudarStatusOS": {
+    "metodo": "POST",
+    "caminho": "/ordens-servico/:id/status",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "para": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "motivo": {
+      "tipo": "texto"
+     },
+     "diagnostico": {
+      "tipo": "texto"
+     }
+    },
+    "saida": "ordemServico",
+    "permissao": "servicos",
+    "publica": [
+     "os.concluida"
+    ]
+   }
+  }
+ }
+}

@@ -13,7 +13,7 @@ import { criaEstoque, criaPagamentos, criaVendas, nosDoPack, portaEstoque, porta
 
 // O fluxo de venda COMPLETO com os três serviços reais, cada um com o seu banco: Vendas (saga) → Estoque (reserva/baixa por evento) → Pagamentos.
 const A = '11111111-1111-1111-1111-111111111111', ISS = 'https://id.teste', AUD = 'polaris'
-const reg = (pack: 'vendas' | 'pagamentos' | 'estoque') => { const r = new Registry(); for (const n of nosDoPack(pack)) r.registra(n); if (pack === 'estoque') for (const n of nosDoPack('vendas')) if ((n as { kind: string }).kind === 'evento') r.registra(n); return r }
+const reg = (pack: 'vendas' | 'pagamentos' | 'estoque') => { const r = new Registry(); for (const n of nosDoPack(pack)) r.registra(n); if (pack === 'estoque') for (const p of ['vendas', 'servicos'] as const) for (const n of nosDoPack(p)) if ((n as { kind: string }).kind === 'evento') r.registra(n); return r }
 const regV = reg('vendas'), regP = reg('pagamentos'), regE = reg('estoque')
 const noV = regV.resolve('servico', 'vendas')!.no, noP = regP.resolve('servico', 'pagamentos')!.no, noE = regE.resolve('servico', 'estoque')!.no
 const eventos = Object.fromEntries(regV.ids('evento').map((id) => [id, regV.resolve('evento', id)!.no])) as Record<string, No>

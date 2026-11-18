@@ -42,6 +42,6 @@
       "expirarReservas": { "metodo": "POST", "caminho": "/reservas/expirar", "entrada": {}, "saida": "reserva", "lista": true, "permissao": "estoque" },
       "abaixoDoMinimo": { "metodo": "GET", "caminho": "/estoque/abaixo-do-minimo", "entrada": {}, "saida": "saldo", "lista": true, "permissao": "estoque" }
     },
-    "consome": ["pedido.confirmado"]
+    "consome": ["pedido.confirmado", "os.concluida"]
   }
 }
