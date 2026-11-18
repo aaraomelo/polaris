@@ -399,6 +399,9 @@
           },
           "selecionado": {
             "tipo": "texto"
+          },
+          "modo": {
+            "tipo": "texto"
           }
         },
         "saida": "previa",

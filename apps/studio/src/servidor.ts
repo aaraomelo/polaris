@@ -9,7 +9,7 @@ import { geraPreview } from './preview'
 
 /** a pré-visualização do servidor: o mesmo `geraPreview` do cliente */
 export const previsualiza: NonNullable<OpcoesStudio['previsualiza']> = (a) => {
-  const r = geraPreview(a.no, a.blocosDoTenant, a.selecionado, a.tema)
+  const r = geraPreview(a.no, a.blocosDoTenant, a.selecionado, a.tema, a.modo)
   const tema = (a.tema as { spec?: { tokens?: unknown } } | undefined)?.spec
   return r.ok && tema?.tokens && typeof tema.tokens === 'object' ? { ...r, avisos: auditaContraste(tema as never) } : r // tema: junto da prévia vão os avisos de contraste (WCAG)
 }

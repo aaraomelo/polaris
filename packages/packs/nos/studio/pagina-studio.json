@@ -404,6 +404,34 @@
     },
     "selecionado": {
      "tipo": "texto"
+    },
+    "modo": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.restaurar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "restaurarPadrao"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
     }
    },
    "carregar": "manual",
@@ -430,6 +458,7 @@
     "comentarios": "studio.comentarios",
     "comentar": "studio.comentar",
     "resolver": "studio.resolver",
+    "restaurar": "studio.restaurar",
     "publicar": "studio.publicar",
     "site": "studio.site",
     "releases": "studio.releases",
@@ -461,6 +490,17 @@
     "painel": {
      "tipo": "texto",
      "inicial": ""
+    },
+    "modoPrevia": {
+     "tipo": "texto",
+     "inicial": "claro"
+    },
+    "pendente": {
+     "tipo": "json"
+    },
+    "confirmaRestaurar": {
+     "tipo": "booleano",
+     "inicial": false
     },
     "aba": {
      "tipo": "texto",
@@ -643,7 +683,8 @@
              "args": {
               "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+              "modo": "{estado.modoPrevia}"
              }
             }
            ]
@@ -683,7 +724,8 @@
              "args": {
               "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+              "modo": "{estado.modoPrevia}"
              }
             }
            ]
@@ -890,6 +932,82 @@
           "bloco": "texto/paragrafo",
           "props": {
            "texto": "{estado.aviso}"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/linha",
+       "se": "estado.no",
+       "props": {
+        "gap": 8,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "Prévia:"
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.modoPrevia != \"claro\"",
+          "props": {
+           "texto": "claro"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "modoPrevia",
+             "valor": "\"claro\""
+            },
+            {
+             "acao": "executar",
+             "dados": "previa",
+             "args": {
+              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+              "modo": "{estado.modoPrevia}"
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.modoPrevia != \"escuro\"",
+          "props": {
+           "texto": "escuro"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "modoPrevia",
+             "valor": "\"escuro\""
+            },
+            {
+             "acao": "executar",
+             "dados": "previa",
+             "args": {
+              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+              "modo": "{estado.modoPrevia}"
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "({estado.modoPrevia})"
           }
          }
         ]
@@ -1298,7 +1416,8 @@
              "args": {
               "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+              "modo": "{estado.modoPrevia}"
              }
             }
            ]
@@ -1315,6 +1434,162 @@
              "acao": "definir",
              "estado": "criando",
              "valor": "\"\""
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/linha",
+       "se": "estado.pendente && estado.no && !igual(estado.no, estado.noSalvo)",
+       "props": {
+        "gap": 8,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "Há alterações não salvas em {estado.aberto.id}. Descartar e abrir {estado.pendente.id}?"
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Descartar e abrir"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "executar",
+             "dados": "abrir",
+             "args": {
+              "kind": "{estado.pendente.kind}",
+              "id": "{estado.pendente.id}"
+             },
+             "depois": [
+              {
+               "acao": "definir",
+               "estado": "aberto",
+               "valor": "objeto([[\"kind\", estado.pendente.kind], [\"id\", estado.pendente.id], [\"origem\", resultado.origem], [\"seq\", resultado.seq]])"
+              },
+              {
+               "acao": "definir",
+               "estado": "no",
+               "valor": "resultado.no"
+              },
+              {
+               "acao": "definir",
+               "estado": "noSalvo",
+               "valor": "resultado.no"
+              },
+              {
+               "acao": "definir",
+               "estado": "passado",
+               "valor": "[]"
+              },
+              {
+               "acao": "definir",
+               "estado": "futuro",
+               "valor": "[]"
+              },
+              {
+               "acao": "definir",
+               "estado": "chaveEdicao",
+               "valor": "\"\""
+              },
+              {
+               "acao": "definir",
+               "estado": "sel",
+               "valor": "[]"
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "\"\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aba",
+               "valor": "\"editor\""
+              },
+              {
+               "acao": "definir",
+               "estado": "de",
+               "valor": "\"\""
+              },
+              {
+               "acao": "definir",
+               "estado": "para",
+               "valor": "\"\""
+              },
+              {
+               "acao": "definir",
+               "estado": "pendente",
+               "valor": "null"
+              },
+              {
+               "acao": "definir",
+               "estado": "confirmaRestaurar",
+               "valor": "false"
+              },
+              {
+               "acao": "executar",
+               "dados": "previa",
+               "args": {
+                "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                "modo": "{estado.modoPrevia}"
+               }
+              },
+              {
+               "acao": "executar",
+               "dados": "versoes",
+               "args": {
+                "kind": "{estado.pendente.kind}",
+                "id": "{estado.pendente.id}"
+               }
+              },
+              {
+               "acao": "executar",
+               "dados": "comentarios",
+               "args": {
+                "kind": "{estado.pendente.kind}",
+                "id": "{estado.pendente.id}"
+               }
+              }
+             ],
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Continuar editando"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "pendente",
+             "valor": "null"
             }
            ]
           }
@@ -1358,6 +1633,7 @@
               "filhos": [
                {
                 "bloco": "nav/botao",
+                "se": "!(estado.no && !igual(estado.no, estado.noSalvo))",
                 "props": {
                  "texto": "{n.id} (personalizado)"
                 },
@@ -1367,7 +1643,7 @@
                    "acao": "executar",
                    "dados": "abrir",
                    "args": {
-                    "kind": "pagina",
+                    "kind": "{\"pagina\"}",
                     "id": "{n.id}"
                    },
                    "depois": [
@@ -1427,19 +1703,30 @@
                      "valor": "\"\""
                     },
                     {
+                     "acao": "definir",
+                     "estado": "pendente",
+                     "valor": "null"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "confirmaRestaurar",
+                     "valor": "false"
+                    },
+                    {
                      "acao": "executar",
                      "dados": "previa",
                      "args": {
                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                      "modo": "{estado.modoPrevia}"
                      }
                     },
                     {
                      "acao": "executar",
                      "dados": "versoes",
                      "args": {
-                      "kind": "pagina",
+                      "kind": "{\"pagina\"}",
                       "id": "{n.id}"
                      }
                     },
@@ -1447,7 +1734,7 @@
                      "acao": "executar",
                      "dados": "comentarios",
                      "args": {
-                      "kind": "pagina",
+                      "kind": "{\"pagina\"}",
                       "id": "{n.id}"
                      }
                     }
@@ -1464,6 +1751,22 @@
                      "valor": "erro"
                     }
                    ]
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "nav/botao",
+                "se": "estado.no && !igual(estado.no, estado.noSalvo)",
+                "props": {
+                 "texto": "{n.id} (personalizado)"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "definir",
+                   "estado": "pendente",
+                   "valor": "objeto([[\"kind\", \"pagina\"], [\"id\", n.id]])"
                   }
                  ]
                 }
@@ -1485,6 +1788,7 @@
               "filhos": [
                {
                 "bloco": "nav/botao",
+                "se": "!(estado.no && !igual(estado.no, estado.noSalvo))",
                 "props": {
                  "texto": "{b} (padrão)"
                 },
@@ -1494,7 +1798,7 @@
                    "acao": "executar",
                    "dados": "abrir",
                    "args": {
-                    "kind": "pagina",
+                    "kind": "{\"pagina\"}",
                     "id": "{b}"
                    },
                    "depois": [
@@ -1554,19 +1858,30 @@
                      "valor": "\"\""
                     },
                     {
+                     "acao": "definir",
+                     "estado": "pendente",
+                     "valor": "null"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "confirmaRestaurar",
+                     "valor": "false"
+                    },
+                    {
                      "acao": "executar",
                      "dados": "previa",
                      "args": {
                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                      "modo": "{estado.modoPrevia}"
                      }
                     },
                     {
                      "acao": "executar",
                      "dados": "versoes",
                      "args": {
-                      "kind": "pagina",
+                      "kind": "{\"pagina\"}",
                       "id": "{b}"
                      }
                     },
@@ -1574,7 +1889,7 @@
                      "acao": "executar",
                      "dados": "comentarios",
                      "args": {
-                      "kind": "pagina",
+                      "kind": "{\"pagina\"}",
                       "id": "{b}"
                      }
                     }
@@ -1591,6 +1906,22 @@
                      "valor": "erro"
                     }
                    ]
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "nav/botao",
+                "se": "estado.no && !igual(estado.no, estado.noSalvo)",
+                "props": {
+                 "texto": "{b} (padrão)"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "definir",
+                   "estado": "pendente",
+                   "valor": "objeto([[\"kind\", \"pagina\"], [\"id\", b]])"
                   }
                  ]
                 }
@@ -1640,6 +1971,7 @@
               "filhos": [
                {
                 "bloco": "nav/botao",
+                "se": "!(estado.no && !igual(estado.no, estado.noSalvo))",
                 "props": {
                  "texto": "{n.id} (personalizado)"
                 },
@@ -1649,7 +1981,7 @@
                    "acao": "executar",
                    "dados": "abrir",
                    "args": {
-                    "kind": "tema",
+                    "kind": "{\"tema\"}",
                     "id": "{n.id}"
                    },
                    "depois": [
@@ -1709,19 +2041,30 @@
                      "valor": "\"\""
                     },
                     {
+                     "acao": "definir",
+                     "estado": "pendente",
+                     "valor": "null"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "confirmaRestaurar",
+                     "valor": "false"
+                    },
+                    {
                      "acao": "executar",
                      "dados": "previa",
                      "args": {
                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                      "modo": "{estado.modoPrevia}"
                      }
                     },
                     {
                      "acao": "executar",
                      "dados": "versoes",
                      "args": {
-                      "kind": "tema",
+                      "kind": "{\"tema\"}",
                       "id": "{n.id}"
                      }
                     },
@@ -1729,7 +2072,7 @@
                      "acao": "executar",
                      "dados": "comentarios",
                      "args": {
-                      "kind": "tema",
+                      "kind": "{\"tema\"}",
                       "id": "{n.id}"
                      }
                     }
@@ -1746,6 +2089,22 @@
                      "valor": "erro"
                     }
                    ]
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "nav/botao",
+                "se": "estado.no && !igual(estado.no, estado.noSalvo)",
+                "props": {
+                 "texto": "{n.id} (personalizado)"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "definir",
+                   "estado": "pendente",
+                   "valor": "objeto([[\"kind\", \"tema\"], [\"id\", n.id]])"
                   }
                  ]
                 }
@@ -1767,6 +2126,7 @@
               "filhos": [
                {
                 "bloco": "nav/botao",
+                "se": "!(estado.no && !igual(estado.no, estado.noSalvo))",
                 "props": {
                  "texto": "{b} (padrão)"
                 },
@@ -1776,7 +2136,7 @@
                    "acao": "executar",
                    "dados": "abrir",
                    "args": {
-                    "kind": "tema",
+                    "kind": "{\"tema\"}",
                     "id": "{b}"
                    },
                    "depois": [
@@ -1836,19 +2196,30 @@
                      "valor": "\"\""
                     },
                     {
+                     "acao": "definir",
+                     "estado": "pendente",
+                     "valor": "null"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "confirmaRestaurar",
+                     "valor": "false"
+                    },
+                    {
                      "acao": "executar",
                      "dados": "previa",
                      "args": {
                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                      "modo": "{estado.modoPrevia}"
                      }
                     },
                     {
                      "acao": "executar",
                      "dados": "versoes",
                      "args": {
-                      "kind": "tema",
+                      "kind": "{\"tema\"}",
                       "id": "{b}"
                      }
                     },
@@ -1856,7 +2227,7 @@
                      "acao": "executar",
                      "dados": "comentarios",
                      "args": {
-                      "kind": "tema",
+                      "kind": "{\"tema\"}",
                       "id": "{b}"
                      }
                     }
@@ -1876,9 +2247,153 @@
                   }
                  ]
                 }
+               },
+               {
+                "bloco": "nav/botao",
+                "se": "estado.no && !igual(estado.no, estado.noSalvo)",
+                "props": {
+                 "texto": "{b} (padrão)"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "definir",
+                   "estado": "pendente",
+                   "valor": "objeto([[\"kind\", \"tema\"], [\"id\", b]])"
+                  }
+                 ]
+                }
                }
               ]
              }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/linha",
+       "se": "estado.no && estado.aberto.origem == \"tenant\"",
+       "props": {
+        "gap": 8,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "nav/botao",
+          "se": "estado.no && estado.aberto.origem == \"tenant\" && !estado.confirmaRestaurar",
+          "props": {
+           "texto": "Restaurar o padrão"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "confirmaRestaurar",
+             "valor": "true"
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "estado.confirmaRestaurar",
+          "props": {
+           "texto": "Voltar {estado.aberto.id} ao padrão da plataforma? O histórico fica; vale no site após Publicar."
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.confirmaRestaurar",
+          "props": {
+           "texto": "Sim, restaurar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "executar",
+             "dados": "restaurar",
+             "args": {
+              "kind": "{estado.aberto.kind}",
+              "id": "{estado.aberto.id}"
+             },
+             "depois": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"sucesso\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "\"Restaurado o padrão de \" + estado.aberto.id + \". Publique para o site mudar.\""
+              },
+              {
+               "acao": "executar",
+               "dados": "nos"
+              },
+              {
+               "acao": "definir",
+               "estado": "no",
+               "valor": "null"
+              },
+              {
+               "acao": "definir",
+               "estado": "noSalvo",
+               "valor": "null"
+              },
+              {
+               "acao": "definir",
+               "estado": "aberto",
+               "valor": "null"
+              },
+              {
+               "acao": "definir",
+               "estado": "passado",
+               "valor": "[]"
+              },
+              {
+               "acao": "definir",
+               "estado": "futuro",
+               "valor": "[]"
+              },
+              {
+               "acao": "definir",
+               "estado": "confirmaRestaurar",
+               "valor": "false"
+              }
+             ],
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.confirmaRestaurar",
+          "props": {
+           "texto": "Cancelar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "confirmaRestaurar",
+             "valor": "false"
             }
            ]
           }
@@ -1991,7 +2506,8 @@
                 "args": {
                  "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                 "modo": "{estado.modoPrevia}"
                 }
                }
               ]
@@ -2036,7 +2552,8 @@
                 "args": {
                  "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                 "modo": "{estado.modoPrevia}"
                 }
                }
               ]
@@ -2081,7 +2598,8 @@
                 "args": {
                  "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                 "modo": "{estado.modoPrevia}"
                 }
                }
               ]
@@ -2142,7 +2660,8 @@
                       "args": {
                        "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                        "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                       "modo": "{estado.modoPrevia}"
                       }
                      }
                     ]
@@ -2270,7 +2789,8 @@
                    "args": {
                     "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                     "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                    "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                    "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                    "modo": "{estado.modoPrevia}"
                    }
                   }
                  ]
@@ -2310,7 +2830,8 @@
                    "args": {
                     "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                     "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                    "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                    "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                    "modo": "{estado.modoPrevia}"
                    }
                   }
                  ]
@@ -2369,7 +2890,8 @@
                       "args": {
                        "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                        "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                       "modo": "{estado.modoPrevia}"
                       }
                      }
                     ]
@@ -2410,7 +2932,8 @@
                       "args": {
                        "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                        "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                       "modo": "{estado.modoPrevia}"
                       }
                      }
                     ]
@@ -2467,7 +2990,8 @@
                             "args": {
                              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                             "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                             "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                             "modo": "{estado.modoPrevia}"
                             }
                            }
                           ]
@@ -2546,7 +3070,8 @@
                       "args": {
                        "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                        "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                       "modo": "{estado.modoPrevia}"
                       }
                      }
                     ]
@@ -2730,7 +3255,8 @@
                          "args": {
                           "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                           "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                          "modo": "{estado.modoPrevia}"
                          }
                         }
                        ]
@@ -2769,7 +3295,8 @@
                          "args": {
                           "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                           "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                          "modo": "{estado.modoPrevia}"
                          }
                         }
                        ]
@@ -2854,7 +3381,8 @@
                          "args": {
                           "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                           "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                          "modo": "{estado.modoPrevia}"
                          }
                         },
                         {
@@ -3045,7 +3573,8 @@
                   "args": {
                    "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
                    "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                   "modo": "{estado.modoPrevia}"
                   }
                  },
                  {

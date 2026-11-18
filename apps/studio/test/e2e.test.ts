@@ -160,4 +160,31 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const r = await (await entra('ana')).p.request.get(`${url}/studio`); const csp = r.headers()['content-security-policy']!
     expect(csp).toContain("script-src 'self'"); expect(csp).not.toContain('unsafe-eval'); expect(csp).toContain("frame-ancestors 'none'"); expect(erros.join('\n')).toBe('')
   })
+  it('alterações não salvas: abrir outro nó pede confirmação; "Continuar editando" mantém, "Descartar e abrir" troca; sem alterações abre direto', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'home (personalizado)' }).click(); await expect(p.getByText('Página home')).toBeVisible()
+    await p.getByRole('button', { name: 'edita (personalizado)' }).click(); await expect(p.getByText('Página edita')).toBeVisible() // sem alterações: abre direto, sem pergunta
+    await expect(p.getByText(/Descartar e abrir/)).toHaveCount(0)
+    await linhaDe(p, 'titulo').click(); await p.getByRole('textbox', { name: 'Texto' }).fill('mudei sem salvar'); await expect(p.getByText('alterações não salvas')).toBeVisible()
+    await p.getByRole('button', { name: 'home (personalizado)' }).click()
+    await expect(p.getByText('Há alterações não salvas em edita. Descartar e abrir home?')).toBeVisible(); await expect(p.getByText('Página edita')).toBeVisible() // nada mudou ainda
+    await p.getByRole('button', { name: 'Continuar editando' }).click(); await expect(p.getByText(/Descartar e abrir/)).toHaveCount(0); await expect(p.getByText('alterações não salvas')).toBeVisible()
+    await p.getByRole('button', { name: /^padrao \(/ }).click(); await p.getByRole('button', { name: 'Descartar e abrir' }).click(); await expect(p.getByText('Tokens do tema padrao')).toBeVisible()
+    await expect(p.getByText(/Descartar e abrir/)).toHaveCount(0); await ctx.close()
+  })
+  it('restaurar o padrão: pede confirmação, grava a lápide e fecha o editor; o histórico continua', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'xss (personalizado)' }).click(); await expect(p.getByText('Página xss')).toBeVisible()
+    await p.getByRole('button', { name: 'Restaurar o padrão' }).click(); await expect(p.getByText(/Voltar xss ao padrão da plataforma/)).toBeVisible()
+    await p.getByRole('button', { name: 'Cancelar' }).click(); await expect(p.getByText(/Voltar xss ao padrão/)).toHaveCount(0); expect((await app.inject({ url: '/studio/nos/pagina/xss', headers: { cookie: 'u=ana|a' } })).json()).toMatchObject({ origem: 'tenant' })
+    await p.getByRole('button', { name: 'Restaurar o padrão' }).click(); await p.getByRole('button', { name: 'Sim, restaurar' }).click(); await expect(p.getByText(/Restaurado o padrão de xss/)).toBeVisible()
+    expect((await app.inject({ url: '/studio/nos/pagina/xss', headers: { cookie: 'u=ana|a' } })).statusCode).toBe(404) // (xss só existia no tenant: sem padrão, o histórico guarda a lápide)
+    await expect(p.getByText('Página xss')).toHaveCount(0) // o editor fecha
+    const hist = (await app.inject({ url: '/studio/historico/pagina/xss', headers: { cookie: 'u=ana|a' } })).json().versoes; expect(hist[0].removido).toBe(true) // o histórico continua, com a lápide no topo
+    await ctx.close()
+  })
+  it('prévia: alternar claro/escuro muda o modo do documento da prévia', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'home (personalizado)' }).click(); await expect(p.getByText('Página home')).toBeVisible()
+    const modo = async () => (await p.locator('iframe[title="Pré-visualização da página"]').getAttribute('srcdoc')) ?? ''
+    await expect.poll(modo).toContain('data-modo="claro"'); await p.getByRole('button', { name: 'escuro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="escuro"')
+    await p.getByRole('button', { name: 'claro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="claro"'); await ctx.close()
+  })
 })

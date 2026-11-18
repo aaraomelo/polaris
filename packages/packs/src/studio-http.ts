@@ -34,7 +34,7 @@ export type OpcoesStudio = {
   }
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
-  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
+  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; modo?: 'claro' | 'escuro'; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
 }
 const ID = /^[a-z][A-Za-z0-9._/-]{0,127}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, ANCORA = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
@@ -244,8 +244,9 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.post('/studio/previa', { bodyLimit: 512 * 1024 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver', 3); if (!s) return reply
     if (!o.previsualiza) return erro(reply, 501, 'nao_implementado', 'este servidor não gera pré-visualização')
-    const b = req.body; if (!so(b, ['no', 'tema', 'selecionado'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { no, tema?, selecionado? }')
-    const x = b as { no?: unknown; tema?: unknown; selecionado?: unknown }
+    const b = req.body; if (!so(b, ['no', 'tema', 'selecionado', 'modo'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { no, tema?, selecionado?, modo? }')
+    const x = b as { no?: unknown; tema?: unknown; selecionado?: unknown; modo?: unknown }
+    if (x.modo !== undefined && x.modo !== 'claro' && x.modo !== 'escuro') return erro(reply, 400, 'requisicao_invalida', 'modo: claro ou escuro')
     if (!x.no || typeof x.no !== 'object' || Array.isArray(x.no)) return erro(reply, 400, 'requisicao_invalida', 'no: objeto esperado')
     if (x.selecionado !== undefined && (typeof x.selecionado !== 'string' || !ANCORA.test(x.selecionado))) return erro(reply, 400, 'requisicao_invalida', 'selecionado inválido')
     const blocos = (await o.armazem.cabecas(s.tenantId)).filter((c) => c.kind === 'bloco').map((c) => ({ ...(c.conteudo as object), tenantId: s.tenantId }))
@@ -258,7 +259,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
       const h = cabecas.find((c) => c.kind === 'dados' && c.id === id)?.conteudo ?? base.resolve('dados', id, { tenantId: s.tenantId })?.no
       if (h) dados.push({ ...(h as object), tenantId: null })
     }
-    const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), blocosDoTenant: [...blocos, ...dados] })
+    const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), ...(x.modo ? { modo: x.modo } : {}), blocosDoTenant: [...blocos, ...dados] })
     return r.ok ? { ok: true, html: r.html, erros: [], avisos: r.avisos ?? [] } : { ok: false, html: '', erros: r.erros, avisos: [] }
   })
 

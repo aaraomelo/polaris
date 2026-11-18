@@ -61,5 +61,9 @@ Tenant e autor vêm **sempre da sessão** (`autentica` é injetado); corpo com `
 ## Tema do site
 Ao abrir um tema salvo (ou da plataforma), o botão **Usar este tema no site** chama `PUT /studio/site { tema }`: grava um override do nó `tenant` do tenant (copiando o que ele já declara e trocando só `tema`, com a versão incrementada) e o site muda **na próxima publicação**. `GET /studio/site` devolve o tema atual e os temas disponíveis. O armazém só aceita o nó `tenant` por esse caminho (a rota genérica de nós continua recusando). Sem escolha, vale o tema `padrao` (e editar o `padrao` do tenant também vale).
 
+## Restaurar o padrão e alterações não salvas
+- **Restaurar o padrão** (nó personalizado): pede confirmação, grava uma lápide (`DELETE /studio/nos/:kind/:id`; o histórico continua) e fecha o editor; o site só muda depois de **Publicar**.
+- Com alterações não salvas, clicar em outro nó **não descarta em silêncio**: aparece "Há alterações não salvas… Descartar e abrir?" (ou "Continuar editando").
+
 ## Prévia
-A prévia segue o modo **claro** do tema (o modo escuro ainda não tem seletor). Os nós `dados` que a página referencia vão junto, mas os dados em si não são buscados no editor.
+A prévia tem seletor **claro/escuro** (`modo` em `POST /studio/previa`); o padrão é o claro, para que o que você edita nos tokens apareça. Os nós `dados` que a página referencia vão junto, mas os dados em si não são buscados no editor.
