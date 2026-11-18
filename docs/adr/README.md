@@ -18,3 +18,4 @@ Formato curto: **Contexto**, **Decisão**, **Consequências** (inclusive o que s
 | [0012](0012-fastify-nao-nestjs.md) | Serviços gerados em Fastify, sem NestJS | aceito |
 | [0013](0013-formulario-declarativo.md) | Formulários declarativos, com o mesmo motor no navegador e no servidor | aceito |
 | [0014](0014-identidade-propria.md) | Identidade própria (e-mail e senha), com sessão assinada por chave privada | aceito |
+| [0015](0015-sign-maker.md) | Sign Maker: um layout calculado, HTML e PDF só desenham | aceito |

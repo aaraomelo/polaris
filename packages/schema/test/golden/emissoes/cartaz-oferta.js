@@ -1,0 +1,132 @@
+// polaris: cartaz oferta-de-por@1.0.0
+export const kind = "cartaz";
+export const id = "oferta-de-por";
+export const versao = "1.0.0";
+export default {
+  "estatuto": "publicado",
+  "id": "oferta-de-por",
+  "kind": "cartaz",
+  "spec": {
+    "dados": {
+      "preco": {
+        "tipo": "json"
+      },
+      "produto": {
+        "tipo": "json"
+      }
+    },
+    "elementos": [
+      {
+        "caixa": {
+          "altura": 0.22,
+          "esquerda": 0,
+          "largura": 1,
+          "topo": 0
+        },
+        "cor": [
+          200,
+          16,
+          46
+        ],
+        "id": "topo",
+        "tipo": "faixa"
+      },
+      {
+        "alinhaV": "meio",
+        "caixa": {
+          "altura": 0.16,
+          "esquerda": 0.04,
+          "largura": 0.92,
+          "topo": 0.03
+        },
+        "cor": [
+          255,
+          255,
+          255
+        ],
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "tipo": "texto"
+      },
+      {
+        "alinhaH": "esquerda",
+        "caixa": {
+          "altura": 0.1,
+          "esquerda": 0.06,
+          "largura": 0.4,
+          "topo": 0.3
+        },
+        "id": "de",
+        "se": "preco.de",
+        "texto": "DE {preco.de | brl}",
+        "tipo": "texto"
+      },
+      {
+        "caixa": {
+          "altura": 0.3,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "topo": 0.5
+        },
+        "cor": [
+          255,
+          214,
+          0
+        ],
+        "id": "selo",
+        "raio": 0.2,
+        "tipo": "faixa"
+      },
+      {
+        "alinhaV": "meio",
+        "caixa": {
+          "altura": 0.26,
+          "esquerda": 0.07,
+          "largura": 0.86,
+          "topo": 0.52
+        },
+        "cor": [
+          200,
+          16,
+          46
+        ],
+        "id": "por",
+        "texto": "POR {preco.por | brl}",
+        "tipo": "texto"
+      },
+      {
+        "alinhaH": "esquerda",
+        "caixa": {
+          "altura": 0.04,
+          "esquerda": 0.02,
+          "largura": 0.3,
+          "topo": 0.95
+        },
+        "cor": [
+          120,
+          120,
+          120
+        ],
+        "id": "lateral",
+        "rotacao": 90,
+        "texto": "OFERTA",
+        "tipo": "texto"
+      }
+    ],
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "fundo": {
+      "cor": [
+        255,
+        244,
+        214
+      ]
+    },
+    "orientacao": "paisagem",
+    "tamanho": "A5",
+    "titulo": "Oferta de/por"
+  },
+  "versao": "1.0.0"
+};

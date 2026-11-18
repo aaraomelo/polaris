@@ -1,0 +1,31 @@
+{
+  "kind": "cartaz",
+  "id": "oferta-de-por",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A5",
+    "orientacao": "paisagem",
+    "titulo": "Oferta de/por",
+    "fundo": {
+      "cor": [
+        255,
+        244,
+        214
+      ]
+    },
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "dados": {
+      "produto": {
+        "tipo": "json"
+      },
+      "preco": {
+        "tipo": "json"
+      }
+    },
+    "elementos": []
+  }
+}

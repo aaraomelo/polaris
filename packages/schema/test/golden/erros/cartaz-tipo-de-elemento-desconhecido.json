@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/elementos/0",
+    "regra": "oneOf",
+    "mensagem": "não corresponde a nenhuma das formas permitidas",
+    "dica": "confira o campo que distingue a forma (op, acao…) e os campos exigidos por ela"
+  }
+]

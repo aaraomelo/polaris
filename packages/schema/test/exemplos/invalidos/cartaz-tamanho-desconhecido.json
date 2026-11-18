@@ -1,0 +1,128 @@
+{
+  "kind": "cartaz",
+  "id": "oferta-de-por",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A0",
+    "orientacao": "paisagem",
+    "titulo": "Oferta de/por",
+    "fundo": {
+      "cor": [
+        255,
+        244,
+        214
+      ]
+    },
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "dados": {
+      "produto": {
+        "tipo": "json"
+      },
+      "preco": {
+        "tipo": "json"
+      }
+    },
+    "elementos": [
+      {
+        "tipo": "faixa",
+        "id": "topo",
+        "caixa": {
+          "topo": 0,
+          "esquerda": 0,
+          "largura": 1,
+          "altura": 0.22
+        },
+        "cor": [
+          200,
+          16,
+          46
+        ]
+      },
+      {
+        "tipo": "texto",
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "caixa": {
+          "topo": 0.03,
+          "esquerda": 0.04,
+          "largura": 0.92,
+          "altura": 0.16
+        },
+        "cor": [
+          255,
+          255,
+          255
+        ],
+        "alinhaV": "meio"
+      },
+      {
+        "tipo": "texto",
+        "id": "de",
+        "texto": "DE {preco.de | brl}",
+        "caixa": {
+          "topo": 0.3,
+          "esquerda": 0.06,
+          "largura": 0.4,
+          "altura": 0.1
+        },
+        "alinhaH": "esquerda",
+        "se": "preco.de"
+      },
+      {
+        "tipo": "faixa",
+        "id": "selo",
+        "caixa": {
+          "topo": 0.5,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "altura": 0.3
+        },
+        "cor": [
+          255,
+          214,
+          0
+        ],
+        "raio": 0.2
+      },
+      {
+        "tipo": "texto",
+        "id": "por",
+        "texto": "POR {preco.por | brl}",
+        "caixa": {
+          "topo": 0.52,
+          "esquerda": 0.07,
+          "largura": 0.86,
+          "altura": 0.26
+        },
+        "cor": [
+          200,
+          16,
+          46
+        ],
+        "alinhaV": "meio"
+      },
+      {
+        "tipo": "texto",
+        "id": "lateral",
+        "texto": "OFERTA",
+        "caixa": {
+          "topo": 0.95,
+          "esquerda": 0.02,
+          "largura": 0.3,
+          "altura": 0.04
+        },
+        "rotacao": 90,
+        "alinhaH": "esquerda",
+        "cor": [
+          120,
+          120,
+          120
+        ]
+      }
+    ]
+  }
+}

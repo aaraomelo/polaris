@@ -25,7 +25,8 @@
         "backend",
         "papel",
         "pack",
-        "formulario"
+        "formulario",
+        "cartaz"
       ]
     },
     "id": {
@@ -358,6 +359,25 @@
         "properties": {
           "spec": {
             "$ref": "polaris://kind/formulario/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "cartaz"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/cartaz/v1"
           }
         }
       }

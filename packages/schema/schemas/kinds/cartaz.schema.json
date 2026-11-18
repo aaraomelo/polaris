@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/cartaz/v1",
+  "title": "Cartaz (Sign Maker)",
+  "description": "Uma peça gráfica impressa (cartaz, etiqueta): elementos posicionados em frações da página. Do MESMO layout calculado saem HTML e PDF.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tamanho",
+    "elementos"
+  ],
+  "properties": {
+    "tamanho": {
+      "enum": [
+        "A4",
+        "A5",
+        "A6",
+        "A7"
+      ]
+    },
+    "orientacao": {
+      "enum": [
+        "retrato",
+        "paisagem"
+      ],
+      "default": "retrato"
+    },
+    "titulo": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "fundo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cor": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "[R, G, B], 0 a 255"
+        },
+        "imagem": {
+          "type": "string",
+          "maxLength": 8000000,
+          "pattern": "^data:image/(png|jpeg);base64,[A-Za-z0-9+/=]+$",
+          "description": "data URL png/jpeg (sem busca de rede)"
+        }
+      }
+    },
+    "fonte": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "familia": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "peso": {
+          "enum": [
+            "normal",
+            "negrito"
+          ]
+        }
+      },
+      "description": "fonte padrão dos textos"
+    },
+    "dados": {
+      "type": "object",
+      "maxProperties": 40,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][A-Za-z0-9]{0,30}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tipo": {
+            "enum": [
+              "texto",
+              "numero",
+              "dinheiro",
+              "data",
+              "dataHora",
+              "booleano",
+              "json",
+              "lista"
+            ]
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "description": "os dados que a peça recebe (nome → tipo); sem declarar, o modelo não os usa"
+    },
+    "elementos": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tipo",
+              "caixa",
+              "texto"
+            ],
+            "properties": {
+              "tipo": {
+                "const": "texto"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][A-Za-z0-9_-]{0,40}$",
+                "description": "identificador do elemento (único na peça)"
+              },
+              "se": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "condição sobre os dados (caminho, ou !caminho): o elemento só aparece se verdadeira"
+              },
+              "caixa": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "topo",
+                  "largura",
+                  "altura"
+                ],
+                "properties": {
+                  "topo": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da ALTURA da peça"
+                  },
+                  "esquerda": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da esquerda)"
+                  },
+                  "direita": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da direita); use esquerda OU direita"
+                  },
+                  "largura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "altura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "description": "a caixa do elemento, em FRAÇÕES da peça (0 a 1): o mesmo layout serve a todos os tamanhos"
+              },
+              "rotacao": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "description": "graus, ANTI-HORÁRIO, em torno do meio da borda esquerda da caixa"
+              },
+              "texto": {
+                "type": "string",
+                "maxLength": 2000,
+                "description": "modelo com {dado.caminho | filtro}; o corpo do texto SEMPRE é ajustado para caber na caixa"
+              },
+              "alinhaH": {
+                "enum": [
+                  "esquerda",
+                  "centro",
+                  "direita"
+                ],
+                "default": "centro"
+              },
+              "alinhaV": {
+                "enum": [
+                  "topo",
+                  "meio",
+                  "base"
+                ],
+                "default": "topo"
+              },
+              "cor": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "fundo": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "prefixItems": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                ],
+                "items": false,
+                "description": "[R, G, B, A]: A de 0 (transparente) a 1"
+              },
+              "fonte": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "familia": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "peso": {
+                    "enum": [
+                      "normal",
+                      "negrito"
+                    ]
+                  }
+                }
+              },
+              "quebra": {
+                "enum": [
+                  "normal",
+                  "nenhuma"
+                ],
+                "default": "normal",
+                "description": "nenhuma: tudo numa linha só (o tamanho encolhe até caber)"
+              },
+              "tamanho": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "min": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 400
+                  },
+                  "max": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 400
+                  }
+                },
+                "description": "limites do ajuste, em pt (padrão 6 a 300)"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tipo",
+              "caixa"
+            ],
+            "properties": {
+              "tipo": {
+                "const": "faixa"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][A-Za-z0-9_-]{0,40}$",
+                "description": "identificador do elemento (único na peça)"
+              },
+              "se": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "condição sobre os dados (caminho, ou !caminho): o elemento só aparece se verdadeira"
+              },
+              "caixa": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "topo",
+                  "largura",
+                  "altura"
+                ],
+                "properties": {
+                  "topo": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da ALTURA da peça"
+                  },
+                  "esquerda": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da esquerda)"
+                  },
+                  "direita": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da direita); use esquerda OU direita"
+                  },
+                  "largura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "altura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "description": "a caixa do elemento, em FRAÇÕES da peça (0 a 1): o mesmo layout serve a todos os tamanhos"
+              },
+              "rotacao": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "description": "graus, ANTI-HORÁRIO, em torno do meio da borda esquerda da caixa"
+              },
+              "cor": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "opacidade": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "raio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.5,
+                "description": "canto arredondado, em fração do MENOR lado da caixa"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
