@@ -66,3 +66,30 @@ Disparada por `pedido.criado` (relay → barramento → consumidor com inbox) ou
 
 ### Defeito achado e corrigido pelo teste de integração
 `cotar` (Catálogo) devolvia a linha crua do banco e `null` saía como `""` (`varianteId: ""`). As operações dos packs agora passam por `linhaParaApi`, o mesmo caminho do CRUD.
+
+---
+
+## Pagamentos e Caixa (`pagamentos`)
+Serviço próprio (banco próprio): provedor plugável, ciclo `autorizar → capturar → cancelar | estornar`, **carteira com razão** e **caixa**. Vendas o usa pela porta `portaPagamento(cliente)` (HTTP em produção).
+
+### Provedor
+`Provedor { autoriza, captura, cancela, estorna }`, registrado por nome em `criaPagamentos(no, { provedores })`; o tenant liga **método → provedor + taxa %** em `configPagamento` (`pix`, `credito`, `debito`, `dinheiro`, `vale`). O pack não conhece PagBank, Mercado Pago etc.: cada um é um adaptador. `provedorInterno` aprova na hora (dinheiro, vale). **Contrato**: toda chamada leva `pagamentoId` como chave de idempotência.
+
+### Regras (todas testadas)
+- **Idempotente por pedido**: repetir `autorizar` devolve o mesmo pagamento (1 chamada ao provedor); outro método/valor para o mesmo pedido é 409. Capturar/cancelar repetidos são no-op.
+- **Recusa é resultado, não erro**: o provedor recusou → `200` com `status: falhou` e `motivoFalha`, gravado; a repetição **não recobra**. Provedor **fora do ar** → `502`, a transação desfaz e nada fica gravado (repetir é seguro).
+- **Taxa e líquido exatos** (`percentual`, 4 casas). A carteira recebe o **líquido** na captura (dinheiro não passa pela carteira: vai para a gaveta).
+- **Estorno** parcial/total com `chaveIdempotencia`; não excede o que resta; a carteira devolve a fatia proporcional do líquido e o **último estorno devolve o restante** (provado com 3,33 + 3,33 + 3,34: nenhum resto de arredondamento). A taxa do provedor não volta.
+- **Razão da carteira**: saldo muda por `UPDATE` atômico (a linha serializa concorrentes); cada movimento grava um `lancamento` com `saldoApos`.
+- **Caixa**: uma sessão aberta por caixa; dinheiro exige sessão; `esperado = abertura + vendas em dinheiro − estornos em dinheiro + reforços − sangrias`; fechar grava `esperado`, `contado` e `diferenca` (negativa = falta); sangria acima do que há na gaveta é 422; só quem abriu movimenta e fecha.
+- **Papéis**: `sistema` (autoriza/captura/cancela, usado pela saga), `caixa` (operador de PDV), `financeiro` (estorna, configura, lê tudo). O sistema não estorna.
+
+### Ligação com Vendas
+`carrinho.metodoPagamento` e `parcelas` (escolha do cliente, copiados ao pedido) chegam à saga em `PedidoSaga`. O adaptador traduz: recusa/4xx → `ok:false` (a saga compensa); 5xx/rede → **lança** (a saga não compensa à toa e repete). Provado com os dois serviços em **bancos separados**.
+
+### Limites conhecidos
+- **PIX é síncrono aqui** (o provedor responde na hora). O PIX real confirma depois por webhook: exige um passo assíncrono na saga e um endpoint de confirmação — fica para uma entrega própria.
+- Um pagamento por pedido (`unicos: [pedidoId]`); divisão de pagamento (parte em dinheiro, parte em cartão) não existe ainda.
+- Sem repasse/`payout`, chargeback e conciliação do original; credenciais do provedor ficam fora do banco (variáveis/segredos do ambiente).
+- A chamada ao provedor acontece dentro da transação do banco (com idempotência); com provedor lento isso segura uma conexão.
+- Venda em dinheiro no PDV usa `autorizar`+`capturar` com `sessaoCaixaId`; não passa pela saga de Vendas (que cobre os métodos eletrônicos).

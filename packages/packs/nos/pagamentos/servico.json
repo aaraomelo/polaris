@@ -1,0 +1,59 @@
+{
+  "kind": "servico", "id": "pagamentos", "versao": "1.0.0", "estatuto": "publicado",
+  "spec": {
+    "entidades": {
+      "configPagamento": {
+        "campos": { "metodo": { "tipo": "texto", "obrigatorio": true, "descricao": "dinheiro | pix | credito | debito | vale" }, "provedor": { "tipo": "texto", "obrigatorio": true }, "taxaPercentual": { "tipo": "decimal", "padrao": 0 }, "ativo": { "tipo": "booleano", "padrao": true } },
+        "unicos": [["metodo"]], "crud": { "caminho": "/config-pagamento" }
+      },
+      "caixa": { "campos": { "nome": { "tipo": "texto", "obrigatorio": true }, "ativo": { "tipo": "booleano", "padrao": true } }, "unicos": [["nome"]], "crud": { "caminho": "/caixas" } },
+      "sessaoCaixa": {
+        "campos": {
+          "caixaId": { "tipo": "uuid", "obrigatorio": true, "referencia": "caixa" }, "status": { "tipo": "texto", "obrigatorio": true, "descricao": "aberta | fechada" },
+          "abertoPor": { "tipo": "texto", "obrigatorio": true }, "fechadoPor": { "tipo": "texto" }, "valorAbertura": { "tipo": "dinheiro", "obrigatorio": true },
+          "valorEsperado": { "tipo": "dinheiro" }, "valorContado": { "tipo": "dinheiro" }, "diferenca": { "tipo": "dinheiro", "descricao": "contado − esperado (negativo = falta)" }, "fechadaEm": { "tipo": "dataHora" }
+        },
+        "indices": [["caixaId", "status"], ["abertoPor"]], "crud": { "caminho": "/sessoes-caixa", "operacoes": ["listar", "obter"] }
+      },
+      "operacaoCaixa": {
+        "campos": { "sessaoCaixaId": { "tipo": "uuid", "obrigatorio": true, "referencia": "sessaoCaixa" }, "tipo": { "tipo": "texto", "obrigatorio": true, "descricao": "sangria | reforco" }, "valor": { "tipo": "dinheiro", "obrigatorio": true }, "operador": { "tipo": "texto", "obrigatorio": true }, "notas": { "tipo": "texto" } },
+        "indices": [["sessaoCaixaId"]], "crud": { "caminho": "/operacoes-caixa", "operacoes": ["listar", "obter"] }
+      },
+      "pagamento": {
+        "campos": {
+          "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "metodo": { "tipo": "texto", "obrigatorio": true },
+          "status": { "tipo": "texto", "obrigatorio": true, "descricao": "autorizado | pago | falhou | cancelado | estornado_parcial | estornado" },
+          "valor": { "tipo": "dinheiro", "obrigatorio": true }, "taxa": { "tipo": "dinheiro", "obrigatorio": true }, "liquido": { "tipo": "dinheiro", "obrigatorio": true },
+          "parcelas": { "tipo": "inteiro", "padrao": 1 }, "provedor": { "tipo": "texto", "obrigatorio": true }, "referenciaExterna": { "tipo": "texto" }, "motivoFalha": { "tipo": "texto" },
+          "estornado": { "tipo": "dinheiro", "obrigatorio": true }, "sessaoCaixaId": { "tipo": "uuid", "referencia": "sessaoCaixa" }, "pagoEm": { "tipo": "dataHora" }
+        },
+        "unicos": [["pedidoId"]], "indices": [["status"], ["sessaoCaixaId"]], "crud": { "caminho": "/pagamentos", "operacoes": ["listar", "obter"] }
+      },
+      "estorno": {
+        "campos": {
+          "pagamentoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "pagamento" }, "valor": { "tipo": "dinheiro", "obrigatorio": true }, "motivo": { "tipo": "texto", "obrigatorio": true },
+          "chaveIdempotencia": { "tipo": "texto", "obrigatorio": true }, "referenciaExterna": { "tipo": "texto" }, "sessaoCaixaId": { "tipo": "uuid", "referencia": "sessaoCaixa" }
+        },
+        "unicos": [["chaveIdempotencia"]], "indices": [["pagamentoId"]], "crud": { "caminho": "/estornos", "operacoes": ["listar", "obter"] }
+      },
+      "carteira": { "campos": { "nome": { "tipo": "texto", "obrigatorio": true }, "saldo": { "tipo": "dinheiro", "obrigatorio": true } }, "unicos": [["nome"]], "crud": { "caminho": "/carteiras", "operacoes": ["listar", "obter"] } },
+      "lancamento": {
+        "campos": {
+          "carteiraId": { "tipo": "uuid", "obrigatorio": true, "referencia": "carteira" }, "tipo": { "tipo": "texto", "obrigatorio": true, "descricao": "credito | debito" },
+          "valor": { "tipo": "dinheiro", "obrigatorio": true }, "saldoApos": { "tipo": "dinheiro", "obrigatorio": true },
+          "pagamentoId": { "tipo": "uuid", "referencia": "pagamento" }, "estornoId": { "tipo": "uuid", "referencia": "estorno" }, "descricao": { "tipo": "texto" }
+        },
+        "indices": [["carteiraId"], ["pagamentoId"]], "crud": { "caminho": "/lancamentos", "operacoes": ["listar", "obter"] }
+      }
+    },
+    "operacoes": {
+      "autorizar": { "metodo": "POST", "caminho": "/pagamentos/autorizar", "entrada": { "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "metodo": { "tipo": "texto", "obrigatorio": true }, "valor": { "tipo": "dinheiro", "obrigatorio": true }, "parcelas": { "tipo": "inteiro" }, "sessaoCaixaId": { "tipo": "uuid" } }, "saida": "pagamento", "permissao": "pagamentos" },
+      "capturar": { "metodo": "POST", "caminho": "/pagamentos/:id/capturar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true } }, "saida": "pagamento", "permissao": "pagamentos" },
+      "cancelar": { "metodo": "POST", "caminho": "/pagamentos/:id/cancelar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true } }, "saida": "pagamento", "permissao": "pagamentos" },
+      "estornar": { "metodo": "POST", "caminho": "/pagamentos/:id/estornar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true }, "valor": { "tipo": "dinheiro", "obrigatorio": true }, "motivo": { "tipo": "texto", "obrigatorio": true }, "chaveIdempotencia": { "tipo": "texto", "obrigatorio": true }, "sessaoCaixaId": { "tipo": "uuid" } }, "saida": "estorno", "permissao": "pagamentos" },
+      "abrirCaixa": { "metodo": "POST", "caminho": "/caixas/:id/abrir", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true }, "valorAbertura": { "tipo": "dinheiro", "obrigatorio": true } }, "saida": "sessaoCaixa", "permissao": "pagamentos" },
+      "movimentarCaixa": { "metodo": "POST", "caminho": "/sessoes-caixa/:id/movimentos", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true }, "tipo": { "tipo": "texto", "obrigatorio": true }, "valor": { "tipo": "dinheiro", "obrigatorio": true }, "notas": { "tipo": "texto" } }, "saida": "operacaoCaixa", "permissao": "pagamentos" },
+      "fecharCaixa": { "metodo": "POST", "caminho": "/sessoes-caixa/:id/fechar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true }, "valorContado": { "tipo": "dinheiro", "obrigatorio": true } }, "saida": "sessaoCaixa", "permissao": "pagamentos" }
+    }
+  }
+}

@@ -3,8 +3,8 @@
   "spec": {
     "entidades": {
       "carrinho": {
-        "campos": { "criadoPor": { "tipo": "texto", "obrigatorio": true }, "clienteId": { "tipo": "texto" }, "status": { "tipo": "texto", "padrao": "aberto", "descricao": "aberto | finalizado (só o servidor muda)" } },
-        "indices": [["criadoPor"]], "crud": { "caminho": "/carrinhos", "operacoes": ["listar", "obter", "criar", "remover"] }
+        "campos": { "criadoPor": { "tipo": "texto", "obrigatorio": true }, "clienteId": { "tipo": "texto" }, "status": { "tipo": "texto", "padrao": "aberto", "descricao": "aberto | finalizado (só o servidor muda)" }, "metodoPagamento": { "tipo": "texto", "padrao": "pix" }, "parcelas": { "tipo": "inteiro", "padrao": 1 } },
+        "indices": [["criadoPor"]], "crud": { "caminho": "/carrinhos", "operacoes": ["listar", "obter", "criar", "atualizar", "remover"] }
       },
       "itemCarrinho": {
         "campos": {
@@ -18,7 +18,7 @@
       "pedido": {
         "campos": {
           "carrinhoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "carrinho" }, "criadoPor": { "tipo": "texto", "obrigatorio": true },
-          "chaveIdempotencia": { "tipo": "texto", "obrigatorio": true }, "status": { "tipo": "texto", "obrigatorio": true, "descricao": "criado | processando | confirmado | falhou | cancelado" },
+          "chaveIdempotencia": { "tipo": "texto", "obrigatorio": true }, "metodoPagamento": { "tipo": "texto", "obrigatorio": true }, "parcelas": { "tipo": "inteiro", "obrigatorio": true }, "status": { "tipo": "texto", "obrigatorio": true, "descricao": "criado | processando | confirmado | falhou | cancelado" },
           "total": { "tipo": "dinheiro", "obrigatorio": true }, "motivoFalha": { "tipo": "texto" }
         },
         "unicos": [["chaveIdempotencia"]], "indices": [["criadoPor"], ["status"]], "crud": { "caminho": "/pedidos", "operacoes": ["listar", "obter"] }

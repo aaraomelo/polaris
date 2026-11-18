@@ -1,7 +1,8 @@
 [
   { "kind": "papel", "id": "vendas.operador", "versao": "1.0.0", "estatuto": "publicado",
     "spec": { "regras": [
-      { "acoes": ["criar"], "sujeitos": ["vendas.carrinho"], "onde": { "criadoPor": "$usuario" }, "campos": ["criadoPor", "clienteId"] },
+      { "acoes": ["criar"], "sujeitos": ["vendas.carrinho"], "onde": { "criadoPor": "$usuario" }, "campos": ["criadoPor", "clienteId", "metodoPagamento", "parcelas"] },
+      { "acoes": ["atualizar"], "sujeitos": ["vendas.carrinho"], "onde": { "criadoPor": "$usuario" }, "campos": ["clienteId", "metodoPagamento", "parcelas"] },
       { "acoes": ["listar", "obter", "remover"], "sujeitos": ["vendas.carrinho", "vendas.itemCarrinho"], "onde": { "criadoPor": "$usuario" } },
       { "acoes": ["adicionarItem"], "sujeitos": ["vendas.itemCarrinho"], "onde": { "criadoPor": "$usuario" } },
       { "acoes": ["listar", "obter", "finalizar", "cancelar"], "sujeitos": ["vendas.pedido"], "onde": { "criadoPor": "$usuario" } },

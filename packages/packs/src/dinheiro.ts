@@ -22,3 +22,18 @@ export function multiplica(preco: string, quantidade: string): string {
 }
 export function soma(valores: string[]): string { return normaliza(formata4(valores.reduce((a, v) => a + paraCentavos4(v), 0n))) }
 function formata4(v: bigint): string { const n = v < 0n, a = n ? -v : v; return `${n ? '-' : ''}${a / 10_000n}.${(a % 10_000n).toString().padStart(4, '0')}` }
+
+const meioParaCima = (n: bigint, d: bigint): bigint => (n < 0n ? -((-n * 2n + d) / (2n * d)) : (n * 2n + d) / (2n * d))
+/** valor × percentual / 100 (ex.: taxa de 2.99%), arredondado em 4 casas */
+export function percentual(valor: string, pct: string): string {
+  const m = /^(\d{1,3})(?:\.(\d{1,4})0*)?$/.exec(pct.trim()); if (!m) throw new Error(`percentual inválido: ${JSON.stringify(pct.slice(0, 20))}`)
+  const p = BigInt(m[1]!) * 10_000n + BigInt((m[2] ?? '').padEnd(4, '0'))
+  return normaliza(formata4(meioParaCima(paraCentavos4(valor) * p, 1_000_000n)))
+}
+/** parte × total / base (ex.: a fatia do líquido que cabe a um estorno parcial) */
+export function proporcional(parte: string, total: string, base: string): string {
+  const b = paraCentavos4(base); if (b <= 0n) throw new Error('base deve ser positiva')
+  return normaliza(formata4(meioParaCima(paraCentavos4(parte) * paraCentavos4(total), b)))
+}
+export const subtrai = (a: string, b: string): string => normaliza(formata4(paraCentavos4(a) - paraCentavos4(b)))
+export const adiciona = (a: string, b: string): string => normaliza(formata4(paraCentavos4(a) + paraCentavos4(b)))

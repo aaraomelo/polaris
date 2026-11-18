@@ -9,7 +9,7 @@ import { multiplica, soma } from './dinheiro'
 
 export type Cotacao = { id: string; produtoId: string; varianteId: string | null; quantidade: string; precoUnitario: string; criadoEm: string }
 export type ItemSaga = { produtoId: string; varianteId: string | null; quantidade: string }
-export type PedidoSaga = { tenantId: string; pedidoId: string; total: string; itens: ItemSaga[] }
+export type PedidoSaga = { tenantId: string; pedidoId: string; total: string; metodoPagamento: string; parcelas: number; itens: ItemSaga[] }
 export type Resultado = { ok: true; referencia: string } | { ok: false; motivo: string }
 
 export type Portas = {
@@ -40,7 +40,7 @@ export function criaVendas(no: No, o: OpcoesVendas) {
     if (p.status !== 'criado' && p.status !== 'processando') return p // confirmado, falhou ou cancelado: reprocessar não faz nada (idempotente)
     await q(`UPDATE ${T('pedido')} SET status = 'processando', atualizado_em = now() WHERE id = $1`, [pedidoId])
     const itens = (await q(`SELECT produto_id::text AS "produtoId", variante_id::text AS "varianteId", quantidade::text AS quantidade FROM ${T('item_pedido')} WHERE pedido_id = $1 ORDER BY criado_em, id`, [pedidoId])).rows as unknown as ItemSaga[]
-    const ped: PedidoSaga = { tenantId, pedidoId, total: p.total as string, itens }
+    const ped: PedidoSaga = { tenantId, pedidoId, total: p.total as string, metodoPagamento: p.metodoPagamento as string, parcelas: Number(p.parcelas ?? 1), itens }
     const feitos = new Map<string, string>(((await q(`SELECT passo, referencia FROM ${T('passo_saga')} WHERE pedido_id = $1 AND estado = 'ok'`, [pedidoId])).rows as Linha[]).map((r) => [r.passo as string, r.referencia as string]))
     const grava = (passo: string, estado: string, referencia: string | null, detalhe: string | null) => q(
       `INSERT INTO ${T('passo_saga')} (tenant_id, pedido_id, passo, estado, referencia, detalhe) VALUES ($1, $2, $3, $4, $5, $6)
@@ -104,7 +104,7 @@ export function criaVendas(no: No, o: OpcoesVendas) {
       const itens = (await q(`SELECT cotacao_id::text AS "cotacaoId", produto_id::text AS "produtoId", variante_id::text AS "varianteId", quantidade::text AS quantidade, preco_unitario::text AS "precoUnitario", total_linha::text AS "totalLinha" FROM ${T('item_carrinho')} WHERE carrinho_id = $1 ORDER BY criado_em, id`, [c.id])).rows as Linha[]
       if (!itens.length) throw new ErroApi(422, 'carrinho_vazio', 'o carrinho não tem itens')
       const total = soma(itens.map((i) => i.totalLinha as string))
-      const ped = await q(`INSERT INTO ${T('pedido')} (tenant_id, carrinho_id, criado_por, chave_idempotencia, status, total) VALUES ($1, $2, $3, $4, 'criado', $5) RETURNING id::text AS id`, [ctx.tenantId, c.id, c.criadoPor, chave, total])
+      const ped = await q(`INSERT INTO ${T('pedido')} (tenant_id, carrinho_id, criado_por, chave_idempotencia, status, total, metodo_pagamento, parcelas) VALUES ($1, $2, $3, $4, 'criado', $5, $6, $7) RETURNING id::text AS id`, [ctx.tenantId, c.id, c.criadoPor, chave, total, c.metodoPagamento, c.parcelas ?? 1])
       const pedidoId = (ped.rows[0] as { id: string }).id
       for (const i of itens) await q(`INSERT INTO ${T('item_pedido')} (tenant_id, pedido_id, criado_por, produto_id, variante_id, cotacao_id, quantidade, preco_unitario, total_linha) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [ctx.tenantId, pedidoId, c.criadoPor, i.produtoId, i.varianteId, i.cotacaoId, i.quantidade, i.precoUnitario, i.totalLinha])

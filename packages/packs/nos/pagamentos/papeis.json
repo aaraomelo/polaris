@@ -1,0 +1,18 @@
+[
+  { "kind": "papel", "id": "pagamentos.sistema", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [ { "acoes": ["autorizar", "capturar", "cancelar"], "sujeitos": ["pagamentos.pagamento"] }, { "acoes": ["obter"], "sujeitos": ["pagamentos.pagamento"] } ] } },
+  { "kind": "papel", "id": "pagamentos.caixa", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [
+      { "acoes": ["listar", "obter"], "sujeitos": ["pagamentos.caixa"] },
+      { "acoes": ["abrirCaixa"], "sujeitos": ["pagamentos.sessaoCaixa"] },
+      { "acoes": ["fecharCaixa", "listar", "obter"], "sujeitos": ["pagamentos.sessaoCaixa"], "onde": { "abertoPor": "$usuario" } },
+      { "acoes": ["movimentarCaixa"], "sujeitos": ["pagamentos.operacaoCaixa"] },
+      { "acoes": ["autorizar", "capturar"], "sujeitos": ["pagamentos.pagamento"] }
+    ] } },
+  { "kind": "papel", "id": "pagamentos.financeiro", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [
+      { "acoes": ["listar", "obter"], "sujeitos": ["pagamentos.pagamento", "pagamentos.estorno", "pagamentos.carteira", "pagamentos.lancamento", "pagamentos.sessaoCaixa", "pagamentos.operacaoCaixa", "pagamentos.caixa", "pagamentos.configPagamento"] },
+      { "acoes": ["estornar", "cancelar"], "sujeitos": ["pagamentos.estorno", "pagamentos.pagamento"] },
+      { "acoes": ["criar", "atualizar", "remover"], "sujeitos": ["pagamentos.configPagamento", "pagamentos.caixa"] }
+    ] } }
+]
