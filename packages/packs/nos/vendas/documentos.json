@@ -1,0 +1,232 @@
+[
+ {
+  "kind": "documento",
+  "id": "vendas.doc.pedido",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "emit": [
+   "html",
+   "pdf"
+  ],
+  "spec": {
+   "tamanho": "A4",
+   "margem": {
+    "topo": 12,
+    "direita": 12,
+    "baixo": 14,
+    "esquerda": 12
+   },
+   "titulo": "Pedido {pedido.numero}",
+   "rodape": "Pedido {pedido.numero} · Página {pagina}/{paginas}",
+   "dados": {
+    "empresa": {
+     "tipo": "json"
+    },
+    "pedido": {
+     "tipo": "json"
+    },
+    "cliente": {
+     "tipo": "json"
+    },
+    "itens": {
+     "tipo": "lista"
+    },
+    "totais": {
+     "tipo": "json"
+    }
+   },
+   "blocos": [
+    {
+     "tipo": "barraSecao",
+     "variante": "titulo",
+     "texto": "Pedido"
+    },
+    {
+     "tipo": "colunas",
+     "colunas": [
+      {
+       "flex": 2,
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Empresa",
+         "valor": "{empresa.nome}",
+         "estiloValor": {
+          "peso": "negrito",
+          "tamanho": 11
+         }
+        },
+        {
+         "tipo": "campo",
+         "rotulo": "CNPJ",
+         "valor": "{empresa.cnpj | cpfcnpj}"
+        }
+       ]
+      },
+      {
+       "flex": 1,
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Telefone",
+         "valor": "{empresa.telefone}"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "tipo": "espaco",
+     "altura": 6
+    },
+    {
+     "tipo": "colunas",
+     "colunas": [
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Pedido",
+         "valor": "{pedido.numero}",
+         "estiloValor": {
+          "peso": "negrito"
+         }
+        }
+       ]
+      },
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Data",
+         "valor": "{pedido.criadoEm | datahora}"
+        }
+       ]
+      },
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Pagamento",
+         "valor": "{pedido.metodoPagamento | upper}"
+        }
+       ]
+      },
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Situação",
+         "valor": "{pedido.status | upper}"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "tipo": "barraSecao",
+     "texto": "Cliente"
+    },
+    {
+     "tipo": "colunas",
+     "colunas": [
+      {
+       "flex": 2,
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Nome",
+         "valor": "{cliente.nome}"
+        }
+       ]
+      },
+      {
+       "flex": 1,
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "CPF/CNPJ",
+         "valor": "{cliente.documento | cpfcnpj}"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "tipo": "barraSecao",
+     "texto": "Itens"
+    },
+    {
+     "tipo": "tabela",
+     "colunas": [
+      {
+       "cabecalho": "Item",
+       "flex": 6
+      },
+      {
+       "cabecalho": "Qtd",
+       "flex": 1,
+       "alinhamento": "direita"
+      },
+      {
+       "cabecalho": "Unitário",
+       "flex": 2,
+       "alinhamento": "direita"
+      },
+      {
+       "cabecalho": "Total",
+       "flex": 2,
+       "alinhamento": "direita"
+      }
+     ],
+     "linhasDe": {
+      "cada": "itens",
+      "como": "i",
+      "limite": 500,
+      "celulas": [
+       {
+        "principal": "{i.nome}",
+        "secundario": "{i.variante}"
+       },
+       "{i.quantidade | num:3}",
+       "{i.precoUnitario | brl}",
+       "{i.totalLinha | brl}"
+      ]
+     }
+    },
+    {
+     "tipo": "espaco",
+     "altura": 6
+    },
+    {
+     "tipo": "resumo",
+     "linhas": [
+      {
+       "rotulo": "Subtotal",
+       "valor": "{totais.subtotal | brl}"
+      },
+      {
+       "rotulo": "Frete",
+       "valor": "{totais.frete | brl}"
+      },
+      {
+       "rotulo": "Desconto",
+       "valor": "{totais.desconto | brl}"
+      },
+      {
+       "rotulo": "Total",
+       "valor": "{totais.total | brl}",
+       "forte": true
+      }
+     ]
+    },
+    {
+     "tipo": "paragrafo",
+     "texto": "{pedido.observacoes}",
+     "se": "pedido.observacoes",
+     "tamanho": 8
+    }
+   ]
+  }
+ }
+]

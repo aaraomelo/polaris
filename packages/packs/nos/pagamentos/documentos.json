@@ -1,0 +1,151 @@
+[
+ {
+  "kind": "documento",
+  "id": "pagamentos.doc.recibo",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "emit": [
+   "html",
+   "pdf"
+  ],
+  "spec": {
+   "tamanho": "A5",
+   "orientacao": "paisagem",
+   "margem": {
+    "topo": 10,
+    "direita": 12,
+    "baixo": 12,
+    "esquerda": 12
+   },
+   "titulo": "Recibo {pagamento.numero}",
+   "dados": {
+    "empresa": {
+     "tipo": "json"
+    },
+    "pagamento": {
+     "tipo": "json"
+    },
+    "pagador": {
+     "tipo": "json"
+    }
+   },
+   "blocos": [
+    {
+     "tipo": "barraSecao",
+     "variante": "titulo",
+     "texto": "Recibo"
+    },
+    {
+     "tipo": "colunas",
+     "colunas": [
+      {
+       "flex": 2,
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Empresa",
+         "valor": "{empresa.nome}",
+         "estiloValor": {
+          "peso": "negrito",
+          "tamanho": 11
+         }
+        },
+        {
+         "tipo": "campo",
+         "rotulo": "CNPJ",
+         "valor": "{empresa.cnpj | cpfcnpj}"
+        }
+       ]
+      },
+      {
+       "flex": 1,
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Telefone",
+         "valor": "{empresa.telefone}"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "tipo": "espaco",
+     "altura": 8
+    },
+    {
+     "tipo": "colunas",
+     "colunas": [
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Recibo nº",
+         "valor": "{pagamento.numero}"
+        }
+       ]
+      },
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Pago em",
+         "valor": "{pagamento.pagoEm | datahora}"
+        }
+       ]
+      },
+      {
+       "blocos": [
+        {
+         "tipo": "campo",
+         "rotulo": "Valor",
+         "valor": "{pagamento.valor | brl}",
+         "estiloValor": {
+          "peso": "negrito",
+          "tamanho": 14
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "tipo": "paragrafo",
+     "texto": "Recebemos de {pagador.nome} (CPF/CNPJ {pagador.documento | cpfcnpj}) a importância de {pagamento.valor | brl}, referente a {pagamento.referencia}, paga por {pagamento.metodo | lower}.",
+     "tamanho": 11
+    },
+    {
+     "tipo": "resumo",
+     "se": "pagamento.taxa",
+     "linhas": [
+      {
+       "rotulo": "Valor",
+       "valor": "{pagamento.valor | brl}"
+      },
+      {
+       "rotulo": "Taxa",
+       "valor": "{pagamento.taxa | brl}"
+      },
+      {
+       "rotulo": "Líquido",
+       "valor": "{pagamento.liquido | brl}",
+       "forte": true
+      }
+     ]
+    },
+    {
+     "tipo": "espaco",
+     "altura": 24
+    },
+    {
+     "tipo": "assinaturas",
+     "itens": [
+      {
+       "rotulo": "{empresa.nome}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+]
