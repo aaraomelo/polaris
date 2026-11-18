@@ -1,0 +1,6 @@
+{
+  "kind": "kernel",
+  "id": "k",
+  "versao": "1.0.0",
+  "spec": { "entradas": {}, "saidas": { "r": { "tipo": "decimal" } }, "corpo": {"locais":[{"nome":"Ruim","valor":"1"}],"saidas":{"r":"1"}} }
+}

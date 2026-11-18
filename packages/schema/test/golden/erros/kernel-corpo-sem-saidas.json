@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/corpo/saidas",
+    "regra": "minProperties",
+    "mensagem": "o objeto precisa de pelo menos 1 campo(s)"
+  }
+]

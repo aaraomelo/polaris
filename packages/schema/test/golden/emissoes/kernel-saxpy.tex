@@ -1,0 +1,26 @@
+\subsection*{kernel: saxpy}
+\begin{tabular}{@{}ll@{}}
+versão & 1.0.0 \\
+estatuto & rascunho \\
+escopo & core \\
+\end{tabular}
+
+\begin{tabular}{@{}p{0.35\linewidth}p{0.6\linewidth}@{}}
+\texttt{spec.corpo.locais[0].nome} & t \\
+\texttt{spec.corpo.locais[0].valor} & a * x \\
+\texttt{spec.corpo.saidas.r} & t + y \\
+\texttt{spec.dominio.maxElementos} & 1000000 \\
+\texttt{spec.emissoes[0].alvo} & js \\
+\texttt{spec.emissoes[1].alvo} & wasm \\
+\texttt{spec.emissoes[2].alvo} & glsl \\
+\texttt{spec.emissoes[3].alvo} & ptx \\
+\texttt{spec.entradas.a.tipo} & decimal \\
+\texttt{spec.entradas.x.lista} & true \\
+\texttt{spec.entradas.x.tipo} & decimal \\
+\texttt{spec.entradas.y.lista} & true \\
+\texttt{spec.entradas.y.tipo} & decimal \\
+\texttt{spec.restricoes[0]} & a >= 0 \\
+\texttt{spec.saidas.r.lista} & true \\
+\texttt{spec.saidas.r.tipo} & decimal \\
+\texttt{spec.tolerancia.relativa} & 0.00001 \\
+\end{tabular}

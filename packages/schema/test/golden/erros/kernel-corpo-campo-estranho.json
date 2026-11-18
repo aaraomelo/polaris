@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/corpo/laco",
+    "regra": "additionalProperties",
+    "mensagem": "o campo 'laco' não existe aqui",
+    "dica": "campos válidos: locais, saidas"
+  }
+]

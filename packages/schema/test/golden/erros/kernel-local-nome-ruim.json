@@ -1,0 +1,8 @@
+[
+  {
+    "caminho": "/spec/corpo/locais/0/nome",
+    "regra": "pattern",
+    "mensagem": "\"Ruim\" não segue o formato esperado",
+    "dica": "use camelCase começando por minúscula (ex.: precoUnitario)"
+  }
+]

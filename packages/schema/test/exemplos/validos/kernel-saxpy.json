@@ -1,0 +1,14 @@
+{
+  "kind": "kernel",
+  "id": "saxpy",
+  "versao": "1.0.0",
+  "spec": {
+    "entradas": { "a": { "tipo": "decimal" }, "x": { "tipo": "decimal", "lista": true }, "y": { "tipo": "decimal", "lista": true } },
+    "saidas": { "r": { "tipo": "decimal", "lista": true } },
+    "dominio": { "maxElementos": 1000000 },
+    "restricoes": ["a >= 0"],
+    "tolerancia": { "relativa": 0.00001 },
+    "corpo": { "locais": [{ "nome": "t", "valor": "a * x" }], "saidas": { "r": "t + y" } },
+    "emissoes": [{ "alvo": "js" }, { "alvo": "wasm" }, { "alvo": "glsl" }, { "alvo": "ptx" }]
+  }
+}

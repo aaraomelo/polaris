@@ -1,0 +1,6 @@
+{
+  "kind": "kernel",
+  "id": "k",
+  "versao": "1.0.0",
+  "spec": { "entradas": {}, "saidas": { "r": { "tipo": "decimal" } }, "corpo": {"saidas":{"r":"1"},"laco":"for"} }
+}
