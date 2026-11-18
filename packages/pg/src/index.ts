@@ -33,14 +33,21 @@ export function criaPool(o: OpcoesPool): pg.Pool {
   const u = new URL(o.url)
   if (u.protocol !== 'postgres:' && u.protocol !== 'postgresql:') throw new Error('url deve ser postgres://…')
   if (o.papel !== undefined && !IDENT.test(o.papel)) throw new Error('papel inválido (use minúsculas, números e _)')
+  // prazos e papel por SET ao conectar (e não por opções de startup: pgbouncer em modo transação as ignora). O SET roda DENTRO do `connect` do cliente, antes de o pool entregá-lo:
+  // nenhuma consulta de quem recebe a conexão corre antes dele, sem consultas concorrentes no mesmo cliente (o que o pg 9 vai proibir). Se o SET falha, a conexão falha (nunca sem o papel).
+  const st = Math.trunc(o.statementTimeoutMs ?? 15_000), it = Math.trunc(o.idleTransacaoMs ?? 15_000)
+  const inicio = `SET statement_timeout = ${st}; SET idle_in_transaction_session_timeout = ${it}${o.papel ? `; SET ROLE ${o.papel}` : ''}`
+  class ClienteIniciado extends pg.Client {
+    // @ts-expect-error o pg-pool chama `connect(callback)`; a assinatura de promessa também é mantida
+    override connect(cb?: (err?: Error) => void): Promise<void> | void {
+      if (!cb) return super.connect().then(() => this.query(inicio)).then(() => undefined)
+      super.connect((err?: Error) => { if (err) return cb(err); this.query(inicio).then(() => cb(), (e: Error) => { this.end().catch(() => {}); cb(e) }) })
+    }
+  }
   const pool = new pg.Pool({
-    connectionString: o.url, max: o.max ?? 10, connectionTimeoutMillis: o.esperaConexaoMs ?? 5000,
+    connectionString: o.url, max: o.max ?? 10, connectionTimeoutMillis: o.esperaConexaoMs ?? 5000, Client: ClienteIniciado as unknown as typeof pg.Client,
     ...(o.ssl !== undefined ? { ssl: o.ssl } : {}),
   })
-  // prazos e papel por SET ao conectar (e não por opções de startup: pgbouncer em modo transação as ignora). As consultas de uma conexão são enfileiradas
-  // em ordem, então isto roda ANTES de qualquer consulta de quem recebe a conexão do pool.
-  const st = Math.trunc(o.statementTimeoutMs ?? 15_000), it = Math.trunc(o.idleTransacaoMs ?? 15_000)
-  pool.on('connect', (c) => { void c.query(`SET statement_timeout = ${st}; SET idle_in_transaction_session_timeout = ${it}${o.papel ? `; SET ROLE ${o.papel}` : ''}`) })
   // erro numa conexão ociosa (rede caiu) não pode derrubar o processo
   pool.on('error', () => {})
   return pool

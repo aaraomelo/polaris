@@ -21,6 +21,22 @@ beforeAll(async () => {
 afterAll(async () => { await srv.stop(); await db.close() })
 const tenant = (p = criaPool({ url, max: 1, papel: 'app' })) => ({ p, db: dbTenantDePg(p) })
 
+describe('criaPool: prazos e papel aplicados NO connect, antes da primeira consulta e sem consultas concorrentes', () => {
+  it('a primeira consulta de uma conexão nova já roda com o papel e o statement_timeout; sem aviso de consulta concorrente do pg', async () => {
+    const avisos: string[] = []; const ouve = (w: Error) => avisos.push(w.message); process.on('warning', ouve)
+    const p = criaPool({ url, max: 3, papel: 'app', statementTimeoutMs: 4321 })
+    try {
+      const rs = await Promise.all([1, 2, 3].map(() => p.query(`SELECT current_user AS u, current_setting('statement_timeout') AS t`))) // 3 conexões novas ao mesmo tempo, cada uma já com a primeira consulta na fila
+      for (const r of rs) expect(r.rows[0]).toEqual({ u: 'app', t: '4321ms' })
+      await new Promise((r) => setTimeout(r, 50)); expect(avisos.filter((m) => /already executing a query/.test(m))).toEqual([])
+    } finally { process.off('warning', ouve); await p.end() }
+  })
+  it('se o SET do papel falha (papel inexistente), a conexão FALHA: nunca se usa uma conexão sem o papel', async () => {
+    const p = criaPool({ url, max: 1, papel: 'nao_existe' })
+    try { await expect(p.query('SELECT 1')).rejects.toThrow(/nao_existe|role/i) } finally { await p.end() }
+  })
+})
+
 describe('dbTenantDePg: RLS por transação, com o driver real', () => {
   it('cada transação enxerga só o próprio tenant; commit grava; o tenant NÃO sobrevive à transação (a conexão volta limpa ao pool)', async () => {
     const { p, db: d } = tenant()
