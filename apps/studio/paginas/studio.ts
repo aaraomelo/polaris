@@ -25,6 +25,7 @@ export const DADOS = [
   dado('voltar', 'voltarRelease', { para: campo('inteiro'), nota: campo('texto') }),
   dado('diffrel', 'compararReleases', { de: campo('inteiro', { obrigatorio: true }), para: campo('inteiro', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
+  dado('diagrama', 'diagramar', { tipo: campo('texto', { obrigatorio: true }), no: campo('json'), selecionado: campo('texto') }),
   dado('previa', 'previsualizar', { no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto'), modo: campo('texto') }),
   dado('restaurar', 'restaurarPadrao', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }) }),
 ]
@@ -334,6 +335,19 @@ const releasesVista = (): Inst => pilha([
   ], { se: 'diffrel', gap: 2 }),
 ], { se: 'estado.painel == "releases" && releases', gap: 8 })
 
+/** diagramas gerados do JSON no servidor: o fluxo do site (páginas, formulários, dados, serviços) e os blocos da página aberta (o rascunho, com o bloco selecionado em destaque) */
+const diagramasVista = (): Inst => pilha([
+  titulo('Diagramas', 3),
+  linha([
+    botao('Fluxo da aplicação', [def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))]),
+    botao('Blocos da página aberta', [def('tipoDiagrama', '"blocos"'), exe('diagrama', { tipo: 'blocos', no: '{estado.no}', selecionado: `{${SELNO}.id ?? ""}` }, undefined, aviso('erro', 'erro'))], { se: `estado.no && ${EH_PAGINA}` }),
+  ]),
+  texto('{estado.tipoDiagrama == "fluxo" ? "Fluxo: " + diagrama.resumo.nos + " nó(s) e " + diagrama.resumo.ligacoes + " ligação(ões) — páginas → formulários → dados → serviços." : "Blocos: " + diagrama.resumo.blocos + " bloco(s) da página aberta (rascunho)."}{diagrama.resumo.truncado ? " O desenho foi cortado por ser grande." : ""}', { se: 'diagrama && diagrama.ok' }),
+  P('midia/quadro', { props: { titulo: 'Diagrama', html: '{diagrama.html}', altura: 560 }, se: 'diagrama && diagrama.ok' }),
+  texto('Atenção: {a}', { repetir: { cada: 'diagrama.resumo.avisos ?? []', como: 'a', chave: 'a' }, se: 'diagrama && diagrama.ok' }),
+  texto('Abra um diagrama pelos botões acima.', { se: '!diagrama' }),
+], { se: 'estado.painel == "diagramas"', gap: 8 })
+
 const diffVista = (): Inst => pilha([
   texto('Sem diferenças.', { se: 'diff.diff.igual' }),
   pilha([
@@ -391,10 +405,10 @@ const formCriar = (): Inst => linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
+  dados: { diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    painel: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
@@ -406,6 +420,7 @@ export const PAGINA = no('pagina', 'studio.app', {
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
       ], aviso('erro', 'erro'))], { se: 'estado.no' }),
       botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))]),
+      botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))]),
       botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))]),
       texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
     ]),
@@ -417,6 +432,7 @@ export const PAGINA = no('pagina', 'studio.app', {
     seletorDeNos('pagina'),
     seletorDeNos('tema'),
     seletorDeNos('formulario'),
+    diagramasVista(),
     linha([
       botao('Restaurar o padrão', [def('confirmaRestaurar', 'true')], { se: 'estado.no && estado.aberto.origem == "tenant" && !estado.confirmaRestaurar' }),
       texto('Voltar {estado.aberto.id} ao padrão da plataforma? O histórico fica; vale no site após Publicar.', { se: 'estado.confirmaRestaurar' }),

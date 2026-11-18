@@ -409,6 +409,33 @@
  },
  {
   "kind": "dados",
+  "id": "studio.diagrama",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "diagramar"
+   },
+   "parametros": {
+    "tipo": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "no": {
+     "tipo": "json"
+    },
+    "selecionado": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.previa",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -471,6 +498,7 @@
    "rota": "/studio",
    "titulo": "Polaris Studio",
    "dados": {
+    "diagrama": "studio.diagrama",
     "nos": "studio.nos",
     "blocos": "studio.blocos",
     "abrir": "studio.abrir",
@@ -515,6 +543,10 @@
     "painel": {
      "tipo": "texto",
      "inicial": ""
+    },
+    "tipoDiagrama": {
+     "tipo": "texto",
+     "inicial": "fluxo"
     },
     "selCampo": {
      "tipo": "json",
@@ -878,6 +910,45 @@
              "acao": "executar",
              "dados": "releases",
              "args": {},
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Diagramas"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "painel",
+             "valor": "estado.painel == \"diagramas\" ? \"\" : \"diagramas\""
+            },
+            {
+             "acao": "definir",
+             "estado": "tipoDiagrama",
+             "valor": "\"fluxo\""
+            },
+            {
+             "acao": "executar",
+             "dados": "diagrama",
+             "args": {
+              "tipo": "fluxo"
+             },
              "emErro": [
               {
                "acao": "definir",
@@ -3068,6 +3139,141 @@
              }
             }
            ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "se": "estado.painel == \"diagramas\"",
+       "props": {
+        "gap": 8
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Diagramas",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "props": {
+           "gap": 8,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "nav/botao",
+             "props": {
+              "texto": "Fluxo da aplicação"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "tipoDiagrama",
+                "valor": "\"fluxo\""
+               },
+               {
+                "acao": "executar",
+                "dados": "diagrama",
+                "args": {
+                 "tipo": "fluxo"
+                },
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "estado.no && estado.aberto.kind == \"pagina\"",
+             "props": {
+              "texto": "Blocos da página aberta"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "tipoDiagrama",
+                "valor": "\"blocos\""
+               },
+               {
+                "acao": "executar",
+                "dados": "diagrama",
+                "args": {
+                 "tipo": "blocos",
+                 "no": "{estado.no}",
+                 "selecionado": "{obter(estado.no.spec.raiz, estado.sel).id ?? \"\"}"
+                },
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "diagrama && diagrama.ok",
+          "props": {
+           "texto": "{estado.tipoDiagrama == \"fluxo\" ? \"Fluxo: \" + diagrama.resumo.nos + \" nó(s) e \" + diagrama.resumo.ligacoes + \" ligação(ões) — páginas → formulários → dados → serviços.\" : \"Blocos: \" + diagrama.resumo.blocos + \" bloco(s) da página aberta (rascunho).\"}{diagrama.resumo.truncado ? \" O desenho foi cortado por ser grande.\" : \"\"}"
+          }
+         },
+         {
+          "bloco": "midia/quadro",
+          "props": {
+           "titulo": "Diagrama",
+           "html": "{diagrama.html}",
+           "altura": 560
+          },
+          "se": "diagrama && diagrama.ok"
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "repetir": {
+           "cada": "diagrama.resumo.avisos ?? []",
+           "como": "a",
+           "chave": "a"
+          },
+          "se": "diagrama && diagrama.ok",
+          "props": {
+           "texto": "Atenção: {a}"
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "!diagrama",
+          "props": {
+           "texto": "Abra um diagrama pelos botões acima."
           }
          }
         ]

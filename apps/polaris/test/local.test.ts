@@ -302,6 +302,22 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('Studio: diagramas — o fluxo do site (páginas, links, formulário, dados) e os blocos da página aberta, no quadro isolado', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
+      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Diagramas' }).click()
+      const quadro = p.frameLocator('iframe[title="Diagrama"]'); await quadro.locator('svg').waitFor()
+      for (const t of ['Páginas', 'Formulários', 'Dados', 'Serviços', '/produtos', '/contato']) await quadro.getByText(t, { exact: true }).first().waitFor() // o fluxo do site de exemplo
+      expect(await quadro.locator('path.lig').count()).toBeGreaterThan(5)
+      await p.getByText(/Fluxo: \d+ nó\(s\) e \d+ ligação/).waitFor()
+      await p.getByRole('button', { name: 'site.home (padrão)' }).click(); await p.getByRole('button', { name: 'Salvar' }).waitFor(); await p.getByRole('button', { name: 'Blocos da página aberta' }).click()
+      await p.getByText(/Blocos: \d+ bloco\(s\) da página aberta/).waitFor(); await quadro.getByText('layout/pilha').first().waitFor(); await quadro.getByText('nav/link').first().waitFor()
+      expect(await p.locator('iframe[title="Diagrama"]').getAttribute('sandbox')).toBe('') // sem scripts, sem formulários, origem opaca
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('o Studio sem sessão manda ao login e volta para ele depois de entrar', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

@@ -209,6 +209,21 @@
             "tipo": "inteiro"
           }
         }
+      },
+      "diagrama": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          },
+          "html": {
+            "tipo": "texto",
+            "descricao": "documento do diagrama (SVG), para o quadro isolado"
+          },
+          "resumo": {
+            "tipo": "json",
+            "descricao": "quantos blocos/nós/ligações, se foi cortado e os avisos (ex.: link para rota sem página)"
+          }
+        }
       }
     },
     "operacoes": {
@@ -422,6 +437,24 @@
           }
         },
         "saida": "previa",
+        "permissao": "studio"
+      },
+      "diagramar": {
+        "metodo": "POST",
+        "caminho": "/diagrama",
+        "entrada": {
+          "tipo": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "no": {
+            "tipo": "json"
+          },
+          "selecionado": {
+            "tipo": "texto"
+          }
+        },
+        "saida": "diagrama",
         "permissao": "studio"
       },
       "publicarSite": {

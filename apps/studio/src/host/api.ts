@@ -26,6 +26,7 @@ export const OPERACOES: Record<string, (a: Record<string, unknown>) => Req> = {
   linkDePreview: (a) => ({ metodo: 'POST', url: '/studio/releases/preview', corpo: sem({ release: a.release, horas: typeof a.horas === 'number' ? a.horas : undefined }) }),
   voltarRelease: (a) => ({ metodo: 'POST', url: '/studio/releases/voltar', corpo: sem({ para: typeof a.para === 'number' ? a.para : undefined, nota: a.nota || undefined }) }),
   compararReleases: (a) => ({ metodo: 'GET', url: `/studio/releases/diff?de=${e(String(a.de))}&para=${e(String(a.para))}` }),
+  diagramar: (a) => ({ metodo: 'POST', url: '/studio/diagrama', corpo: sem({ tipo: a.tipo, no: a.no ?? undefined, selecionado: a.selecionado || undefined }) }),
   previsualizar: (a) => ({ metodo: 'POST', url: '/studio/previa', corpo: sem({ no: a.no, tema: a.tema ?? undefined, selecionado: a.selecionado || undefined, modo: a.modo || undefined }) }),
 }
 

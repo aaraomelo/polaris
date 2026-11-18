@@ -110,6 +110,17 @@ describe('API de autoria do Studio', () => {
     expect(pode([])).toEqual([false, false, false]); expect(pode(['gerente', 'catalogo.gerente'])).toEqual([false, false, false]); expect(pode(['studio.inexistente'])).toEqual([false, false, false]); expect(pode(['studio.leitor', 'studio.inexistente'])).toEqual([false, false, false])
     expect(sessaoDeToken(base, { tenantId: A, usuario: 'u', papeis: ['studio.editor'] })).toMatchObject({ tenantId: A, usuario: 'u' })
   })
+  it('diagrama: blocos do rascunho enviado e fluxo do tenant (cabeças sobre a base), isolado por tenant, com validação do corpo', async () => {
+    const post = (corpo: object, t = h(A, 'ana', 'ver')) => app.inject({ method: 'POST', url: '/studio/diagrama', headers: t, payload: corpo })
+    const pagina2 = (id: string, rota: string, filhos: object[]) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, raiz: { bloco: 'layout/pilha', slots: { filhos } } } })
+    expect((await put(A, pagina2('fx.home', '/fx', [{ bloco: 'nav/link', props: { href: '/fx/sobre', texto: 'Sobre' } }, { bloco: 'nav/link', props: { href: '/fx/some', texto: 'Some' } }]))).statusCode).toBe(201)
+    expect((await put(A, pagina2('fx.sobre', '/fx/sobre', []))).statusCode).toBe(201)
+    const b = (await post({ tipo: 'blocos', no: pagina('p'), selecionado: 'r' })).json(); expect(b).toMatchObject({ ok: true, resumo: { blocos: 2, truncado: false } }); expect(b.html).toContain('<svg'); expect(b.html).toContain('cx sel')
+    const f = (await post({ tipo: 'fluxo' })).json(); expect(f.ok).toBe(true); expect(f.html).toContain('/fx/sobre'); expect(f.resumo.ligacoes).toBeGreaterThanOrEqual(2); expect(f.resumo.avisos.join()).toContain('/fx/some') // link para rota sem página
+    const fb = (await post({ tipo: 'fluxo' }, h(B, 'bia', 'ver'))).json(); expect(fb.html).not.toContain('/fx/sobre') // o fluxo do tenant B não mostra as páginas do A
+    for (const ruim of [{}, { tipo: 'outro' }, { tipo: 'blocos' }, { tipo: 'blocos', no: { spec: { raiz: [] } } }, { tipo: 'fluxo', extra: 1 }, { tipo: 'blocos', no: pagina('p'), selecionado: "x'; --" }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim).slice(0, 50)).toBe(400)
+    expect((await app.inject({ method: 'POST', url: '/studio/diagrama', payload: { tipo: 'fluxo' } })).statusCode).toBe(401)
+  })
   it('previa: sem gerador injetado é 501; com ele, valida o corpo, passa os blocos do tenant e devolve o HTML ou os erros', async () => {
     expect((await app.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: pagina('p') } })).statusCode).toBe(501)
     const chamadas: any[] = []; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, previsualiza: (x) => { chamadas.push(x); return (x.no as any).spec.rota === '/ruim' ? { ok: false, erros: ['quebrou'] } : { ok: true, html: '<p>oi</p>', titulo: 't' } } })

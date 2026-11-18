@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { regrasDePapeis, resolve } from '@polaris/acesso'
 import type { Registry } from '@polaris/schema'
-import { diffNo, GRUPOS, validaTexto, validaToken, type Grupo } from '@polaris/studio'
+import { desenhaFluxo, diagramaDeBlocos, diffNo, fluxoDaAplicacao, paginaDoDiagrama, GRUPOS, validaTexto, validaToken, type Grupo } from '@polaris/studio'
 import type { criaArmazemDeNos, KindDoTenant } from './overrides'
 import { KINDS_DO_TENANT } from './overrides'
 
@@ -284,6 +284,31 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     }
     const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), ...(x.modo ? { modo: x.modo } : {}), blocosDoTenant: [...blocos, ...dados] })
     return r.ok ? { ok: true, html: r.html, erros: [], avisos: r.avisos ?? [], ...(r.problemas ? { problemas: r.problemas } : {}) } : { ok: false, html: '', erros: r.erros, avisos: [] }
+  })
+
+  /** diagramas gerados do JSON: `blocos` (a árvore da página enviada, o RASCUNHO) e `fluxo` (páginas, formulários, dados e serviços do tenant: as cabeças dele sobre a base) */
+  app.post('/studio/diagrama', { bodyLimit: 512 * 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver', 3); if (!s) return reply
+    const b = req.body; if (!so(b, ['tipo', 'no', 'selecionado'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { tipo, no?, selecionado? }')
+    const x = b as { tipo?: unknown; no?: unknown; selecionado?: unknown }
+    if (x.selecionado !== undefined && (typeof x.selecionado !== 'string' || !ANCORA.test(x.selecionado))) return erro(reply, 400, 'requisicao_invalida', 'selecionado inválido')
+    if (x.tipo === 'blocos') {
+      const raiz = (x.no as { spec?: { raiz?: unknown } } | null | undefined)?.spec?.raiz
+      if (!raiz || typeof raiz !== 'object' || Array.isArray(raiz) || typeof (raiz as { bloco?: unknown }).bloco !== 'string') return erro(reply, 400, 'requisicao_invalida', 'no: uma página com spec.raiz')
+      const d = diagramaDeBlocos(raiz as never, x.selecionado ? { selecionado: x.selecionado } : {})
+      return { ok: true, html: paginaDoDiagrama(d.svg), resumo: { blocos: d.blocos, truncado: d.truncado, avisos: [] } }
+    }
+    if (x.tipo !== 'fluxo') return erro(reply, 400, 'requisicao_invalida', 'tipo: blocos ou fluxo')
+    const cabecas = await o.armazem.cabecas(s.tenantId), base = await o.baseDe(s.tenantId)
+    const juntos = (kind: 'pagina' | 'formulario' | 'dados') => {
+      const ids = new Set<string>([...base.ids(kind as never), ...cabecas.filter((c) => c.kind === kind).map((c) => c.id)]), out: Array<{ id: string; spec?: Record<string, unknown> }> = []
+      for (const id of [...ids].sort().slice(0, 200)) { const no = (cabecas.find((c) => c.kind === kind && c.id === id)?.conteudo ?? base.resolve(kind as never, id, { tenantId: s.tenantId })?.no) as { spec?: Record<string, unknown> } | undefined; if (no) out.push({ id, ...(no.spec ? { spec: no.spec } : {}) }) }
+      return out
+    }
+    const alias = await o.tenantNo?.(s.tenantId), site = alias ? ((cabecas.find((c) => c.kind === ('tenant' as string) && c.id === alias)?.conteudo ?? base.resolve('tenant' as never, alias)?.no) as { spec?: { rotaLogin?: unknown } } | undefined) : undefined
+    const rotaLogin = typeof site?.spec?.rotaLogin === 'string' ? site.spec.rotaLogin : undefined
+    const f = fluxoDaAplicacao({ paginas: juntos('pagina'), formularios: juntos('formulario'), dados: juntos('dados'), ...(rotaLogin ? { rotaLogin } : {}) }), d = desenhaFluxo(f)
+    return { ok: true, html: paginaDoDiagrama(d.svg), resumo: { nos: d.nos, ligacoes: d.arestas, truncado: f.truncado, avisos: f.avisos } }
   })
 
   app.post<{ Params: { cid: string } }>('/studio/comentarios/:cid/resolver', async (req, reply) => {
