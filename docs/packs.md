@@ -152,3 +152,33 @@ Concluir a OS publica `os.concluida` (mesma transação) com as peças agregadas
 - Preço de peça e mão de obra são **digitados no balcão** (não vêm de cotação do Catálogo, como no varejo online).
 - OS concluída não reabre (retrabalho = nova OS); concluir exige ao menos um item.
 - Sem anexos/fotos, laudo, checklist, comissão do técnico nem cobrança da OS (a cobrança é pelo pack Pagamentos, ainda não ligada à OS).
+
+---
+
+## Alimentos (`alimentos`): cardápio, comanda, cozinha (KDS) e entrega
+Pack novo (não há original no tiffany): restaurante, lanchonete, bar e delivery.
+
+| Entidade | Papel |
+|---|---|
+| `categoriaCardapio`, `item` | cardápio; cada item tem uma **estação** (`cozinha`, `bar`, `sobremesa`…) e `disponivel` (acabou = não se lança) |
+| `grupoModificador`, `opcao`, `itemGrupo` | modificadores: grupo com **mínimo e máximo** de escolhas ("ponto da carne": 1–1; "adicionais": 0–2), opções com acréscimo, ligados ao item |
+| `mesa` | número, lugares, ativa |
+| `comanda` | `mesa` \| `balcao` \| `entrega`; numeração sequencial por tenant; subtotal, taxa de serviço, desconto, total |
+| `itemComanda` | **foto** do nome, preço e modificadores no momento do lançamento; `novo → em_preparo → pronto → entregue` (ou `cancelado`) |
+| `parteConta` | a divisão da conta fechada |
+
+### Regras (todas testadas)
+- **Modificadores validados no servidor**: mínimo e máximo por grupo, opção só vale se o grupo é do item, opção inativa recusada, repetida recusada. `total = (preço + acréscimos) × quantidade`, exato. Mudar o cardápio depois **não altera** o que já foi lançado.
+- **Mesa**: uma comanda aberta por mesa (a mesa é travada, 409 `mesa_ocupada`); fechar ou cancelar a comanda libera.
+- **Cozinha (KDS)**: `GET /kds/fila?estacao=` devolve só a estação pedida, só `novo`/`em_preparo`, do mais antigo ao mais novo, só de comandas abertas. Cada papel faz a sua transição: a **cozinha** inicia e marca pronto, o **garçom** entrega; transição fora de ordem é 409 e repetir é no-op.
+- **Cancelar item**: o garçom só enquanto `novo`; depois de iniciado, só o **gerente**; entregue não cancela (o ajuste é desconto na conta).
+- **Fechar a conta** (caixa): exige ao menos um item e **todos entregues**; mesa cobra **10% de serviço** por padrão (balcão e entrega, 0), configurável por chamada; desconto maior que a conta é 422; publica `comanda.fechada` **uma vez** (o Pagamentos cobra com `pedidoId = comandaId`); fechada não aceita mais nada.
+- **Dividir a conta**: `N` partes que **somam exatamente** o total (o resto de centavos vai às primeiras; provado por fuzz de 3.000 casos); redividir antes de pagar substitui; com parte paga não refaz.
+- **Entrega**: endereço obrigatório e taxa de entrega (que não paga serviço); só despacha com tudo pronto; `saiu → entregue` (confirmar marca os itens como entregues); fechar exige a entrega confirmada.
+
+### Limites conhecidos
+- **Baixa de estoque dos ingredientes não existe**: o item pode carregar `produtoId`, mas a ficha técnica (receita → insumos) é um pack próprio.
+- Sem gestão de **motoboy/rota/cálculo de frete por zona**, sem **cupom/combos**, sem **fidelidade**.
+- A cobrança é feita pelo Pagamentos a partir do evento; a ligação `comanda.fechada` → `autorizar` não está automatizada neste pack (hoje é uma chamada do caixa/PDV).
+- Garçons compartilham as comandas da casa (não há escopo por garçom).
+- A fila do KDS é consulta (polling); não há push em tempo real.

@@ -1,0 +1,593 @@
+{
+ "kind": "servico",
+ "id": "alimentos",
+ "versao": "1.0.0",
+ "estatuto": "publicado",
+ "spec": {
+  "entidades": {
+   "categoriaCardapio": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "ordem": {
+      "tipo": "inteiro",
+      "padrao": 0
+     },
+     "ativo": {
+      "tipo": "booleano",
+      "padrao": true
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ],
+    "crud": {
+     "caminho": "/categorias-cardapio"
+    }
+   },
+   "item": {
+    "campos": {
+     "categoriaId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "categoriaCardapio"
+     },
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "descricao": {
+      "tipo": "texto"
+     },
+     "preco": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "disponivel": {
+      "tipo": "booleano",
+      "padrao": true,
+      "descricao": "falso = acabou (86): não se lança"
+     },
+     "estacao": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "onde se prepara: cozinha | bar | sobremesa…"
+     },
+     "tempoPreparoMin": {
+      "tipo": "inteiro"
+     },
+     "produtoId": {
+      "tipo": "uuid",
+      "descricao": "vínculo opcional com o Catálogo/Estoque"
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ],
+    "indices": [
+     [
+      "categoriaId"
+     ],
+     [
+      "estacao"
+     ]
+    ],
+    "crud": {
+     "caminho": "/itens-cardapio"
+    }
+   },
+   "grupoModificador": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "minimo": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "maximo": {
+      "tipo": "inteiro",
+      "descricao": "ausente = sem limite"
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ],
+    "crud": {
+     "caminho": "/grupos-modificador"
+    }
+   },
+   "opcao": {
+    "campos": {
+     "grupoId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "grupoModificador"
+     },
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "acrescimo": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "ativo": {
+      "tipo": "booleano",
+      "padrao": true
+     }
+    },
+    "unicos": [
+     [
+      "grupoId",
+      "nome"
+     ]
+    ],
+    "indices": [
+     [
+      "grupoId"
+     ]
+    ],
+    "crud": {
+     "caminho": "/opcoes"
+    }
+   },
+   "itemGrupo": {
+    "campos": {
+     "itemId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "item"
+     },
+     "grupoId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "grupoModificador"
+     }
+    },
+    "unicos": [
+     [
+      "itemId",
+      "grupoId"
+     ]
+    ],
+    "crud": {
+     "caminho": "/itens-grupos"
+    }
+   },
+   "mesa": {
+    "campos": {
+     "numero": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "lugares": {
+      "tipo": "inteiro",
+      "padrao": 4
+     },
+     "ativo": {
+      "tipo": "booleano",
+      "padrao": true
+     }
+    },
+    "unicos": [
+     [
+      "numero"
+     ]
+    ],
+    "crud": {
+     "caminho": "/mesas"
+    }
+   },
+   "sequencia": {
+    "campos": {
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "valor": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     }
+    },
+    "unicos": [
+     [
+      "nome"
+     ]
+    ]
+   },
+   "comanda": {
+    "campos": {
+     "numero": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "tipo": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "mesa | balcao | entrega"
+     },
+     "mesaId": {
+      "tipo": "uuid",
+      "referencia": "mesa"
+     },
+     "clienteId": {
+      "tipo": "texto"
+     },
+     "status": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "aberta | fechada | cancelada"
+     },
+     "enderecoEntrega": {
+      "tipo": "texto"
+     },
+     "taxaEntrega": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "statusEntrega": {
+      "tipo": "texto",
+      "descricao": "aguardando | saiu | entregue"
+     },
+     "entregador": {
+      "tipo": "texto"
+     },
+     "subtotal": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "taxaServico": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "desconto": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "total": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "abertaPor": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "fechadaEm": {
+      "tipo": "dataHora"
+     }
+    },
+    "unicos": [
+     [
+      "numero"
+     ]
+    ],
+    "indices": [
+     [
+      "status"
+     ],
+     [
+      "mesaId",
+      "status"
+     ]
+    ],
+    "crud": {
+     "caminho": "/comandas",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   },
+   "itemComanda": {
+    "campos": {
+     "comandaId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "comanda"
+     },
+     "itemId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "item"
+     },
+     "nome": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "estacao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "quantidade": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "precoBase": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "modificadores": {
+      "tipo": "json",
+      "descricao": "[{ opcaoId, nome, acrescimo }] (foto do momento)"
+     },
+     "total": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "observacao": {
+      "tipo": "texto"
+     },
+     "status": {
+      "tipo": "texto",
+      "obrigatorio": true,
+      "descricao": "novo | em_preparo | pronto | entregue | cancelado"
+     },
+     "motivoCancelamento": {
+      "tipo": "texto"
+     },
+     "preparoIniciadoEm": {
+      "tipo": "dataHora"
+     },
+     "prontoEm": {
+      "tipo": "dataHora"
+     }
+    },
+    "indices": [
+     [
+      "comandaId"
+     ],
+     [
+      "estacao",
+      "status"
+     ]
+    ],
+    "crud": {
+     "caminho": "/itens-comanda",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   },
+   "parteConta": {
+    "campos": {
+     "comandaId": {
+      "tipo": "uuid",
+      "obrigatorio": true,
+      "referencia": "comanda"
+     },
+     "indice": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "valor": {
+      "tipo": "dinheiro",
+      "obrigatorio": true
+     },
+     "paga": {
+      "tipo": "booleano",
+      "padrao": false
+     }
+    },
+    "unicos": [
+     [
+      "comandaId",
+      "indice"
+     ]
+    ],
+    "crud": {
+     "caminho": "/partes-conta",
+     "operacoes": [
+      "listar",
+      "obter"
+     ]
+    }
+   }
+  },
+  "operacoes": {
+   "abrirComanda": {
+    "metodo": "POST",
+    "caminho": "/comandas",
+    "entrada": {
+     "tipo": {
+      "tipo": "texto",
+      "obrigatorio": true
+     },
+     "mesaId": {
+      "tipo": "uuid"
+     },
+     "clienteId": {
+      "tipo": "texto"
+     },
+     "enderecoEntrega": {
+      "tipo": "texto"
+     },
+     "taxaEntrega": {
+      "tipo": "dinheiro"
+     }
+    },
+    "saida": "comanda",
+    "permissao": "alimentos"
+   },
+   "lancarItem": {
+    "metodo": "POST",
+    "caminho": "/comandas/:id/itens",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "itemId": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "quantidade": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     },
+     "modificadores": {
+      "tipo": "json"
+     },
+     "observacao": {
+      "tipo": "texto"
+     }
+    },
+    "saida": "itemComanda",
+    "permissao": "alimentos"
+   },
+   "cancelarItem": {
+    "metodo": "POST",
+    "caminho": "/itens-comanda/:id/cancelar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "motivo": {
+      "tipo": "texto",
+      "obrigatorio": true
+     }
+    },
+    "saida": "itemComanda",
+    "permissao": "alimentos"
+   },
+   "iniciarPreparo": {
+    "metodo": "POST",
+    "caminho": "/itens-comanda/:id/iniciar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "itemComanda",
+    "permissao": "alimentos"
+   },
+   "marcarPronto": {
+    "metodo": "POST",
+    "caminho": "/itens-comanda/:id/pronto",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "itemComanda",
+    "permissao": "alimentos"
+   },
+   "entregarItem": {
+    "metodo": "POST",
+    "caminho": "/itens-comanda/:id/entregar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "itemComanda",
+    "permissao": "alimentos"
+   },
+   "fila": {
+    "metodo": "GET",
+    "caminho": "/kds/fila",
+    "entrada": {
+     "estacao": {
+      "tipo": "texto",
+      "obrigatorio": true
+     }
+    },
+    "saida": "itemComanda",
+    "permissao": "alimentos",
+    "lista": true
+   },
+   "fecharComanda": {
+    "metodo": "POST",
+    "caminho": "/comandas/:id/fechar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "taxaServicoPercentual": {
+      "tipo": "decimal"
+     },
+     "desconto": {
+      "tipo": "dinheiro"
+     }
+    },
+    "saida": "comanda",
+    "permissao": "alimentos",
+    "publica": [
+     "comanda.fechada"
+    ]
+   },
+   "cancelarComanda": {
+    "metodo": "POST",
+    "caminho": "/comandas/:id/cancelar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "comanda",
+    "permissao": "alimentos"
+   },
+   "dividirConta": {
+    "metodo": "POST",
+    "caminho": "/comandas/:id/dividir",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "partes": {
+      "tipo": "inteiro",
+      "obrigatorio": true
+     }
+    },
+    "saida": "parteConta",
+    "permissao": "alimentos",
+    "lista": true
+   },
+   "despachar": {
+    "metodo": "POST",
+    "caminho": "/comandas/:id/despachar",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     },
+     "entregador": {
+      "tipo": "texto",
+      "obrigatorio": true
+     }
+    },
+    "saida": "comanda",
+    "permissao": "alimentos"
+   },
+   "confirmarEntrega": {
+    "metodo": "POST",
+    "caminho": "/comandas/:id/entrega-confirmada",
+    "entrada": {
+     "id": {
+      "tipo": "uuid",
+      "obrigatorio": true
+     }
+    },
+    "saida": "comanda",
+    "permissao": "alimentos"
+   }
+  }
+ }
+}

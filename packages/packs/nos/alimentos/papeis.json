@@ -1,0 +1,174 @@
+[
+ {
+  "kind": "papel",
+  "id": "alimentos.cozinha",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "regras": [
+    {
+     "acoes": [
+      "listar",
+      "obter",
+      "fila",
+      "iniciarPreparo",
+      "marcarPronto"
+     ],
+     "sujeitos": [
+      "alimentos.itemComanda"
+     ]
+    },
+    {
+     "acoes": [
+      "listar",
+      "obter"
+     ],
+     "sujeitos": [
+      "alimentos.categoriaCardapio",
+      "alimentos.item",
+      "alimentos.grupoModificador",
+      "alimentos.opcao",
+      "alimentos.itemGrupo",
+      "alimentos.mesa",
+      "alimentos.comanda"
+     ]
+    },
+    {
+     "acoes": [
+      "atualizar"
+     ],
+     "sujeitos": [
+      "alimentos.item"
+     ],
+     "campos": [
+      "disponivel"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "kind": "papel",
+  "id": "alimentos.garcom",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "regras": [
+    {
+     "acoes": [
+      "listar",
+      "obter"
+     ],
+     "sujeitos": [
+      "alimentos.categoriaCardapio",
+      "alimentos.item",
+      "alimentos.grupoModificador",
+      "alimentos.opcao",
+      "alimentos.itemGrupo",
+      "alimentos.mesa",
+      "alimentos.comanda",
+      "alimentos.itemComanda",
+      "alimentos.parteConta"
+     ]
+    },
+    {
+     "acoes": [
+      "abrirComanda",
+      "cancelarComanda",
+      "despachar",
+      "confirmarEntrega"
+     ],
+     "sujeitos": [
+      "alimentos.comanda"
+     ]
+    },
+    {
+     "acoes": [
+      "lancarItem",
+      "entregarItem"
+     ],
+     "sujeitos": [
+      "alimentos.itemComanda"
+     ]
+    },
+    {
+     "acoes": [
+      "cancelarItem"
+     ],
+     "sujeitos": [
+      "alimentos.itemComanda"
+     ],
+     "onde": {
+      "status": "novo"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "kind": "papel",
+  "id": "alimentos.caixa",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "herda": [
+    "alimentos.garcom"
+   ],
+   "regras": [
+    {
+     "acoes": [
+      "fecharComanda"
+     ],
+     "sujeitos": [
+      "alimentos.comanda"
+     ]
+    },
+    {
+     "acoes": [
+      "dividirConta"
+     ],
+     "sujeitos": [
+      "alimentos.parteConta"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "kind": "papel",
+  "id": "alimentos.gerente",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "herda": [
+    "alimentos.caixa",
+    "alimentos.cozinha"
+   ],
+   "regras": [
+    {
+     "acoes": [
+      "criar",
+      "atualizar",
+      "remover"
+     ],
+     "sujeitos": [
+      "alimentos.categoriaCardapio",
+      "alimentos.item",
+      "alimentos.grupoModificador",
+      "alimentos.opcao",
+      "alimentos.itemGrupo",
+      "alimentos.mesa"
+     ]
+    },
+    {
+     "acoes": [
+      "cancelarItem"
+     ],
+     "sujeitos": [
+      "alimentos.itemComanda"
+     ]
+    }
+   ]
+  }
+ }
+]

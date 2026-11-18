@@ -44,3 +44,11 @@ export function custoMedio(q: string, cm: string, qe: string, cu: string): strin
   if (q0 + qn <= 0n) return normaliza(cu)
   return normaliza(formata4(meioParaCima(q0 * paraCentavos4(cm) + qn * paraCentavos4(cu), q0 + qn)))
 }
+
+/** divide `total` em `n` partes que SOMAM exatamente o total: o resto vai, uma unidade por vez, para as primeiras partes (unidade = 1 centavo se o total é múltiplo de 0,01, senão 0,0001) */
+export function divideConta(total: string, n: number): string[] {
+  if (!Number.isInteger(n) || n < 1) throw new Error('n deve ser um inteiro positivo')
+  const t = paraCentavos4(total); if (t < 0n) throw new Error('total negativo')
+  const un = t % 100n === 0n ? 100n : 1n, partes = t / un, base = partes / BigInt(n), resto = Number(partes % BigInt(n))
+  return Array.from({ length: n }, (_, i) => normaliza(formata4((base + (i < resto ? 1n : 0n)) * un)))
+}

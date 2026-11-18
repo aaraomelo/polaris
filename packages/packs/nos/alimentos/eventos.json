@@ -1,0 +1,26 @@
+[
+ {
+  "kind": "evento",
+  "id": "comanda.fechada",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "nome": "comanda.fechada",
+   "payload": {
+    "comandaId": {
+     "tipo": "uuid",
+     "obrigatorio": true
+    },
+    "total": {
+     "tipo": "dinheiro",
+     "obrigatorio": true
+    },
+    "tipo": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "idempotencia": "comandaId"
+  }
+ }
+]
