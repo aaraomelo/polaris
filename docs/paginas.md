@@ -18,8 +18,15 @@ host/token → tenant → nó `tenant` (paginas, idiomas, login, 404…) → tab
 - **CSP por resposta**, com nonce: `default-src 'none'`, scripts só com o nonce ou `'self'`, `frame-ancestors 'none'`, sem `unsafe-eval`.
 - Prefixos reservados (`/api`, `/bff`, `/studio`, `/graphql`, `/_polaris`, `/metricas`, `/saude`) nunca viram página: seguem JSON.
 
+## Sessão por cookie
+O navegador não manda `Authorization` ao navegar, então a sessão do site é um **cookie com o próprio JWT** do provedor de identidade:
+- `POST /_polaris/sessao` com `{"token": "…"}` (só `application/json`, o que um formulário de outro site não consegue enviar) valida o token **no host do tenant** e responde 204 com `Set-Cookie: polaris_sessao=…; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800; Secure`. Sem `Domain`: vale só para aquele host. `POST /_polaris/sair` apaga.
+- O cookie vale **só para páginas (GET)**. A API (`/api`, `/bff`, `/graphql`) continua exigindo `Authorization`, então um site de outra origem não age em nome do visitante (nada de CSRF contra mutações).
+- Cookie inválido, expirado ou de outro tenant: a página sai como anônima, o cookie é apagado e a `guarda` leva ao login (`rotaLogin?volta=<caminho>`; `voltaSegura` impede redirecionamento aberto). As respostas variam por `Cookie`.
+- `Secure` é padrão; só `cookieSeguro: false` (desenvolvimento, http) o tira. No `pnpm local`, `/entrar` tem o botão "site como …", que grava o cookie e volta para a página pedida.
+- Quem emite o token em produção é o provedor de identidade; o formulário de login que o chama ainda não existe (o `/entrar` do `pnpm local` é só de desenvolvimento).
+
 ## Limites (conhecidos)
-- **Sem sessão por cookie.** O token vai no cabeçalho `Authorization`; um navegador comum não o manda ao navegar, então páginas que dependem de login só funcionam para clientes que mandam o cabeçalho. O fluxo de login (cookie, `?volta=`) ainda não existe.
 - As `guarda` das páginas comparam com os **papéis** do token (não há mapa papel → permissão).
 - O serviço só resolve o tenant de uma chamada **anônima** pelo mapa de desenvolvimento `POLARIS_HOSTS`. Em produção, páginas públicas com dados de serviço ainda não têm esse caminho (o serviço atende só com token).
 - Páginas que o runtime do navegador não suporta respondem 501; ações que chamam serviços no cliente (`executar`) dependem do carregador do hospedeiro, que o site ainda não tem.

@@ -54,6 +54,13 @@
                       "href": "/sobre",
                       "texto": "Sobre"
                     }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Produtos (gerente)"
+                    }
                   }
                 ]
               }
@@ -210,9 +217,12 @@
       "paginas": [
         "site.home",
         "site.sobre",
-        "site.nao"
+        "site.nao",
+        "site.produtos",
+        "site.entrar"
       ],
-      "paginaNaoEncontrada": "site.nao"
+      "paginaNaoEncontrada": "site.nao",
+      "rotaLogin": "/entrar"
     }
   },
   {
@@ -231,9 +241,116 @@
       "paginas": [
         "site.home",
         "site.sobre",
-        "site.nao"
+        "site.nao",
+        "site.produtos",
+        "site.entrar"
       ],
-      "paginaNaoEncontrada": "site.nao"
+      "paginaNaoEncontrada": "site.nao",
+      "rotaLogin": "/entrar"
+    }
+  },
+  {
+    "kind": "dados",
+    "id": "site.produtos",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "fonte": {
+        "tipo": "servico",
+        "servico": "loja",
+        "operacao": "listarProduto"
+      },
+      "carregar": "auto"
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "site.produtos",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/produtos",
+      "titulo": "Produtos",
+      "guarda": [
+        "gerente"
+      ],
+      "dados": {
+        "produtos": "site.produtos"
+      },
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "layout/linha",
+              "props": {
+                "gap": 16
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/",
+                      "texto": "Início"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/sobre",
+                      "texto": "Sobre"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Produtos (gerente)"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Produtos",
+                "nivel": 1
+              }
+            },
+            {
+              "bloco": "texto/paragrafo",
+              "props": {
+                "texto": "{p.nome}: R$ {p.preco}"
+              },
+              "repetir": {
+                "cada": "produtos",
+                "como": "p"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "site.entrar",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/entrar",
+      "titulo": "Entrar",
+      "raiz": {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Entrar"
+        }
+      }
     }
   }
 ]

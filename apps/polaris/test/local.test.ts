@@ -15,8 +15,8 @@ const dir = mkdtempSync(join(tmpdir(), 'polaris-local-')); const abertos: Local[
 const sobe = async (dados: string | null) => { const l = await sobeLocal({ dados, porta: 0, silencioso: true }); abertos.push(l); return l }
 afterAll(async () => { for (const l of abertos) await l.fecha().catch(() => {}); rmSync(dir, { recursive: true, force: true }) })
 // `fetch` não deixa trocar o cabeçalho Host; o tenant sai do Host, então as chamadas usam node:http
-const req = (l: Local, alias: string, metodo: string, caminho: string, token?: string, corpo?: unknown): Promise<{ status: number; headers: { get(k: string): string | null }; text(): Promise<string>; json(): Promise<unknown> }> => new Promise((ok, falha) => {
-  const r = httpRequest({ host: '127.0.0.1', port: l.porta, method: metodo, path: caminho, headers: { host: `${alias}.polaris.localhost:${l.porta}`, ...(token ? { authorization: `Bearer ${token}` } : {}), ...(corpo !== undefined ? { 'content-type': 'application/json' } : {}) } }, (res) => {
+const req = (l: Local, alias: string, metodo: string, caminho: string, token?: string, corpo?: unknown, extra: Record<string, string> = {}): Promise<{ status: number; headers: { get(k: string): string | null }; text(): Promise<string>; json(): Promise<unknown> }> => new Promise((ok, falha) => {
+  const r = httpRequest({ host: '127.0.0.1', port: l.porta, method: metodo, path: caminho, headers: { host: `${alias}.polaris.localhost:${l.porta}`, ...(token ? { authorization: `Bearer ${token}` } : {}), ...(corpo !== undefined ? { 'content-type': 'application/json' } : {}), ...extra } }, (res) => {
     const partes: Buffer[] = []; res.on('data', (c) => partes.push(c)); res.on('end', () => { const t = Buffer.concat(partes).toString('utf8'); ok({ status: res.statusCode!, headers: { get: (k) => { const v = res.headers[k.toLowerCase()]; return Array.isArray(v) ? v[0]! : (v ?? null) } }, text: async () => t, json: async () => JSON.parse(t) }) })
   }); r.on('error', falha); if (corpo !== undefined) r.write(JSON.stringify(corpo)); r.end()
 })
@@ -47,6 +47,18 @@ describe('ambiente local', () => {
     expect((await get(l, 'loja-demo', '/sobre')).status).toBe(200)
     const nao = await get(l, 'loja-demo', '/nao-existe'); expect(nao.status).toBe(404); expect(await nao.text()).toContain('Página não encontrada')
     expect((await get(l, 'loja-demo', '/api/loja/destaques')).status).toBe(200) // a API pública continua JSON
+  })
+  it('login do SITE por cookie: a página protegida manda ao login, o login grava o cookie e volta para ela; a API não aceita o cookie', async () => {
+    const l = await sobe(null), gerente = await l.token('loja-demo', ['gerente'])
+    await req(l, 'loja-demo', 'POST', '/api/loja/produtos', gerente, { nome: 'Café', preco: '49.90' })
+    const anon = await get(l, 'loja-demo', '/produtos'); expect([anon.status, anon.headers.get('location')]).toEqual([302, '/entrar?volta=%2Fprodutos'])
+    const ir = await get(l, 'loja-demo', '/entrar/ir?tenant=loja-demo&papel=gerente&para=site&volta=%2Fprodutos'); expect(ir.status).toBe(302)
+    const ck = ir.headers.get('set-cookie')!; expect(ck).toMatch(/^polaris_sessao=[\w.-]+; Path=\/; HttpOnly; SameSite=Lax/); expect(ir.headers.get('location')).toMatch(/\/produtos$/)
+    const cookie = ck.split(';')[0]!
+    const pagina = await req(l, 'loja-demo', 'GET', '/produtos', undefined, undefined, { cookie }); expect(pagina.status).toBe(200); expect(await pagina.text()).toContain('Café')
+    expect((await req(l, 'loja-demo', 'GET', '/api/loja/produtos', undefined, undefined, { cookie })).status).toBeGreaterThanOrEqual(401) // o cookie só vale para páginas
+    const outro = await ir.headers.get('location')!; expect(outro).not.toContain('token') // nada de token na URL
+    expect((await get(l, 'loja-demo', '/entrar/ir?tenant=loja-demo&papel=gerente&para=site&volta=%2F%2Fmal.com')).headers.get('location')).toMatch(/polaris\.localhost:\d+\/$/) // volta externa vira /
   })
   it('o login recusa tenant, papel e usuário inválidos; papel sem permissão no Studio dá 403', async () => {
     const l = await sobe(null)
@@ -79,6 +91,20 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.getByRole('heading', { name: 'Bem-vindo à loja' }).waitFor(); await p.getByText('Café de Loja Demo').waitFor()
       await p.getByRole('link', { name: 'Sobre' }).click(); await p.waitForURL(/\/sobre$/); await p.getByRole('heading', { name: 'Sobre' }).waitFor()
       expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('no navegador: página protegida → login → volta para ela já logado → sair', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/produtos`) // sem sessão: cai no login com ?volta
+      await p.getByRole('heading', { name: /Polaris/ }).waitFor(); expect(p.url()).toContain('volta=%2Fprodutos')
+      await p.locator('li', { hasText: 'Loja Demo' }).first() // a página lista os dois tenants
+      await p.locator('h2', { hasText: 'Loja Demo' }).locator('xpath=following-sibling::ul[1]').getByRole('link', { name: /site como gerente/ }).click()
+      await p.waitForURL(/\/produtos$/); await p.getByRole('heading', { name: 'Produtos' }).waitFor()
+      expect(await p.evaluate(() => document.cookie)).not.toContain('polaris_sessao') // HttpOnly: o JavaScript não enxerga
+      await p.evaluate(() => fetch('/_polaris/sair', { method: 'POST' })); await p.reload(); await p.waitForURL(/\/entrar\?volta=/)
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
   it('clicar em "entrar" abre o Studio do tenant, já autenticado: lista os temas e abre o padrão', async () => {

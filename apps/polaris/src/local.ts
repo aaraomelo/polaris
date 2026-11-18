@@ -3,7 +3,8 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
-import { registraBase } from '@polaris/engine'
+import { registraBase, voltaSegura } from '@polaris/engine'
+import { cookieDeSessao } from '@polaris/gateway'
 import { registraTemas } from '@polaris/engine/tema'
 import { SignJWT } from 'jose'
 import { configGateway, configServico } from './config'
@@ -92,14 +93,18 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     // 4. login de DESENVOLVIMENTO: emite o JWT e leva ao Studio do tenant (o token vai no fragmento da URL, que não chega a servidor nenhum)
     let porta = o.porta ?? 3000
     const cab = (reply: { header(k: string, v: string): unknown }) => { reply.header('content-security-policy', "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"); reply.header('cache-control', 'no-store') }
-    gw.get('/entrar', async (_req, reply) => {
-      cab(reply)
-      const linhas = TENANTS_LOCAIS.map((t) => `<h2>${esc(t.nome)} <small>(${esc(t.alias)}.polaris.localhost)</small></h2><ul>${PAPEIS_LOCAIS.map((p) => `<li><a href="/entrar/ir?tenant=${esc(t.alias)}&amp;papel=${esc(p)}">entrar como <code>${esc(p)}</code></a></li>`).join('')}</ul>`).join('')
+    gw.get<{ Querystring: { volta?: string } }>('/entrar', async (req, reply) => {
+      cab(reply); const volta = voltaSegura(req.query.volta)
+      const linhas = TENANTS_LOCAIS.map((t) => `<h2>${esc(t.nome)} <small>(${esc(t.alias)}.polaris.localhost)</small></h2><ul>${PAPEIS_LOCAIS.map((p) => `<li><a href="/entrar/ir?tenant=${esc(t.alias)}&amp;papel=${esc(p)}">Studio como <code>${esc(p)}</code></a> · <a href="/entrar/ir?tenant=${esc(t.alias)}&amp;papel=${esc(p)}&amp;para=site&amp;volta=${encodeURIComponent(volta)}">site como <code>${esc(p)}</code></a></li>`).join('')}</ul>`).join('')
       return reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Polaris local: entrar</title><body><h1>Polaris — ambiente local</h1><p>Login de <strong>desenvolvimento</strong>: emite um JWT de 12 h para o papel escolhido e abre o Studio.</p>${linhas}<p>Usuário: <code>?usuario=ana</code> na URL (padrão <code>dev</code>).</p></body></html>`)
     })
-    gw.get<{ Querystring: { tenant?: string; papel?: string; usuario?: string } }>('/entrar/ir', async (req, reply) => {
-      const { tenant, papel, usuario = 'dev' } = req.query
+    gw.get<{ Querystring: { tenant?: string; papel?: string; usuario?: string; para?: string; volta?: string } }>('/entrar/ir', async (req, reply) => {
+      const { tenant, papel, usuario = 'dev', para } = req.query
       if (!tenant || !ALIAS.test(tenant) || !TENANTS_LOCAIS.some((t) => t.alias === tenant) || !papel || !(PAPEIS_LOCAIS as readonly string[]).includes(papel) || !USUARIO.test(usuario)) { cab(reply); return reply.status(400).type('text/plain').send('tenant, papel ou usuário inválido') }
+      if (para === 'site') { // sessão do SITE: cookie HttpOnly só deste host, e volta para onde a guarda mandou
+        const t = await token(tenant, [papel], usuario)
+        return reply.header('set-cookie', cookieDeSessao(t, false)).redirect(`http://${tenant}.polaris.localhost:${porta}${voltaSegura(req.query.volta)}`, 302)
+      }
       return reply.redirect(`http://${tenant}.polaris.localhost:${porta}/studio#token=${await token(tenant, [papel], usuario)}`, 302)
     })
     await gw.listen({ port: porta, host: '127.0.0.1' }); porta = (gw.server.address() as { port: number }).port

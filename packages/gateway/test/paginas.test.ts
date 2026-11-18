@@ -59,6 +59,23 @@ describe('servidor de páginas', () => {
     const sem = await e.token('x', A, ['outro']); expect((await e.req('GET', '/privada', { host: 'a.loja.test', tok: sem })).statusCode).toBe(403)
     const com = await e.token('y', A, ['vendedor']); const ok = await e.req('GET', '/privada', { host: 'a.loja.test', tok: com }); expect(ok.statusCode).toBe(200); expect(ok.body).toContain('Só vendedores')
   })
+  it('sessão por cookie: o token vira cookie HttpOnly/SameSite, as páginas o aceitam, a API NÃO, e token ruim não cria sessão', async () => {
+    const tk = await e.token('ana', A, ['vendedor'])
+    const ok = await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: tk } }); expect(ok.statusCode).toBe(204)
+    const ck = String(ok.headers['set-cookie']); expect(ck).toMatch(/^polaris_sessao=[\w.-]+; Path=\/; HttpOnly; SameSite=Lax; Max-Age=\d+; Secure$/); expect(ck).not.toContain('Domain')
+    const cookie = ck.split(';')[0]!
+    const p = await e.req('GET', '/privada', { host: 'a.loja.test', headers: { cookie } }); expect(p.statusCode).toBe(200); expect(p.body).toContain('Só vendedores')
+    expect(String(p.headers.vary)).toContain('Cookie')
+    // a API não aceita o cookie (nada de CSRF contra mutações)
+    const api = await e.req('GET', '/api/loja/produtos', { host: 'a.loja.test', headers: { cookie } }); expect([401, 403]).toContain(api.statusCode)
+    // lixo e token expirado/inválido: anônimo + cookie limpo; a guarda manda ao login
+    const lixo = await e.req('GET', '/privada', { host: 'a.loja.test', headers: { cookie: 'polaris_sessao=aaaa.bbbb.cccc' } }); expect(lixo.statusCode).toBe(302); expect(String(lixo.headers['set-cookie'])).toContain('Max-Age=0')
+    expect((await e.req('GET', '/privada', { host: 'a.loja.test', headers: { cookie: 'polaris_sessao=<script>' } })).statusCode).toBe(302)
+    expect((await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: 'a.b.c' } })).statusCode).toBe(400)
+    expect((await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: 'aaaa.bbbb.cccc' } })).statusCode).toBe(401)
+    expect((await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: tk } , headers: { 'content-type': 'text/plain' } })).statusCode).toBe(415)
+    const sai = await e.req('POST', '/_polaris/sair', { host: 'a.loja.test', corpo: {} }); expect([sai.statusCode, String(sai.headers['set-cookie'])]).toEqual([204, expect.stringContaining('Max-Age=0')])
+  })
   it('a API segue sendo JSON (nada do prefixo reservado cai em página) e pedido malformado é 400', async () => {
     const r = await e.req('GET', '/api/loja/nao-existe', { host: 'a.loja.test' }); expect(r.headers['content-type']).toContain('json')
     const b = await e.req('GET', '/studio/qualquer', { host: 'a.loja.test' }); expect([404, 401, 403]).toContain(b.statusCode); expect(b.headers['content-type']).toContain('json')
