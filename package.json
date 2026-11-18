@@ -11,8 +11,10 @@
     "afetados": "turbo run tipos test --concurrency=2 --filter='...[origin/main]'",
     "valida-ci": "node tools/ferramentas/bin/valida-ci.ts",
     "commits": "node tools/ferramentas/bin/check-commits.ts",
-    "dev": "docker compose up --build",
-    "dev:config": "docker compose --env-file .env.exemplo config -q"
+    "dev": "docker compose --env-file docker/dev.env up --build",
+    "dev:config": "docker compose --env-file .env.exemplo config -q",
+    "test:pgreal": "bash -c 'export POLARIS_PG_REAL_URL=\"${POLARIS_PG_REAL_URL:-$(./scripts/pg-real.sh up)}\"; pnpm --filter @polaris/pgreal test'",
+    "pg:down": "./scripts/pg-real.sh down"
   },
   "devDependencies": {
     "turbo": "^2.11.11"

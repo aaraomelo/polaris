@@ -73,6 +73,34 @@ jobs:
       - name: Testes (Postgres real em memória, sem credenciais)
         run: pnpm test
 
+  postgres-real:
+    name: Postgres real (concorrência, locks, timeouts)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      POLARIS_PG_REAL_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Instalar (lockfile congelado, sem scripts de pós-instalação)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Testes contra Postgres de verdade (mesmos testes, sem PGlite)
+        run: pnpm --filter @polaris/pgreal test
+
   auditoria:
     name: Dependências
     runs-on: ubuntu-latest

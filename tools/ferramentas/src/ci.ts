@@ -35,6 +35,7 @@ export function validaWorkflow(yaml: string, scriptsDoPackage: string[]): string
         if (INJECAO.test(s.run)) erros.push(`${onde}: \`run\` interpola dado do evento (\${{ github.event… }}): injeção de script. Passe por \`env:\` e use "$VAR"`)
         for (const m of s.run.matchAll(/\bpnpm (?:run )?([a-z0-9:-]+)/g)) {
           const cmd = m[1]!
+          if (cmd.startsWith('-')) continue // opção do pnpm (`--filter`, `-r`…), não um script
           if (['install', 'i', 'add', 'audit', 'exec', 'dlx', 'store', 'turbo', 'run', 'config', 'fetch', '-r', 'ci'].includes(cmd) && cmd !== 'ci') continue
           if (!scriptsDoPackage.includes(cmd)) erros.push(`${onde}: 'pnpm ${cmd}' não existe nos scripts do package.json`)
         }

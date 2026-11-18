@@ -49,6 +49,10 @@ export function criaPool(o: OpcoesPool): pg.Pool {
 async function rodaTransacao<T>(pool: pg.Pool, inicio: (c: pg.PoolClient) => Promise<void>, fn: (q: Consulta) => Promise<T>): Promise<T> {
   const c = await pool.connect()
   let descarta = false
+  // Se o SERVIDOR derruba esta conexão enquanto ela está emprestada e ociosa (idle_in_transaction_session_timeout, falha de rede, failover), o `pg` emite `error` no cliente:
+  // sem ouvinte isso é uma exceção não tratada e o PROCESSO CAI. Aqui o erro vira uma falha da transação (a próxima consulta rejeita) e a conexão é descartada.
+  const aoErro = () => { descarta = true }
+  c.on('error', aoErro)
   try {
     await c.query('BEGIN')
     await inicio(c)
@@ -59,7 +63,7 @@ async function rodaTransacao<T>(pool: pg.Pool, inicio: (c: pg.PoolClient) => Pro
   } catch (e) {
     try { await c.query('ROLLBACK') } catch { descarta = true } // não deu para desfazer: a conexão está num estado desconhecido
     throw e
-  } finally { c.release(descarta) }
+  } finally { c.removeListener('error', aoErro); c.release(descarta) }
 }
 
 export function dbTenantDePg(pool: pg.Pool): DbTenant {

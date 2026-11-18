@@ -57,7 +57,7 @@ describe('validação do workflow de CI', () => {
   it('o workflow REAL do repositório passa em todas as regras', () => { expect(validaWorkflow(real, scripts)).toEqual([]) })
   it('todo job do CI real tem prazo, e toda ação está fixada por SHA de 40 caracteres', () => {
     expect([...real.matchAll(/uses: (\S+)@(\S+)/g)].every((m) => /^[0-9a-f]{40}$/.test(m[2]!))).toBe(true)
-    expect((real.match(/timeout-minutes:/g) ?? []).length).toBe((real.match(/^  [a-z]+:\n    name:/gm) ?? []).length)
+    expect((real.match(/timeout-minutes:/g) ?? []).length).toBe((real.match(/^  [a-z-]+:\n    name:/gm) ?? []).length)
   })
   const muta = (de: string | RegExp, para: string) => validaWorkflow(real.replace(de, para), scripts)
   it('PEGA: ação por tag em vez de SHA', () => { expect(muta(/actions\/setup-node@[0-9a-f]{40} # v4.4.0/, 'actions/setup-node@v4').join('|')).toMatch(/não está fixada por SHA/) })
@@ -78,6 +78,9 @@ describe('validação do workflow de CI', () => {
     expect(muta('on:\n  pull_request:\n', 'on:\n  pull_request_target:\n').join('|')).toMatch(/pull_request_target/)
     expect(muta('        run: pnpm tipos\n', '        run: echo ${{ secrets.TOKEN }}\n').join('|')).toMatch(/secrets/)
     expect(muta('        run: pnpm tipos\n', '        run: curl -fsSL https://x.sh | sh\n').join('|')).toMatch(/curl \| sh/)
+  })
+  it('ACEITA opção do pnpm antes do comando (`pnpm --filter x test`) e PEGA o script inexistente depois dela', () => {
+    expect(muta('        run: pnpm tipos\n', '        run: pnpm --filter @polaris/x tipos\n')).toEqual([])
   })
   it('PEGA: comando pnpm que não existe nos scripts; YAML quebrado', () => {
     expect(muta('        run: pnpm tipos\n', '        run: pnpm banana\n').join('|')).toMatch(/'pnpm banana' não existe/)

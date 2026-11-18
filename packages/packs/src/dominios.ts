@@ -63,8 +63,10 @@ export function criaGestorDominios(o: { q: Q; dns: Dns; bases: string[]; novoTok
       let txt: string[]; try { txt = await o.dns.txt(NOME_TXT(d)) } catch { return 'dns_indisponivel' }
       if (!txt.includes(`polaris-verificacao=${r.token}`)) return 'pendente'
       if ((await q(`SELECT 1 FROM plataforma.dominio WHERE dominio = $1 AND verificado AND tenant_id <> $2`, [d, tenantId])).rows.length) return 'em_uso'
+      // GRAVA primeiro: o índice único parcial decide quem fica com o domínio (quem perde recebe `em_uso`). Só depois do ganho se derrubam as reivindicações não verificadas dos outros:
+      // fazer ao contrário deixava duas provas simultâneas apagarem uma à outra e NENHUMA ficar verificada.
+      try { await q(`UPDATE plataforma.dominio SET verificado = true, verificado_em = now() WHERE tenant_id = $1 AND dominio = $2`, [tenantId, d]) } catch (e) { if ((e as { code?: string }).code === '23505' || /unique|duplicate/i.test((e as Error).message)) return 'em_uso'; throw e }
       await q(`DELETE FROM plataforma.dominio WHERE dominio = $1 AND NOT verificado AND tenant_id <> $2`, [d, tenantId])
-      await q(`UPDATE plataforma.dominio SET verificado = true, verificado_em = now() WHERE tenant_id = $1 AND dominio = $2`, [tenantId, d])
       return 'verificado'
     },
     async remove(tenantId: string, dominio: unknown): Promise<boolean> { const d = normalizaHost(dominio); return !!d && (await q(`DELETE FROM plataforma.dominio WHERE tenant_id = $1 AND dominio = $2`, [tenantId, d])).rowCount > 0 },
