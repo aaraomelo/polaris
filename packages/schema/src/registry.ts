@@ -92,6 +92,16 @@ export class Registry {
     return no
   }
 
+  /**
+   * Uma CÓPIA independente: os nós (imutáveis) são compartilhados, os índices não. Registrar no derivado NÃO altera o original — é assim que se compõe
+   * core + segmento + os nós de UM tenant sem que o tenant enxergue ou contamine os outros.
+   */
+  derivado(): Registry {
+    const r = new Registry(this.opcoes)
+    for (const [chave, porEscopo] of this.nos) { const nova = new Map<string, Map<string, No>>(); for (const [e, porVersao] of porEscopo) nova.set(e, new Map(porVersao)); r.nos.set(chave, nova) }
+    return r
+  }
+
   async carrega(fonte: Fonte): Promise<number> {
     const lista = await fonte()
     for (const d of lista) this.registra(d)

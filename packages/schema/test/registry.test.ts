@@ -231,3 +231,14 @@ describe('registry — fontes', () => {
     await expect(r.carrega(fonteHttp('http://x/nos.json', ruim))).rejects.toThrow(/500/)
   })
 })
+
+describe('Registry.derivado: cópia isolada', () => {
+  const pag = (versao: string, extra: object = {}) => ({ kind: 'pagina', id: 'home', versao, estatuto: 'publicado', spec: { rota: '/', raiz: { bloco: 'texto/paragrafo' } }, ...extra }) as never
+  it('registrar no derivado não altera o original (nem o contrário depois da cópia); o derivado enxerga o que o original tinha', () => {
+    const base = new Registry(); base.registra(pag('1.0.0')); const d = base.derivado()
+    d.registra(pag('1.0.0', { tenantId: 't1' })); d.registra({ kind: 'pagina', id: 'so-no-derivado', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/x', raiz: { bloco: 'texto/paragrafo' } } } as never)
+    expect(base.ids('pagina')).toEqual(['home']); expect(d.ids('pagina')).toEqual(['home', 'so-no-derivado'])
+    expect(d.resolve('pagina', 'home', { tenantId: 't1' })!.escopo).toBe('tenant'); expect(base.resolve('pagina', 'home', { tenantId: 't1' })!.escopo).toBe('core') // o override só existe no derivado
+    base.registra({ kind: 'pagina', id: 'depois', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/d', raiz: { bloco: 'texto/paragrafo' } } } as never); expect(d.ids('pagina')).not.toContain('depois')
+  })
+})

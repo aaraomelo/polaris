@@ -37,3 +37,35 @@ O gateway leva a lista de módulos do tenant em cada chamada e o **único ponto 
 - Os **serviços** ainda resolvem o tenant anônimo pelo `x-forwarded-host` com o próprio mapa (`contextoPorJwt`/`anonimo`); só o gateway usa o diretório. Enquanto o gateway for a única porta de entrada (rede fechada), é consistente; o ideal é o gateway repassar o tenant já resolvido.
 - Nenhuma rota de **gestão** ainda (adicionar/verificar domínio, suspender): as funções existem; a API administrativa vem com o Studio/console (E8).
 - **TLS/certificado** por domínio próprio (emissão automática) é da camada de entrada, fora daqui (E10).
+
+---
+
+# Overrides por tenant (armazém versionado)
+
+O tenant redefine **páginas, temas, dados, papéis, documentos e blocos de composição** pela cascata `tenant → segmento → core`, sem tocar nos outros tenants. O armazém é `plataforma.no_versao` (`criaArmazemDeNos`).
+
+## Versões imutáveis
+Cada gravação é uma **versão nova** `(tenant, kind, id, seq)` com `hash` canônico, autor e nota. **Um gatilho no banco recusa `UPDATE` e `DELETE`**: a imutabilidade não depende do código. O "rascunho" é a **versão mais recente**; o mesmo conteúdo não cria versão nova (idempotente); gravações simultâneas do mesmo nó ganham `seq` distintos (`ON CONFLICT` + nova tentativa). Remover grava uma **lápide** (o nó volta a ser o do segmento/core; o histórico fica).
+
+## O que um tenant pode (e não pode) gravar
+| Regra | Por quê |
+|---|---|
+| só `pagina`, `tema`, `dados`, `papel`, `documento`, `bloco` | `servico` muda banco; `evento` é contrato entre serviços; `kernel`/`backend` executam código; `pack`/`tenant` são da plataforma |
+| **sem `segmento`** | um tenant não publica no escopo de um segmento (valeria para todos os tenants dele) |
+| **sem `tenantId` de outro**; o `tenantId` gravado é **sempre o do dono** | o conteúdo armazenado nunca manda no escopo |
+| **sem `filhos`** | nós aninhados seriam registrados com os próprios escopos, furando as regras acima |
+| bloco **sem `codigo`** | blocos que executam são da plataforma; o tenant compõe (`modelo`/`extends`) |
+| ≤ 256 KB por nó, ≤ 500 overrides por tenant, ≤ 1.000 versões por nó | memória e abuso |
+| tenant `cancelado` não grava | |
+
+## Validação na gravação (não depois)
+O nó entra num **registro derivado** (`Registry.derivado()`: cópia isolada de core + segmento + as cabeças do próprio tenant) e passa por: schema, **integridade referencial** (bloco, dados, papéis…) e **validação estrutural** (props contra o contrato do bloco; sujeitos, ações e campos do papel contra os serviços; operação do `dados` contra o serviço). Um `dados` só pode apontar para **serviço habilitado** para o tenant. O que foi gravado já foi conferido.
+
+## O registro do tenant
+`registroDoTenant(tenantId, escolha?)` monta o registro: as **cabeças** (rascunho) ou as **versões fixadas** por uma release (`escolha`). Nó corrompido no banco **não derruba o tenant**: é pulado e reportado em `ignorados`. O registro base nunca é alterado e dois tenants nunca compartilham override (provado).
+
+## Limites conhecidos
+- **Publicar** (release, preview, rollback) é o card seguinte: aqui o "rascunho" já existe, mas ainda não há o conjunto imutável que vai para produção.
+- O diretório de versões **só cresce** (imutável); a poda/arquivo de versões antigas não existe.
+- O `bloco` de composição só é validado pelo schema e pelas referências; o **comportamento visual** (CSS/acessibilidade) de um override não é auditado (o tema tem auditoria de contraste própria no engine, que o armazém ainda não chama).
+- Um `papel` do tenant pode ser **mais permissivo** que o do core, de propósito (a cascata é do tenant sobre os dados dele); não há "teto" imposto pela plataforma.

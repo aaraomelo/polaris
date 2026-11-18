@@ -38,6 +38,22 @@ CREATE TABLE IF NOT EXISTS plataforma.dominio (
 );
 -- um domínio só pode estar VERIFICADO em UM tenant; reivindicações não verificadas podem coexistir (e perdem para quem provar a posse)
 CREATE UNIQUE INDEX IF NOT EXISTS dominio_verificado_uidx ON plataforma.dominio (dominio) WHERE verificado;
+-- as versões dos nós de um tenant (overrides): IMUTÁVEIS. O "rascunho" é a versão mais recente; uma release (publicação) fixa um conjunto de versões.
+CREATE TABLE IF NOT EXISTS plataforma.no_versao (
+  tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
+  kind text NOT NULL,
+  id text NOT NULL,
+  seq integer NOT NULL,
+  conteudo jsonb,
+  hash text NOT NULL,
+  autor text NOT NULL,
+  nota text,
+  criado_em timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, kind, id, seq)
+);
+CREATE OR REPLACE FUNCTION plataforma.imutavel() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'versões de nó são imutáveis (%)', TG_OP; END $$;
+DROP TRIGGER IF EXISTS no_versao_imutavel ON plataforma.no_versao;
+CREATE TRIGGER no_versao_imutavel BEFORE UPDATE OR DELETE ON plataforma.no_versao FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
 CREATE TABLE IF NOT EXISTS plataforma.modulo (
   tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
   servico text NOT NULL,
