@@ -4,3 +4,4 @@ export { FalhaServico, clienteEmProcesso, clienteHttp, montaQuery, type ClienteS
 export { ErroGw, criaGateway, traduz, type CtxGw, type Gateway, type OpcoesGateway } from './gateway'
 export { geraSchema, type OpcoesGraphql } from './graphql'
 export { LimiteTaxa, type OpcoesTaxa } from './taxa'
+export type { InfoTenant, ResolvedorTenant, StatusTenant } from './tenants'

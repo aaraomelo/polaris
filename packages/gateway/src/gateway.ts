@@ -10,6 +10,7 @@ import { criaChamador, indiceDeRotas, type ContextoChamada, type Servicos } from
 import { CacheDoGateway, VisaoDeCache } from './cache'
 import { FalhaServico } from './cliente'
 import { instalaGraphql, type OpcoesGraphql } from './graphql'
+import type { InfoTenant, ResolvedorTenant } from './tenants'
 import { LimiteTaxa } from './taxa'
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,6 +31,8 @@ export type OpcoesGateway = {
   autenticador?: (cabecalho: string | undefined) => Promise<ResultadoAuth>
   /** tenant de uma requisição anônima, pelo host. `null`/`undefined` = host desconhecido (400). */
   tenantPorHost?: (host: string) => string | null | undefined
+  /** o diretório de tenants: status (suspenso não opera), módulos habilitados e amarração host ↔ tenant. Se informado, SUBSTITUI `tenantPorHost`. */
+  tenants?: ResolvedorTenant
   obs?: Observabilidade
   metricasToken?: string
   cache?: CacheDoGateway
@@ -41,7 +44,7 @@ export type OpcoesGateway = {
 }
 
 /** Quem está chamando o gateway (já verificado). */
-export type CtxGw = { tenantId: string; usuario?: string; papeis?: string[]; authorization?: string; anonimo: boolean; chamada: ContextoChamada }
+export type CtxGw = { modulos?: readonly string[]; tenantId: string; usuario?: string; papeis?: string[]; authorization?: string; anonimo: boolean; chamada: ContextoChamada }
 type Req = FastifyRequest & ReqComObs & { gw?: CtxGw }
 
 const IDIOMA = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/
@@ -94,11 +97,31 @@ export function criaGateway(o: OpcoesGateway): Gateway {
     const cab = req.headers.authorization
     const base = { requisicaoId: obsDe(req)?.reqId ?? 'sem-id', hostOriginal: req.hostname, ...(IDIOMA.test(String(req.headers['accept-language'] ?? '').split(/[,;]/)[0]!.trim()) ? { idioma: String(req.headers['accept-language']).split(/[,;]/)[0]!.trim() } : {}) }
     let ctx: CtxGw
+    const exigeAtivo = (t: InfoTenant): InfoTenant => {
+      if (t.status === 'ativo') return t
+      if (t.status === 'suspenso') throw new ErroGw(403, 'tenant_suspenso', 'esta conta está suspensa')
+      if (t.status === 'cancelado') throw new ErroGw(410, 'tenant_encerrado', 'esta conta foi encerrada')
+      throw new ErroGw(503, 'tenant_indisponivel', 'esta conta ainda não está disponível', undefined, { 'retry-after': '30' })
+    }
     if (cab !== undefined) { // token presente e inválido é SEMPRE 401: nunca cai em anônimo por engano
       const h = Array.isArray(cab) ? cab[0]! : cab
       const r = o.autenticador ? await o.autenticador(h) : ({ ok: false, motivo: 'sem autenticador' } as const)
       if (!r.ok) throw new ErroGw(401, 'credencial_invalida', 'credencial inválida')
-      ctx = { tenantId: r.contexto.tenantId, usuario: r.contexto.usuario, papeis: r.contexto.papeis, authorization: h, anonimo: false, chamada: { ...base, authorization: h } }
+      let modulos: readonly string[] | undefined
+      if (o.tenants) {
+        const t = await o.tenants.porId(r.contexto.tenantId)
+        if (!t) throw new ErroGw(403, 'tenant_desconhecido', 'a conta deste token não existe')
+        exigeAtivo(t); modulos = t.modulos
+        // o token de um tenant NÃO vale na vitrine de outro: host de tenant com tenant diferente do token é recusado (host genérico da plataforma não tem dono e passa)
+        const doHost = await o.tenants.porHost(req.hostname)
+        if (doHost && doHost.id !== t.id) throw new ErroGw(403, 'tenant_divergente', 'este endereço pertence a outra conta')
+      }
+      ctx = { tenantId: r.contexto.tenantId, usuario: r.contexto.usuario, papeis: r.contexto.papeis, authorization: h, anonimo: false, chamada: { ...base, authorization: h, ...(modulos ? { modulos } : {}) }, ...(modulos ? { modulos } : {}) }
+    } else if (o.tenants) {
+      const t = await o.tenants.porHost(req.hostname)
+      if (!t) throw new ErroGw(400, 'tenant_nao_resolvido', 'não foi possível resolver o tenant desta requisição')
+      exigeAtivo(t)
+      ctx = { tenantId: t.id, anonimo: true, chamada: { ...base, modulos: t.modulos }, modulos: t.modulos }
     } else {
       const t = o.tenantPorHost?.(req.hostname)
       if (!t) throw new ErroGw(400, 'tenant_nao_resolvido', 'não foi possível resolver o tenant desta requisição')

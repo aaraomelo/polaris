@@ -47,6 +47,19 @@ describe('configServico', () => {
   it('PORT: inteiro de 1 a 65535 (sem decimais, sem lixo)', () => { for (const v of ['0', '70000', '3.5', 'abc', '-1']) expect(problemas(() => configServico({ ...srv, PORT: v })).join(), v).toMatch(/PORT/); expect(configServico({ ...srv, PORT: '8080' }).porta).toBe(8080) })
 })
 
+describe('configGateway: plataforma (status, módulos e domínios dos tenants)', () => {
+  const plat = { ...gw, DATABASE_URL_PLATAFORMA: 'postgres://plat:SENHA-SECRETA@db/polaris', POLARIS_BASES_DOMINIO: 'Polaris.app, outra.com.br' }
+  it('válida: bases normalizadas; a senha nunca aparece nas mensagens', () => {
+    expect(configGateway(plat).plataforma).toEqual({ url: 'postgres://plat:SENHA-SECRETA@db/polaris', bases: ['polaris.app', 'outra.com.br'] })
+    const p = problemas(() => configGateway({ ...plat, POLARIS_BASES_DOMINIO: 'não é domínio,x' })).join(); expect(p).toMatch(/POLARIS_BASES_DOMINIO/); expect(p).not.toContain('SENHA-SECRETA')
+  })
+  it('as duas variáveis andam juntas; em produção a plataforma é obrigatória (o mapa estático é só de desenvolvimento)', () => {
+    expect(problemas(() => configGateway({ ...gw, DATABASE_URL_PLATAFORMA: 'postgres://u:p@db/x' })).join()).toMatch(/BASES_DOMINIO é obrigatória/)
+    expect(problemas(() => configGateway({ ...gw, POLARIS_BASES_DOMINIO: 'polaris.app' })).join()).toMatch(/só vale com DATABASE_URL_PLATAFORMA/)
+    expect(problemas(() => configGateway({ ...gw, NODE_ENV: 'production' })).join()).toMatch(/exige DATABASE_URL_PLATAFORMA/); expect(configGateway({ ...plat, NODE_ENV: 'production' }).plataforma).toBeDefined()
+  })
+})
+
 describe('configGateway', () => {
   it('válida; taxa padrão e introspecção desligada', () => { expect(configGateway(gw)).toMatchObject({ servicos: { loja: 'http://loja:3001' }, taxa: { capacidade: 120, porSegundo: 20 }, introspeccao: false }) })
   it('URLs de serviço: só http(s), sem credenciais, sem query/hash; ids fechados', () => {
@@ -57,7 +70,7 @@ describe('configGateway', () => {
   })
   it('introspecção GraphQL só fora de produção; limite de taxa pode ser desligado só explicitamente', () => {
     expect(configGateway({ ...gw, POLARIS_GRAPHQL_INTROSPECCAO: '1' }).introspeccao).toBe(true)
-    expect(configGateway({ ...gw, POLARIS_GRAPHQL_INTROSPECCAO: '1', NODE_ENV: 'production' }).introspeccao).toBe(false)
+    expect(configGateway({ ...gw, POLARIS_GRAPHQL_INTROSPECCAO: '1', NODE_ENV: 'production', DATABASE_URL_PLATAFORMA: 'postgres://u:p@db/x', POLARIS_BASES_DOMINIO: 'polaris.app' }).introspeccao).toBe(false)
     expect(configGateway({ ...gw, POLARIS_LIMITE_TAXA: 'desligado' }).taxa).toBe(false)
     expect(configGateway({ ...gw, POLARIS_LIMITE_TAXA: 'false' }).taxa).toEqual({ capacidade: 120, porSegundo: 20 })
     expect(problemas(() => configGateway({ ...gw, POLARIS_TAXA_CAPACIDADE: '0' })).join()).toMatch(/POLARIS_TAXA_CAPACIDADE/)

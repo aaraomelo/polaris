@@ -12,6 +12,8 @@ export type ContextoChamada = {
   /** o host que o cliente usou (para rotas públicas: o serviço resolve o tenant por ele). Só segue se o gateway é a única porta de entrada dos serviços. */
   hostOriginal?: string
   idioma?: string
+  /** serviços habilitados para o tenant desta requisição. Se informado, é a ÚNICA porta de checagem: serviço fora da lista é 404 para qualquer caminho (REST, BFF, GraphQL) */
+  modulos?: readonly string[]
 }
 
 const SEM_CORPO = new Set(['get', 'delete'])
@@ -37,6 +39,7 @@ export function criaChamador(servicos: Servicos, obs?: Observabilidade): Chamado
   return async (servico, operacao, args, ctx, signal) => {
     const rota = rotas.get(`${servico}\u0000${operacao}`)
     if (!rota) throw new FalhaServico(`operação desconhecida: ${servico}.${operacao}`)
+    if (ctx.modulos && !ctx.modulos.includes(servico)) throw new FalhaServico(`módulo não habilitado: ${servico}`, 404, 'modulo_nao_habilitado', 'este recurso não está habilitado para a sua conta')
     const cfg = servicos[servico]!
     const params: Record<string, string> = {}
     const resto: Record<string, unknown> = {}

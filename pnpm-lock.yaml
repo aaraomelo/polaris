@@ -184,6 +184,9 @@ importers:
       '@polaris/observabilidade':
         specifier: workspace:*
         version: link:../../packages/observabilidade
+      '@polaris/packs':
+        specifier: workspace:*
+        version: link:../../packages/packs
       '@polaris/pg':
         specifier: workspace:*
         version: link:../../packages/pg

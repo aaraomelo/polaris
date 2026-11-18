@@ -27,6 +27,17 @@ CREATE TABLE IF NOT EXISTS plataforma.etapa (
   feita_em timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (tenant_id, nome)
 );
+CREATE TABLE IF NOT EXISTS plataforma.dominio (
+  tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
+  dominio text NOT NULL,
+  token text NOT NULL,
+  verificado boolean NOT NULL DEFAULT false,
+  verificado_em timestamptz,
+  criado_em timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, dominio)
+);
+-- um domínio só pode estar VERIFICADO em UM tenant; reivindicações não verificadas podem coexistir (e perdem para quem provar a posse)
+CREATE UNIQUE INDEX IF NOT EXISTS dominio_verificado_uidx ON plataforma.dominio (dominio) WHERE verificado;
 CREATE TABLE IF NOT EXISTS plataforma.modulo (
   tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
   servico text NOT NULL,

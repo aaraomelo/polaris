@@ -13,6 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { configGateway, configServico } from '../src/config'
 import { montaGateway } from '../src/gateway'
 import { carregaNos } from '../src/nos'
+import { DDL_DIRETORIO } from '@polaris/packs'
 import { montaServico } from '../src/servico'
 
 // Os runners de produção ponta a ponta: config por ambiente → nós do disco → migração com o papel migrador → serviço com o driver `pg` (papel sem BYPASSRLS) → gateway por HTTP.
@@ -57,6 +58,28 @@ describe('serviço de produção: migração + driver pg + RLS + JWT', () => {
       const r = await gw.inject({ method: 'GET', url: '/api/loja/produtos', headers: { authorization: `Bearer ${a}` } })
       expect(r.statusCode).toBe(200) // config → cliente HTTP → serviço → banco, atravessando o gateway
       expect((await gw.inject({ method: 'GET', url: '/api/loja/produtos' })).statusCode).toBe(400) // anônimo e host desconhecido: o gateway não adivinha o tenant
+    } finally { await gw.close() }
+  })
+})
+
+describe('gateway de produção com o diretório de tenants (plataforma)', () => {
+  it('subdomínio resolve o tenant, módulo habilitado funciona, módulo ausente é 404, suspenso é 403 e o token de outro tenant na vitrine alheia é 403', async () => {
+    await db.exec('RESET ROLE'); await db.exec(DDL_DIRETORIO) // (o PGlite tem UMA sessão: os pools dos testes anteriores deixaram um SET ROLE nela)
+    const ativo = A, suspenso = B
+    const novo = async (id: string, alias: string, status: string, modulos: string[]) => { await db.query(`INSERT INTO plataforma.tenant (id, alias, nome, segmento, packs, dono_email, status, chave) VALUES ($1, $2, $2, 'varejo', '{varejo}', 'a@b.com', $3, $4)`, [id, alias, status, `chave-e2e-${alias}-xxxxxxxx`]); for (const m of modulos) await db.query(`INSERT INTO plataforma.modulo (tenant_id, servico) VALUES ($1, $2)`, [id, m]) }
+    await novo(ativo, 'loja-e2e', 'ativo', ['loja']); await novo(suspenso, 'loja-susp', 'suspenso', ['loja']); await novo('33333333-3333-3333-3333-333333333333', 'sem-modulo', 'ativo', ['catalogo'])
+    const reg = new Registry(); registraBase(reg); carregaNos(dir, reg)
+    const porta = /:(\d+)/.exec(srv.getServerConn())![1]
+    const gw = montaGateway(configGateway({ POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, DATABASE_URL_PLATAFORMA: `postgres://postgres@127.0.0.1:${porta}/postgres`, POLARIS_BASES_DOMINIO: 'polaris.test' }), reg)
+    try {
+      const tok = async (tid: string) => new SignJWT({ tid, papeis: ['gerente'] }).setProtectedHeader({ alg: 'HS256' }).setSubject('u1').setIssuer(ISS).setAudience(AUD).setExpirationTime('5m').sign(new TextEncoder().encode(SEG))
+      const get = (host: string, t?: string) => gw.inject({ method: 'GET', url: '/api/loja/produtos', headers: { host, ...(t ? { authorization: `Bearer ${t}` } : {}) } })
+      expect((await get('loja-e2e.polaris.test', await tok(ativo))).statusCode).toBe(200)
+      expect((await get('loja-susp.polaris.test', await tok(suspenso))).statusCode).toBe(403)
+      expect((await get('sem-modulo.polaris.test', await tok('33333333-3333-3333-3333-333333333333'))).statusCode).toBe(404) // tenant ativo, mas sem o módulo `loja`
+      expect((await get('loja-susp.polaris.test', await tok(ativo))).statusCode).toBe(403) // o host é de um tenant suspenso e o token é de outro: a conta do host manda
+      expect((await get('loja-e2e.polaris.test', await tok(suspenso))).statusCode).toBe(403)
+      expect((await gw.inject({ method: 'GET', url: '/api/loja/produtos', headers: { host: 'nao-existe.polaris.test' } })).statusCode).toBe(400)
     } finally { await gw.close() }
   })
 })
