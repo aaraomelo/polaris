@@ -1,11 +1,13 @@
 import { htmlDe, type OpcoesHtml } from './html'
 import { layoutCartaz, validaCartaz } from './layout'
+import { layoutLote, type ItemLote } from './lote'
 import { pdfDe } from './pdf'
 
 export { layoutCartaz, validaCartaz, gira, caminhoRet } from './layout'
 export { htmlDe, cssDoCartaz, type OpcoesHtml } from './html'
 export { pdfDe } from './pdf'
 export { FONTES, FONTE_PADRAO, bytesDe, fonteDe } from './fontes'
+export { layoutLote, LIMITES_LOTE, type ItemLote } from './lote'
 export { analisaCondicao, avalia } from './condicao'
 export { FUNCOES, calcula } from './decimal'
 export { ajusta, largura, quebraLinhas } from './texto'
@@ -21,3 +23,9 @@ export async function geraCartaz(no: No, dados: unknown, o: { agora?: Date; html
 }
 export const validaNoCartaz = (no: No): string[] => validaCartaz(spec(no))
 export { converteConfiguracao, converteGeometria, type Convertido, type Relatorio } from './legado'
+
+/** várias peças num só HTML e PDF (uma página por cópia) */
+export async function geraLote(itens: ItemLote[], o: { agora?: Date; html?: OpcoesHtml } = {}) {
+  const l = layoutLote(itens)
+  return { layout: l, html: htmlDe(l, o.html), pdf: await pdfDe(l, o.agora) }
+}

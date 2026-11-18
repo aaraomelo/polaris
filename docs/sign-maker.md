@@ -21,6 +21,10 @@ Elementos (por enquanto): **`texto`**, **`faixa`**, **`preco`**, **`validade`**,
 - `codigoBarras`: `valor` (modelo), `formato` (`code128`, o mesmo padrão do jsbarcode do legado, ou `ean13`, com dígito verificador conferido), `numero` (`cima` | `baixo` | `nenhum`: o número legível, ajustado como todo texto), `rotulo`, `cor`, `fundo`, `raio` e `margem`. As barras são **um só caminho vetorial** (corridas de módulos escuros, sem pixel) e o valor inválido para o formato é recusado antes de gerar.
 - `qrcode`: `valor`, `nivel` (L/M/Q/H), `cor`, `fundo`, `margem`; a matriz vem do `qrcode-generator` e vira um caminho vetorial por corridas.
 
+## Lote
+`layoutLote(itens)` / `geraLote(itens)`: vários cartazes num só HTML e PDF, **uma página por cópia**, na ordem dos itens. Cada item tem `no`, `dados`, `quantidade` (1 a 200), `tamanho` (sobrescreve o do nó) e `semFundo` (tira a imagem de fundo, a cor fica). Peças de tamanhos diferentes convivem: o PDF dá a cada página o seu tamanho e o HTML usa uma `@page` nomeada por tamanho. Limites: 200 itens, 500 páginas. Fail-closed: um item ruim recusa o lote inteiro e a mensagem diz **qual** (`item 2: dado obrigatório ausente…`); avisos de ajuste de fonte também levam o número do item. `test/lote.test.ts` confere a paridade Chrome × PDF de um lote com três tamanhos.
+Ainda não há: várias peças pequenas na MESMA folha (imposição) nem marcas de corte.
+
 ## Dados derivados, condições, cores e tamanhos
 - `calculos`: valores derivados em **decimal exato** (BigInt, sem `Number`), usados como `{calculo.nome}`: `diferenca(a,b)`, `diferencaPercentual(a,b)` (piso, como o legado), `percentual`, `desconto(preço, %)`, `parcela(preço, n)` (piso em centavos), `arredonda`, `identidade`. Argumento que não é número usa `padrao`; sem `padrao` é erro (nunca sai peça com buraco). Os dados de dinheiro passam a ser **decimais** (`"12.90"`), não centavos inteiros como no legado.
 - `se` (e `cores[].se`): gramática fechada, sem avaliador: `caminho`, `!caminho`, `caminho == "x"`, `caminho != "x"`, `caminho em ["a", "b"]`. Protótipo nunca é lido.
@@ -43,5 +47,5 @@ Montserrat (OFL) e Roboto (Apache 2.0) estão no repositório. As fontes `Primar
 - Faltam sobrescrito (`$pow`), texto justificado e o tamanho EP21: cards S7, S3, S11.
 - Código de barras e QR: os testes provam que o desenho **é** a matriz de módulos do gerador (e a paridade Chrome × PDF), mas **nenhum leitor real** (zbar, OpenCV, câmera) foi usado para decodificar: não há decodificador instalado aqui. Antes de imprimir em produção, leia uma amostra com um leitor físico.
 - Os fundos do legado (`filename`) vêm do backend e não estão no repositório: o fundo aqui é cor ou data URL.
-- Uma peça por PDF (lote com quantidades: card S11). A semântica de caixa/rotação/ajuste é a **deste** motor, mais limpa que a do legado (que usava fatores empíricos como 0,93 e 1,045); o conversor das configurações (S2) traduz as geometrias e o resultado será conferido visualmente.
+- A semântica de caixa/rotação/ajuste é a **deste** motor, mais limpa que a do legado (que usava fatores empíricos como 0,93 e 1,045); o conversor das configurações (S2) traduz as geometrias e o resultado será conferido visualmente.
 - Não há editor no Studio ainda (S12); o kind já valida pelo schema.

@@ -27,7 +27,9 @@ export async function doChrome(html: string): Promise<{ palavras: Palavra[]; img
   try {
     await pg.setContent(html, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready)
     // a peça no canto (0,0), sem sombra: com `margin:auto` ela cai numa posição fracionária e o Chrome reamostra o conteúdo inteiro (até 0,75 px de erro, só do teste)
-    await pg.addStyleTag({ content: '.pagina{margin:0!important;box-shadow:none!important}' })
+    await pg.addStyleTag({ content: '.pagina{margin:0!important;box-shadow:none!important;position:absolute!important;left:0}' })
+    // várias páginas: cada uma começa num y INTEIRO (empilhadas, o resto fracionário das alturas faria o Chrome reamostrar as seguintes)
+    await pg.evaluate(() => { let y = 0; document.querySelectorAll<HTMLElement>('section.pagina').forEach((sec) => { sec.style.top = `${y}px`; y += Math.ceil(sec.getBoundingClientRect().height) + 8 }); document.body.style.height = `${y}px` })
     // O Chrome arredonda ascendente/descendente para pixel inteiro ao medir a caixa do texto (por isso a caixa dele não serve de régua): mede-se o que ele de fato POSICIONOU,
     // a linha de base e o início/fim de cada palavra (getStartPositionOfChar/getEndPositionOfChar), e a altura do centro vem das métricas verdadeiras da fonte, como no poppler.
     const k: Record<string, number> = {}
@@ -49,7 +51,7 @@ export async function doChrome(html: string): Promise<{ palavras: Palavra[]; img
     return { palavras, imgs }
   } finally { await pg.close() }
 }
-export type Regiao = { x0: number; y0: number; x1: number; y1: number }
+export type Regiao = { pag?: number; x0: number; y0: number; x1: number; y1: number }
 export function doPdf(pdf: Uint8Array, girados: Regiao[]): { palavras: Palavra[]; imgs: Buffer[] } {
   const f = join(tmp, `d${Math.random().toString(36).slice(2)}.pdf`); writeFileSync(f, pdf)
   const xml = execFileSync('pdftotext', ['-bbox', f, '-'], { encoding: 'utf8', maxBuffer: 1 << 26 })
@@ -57,7 +59,7 @@ export function doPdf(pdf: Uint8Array, girados: Regiao[]): { palavras: Palavra[]
   for (const linha of xml.split('\n')) {
     if (/<page /.test(linha)) pag++
     const m = /<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*)<\/word>/.exec(linha)
-    if (m) { const t = m[5]!.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&'); const cx = (+m[1]! + +m[3]!) / 2, cy = (+m[2]! + +m[4]!) / 2; if (!girados.some((r) => cx >= r.x0 && cx <= r.x1 && cy >= r.y0 && cy <= r.y1)) palavras.push({ pag, t, x0: +m[1]!, x1: +m[3]!, y: cy }) }
+    if (m) { const t = m[5]!.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&'); const cx = (+m[1]! + +m[3]!) / 2, cy = (+m[2]! + +m[4]!) / 2; if (!girados.some((r) => (r.pag === undefined || r.pag === pag) && cx >= r.x0 && cx <= r.x1 && cy >= r.y0 && cy <= r.y1)) palavras.push({ pag, t, x0: +m[1]!, x1: +m[3]!, y: cy }) }
   }
   execFileSync('pdftoppm', ['-r', String(DPI), '-png', f, f.replace(/\.pdf$/, '')])
   const base = f.replace(/\.pdf$/, ''), imgs: Buffer[] = []
@@ -93,11 +95,11 @@ export function diferenca(a: Buffer, b: Buffer): { medio: number; ruins: number 
   return { medio: soma / (w * h), ruins: ruins / (w * h) }
 }
 /** as regiões (caixa que contém a linha girada, +2 pt) onde o poppler fragmenta as palavras: lá só vale o pixel */
-export const palavrasGiradas = (l: Layout): Regiao[] => l.paginas.flatMap((p) => p.ops.flatMap((o) => {
+export const palavrasGiradas = (l: Layout): Regiao[] => l.paginas.flatMap((p, ip) => p.ops.flatMap((o) => {
   if (o.tipo !== 'texto' || o.graus === 0) return []
   const a = (o.graus * Math.PI) / 180, lw = largura(fonteDe(o.familia, o.peso), o.texto, o.tamanho)
   const pts = [[0, 0], [lw, 0], [0, o.alturaLinha], [lw, o.alturaLinha]].map(([dx, dy]) => [o.x + dx! * Math.cos(a) + dy! * Math.sin(a), o.yTopo - dx! * Math.sin(a) + dy! * Math.cos(a)] as const)
-  return [{ x0: Math.min(...pts.map((q) => q[0])) - 2, x1: Math.max(...pts.map((q) => q[0])) + 2, y0: Math.min(...pts.map((q) => q[1])) - 2, y1: Math.max(...pts.map((q) => q[1])) + 2 }]
+  return [{ pag: ip + 1, x0: Math.min(...pts.map((q) => q[0])) - 2, x1: Math.max(...pts.map((q) => q[0])) + 2, y0: Math.min(...pts.map((q) => q[1])) - 2, y1: Math.max(...pts.map((q) => q[1])) + 2 }]
 }))
 
 
