@@ -102,7 +102,7 @@ export function rotasDe(no: No): Rota[] {
     const permissao = modoDeAcesso(ent.crud.permissao)
     const ops = ent.crud.operacoes ?? ['listar', 'obter', 'criar', 'atualizar', 'remover']
     const idParam = { id: { tipo: 'uuid', obrigatorio: true } } as Record<string, Campo>
-    const filtros = Object.fromEntries(Object.entries(ent.campos).filter(([, c]) => !c.lista && c.tipo !== 'json').map(([k, c]) => [k, { ...c, obrigatorio: false }])) as Record<string, Campo>
+    const filtros = Object.fromEntries(Object.entries(ent.campos).filter(([, c]) => !c.lista && c.tipo !== 'json').map(([k, c]) => [k, { ...c, obrigatorio: false, padrao: undefined }])) as Record<string, Campo> // filtro NÃO herda o padrão: um default de campo aplicado como filtro escondia todo registro com outro valor (depósito padrão, inativos…)
     const comum = { saida: nome, permissao, publica: [] as string[] }
     for (const op of ops) {
       const base = { origem: { tipo: 'crud', crud: op, entidade: nome } as const, ...comum }

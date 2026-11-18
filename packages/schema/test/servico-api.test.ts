@@ -1,7 +1,7 @@
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
 import { describe, expect, it } from 'vitest'
-import { emite, esquemaDeEntidade, esquemaDoCampo, rotasDe, type No } from '../src/index'
+import { emite, esquemaDeEntidade, esquemaDoCampo, esquemasHttp, rotasDe, type No } from '../src/index'
 
 const svc = (spec: object, id = 'loja'): No => ({ kind: 'servico', id, versao: '1.2.0', estatuto: 'publicado', spec: { operacoes: {}, ...spec } }) as never
 const LOJA = svc({
@@ -95,5 +95,15 @@ describe('OpenAPI 3.1 gerado', () => {
   })
   it('determinístico e sem tenant em lugar nenhum', () => {
     expect(emite(LOJA, 'openapi')).toBe(emite(LOJA, 'openapi')); expect(JSON.stringify(doc)).not.toMatch(/tenant_?id/i)
+  })
+})
+
+describe('REGRESSÃO: o padrão de um campo NÃO vira filtro da listagem', () => {
+  it('a querystring de listar não tem `default` nos filtros (só pagina/limite têm); o corpo de criar mantém o padrão', () => {
+    const no = { kind: 'servico', id: 'x', versao: '1.0.0', estatuto: 'publicado', spec: { entidades: { dep: { campos: { codigo: { tipo: 'texto', obrigatorio: true }, padrao: { tipo: 'booleano', padrao: false }, ativo: { tipo: 'booleano', padrao: true } }, crud: { caminho: '/deps' } } }, operacoes: {} } } as never
+    const rotas = rotasDe(no), lista = rotas.find((r) => r.id === 'listarDep')!, criar = rotas.find((r) => r.id === 'criarDep')!
+    const q = esquemasHttp(lista).querystring!.properties as Record<string, { default?: unknown }>
+    expect(q.padrao!.default).toBeUndefined(); expect(q.ativo!.default).toBeUndefined(); expect(q.pagina!.default).toBe(1); expect(q.limite!.default).toBe(24)
+    const c = esquemasHttp(criar).body!.properties as Record<string, { default?: unknown }>; expect(c.padrao!.default).toBe(false); expect(c.ativo!.default).toBe(true)
   })
 })
