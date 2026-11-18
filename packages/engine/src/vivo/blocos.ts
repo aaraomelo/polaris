@@ -44,7 +44,7 @@ export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
       const w = num(p.largura), h = num(p.altura)
-      return { ...comId(id), src: urlSegura(p.src) ?? '', alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy' }
+      return { ...comId(id), src: urlSegura(p.src) ?? '', alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: 'max-width:100%;height:auto' } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
     },
   }
 export const d_nav_link: Descritor = {
@@ -60,9 +60,11 @@ export const d_nav_botao: Descritor = {
     attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}) }),
     eventos: { aoClicar: { dom: 'click' } },
   }
+/** nome acessível do campo: `rotulo` vira `aria-label` (sem ele, o único jeito era um `texto/rotulo` ligado por `para`/`id`) */
+const rotulo = (p: Record<string, unknown>): Record<string, string> => (typeof p.rotulo === 'string' && p.rotulo.trim() ? { 'aria-label': p.rotulo.trim().slice(0, 200) } : {})
 export const d_entrada_texto: Descritor = {
     chave: () => 'input', tag: () => 'input', valor: (p) => txt(p.valor),
-    attrs: (p, id) => ({ ...comId(id), type: 'text', placeholder: txt(p.placeholder), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
+    attrs: (p, id) => ({ ...comId(id), type: 'text', ...rotulo(p), placeholder: txt(p.placeholder), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
     eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLInputElement).value } },
   }
 
@@ -97,12 +99,12 @@ export const d_tabela_celula: Descritor = {
 }
 export const d_entrada_numero: Descritor = {
   chave: () => 'input', tag: () => 'input', valor: (p) => txt(p.valor),
-  attrs: (p, id) => ({ ...comId(id), type: 'number', placeholder: txt(p.placeholder), ...opcional('min', p.min), ...opcional('max', p.max), ...opcional('step', p.passo), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
+  attrs: (p, id) => ({ ...comId(id), type: 'number', ...rotulo(p), placeholder: txt(p.placeholder), ...opcional('min', p.min), ...opcional('max', p.max), ...opcional('step', p.passo), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
   eventos: { aoMudar: { dom: 'input', payload: (e) => { const v = (e.target as HTMLInputElement).value; return v === '' ? null : Number(v) } } },
 }
 export const d_entrada_caixa: Descritor = {
   chave: () => 'input', tag: () => 'input', marcado: (p) => p.marcado === true,
-  attrs: (p, id) => ({ ...comId(id), type: 'checkbox', ...(p.desabilitado === true ? { disabled: '' } : {}) }),
+  attrs: (p, id) => ({ ...comId(id), type: 'checkbox', ...rotulo(p), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
   eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLInputElement).checked } },
 }
 export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'span', attrs: (p, id) => ({ ...comId(id), ...tom(p) }), texto: (p) => txt(p.texto) }

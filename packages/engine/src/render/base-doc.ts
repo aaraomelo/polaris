@@ -70,15 +70,15 @@ export const DOCS_BASE: Record<string, DocBloco> = {
     { titulo: 'Mesclando colunas', instancia: { bloco: 'tabela/tabela', slots: { filhos: [{ bloco: 'tabela/corpo', slots: { filhos: [linha(td('Total', { colunas: 2 })), linha(td('a'), td('b'))] } }] } } },
   ] },
   'entrada/texto': { titulo: 'Campo de texto', descricao: 'Campo controlado pelo estado: `valor` vem do estado e `aoMudar` recebe o texto digitado (compatível com IME).', exemplos: [
-    { titulo: 'Com placeholder', instancia: { bloco: 'entrada/texto', props: { valor: '', placeholder: 'Buscar produtos' } } },
-    { titulo: 'Desabilitado', instancia: { bloco: 'entrada/texto', props: { valor: 'somente leitura', desabilitado: true } } },
+    { titulo: 'Com placeholder', instancia: { bloco: 'entrada/texto', props: { valor: '', rotulo: 'Buscar produtos', placeholder: 'Buscar produtos' } } },
+    { titulo: 'Desabilitado', instancia: { bloco: 'entrada/texto', props: { valor: 'somente leitura', rotulo: 'Campo somente leitura', desabilitado: true } } },
   ] },
   'entrada/numero': { titulo: 'Campo numérico', descricao: 'Campo `number` com `min`, `max` e `passo`. `aoMudar` recebe um número, ou `null` se o campo estiver vazio.', exemplos: [
-    { titulo: 'Quantidade', instancia: { bloco: 'entrada/numero', props: { valor: 2, min: 1, max: 10, passo: 1 } } },
+    { titulo: 'Quantidade', instancia: { bloco: 'entrada/numero', props: { valor: 2, rotulo: 'Quantidade', min: 1, max: 10, passo: 1 } } },
   ] },
   'entrada/caixa': { titulo: 'Caixa de seleção', descricao: 'Checkbox controlado: `marcado` vem do estado e `aoMudar` recebe um booleano.', exemplos: [
-    { titulo: 'Marcada', instancia: { bloco: 'entrada/caixa', props: { marcado: true } } },
-    { titulo: 'Desabilitada', instancia: { bloco: 'entrada/caixa', props: { marcado: false, desabilitado: true } } },
+    { titulo: 'Marcada', instancia: { bloco: 'entrada/caixa', props: { marcado: true, rotulo: 'Aceito os termos' } } },
+    { titulo: 'Desabilitada', instancia: { bloco: 'entrada/caixa', props: { marcado: false, rotulo: 'Opção indisponível', desabilitado: true } } },
   ] },
   'nav/botao': { titulo: 'Botão', descricao: 'Botão de ação. `aoClicar` executa a lista de ações declarada na instância.', exemplos: [
     { titulo: 'Padrão', instancia: { bloco: 'nav/botao', props: { texto: 'Comprar' } } },

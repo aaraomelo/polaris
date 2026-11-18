@@ -144,7 +144,7 @@ export const BLOCOS_COMMERCE = [
   no('bloco', 'commerce.detalhe-produto', {
     interface: 'commerce/detalhe-produto', titulo: 'Detalhe do produto', descricao: 'Página de produto (PDP): foto ao lado do nome, preço, descrição e disponibilidade. O slot `acoes` recebe quantidade e "Adicionar ao carrinho".',
     props: { type: 'object', properties: { produto: produtoProp }, required: ['produto'] }, slots: { acoes: {} },
-    exemplos: [{ titulo: 'Com ações', instancia: instancia('commerce/detalhe-produto', { produto: PRODUTO_EX }, { acoes: [{ bloco: 'entrada/numero', props: { valor: 1, min: 1 } }, { bloco: 'nav/botao', props: { texto: 'Adicionar ao carrinho' } }] }) }],
+    exemplos: [{ titulo: 'Com ações', instancia: instancia('commerce/detalhe-produto', { produto: PRODUTO_EX }, { acoes: [{ bloco: 'entrada/numero', props: { valor: 1, min: 1, rotulo: 'Quantidade' } }, { bloco: 'nav/botao', props: { texto: 'Adicionar ao carrinho' } }] }) }],
     modelo: { bloco: 'layout/grade', props: { colunas: 2, gap: 24 }, slots: { filhos: [
       { bloco: 'midia/imagem', se: 'props.produto.fotoUrl', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}' } },
       { bloco: 'layout/pilha', props: { gap: 12 }, slots: { filhos: [

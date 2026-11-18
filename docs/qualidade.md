@@ -6,6 +6,7 @@
 | Integração com **PGlite** (Postgres em WASM, uma sessão) | `schema`, `servico`, `packs`, `gateway`, `apps` | SQL, RLS (com `SET ROLE`), FKs compostas, migrações, serviços ponta a ponta | **concorrência**, locks, deadlock, timeouts do servidor, login de papel real |
 | **Postgres real** | `packages/pgreal` | tudo o que a linha de cima não prova (abaixo) | desempenho sob carga de produção |
 | Navegador real (CDP) | `engine/bench/navegador` | tempos, INP, hidratação | — |
+| **E2E no navegador** (Playwright + Chrome) | `packages/e2e` | cada exemplo de bloco: console limpo, CSP estrita, hidratação igual ao servidor, acessibilidade, celular, modo escuro (`docs/e2e.md`) | fluxos de negócio inteiros, contraste, outros navegadores |
 | Deploy real | `docs/deploy.md` | imagem, compose, stack em modo produção | nginx/TLS, VPS |
 
 ## Postgres real (`packages/pgreal`)

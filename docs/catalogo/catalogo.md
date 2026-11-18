@@ -177,7 +177,8 @@ Página de produto (PDP): foto ao lado do nome, preço, descrição e disponibil
         "bloco": "entrada/numero",
         "props": {
           "valor": 1,
-          "min": 1
+          "min": 1,
+          "rotulo": "Quantidade"
         }
       },
       {
@@ -338,6 +339,7 @@ Checkbox controlado: `marcado` vem do estado e `aoMudar` recebe um booleano.
 |---|---|---|---|---|
 | `desabilitado` | booleano | não |  |  |
 | `marcado` | booleano | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 
 **Eventos**
 
@@ -351,7 +353,8 @@ Checkbox controlado: `marcado` vem do estado e `aoMudar` recebe um booleano.
 {
   "bloco": "entrada/caixa",
   "props": {
-    "marcado": true
+    "marcado": true,
+    "rotulo": "Aceito os termos"
   }
 }
 ```
@@ -363,6 +366,7 @@ Checkbox controlado: `marcado` vem do estado e `aoMudar` recebe um booleano.
   "bloco": "entrada/caixa",
   "props": {
     "marcado": false,
+    "rotulo": "Opção indisponível",
     "desabilitado": true
   }
 }
@@ -381,6 +385,7 @@ Campo `number` com `min`, `max` e `passo`. `aoMudar` recebe um número, ou `null
 | `min` | número | não |  |  |
 | `passo` | número | não |  |  |
 | `placeholder` | texto | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 | `valor` | número \| texto | não |  |  |
 
 **Eventos**
@@ -396,6 +401,7 @@ Campo `number` com `min`, `max` e `passo`. `aoMudar` recebe um número, ou `null
   "bloco": "entrada/numero",
   "props": {
     "valor": 2,
+    "rotulo": "Quantidade",
     "min": 1,
     "max": 10,
     "passo": 1
@@ -413,6 +419,7 @@ Campo controlado pelo estado: `valor` vem do estado e `aoMudar` recebe o texto d
 |---|---|---|---|---|
 | `desabilitado` | booleano | não |  |  |
 | `placeholder` | texto | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 | `valor` | texto | não |  |  |
 
 **Eventos**
@@ -428,6 +435,7 @@ Campo controlado pelo estado: `valor` vem do estado e `aoMudar` recebe o texto d
   "bloco": "entrada/texto",
   "props": {
     "valor": "",
+    "rotulo": "Buscar produtos",
     "placeholder": "Buscar produtos"
   }
 }
@@ -440,6 +448,7 @@ Campo controlado pelo estado: `valor` vem do estado e `aoMudar` recebe o texto d
   "bloco": "entrada/texto",
   "props": {
     "valor": "somente leitura",
+    "rotulo": "Campo somente leitura",
     "desabilitado": true
   }
 }

@@ -33,7 +33,7 @@ const MAO: Emissores = {
     const src = urlSegura(props.src)
     if (!src) return ''
     const w = num(props.largura), h = num(props.altura)
-    return `<img${idAttr(id)} src="${escHtml(src)}" alt="${escHtml(txt(props.alt))}"${w !== undefined ? ` width="${w}"` : ''}${h !== undefined ? ` height="${h}"` : ''} loading="lazy"/>`
+    return `<img${idAttr(id)} src="${escHtml(src)}" alt="${escHtml(txt(props.alt))}"${w !== undefined ? ` width="${w}"` : ''}${h !== undefined ? ` height="${h}"` : ''} loading="lazy" style="max-width:100%;height:auto"/>`
   },
   'nav/link': ({ props, filhos, id }) => {
     const href = urlSegura(props.href)

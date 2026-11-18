@@ -245,7 +245,7 @@ describe('segurança do SSR', () => {
     expect(ssr(pg, { params: { u: 'javascript:alert(1)' } }).corpo).toBe('<div style="display:flex;flex-direction:column"><a>x</a></div>')
     const ok = ssr(pg, { params: { u: 'https://a.com/i.png' } }).corpo
     expect(ok).toContain('<a href="https://a.com/i.png" rel="noopener noreferrer">x</a>')
-    expect(ok).toContain('<img src="https://a.com/i.png" alt="a" loading="lazy"/>')
+    expect(ok).toContain('<img src="https://a.com/i.png" alt="a" loading="lazy" style="max-width:100%;height:auto"/>')
   })
 })
 

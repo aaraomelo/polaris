@@ -11,6 +11,9 @@ export { urlSegura } from './url'
 import { urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
+/** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
+const rotuloDe = (props: Record<string, unknown>): Record<string, string> => (typeof props.rotulo === 'string' && props.rotulo.trim() ? { 'aria-label': props.rotulo.trim().slice(0, 200) } : {})
+const ROTULO = { type: 'string', maxLength: 200, description: 'nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para`' }
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
 const tomDe = (p: Record<string, unknown>): string => (typeof p.tom === 'string' && ['neutro', 'sucesso', 'alerta', 'erro'].includes(p.tom) ? p.tom : 'neutro')
 const ALINHA: Record<string, CSSProperties['alignItems']> = { inicio: 'flex-start', centro: 'center', fim: 'flex-end', esticar: 'stretch' }
@@ -32,13 +35,13 @@ export const COMPONENTES_BASE: Componentes = {
   'midia/imagem': ({ props, id }) => {
     const src = urlSegura(props.src)
     if (!src) return null
-    return createElement('img', { ...(id ? { id } : {}), src, alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy' })
+    return createElement('img', { ...(id ? { id } : {}), src, alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto' } })
   },
   'nav/botao': ({ props, on, id }) =>
     createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, onClick: () => on.aoClicar?.() }, txt(props.texto)),
   'entrada/texto': ({ props, on, id }) =>
     createElement('input', {
-      ...(id ? { id } : {}), type: 'text', value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
+      ...(id ? { id } : {}), type: 'text', ...rotuloDe(props), value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
       onChange: (e: { target: { value: string } }) => on.aoMudar?.(e.target.value),
     }),
   'layout/grade': ({ props, slots, id }) => {
@@ -67,12 +70,12 @@ export const COMPONENTES_BASE: Componentes = {
   },
   'entrada/numero': ({ props, on, id }) =>
     createElement('input', {
-      ...(id ? { id } : {}), type: 'number', value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
+      ...(id ? { id } : {}), type: 'number', ...rotuloDe(props), value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
       ...(num(props.min) !== undefined ? { min: num(props.min) } : {}), ...(num(props.max) !== undefined ? { max: num(props.max) } : {}), ...(num(props.passo) !== undefined ? { step: num(props.passo) } : {}),
       onChange: (e: { target: { value: string } }) => on.aoMudar?.(e.target.value === '' ? null : Number(e.target.value)),
     }),
   'entrada/caixa': ({ props, on, id }) =>
-    createElement('input', { ...(id ? { id } : {}), type: 'checkbox', checked: props.marcado === true, disabled: props.desabilitado === true, onChange: (e: { target: { checked: boolean } }) => on.aoMudar?.(e.target.checked) }),
+    createElement('input', { ...(id ? { id } : {}), type: 'checkbox', ...rotuloDe(props), checked: props.marcado === true, disabled: props.desabilitado === true, onChange: (e: { target: { checked: boolean } }) => on.aoMudar?.(e.target.checked) }),
   'feedback/selo': ({ props, id }) => createElement('span', { ...(id ? { id } : {}), 'data-tom': tomDe(props) }, txt(props.texto)),
   'feedback/alerta': ({ props, slots, id }) => createElement('div', { ...(id ? { id } : {}), role: 'alert', 'data-tom': tomDe(props) }, slots.filhos),
   'nav/link': ({ props, slots, id }) => {
@@ -91,7 +94,7 @@ export const BLOCOS_BASE = [
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 } }, required: ['src'] } }),
   bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
-  bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
+  bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/divisor'),
   bloco('layout/espacador', { props: { type: 'object', properties: { tamanho: { type: 'number', minimum: 0, default: 8 } } } }),
@@ -106,8 +109,8 @@ export const BLOCOS_BASE = [
   bloco('tabela/corpo', { slots: { filhos: { aceita: ['tabela/linha'] } } }),
   bloco('tabela/linha', { slots: { filhos: { aceita: ['tabela/celula'] } } }),
   bloco('tabela/celula', { slots: { filhos: {} }, props: { type: 'object', properties: { texto: { type: 'string' }, cabecalho: { type: 'boolean', default: false }, colunas: { type: 'integer', minimum: 1, maximum: 1000 }, linhas: { type: 'integer', minimum: 1, maximum: 65534 } } } }),
-  bloco('entrada/numero', { props: { type: 'object', properties: { valor: { type: ['number', 'string'] }, min: { type: 'number' }, max: { type: 'number' }, passo: { type: 'number' }, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'decimal' } } }),
-  bloco('entrada/caixa', { props: { type: 'object', properties: { marcado: { type: 'boolean' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'booleano' } } }),
+  bloco('entrada/numero', { props: { type: 'object', properties: { valor: { type: ['number', 'string'] }, rotulo: ROTULO, min: { type: 'number' }, max: { type: 'number' }, passo: { type: 'number' }, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'decimal' } } }),
+  bloco('entrada/caixa', { props: { type: 'object', properties: { marcado: { type: 'boolean' }, rotulo: ROTULO, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'booleano' } } }),
   bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } }, required: ['texto'] } }),
   bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } } } }),
   bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' } }, required: ['href'] } }),
