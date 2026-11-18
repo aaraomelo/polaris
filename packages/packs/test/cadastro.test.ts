@@ -7,7 +7,10 @@ import type { Consulta, DbTenant } from '@polaris/eventos'
 import { emite, validaEstrutura, type No, type Registry } from '@polaris/schema'
 import { contextoPorJwt, criaServico, regrasDoRegistry } from '@polaris/servico'
 import Fastify, { type FastifyInstance } from 'fastify'
-import { SignJWT, generateKeyPair, type KeyLike } from 'jose'
+import type { KeyObject } from 'node:crypto'
+import { SignJWT, generateKeyPair } from 'jose'
+
+type KeyLike = CryptoKey | KeyObject
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { DDL_DIRETORIO, criaAlimentos, criaEstoque, criaPagamentos, criaSemeador, criaServicos, diretorioSql, planoDeCadastro, provedorInterno, provisiona, registroDaPlataforma, rotasCadastro, segmentosDisponiveis, validaAlias, type Diretorio, type PedidoCadastro, type PortasCadastro } from '../src/index'
 
