@@ -86,6 +86,14 @@ function patchesDe(v: unknown, exigeAntes = false): E.Patch[] | undefined {
   return v as E.Patch[]
 }
 
+/** texto → número, o inverso de `numero`/`texto`: decimal com ponto (ou vírgula pt-BR, que vale como ponto) e expoente; nada de hex, Infinity, vazio ou espaço solto. Número finito passa; o resto é ausente. */
+const NUM_TEXTO = /^[+-]?(\d+([.,]\d*)?|[.,]\d+)([eE][+-]?\d+)?$/
+export const f_paraNumero: Funcao = { min: 1, max: 1, fn: (x) => {
+  if (typeof x === 'number') return Number.isFinite(x) ? x : undefined
+  if (typeof x !== 'string') return undefined
+  const t = x.trim(); if (t.length > 64 || !NUM_TEXTO.test(t)) return undefined
+  const n = Number(t.replace(',', '.')); return Number.isFinite(n) ? n : undefined
+} }
 export const f_percorre: Funcao = { min: 2, max: 2, fn: (raiz, chave) => percorre(raiz, chave) }
 export const f_camposDoSchema: Funcao = { min: 1, max: 1, fn: (schema) => camposDoSchema(schema) }
 export const f_igual: Funcao = { min: 2, max: 2, fn: (a, b) => igualProfundo(a, b) }

@@ -16,7 +16,7 @@
       "listaComentarios": { "campos": { "comentarios": { "tipo": "json" } } },
       "comentarioCriado": { "campos": { "comentario": { "tipo": "json" } } },
       "comentarioResolvido": { "campos": { "ok": { "tipo": "booleano" } } },
-      "previa": { "campos": { "ok": { "tipo": "booleano" }, "html": { "tipo": "texto" }, "erros": { "tipo": "json" } } }
+      "previa": { "campos": { "ok": { "tipo": "booleano" }, "html": { "tipo": "texto" }, "erros": { "tipo": "json" }, "avisos": { "tipo": "json", "descricao": "contraste baixo no tema (par, modo, razão, mínimo)" } } }
     },
     "operacoes": {
       "listarNos": { "metodo": "GET", "caminho": "/nos", "saida": "catalogoNos", "permissao": "studio" },

@@ -53,3 +53,14 @@ describe('camposDoSchema', () => {
     expect(ev('mapeia(camposDoSchema(s), c => c.rotulo)', { s })).toEqual(['Texto']); expect(JSON.stringify(s)).toBe(c)
   })
 })
+
+describe('paraNumero', () => {
+  const pn = (x: unknown) => ev('paraNumero(x)', { x })
+  it('texto decimal (ponto ou vírgula), com sinal e expoente; número finito passa', () => {
+    expect([pn('12'), pn(' 2,5 '), pn('-1e3'), pn('+7'), pn('.5'), pn('5.'), pn('1E2'), pn(0), pn(-3.5), pn('0'), pn('-0')]).toEqual([12, 2.5, -1000, 7, 0.5, 5, 100, 0, -3.5, 0, -0])
+  })
+  it('o que não é número decimal é ausente: vazio, hex, Infinity, NaN, mistura, ponto e vírgula juntos, tipos errados, texto enorme', () => {
+    for (const x of ['', ' ', 'abc', '0x10', 'Infinity', '-Infinity', 'NaN', '1 2', '1_000', '1,234.5', '1.234,5', '1e', 'e5', '--1', '1e999', '٣', '１２', NaN, Infinity, null, undefined, true, [], {}, '1'.repeat(65)]) expect(pn(x), String(x)).toBeUndefined()
+  })
+  it('é o inverso de texto()/numero em ida e volta (inteiros e decimais simples)', () => { for (const n of [0, 1, -7, 3.25, 1e21]) expect(pn(ev('texto(n)', { n }))).toBe(n) })
+})

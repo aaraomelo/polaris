@@ -23,7 +23,7 @@ export type OpcoesStudio = {
   q: (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
   autentica: (req: FastifyRequest) => Promise<Sessao | null>
   /** gera o HTML de pré-visualização de uma página (compilador e renderizador do engine); injetado porque o pacote não depende do engine. Sem ele, `/studio/previa` é 501. */
-  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string } | { ok: false; erros: string[] }
+  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
 }
 const ID = /^[a-z][A-Za-z0-9._/-]{0,127}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, ANCORA = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
@@ -175,7 +175,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     if (x.selecionado !== undefined && (typeof x.selecionado !== 'string' || !ANCORA.test(x.selecionado))) return erro(reply, 400, 'requisicao_invalida', 'selecionado inválido')
     const blocos = (await o.armazem.cabecas(s.tenantId)).filter((c) => c.kind === 'bloco').map((c) => ({ ...(c.conteudo as object), tenantId: s.tenantId }))
     const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), blocosDoTenant: blocos })
-    return r.ok ? { ok: true, html: r.html, erros: [] } : { ok: false, html: '', erros: r.erros }
+    return r.ok ? { ok: true, html: r.html, erros: [], avisos: r.avisos ?? [] } : { ok: false, html: '', erros: r.erros, avisos: [] }
   })
 
   app.post<{ Params: { cid: string } }>('/studio/comentarios/:cid/resolver', async (req, reply) => {

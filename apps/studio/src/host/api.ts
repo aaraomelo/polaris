@@ -17,9 +17,9 @@ export const OPERACOES: Record<string, (a: Record<string, unknown>) => Req> = {
   abrirVersao: (a) => ({ metodo: 'GET', url: `/studio/versao/${e(String(a.kind))}/${idNaUrl(a.id)}?seq=${e(String(a.seq))}` }),
   compararVersoes: (a) => ({ metodo: 'GET', url: `/studio/diff/${e(String(a.kind))}/${idNaUrl(a.id)}?de=${e(String(a.de))}&para=${e(String(a.para))}` }),
   listarComentarios: (a) => ({ metodo: 'GET', url: `/studio/comentarios?kind=${e(String(a.kind))}&id=${e(String(a.id))}` }),
-  comentar: (a) => ({ metodo: 'POST', url: '/studio/comentarios', corpo: sem(a) }),
+  comentar: (a) => ({ metodo: 'POST', url: '/studio/comentarios', corpo: sem({ kind: a.kind, id: a.id, texto: a.texto, ancora: a.ancora || undefined, versao: typeof a.versao === 'number' ? a.versao : undefined, respondeA: a.respondeA || undefined }) }),
   resolverComentario: (a) => ({ metodo: 'POST', url: `/studio/comentarios/${e(String(a.cid))}/resolver`, corpo: { resolvido: a.resolvido } }),
-  previsualizar: (a) => ({ metodo: 'POST', url: '/studio/previa', corpo: sem(a) }),
+  previsualizar: (a) => ({ metodo: 'POST', url: '/studio/previa', corpo: sem({ no: a.no, tema: a.tema ?? undefined, selecionado: a.selecionado || undefined }) }),
 }
 
 /** o token do gateway chega no fragmento (`/studio#token=…`), vive só em `sessionStorage` e o fragmento some da barra de endereço; sem token vale a sessão por cookie (dev) */

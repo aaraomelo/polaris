@@ -1434,6 +1434,28 @@ Aplica os patches em sequência. Atômico: qualquer patch inválido (forma, cami
 | `aplica(a, difere(a, b))` | `{"a":{"x":1},"b":{"x":2,"y":[1]}}` | `{"x":2,"y":[1]}` |
 | `aplica(a, ps)` | `{"a":{},"ps":[{"op":1}]}` | _(ausente)_ |
 
+### `paraNumero`
+
+`paraNumero(x) → número`
+
+Texto → número (o inverso de `numero`/`texto`): decimal com ponto, ou com vírgula pt-BR (que vale como ponto), com sinal e expoente opcionais. Número finito passa. Vazio, espaço solto, hexadecimal, `Infinity`, ponto e vírgula juntos, ou mais de 64 caracteres: ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `paraNumero("12")` |  | `12` |
+| `paraNumero(" 2,5 ")` |  | `2.5` |
+| `paraNumero("-1e3")` |  | `-1000` |
+| `paraNumero(".5")` |  | `0.5` |
+| `paraNumero(7)` |  | `7` |
+| `paraNumero("")` |  | _(ausente)_ |
+| `paraNumero("0x10")` |  | _(ausente)_ |
+| `paraNumero("1,234.5")` |  | _(ausente)_ |
+| `paraNumero("abc")` |  | _(ausente)_ |
+| `paraNumero(true)` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `paraNumero(x) == null || paraNumero(texto(paraNumero(x))) == paraNumero(x)`
+
 ### `percorre`
 
 `percorre(raiz, chave) → lista de { caminho, no, nivel }`

@@ -91,6 +91,181 @@
  },
  {
   "kind": "dados",
+  "id": "studio.versoes",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarVersoes"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.versao",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "abrirVersao"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "seq": {
+     "tipo": "inteiro",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.diff",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "compararVersoes"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "de": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "para": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.comentarios",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarComentarios"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.comentar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "comentar"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "texto": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "ancora": {
+     "tipo": "texto"
+    },
+    "versao": {
+     "tipo": "inteiro"
+    },
+    "respondeA": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.resolver",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "resolverComentario"
+   },
+   "parametros": {
+    "cid": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "resolvido": {
+     "tipo": "booleano",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.previa",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -124,15 +299,60 @@
   "spec": {
    "rota": "/studio",
    "titulo": "Polaris Studio",
-   "guarda": [],
    "dados": {
     "nos": "studio.nos",
     "blocos": "studio.blocos",
     "abrir": "studio.abrir",
     "salvar": "studio.salvar",
-    "previa": "studio.previa"
+    "previa": "studio.previa",
+    "versoes": "studio.versoes",
+    "versao": "studio.versao",
+    "diff": "studio.diff",
+    "comentarios": "studio.comentarios",
+    "comentar": "studio.comentar",
+    "resolver": "studio.resolver"
    },
    "estado": {
+    "criando": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "novoId": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "novaRota": {
+     "tipo": "texto",
+     "inicial": "/"
+    },
+    "novoTokenNome": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "novoTokenValor": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "aba": {
+     "tipo": "texto",
+     "inicial": "editor"
+    },
+    "de": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "para": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "novoComentario": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "respondendo": {
+     "tipo": "texto",
+     "inicial": ""
+    },
     "aberto": {
      "tipo": "json"
     },
@@ -142,6 +362,26 @@
     "noSalvo": {
      "tipo": "json"
     },
+    "passado": {
+     "tipo": "json",
+     "inicial": []
+    },
+    "futuro": {
+     "tipo": "json",
+     "inicial": []
+    },
+    "chaveEdicao": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "sel": {
+     "tipo": "json",
+     "inicial": []
+    },
+    "contador": {
+     "tipo": "inteiro",
+     "inicial": 1
+    },
     "aviso": {
      "tipo": "texto",
      "inicial": ""
@@ -149,6 +389,73 @@
     "tipoAviso": {
      "tipo": "texto",
      "inicial": "neutro"
+    },
+    "amostra": {
+     "tipo": "json",
+     "inicial": {
+      "kind": "pagina",
+      "id": "amostra",
+      "versao": "1.0.0",
+      "spec": {
+       "rota": "/amostra",
+       "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+         "gap": 12
+        },
+        "slots": {
+         "filhos": [
+          {
+           "bloco": "texto/titulo",
+           "props": {
+            "texto": "Título de exemplo",
+            "nivel": 1
+           }
+          },
+          {
+           "bloco": "texto/paragrafo",
+           "props": {
+            "texto": "Um parágrafo com o texto principal do tema."
+           }
+          },
+          {
+           "bloco": "texto/pequeno",
+           "props": {
+            "texto": "Texto suave, menor."
+           }
+          },
+          {
+           "bloco": "nav/botao",
+           "props": {
+            "texto": "Botão"
+           }
+          },
+          {
+           "bloco": "feedback/selo",
+           "props": {
+            "texto": "Sucesso",
+            "tom": "sucesso"
+           }
+          },
+          {
+           "bloco": "feedback/selo",
+           "props": {
+            "texto": "Alerta",
+            "tom": "alerta"
+           }
+          },
+          {
+           "bloco": "feedback/selo",
+           "props": {
+            "texto": "Erro",
+            "tom": "erro"
+           }
+          }
+         ]
+        }
+       }
+      }
+     }
     }
    },
    "raiz": {
@@ -175,10 +482,89 @@
          },
          {
           "bloco": "nav/botao",
+          "se": "estado.no && tamanho(estado.passado) > 0",
+          "props": {
+           "texto": "Desfazer"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "futuro",
+             "valor": "concat(estado.futuro, [estado.no])"
+            },
+            {
+             "acao": "definir",
+             "estado": "no",
+             "valor": "ultimo(estado.passado)"
+            },
+            {
+             "acao": "definir",
+             "estado": "passado",
+             "valor": "fatia(estado.passado, 0, -1)"
+            },
+            {
+             "acao": "definir",
+             "estado": "chaveEdicao",
+             "valor": "\"\""
+            },
+            {
+             "acao": "executar",
+             "dados": "previa",
+             "args": {
+              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.no && tamanho(estado.futuro) > 0",
+          "props": {
+           "texto": "Refazer"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "passado",
+             "valor": "concat(estado.passado, [estado.no])"
+            },
+            {
+             "acao": "definir",
+             "estado": "no",
+             "valor": "ultimo(estado.futuro)"
+            },
+            {
+             "acao": "definir",
+             "estado": "futuro",
+             "valor": "fatia(estado.futuro, 0, -1)"
+            },
+            {
+             "acao": "definir",
+             "estado": "chaveEdicao",
+             "valor": "\"\""
+            },
+            {
+             "acao": "executar",
+             "dados": "previa",
+             "args": {
+              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
           "se": "estado.no",
           "props": {
-           "texto": "Salvar",
-           "desabilitado": false
+           "texto": "Salvar"
           },
           "eventos": {
            "aoClicar": [
@@ -215,6 +601,22 @@
               {
                "acao": "executar",
                "dados": "nos"
+              },
+              {
+               "acao": "executar",
+               "dados": "versoes",
+               "args": {
+                "kind": "{estado.aberto.kind}",
+                "id": "{estado.aberto.id}"
+               }
+              },
+              {
+               "acao": "executar",
+               "dados": "comentarios",
+               "args": {
+                "kind": "{estado.aberto.kind}",
+                "id": "{estado.aberto.id}"
+               }
               }
              ],
              "emErro": [
@@ -294,6 +696,483 @@
        }
       },
       {
+       "bloco": "layout/linha",
+       "props": {
+        "gap": 8,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "layout/linha",
+          "props": {
+           "gap": 4,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "nav/botao",
+             "props": {
+              "texto": "Nova página"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "criando",
+                "valor": "\"pagina\""
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "props": {
+           "gap": 4,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "nav/botao",
+             "props": {
+              "texto": "Novo tema"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "criando",
+                "valor": "\"tema\""
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/linha",
+       "se": "estado.criando != \"\"",
+       "props": {
+        "gap": 4,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "entrada/texto",
+          "props": {
+           "valor": "{estado.novoId}",
+           "rotulo": "Identificador do novo nó",
+           "placeholder": "identificador"
+          },
+          "eventos": {
+           "aoMudar": [
+            {
+             "acao": "definir",
+             "estado": "novoId",
+             "valor": "evento"
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "entrada/texto",
+          "se": "estado.criando == \"pagina\"",
+          "props": {
+           "valor": "{estado.novaRota}",
+           "rotulo": "Rota da nova página",
+           "placeholder": "/rota"
+          },
+          "eventos": {
+           "aoMudar": [
+            {
+             "acao": "definir",
+             "estado": "novaRota",
+             "valor": "evento"
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.novoId != \"\"",
+          "props": {
+           "texto": "Criar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "aberto",
+             "valor": "objeto([[\"kind\", estado.criando], [\"id\", estado.novoId], [\"origem\", \"novo\"], [\"seq\", null]])"
+            },
+            {
+             "acao": "definir",
+             "estado": "no",
+             "valor": "estado.criando == \"pagina\" ? objeto([[\"kind\", \"pagina\"], [\"id\", estado.novoId], [\"versao\", \"1.0.0\"], [\"estatuto\", \"rascunho\"], [\"spec\", objeto([[\"rota\", estado.novaRota], [\"raiz\", objeto([[\"bloco\", \"layout/pilha\"], [\"id\", \"raiz\"]])]])]]) : objeto([[\"kind\", \"tema\"], [\"id\", estado.novoId], [\"versao\", \"1.0.0\"], [\"estatuto\", \"rascunho\"], [\"spec\", objeto([[\"tokens\", objeto([[\"cor\", objeto([[\"fundo\", \"#ffffff\"], [\"texto\", \"#111111\"], [\"primaria\", \"#1d4ed8\"]])]])]])]])"
+            },
+            {
+             "acao": "definir",
+             "estado": "noSalvo",
+             "valor": "null"
+            },
+            {
+             "acao": "definir",
+             "estado": "passado",
+             "valor": "[]"
+            },
+            {
+             "acao": "definir",
+             "estado": "futuro",
+             "valor": "[]"
+            },
+            {
+             "acao": "definir",
+             "estado": "chaveEdicao",
+             "valor": "\"\""
+            },
+            {
+             "acao": "definir",
+             "estado": "sel",
+             "valor": "[]"
+            },
+            {
+             "acao": "definir",
+             "estado": "aviso",
+             "valor": "\"\""
+            },
+            {
+             "acao": "definir",
+             "estado": "aba",
+             "valor": "\"editor\""
+            },
+            {
+             "acao": "definir",
+             "estado": "criando",
+             "valor": "\"\""
+            },
+            {
+             "acao": "executar",
+             "dados": "previa",
+             "args": {
+              "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+              "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+              "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Cancelar"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "criando",
+             "valor": "\"\""
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "props": {
+        "gap": 4
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Páginas",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "props": {
+           "gap": 8,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "layout/linha",
+             "repetir": {
+              "cada": "filtra(nos.nos, n => n.kind == \"pagina\")",
+              "como": "n",
+              "chave": "n.id"
+             },
+             "props": {
+              "gap": 4
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "nav/botao",
+                "props": {
+                 "texto": "{n.id} ●"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "executar",
+                   "dados": "abrir",
+                   "args": {
+                    "kind": "pagina",
+                    "id": "{n.id}"
+                   },
+                   "depois": [
+                    {
+                     "acao": "definir",
+                     "estado": "aberto",
+                     "valor": "objeto([[\"kind\", \"pagina\"], [\"id\", n.id], [\"origem\", resultado.origem], [\"seq\", resultado.seq]])"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "no",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "noSalvo",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "passado",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "futuro",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "chaveEdicao",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aba",
+                     "valor": "\"editor\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "de",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "para",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "previa",
+                     "args": {
+                      "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "versoes",
+                     "args": {
+                      "kind": "pagina",
+                      "id": "{n.id}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "comentarios",
+                     "args": {
+                      "kind": "pagina",
+                      "id": "{n.id}"
+                     }
+                    }
+                   ],
+                   "emErro": [
+                    {
+                     "acao": "definir",
+                     "estado": "tipoAviso",
+                     "valor": "\"erro\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "erro"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "layout/linha",
+             "repetir": {
+              "cada": "nos.base.pagina",
+              "como": "b",
+              "chave": "b"
+             },
+             "props": {
+              "gap": 4
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "nav/botao",
+                "props": {
+                 "texto": "{b} (padrão)"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "executar",
+                   "dados": "abrir",
+                   "args": {
+                    "kind": "pagina",
+                    "id": "{b}"
+                   },
+                   "depois": [
+                    {
+                     "acao": "definir",
+                     "estado": "aberto",
+                     "valor": "objeto([[\"kind\", \"pagina\"], [\"id\", b], [\"origem\", resultado.origem], [\"seq\", resultado.seq]])"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "no",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "noSalvo",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "passado",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "futuro",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "chaveEdicao",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aba",
+                     "valor": "\"editor\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "de",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "para",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "previa",
+                     "args": {
+                      "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "versoes",
+                     "args": {
+                      "kind": "pagina",
+                      "id": "{b}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "comentarios",
+                     "args": {
+                      "kind": "pagina",
+                      "id": "{b}"
+                     }
+                    }
+                   ],
+                   "emErro": [
+                    {
+                     "acao": "definir",
+                     "estado": "tipoAviso",
+                     "valor": "\"erro\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "erro"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
        "bloco": "layout/pilha",
        "props": {
         "gap": 4
@@ -359,78 +1238,67 @@
                     },
                     {
                      "acao": "definir",
+                     "estado": "passado",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "futuro",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "chaveEdicao",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
                      "estado": "aviso",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aba",
+                     "valor": "\"editor\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "de",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "para",
                      "valor": "\"\""
                     },
                     {
                      "acao": "executar",
                      "dados": "previa",
                      "args": {
-                      "no": {
-                       "kind": "pagina",
-                       "id": "amostra",
-                       "versao": "1.0.0",
-                       "spec": {
-                        "rota": "/amostra",
-                        "raiz": {
-                         "bloco": "layout/pilha",
-                         "props": {
-                          "gap": 12
-                         },
-                         "slots": {
-                          "filhos": [
-                           {
-                            "bloco": "texto/titulo",
-                            "props": {
-                             "texto": "Título de exemplo",
-                             "nivel": 1
-                            }
-                           },
-                           {
-                            "bloco": "texto/paragrafo",
-                            "props": {
-                             "texto": "Um parágrafo com o texto principal do tema."
-                            }
-                           },
-                           {
-                            "bloco": "texto/pequeno",
-                            "props": {
-                             "texto": "Texto suave, menor."
-                            }
-                           },
-                           {
-                            "bloco": "nav/botao",
-                            "props": {
-                             "texto": "Botão"
-                            }
-                           },
-                           {
-                            "bloco": "feedback/selo",
-                            "props": {
-                             "texto": "Sucesso",
-                             "tom": "sucesso"
-                            }
-                           },
-                           {
-                            "bloco": "feedback/selo",
-                            "props": {
-                             "texto": "Alerta",
-                             "tom": "alerta"
-                            }
-                           },
-                           {
-                            "bloco": "feedback/selo",
-                            "props": {
-                             "texto": "Erro",
-                             "tom": "erro"
-                            }
-                           }
-                          ]
-                         }
-                        }
-                       }
-                      },
-                      "tema": "{estado.no}"
+                      "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "versoes",
+                     "args": {
+                      "kind": "tema",
+                      "id": "{n.id}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "comentarios",
+                     "args": {
+                      "kind": "tema",
+                      "id": "{n.id}"
                      }
                     }
                    ],
@@ -497,78 +1365,67 @@
                     },
                     {
                      "acao": "definir",
+                     "estado": "passado",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "futuro",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "chaveEdicao",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
                      "estado": "aviso",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aba",
+                     "valor": "\"editor\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "de",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "para",
                      "valor": "\"\""
                     },
                     {
                      "acao": "executar",
                      "dados": "previa",
                      "args": {
-                      "no": {
-                       "kind": "pagina",
-                       "id": "amostra",
-                       "versao": "1.0.0",
-                       "spec": {
-                        "rota": "/amostra",
-                        "raiz": {
-                         "bloco": "layout/pilha",
-                         "props": {
-                          "gap": 12
-                         },
-                         "slots": {
-                          "filhos": [
-                           {
-                            "bloco": "texto/titulo",
-                            "props": {
-                             "texto": "Título de exemplo",
-                             "nivel": 1
-                            }
-                           },
-                           {
-                            "bloco": "texto/paragrafo",
-                            "props": {
-                             "texto": "Um parágrafo com o texto principal do tema."
-                            }
-                           },
-                           {
-                            "bloco": "texto/pequeno",
-                            "props": {
-                             "texto": "Texto suave, menor."
-                            }
-                           },
-                           {
-                            "bloco": "nav/botao",
-                            "props": {
-                             "texto": "Botão"
-                            }
-                           },
-                           {
-                            "bloco": "feedback/selo",
-                            "props": {
-                             "texto": "Sucesso",
-                             "tom": "sucesso"
-                            }
-                           },
-                           {
-                            "bloco": "feedback/selo",
-                            "props": {
-                             "texto": "Alerta",
-                             "tom": "alerta"
-                            }
-                           },
-                           {
-                            "bloco": "feedback/selo",
-                            "props": {
-                             "texto": "Erro",
-                             "tom": "erro"
-                            }
-                           }
-                          ]
-                         }
-                        }
-                       }
-                      },
-                      "tema": "{estado.no}"
+                      "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "versoes",
+                     "args": {
+                      "kind": "tema",
+                      "id": "{b}"
+                     }
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "comentarios",
+                     "args": {
+                      "kind": "tema",
+                      "id": "{b}"
                      }
                     }
                    ],
@@ -598,8 +1455,686 @@
        }
       },
       {
+       "bloco": "layout/linha",
+       "se": "estado.no && estado.aberto.origem != \"novo\"",
+       "props": {
+        "gap": 8,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Editor"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "aba",
+             "valor": "\"editor\""
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Histórico e comentários"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "aba",
+             "valor": "\"historico\""
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
        "bloco": "layout/pilha",
-       "se": "estado.no && estado.aberto.kind == \"tema\"",
+       "se": "estado.no && estado.aberto.kind == \"pagina\" && estado.aba == \"editor\"",
+       "props": {
+        "gap": 8
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Página {estado.aberto.id}",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "se": "estado.no && estado.aberto.kind == \"pagina\"",
+          "props": {
+           "gap": 4,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "nav/botao",
+             "se": "tamanho(estado.sel) > 0",
+             "props": {
+              "texto": "Remover"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "passado",
+                "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+               },
+               {
+                "acao": "definir",
+                "estado": "futuro",
+                "valor": "[]"
+               },
+               {
+                "acao": "definir",
+                "estado": "chaveEdicao",
+                "valor": "\"\""
+               },
+               {
+                "acao": "definir",
+                "estado": "no",
+                "valor": "sem(estado.no, concat([\"spec\", \"raiz\"], estado.sel))"
+               },
+               {
+                "acao": "definir",
+                "estado": "sel",
+                "valor": "fatia(estado.sel, 0, tamanho(estado.sel) - 3)"
+               },
+               {
+                "acao": "executar",
+                "dados": "previa",
+                "args": {
+                 "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                 "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0",
+             "props": {
+              "texto": "Subir"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "passado",
+                "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+               },
+               {
+                "acao": "definir",
+                "estado": "futuro",
+                "valor": "[]"
+               },
+               {
+                "acao": "definir",
+                "estado": "chaveEdicao",
+                "valor": "\"\""
+               },
+               {
+                "acao": "definir",
+                "estado": "no",
+                "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))"
+               },
+               {
+                "acao": "definir",
+                "estado": "sel",
+                "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])"
+               },
+               {
+                "acao": "executar",
+                "dados": "previa",
+                "args": {
+                 "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                 "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1",
+             "props": {
+              "texto": "Descer"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "passado",
+                "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+               },
+               {
+                "acao": "definir",
+                "estado": "futuro",
+                "valor": "[]"
+               },
+               {
+                "acao": "definir",
+                "estado": "chaveEdicao",
+                "valor": "\"\""
+               },
+               {
+                "acao": "definir",
+                "estado": "no",
+                "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) + 1))"
+               },
+               {
+                "acao": "definir",
+                "estado": "sel",
+                "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])"
+               },
+               {
+                "acao": "executar",
+                "dados": "previa",
+                "args": {
+                 "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                 "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                 "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "layout/grade",
+          "props": {
+           "colunas": 3,
+           "gap": 12
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "layout/pilha",
+             "props": {
+              "gap": 8
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/titulo",
+                "props": {
+                 "texto": "Blocos",
+                 "nivel": 4
+                }
+               },
+               {
+                "bloco": "layout/pilha",
+                "repetir": {
+                 "cada": "percorre(estado.no.spec.raiz, \"slots\")",
+                 "como": "x",
+                 "chave": "junta(mapeia(x.caminho, p => texto(p)), \"/\")"
+                },
+                "props": {
+                 "gap": 0
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "nav/botao",
+                   "props": {
+                    "texto": "{(x.nivel > 0 ? junta(mapeia(intervalo(0, x.nivel), i => \"· \"), \"\") : \"\") + (igual(x.caminho, estado.sel) ? \"▶ \" : \"\") + x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}"
+                   },
+                   "eventos": {
+                    "aoClicar": [
+                     {
+                      "acao": "definir",
+                      "estado": "sel",
+                      "valor": "x.caminho"
+                     },
+                     {
+                      "acao": "executar",
+                      "dados": "previa",
+                      "args": {
+                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "layout/pilha",
+             "props": {
+              "gap": 4
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/titulo",
+                "props": {
+                 "texto": "Pré-visualização",
+                 "nivel": 4
+                }
+               },
+               {
+                "bloco": "midia/quadro",
+                "props": {
+                 "titulo": "Pré-visualização da página",
+                 "html": "{previa.html}",
+                 "altura": 480
+                }
+               },
+               {
+                "bloco": "layout/pilha",
+                "se": "previa && previa.ok == false",
+                "props": {
+                 "gap": 2
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/paragrafo",
+                   "props": {
+                    "texto": "O preview não compila:"
+                   }
+                  },
+                  {
+                   "bloco": "lista/lista",
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "lista/item",
+                      "repetir": {
+                       "cada": "previa.erros",
+                       "como": "e",
+                       "chave": "e"
+                      },
+                      "slots": {
+                       "filhos": [
+                        {
+                         "bloco": "texto/paragrafo",
+                         "props": {
+                          "texto": "{e}"
+                         }
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "layout/pilha",
+             "se": "estado.no && estado.aberto.kind == \"pagina\" && obter(estado.no.spec.raiz, estado.sel)",
+             "props": {
+              "gap": 6
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/titulo",
+                "props": {
+                 "texto": "{(obter(estado.no.spec.raiz, estado.sel)).bloco}",
+                 "nivel": 4
+                }
+               },
+               {
+                "bloco": "entrada/texto",
+                "props": {
+                 "valor": "{(obter(estado.no.spec.raiz, estado.sel)).id ?? \"\"}",
+                 "rotulo": "Identificador"
+                },
+                "eventos": {
+                 "aoMudar": [
+                  {
+                   "acao": "definir",
+                   "estado": "passado",
+                   "valor": "\"id:\" + junta(estado.sel, \".\") != \"\" && estado.chaveEdicao == \"id:\" + junta(estado.sel, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                  },
+                  {
+                   "acao": "definir",
+                   "estado": "futuro",
+                   "valor": "[]"
+                  },
+                  {
+                   "acao": "definir",
+                   "estado": "chaveEdicao",
+                   "valor": "\"id:\" + junta(estado.sel, \".\")"
+                  },
+                  {
+                   "acao": "definir",
+                   "estado": "no",
+                   "valor": "evento == \"\" ? sem(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"id\"])) : com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"id\"]), evento)"
+                  },
+                  {
+                   "acao": "executar",
+                   "dados": "previa",
+                   "args": {
+                    "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                    "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                    "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "entrada/texto",
+                "props": {
+                 "valor": "{(obter(estado.no.spec.raiz, estado.sel)).se ?? \"\"}",
+                 "rotulo": "Exibir se (expressão)"
+                },
+                "eventos": {
+                 "aoMudar": [
+                  {
+                   "acao": "definir",
+                   "estado": "passado",
+                   "valor": "\"se:\" + junta(estado.sel, \".\") != \"\" && estado.chaveEdicao == \"se:\" + junta(estado.sel, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                  },
+                  {
+                   "acao": "definir",
+                   "estado": "futuro",
+                   "valor": "[]"
+                  },
+                  {
+                   "acao": "definir",
+                   "estado": "chaveEdicao",
+                   "valor": "\"se:\" + junta(estado.sel, \".\")"
+                  },
+                  {
+                   "acao": "definir",
+                   "estado": "no",
+                   "valor": "evento == \"\" ? sem(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"se\"])) : com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"se\"]), evento)"
+                  },
+                  {
+                   "acao": "executar",
+                   "dados": "previa",
+                   "args": {
+                    "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                    "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                    "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "layout/pilha",
+                "repetir": {
+                 "cada": "camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props)",
+                 "como": "c",
+                 "chave": "junta(c.caminho, \".\")"
+                },
+                "props": {
+                 "gap": 2
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/rotulo",
+                   "props": {
+                    "texto": "{c.rotulo}{c.obrigatorio ? \" *\" : \"\"}"
+                   }
+                  },
+                  {
+                   "bloco": "entrada/texto",
+                   "se": "c.tipo == \"texto\" || c.tipo == \"inteiro\" || c.tipo == \"numero\"",
+                   "props": {
+                    "valor": "{obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho)}",
+                    "rotulo": "{c.rotulo}"
+                   },
+                   "eventos": {
+                    "aoMudar": [
+                     {
+                      "acao": "definir",
+                      "estado": "passado",
+                      "valor": "\"pr:\" + junta(estado.sel, \".\") + \".\" + junta(c.caminho, \".\") != \"\" && estado.chaveEdicao == \"pr:\" + junta(estado.sel, \".\") + \".\" + junta(c.caminho, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "futuro",
+                      "valor": "[]"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "chaveEdicao",
+                      "valor": "\"pr:\" + junta(estado.sel, \".\") + \".\" + junta(c.caminho, \".\")"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "no",
+                      "valor": "evento == \"\" ? sem(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho)) : com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (paraNumero(evento) ?? evento) : evento)"
+                     },
+                     {
+                      "acao": "executar",
+                      "dados": "previa",
+                      "args": {
+                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "entrada/caixa",
+                   "se": "c.tipo == \"booleano\"",
+                   "props": {
+                    "marcado": "{obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho) == true}",
+                    "rotulo": "{c.rotulo}"
+                   },
+                   "eventos": {
+                    "aoMudar": [
+                     {
+                      "acao": "definir",
+                      "estado": "passado",
+                      "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "futuro",
+                      "valor": "[]"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "chaveEdicao",
+                      "valor": "\"\""
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "no",
+                      "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), evento)"
+                     },
+                     {
+                      "acao": "executar",
+                      "dados": "previa",
+                      "args": {
+                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "se": "c.tipo == \"escolha\"",
+                   "props": {
+                    "gap": 4,
+                    "alinha": "centro"
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "layout/linha",
+                      "repetir": {
+                       "cada": "c.opcoes",
+                       "como": "o",
+                       "chave": "texto(o)"
+                      },
+                      "slots": {
+                       "filhos": [
+                        {
+                         "bloco": "nav/botao",
+                         "props": {
+                          "texto": "{o}{obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho) == o ? \" ✓\" : \"\"}"
+                         },
+                         "eventos": {
+                          "aoClicar": [
+                           {
+                            "acao": "definir",
+                            "estado": "passado",
+                            "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                           },
+                           {
+                            "acao": "definir",
+                            "estado": "futuro",
+                            "valor": "[]"
+                           },
+                           {
+                            "acao": "definir",
+                            "estado": "chaveEdicao",
+                            "valor": "\"\""
+                           },
+                           {
+                            "acao": "definir",
+                            "estado": "no",
+                            "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), o)"
+                           },
+                           {
+                            "acao": "executar",
+                            "dados": "previa",
+                            "args": {
+                             "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                             "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                             "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                            }
+                           }
+                          ]
+                         }
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "texto/paragrafo",
+                   "se": "c.tipo == \"json\"",
+                   "props": {
+                    "texto": "(valor estruturado: edite no JSON do nó)"
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "texto/titulo",
+                "props": {
+                 "texto": "Adicionar dentro",
+                 "nivel": 5
+                }
+               },
+               {
+                "bloco": "layout/linha",
+                "props": {
+                 "gap": 4
+                },
+                "repetir": {
+                 "cada": "filtra(blocos.blocos, bd => !acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco).slots || (acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos || tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)) > 0)",
+                 "como": "bd",
+                 "chave": "bd.id"
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "nav/botao",
+                   "props": {
+                    "texto": "+ {bd.id}"
+                   },
+                   "eventos": {
+                    "aoClicar": [
+                     {
+                      "acao": "definir",
+                      "estado": "chaveEdicao",
+                      "valor": "\"\""
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "passado",
+                      "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "futuro",
+                      "valor": "[]"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "no",
+                      "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]), concat(obter(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))])) ?? [], [mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + estado.contador]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))]))"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "contador",
+                      "valor": "estado.contador + 1"
+                     },
+                     {
+                      "acao": "executar",
+                      "dados": "previa",
+                      "args": {
+                       "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "se": "estado.no && estado.aberto.kind == \"tema\" && estado.aba == \"editor\"",
        "props": {
         "gap": 8
        },
@@ -675,79 +2210,166 @@
                        "aoMudar": [
                         {
                          "acao": "definir",
+                         "estado": "passado",
+                         "valor": "\"tk:\" + g + t[0] != \"\" && estado.chaveEdicao == \"tk:\" + g + t[0] ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "futuro",
+                         "valor": "[]"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "chaveEdicao",
+                         "valor": "\"tk:\" + g + t[0]"
+                        },
+                        {
+                         "acao": "definir",
                          "estado": "no",
-                         "valor": "com(estado.no, [\"spec\", \"tokens\", g, t[0]], g == \"cor\" ? evento : (numero(evento) ?? evento))"
+                         "valor": "com(estado.no, [\"spec\", \"tokens\", g, t[0]], g == \"cor\" ? evento : (paraNumero(evento) ?? evento))"
                         },
                         {
                          "acao": "executar",
                          "dados": "previa",
                          "args": {
-                          "no": {
-                           "kind": "pagina",
-                           "id": "amostra",
-                           "versao": "1.0.0",
-                           "spec": {
-                            "rota": "/amostra",
-                            "raiz": {
-                             "bloco": "layout/pilha",
-                             "props": {
-                              "gap": 12
-                             },
-                             "slots": {
-                              "filhos": [
-                               {
-                                "bloco": "texto/titulo",
-                                "props": {
-                                 "texto": "Título de exemplo",
-                                 "nivel": 1
-                                }
-                               },
-                               {
-                                "bloco": "texto/paragrafo",
-                                "props": {
-                                 "texto": "Um parágrafo com o texto principal do tema."
-                                }
-                               },
-                               {
-                                "bloco": "texto/pequeno",
-                                "props": {
-                                 "texto": "Texto suave, menor."
-                                }
-                               },
-                               {
-                                "bloco": "nav/botao",
-                                "props": {
-                                 "texto": "Botão"
-                                }
-                               },
-                               {
-                                "bloco": "feedback/selo",
-                                "props": {
-                                 "texto": "Sucesso",
-                                 "tom": "sucesso"
-                                }
-                               },
-                               {
-                                "bloco": "feedback/selo",
-                                "props": {
-                                 "texto": "Alerta",
-                                 "tom": "alerta"
-                                }
-                               },
-                               {
-                                "bloco": "feedback/selo",
-                                "props": {
-                                 "texto": "Erro",
-                                 "tom": "erro"
-                                }
-                               }
-                              ]
-                             }
-                            }
-                           }
-                          },
-                          "tema": "{estado.no}"
+                          "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                          "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
                          }
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "✕"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "passado",
+                         "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "futuro",
+                         "valor": "[]"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "chaveEdicao",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "no",
+                         "valor": "sem(estado.no, [\"spec\", \"tokens\", g, t[0]])"
+                        },
+                        {
+                         "acao": "executar",
+                         "dados": "previa",
+                         "args": {
+                          "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                          "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                         }
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "props": {
+                    "gap": 4,
+                    "alinha": "centro"
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "entrada/texto",
+                      "props": {
+                       "valor": "{estado.novoTokenNome}",
+                       "rotulo": "novo token de {g}",
+                       "placeholder": "nome"
+                      },
+                      "eventos": {
+                       "aoMudar": [
+                        {
+                         "acao": "definir",
+                         "estado": "novoTokenNome",
+                         "valor": "evento"
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "entrada/texto",
+                      "props": {
+                       "valor": "{estado.novoTokenValor}",
+                       "rotulo": "valor do novo token de {g}",
+                       "placeholder": "valor"
+                      },
+                      "eventos": {
+                       "aoMudar": [
+                        {
+                         "acao": "definir",
+                         "estado": "novoTokenValor",
+                         "valor": "evento"
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "se": "estado.novoTokenNome != \"\" && estado.novoTokenValor != \"\"",
+                      "props": {
+                       "texto": "Adicionar token"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "passado",
+                         "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "futuro",
+                         "valor": "[]"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "chaveEdicao",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "no",
+                         "valor": "com(estado.no, [\"spec\", \"tokens\", g, estado.novoTokenNome], paraNumero(estado.novoTokenValor) ?? estado.novoTokenValor)"
+                        },
+                        {
+                         "acao": "executar",
+                         "dados": "previa",
+                         "args": {
+                          "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                          "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                         }
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "novoTokenNome",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "novoTokenValor",
+                         "valor": "\"\""
                         }
                        ]
                       }
@@ -782,6 +2404,492 @@
                  "html": "{previa.html}",
                  "altura": 420
                 }
+               },
+               {
+                "bloco": "layout/pilha",
+                "props": {
+                 "gap": 2
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/paragrafo",
+                   "repetir": {
+                    "cada": "previa.avisos ?? []",
+                    "como": "a",
+                    "chave": "a.modo + a.par"
+                   },
+                   "props": {
+                    "texto": "Contraste baixo em {a.par} ({a.modo}): {a.contraste}:1; o mínimo é {a.minimo}:1"
+                   }
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "se": "estado.no && estado.aberto.origem != \"novo\" && estado.aba == \"historico\"",
+       "props": {
+        "gap": 8
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Versões de {estado.aberto.id}",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "tamanho(versoes.versoes ?? []) == 0",
+          "props": {
+           "texto": "Sem versões do tenant: o nó é o padrão da plataforma."
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "repetir": {
+           "cada": "versoes.versoes ?? []",
+           "como": "v",
+           "chave": "texto(v.seq)"
+          },
+          "props": {
+           "gap": 8,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/paragrafo",
+             "props": {
+              "texto": "v{v.seq} · {v.autor} · {v.criadoEm} · {v.nota ?? \"\"}{v.removido ? \" (restaurou o padrão)\" : \"\"}"
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "props": {
+              "texto": "De"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "de",
+                "valor": "texto(v.seq)"
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "props": {
+              "texto": "Para"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "definir",
+                "estado": "para",
+                "valor": "texto(v.seq)"
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "!v.removido",
+             "props": {
+              "texto": "Restaurar no editor"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "versao",
+                "args": {
+                 "kind": "{estado.aberto.kind}",
+                 "id": "{estado.aberto.id}",
+                 "seq": "{v.seq}"
+                },
+                "depois": [
+                 {
+                  "acao": "definir",
+                  "estado": "passado",
+                  "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "futuro",
+                  "valor": "[]"
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "chaveEdicao",
+                  "valor": "\"\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "no",
+                  "valor": "com(resultado.no, [\"versao\"], estado.no.versao)"
+                 },
+                 {
+                  "acao": "executar",
+                  "dados": "previa",
+                  "args": {
+                   "no": "{estado.aberto.kind == \"pagina\" ? estado.no : estado.amostra}",
+                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}"
+                  }
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aba",
+                  "valor": "\"editor\""
+                 }
+                ],
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "estado.de != \"\" || estado.para != \"\"",
+          "props": {
+           "texto": "Comparar: de v{estado.de} até v{estado.para}"
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.de != \"\" && estado.para != \"\"",
+          "props": {
+           "texto": "Comparar versões"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "executar",
+             "dados": "diff",
+             "args": {
+              "kind": "{estado.aberto.kind}",
+              "id": "{estado.aberto.id}",
+              "de": "{estado.de}",
+              "para": "{estado.para}"
+             },
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.aberto.origem == \"tenant\"",
+          "props": {
+           "texto": "Comparar com o padrão"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "de",
+             "valor": "\"base\""
+            },
+            {
+             "acao": "executar",
+             "dados": "diff",
+             "args": {
+              "kind": "{estado.aberto.kind}",
+              "id": "{estado.aberto.id}",
+              "de": "base",
+              "para": "{estado.aberto.seq}"
+             },
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "layout/pilha",
+          "se": "diff && diff.diff",
+          "props": {
+           "gap": 2
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/paragrafo",
+             "se": "diff.diff.igual",
+             "props": {
+              "texto": "Sem diferenças."
+             }
+            },
+            {
+             "bloco": "layout/pilha",
+             "repetir": {
+              "cada": "diff.diff.blocos",
+              "como": "m",
+              "chave": "m.tipo + m.rotulo"
+             },
+             "props": {
+              "gap": 0
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/paragrafo",
+                "props": {
+                 "texto": "{m.tipo} {m.rotulo}{m.descendentes ? \" (com \" + m.descendentes + \" bloco(s) dentro)\" : \"\"}{m.tipo == \"movido\" ? \" de \" + m.de + \" para \" + m.para : \"\"}"
+                }
+               },
+               {
+                "bloco": "texto/paragrafo",
+                "repetir": {
+                 "cada": "m.campos ?? []",
+                 "como": "c",
+                 "chave": "junta(c.caminho, \".\") + c.tipo"
+                },
+                "props": {
+                 "texto": "   {c.tipo} {junta(c.caminho, \".\")}: {texto(c.antes)} → {texto(c.depois)}"
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "repetir": {
+              "cada": "diff.diff.campos",
+              "como": "c",
+              "chave": "junta(c.caminho, \".\") + c.tipo"
+             },
+             "props": {
+              "texto": "{c.tipo} {junta(c.caminho, \".\")}: {texto(c.antes)} → {texto(c.depois)}"
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "layout/pilha",
+          "props": {
+           "gap": 4
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/titulo",
+             "props": {
+              "texto": "Comentários",
+              "nivel": 4
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "se": "tamanho(comentarios.comentarios ?? []) == 0",
+             "props": {
+              "texto": "Nenhum comentário."
+             }
+            },
+            {
+             "bloco": "layout/linha",
+             "repetir": {
+              "cada": "comentarios.comentarios ?? []",
+              "como": "k",
+              "chave": "k.id"
+             },
+             "props": {
+              "gap": 8,
+              "alinha": "centro"
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/paragrafo",
+                "props": {
+                 "texto": "{k.respondeA ? \"↳ \" : \"\"}{k.autor}{k.ancora ? \" #\" + k.ancora : \"\"}{k.resolvido ? \" (resolvido)\" : \"\"}: {k.texto}"
+                }
+               },
+               {
+                "bloco": "nav/botao",
+                "se": "!k.respondeA",
+                "props": {
+                 "texto": "Responder"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "definir",
+                   "estado": "respondendo",
+                   "valor": "k.id"
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "nav/botao",
+                "se": "!k.respondeA",
+                "props": {
+                 "texto": "{k.resolvido ? \"Reabrir\" : \"Resolver\"}"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "executar",
+                   "dados": "resolver",
+                   "args": {
+                    "cid": "{k.id}",
+                    "resolvido": "{!k.resolvido}"
+                   },
+                   "depois": [
+                    {
+                     "acao": "executar",
+                     "dados": "comentarios",
+                     "args": {
+                      "kind": "{estado.aberto.kind}",
+                      "id": "{estado.aberto.id}"
+                     }
+                    }
+                   ],
+                   "emErro": [
+                    {
+                     "acao": "definir",
+                     "estado": "tipoAviso",
+                     "valor": "\"erro\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "erro"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "se": "estado.respondendo != \"\"",
+             "props": {
+              "texto": "Respondendo a um comentário."
+             }
+            },
+            {
+             "bloco": "entrada/area",
+             "props": {
+              "valor": "{estado.novoComentario}",
+              "rotulo": "Comentário",
+              "linhas": 3
+             },
+             "eventos": {
+              "aoMudar": [
+               {
+                "acao": "definir",
+                "estado": "novoComentario",
+                "valor": "evento"
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "se": "estado.novoComentario != \"\"",
+             "props": {
+              "texto": "Comentar"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "comentar",
+                "args": {
+                 "kind": "{estado.aberto.kind}",
+                 "id": "{estado.aberto.id}",
+                 "texto": "{estado.novoComentario}",
+                 "ancora": "{estado.respondendo == \"\" && estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : \"\"}",
+                 "respondeA": "{estado.respondendo}"
+                },
+                "depois": [
+                 {
+                  "acao": "definir",
+                  "estado": "novoComentario",
+                  "valor": "\"\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "respondendo",
+                  "valor": "\"\""
+                 },
+                 {
+                  "acao": "executar",
+                  "dados": "comentarios",
+                  "args": {
+                   "kind": "{estado.aberto.kind}",
+                   "id": "{estado.aberto.id}"
+                  }
+                 }
+                ],
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
                }
               ]
              }
