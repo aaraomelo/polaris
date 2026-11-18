@@ -1,4 +1,5 @@
 import { montaVivo, type Programa } from '@polaris/engine'
+import '@polaris/engine/formulario' // registra o validador na função `validaFormulario` (o painel de teste do editor de formulários)
 import { criaCarregador, fonteDe } from './api'
 
 // O hospedeiro: carrega o PROGRAMA da página `studio.app` (compilado em build a partir dos nós JSON), resolve os dados `auto` e monta a página com o runtime vivo da plataforma.

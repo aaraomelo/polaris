@@ -36,7 +36,7 @@ export type OpcoesStudio = {
   previewEmite?: (tenantId: string, release: number, ttlSeg: number) => string
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
-  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; modo?: 'claro' | 'escuro'; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
+  previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; modo?: 'claro' | 'escuro'; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[]; problemas?: string[] } | { ok: false; erros: string[] }
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
 }
 const ID = /^[a-z][A-Za-z0-9._/-]{0,127}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, ANCORA = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
@@ -273,8 +273,17 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
       const h = cabecas.find((c) => c.kind === 'dados' && c.id === id)?.conteudo ?? base.resolve('dados', id, { tenantId: s.tenantId })?.no
       if (h) dados.push({ ...(h as object), tenantId: null })
     }
+    if ((x.no as { kind?: unknown }).kind === 'formulario') { // formulário: os `dados` das opções/valores iniciais e o `servico` do envio vão junto (a validação confere o envio contra o contrato dele)
+      const spec = (x.no as { spec?: { valoresIniciais?: { dados?: unknown }; envio?: { servico?: unknown }; campos?: unknown[] } }).spec ?? {}
+      const dadosIds = new Set<string>(), serv = typeof spec.envio?.servico === 'string' ? spec.envio.servico : undefined
+      if (typeof spec.valoresIniciais?.dados === 'string') dadosIds.add(spec.valoresIniciais.dados)
+      const anda = (lista: unknown[], n: number) => { if (n > 4) return; for (const c of lista.slice(0, 200)) { const cc = c as { opcoes?: { dados?: unknown }; campos?: unknown[] }; if (typeof cc?.opcoes?.dados === 'string') dadosIds.add(cc.opcoes.dados); if (Array.isArray(cc?.campos)) anda(cc.campos, n + 1) } }
+      if (Array.isArray(spec.campos)) anda(spec.campos, 0)
+      for (const id of [...dadosIds].slice(0, 50)) { if (!ANCORA_NO.test(id)) continue; const h = cabecas.find((c) => c.kind === 'dados' && c.id === id)?.conteudo ?? base.resolve('dados', id, { tenantId: s.tenantId })?.no; if (h) dados.push({ ...(h as object), tenantId: null }) }
+      if (serv && ANCORA_NO.test(serv)) { const sv = base.resolve('servico', serv, { tenantId: s.tenantId })?.no; if (sv) dados.push({ ...(sv as object), tenantId: null }) }
+    }
     const r = o.previsualiza({ no: x.no, ...(x.tema ? { tema: x.tema } : {}), ...(x.selecionado ? { selecionado: x.selecionado } : {}), ...(x.modo ? { modo: x.modo } : {}), blocosDoTenant: [...blocos, ...dados] })
-    return r.ok ? { ok: true, html: r.html, erros: [], avisos: r.avisos ?? [] } : { ok: false, html: '', erros: r.erros, avisos: [] }
+    return r.ok ? { ok: true, html: r.html, erros: [], avisos: r.avisos ?? [], ...(r.problemas ? { problemas: r.problemas } : {}) } : { ok: false, html: '', erros: r.erros, avisos: [] }
   })
 
   app.post<{ Params: { cid: string } }>('/studio/comentarios/:cid/resolver', async (req, reply) => {

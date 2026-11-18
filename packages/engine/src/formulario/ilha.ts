@@ -60,7 +60,7 @@ export function posicaoDoCursor(formatado: string, significativosAntes: number):
   return formatado.length
 }
 
-const CSS = `.pl-form{display:flex;flex-direction:column;gap:var(--espacamento-base,8px)}.pl-form fieldset{border:1px solid var(--cor-borda,#ccc);border-radius:var(--raio-pequeno,4px);padding:var(--espacamento-base,8px)}
+export const CSS_FORMULARIO = `.pl-form{display:flex;flex-direction:column;gap:var(--espacamento-base,8px)}.pl-form fieldset{border:1px solid var(--cor-borda,#ccc);border-radius:var(--raio-pequeno,4px);padding:var(--espacamento-base,8px)}
 .pl-campo{display:flex;flex-direction:column;gap:2px}.pl-campo[hidden]{display:none}.pl-campo input:not([type=checkbox]):not([type=radio]),.pl-campo select,.pl-campo textarea{padding:6px;border:1px solid var(--cor-borda,#ccc);border-radius:var(--raio-pequeno,4px);font:inherit}
 .pl-campo [aria-invalid=true]{border-color:var(--cor-erro,#c0392b)}.pl-erro{color:var(--cor-erro,#c0392b);font-size:.9em}.pl-ajuda{color:var(--cor-texto-suave,#666);font-size:.9em}
 .pl-acoes{display:flex;gap:var(--espacamento-base,8px);flex-wrap:wrap}.pl-acoes button{padding:6px 12px;border:1px solid var(--cor-borda,#ccc);border-radius:var(--raio-pequeno,4px);background:var(--cor-superficie,#fff);color:inherit;font:inherit;cursor:pointer}
@@ -91,7 +91,7 @@ export async function montaFormulario(el: HTMLElement, opc: OpcoesIlha = {}): Pr
 
   const T = (t: Texto | undefined): string | undefined => textoI18n(t, idioma, def.idioma)
   const uid = `plf${++uidSeq}`
-  if (!doc.getElementById('pl-form-css')) { const st = doc.createElement('style'); st.id = 'pl-form-css'; st.textContent = CSS; doc.head.appendChild(st) }
+  if (!doc.getElementById('pl-form-css')) { const st = doc.createElement('style'); st.id = 'pl-form-css'; st.textContent = CSS_FORMULARIO; doc.head.appendChild(st) }
   const mk = <K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string> = {}, texto?: string): HTMLElementTagNameMap[K] => { const e = doc.createElement(tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (texto !== undefined) e.textContent = texto; return e }
 
   // ---- estado da tela ----------------------------------------------------------------------------------------------------------------

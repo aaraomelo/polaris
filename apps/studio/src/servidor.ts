@@ -11,7 +11,7 @@ import { geraPreview } from './preview'
 export const previsualiza: NonNullable<OpcoesStudio['previsualiza']> = (a) => {
   const r = geraPreview(a.no, a.blocosDoTenant, a.selecionado, a.tema, a.modo)
   const tema = (a.tema as { spec?: { tokens?: unknown } } | undefined)?.spec
-  return r.ok && tema?.tokens && typeof tema.tokens === 'object' ? { ...r, avisos: auditaContraste(tema as never) } : r // tema: junto da prévia vão os avisos de contraste (WCAG)
+  return r.ok && !r.problemas && tema?.tokens && typeof tema.tokens === 'object' ? { ...r, avisos: auditaContraste(tema as never) } : r // tema: junto da prévia vão os avisos de contraste (WCAG)
 }
 
 // O cliente do Studio (dist/) e a API de autoria. Quem AUTENTICA é injetado: no gateway, o JWT dele; em dev/teste, um stub. O servidor nunca decide identidade sozinho.

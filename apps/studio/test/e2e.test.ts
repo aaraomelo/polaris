@@ -200,4 +200,46 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Página terceira')).toBeVisible(); await expect(p.getByText(/criar um novo nó as descarta/)).toHaveCount(0)
     await ctx.close()
   })
+  it('editor de formulários: criar, adicionar e editar campos, prévia, problemas, teste com valores, JSON e salvar', async () => {
+    const { ctx, p } = await entra('ana'); const prev = () => p.frameLocator('iframe[title="Pré-visualização do formulário"]')
+    await p.getByRole('button', { name: 'Novo formulário' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('contato2'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
+    await expect(p.getByText('Formulário contato2')).toBeVisible(); await expect(p.getByRole('button', { name: /nome \(texto\) \*/ })).toBeVisible(); await expect(prev().getByText('Nome')).toBeVisible()
+    await expect(p.getByText('Definição coerente: sem problemas.')).toBeVisible()
+    // adiciona um e-mail, seleciona, edita o rótulo e marca como obrigatório: lista e prévia seguem
+    await p.getByRole('button', { name: '+ email', exact: true }).click(); await p.getByRole('button', { name: /campo1 \(email\)/ }).click(); await expect(p.getByText('Campo campo1')).toBeVisible()
+    await p.getByRole('textbox', { name: 'Rótulo', exact: true }).fill('E-mail de contato'); await expect(prev().getByText('E-mail de contato')).toBeVisible()
+    await p.getByRole('checkbox', { name: 'Obrigatório', exact: true }).check(); await expect(p.getByRole('button', { name: /campo1 \(email\) \*/ })).toBeVisible()
+    // CPF: a prévia mostra a dica da máscara padrão do tipo; máscara própria no campo de texto
+    await p.getByRole('button', { name: '+ cpf', exact: true }).click(); await expect(prev().locator('input[placeholder="000.000.000-00"]')).toBeVisible()
+    // problema: nome repetido aparece na lista e some ao corrigir
+    await p.getByRole('textbox', { name: 'Nome (chave do valor)', exact: true }).fill('nome'); await expect(p.getByText(/já existe um campo 'nome'/)).toBeVisible()
+    await p.getByRole('textbox', { name: 'Nome (chave do valor)', exact: true }).fill('email'); await expect(p.getByText('Definição coerente: sem problemas.')).toBeVisible()
+    // escolha: opções por linha (valor | rótulo) aparecem na prévia
+    await p.getByRole('button', { name: '+ escolha', exact: true }).click(); await p.getByRole('button', { name: /campo3 \(escolha\)/ }).click()
+    await p.getByRole('textbox', { name: 'Opções', exact: true }).fill('x | Ex\ny | Ypsilon\nz'); await expect(prev().locator('option', { hasText: 'Ypsilon' })).toHaveCount(1); await expect(prev().locator('option', { hasText: 'z' })).toHaveCount(1)
+    // máscara do campo de texto: padrão vira {mascara:{padrao}} no JSON
+    await p.getByRole('button', { name: /nome \(texto\)/ }).click(); await p.getByRole('textbox', { name: /^Padrão \(0 dígito/ }).fill('AAA-0000'); await expect(prev().locator('input[placeholder="xxx-0000"]')).toBeVisible()
+    // teste com valores de exemplo: o validador real
+    await p.getByRole('button', { name: 'Testar', exact: true }).click(); await p.getByRole('textbox', { name: 'Valores de exemplo (JSON)' }).fill('{"nome": "ab1", "email": "ruim", "campo2": "111.111.111-11"}')
+    await expect(p.getByText('Com erros')).toBeVisible(); await expect(p.getByText(/email: E-mail de contato está em um formato inválido\./)).toBeVisible(); await expect(p.getByText(/campo2: Campo 2 está em um formato inválido\./)).toBeVisible()
+    await p.getByRole('textbox', { name: 'Valores de exemplo (JSON)' }).fill('{"nome": "abc1234", "email": " ANA@Exemplo.com ", "campo2": "529.982.247-25"}'); await expect(p.getByText('Válido', { exact: true })).toBeVisible()
+    const norm = p.getByRole('textbox', { name: 'Valores normalizados' }); await expect.poll(() => norm.inputValue()).toMatch(/"campo2": "52998224725"/); await expect.poll(() => norm.inputValue()).toMatch(/"email": "ana@exemplo.com"/)
+    await p.getByRole('textbox', { name: 'Valores de exemplo (JSON)' }).fill('{ruim'); await expect(p.getByText(/JSON inválido: use um objeto/)).toBeVisible()
+    // JSON do nó: mostra a definição, recusa JSON ruim e aplica mudanças válidas
+    await p.getByRole('button', { name: 'JSON', exact: true }).click(); const area = p.getByRole('textbox', { name: 'spec do formulário' }); await expect.poll(() => area.inputValue()).toMatch(/"mascara": \{\s*"padrao": "AAA-0000"/)
+    await area.fill('{ruim'); await p.getByRole('button', { name: 'Aplicar' }).click(); await expect(p.getByText('JSON inválido (use um objeto).')).toBeVisible()
+    await area.fill('{"titulo": "Via JSON", "campos": [{"nome": "so", "tipo": "texto", "obrigatorio": true}], "passos": [{"id": "p1", "titulo": "Um", "campos": ["so"]}]}'); await p.getByRole('button', { name: 'Aplicar' }).click()
+    await p.getByRole('button', { name: 'Campos', exact: true }).click(); await expect(p.getByRole('button', { name: /so \(texto\) \*/ })).toBeVisible(); await expect(p.getByText(/pelo menos 2/)).toBeVisible() // 1 passo só: o schema exige 2 (a prévia some, os problemas dizem por quê)
+    await p.getByRole('button', { name: 'JSON', exact: true }).click(); await p.getByRole('textbox', { name: 'spec do formulário' }).fill('{"titulo": "Via JSON", "campos": [{"nome": "so", "tipo": "texto", "obrigatorio": true}, {"nome": "dois", "tipo": "texto"}], "passos": [{"id": "p1", "titulo": "Um", "campos": ["so"]}, {"id": "p2", "titulo": "Dois", "campos": ["dois"]}]}'); await p.getByRole('button', { name: 'Aplicar' }).click()
+    await p.getByRole('button', { name: 'Campos', exact: true }).click(); await expect(prev().getByText('Via JSON')).toBeVisible(); await expect(prev().locator('[data-campo="so"]')).toHaveCount(1); await expect(prev().locator('[data-campo="dois"]')).toHaveCount(0)
+    await p.getByRole('button', { name: /Dois/ }).click(); await expect(prev().locator('[data-campo="dois"]')).toHaveCount(1) // alterna o passo da prévia
+    // desfazer: uma aplicação de JSON por vez
+    await p.getByRole('button', { name: 'Desfazer' }).click(); await expect(p.getByRole('button', { name: /dois \(texto\)/ })).toHaveCount(0); await p.getByRole('button', { name: 'Desfazer' }).click(); await expect(p.getByRole('button', { name: /nome \(texto\)/ })).toBeVisible()
+    // subir/descer/remover
+    await p.getByRole('button', { name: /campo3 \(escolha\)/ }).click(); await p.getByRole('button', { name: 'Subir' }).click(); await expect(p.getByRole('button', { name: /▶ campo3 \(escolha\)/ })).toBeVisible(); await p.getByRole('button', { name: 'Remover', exact: true }).click(); await expect(p.getByRole('button', { name: /campo3/ })).toHaveCount(0)
+    // salvar: o servidor valida o nó inteiro; reabrir traz o salvo
+    await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText('Salvo como versão 1')).toBeVisible()
+    const salvo = (await app.inject({ url: '/studio/nos/formulario/contato2', headers: { cookie: 'u=ana|a' } })).json(); expect(salvo).toMatchObject({ origem: 'tenant', seq: 1 }); expect(salvo.no.spec.campos.map((c: { nome: string }) => c.nome)).toEqual(['nome', 'email', 'campo2']); expect(salvo.no.spec.campos[0].mascara).toEqual({ padrao: 'AAA-0000' })
+    await ctx.close()
+  })
 })

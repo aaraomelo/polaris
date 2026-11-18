@@ -67,3 +67,6 @@ Ao abrir um tema salvo (ou da plataforma), o botão **Usar este tema no site** c
 
 ## Prévia
 A prévia tem seletor **claro/escuro** (`modo` em `POST /studio/previa`); o padrão é o claro, para que o que você edita nos tokens apareça. Os nós `dados` que a página referencia vão junto, mas os dados em si não são buscados no editor.
+
+## Formulários
+O Studio também edita `kind: formulario` (campos, máscaras, validação, mensagens, prévia, problemas e teste com valores): veja `docs/formularios.md#editor-no-studio`.

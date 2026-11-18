@@ -179,6 +179,16 @@ describe('API de autoria do Studio', () => {
     for (const ruim of [{}, { release: 0 }, { release: 'x' }, { release: 1, horas: 0 }, { release: 1, horas: 169 }, { release: 1, horas: 1.5 }, { release: 1, tenantId: B }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim)).toBe(400)
     expect((await post({ release: 1 }, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'POST', url: '/studio/releases/preview', payload: { release: 1 } })).statusCode).toBe(401); await a2.close()
   })
+  it('previa de formulário: leva junto o `servico` do envio e os `dados` das opções/valores iniciais (sem vazar de outro tenant) e repassa `problemas`', async () => {
+    base.registra({ kind: 'servico', id: 'loja', versao: '1.0.0', estatuto: 'publicado', spec: { entidades: { contato: { campos: { nome: { tipo: 'texto', obrigatorio: true } }, crud: { caminho: '/contatos', operacoes: ['criar'] } } }, operacoes: {} } })
+    base.registra({ kind: 'dados', id: 'd.paises', versao: '1.0.0', estatuto: 'publicado', spec: { fonte: { tipo: 'estatico', valor: [] } } })
+    const chamadas: any[] = []; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, previsualiza: (x) => { chamadas.push(x); return { ok: true, html: '<form></form>', titulo: 't', problemas: ['/spec x'] } } })
+    const f = { kind: 'formulario', id: 'f', versao: '1.0.0', spec: { campos: [{ nome: 'a', tipo: 'texto' }, { nome: 'g', tipo: 'grupo', campos: [{ nome: 'p', tipo: 'escolha', opcoes: { dados: 'd.paises' } }] }], valoresIniciais: { dados: 'd.vitrine' }, envio: { servico: 'loja', operacao: 'criarContato' } } }
+    const r = await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: f, selecionado: 'passo1' } }); expect(r.json()).toEqual({ ok: true, html: '<form></form>', erros: [], avisos: [], problemas: ['/spec x'] })
+    const extras = chamadas[0].blocosDoTenant.filter((n: any) => n.kind === 'servico' || n.kind === 'dados'); expect(extras.map((n: any) => n.id).sort()).toEqual(['d.paises', 'd.vitrine', 'loja']); expect(extras.every((n: any) => n.tenantId === null)).toBe(true)
+    const ruim = { ...f, spec: { ...f.spec, envio: { servico: '../x', operacao: 'y' }, valoresIniciais: { dados: 5 } } }; await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: ruim } }); expect(chamadas[1].blocosDoTenant.filter((n: any) => n.kind === 'servico').length).toBe(0) // id inseguro não procura nada
+    await a2.close()
+  })
   it('publicar: 501 sem a função; exige editar; chama com tenant/autor/nota da SESSÃO; falha vira 422', async () => {
     expect((await app.inject({ method: 'POST', url: '/studio/publicar', headers: h(A, 'ana'), payload: {} })).statusCode).toBe(501)
     const chamadas: any[] = []; let falha = false; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, publicar: async (x) => { chamadas.push(x); return falha ? { ok: false, erros: ['não fecha'] } : { ok: true, release: 7 } } })

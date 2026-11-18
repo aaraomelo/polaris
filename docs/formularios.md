@@ -97,9 +97,22 @@ Como funciona (uma "ilha"): o servidor entrega só o ponto de montagem (`<div da
 - **Envio**: valida na tela (mesmo motor), envia `{ valores, idioma }` com `Idempotency-Key` (a mesma na retentativa, nova quando o visitante muda um valor), desabilita os botões enquanto espera (o duplo clique não duplica), mostra a mensagem de sucesso, executa as ações `navegar` **seguras** (só caminho do próprio site) e avisa a página. Erro 422 do servidor vai para o campo certo e foca o primeiro.
 - **Sessão**: o envio usa o cookie de sessão do site **junto do cabeçalho `x-polaris-form`** (sem o cabeçalho, só o cookie não basta: nada de CSRF); cookie vencido segue como visitante.
 
+## Editor no Studio
+
+No Studio, **Novo formulário** cria uma definição com um campo e abre o editor (qualquer formulário do tenant ou da plataforma aparece em **Formulários**; salvar grava o override do tenant, publicar o leva ao site, como páginas e temas).
+
+- **Campos**: a lista (grupos e listas aparecem aninhados, `*` marca obrigatório), a **paleta** (`+ texto`, `+ cpf`, `+ escolha`, `+ lista`…), **Subir/Descer/Remover** e **Desfazer/Refazer**. Com um grupo ou lista selecionado, o campo novo entra dentro dele.
+- **Propriedades do campo**: nome, rótulo, ajuda, placeholder, tipo (botões), obrigatório, obrigatório se / exibir se (expressões), valor padrão, **máscara** (padrão com `0 9 A a *`; vários separados por `|`; "enviar com literais"), validação (tamanho, mínimo/máximo, expressão regular, igual a outro campo), **opções** (uma por linha: `valor | rótulo`) e mensagens de erro do campo. O que não se aplica ao tipo some (tamanho só em texto, mínimo/máximo só em número…).
+- **Formulário**: título, descrição e o **envio** (serviço, operação, mensagem de sucesso).
+- **Prévia** (num quadro isolado, **sem comportamento**): rótulos, obrigatórios, ajuda, dica da máscara, opções, seções e passos (botões alternam o passo), com o tema e o modo claro/escuro do Studio.
+- **Problemas**: a lista do que a validação do nó reprova, ao vivo: schema, referências quebradas, nomes repetidos, máscara incoerente com o tipo, regex perigosa, expressão com erro e `envio` contra a operação **real** do serviço. Vazio = "Definição coerente".
+- **Testar**: valores de exemplo (JSON) passam pelo **validador real do servidor** (`validaFormulario`): mostra válido/erros com as mensagens e os **valores normalizados** (o CPF sem pontos, o e-mail em minúsculas…).
+- **JSON**: a definição inteira, para o que a tela não cobre (seções, passos, ações, regras entre campos, mensagens gerais). **Aplicar** recusa JSON inválido e entra no histórico de desfazer.
+
 ## Limites (conhecidos)
 
-- **Ainda não há editor de formulários no Studio** (o JSON é escrito à mão ou gerado). Sem JavaScript o visitante vê só "Carregando formulário…" (a ilha precisa do navegador).
+- A prévia do Studio é **estática**: o comportamento (máscara ao digitar, validação, passos) se experimenta no site ou no painel **Testar**. Sem JavaScript o visitante vê só "Carregando formulário…" (a ilha precisa do navegador).
+- O editor estruturado cobre os campos mais usados; seções, passos, ações, regras entre campos e mensagens gerais são editados no **JSON**.
 - A ilha executa só a ação `navegar`; `definir` e `executar` são da página (use `aoEnviado`).
 - Opções vindas de `dados` **não são conferidas no servidor** (o serviço continua validando o valor que recebe).
 - `arquivo` valida nome, extensão e tamanho declarados; **não há envio de arquivo** pelo gateway ainda.

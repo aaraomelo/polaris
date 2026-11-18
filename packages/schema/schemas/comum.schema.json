@@ -199,7 +199,7 @@
         },
         "depois": {
           "type": "array",
-          "maxItems": 20,
+          "maxItems": 40,
           "items": {
             "$ref": "#/$defs/acao"
           },
@@ -207,7 +207,7 @@
         },
         "emErro": {
           "type": "array",
-          "maxItems": 20,
+          "maxItems": 40,
           "items": {
             "$ref": "#/$defs/acao"
           },

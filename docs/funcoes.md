@@ -1456,6 +1456,69 @@ Texto → número (o inverso de `numero`/`texto`): decimal com ponto, ou com ví
 **Leis** (testadas com entradas aleatórias):
 - `paraNumero(x) == null || paraNumero(texto(paraNumero(x))) == paraNumero(x)`
 
+### `analisaJson`
+
+`analisaJson(texto) → valor`
+
+JSON em texto → valor (o inverso de `paraJson`). Até 200 KB; as chaves `__proto__`, `constructor` e `prototype` somem; texto vazio ou JSON ruim é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `analisaJson("{\"a\":[1,2]}")` |  | `{"a":[1,2]}` |
+| `analisaJson("[1, \"x\", true, null]")` |  | `[1,"x",true,null]` |
+| `analisaJson("3")` |  | `3` |
+| `analisaJson("{ruim")` |  | _(ausente)_ |
+| `analisaJson("")` |  | _(ausente)_ |
+| `analisaJson(1)` |  | _(ausente)_ |
+| `analisaJson("{\"__proto__\":{\"x\":1},\"ok\":1}")` |  | `{"ok":1}` |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(analisaJson(paraJson(x, 0)), x)`
+
+### `paraJson`
+
+`paraJson(valor, indentacao?) → texto`
+
+Valor → JSON em texto, com `indentacao` espaços (0 a 8; padrão 2). Até 200 KB; fora disso é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `paraJson(x, 0)` | `{"x":{"a":[1,2],"b":"z"}}` | `"{\"a\":[1,2],\"b\":\"z\"}"` |
+| `paraJson(x)` | `{"x":{"a":1}}` | `"{\n  \"a\": 1\n}"` |
+| `paraJson(x, 9)` | `{"x":1}` | _(ausente)_ |
+
+### `divide`
+
+`divide(texto, separador) → lista de textos`
+
+Divide pelo separador (não vazio): o inverso de `junta`. Até 1000 pedaços e 100 KB; fora disso é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `divide("a\|b\|c", "\|")` |  | `["a","b","c"]` |
+| `divide("sem", "\|")` |  | `["sem"]` |
+| `divide("a\|\|b", "\|")` |  | `["a","","b"]` |
+| `divide("a", "")` |  | _(ausente)_ |
+| `divide(1, ",")` |  | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `junta(divide(x, ","), ",") == x`
+
+### `validaFormulario`
+
+`validaFormulario(definicao, valores, idioma?) → { ok, erros, valores }`
+
+O validador do `kind: formulario` (o mesmo do servidor): normaliza os `valores` crus e devolve os erros por campo (`{ campo, regra, mensagem }`) na língua pedida. Definição sem `campos` ou valores que não são objeto: ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `validaFormulario(f, v).ok` | `{"f":{"campos":[{"nome":"a","tipo":"texto","obrigatorio":true}]},"v":{"a":"oi"}}` | `true` |
+| `validaFormulario(f, v).erros[0].mensagem` | `{"f":{"campos":[{"nome":"a","tipo":"texto","obrigatorio":true}]},"v":{}}` | `"A é obrigatório."` |
+| `validaFormulario(f, v, "en").erros[0].mensagem` | `{"f":{"campos":[{"nome":"a","tipo":"texto","obrigatorio":true}]},"v":{}}` | `"A is required."` |
+| `validaFormulario(f, v).valores.cpf` | `{"f":{"campos":[{"nome":"cpf","tipo":"cpf","mascara":{"padrao":"000.000.000-00"}}]},"v":{"cpf":"529.982.247-25"}}` | `"52998224725"` |
+| `validaFormulario(1, v)` | `{"v":{}}` | _(ausente)_ |
+| `validaFormulario(f, 1)` | `{"f":{"campos":[]}}` | _(ausente)_ |
+
 ### `percorre`
 
 `percorre(raiz, chave) → lista de { caminho, no, nivel }`

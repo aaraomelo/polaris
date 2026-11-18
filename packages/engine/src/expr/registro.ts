@@ -278,6 +278,23 @@ export const REGISTRO: Def[] = [
     { expr: 'paraNumero("12")', saida: 12 }, { expr: 'paraNumero(" 2,5 ")', saida: 2.5 }, { expr: 'paraNumero("-1e3")', saida: -1000 }, { expr: 'paraNumero(".5")', saida: 0.5 }, { expr: 'paraNumero(7)', saida: 7 },
     { expr: 'paraNumero("")', indefinido: U }, { expr: 'paraNumero("0x10")', indefinido: U }, { expr: 'paraNumero("1,234.5")', indefinido: U }, { expr: 'paraNumero("abc")', indefinido: U }, { expr: 'paraNumero(true)', indefinido: U },
   ], leis: [{ expr: 'paraNumero(x) == null || paraNumero(texto(paraNumero(x))) == paraNumero(x)', gera: { x: 'numero' } }] },
+  { nome: 'analisaJson', tipo: 'funcao', assinatura: 'analisaJson(texto) → valor', descricao: 'JSON em texto → valor (o inverso de `paraJson`). Até 200 KB; as chaves `__proto__`, `constructor` e `prototype` somem; texto vazio ou JSON ruim é ausente.', exemplos: [
+    { expr: 'analisaJson("{\\"a\\":[1,2]}")', saida: { a: [1, 2] } }, { expr: 'analisaJson("[1, \\"x\\", true, null]")', saida: [1, 'x', true, null] }, { expr: 'analisaJson("3")', saida: 3 },
+    { expr: 'analisaJson("{ruim")', indefinido: U }, { expr: 'analisaJson("")', indefinido: U }, { expr: 'analisaJson(1)', indefinido: U }, { expr: 'analisaJson("{\\"__proto__\\":{\\"x\\":1},\\"ok\\":1}")', saida: { ok: 1 } },
+  ], leis: [{ expr: 'igual(analisaJson(paraJson(x, 0)), x)', gera: { x: 'json' } }] },
+  { nome: 'paraJson', tipo: 'funcao', assinatura: 'paraJson(valor, indentacao?) → texto', descricao: 'Valor → JSON em texto, com `indentacao` espaços (0 a 8; padrão 2). Até 200 KB; fora disso é ausente.', exemplos: [
+    { expr: 'paraJson(x, 0)', esc: { x: { a: [1, 2], b: 'z' } }, saida: '{"a":[1,2],"b":"z"}' }, { expr: 'paraJson(x)', esc: { x: { a: 1 } }, saida: '{\n  "a": 1\n}' }, { expr: 'paraJson(x, 9)', esc: { x: 1 }, indefinido: U },
+  ] },
+  { nome: 'divide', tipo: 'funcao', assinatura: 'divide(texto, separador) → lista de textos', descricao: 'Divide pelo separador (não vazio): o inverso de `junta`. Até 1000 pedaços e 100 KB; fora disso é ausente.', exemplos: [
+    { expr: 'divide("a|b|c", "|")', saida: ['a', 'b', 'c'] }, { expr: 'divide("sem", "|")', saida: ['sem'] }, { expr: 'divide("a||b", "|")', saida: ['a', '', 'b'] }, { expr: 'divide("a", "")', indefinido: U }, { expr: 'divide(1, ",")', indefinido: U },
+  ], leis: [{ expr: 'junta(divide(x, ","), ",") == x', gera: { x: 'texto' } }] },
+  { nome: 'validaFormulario', tipo: 'funcao', assinatura: 'validaFormulario(definicao, valores, idioma?) → { ok, erros, valores }', descricao: 'O validador do `kind: formulario` (o mesmo do servidor): normaliza os `valores` crus e devolve os erros por campo (`{ campo, regra, mensagem }`) na língua pedida. Definição sem `campos` ou valores que não são objeto: ausente.', exemplos: [
+    { expr: 'validaFormulario(f, v).ok', esc: { f: { campos: [{ nome: 'a', tipo: 'texto', obrigatorio: true }] }, v: { a: 'oi' } }, saida: true },
+    { expr: 'validaFormulario(f, v).erros[0].mensagem', esc: { f: { campos: [{ nome: 'a', tipo: 'texto', obrigatorio: true }] }, v: {} }, saida: 'A é obrigatório.' },
+    { expr: 'validaFormulario(f, v, "en").erros[0].mensagem', esc: { f: { campos: [{ nome: 'a', tipo: 'texto', obrigatorio: true }] }, v: {} }, saida: 'A is required.' },
+    { expr: 'validaFormulario(f, v).valores.cpf', esc: { f: { campos: [{ nome: 'cpf', tipo: 'cpf', mascara: { padrao: '000.000.000-00' } }] }, v: { cpf: '529.982.247-25' } }, saida: '52998224725' },
+    { expr: 'validaFormulario(1, v)', esc: { v: {} }, indefinido: U }, { expr: 'validaFormulario(f, 1)', esc: { f: { campos: [] } }, indefinido: U },
+  ] },
   { nome: 'percorre', tipo: 'funcao', assinatura: 'percorre(raiz, chave) → lista de { caminho, no, nivel }', descricao: 'Todos os nós de uma árvore em pré-ordem. Os filhos de um nó estão em `no[chave]`: uma lista de nós, ou um objeto cujas chaves levam a listas de nós (slots). `caminho` é o do nó DENTRO do documento, pronto para `obter`, `com`, `sem` e `insere`. Entrada que não é objeto, ou árvore grande demais, é ausente.', exemplos: [
     { expr: 'mapeia(percorre(r, "filhos"), n => n.no.id)', esc: { r: { id: "a", filhos: [{ id: "b" }, { id: "c", filhos: [{ id: "d" }] }] } }, saida: ['a', 'b', 'c', 'd'] },
     { expr: 'mapeia(percorre(r, "slots"), n => n.caminho)', esc: { r: { id: 'a', slots: { x: [{ id: 'b' }] } } }, saida: [[], ['slots', 'x', 0]] },

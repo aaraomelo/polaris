@@ -1,7 +1,8 @@
 import { COMPONENTES_BASE, compilaPrograma, registraBase, renderPaginaHtml } from '@polaris/engine'
 import { registraCommerce } from '@polaris/engine/commerce'
 import { cssDoTema, registraTemas, TEMA_PADRAO } from '@polaris/engine/tema'
-import { Registry } from '@polaris/schema'
+import { Registry, validaFormulario } from '@polaris/schema'
+import { CSS_FORMULARIO, confereExpressoes, renderizaFormularioHtml } from '@polaris/engine'
 
 // Pré-visualização: o mesmo compilador e renderizador da produção sobre o RASCUNHO. Serve ao cliente (SPA) e ao servidor (`/studio/previa`).
 // Preview AO VIVO: o mesmo compilador e o mesmo renderizador da produção, no navegador, sobre o RASCUNHO (não sobre o salvo). Roda num iframe `sandbox=""` (sem scripts, origem opaca):
@@ -9,8 +10,25 @@ import { Registry } from '@polaris/schema'
 const BASE = (() => { const r = new Registry(); registraBase(r); registraTemas(r); registraCommerce(r); return r })()
 const ID_SEGURO = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
 
-export type ResultadoPreview = { ok: true; html: string; titulo: string } | { ok: false; erros: string[] }
+export type ResultadoPreview = { ok: true; html: string; titulo: string; problemas?: string[] } | { ok: false; erros: string[] }
+/** prévia de um `formulario`: o HTML estático (sem comportamento) e os problemas da definição (schema, referências, estrutura contra o serviço, expressões) */
+function geraPreviewFormulario(no: any, extras: any[], selecionadoId: string | undefined, temaNo: any, modo: 'claro' | 'escuro'): ResultadoPreview {
+  const fmt = (e: { caminho: string; mensagem: string }) => `${e.caminho} ${e.mensagem}`
+  const reg = BASE.derivado(); for (const b of extras) { try { reg.registra(b) } catch { /* nó inválido do tenant: a prévia segue sem ele */ } }
+  let tema: any = TEMA_PADRAO; if (temaNo) { try { tema = reg.registra({ ...temaNo, id: 'studio.preview-tema' }) } catch { /* tema ainda inválido */ } }
+  const problemas: string[] = []
+  let registrado
+  try { registrado = reg.registra({ ...no, id: 'studio.preview-formulario', estatuto: 'publicado', tenantId: null }) } catch (e) { problemas.push(...(((e as { detalhes?: Array<{ caminho: string; mensagem: string }> }).detalhes ?? [{ caminho: '/', mensagem: (e as Error).message }]).slice(0, 30).map(fmt))); return { ok: true, html: '', titulo: '', problemas } }
+  problemas.push(...reg.verifica(registrado).map(fmt), ...validaFormulario(reg, registrado).map(fmt), ...confereExpressoes(registrado.spec as never))
+  const spec = registrado.spec as { passos?: Array<{ id: string }> }
+  const passo = selecionadoId && spec.passos ? Math.max(0, spec.passos.findIndex((p) => p.id === selecionadoId)) : 0
+  let corpo = ''; try { corpo = renderizaFormularioHtml(spec as never, { passo }) } catch (e) { problemas.push(`/spec não pôde ser desenhado: ${(e as Error).message.slice(0, 120)}`) }
+  const css = cssDoTema(tema)
+  return { ok: true, titulo: String((spec as { titulo?: unknown }).titulo ?? ''), problemas: problemas.slice(0, 50), html: `<!doctype html><html lang="pt-BR" data-modo="${modo === 'escuro' ? 'escuro' : 'claro'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}${CSS_FORMULARIO}</style></head><body><div id="polaris">${corpo}</div></body></html>` }
+}
+
 export function geraPreview(no: any, blocosDoTenant: any[], selecionadoId: string | undefined, temaNo?: any, modo: 'claro' | 'escuro' = 'claro'): ResultadoPreview {
+  if (no?.kind === 'formulario') { try { return geraPreviewFormulario(no, blocosDoTenant, selecionadoId, temaNo, modo) } catch (e) { return { ok: false, erros: [(e as Error).message.slice(0, 300)] } } }
   try {
     const reg = BASE.derivado()
     for (const b of blocosDoTenant) { try { reg.registra(b) } catch { /* bloco inválido do tenant: o preview segue sem ele */ } }

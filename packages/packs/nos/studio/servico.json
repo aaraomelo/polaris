@@ -115,6 +115,10 @@
           "avisos": {
             "tipo": "json",
             "descricao": "contraste baixo no tema (par, modo, razão, mínimo)"
+          },
+          "problemas": {
+            "tipo": "json",
+            "descricao": "formulário: o que a validação do nó reprova (schema, referências, estrutura e expressões); lista vazia = nó coerente"
           }
         }
       },

@@ -5,6 +5,7 @@ import { geraDocFuncoes } from '../src/expr/docs'
 import { ORDEM_SUPERIOR } from '../src/expr/ordem-superior'
 import { FUNCOES_PADRAO, OPERADORES, avalia, deAst, formata, paraAst, parseExpr, semPos, validaAst, type Ast, type Expr } from '../src/expr/index'
 import { REGISTRO, type Gerador } from '../src/expr/registro'
+import '../src/formulario/index' // registra o validador na função validaFormulario (os exemplos da documentação a usam)
 
 let seed = 31
 const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)

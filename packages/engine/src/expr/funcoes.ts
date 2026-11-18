@@ -94,6 +94,22 @@ export const f_paraNumero: Funcao = { min: 1, max: 1, fn: (x) => {
   const t = x.trim(); if (t.length > 64 || !NUM_TEXTO.test(t)) return undefined
   const n = Number(t.replace(',', '.')); return Number.isFinite(n) ? n : undefined
 } }
+/** JSON em texto → valor (o inverso de `paraJson`). Só até 200 KB; chaves de protótipo somem; ruim é ausente. */
+const PROIBIDAS_JSON = new Set(['__proto__', 'constructor', 'prototype'])
+export const f_analisaJson: Funcao = { min: 1, max: 1, fn: (t) => {
+  if (typeof t !== 'string' || t.length > 200_000 || !t.trim()) return undefined
+  try { return JSON.parse(t, (k, v) => (PROIBIDAS_JSON.has(k) ? undefined : v)) as unknown } catch { return undefined }
+} }
+/** valor → JSON em texto, com `indentacao` espaços (0 a 8; padrão 2). Só até 200 KB. */
+export const f_paraJson: Funcao = { min: 1, max: 2, fn: (v, ind) => {
+  const n = ind === undefined ? 2 : typeof ind === 'number' && Number.isInteger(ind) && ind >= 0 && ind <= 8 ? ind : undefined; if (n === undefined) return undefined
+  try { const t = JSON.stringify(v, null, n); return typeof t === 'string' && t.length <= 200_000 ? t : undefined } catch { return undefined }
+} }
+/** divide um texto pelo separador (não vazio). Até 1000 pedaços. */
+export const f_divide: Funcao = { min: 2, max: 2, fn: (t, sep) => {
+  if (typeof t !== 'string' || typeof sep !== 'string' || sep.length === 0 || t.length > 100_000) return undefined
+  const partes = t.split(sep); return partes.length <= 1000 ? partes : undefined
+} }
 export const f_percorre: Funcao = { min: 2, max: 2, fn: (raiz, chave) => percorre(raiz, chave) }
 export const f_camposDoSchema: Funcao = { min: 1, max: 1, fn: (schema) => camposDoSchema(schema) }
 export const f_igual: Funcao = { min: 2, max: 2, fn: (a, b) => igualProfundo(a, b) }
