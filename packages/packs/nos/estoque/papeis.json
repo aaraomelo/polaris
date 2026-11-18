@@ -1,0 +1,14 @@
+[
+  { "kind": "papel", "id": "estoque.leitor", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [ { "acoes": ["listar", "obter", "abaixoDoMinimo"], "sujeitos": ["estoque.deposito", "estoque.saldo", "estoque.movimento", "estoque.reserva", "estoque.reservaItem"] } ] } },
+  { "kind": "papel", "id": "estoque.operador", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "herda": ["estoque.leitor"], "regras": [ { "acoes": ["entrada", "saida", "ajustar", "transferir"], "sujeitos": ["estoque.movimento"] } ] } },
+  { "kind": "papel", "id": "estoque.gerente", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "herda": ["estoque.operador"], "regras": [
+      { "acoes": ["criar", "atualizar", "remover"], "sujeitos": ["estoque.deposito"] },
+      { "acoes": ["atualizar"], "sujeitos": ["estoque.saldo"], "campos": ["minimo", "maximo"] },
+      { "acoes": ["expirarReservas", "liberar"], "sujeitos": ["estoque.reserva"] }
+    ] } },
+  { "kind": "papel", "id": "estoque.sistema", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [ { "acoes": ["reservar", "liberar", "obter"], "sujeitos": ["estoque.reserva"] } ] } }
+]

@@ -1,0 +1,47 @@
+{
+  "kind": "servico", "id": "estoque", "versao": "1.0.0", "estatuto": "publicado",
+  "spec": {
+    "entidades": {
+      "deposito": { "campos": { "codigo": { "tipo": "texto", "obrigatorio": true }, "nome": { "tipo": "texto", "obrigatorio": true }, "padrao": { "tipo": "booleano", "padrao": false }, "ativo": { "tipo": "booleano", "padrao": true } }, "unicos": [["codigo"]], "crud": { "caminho": "/depositos" } },
+      "saldo": {
+        "campos": {
+          "itemId": { "tipo": "uuid", "obrigatorio": true, "descricao": "a variante, ou o produto quando não há variante" }, "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" },
+          "depositoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "deposito" }, "quantidade": { "tipo": "decimal", "obrigatorio": true }, "reservado": { "tipo": "decimal", "obrigatorio": true },
+          "custoMedio": { "tipo": "dinheiro", "obrigatorio": true }, "minimo": { "tipo": "decimal" }, "maximo": { "tipo": "decimal" }
+        },
+        "unicos": [["itemId", "depositoId"]], "indices": [["produtoId"], ["depositoId"]], "crud": { "caminho": "/saldos", "operacoes": ["listar", "obter", "atualizar"] }
+      },
+      "movimento": {
+        "campos": {
+          "itemId": { "tipo": "uuid", "obrigatorio": true }, "produtoId": { "tipo": "uuid", "obrigatorio": true }, "depositoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "deposito" },
+          "tipo": { "tipo": "texto", "obrigatorio": true, "descricao": "entrada | ajuste | perda | devolucao_fornecedor | consumo | transferencia_saida | transferencia_entrada | venda" },
+          "delta": { "tipo": "decimal", "obrigatorio": true, "descricao": "com sinal: + entra, − sai" }, "custoUnitario": { "tipo": "dinheiro", "obrigatorio": true },
+          "refTipo": { "tipo": "texto" }, "refId": { "tipo": "texto" }, "chave": { "tipo": "texto", "obrigatorio": true }, "notas": { "tipo": "texto" }, "criadoPor": { "tipo": "texto", "obrigatorio": true }
+        },
+        "unicos": [["chave", "tipo", "depositoId"]], "indices": [["itemId", "depositoId"], ["refTipo", "refId"]], "crud": { "caminho": "/movimentos", "operacoes": ["listar", "obter"] }
+      },
+      "reserva": {
+        "campos": {
+          "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "status": { "tipo": "texto", "obrigatorio": true, "descricao": "ativa | confirmada | liberada | recusada | divergente" },
+          "motivo": { "tipo": "texto" }, "expiraEm": { "tipo": "dataHora" }
+        },
+        "unicos": [["pedidoId"]], "indices": [["status"]], "crud": { "caminho": "/reservas", "operacoes": ["listar", "obter"] }
+      },
+      "reservaItem": {
+        "campos": { "reservaId": { "tipo": "uuid", "obrigatorio": true, "referencia": "reserva" }, "itemId": { "tipo": "uuid", "obrigatorio": true }, "produtoId": { "tipo": "uuid", "obrigatorio": true }, "depositoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "deposito" }, "quantidade": { "tipo": "decimal", "obrigatorio": true } },
+        "indices": [["reservaId"]], "crud": { "caminho": "/itens-reserva", "operacoes": ["listar", "obter"] }
+      }
+    },
+    "operacoes": {
+      "entrada": { "metodo": "POST", "caminho": "/estoque/entrada", "entrada": { "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" }, "depositoId": { "tipo": "uuid", "obrigatorio": true }, "quantidade": { "tipo": "decimal", "obrigatorio": true }, "custoUnitario": { "tipo": "dinheiro", "obrigatorio": true }, "chave": { "tipo": "texto", "obrigatorio": true }, "refTipo": { "tipo": "texto" }, "refId": { "tipo": "texto" }, "notas": { "tipo": "texto" } }, "saida": "movimento", "permissao": "estoque" },
+      "saida": { "metodo": "POST", "caminho": "/estoque/saida", "entrada": { "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" }, "depositoId": { "tipo": "uuid", "obrigatorio": true }, "quantidade": { "tipo": "decimal", "obrigatorio": true }, "tipo": { "tipo": "texto", "obrigatorio": true, "descricao": "perda | devolucao_fornecedor | consumo" }, "chave": { "tipo": "texto", "obrigatorio": true }, "notas": { "tipo": "texto" } }, "saida": "movimento", "permissao": "estoque" },
+      "ajustar": { "metodo": "POST", "caminho": "/estoque/ajuste", "entrada": { "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" }, "depositoId": { "tipo": "uuid", "obrigatorio": true }, "quantidadeContada": { "tipo": "decimal", "obrigatorio": true }, "chave": { "tipo": "texto", "obrigatorio": true }, "notas": { "tipo": "texto" } }, "saida": "movimento", "permissao": "estoque" },
+      "transferir": { "metodo": "POST", "caminho": "/estoque/transferir", "entrada": { "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" }, "origemId": { "tipo": "uuid", "obrigatorio": true }, "destinoId": { "tipo": "uuid", "obrigatorio": true }, "quantidade": { "tipo": "decimal", "obrigatorio": true }, "chave": { "tipo": "texto", "obrigatorio": true } }, "saida": "movimento", "permissao": "estoque" },
+      "reservar": { "metodo": "POST", "caminho": "/reservas", "entrada": { "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "itens": { "tipo": "json", "obrigatorio": true, "descricao": "[{ produtoId, varianteId?, quantidade }]" }, "validadeMinutos": { "tipo": "inteiro" } }, "saida": "reserva", "permissao": "estoque" },
+      "liberar": { "metodo": "POST", "caminho": "/reservas/:id/liberar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true } }, "saida": "reserva", "permissao": "estoque" },
+      "expirarReservas": { "metodo": "POST", "caminho": "/reservas/expirar", "entrada": {}, "saida": "reserva", "lista": true, "permissao": "estoque" },
+      "abaixoDoMinimo": { "metodo": "GET", "caminho": "/estoque/abaixo-do-minimo", "entrada": {}, "saida": "saldo", "lista": true, "permissao": "estoque" }
+    },
+    "consome": ["pedido.confirmado"]
+  }
+}

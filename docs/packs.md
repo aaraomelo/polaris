@@ -93,3 +93,33 @@ Serviço próprio (banco próprio): provedor plugável, ciclo `autorizar → cap
 - Sem repasse/`payout`, chargeback e conciliação do original; credenciais do provedor ficam fora do banco (variáveis/segredos do ambiente).
 - A chamada ao provedor acontece dentro da transação do banco (com idempotência); com provedor lento isso segura uma conexão.
 - Venda em dinheiro no PDV usa `autorizar`+`capturar` com `sessaoCaixaId`; não passa pela saga de Vendas (que cobre os métodos eletrônicos).
+
+---
+
+## Estoque e Depósitos (`estoque`)
+Serviço próprio. Portado do `stock`/`warehouse` do erp-api, com as regras apertadas.
+
+| Entidade | O que guarda |
+|---|---|
+| `deposito` | `codigo` único, `padrao` (onde as reservas da saga procuram), `ativo` |
+| `saldo` | por `(itemId, depósito)`: `quantidade`, `reservado`, `custoMedio`, `minimo`/`maximo`. `itemId` = a variante, ou o produto se não há variante. **Só as operações movem o saldo** (API não cria nem grava quantidade; o gerente só edita mínimo/máximo) |
+| `movimento` | razão **append-only** com `delta` (± sinal), `custoUnitario`, `chave` de idempotência, referência (`pedido`, `inventario`…) |
+| `reserva` / `reservaItem` | reserva por pedido: `ativa`, `confirmada`, `liberada`, `recusada`, `divergente` |
+
+### Operações e regras (testadas)
+- `entrada` (custo médio **ponderado exato**, 4 casas), `saida` (`perda`, `devolucao_fornecedor`, `consumo`), `ajustar` (inventário: grava a diferença; recusa contagem abaixo do reservado), `transferir` (o custo viaja com a mercadoria). Todas **idempotentes pela `chave`**; a mesma chave com outro conteúdo é 409.
+- **Nunca saldo negativo** e **o reservado não se vende**: saída/transferência acima do `disponível = quantidade − reservado` é 422.
+- `reservar` é **idempotente por pedido**, **tudo ou nada** (se um item falta, a reserva é `recusada` com o motivo e nenhum item fica preso), soma itens repetidos, trava os saldos em **ordem fixa** e expira (`validadeMinutos`, padrão 30). `liberar` e `expirarReservas` (job) devolvem o reservado.
+- **Baixa por evento**: o Estoque consome `pedido.confirmado` (inbox, efeito uma vez) e a reserva vira saída `venda` ao custo médio do momento. Se a reserva expirou antes da confirmação, baixa direta quando há estoque livre; senão (ou sem reserva) marca a reserva como `divergente`, **sem tocar o estoque**, para o time resolver.
+- `abaixoDoMinimo` lista os saldos no limite. Papéis: `leitor` < `operador` < `gerente`; `sistema` (saga) só reserva/libera.
+- **Invariante testado**: a soma dos deltas do razão é igual ao saldo, e o reservado é a soma das reservas ativas.
+
+### Ligação com Vendas (`portaEstoque`)
+Sem estoque = recusa (`ok:false`, a saga compensa e o pagamento nem é tentado); 5xx/rede = lança (a saga repete). Provado com **três serviços em três bancos** (Vendas, Pagamentos, Estoque): compra feliz, sem estoque, pagamento recusado liberando a reserva, dois pedidos disputando o último item (um confirma, o outro falha, nada negativo) e estoque fora do ar.
+
+### Limites conhecidos
+- **Um depósito padrão atende as reservas**; alocação entre depósitos (pegar do que tiver) não existe ainda.
+- A **ordem de trava** (anti-deadlock) está implementada mas **não pode ser exercitada** no PGlite (uma conexão): o teste de mutação não a pega. Precisa de teste com Postgres real e concorrência.
+- Lote/validade/série, endereçamento e inventário cíclico agendado não foram portados.
+- A baixa depende do relay entregar `pedido.confirmado`; se o evento se perder, o pedido fica com reserva `ativa` até expirar (o job a libera, e a venda aparece como estoque que nunca baixou). Monitorar o atraso do outbox (métrica do relay).
+- Quantidades chegam como número JSON (`decimal` da API); mais de 4 casas é recusado.

@@ -37,3 +37,10 @@ export function proporcional(parte: string, total: string, base: string): string
 }
 export const subtrai = (a: string, b: string): string => normaliza(formata4(paraCentavos4(a) - paraCentavos4(b)))
 export const adiciona = (a: string, b: string): string => normaliza(formata4(paraCentavos4(a) + paraCentavos4(b)))
+
+/** custo médio ponderado ao dar entrada de `qe` a custo `cu` sobre `q` a custo `cm` (quantidades e custos em 4 casas) */
+export function custoMedio(q: string, cm: string, qe: string, cu: string): string {
+  const q0 = paraCentavos4(q), qn = paraCentavos4(qe)
+  if (q0 + qn <= 0n) return normaliza(cu)
+  return normaliza(formata4(meioParaCima(q0 * paraCentavos4(cm) + qn * paraCentavos4(cu), q0 + qn)))
+}
