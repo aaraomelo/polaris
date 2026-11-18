@@ -121,4 +121,12 @@ describe('API de autoria do Studio', () => {
     for (const ruim of [{}, { no: 5 }, { no: [] }, { no: pagina('p'), extra: 1 }, { no: pagina('p'), selecionado: "x'; --" }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim).slice(0, 40)).toBe(400)
     expect((await a2.inject({ method: 'POST', url: '/studio/previa', payload: { no: pagina('p') } })).statusCode).toBe(401); await a2.close()
   })
+  it('tema: valor de token que o CSS não aceita é 422 ANTES de gravar (cor, medida, modos); válidos passam', async () => {
+    const tema = (cor: object, extra: object = {}) => ({ kind: 'tema', id: 'validado', versao: '1.0.0', estatuto: 'publicado', spec: { tokens: { cor, ...extra } } })
+    const r = await put(A, tema({ primaria: 'azul', fundo: '#fff; } body { display:none' }, { espacamento: { m: '8 8' } })); expect(r.statusCode).toBe(422)
+    expect(r.json().erro.erros).toEqual(expect.arrayContaining([expect.stringContaining('tokens.cor.primaria'), expect.stringContaining('tokens.cor.fundo'), expect.stringContaining('tokens.espacamento.m')]))
+    const m = await put(A, { ...tema({ primaria: '#fff' }), spec: { tokens: { cor: { primaria: '#fff' } }, modos: { escuro: { cor: { fundo: 'red' } } } } }); expect(m.statusCode).toBe(422); expect(m.json().erro.erros[0]).toContain('modos.escuro.cor.fundo')
+    expect((await app.inject({ url: '/studio/historico/tema/validado', headers: h(A, 'ana') })).json().versoes).toEqual([]) // nada foi gravado
+    expect((await put(A, tema({ primaria: '#1d4ed8', texto: 'rgb(0,0,0)' }, { espacamento: { m: 8 }, raio: { g: '0.5rem' } }))).statusCode).toBe(201)
+  })
 })

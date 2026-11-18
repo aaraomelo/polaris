@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { regrasDePapeis, resolve } from '@polaris/acesso'
 import type { Registry } from '@polaris/schema'
-import { diffNo, validaTexto } from '@polaris/studio'
+import { diffNo, GRUPOS, validaTexto, validaToken, type Grupo } from '@polaris/studio'
 import type { criaArmazemDeNos, KindDoTenant } from './overrides'
 import { KINDS_DO_TENANT } from './overrides'
 
@@ -30,6 +30,18 @@ const ID = /^[a-z][A-Za-z0-9._/-]{0,127}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-
 const erro = (r: FastifyReply, s: number, codigo: string, mensagem: string, extra: object = {}) => r.status(s).send({ erro: { codigo, mensagem, ...extra } })
 const so = (o: unknown, chaves: string[]) => !!o && typeof o === 'object' && !Array.isArray(o) && Object.keys(o).every((k) => chaves.includes(k))
 const comentarioDe = (r: Record<string, unknown>) => ({ id: r.id as string, kind: r.kind as string, noId: r.no_id as string, ...(r.ancora ? { ancora: r.ancora as string } : {}), ...(r.versao !== null && r.versao !== undefined ? { versao: Number(r.versao) } : {}), autor: r.autor as string, texto: r.texto as string, criadoEm: new Date(r.criado_em as string).toISOString(), ...(r.resp_a ? { respondeA: r.resp_a as string } : {}), resolvido: r.resolvido === true })
+
+/** valores de token que o schema do tema aceita (texto livre) mas que o CSS não: cor e medida inválidas viram erro ANTES de gravar */
+export function errosDeTema(no: Record<string, unknown>): string[] {
+  const out: string[] = [], spec = (no.spec ?? {}) as { tokens?: Record<string, unknown>; modos?: Record<string, Record<string, unknown>> }
+  const confere = (base: string, t: unknown) => {
+    if (!t || typeof t !== 'object') return
+    for (const g of GRUPOS) { const grupo = (t as Record<string, unknown>)[g]; if (!grupo || typeof grupo !== 'object') continue
+      for (const [nome, v] of Object.entries(grupo as Record<string, unknown>)) { const e = validaToken(g as Grupo, nome, v); if (e) out.push(`${base}.${g}.${nome}: ${e}`) } }
+  }
+  confere('tokens', spec.tokens); for (const [m, t] of Object.entries(spec.modos ?? {})) confere(`modos.${m}`, t)
+  return out.slice(0, 20)
+}
 
 export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.addHook('onSend', async (_req, reply) => { reply.header('cache-control', 'no-store'); reply.header('x-content-type-options', 'nosniff') })
@@ -87,6 +99,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
       const atual = cab ? cab.seq : null
       if ((x.baseSeq ?? null) !== atual) { const h = atual === null ? [] : await o.armazem.historico(s.tenantId, a.kind, a.id, 1); return erro(reply, 409, 'conflito', 'este nó foi alterado por outra pessoa depois que você o abriu', { seqAtual: atual, ...(h[0] ? { autor: h[0].autor, criadoEm: h[0].criadoEm } : {}) }) }
     }
+    if (a.kind === 'tema') { const inv = errosDeTema(no); if (inv.length) return erro(reply, 422, 'no_invalido', 'o tema tem valores inválidos', { erros: inv }) }
     const r = await o.armazem.salva(s.tenantId, s.usuario, no, x.nota as string | undefined)
     return r.ok ? reply.status(r.novo ? 201 : 200).send({ versao: r.versao, novo: r.novo }) : erro(reply, 422, 'no_invalido', 'o nó não passou na validação', { erros: r.erros })
   })

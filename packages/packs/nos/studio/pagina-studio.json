@@ -1,0 +1,800 @@
+[
+ {
+  "kind": "dados",
+  "id": "studio.nos",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarNos"
+   },
+   "carregar": "auto",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.blocos",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarBlocos"
+   },
+   "carregar": "auto",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.abrir",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "abrirNo"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.salvar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "salvarNo"
+   },
+   "parametros": {
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "no": {
+     "tipo": "json",
+     "obrigatorio": true
+    },
+    "baseSeq": {
+     "tipo": "json"
+    },
+    "nota": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.previa",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "previsualizar"
+   },
+   "parametros": {
+    "no": {
+     "tipo": "json",
+     "obrigatorio": true
+    },
+    "tema": {
+     "tipo": "json"
+    },
+    "selecionado": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "pagina",
+  "id": "studio.app",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "rota": "/studio",
+   "titulo": "Polaris Studio",
+   "guarda": [],
+   "dados": {
+    "nos": "studio.nos",
+    "blocos": "studio.blocos",
+    "abrir": "studio.abrir",
+    "salvar": "studio.salvar",
+    "previa": "studio.previa"
+   },
+   "estado": {
+    "aberto": {
+     "tipo": "json"
+    },
+    "no": {
+     "tipo": "json"
+    },
+    "noSalvo": {
+     "tipo": "json"
+    },
+    "aviso": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "tipoAviso": {
+     "tipo": "texto",
+     "inicial": "neutro"
+    }
+   },
+   "raiz": {
+    "bloco": "layout/pilha",
+    "props": {
+     "gap": 12
+    },
+    "slots": {
+     "filhos": [
+      {
+       "bloco": "layout/linha",
+       "props": {
+        "gap": 8,
+        "alinha": "centro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Polaris Studio",
+           "nivel": 1
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "se": "estado.no",
+          "props": {
+           "texto": "Salvar",
+           "desabilitado": false
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "executar",
+             "dados": "salvar",
+             "args": {
+              "kind": "{estado.aberto.kind}",
+              "id": "{estado.aberto.id}",
+              "no": "{estado.no}",
+              "baseSeq": "{estado.aberto.seq}"
+             },
+             "depois": [
+              {
+               "acao": "definir",
+               "estado": "aberto",
+               "valor": "com(com(estado.aberto, [\"seq\"], resultado.versao.seq), [\"origem\"], \"tenant\")"
+              },
+              {
+               "acao": "definir",
+               "estado": "noSalvo",
+               "valor": "estado.no"
+              },
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"sucesso\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "\"Salvo como versão \" + resultado.versao.seq"
+              },
+              {
+               "acao": "executar",
+               "dados": "nos"
+              }
+             ],
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == \"base\" ? \"padrão da plataforma\" : \"salvo (v\" + estado.aberto.seq + \")\") : \"● alterações não salvas\") : \"\"}"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "feedback/alerta",
+       "se": "estado.aviso && estado.tipoAviso == \"sucesso\"",
+       "props": {
+        "tom": "sucesso"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "{estado.aviso}"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "feedback/alerta",
+       "se": "estado.aviso && estado.tipoAviso == \"erro\"",
+       "props": {
+        "tom": "erro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "{estado.aviso}"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "feedback/alerta",
+       "se": "estado.aviso && estado.tipoAviso == \"neutro\"",
+       "props": {
+        "tom": "neutro"
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "{estado.aviso}"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "props": {
+        "gap": 4
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Temas",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "props": {
+           "gap": 8,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "layout/linha",
+             "repetir": {
+              "cada": "filtra(nos.nos, n => n.kind == \"tema\")",
+              "como": "n",
+              "chave": "n.id"
+             },
+             "props": {
+              "gap": 4
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "nav/botao",
+                "props": {
+                 "texto": "{n.id} ●"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "executar",
+                   "dados": "abrir",
+                   "args": {
+                    "kind": "tema",
+                    "id": "{n.id}"
+                   },
+                   "depois": [
+                    {
+                     "acao": "definir",
+                     "estado": "aberto",
+                     "valor": "objeto([[\"kind\", \"tema\"], [\"id\", n.id], [\"origem\", resultado.origem], [\"seq\", resultado.seq]])"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "no",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "noSalvo",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "previa",
+                     "args": {
+                      "no": {
+                       "kind": "pagina",
+                       "id": "amostra",
+                       "versao": "1.0.0",
+                       "spec": {
+                        "rota": "/amostra",
+                        "raiz": {
+                         "bloco": "layout/pilha",
+                         "props": {
+                          "gap": 12
+                         },
+                         "slots": {
+                          "filhos": [
+                           {
+                            "bloco": "texto/titulo",
+                            "props": {
+                             "texto": "Título de exemplo",
+                             "nivel": 1
+                            }
+                           },
+                           {
+                            "bloco": "texto/paragrafo",
+                            "props": {
+                             "texto": "Um parágrafo com o texto principal do tema."
+                            }
+                           },
+                           {
+                            "bloco": "texto/pequeno",
+                            "props": {
+                             "texto": "Texto suave, menor."
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "props": {
+                             "texto": "Botão"
+                            }
+                           },
+                           {
+                            "bloco": "feedback/selo",
+                            "props": {
+                             "texto": "Sucesso",
+                             "tom": "sucesso"
+                            }
+                           },
+                           {
+                            "bloco": "feedback/selo",
+                            "props": {
+                             "texto": "Alerta",
+                             "tom": "alerta"
+                            }
+                           },
+                           {
+                            "bloco": "feedback/selo",
+                            "props": {
+                             "texto": "Erro",
+                             "tom": "erro"
+                            }
+                           }
+                          ]
+                         }
+                        }
+                       }
+                      },
+                      "tema": "{estado.no}"
+                     }
+                    }
+                   ],
+                   "emErro": [
+                    {
+                     "acao": "definir",
+                     "estado": "tipoAviso",
+                     "valor": "\"erro\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "erro"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "layout/linha",
+             "repetir": {
+              "cada": "nos.base.tema",
+              "como": "b",
+              "chave": "b"
+             },
+             "props": {
+              "gap": 4
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "nav/botao",
+                "props": {
+                 "texto": "{b} (padrão)"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "executar",
+                   "dados": "abrir",
+                   "args": {
+                    "kind": "tema",
+                    "id": "{b}"
+                   },
+                   "depois": [
+                    {
+                     "acao": "definir",
+                     "estado": "aberto",
+                     "valor": "objeto([[\"kind\", \"tema\"], [\"id\", b], [\"origem\", resultado.origem], [\"seq\", resultado.seq]])"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "no",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "noSalvo",
+                     "valor": "resultado.no"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "\"\""
+                    },
+                    {
+                     "acao": "executar",
+                     "dados": "previa",
+                     "args": {
+                      "no": {
+                       "kind": "pagina",
+                       "id": "amostra",
+                       "versao": "1.0.0",
+                       "spec": {
+                        "rota": "/amostra",
+                        "raiz": {
+                         "bloco": "layout/pilha",
+                         "props": {
+                          "gap": 12
+                         },
+                         "slots": {
+                          "filhos": [
+                           {
+                            "bloco": "texto/titulo",
+                            "props": {
+                             "texto": "Título de exemplo",
+                             "nivel": 1
+                            }
+                           },
+                           {
+                            "bloco": "texto/paragrafo",
+                            "props": {
+                             "texto": "Um parágrafo com o texto principal do tema."
+                            }
+                           },
+                           {
+                            "bloco": "texto/pequeno",
+                            "props": {
+                             "texto": "Texto suave, menor."
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "props": {
+                             "texto": "Botão"
+                            }
+                           },
+                           {
+                            "bloco": "feedback/selo",
+                            "props": {
+                             "texto": "Sucesso",
+                             "tom": "sucesso"
+                            }
+                           },
+                           {
+                            "bloco": "feedback/selo",
+                            "props": {
+                             "texto": "Alerta",
+                             "tom": "alerta"
+                            }
+                           },
+                           {
+                            "bloco": "feedback/selo",
+                            "props": {
+                             "texto": "Erro",
+                             "tom": "erro"
+                            }
+                           }
+                          ]
+                         }
+                        }
+                       }
+                      },
+                      "tema": "{estado.no}"
+                     }
+                    }
+                   ],
+                   "emErro": [
+                    {
+                     "acao": "definir",
+                     "estado": "tipoAviso",
+                     "valor": "\"erro\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "erro"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "se": "estado.no && estado.aberto.kind == \"tema\"",
+       "props": {
+        "gap": 8
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Tokens do tema {estado.aberto.id}",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "layout/grade",
+          "props": {
+           "colunas": 2,
+           "gap": 16
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "layout/pilha",
+             "props": {
+              "gap": 12
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "layout/pilha",
+                "repetir": {
+                 "cada": "filtra([\"cor\", \"espacamento\", \"raio\"], g => estado.no.spec.tokens[g])",
+                 "como": "g",
+                 "chave": "g"
+                },
+                "props": {
+                 "gap": 4
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/titulo",
+                   "props": {
+                    "texto": "{g}",
+                    "nivel": 4
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "repetir": {
+                    "cada": "entradas(estado.no.spec.tokens[g])",
+                    "como": "t",
+                    "chave": "t[0]"
+                   },
+                   "props": {
+                    "gap": 8,
+                    "alinha": "centro"
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "texto/rotulo",
+                      "props": {
+                       "texto": "{t[0]}"
+                      }
+                     },
+                     {
+                      "bloco": "entrada/texto",
+                      "props": {
+                       "valor": "{t[1]}",
+                       "rotulo": "{g} {t[0]}"
+                      },
+                      "eventos": {
+                       "aoMudar": [
+                        {
+                         "acao": "definir",
+                         "estado": "no",
+                         "valor": "com(estado.no, [\"spec\", \"tokens\", g, t[0]], g == \"cor\" ? evento : (numero(evento) ?? evento))"
+                        },
+                        {
+                         "acao": "executar",
+                         "dados": "previa",
+                         "args": {
+                          "no": {
+                           "kind": "pagina",
+                           "id": "amostra",
+                           "versao": "1.0.0",
+                           "spec": {
+                            "rota": "/amostra",
+                            "raiz": {
+                             "bloco": "layout/pilha",
+                             "props": {
+                              "gap": 12
+                             },
+                             "slots": {
+                              "filhos": [
+                               {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                 "texto": "Título de exemplo",
+                                 "nivel": 1
+                                }
+                               },
+                               {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                 "texto": "Um parágrafo com o texto principal do tema."
+                                }
+                               },
+                               {
+                                "bloco": "texto/pequeno",
+                                "props": {
+                                 "texto": "Texto suave, menor."
+                                }
+                               },
+                               {
+                                "bloco": "nav/botao",
+                                "props": {
+                                 "texto": "Botão"
+                                }
+                               },
+                               {
+                                "bloco": "feedback/selo",
+                                "props": {
+                                 "texto": "Sucesso",
+                                 "tom": "sucesso"
+                                }
+                               },
+                               {
+                                "bloco": "feedback/selo",
+                                "props": {
+                                 "texto": "Alerta",
+                                 "tom": "alerta"
+                                }
+                               },
+                               {
+                                "bloco": "feedback/selo",
+                                "props": {
+                                 "texto": "Erro",
+                                 "tom": "erro"
+                                }
+                               }
+                              ]
+                             }
+                            }
+                           }
+                          },
+                          "tema": "{estado.no}"
+                         }
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "layout/pilha",
+             "props": {
+              "gap": 4
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/titulo",
+                "props": {
+                 "texto": "Amostra",
+                 "nivel": 4
+                }
+               },
+               {
+                "bloco": "midia/quadro",
+                "props": {
+                 "titulo": "Amostra do tema",
+                 "html": "{previa.html}",
+                 "altura": 420
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+]
