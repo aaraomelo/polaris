@@ -10,7 +10,7 @@ import type { No } from './index'
 // As migrações rodam com um papel que ignora RLS (BYPASSRLS/superusuário): a tabela tem FORCE RLS, então o dono comum não enxergaria linha alguma.
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-type Ent = { campos: Record<string, Campo>; indices?: string[][] }
+type Ent = { campos: Record<string, Campo>; indices?: string[][]; unicos?: string[][] }
 type Spec = { entidades: Record<string, Ent> }
 export type OpcoesMigracao = {
   /** inclui no `up` as operações que PERDEM dados (padrão: não; elas só são listadas em `destrutivas`) */
@@ -117,10 +117,11 @@ export function migraSql(anterior: No, atual: No, opcoes: OpcoesMigracao = {}): 
       mudancas.push(`${nome}.${campo} removido`)
     }
     // índices, por NOME (o nome vem das colunas; renomear coluna troca o índice)
-    const nomesA = new Map((antiga.indices ?? []).map((cols) => [nomeIndice(nome, cols), cols])), nomesB = new Map((nova.indices ?? []).map((cols) => [nomeIndice(nome, cols), cols]))
-    for (const cols of nova.indices ?? []) for (const x of cols) if (!(x in nova.campos)) throw new EmissaoErro(`servico ${atual.id}: índice de '${nome}' usa campo inexistente '${x}'`)
+    const idx = (e: Ent) => new Map<string, { cols: string[]; unico: boolean }>([...(e.indices ?? []).map((cols) => [nomeIndice(nome, cols), { cols, unico: false }] as const), ...(e.unicos ?? []).map((cols) => [nomeIndice(nome, cols, true), { cols, unico: true }] as const)])
+    const nomesA = idx(antiga), nomesB = idx(nova)
+    for (const cols of [...(nova.indices ?? []), ...(nova.unicos ?? [])]) for (const x of cols) if (!(x in nova.campos)) throw new EmissaoErro(`servico ${atual.id}: índice de '${nome}' usa campo inexistente '${x}'`)
     for (const [n] of [...nomesA].sort()) if (!nomesB.has(n)) { indices.push(`DROP INDEX IF EXISTS ${esq}.${identSql(n)};`); mudancas.push(`índice removido: ${n}`) }
-    for (const [n, cols] of [...nomesB].sort()) if (!nomesA.has(n)) { indices.push(sqlIndice(atual.id, nome, cols)); mudancas.push(`índice novo: ${n}`) }
+    for (const [n, x] of [...nomesB].sort()) if (!nomesA.has(n)) { indices.push(sqlIndice(atual.id, nome, x.cols, x.unico)); mudancas.push(`${x.unico ? 'único' : 'índice'} novo: ${n}`) }
   }
   for (const nome of Object.keys(A).sort()) if (!(nome in B)) {
     perigosas.push(`DROP TABLE IF EXISTS ${esq}.${identSql(snake(nome))};`)

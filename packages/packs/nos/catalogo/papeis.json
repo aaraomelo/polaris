@@ -1,0 +1,8 @@
+[
+  { "kind": "papel", "id": "catalogo.leitor", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "regras": [ { "acoes": ["listar", "obter"], "sujeitos": ["catalogo.marca", "catalogo.unidade", "catalogo.categoria", "catalogo.produto", "catalogo.variante", "catalogo.imagem", "catalogo.tabelaPreco", "catalogo.itemTabelaPreco", "catalogo.cotacao"] } ] } },
+  { "kind": "papel", "id": "catalogo.vendedor", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "herda": ["catalogo.leitor"], "regras": [ { "acoes": ["cotar"], "sujeitos": ["catalogo.cotacao"] } ] } },
+  { "kind": "papel", "id": "catalogo.gerente", "versao": "1.0.0", "estatuto": "publicado",
+    "spec": { "herda": ["catalogo.vendedor"], "regras": [ { "acoes": ["criar", "atualizar", "remover"], "sujeitos": ["catalogo.marca", "catalogo.unidade", "catalogo.categoria", "catalogo.produto", "catalogo.variante", "catalogo.imagem", "catalogo.tabelaPreco", "catalogo.itemTabelaPreco"] } ] } }
+]

@@ -27,6 +27,17 @@
               }
             }
           },
+          "unicos": {
+            "type": "array",
+            "description": "chaves únicas POR TENANT (ex.: [[\"sku\"]]); violação vira 409",
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
           "crud": {
             "type": "object",
             "required": [

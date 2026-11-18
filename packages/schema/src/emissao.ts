@@ -183,12 +183,12 @@ export function colunaSql(nome: string, c: Campo): string {
   return partes.join(' ')
 }
 
-type EntidadeSql = { campos: Record<string, Campo>; indices?: string[][] }
+type EntidadeSql = { campos: Record<string, Campo>; indices?: string[][]; unicos?: string[][] }
 const RESERVADOS = ['id', 'tenant_id', 'criado_em', 'atualizado_em']
 
 /** Nome da FK composta de um campo. */
 export const nomeFk = (entidade: string, campo: string) => `${snake(entidade)}_${snake(campo)}_fk`
-export const nomeIndice = (entidade: string, campos: string[]) => `${snake(entidade)}_${campos.map(snake).join('_')}_idx`
+export const nomeIndice = (entidade: string, campos: string[], unico = false) => `${snake(entidade)}_${campos.map(snake).join('_')}_${unico ? 'uidx' : 'idx'}`
 
 /** O comando que cria a FK COMPOSTA (tenant_id, id): as checagens de integridade do Postgres IGNORAM a RLS, então um FK simples deixaria um tenant apontar para a linha de outro. */
 export function sqlFk(servico: string, entidade: string, campo: string, alvo: string): string[] {
@@ -279,12 +279,17 @@ export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, ent
     for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: índice de '${nome}' usa campo inexistente '${c}'`)
     tabela.push(sqlIndice(servico, nome, cols))
   }
+  for (const cols of ent.unicos ?? []) {
+    for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: único de '${nome}' usa campo inexistente '${c}'`)
+    tabela.push(sqlIndice(servico, nome, cols, true))
+  }
   tabela.push(...sqlRls(tab, snake(nome)))
   return { tabela, fks }
 }
 
-export const sqlIndice = (servico: string, entidade: string, cols: string[]): string =>
-  `CREATE INDEX IF NOT EXISTS ${identSql(nomeIndice(entidade, cols))} ON ${identSql(servico)}.${identSql(snake(entidade))} ("tenant_id", ${cols.map(snake).map(identSql).join(', ')});`
+/** `unico`: unicidade POR TENANT (a chave começa por tenant_id): dois tenants podem ter o mesmo SKU */
+export const sqlIndice = (servico: string, entidade: string, cols: string[], unico = false): string =>
+  `CREATE ${unico ? 'UNIQUE ' : ''}INDEX IF NOT EXISTS ${identSql(nomeIndice(entidade, cols, unico))} ON ${identSql(servico)}.${identSql(snake(entidade))} ("tenant_id", ${cols.map(snake).map(identSql).join(', ')});`
 
 function emiteSql(no: No): string {
   const spec = no.spec as { entidades: Record<string, EntidadeSql>; operacoes?: Record<string, { publica?: string[] }>; consome?: string[] }

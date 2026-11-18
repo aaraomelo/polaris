@@ -1,0 +1,66 @@
+{
+  "kind": "servico", "id": "catalogo", "versao": "1.0.0", "estatuto": "publicado",
+  "spec": {
+    "entidades": {
+      "marca": { "campos": { "nome": { "tipo": "texto", "obrigatorio": true } }, "unicos": [["nome"]], "crud": { "caminho": "/marcas" } },
+      "unidade": {
+        "campos": { "codigo": { "tipo": "texto", "obrigatorio": true }, "descricao": { "tipo": "texto", "obrigatorio": true }, "fracionada": { "tipo": "booleano", "padrao": false } },
+        "unicos": [["codigo"]], "crud": { "caminho": "/unidades" }
+      },
+      "categoria": {
+        "campos": { "nome": { "tipo": "texto", "obrigatorio": true }, "paiId": { "tipo": "uuid", "referencia": "categoria" }, "ordem": { "tipo": "inteiro", "padrao": 0 } },
+        "indices": [["paiId"]], "crud": { "caminho": "/categorias" }
+      },
+      "produto": {
+        "campos": {
+          "sku": { "tipo": "texto", "obrigatorio": true }, "gtin": { "tipo": "texto" }, "nome": { "tipo": "texto", "obrigatorio": true }, "descricao": { "tipo": "texto" },
+          "marcaId": { "tipo": "uuid", "referencia": "marca" }, "unidadeId": { "tipo": "uuid", "obrigatorio": true, "referencia": "unidade" }, "categoriaId": { "tipo": "uuid", "referencia": "categoria" },
+          "custo": { "tipo": "dinheiro", "obrigatorio": true, "padrao": "0" }, "preco": { "tipo": "dinheiro", "obrigatorio": true, "padrao": "0" },
+          "ativo": { "tipo": "booleano", "padrao": true }, "vendavel": { "tipo": "booleano", "padrao": true }, "controlaEstoque": { "tipo": "booleano", "padrao": true },
+          "temVariantes": { "tipo": "booleano", "padrao": false }, "fotoUrl": { "tipo": "texto" }
+        },
+        "unicos": [["sku"]], "indices": [["gtin"], ["categoriaId"], ["marcaId"]], "crud": { "caminho": "/produtos" }
+      },
+      "variante": {
+        "campos": {
+          "produtoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "produto" }, "sku": { "tipo": "texto", "obrigatorio": true }, "gtin": { "tipo": "texto" },
+          "opcao0": { "tipo": "texto", "descricao": "ex.: cor" }, "opcao1": { "tipo": "texto", "descricao": "ex.: tamanho" }, "opcao2": { "tipo": "texto" },
+          "custo": { "tipo": "dinheiro", "descricao": "ausente = herda do produto" }, "preco": { "tipo": "dinheiro", "descricao": "ausente = herda do produto" },
+          "fotoUrl": { "tipo": "texto" }, "ativo": { "tipo": "booleano", "padrao": true }, "posicao": { "tipo": "inteiro", "padrao": 0 }
+        },
+        "unicos": [["sku"]], "indices": [["produtoId"], ["gtin"]], "crud": { "caminho": "/variantes" }
+      },
+      "imagem": {
+        "campos": { "produtoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "produto" }, "url": { "tipo": "texto", "obrigatorio": true }, "posicao": { "tipo": "inteiro", "padrao": 0 } },
+        "unicos": [["produtoId", "url"]], "crud": { "caminho": "/imagens" }
+      },
+      "tabelaPreco": {
+        "campos": { "nome": { "tipo": "texto", "obrigatorio": true }, "ativo": { "tipo": "booleano", "padrao": true }, "iniciaEm": { "tipo": "data" }, "terminaEm": { "tipo": "data" } },
+        "crud": { "caminho": "/tabelas-preco" }
+      },
+      "itemTabelaPreco": {
+        "campos": {
+          "tabelaPrecoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "tabelaPreco" }, "produtoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "produto" },
+          "varianteId": { "tipo": "uuid", "referencia": "variante", "descricao": "ausente = vale para o produto e para as variantes sem preço próprio na tabela" },
+          "preco": { "tipo": "dinheiro", "obrigatorio": true }, "qtdMinima": { "tipo": "decimal", "descricao": "ausente = qualquer quantidade" }
+        },
+        "indices": [["tabelaPrecoId"], ["produtoId"]], "crud": { "caminho": "/itens-tabela-preco" }
+      },
+      "cotacao": {
+        "campos": {
+          "produtoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "produto" }, "varianteId": { "tipo": "uuid", "referencia": "variante" },
+          "quantidade": { "tipo": "decimal", "obrigatorio": true }, "precoUnitario": { "tipo": "dinheiro", "obrigatorio": true },
+          "origem": { "tipo": "texto", "obrigatorio": true, "descricao": "base | tabela" }, "tabelaPrecoId": { "tipo": "uuid", "referencia": "tabelaPreco" }
+        },
+        "indices": [["produtoId"]], "crud": { "caminho": "/cotacoes", "operacoes": ["listar", "obter"] }
+      }
+    },
+    "operacoes": {
+      "cotar": {
+        "metodo": "POST", "caminho": "/cotar", "saida": "cotacao",
+        "entrada": { "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" }, "quantidade": { "tipo": "decimal", "obrigatorio": true } },
+        "permissao": "cotar"
+      }
+    }
+  }
+}
