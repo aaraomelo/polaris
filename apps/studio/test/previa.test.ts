@@ -35,6 +35,7 @@ describe('/studio/previa', () => {
   })
   it('HTML no texto sai escapado e o id perigoso não vira CSS', async () => {
     const r = await previa({ no: pagina('<img src=x onerror=alert(1)><script>1</script>'), selecionado: 'titulo' }); expect(r.html).not.toContain('<img src=x'); expect(r.html).toContain('&lt;img src=x')
-    const no = pagina('x'); (no.spec.raiz.slots.filhos[0] as any).id = 'a}body{display:none'; expect((await previa({ no, selecionado: 'a' })).html).not.toContain('a}body{display:none')
+    expect((await previa({ no: pagina('x'), selecionado: 'a}body{display:none' })).status).toBe(400) // o id que vira CSS é validado na borda
+    const solto = (await import('../src/preview')).geraPreview(pagina('x'), [], 'a}body{display:none'); expect(solto.ok && solto.html.split('</style>')[0]).not.toContain('a}body') // e, se chegar à função, não entra no CSS
   })
 })
