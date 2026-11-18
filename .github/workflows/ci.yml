@@ -70,6 +70,8 @@ jobs:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-${{ runner.os }}-
+      - name: Poppler (a paridade HTML × PDF rasteriza o PDF; o Chrome já vem na imagem)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
       - name: Instalar (lockfile congelado, sem scripts de pós-instalação)
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: O próprio workflow é seguro
