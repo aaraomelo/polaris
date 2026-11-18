@@ -60,7 +60,7 @@ describe('validação do workflow de CI', () => {
     expect((real.match(/timeout-minutes:/g) ?? []).length).toBe((real.match(/^  [a-z-]+:\n    name:/gm) ?? []).length)
   })
   const muta = (de: string | RegExp, para: string) => validaWorkflow(real.replace(de, para), scripts)
-  it('PEGA: ação por tag em vez de SHA', () => { expect(muta(/actions\/setup-node@[0-9a-f]{40} # v4.4.0/, 'actions/setup-node@v4').join('|')).toMatch(/não está fixada por SHA/) })
+  it('PEGA: ação por tag em vez de SHA', () => { expect(muta(/actions\/setup-node@[0-9a-f]{40} # v\d+\.\d+\.\d+/, 'actions/setup-node@v4').join('|')).toMatch(/não está fixada por SHA/) })
   it('PEGA: sem permissions de topo; permissions de escrita', () => {
     expect(muta('permissions:\n  contents: read\n', '').join('|')).toMatch(/falta `permissions:`/)
     expect(muta('  contents: read\n', '  contents: write\n').join('|')).toMatch(/somente leitura/)

@@ -9,7 +9,7 @@
     "tipos": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^22.10.5",
+    "@types/node": "^26.6.6",
     "typescript": "~5.6.3",
     "vitest": "^2.1.8",
     "fastify": "^5.2.0"
