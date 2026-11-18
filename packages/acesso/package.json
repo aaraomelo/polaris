@@ -11,7 +11,7 @@
   "dependencies": {
     "@polaris/schema": "workspace:*",
     "jose": "^5.9.6",
-    "@ucast/mongo2js": "^1.4.1",
+    "@ucast/mongo2js": "^2.0.0",
     "@casl/ability": "^6.7.2"
   },
   "devDependencies": {
