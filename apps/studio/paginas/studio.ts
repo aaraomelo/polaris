@@ -57,7 +57,7 @@ const seletorDeNos = (kind: 'tema' | 'pagina'): Inst => pilha([
   titulo(kind === 'tema' ? 'Temas' : 'Páginas', 3),
   linha([
     P('layout/linha', { repetir: { cada: `filtra(nos.nos, n => n.kind == ${q(kind)})`, como: 'n', chave: 'n.id' }, props: { gap: 4 }, filhos: [botao('{n.id} ●', [abrir(kind, 'n.id')])] }),
-    P('layout/linha', { repetir: { cada: `nos.base.${kind}`, como: 'b', chave: 'b' }, props: { gap: 4 }, filhos: [botao('{b} (padrão)', [abrir(kind, 'b')])] }),
+    P('layout/linha', { repetir: { cada: `filtra(nos.base.${kind}, b => !comeca(b, "studio."))`, como: 'b', chave: 'b' }, props: { gap: 4 }, filhos: [botao('{b} (padrão)', [abrir(kind, 'b')])] }),
   ], { props: { gap: 8 } }),
 ], { gap: 4 })
 

@@ -1042,7 +1042,7 @@
             {
              "bloco": "layout/linha",
              "repetir": {
-              "cada": "nos.base.pagina",
+              "cada": "filtra(nos.base.pagina, b => !comeca(b, \"studio.\"))",
               "como": "b",
               "chave": "b"
              },
@@ -1324,7 +1324,7 @@
             {
              "bloco": "layout/linha",
              "repetir": {
-              "cada": "nos.base.tema",
+              "cada": "filtra(nos.base.tema, b => !comeca(b, \"studio.\"))",
               "como": "b",
               "chave": "b"
              },

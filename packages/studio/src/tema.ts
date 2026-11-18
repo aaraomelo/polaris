@@ -1,5 +1,18 @@
 import { contraste } from '@polaris/engine/tema'
-import { defineValor } from './formulario'
+
+const PROIBIDOS = new Set(['__proto__', 'constructor', 'prototype'])
+/** devolve NOVAS props com o valor trocado; `undefined` remove a chave e poda objetos que ficaram vazios. Não muta a entrada; recusa chaves perigosas. */
+function defineValor(props: Record<string, unknown> | undefined, caminho: readonly string[], valor: unknown): Record<string, unknown> {
+  if (!caminho.length || caminho.some((k) => PROIBIDOS.has(k))) throw new Error('caminho inválido')
+  const aplica = (obj: unknown, i: number): unknown => {
+    const atual = obj !== null && typeof obj === 'object' && !Array.isArray(obj) ? (obj as Record<string, unknown>) : {}
+    const k = caminho[i]!, copia: Record<string, unknown> = { ...atual }
+    if (i === caminho.length - 1) { if (valor === undefined) delete copia[k]; else copia[k] = valor }
+    else { const filho = aplica(copia[k], i + 1); if (filho === undefined) delete copia[k]; else copia[k] = filho }
+    return Object.keys(copia).length ? copia : undefined
+  }
+  return (aplica(props ?? {}, 0) as Record<string, unknown> | undefined) ?? {}
+}
 
 // Modelo do EDITOR DE TEMA: tokens por grupo, modos (escuro…) como sobrescritas, validação de valores e auditoria de contraste (WCAG) — tudo sobre o nó `tema` puro, sem UI.
 export type Tokens = { cor?: Record<string, string>; tipografia?: Record<string, unknown>; espacamento?: Record<string, number | string>; raio?: Record<string, number | string> }
