@@ -12,3 +12,7 @@ Formato curto: **Contexto**, **Decisão**, **Consequências** (inclusive o que s
 | [0006](0006-dinheiro-exato.md) | Dinheiro é texto decimal exato, nunca float | aceito |
 | [0007](0007-eventos-outbox.md) | Eventos entre serviços por outbox transacional, ao menos uma vez e inbox idempotente | aceito |
 | [0008](0008-acesso-negar-vence.md) | Autorização por papéis declarativos; negar vence; falha fechada | aceito |
+| [0009](0009-backends-de-computacao.md) | Kernels: um IR, quatro alvos (js, wasm, glsl, ptx), com paridade | aceito |
+| [0010](0010-linguagem-de-expressoes.md) | Linguagem de expressões própria, da família do CEL, total | aceito |
+| [0011](0011-schema-u-do-tiffany.md) | Do Schema U do Tiffany entra o canônico; a teoria fica lá | aceito |
+| [0012](0012-fastify-nao-nestjs.md) | Serviços gerados em Fastify, sem NestJS | aceito |
