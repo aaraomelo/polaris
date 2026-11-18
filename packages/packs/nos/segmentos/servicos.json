@@ -1,0 +1,68 @@
+{
+ "kind": "pack",
+ "id": "servicos",
+ "versao": "1.0.0",
+ "estatuto": "publicado",
+ "spec": {
+  "nome": "Serviços e oficina",
+  "descricao": "Agenda, orçamento, ordem de serviço e garantia.",
+  "segmento": "servicos",
+  "ordem": 20,
+  "inclui": {
+   "servicos": [
+    "servicos",
+    "estoque"
+   ],
+   "papeis": [
+    "servicos.tecnico",
+    "servicos.atendente",
+    "servicos.gerente",
+    "estoque.leitor",
+    "estoque.operador",
+    "estoque.gerente"
+   ]
+  },
+  "papeisDono": [
+   "servicos.gerente",
+   "estoque.gerente"
+  ],
+  "depende": [
+   "base"
+  ],
+  "sementes": [
+   {
+    "servico": "estoque",
+    "entidade": "deposito",
+    "dados": {
+     "codigo": "PRINCIPAL",
+     "nome": "Depósito principal",
+     "padrao": true
+    }
+   },
+   {
+    "servico": "servicos",
+    "entidade": "termoGarantia",
+    "dados": {
+     "nome": "Garantia padrão (90 dias)",
+     "dias": 90,
+     "texto": "Garantia de 90 dias sobre o serviço executado, contados da entrega."
+    }
+   }
+  ],
+  "landing": {
+   "titulo": "{{nome}}",
+   "subtitulo": "Agende seu atendimento e acompanhe o orçamento.",
+   "chamada": "Agendar",
+   "destaques": [
+    {
+     "titulo": "Orçamento sem surpresa",
+     "texto": "Você aprova antes de começarmos."
+    },
+    {
+     "titulo": "Garantia",
+     "texto": "Todo serviço tem garantia."
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,54 @@
+{
+ "kind": "pack",
+ "id": "alimentos",
+ "versao": "1.0.0",
+ "estatuto": "publicado",
+ "spec": {
+  "nome": "Alimentos e delivery",
+  "descricao": "Cardápio, comanda por mesa, cozinha e entrega.",
+  "segmento": "alimentos",
+  "ordem": 30,
+  "inclui": {
+   "servicos": [
+    "alimentos"
+   ],
+   "papeis": [
+    "alimentos.cozinha",
+    "alimentos.garcom",
+    "alimentos.caixa",
+    "alimentos.gerente"
+   ]
+  },
+  "papeisDono": [
+   "alimentos.gerente"
+  ],
+  "depende": [
+   "base"
+  ],
+  "sementes": [
+   {
+    "servico": "alimentos",
+    "entidade": "categoriaCardapio",
+    "dados": {
+     "nome": "Cardápio",
+     "ordem": 0
+    }
+   }
+  ],
+  "landing": {
+   "titulo": "{{nome}}",
+   "subtitulo": "Peça no salão ou receba em casa.",
+   "chamada": "Ver cardápio",
+   "destaques": [
+    {
+     "titulo": "Direto da cozinha",
+     "texto": "Seu pedido vai para o preparo na hora."
+    },
+    {
+     "titulo": "Entrega",
+     "texto": "Acompanhe a saída do pedido."
+    }
+   ]
+  }
+ }
+}

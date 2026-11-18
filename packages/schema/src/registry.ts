@@ -202,6 +202,15 @@ export class Registry {
         ;(s.paginas ?? []).forEach((id: string, n: number) => refs.push({ kind: 'pagina', id, caminho: `/spec/paginas/${n}` }))
         for (const k of ['paginaNegado', 'paginaNaoEncontrada']) if (s[k]) refs.push({ kind: 'pagina', id: s[k], caminho: `/spec/${k}` })
         break
+      case 'pack':
+        ;(s.depende ?? []).forEach((id: string, n: number) => refs.push({ kind: 'pack', id, caminho: `/spec/depende/${n}` }))
+        ;(s.conflita ?? []).forEach((id: string, n: number) => refs.push({ kind: 'pack', id, caminho: `/spec/conflita/${n}` }))
+        ;(s.inclui?.servicos ?? []).forEach((id: string, n: number) => refs.push({ kind: 'servico', id, caminho: `/spec/inclui/servicos/${n}` }))
+        ;(s.inclui?.papeis ?? []).forEach((id: string, n: number) => refs.push({ kind: 'papel', id, caminho: `/spec/inclui/papeis/${n}` }))
+        ;(s.inclui?.paginas ?? []).forEach((id: string, n: number) => refs.push({ kind: 'pagina', id, caminho: `/spec/inclui/paginas/${n}` }))
+        if (s.inclui?.tema) refs.push({ kind: 'tema', id: s.inclui.tema, caminho: '/spec/inclui/tema' })
+        ;(s.papeisDono ?? []).forEach((id: string, n: number) => refs.push({ kind: 'papel', id, caminho: `/spec/papeisDono/${n}` }))
+        break
       case 'kernel':
         ;(s.emissoes ?? []).forEach((e: any, n: number) => {
           if (e.backend) refs.push({ kind: 'backend', id: e.backend, caminho: `/spec/emissoes/${n}/backend` })

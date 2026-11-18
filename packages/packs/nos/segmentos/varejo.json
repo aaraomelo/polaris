@@ -1,0 +1,72 @@
+{
+ "kind": "pack",
+ "id": "varejo",
+ "versao": "1.0.0",
+ "estatuto": "publicado",
+ "spec": {
+  "nome": "Varejo",
+  "descricao": "Loja física e online: catálogo, carrinho e checkout, estoque e pagamentos.",
+  "segmento": "varejo",
+  "ordem": 10,
+  "inclui": {
+   "servicos": [
+    "catalogo",
+    "vendas",
+    "estoque"
+   ],
+   "papeis": [
+    "catalogo.leitor",
+    "catalogo.vendedor",
+    "catalogo.gerente",
+    "vendas.operador",
+    "vendas.gerente",
+    "estoque.leitor",
+    "estoque.operador",
+    "estoque.gerente"
+   ]
+  },
+  "papeisDono": [
+   "catalogo.gerente",
+   "vendas.gerente",
+   "estoque.gerente"
+  ],
+  "padrao": true,
+  "depende": [
+   "base"
+  ],
+  "sementes": [
+   {
+    "servico": "estoque",
+    "entidade": "deposito",
+    "dados": {
+     "codigo": "PRINCIPAL",
+     "nome": "Depósito principal",
+     "padrao": true
+    }
+   },
+   {
+    "servico": "catalogo",
+    "entidade": "unidade",
+    "dados": {
+     "codigo": "UN",
+     "descricao": "Unidade"
+    }
+   }
+  ],
+  "landing": {
+   "titulo": "{{nome}}",
+   "subtitulo": "Compre online e receba em casa ou retire na loja.",
+   "chamada": "Ver produtos",
+   "destaques": [
+    {
+     "titulo": "Pague como preferir",
+     "texto": "Pix, cartão e dinheiro."
+    },
+    {
+     "titulo": "Estoque em tempo real",
+     "texto": "Só aparece o que está disponível."
+    }
+   ]
+  }
+ }
+}

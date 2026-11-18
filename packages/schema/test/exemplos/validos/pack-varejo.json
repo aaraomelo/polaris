@@ -1,0 +1,18 @@
+{
+  "kind": "pack",
+  "id": "varejo",
+  "versao": "1.0.0",
+  "spec": {
+    "nome": "Varejo",
+    "descricao": "Loja física e online: catálogo, vendas, pagamentos e estoque.",
+    "segmento": "varejo",
+    "padrao": true,
+    "ordem": 10,
+    "depende": ["base"],
+    "conflita": ["atacado"],
+    "inclui": { "servicos": ["catalogo", "vendas"], "papeis": ["catalogo.gerente"], "tema": "claro" },
+    "papeisDono": ["catalogo.gerente"],
+    "sementes": [{ "servico": "estoque", "entidade": "deposito", "dados": { "codigo": "LOJA", "nome": "Loja", "padrao": true }, "guarda": "deposito" }],
+    "landing": { "titulo": "{{nome}}", "subtitulo": "Compre online e retire na loja.", "chamada": "Ver produtos", "destaques": [{ "titulo": "Entrega rápida", "texto": "Receba em casa." }] }
+  }
+}

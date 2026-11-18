@@ -4,6 +4,11 @@ import { fileURLToPath } from 'node:url'
 
 export { resolvePreco, operacoesCatalogo, type Candidato, type Preco } from './catalogo'
 export { adiciona, compara, custoMedio, divideConta, multiplica, normaliza, paraCentavos4, percentual, proporcional, soma, subtrai } from './dinheiro'
+export { ALIAS_RESERVADOS, planoDeCadastro, segmentosDisponiveis, validaAlias, type Landing, type PedidoCadastro, type Plano, type SegmentoPublico, type Semente } from './onboarding'
+export { criaSemeador, provisiona, type Diretorio, type Portas as PortasCadastro, type Resultado as ResultadoCadastro, type Status as StatusTenant } from './provisiona'
+export { rotasCadastro, type Limite, type OpcoesCadastro } from './cadastro-http'
+export { DDL_DIRETORIO, diretorioSql } from './diretorio'
+export { registroDaPlataforma } from './plataforma'
 export { criaAlimentos } from './alimentos'
 export { criaServicos } from './servicos'
 export { criaEstoque, portaEstoque, type ClienteEstoque } from './estoque'
@@ -11,7 +16,7 @@ export { criaPagamentos, portaPagamento, provedorInterno, type ClientePagamentos
 export { criaVendas, type Cotacao, type ItemSaga, type OpcoesVendas, type PedidoSaga, type Portas, type Resultado } from './vendas'
 
 /** Os nós (JSON) de um pack, prontos para `registry.registra`. */
-export function nosDoPack(pack: 'catalogo' | 'vendas' | 'pagamentos' | 'estoque' | 'servicos' | 'alimentos'): unknown[] {
+export function nosDoPack(pack: 'catalogo' | 'vendas' | 'pagamentos' | 'estoque' | 'servicos' | 'alimentos' | 'segmentos'): unknown[] {
   const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'nos', pack)
   return readdirSync(dir).filter((f) => f.endsWith('.json')).sort().flatMap((f) => { const j = JSON.parse(readFileSync(join(dir, f), 'utf8')) as unknown; return Array.isArray(j) ? j : [j] })
 }

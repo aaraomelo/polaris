@@ -182,3 +182,35 @@ Pack novo (não há original no tiffany): restaurante, lanchonete, bar e deliver
 - A cobrança é feita pelo Pagamentos a partir do evento; a ligação `comanda.fechada` → `autorizar` não está automatizada neste pack (hoje é uma chamada do caixa/PDV).
 - Garçons compartilham as comandas da casa (não há escopo por garçom).
 - A fila do KDS é consulta (polling); não há push em tempo real.
+
+---
+
+## ModulePack por segmento e cadastro self-service
+O **ModulePack** é um nó declarativo, `kind: pack` (schema `polaris://kind/pack/v1`): diz quais serviços, papéis, páginas e tema um segmento traz, que papéis o **dono** recebe, quais **sementes** (dados iniciais) criar e como é a **landing** inicial. Tudo é dado: um segmento novo é um JSON, sem código. Os de fábrica estão em `packages/packs/nos/segmentos/` (`varejo`, `servicos`, `alimentos`, mais `base`, oculto, que entra como dependência com Pagamentos e Caixa).
+
+### O nó `pack`
+`nome`, `segmento`, `ordem`, `padrao` (pré-marcado), `oculto`, `depende` (entram antes), `conflita`, `inclui {servicos, papeis, paginas, tema}`, `papeisDono`, `sementes [{servico, entidade, dados, guarda}]`, `landing {titulo, subtitulo, chamada, destaques}` (`{{nome}}` vira o nome do negócio). `validaEstrutura` confere o que o JSON Schema não alcança, **na hora de publicar o pack** (não no cadastro de um cliente): sementes contra o contrato do serviço (entidade, campos, obrigatórios), `$guarda` só de semente anterior, guarda repetida, serviço da semente fora do pack e das dependências, e ciclo de dependência.
+
+### O cadastro (`/publico/*`)
+1. `GET /publico/segmentos` e `GET /publico/alias/:alias` (formato, reservado, em uso, livre).
+2. `POST /publico/cadastro` → `planoDeCadastro` (**puro e determinístico**) produz o plano: fecho de dependências, módulos, papéis do dono, sementes (a repetida entre packs vale uma vez), landing e o nó `tenant`. O **1º segmento escolhido** define o segmento do tenant.
+3. `provisiona` executa o plano **por etapas gravadas no diretório da plataforma** (`plataforma.tenant/etapa/modulo`, sem RLS: dado da plataforma, não de tenant): módulos → convite do dono → sementes → landing → `ativo`. É **retomável**: repetir a mesma `chave` continua da etapa que faltou, sem duplicar o que já foi feito (inclusive o id guardado por `$guarda`). Enquanto não terminar, o tenant fica `provisionando`/`falhou`, nunca `ativo`.
+4. As sementes entram **pelo CRUD do próprio serviço, com os papéis do dono**: passam por validação, RLS e permissão como qualquer cliente (e provam que os papéis do pack bastam para o dono trabalhar).
+
+### Segurança do cadastro público
+- **Sem senha na plataforma**: o dono é **convidado** no provedor de identidade (JWT externo). Nenhuma credencial é recebida, guardada nem devolvida.
+- **Alias**: 3–30, minúsculas/números/hífen, sem hífen nas pontas, **sem `--`** (punycode/homógrafos), **lista de reservados** (`admin`, `api`, `login`, `pagamentos`…); corrida pelo mesmo alias é decidida pelo índice único.
+- **Idempotência**: a `chave` é única. Mesma chave + mesmo alias + mesmo e-mail = o mesmo cadastro; **a mesma chave com outro alias ou e-mail nunca devolve o tenant alheio** (responde como ocupado).
+- **Abuso**: limite de taxa por IP (cadastro custa 10 fichas, consulta de alias 2, para dificultar enumeração), corpo **estrito** (campo desconhecido é 400), verificação humana opcional (captcha) e, quando ligada, obrigatória.
+- **Nome**: espaços normalizados, caracteres de controle e override bidirecional recusados; é **dado** (`{{nome}}` no nome não é reinterpretado; quem exibe escapa).
+- **Respostas**: sem id interno do tenant, sem mensagem de erro interna (503 genérico, retomável), `cache-control: no-store`.
+
+### Limites conhecidos
+- A **habilitação por tenant no gateway** (`plataforma.modulo`) está gravada, mas o gateway ainda não a consulta: um tenant enxerga os serviços que o ambiente expõe. E o gateway/serviços ainda **não recusam tenant `provisionando`/`suspenso`** (o status existe no diretório).
+- O **convite do dono** é uma porta (`identidade.convida`): falta o adaptador do provedor de identidade escolhido. O captcha (`verificaHumano`) idem.
+- Sem **planos/cobrança** da plataforma, **troca/ativação de segmento depois do cadastro** e **desativação** de tenant (o `cancelado` existe, não há rota).
+- O cadastro não verifica o **e-mail** (o convite é que confirma): um e-mail alheio pode ser usado para abrir um tenant; o alias fica reservado até o convite expirar (sem rotina de limpeza ainda).
+- A landing é gerada como dado; a **página** que a exibe (no engine) é o card seguinte do Studio.
+
+### Defeito achado e corrigido ao testar o cadastro de ponta a ponta
+A listagem do CRUD aplicava o **`padrao` dos campos como filtro** (`padrao = false AND ativo = true`), então o **depósito padrão** recém-criado (`padrao: true`) e qualquer registro inativo **sumiam da lista**. Os testes dos packs não viam porque criavam dados com os valores padrão. A correção está em `rotasDe` (o filtro não herda o padrão), com teste de regressão no schema.

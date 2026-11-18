@@ -23,7 +23,8 @@
         "documento",
         "tenant",
         "backend",
-        "papel"
+        "papel",
+        "pack"
       ]
     },
     "id": {
@@ -318,6 +319,25 @@
         "properties": {
           "spec": {
             "$ref": "polaris://kind/papel/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "pack"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/pack/v1"
           }
         }
       }

@@ -1,0 +1,58 @@
+// polaris: pack varejo@1.0.0
+export const kind = "pack";
+export const id = "varejo";
+export const versao = "1.0.0";
+export default {
+  "id": "varejo",
+  "kind": "pack",
+  "spec": {
+    "conflita": [
+      "atacado"
+    ],
+    "depende": [
+      "base"
+    ],
+    "descricao": "Loja física e online: catálogo, vendas, pagamentos e estoque.",
+    "inclui": {
+      "papeis": [
+        "catalogo.gerente"
+      ],
+      "servicos": [
+        "catalogo",
+        "vendas"
+      ],
+      "tema": "claro"
+    },
+    "landing": {
+      "chamada": "Ver produtos",
+      "destaques": [
+        {
+          "texto": "Receba em casa.",
+          "titulo": "Entrega rápida"
+        }
+      ],
+      "subtitulo": "Compre online e retire na loja.",
+      "titulo": "{{nome}}"
+    },
+    "nome": "Varejo",
+    "ordem": 10,
+    "padrao": true,
+    "papeisDono": [
+      "catalogo.gerente"
+    ],
+    "segmento": "varejo",
+    "sementes": [
+      {
+        "dados": {
+          "codigo": "LOJA",
+          "nome": "Loja",
+          "padrao": true
+        },
+        "entidade": "deposito",
+        "guarda": "deposito",
+        "servico": "estoque"
+      }
+    ]
+  },
+  "versao": "1.0.0"
+};

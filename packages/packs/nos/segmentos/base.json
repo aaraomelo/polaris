@@ -1,0 +1,54 @@
+{
+ "kind": "pack",
+ "id": "base",
+ "versao": "1.0.0",
+ "estatuto": "publicado",
+ "spec": {
+  "nome": "Base financeira",
+  "descricao": "Pagamentos e caixa: entra com qualquer segmento.",
+  "segmento": "outro",
+  "ordem": 0,
+  "inclui": {
+   "servicos": [
+    "pagamentos"
+   ],
+   "papeis": [
+    "pagamentos.sistema",
+    "pagamentos.caixa",
+    "pagamentos.financeiro"
+   ]
+  },
+  "papeisDono": [
+   "pagamentos.financeiro",
+   "pagamentos.caixa"
+  ],
+  "oculto": true,
+  "sementes": [
+   {
+    "servico": "pagamentos",
+    "entidade": "configPagamento",
+    "dados": {
+     "metodo": "dinheiro",
+     "provedor": "interno",
+     "taxaPercentual": 0
+    }
+   },
+   {
+    "servico": "pagamentos",
+    "entidade": "configPagamento",
+    "dados": {
+     "metodo": "vale",
+     "provedor": "interno",
+     "taxaPercentual": 0
+    }
+   },
+   {
+    "servico": "pagamentos",
+    "entidade": "caixa",
+    "dados": {
+     "nome": "Caixa 1"
+    }
+   }
+  ]
+ }
+}

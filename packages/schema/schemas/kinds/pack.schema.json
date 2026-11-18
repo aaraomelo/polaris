@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/pack/v1",
+  "title": "Pack de módulos (ModulePack por segmento)",
+  "required": [
+    "nome",
+    "segmento",
+    "inclui"
+  ],
+  "properties": {
+    "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "descricao": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "segmento": {
+      "enum": [
+        "varejo",
+        "servicos",
+        "alimentos",
+        "educacao",
+        "saude",
+        "outro"
+      ],
+      "description": "segmento de mercado que o pack atende (define o tenant principal)"
+    },
+    "padrao": {
+      "type": "boolean",
+      "default": false,
+      "description": "vem pré-marcado no cadastro"
+    },
+    "ordem": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "posição na lista do cadastro"
+    },
+    "depende": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "polaris://comum/v1#/$defs/identificador"
+      },
+      "description": "packs que este exige (entram antes)"
+    },
+    "conflita": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "polaris://comum/v1#/$defs/identificador"
+      },
+      "description": "packs que não podem coexistir com este"
+    },
+    "inclui": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "servicos": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "polaris://comum/v1#/$defs/identificador"
+          },
+          "description": "nós `servico` que o tenant passa a ter (cada um é migrado e roteado)"
+        },
+        "papeis": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "polaris://comum/v1#/$defs/identificador"
+          },
+          "description": "nós `papel` disponíveis ao tenant"
+        },
+        "paginas": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "polaris://comum/v1#/$defs/identificador"
+          }
+        },
+        "tema": {
+          "$ref": "polaris://comum/v1#/$defs/identificador"
+        }
+      }
+    },
+    "papeisDono": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "polaris://comum/v1#/$defs/identificador"
+      },
+      "description": "papéis que o DONO do tenant recebe ao entrar neste pack"
+    },
+    "sementes": {
+      "type": "array",
+      "maxItems": 100,
+      "description": "dados iniciais criados no tenant (pelo CRUD do serviço, na ordem)",
+      "items": {
+        "type": "object",
+        "required": [
+          "servico",
+          "entidade",
+          "dados"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "servico": {
+            "$ref": "polaris://comum/v1#/$defs/identificador"
+          },
+          "entidade": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9]*$"
+          },
+          "dados": {
+            "type": "object"
+          },
+          "guarda": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9]*$",
+            "description": "nome com que o id criado fica disponível às sementes seguintes (`$guarda.nome` em um valor)"
+          }
+        }
+      }
+    },
+    "landing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "página inicial pública gerada para o tenant; `{{nome}}` vira o nome do negócio",
+      "required": [
+        "titulo"
+      ],
+      "properties": {
+        "titulo": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "subtitulo": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "chamada": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "destaques": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "titulo"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "titulo": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "texto": {
+                "type": "string",
+                "maxLength": 300
+              }
+            }
+          }
+        }
+      }
+    },
+    "oculto": {
+      "type": "boolean",
+      "default": false,
+      "description": "não aparece no cadastro: só entra como dependência de outro pack"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}
