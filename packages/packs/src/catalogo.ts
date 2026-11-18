@@ -1,4 +1,4 @@
-import { ErroApi, colunas, tabela, type EntradaOperacao } from '@polaris/servico'
+import { ErroApi, colunas, linhaParaApi, tabela, type EntradaOperacao } from '@polaris/servico'
 import type { No } from '@polaris/schema'
 import { compara, normaliza } from './dinheiro'
 
@@ -55,7 +55,7 @@ export function operacoesCatalogo(no: No) {
         `INSERT INTO ${tabela('catalogo', 'cotacao')} (tenant_id, produto_id, variante_id, quantidade, preco_unitario, origem, tabela_preco_id)
          VALUES (current_setting('app.tenant_id')::uuid, $1, $2, $3, $4, $5, $6) RETURNING id::text AS id`, [produtoId, varianteId, qtd, r.preco, r.origem, r.tabelaPrecoId])
       const id = (ins.rows[0] as { id: string }).id
-      return (await q(`SELECT ${colunas(ent as never)} FROM ${tabela('catalogo', 'cotacao')} WHERE id = $1`, [id])).rows[0]
+      return linhaParaApi(ent as never, (await q(`SELECT ${colunas(ent as never)} FROM ${tabela('catalogo', 'cotacao')} WHERE id = $1`, [id])).rows[0]!) // null sai do JSON (nunca "")
     },
   }
 }

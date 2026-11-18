@@ -381,6 +381,9 @@ importers:
       '@polaris/acesso':
         specifier: workspace:*
         version: link:../acesso
+      '@polaris/eventos':
+        specifier: workspace:*
+        version: link:../eventos
       '@polaris/schema':
         specifier: workspace:*
         version: link:../schema

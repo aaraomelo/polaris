@@ -1,0 +1,50 @@
+{
+  "kind": "servico", "id": "vendas", "versao": "1.0.0", "estatuto": "publicado",
+  "spec": {
+    "entidades": {
+      "carrinho": {
+        "campos": { "criadoPor": { "tipo": "texto", "obrigatorio": true }, "clienteId": { "tipo": "texto" }, "status": { "tipo": "texto", "padrao": "aberto", "descricao": "aberto | finalizado (só o servidor muda)" } },
+        "indices": [["criadoPor"]], "crud": { "caminho": "/carrinhos", "operacoes": ["listar", "obter", "criar", "remover"] }
+      },
+      "itemCarrinho": {
+        "campos": {
+          "carrinhoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "carrinho" }, "criadoPor": { "tipo": "texto", "obrigatorio": true },
+          "cotacaoId": { "tipo": "uuid", "obrigatorio": true, "descricao": "cotação do Catálogo: o preço NUNCA vem do cliente" },
+          "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" },
+          "quantidade": { "tipo": "decimal", "obrigatorio": true }, "precoUnitario": { "tipo": "dinheiro", "obrigatorio": true }, "totalLinha": { "tipo": "dinheiro", "obrigatorio": true }
+        },
+        "unicos": [["carrinhoId", "cotacaoId"]], "indices": [["carrinhoId"]], "crud": { "caminho": "/itens-carrinho", "operacoes": ["listar", "obter", "remover"] }
+      },
+      "pedido": {
+        "campos": {
+          "carrinhoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "carrinho" }, "criadoPor": { "tipo": "texto", "obrigatorio": true },
+          "chaveIdempotencia": { "tipo": "texto", "obrigatorio": true }, "status": { "tipo": "texto", "obrigatorio": true, "descricao": "criado | processando | confirmado | falhou | cancelado" },
+          "total": { "tipo": "dinheiro", "obrigatorio": true }, "motivoFalha": { "tipo": "texto" }
+        },
+        "unicos": [["chaveIdempotencia"]], "indices": [["criadoPor"], ["status"]], "crud": { "caminho": "/pedidos", "operacoes": ["listar", "obter"] }
+      },
+      "itemPedido": {
+        "campos": {
+          "pedidoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "pedido" }, "criadoPor": { "tipo": "texto", "obrigatorio": true },
+          "produtoId": { "tipo": "uuid", "obrigatorio": true }, "varianteId": { "tipo": "uuid" }, "cotacaoId": { "tipo": "uuid", "obrigatorio": true },
+          "quantidade": { "tipo": "decimal", "obrigatorio": true }, "precoUnitario": { "tipo": "dinheiro", "obrigatorio": true }, "totalLinha": { "tipo": "dinheiro", "obrigatorio": true }
+        },
+        "indices": [["pedidoId"]], "crud": { "caminho": "/itens-pedido", "operacoes": ["listar", "obter"] }
+      },
+      "passoSaga": {
+        "campos": {
+          "pedidoId": { "tipo": "uuid", "obrigatorio": true, "referencia": "pedido" }, "passo": { "tipo": "texto", "obrigatorio": true },
+          "estado": { "tipo": "texto", "obrigatorio": true, "descricao": "ok | falhou | compensado" }, "referencia": { "tipo": "texto" }, "detalhe": { "tipo": "texto" }
+        },
+        "unicos": [["pedidoId", "passo"]], "crud": { "caminho": "/passos-saga", "operacoes": ["listar", "obter"] }
+      }
+    },
+    "operacoes": {
+      "adicionarItem": { "metodo": "POST", "caminho": "/carrinhos/:id/itens", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true }, "cotacaoId": { "tipo": "uuid", "obrigatorio": true } }, "saida": "itemCarrinho", "permissao": "vendas" },
+      "finalizar": { "metodo": "POST", "caminho": "/carrinhos/:id/finalizar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true }, "chaveIdempotencia": { "tipo": "texto", "obrigatorio": true } }, "saida": "pedido", "permissao": "vendas", "publica": ["pedido.criado"] },
+      "cancelar": { "metodo": "POST", "caminho": "/pedidos/:id/cancelar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true } }, "saida": "pedido", "permissao": "vendas" },
+      "processar": { "metodo": "POST", "caminho": "/pedidos/:id/processar", "entrada": { "id": { "tipo": "uuid", "obrigatorio": true } }, "saida": "pedido", "permissao": "vendas", "publica": ["pedido.confirmado", "pedido.falhou"] }
+    },
+    "consome": ["pedido.criado"]
+  }
+}

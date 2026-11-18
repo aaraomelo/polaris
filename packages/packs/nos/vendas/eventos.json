@@ -1,0 +1,5 @@
+[
+  { "kind": "evento", "id": "pedido.criado", "versao": "1.0.0", "estatuto": "publicado", "spec": { "nome": "pedido.criado", "payload": { "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "total": { "tipo": "dinheiro", "obrigatorio": true } }, "idempotencia": "pedidoId" } },
+  { "kind": "evento", "id": "pedido.confirmado", "versao": "1.0.0", "estatuto": "publicado", "spec": { "nome": "pedido.confirmado", "payload": { "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "total": { "tipo": "dinheiro", "obrigatorio": true } }, "idempotencia": "pedidoId" } },
+  { "kind": "evento", "id": "pedido.falhou", "versao": "1.0.0", "estatuto": "publicado", "spec": { "nome": "pedido.falhou", "payload": { "pedidoId": { "tipo": "uuid", "obrigatorio": true }, "motivo": { "tipo": "texto", "obrigatorio": true } }, "idempotencia": "pedidoId" } }
+]
