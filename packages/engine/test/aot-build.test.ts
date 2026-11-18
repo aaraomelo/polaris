@@ -194,7 +194,7 @@ describe('segurança do HTML gerado', () => {
 })
 
 describe('CLI: pnpm aot', () => {
-  const vite = join(__dirname, '..', '..', '..', 'node_modules', '.pnpm', 'vite-node@2.1.9_@types+node@22.20.5', 'node_modules', 'vite-node', 'vite-node.mjs')
+  const tsx = ['--import', 'tsx'] // o runner dos scripts (era o vite-node, que o vitest 5 não traz mais)
   const script = join(__dirname, '..', 'scripts', 'aot.ts')
   const nosDir = (extra: object[] = []) => {
     const d = tmp('nos'); mkdirSync(d, { recursive: true })
@@ -206,17 +206,17 @@ describe('CLI: pnpm aot', () => {
   it('lê os nós de um diretório, escreve a saída e sai com 0; relata modos e tamanhos', () => {
     const saida = tmp('cli'), nos = nosDir()
     expect(nosDoDiretorio(nos).length).toBe(4)
-    const out = execFileSync('node', [vite, script, '--nos', nos, '--saida', saida], { encoding: 'utf8', cwd: join(__dirname, '..') })
+    const out = execFileSync('node', [...tsx, script, '--nos', nos, '--saida', saida], { encoding: 'utf8', cwd: join(__dirname, '..') })
     expect(out).toContain('2 página(s)'); expect(out).toMatch(/inicio\s+estatico\s+html/); expect(out).toMatch(/contador\s+vivo\s+html\s+cliente/)
     expect(existsSync(join(saida, 'core', 'manifesto.json'))).toBe(true)
   })
   it('sai com código 1 e mostra o erro com o caminho quando uma página é inválida (CI falha)', () => {
     const ruim = no('pagina', 'quebrada', { rota: '/q', raiz: P('texto/paragrafo', { props: { texto: '{semvar.x}' } }) })
-    const r = spawnSync('node', [vite, script, '--nos', nosDir([ruim]), '--saida', tmp('cli-erro')], { encoding: 'utf8', cwd: join(__dirname, '..') })
+    const r = spawnSync('node', [...tsx, script, '--nos', nosDir([ruim]), '--saida', tmp('cli-erro')], { encoding: 'utf8', cwd: join(__dirname, '..') })
     expect(r.status).toBe(1); expect(r.stderr).toContain('quebrada'); expect(r.stderr).toContain('/spec/raiz/props/texto')
   })
   it('sem argumentos: uso e código 2', () => {
-    const r = spawnSync('node', [vite, script], { encoding: 'utf8', cwd: join(__dirname, '..') })
+    const r = spawnSync('node', [...tsx, script], { encoding: 'utf8', cwd: join(__dirname, '..') })
     expect(r.status).toBe(2); expect(r.stderr).toContain('uso: pnpm aot')
   })
 })
