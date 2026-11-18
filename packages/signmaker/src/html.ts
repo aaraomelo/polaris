@@ -17,9 +17,9 @@ export function cssDoCartaz(l: Layout): string {
   return `@page{size:${n(l.largura)}pt ${n(l.altura)}pt;margin:0}
 ${faces}
 html,body{margin:0;padding:0;background:#e8e8e8}
-.pagina{position:relative;overflow:hidden;background:#fff;margin:12px auto;box-shadow:0 1px 4px rgba(0,0,0,.25);font-kerning:none;font-variant-ligatures:none;text-rendering:optimizeSpeed;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pagina{position:relative;overflow:hidden;background:#fff;margin:12px auto;box-shadow:0 1px 4px rgba(0,0,0,.25);font-kerning:none;font-variant-ligatures:none;text-rendering:geometricPrecision;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .pagina>*{position:absolute;box-sizing:border-box}
-.t{white-space:pre;margin:0;padding:0;transform-origin:0 0}
+.t{white-space:pre}
 .v{left:0;top:0;overflow:visible}
 @media print{html,body{background:#fff}.pagina{margin:0;box-shadow:none;break-after:page}.pagina:last-child{break-after:auto}}`
 }
@@ -33,7 +33,9 @@ export function htmlDe(l: Layout, opcoes: OpcoesHtml = {}): string {
         if (!/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(o.src)) throw new Error('imagem inválida')
         return `<img src="${o.src}" alt="${esc(o.alt)}" style="left:${n(o.x)}pt;top:${n(o.y)}pt;width:${n(o.l)}pt;height:${n(o.a)}pt">`
       }
-      return `<span class="t" style="left:${n(o.x)}pt;top:${n(o.yTopo)}pt;font-family:'${fam(o.familia)}';font-size:${n(o.tamanho)}pt;line-height:${n(o.alturaLinha)}pt;font-weight:${o.peso === 'negrito' ? 700 : 400};color:${rgbCss(o.cor)}${o.graus ? `;transform:rotate(${n(-o.graus)}deg)` : ''}">${esc(o.texto)}</span>`
+      // texto em SVG: a LINHA DE BASE é posicionada exatamente (y), sem a caixa de linha do HTML, cujo ascendente/descendente o Chrome arredonda para pixel inteiro (±0,5 px de erro)
+      const a = (o.graus * Math.PI) / 180, bx = o.x + o.tamanho * o.ascender * Math.sin(a), by = o.yTopo + o.tamanho * o.ascender * Math.cos(a)
+      return `<svg class="v" width="${n(p.largura)}pt" height="${n(p.altura)}pt" viewBox="0 0 ${n(p.largura)} ${n(p.altura)}"><text class="t" x="${n(bx)}" y="${n(by)}" font-family="'${fam(o.familia)}'" font-size="${n(o.tamanho)}" font-weight="${o.peso === 'negrito' ? 700 : 400}" fill="${rgbCss(o.cor)}"${o.graus ? ` transform="rotate(${n(-o.graus)} ${n(bx)} ${n(by)})"` : ''} xml:space="preserve">${esc(o.texto)}</text></svg>`
     }).join('\n')
     return `<section class="pagina" data-pagina="${i + 1}" style="width:${n(p.largura)}pt;height:${n(p.altura)}pt">\n${els}\n</section>`
   }).join('\n')

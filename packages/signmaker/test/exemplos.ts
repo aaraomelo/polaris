@@ -17,3 +17,6 @@ export const SPEC_VARIADO: Record<string, any> = {
     { tipo: 'texto', id: 't4', texto: 'uma linha só, sem quebrar, encolhe até caber', caixa: { topo: 0.93, esquerda: 0.05, largura: 0.5, altura: 0.04 }, quebra: 'nenhuma', alinhaH: 'esquerda' },
   ],
 }
+
+export const NO_ETIQUETA = JSON.parse(readFileSync(new URL('../../schema/test/exemplos/validos/cartaz-etiqueta.json', import.meta.url), 'utf8')) as { kind: string; id: string; spec: Record<string, any> }
+export const DADOS_ETIQUETA = { produto: { nome: 'Café Torrado e Moído 500 g', ean: '7891000100103' }, link: 'https://exemplo.com.br/p/7891000100103?ref=etiqueta' }

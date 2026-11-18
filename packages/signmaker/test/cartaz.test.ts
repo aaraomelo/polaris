@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ajusta, caminhoRet, fonteDe, geraCartaz, gira, htmlDe, layoutCartaz, pdfDe, quebraLinhas, validaCartaz } from '../src'
-import { DADOS_LONGO, DADOS_OFERTA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
+import { modulosBarras, matrizQr } from '../src/codigos'
+import { DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
 
 const f = fonteDe('Montserrat', 'negrito')
 
@@ -87,5 +88,41 @@ describe('saídas', () => {
     await expect(geraCartaz({ kind: 'pagina', spec: {} }, {})).rejects.toThrow(/kind=cartaz/)
     const l = layoutCartaz(SPEC_VARIADO, { nome: 'x' }); l.paginas[0]!.ops.push({ tipo: 'imagem', x: 0, y: 0, l: 1, a: 1, src: 'https://evil/x.png', alt: '' })
     expect(() => htmlDe(l)).toThrow(/imagem inválida/); await expect(pdfDe(l)).rejects.toThrow(/imagem inválida/)
+  })
+})
+
+/** lê de volta os retângulos de um caminho `M x y L .. Z` (sem giro): [x, y, l, a] */
+const retsDe = (d: string) => [...d.matchAll(/M([\d.-]+) ([\d.-]+)L([\d.-]+) [\d.-]+L[\d.-]+ ([\d.-]+)L/g)].map((m) => [+m[1]!, +m[2]!, +m[3]! - +m[1]!, +m[4]! - +m[2]!] as const)
+
+describe('código de barras e QR code', () => {
+  const l = layoutCartaz(NO_ETIQUETA.spec, DADOS_ETIQUETA), ops = l.paginas[0]!.ops
+  const caminhos = ops.filter((o) => o.tipo === 'caminho') as Array<{ d: string; cor: number[] }>
+  it('as barras desenhadas SÃO os módulos do EAN-13 (largura de módulo constante, mesmas corridas)', () => {
+    const bits = modulosBarras('7891000100103', 'ean13'); expect(bits).toHaveLength(107) // 95 módulos do EAN-13 + as zonas de silêncio que o gerador inclui
+    const barras = retsDe(caminhos[1]!.d), mod = barras.reduce((m, r) => Math.min(m, r[2]), Infinity), origem = barras[0]![0] - bits.indexOf('1') * mod // o menor retângulo = 1 módulo; a origem recua até o primeiro módulo (a zona de silêncio)
+    const lido = Array.from({ length: 107 }, (_, i) => (barras.some(([x, , w]) => { const c = (x - origem) / mod; return i >= Math.round(c) && i < Math.round(c + w / mod) }) ? '1' : '0')).join('')
+    expect(lido).toBe(bits); expect(new Set(barras.map((r) => r[1])).size).toBe(1) // todas na mesma altura
+  })
+  it('o número legível aparece (texto) e o EAN com dígito verificador errado é recusado', () => {
+    expect(ops.some((o) => o.tipo === 'texto' && o.texto === '7891000100103')).toBe(true)
+    expect(() => modulosBarras('7891000100104', 'ean13')).toThrow(/EAN-13/); expect(() => modulosBarras('', 'code128')).toThrow(/sem valor/); expect(() => modulosBarras('é'.repeat(5) + '\u4e2d', 'code128')).toThrow()
+    expect(() => layoutCartaz(NO_ETIQUETA.spec, { ...DADOS_ETIQUETA, produto: { nome: 'x', ean: '123' } })).toThrow(/EAN-13/)
+  })
+  it('o QR desenhado SÃO os módulos do qrcode-generator (cada módulo escuro coberto, nenhum claro)', () => {
+    const m = matrizQr(DADOS_ETIQUETA.link, 'M'), rets = retsDe(caminhos[2]!.d), cel = rets.reduce((a, r) => Math.min(a, r[3]), Infinity)
+    expect(cel).toBeGreaterThan(1); const x0 = Math.min(...rets.map((r) => r[0])), y0 = Math.min(...rets.map((r) => r[1]))
+    for (let r = 0; r < m.length; r++) for (let c = 0; c < m.length; c++) {
+      const cx = x0 + (c + 0.5) * cel, cy = y0 + (r + 0.5) * cel
+      expect(rets.some(([x, y, w, a]) => cx > x && cx < x + w && cy > y && cy < y + a), `módulo ${r},${c}`).toBe(m[r]![c])
+    }
+  })
+  it('QR e barras ficam dentro da caixa; condição `se` e valor vazio omitem o elemento', () => {
+    const area = (d: string) => { const rs = retsDe(d); return { x0: Math.min(...rs.map((r) => r[0])), x1: Math.max(...rs.map((r) => r[0] + r[2])) } }
+    const q = area(caminhos[2]!.d); expect(q.x1).toBeLessThanOrEqual(l.largura * 0.95 + 0.01); expect(q.x0).toBeGreaterThanOrEqual(l.largura * 0.65 - 0.01)
+    const sem = layoutCartaz({ ...NO_ETIQUETA.spec, elementos: NO_ETIQUETA.spec.elementos.map((e: any) => (e.tipo === 'qrcode' ? { ...e, se: 'link' } : e)) }, { ...DADOS_ETIQUETA, link: '' })
+    expect(sem.paginas[0]!.ops.filter((o) => o.tipo === 'caminho').length).toBe(caminhos.length - 1)
+  })
+  it('valor muito grande para QR é recusado com mensagem clara', () => {
+    expect(() => matrizQr('x'.repeat(1001), 'L')).toThrow(/mais de 1000/)
   })
 })

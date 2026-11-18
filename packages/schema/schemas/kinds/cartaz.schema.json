@@ -367,6 +367,269 @@
                 "description": "canto arredondado, em fração do MENOR lado da caixa"
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tipo",
+              "caixa",
+              "valor"
+            ],
+            "properties": {
+              "tipo": {
+                "const": "codigoBarras"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][A-Za-z0-9_-]{0,40}$",
+                "description": "identificador do elemento (único na peça)"
+              },
+              "se": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "condição sobre os dados (caminho, ou !caminho): o elemento só aparece se verdadeira"
+              },
+              "caixa": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "topo",
+                  "largura",
+                  "altura"
+                ],
+                "properties": {
+                  "topo": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da ALTURA da peça"
+                  },
+                  "esquerda": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da esquerda)"
+                  },
+                  "direita": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da direita); use esquerda OU direita"
+                  },
+                  "largura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "altura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "description": "a caixa do elemento, em FRAÇÕES da peça (0 a 1): o mesmo layout serve a todos os tamanhos"
+              },
+              "rotacao": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "description": "graus, ANTI-HORÁRIO, em torno do meio da borda esquerda da caixa"
+              },
+              "valor": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "modelo com o valor codificado, ex.: {produto.ean}"
+              },
+              "formato": {
+                "enum": [
+                  "code128",
+                  "ean13"
+                ],
+                "default": "code128"
+              },
+              "numero": {
+                "enum": [
+                  "cima",
+                  "baixo",
+                  "nenhum"
+                ],
+                "default": "cima",
+                "description": "onde aparece o número legível"
+              },
+              "rotulo": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "texto do número legível (padrão: o valor)"
+              },
+              "cor": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "fundo": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "raio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.5
+              },
+              "margem": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.4,
+                "description": "fração da ALTURA (padrão 0,15)"
+              },
+              "fonte": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "familia": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "peso": {
+                    "enum": [
+                      "normal",
+                      "negrito"
+                    ]
+                  }
+                },
+                "description": "fonte padrão dos textos"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tipo",
+              "caixa",
+              "valor"
+            ],
+            "properties": {
+              "tipo": {
+                "const": "qrcode"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][A-Za-z0-9_-]{0,40}$",
+                "description": "identificador do elemento (único na peça)"
+              },
+              "se": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "condição sobre os dados (caminho, ou !caminho): o elemento só aparece se verdadeira"
+              },
+              "caixa": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "topo",
+                  "largura",
+                  "altura"
+                ],
+                "properties": {
+                  "topo": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da ALTURA da peça"
+                  },
+                  "esquerda": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da esquerda)"
+                  },
+                  "direita": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da direita); use esquerda OU direita"
+                  },
+                  "largura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "altura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "description": "a caixa do elemento, em FRAÇÕES da peça (0 a 1): o mesmo layout serve a todos os tamanhos"
+              },
+              "rotacao": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "description": "graus, ANTI-HORÁRIO, em torno do meio da borda esquerda da caixa"
+              },
+              "valor": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "nivel": {
+                "enum": [
+                  "L",
+                  "M",
+                  "Q",
+                  "H"
+                ],
+                "default": "L",
+                "description": "correção de erro"
+              },
+              "cor": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "fundo": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "raio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.5
+              },
+              "margem": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.4,
+                "description": "fração do LADO (padrão 0,06)"
+              }
+            }
           }
         ]
       }

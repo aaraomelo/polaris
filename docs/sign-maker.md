@@ -11,19 +11,23 @@ nó cartaz + dados ──layoutCartaz──▶ Layout (ops em pt: texto, ret, ca
 
 ## O nó
 `spec`: `tamanho` (A4 | A5 | A6 | A7), `orientacao`, `titulo`, `fundo` (`cor`, `imagem` em data URL png/jpeg), `fonte` padrão, `dados` (nome → tipo, igual ao documento) e `elementos`.
-Elementos (por enquanto): **`texto`** e **`faixa`**. Todo elemento tem `caixa` (`topo`, `esquerda` **ou** `direita`, `largura`, `altura`, em fração da peça), `se` (condição sobre os dados), `id` e `rotacao` (graus anti-horário, em torno do meio da borda esquerda da caixa).
+Elementos (por enquanto): **`texto`**, **`faixa`**, **`codigoBarras`** e **`qrcode`**. Todo elemento tem `caixa` (`topo`, `esquerda` **ou** `direita`, `largura`, `altura`, em fração da peça), `se` (condição sobre os dados), `id` e `rotacao` (graus anti-horário, em torno do meio da borda esquerda da caixa).
 - `texto`: modelo `{produto.nome}`, `{preco.por | brl}` (a mesma interpolação segura dos documentos), `alinhaH`, `alinhaV`, `cor`, `fundo` (RGBA), `fonte`, `quebra` (`normal` | `nenhuma`) e `tamanho.min/max`. **O tamanho da fonte é sempre ajustado para caber na caixa**: o maior tamanho (passo de 0,25 pt, busca binária) em que as linhas quebradas cabem em largura e altura. Se nem o mínimo cabe, usa o mínimo e o layout devolve um **aviso** (nunca corta em silêncio).
 - `faixa`: retângulo com `cor`, `opacidade` e `raio` (fração do menor lado). Com raio ou rotação vira um **caminho vetorial** (o MESMO `d` SVG vai ao HTML e ao PDF).
 
+- `codigoBarras`: `valor` (modelo), `formato` (`code128`, o mesmo padrão do jsbarcode do legado, ou `ean13`, com dígito verificador conferido), `numero` (`cima` | `baixo` | `nenhum`: o número legível, ajustado como todo texto), `rotulo`, `cor`, `fundo`, `raio` e `margem`. As barras são **um só caminho vetorial** (corridas de módulos escuros, sem pixel) e o valor inválido para o formato é recusado antes de gerar.
+- `qrcode`: `valor`, `nivel` (L/M/Q/H), `cor`, `fundo`, `margem`; a matriz vem do `qrcode-generator` e vira um caminho vetorial por corridas.
+
 ## Por que as saídas coincidem
-Quebra de linha, tamanho de fonte e posições são decididos **uma vez**, no layout, com as métricas das mesmas TTF que vão embarcadas no PDF e referenciadas no HTML; kerning e ligaduras ficam **desligados** nas duas. Texto girado: o layout já entrega o canto da linha girado; o HTML gira em torno dele e o PDF gira em torno da linha de base (calculada).
+Quebra de linha, tamanho de fonte e posições são decididos **uma vez**, no layout, com as métricas das mesmas TTF que vão embarcadas no PDF e referenciadas no HTML; kerning e ligaduras ficam **desligados** nas duas. Texto girado: o layout já entrega o canto da linha girado; o HTML gira em torno dele e o PDF gira em torno da linha de base (calculada). **O texto do HTML é SVG** (`<text x y>`): a linha de base é posicionada exatamente, sem a caixa de linha do HTML, cujo ascendente/descendente o Chrome arredonda para pixel inteiro (isso dava 0,5 pt de erro vertical no HTML comum). No teste, o Chrome é medido pelo que ele **posicionou** (`getStartPositionOfChar`), não pela caixa dele, que é arredondada.
 `test/paridade.test.ts` abre o HTML no Chrome e rasteriza/lê o PDF com o poppler: palavras nas mesmas posições (≤ 1 pt; o texto **girado** só é conferido por pixel, porque o poppler o fragmenta) e pixels comparados em blocos (média < 2,5/255; < 0,4% dos blocos com diferença > 60). Casos: A4/A5/A6/A7, retrato e paisagem, nome longo, elemento condicional, e um "variado" (girado, translúcido, arredondado, alinhamentos, duas fontes). O teste do **detector** reprova 1,5 pt de deslocamento, cor trocada, texto trocado e 3° de giro. Requer Chrome e `poppler-utils`; localmente é pulado sem eles e no CI falha (`CI`). `PARIDADE_SALVA=<dir>` grava os PNG lado a lado.
 
 ## Fontes
 Montserrat (OFL) e Roboto (Apache 2.0) estão no repositório. As fontes `Primary` (Helvetica Neue LT 97 Black Condensed, © Adobe) e `Secondary` (CartazistaPRO) que os layouts legados usam são **proprietárias**: não vão ao repositório e precisam ser entregues como ativo do tenant (card S10). Pendência: texto integral da OFL em `fontes/`.
 
 ## Limites assumidos (até aqui)
-- Só `texto` e `faixa`. Faltam preço (as duas variantes), economia, validade, código de barras (EAN), QR code, sobrescrito (`$pow`), texto justificado e os tamanhos EP21: cards S7, S8, S3, S11.
+- Faltam preço (as duas variantes), economia, validade, sobrescrito (`$pow`), texto justificado e o tamanho EP21: cards S7, S3, S11.
+- Código de barras e QR: os testes provam que o desenho **é** a matriz de módulos do gerador (e a paridade Chrome × PDF), mas **nenhum leitor real** (zbar, OpenCV, câmera) foi usado para decodificar: não há decodificador instalado aqui. Antes de imprimir em produção, leia uma amostra com um leitor físico.
 - Os fundos do legado (`filename`) vêm do backend e não estão no repositório: o fundo aqui é cor ou data URL.
 - Uma peça por PDF (lote com quantidades: card S11). A semântica de caixa/rotação/ajuste é a **deste** motor, mais limpa que a do legado (que usava fatores empíricos como 0,93 e 1,045); o conversor das configurações (S2) traduz as geometrias e o resultado será conferido visualmente.
 - Não há editor no Studio ainda (S12); o kind já valida pelo schema.

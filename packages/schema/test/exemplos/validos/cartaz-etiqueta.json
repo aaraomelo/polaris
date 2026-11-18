@@ -1,0 +1,76 @@
+{
+  "kind": "cartaz",
+  "id": "etiqueta-codigos",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A6",
+    "orientacao": "paisagem",
+    "titulo": "Etiqueta com códigos",
+    "fundo": {
+      "cor": [
+        255,
+        255,
+        255
+      ]
+    },
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "dados": {
+      "produto": {
+        "tipo": "json"
+      },
+      "link": {
+        "tipo": "texto"
+      }
+    },
+    "elementos": [
+      {
+        "tipo": "texto",
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "caixa": {
+          "topo": 0.05,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "altura": 0.25
+        },
+        "alinhaH": "esquerda",
+        "alinhaV": "meio"
+      },
+      {
+        "tipo": "codigoBarras",
+        "id": "barras",
+        "valor": "{produto.ean}",
+        "formato": "ean13",
+        "caixa": {
+          "topo": 0.45,
+          "esquerda": 0.05,
+          "largura": 0.55,
+          "altura": 0.45
+        },
+        "fundo": [
+          255,
+          255,
+          255
+        ],
+        "raio": 0.1,
+        "numero": "cima"
+      },
+      {
+        "tipo": "qrcode",
+        "id": "qr",
+        "valor": "{link}",
+        "nivel": "M",
+        "caixa": {
+          "topo": 0.4,
+          "direita": 0.05,
+          "largura": 0.3,
+          "altura": 0.5
+        }
+      }
+    ]
+  }
+}

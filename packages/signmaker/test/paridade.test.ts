@@ -6,7 +6,7 @@ import { PNG } from 'pngjs'
 import { chromium, type Browser } from 'playwright-core'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { fonteDe, htmlDe, largura, layoutCartaz, pdfDe, type Layout } from '../src'
-import { DADOS_LONGO, DADOS_OFERTA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
+import { DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
 
 // PARIDADE: o MESMO cartaz sai em HTML e PDF; o HTML é aberto num Chrome de verdade e o PDF é rasterizado/lido pelo poppler, e os dois são comparados
 // (1) palavra a palavra, por posição (só texto SEM rotação: o poppler dá a caixa do texto girado de outro jeito) e (2) por pixel, que cobre o texto girado e as formas.
@@ -24,18 +24,22 @@ async function doChrome(html: string): Promise<{ palavras: Palavra[]; imgs: Buff
   const pg = await nav.newPage({ deviceScaleFactor: ESC * 0.75 })
   try {
     await pg.setContent(html, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready)
-    const palavras = await pg.evaluate(() => {
+    // O Chrome arredonda ascendente/descendente para pixel inteiro ao medir a caixa do texto (por isso a caixa dele não serve de régua): mede-se o que ele de fato POSICIONOU,
+    // a linha de base e o início/fim de cada palavra (getStartPositionOfChar/getEndPositionOfChar), e a altura do centro vem das métricas verdadeiras da fonte, como no poppler.
+    const k: Record<string, number> = {}
+    for (const f of ['Montserrat', 'Roboto']) for (const peso of ['normal', 'negrito'] as const) { const m = fonteDe(f, peso); k[`Sign-${f}:${peso === 'negrito' ? 700 : 400}`] = (m.ascender + m.descender) / 2 / m.unitsPerEm }
+    const palavras = await pg.evaluate((k) => {
       const out: Array<{ pag: number; t: string; x0: number; x1: number; y: number }> = []
       document.querySelectorAll('section.pagina').forEach((sec, i) => {
-        const base = sec.getBoundingClientRect()
-        sec.querySelectorAll<HTMLElement>('.t').forEach((sp) => {
-          if (sp.style.transform) return // girado: conferido por pixel
-          const nodo = sp.firstChild as Text; const re = /\S+/g; let m: RegExpExecArray | null
-          while ((m = re.exec(nodo.data))) { const r = document.createRange(); r.setStart(nodo, m.index); r.setEnd(nodo, m.index + m[0].length); const b = r.getBoundingClientRect(); out.push({ pag: i + 1, t: m[0], x0: (b.left - base.left) * 0.75, x1: (b.right - base.left) * 0.75, y: ((b.top + b.bottom) / 2 - base.top) * 0.75 }) }
+        sec.querySelectorAll<SVGTextElement>('text.t').forEach((sp) => {
+          if (sp.getAttribute('transform')) return // girado: conferido por pixel
+          const txt = sp.textContent ?? '', re = /\S+/g, tam = Number(sp.getAttribute('font-size')), fam = (sp.getAttribute('font-family') ?? '').replace(/'/g, ''); let m: RegExpExecArray | null
+          const kk = k[`${fam}:${sp.getAttribute('font-weight')}`] ?? 0
+          while ((m = re.exec(txt))) { const a = sp.getStartPositionOfChar(m.index), b = sp.getEndPositionOfChar(m.index + m[0].length - 1); out.push({ pag: i + 1, t: m[0], x0: a.x, x1: b.x, y: a.y - kk * tam }) }
         })
       })
       return out
-    })
+    }, k)
     const secs = await pg.locator('section.pagina').all(); const imgs: Buffer[] = []
     for (const s of secs) imgs.push(await s.screenshot({ type: 'png' }))
     return { palavras, imgs }
@@ -91,6 +95,9 @@ const CASOS: Array<[string, Record<string, any>, unknown]> = [
   ['oferta A4 retrato', { ...NO_OFERTA.spec, tamanho: 'A4', orientacao: 'retrato' }, DADOS_OFERTA],
   ['oferta A6 com nome longo', { ...NO_OFERTA.spec, tamanho: 'A6' }, DADOS_LONGO],
   ['oferta A7 sem "de"', { ...NO_OFERTA.spec, tamanho: 'A7', orientacao: 'retrato' }, { ...DADOS_OFERTA, preco: { de: '', por: '0.99' } }],
+  ['etiqueta A6: EAN-13 e QR code', NO_ETIQUETA.spec, DADOS_ETIQUETA],
+  ['etiqueta A4 retrato', { ...NO_ETIQUETA.spec, tamanho: 'A4', orientacao: 'retrato' }, DADOS_ETIQUETA],
+  ['códigos girados em 90°', { ...NO_ETIQUETA.spec, elementos: NO_ETIQUETA.spec.elementos.map((e: any) => (e.tipo === 'texto' ? e : { ...e, rotacao: 90 })) }, DADOS_ETIQUETA],
   ['variado: girado, translúcido, arredondado, alinhamentos, Roboto', SPEC_VARIADO, { nome: 'Promoção da Semana' }],
 ]
 
@@ -100,10 +107,10 @@ describe.skipIf(!PRONTO)('paridade HTML × PDF do cartaz', () => {
     it(`${nome}: mesmas palavras nas mesmas posições (±1 pt) e mesmos pixels`, async () => {
       const l = layoutCartaz(spec, dados), html = htmlDe(l), pdf = await pdfDe(l, new Date(0))
       const c = await doChrome(html), p = doPdf(pdf, palavrasGiradas(l))
+      if (process.env.PARIDADE_SALVA) { writeFileSync(join(process.env.PARIDADE_SALVA, `${nome.replace(/\W+/g, '-')}-chrome.png`), c.imgs[0]!); writeFileSync(join(process.env.PARIDADE_SALVA, `${nome.replace(/\W+/g, '-')}-pdf.png`), p.imgs[0]!) }
       expect(c.imgs.length).toBe(1); expect(p.imgs.length).toBe(1); expect(c.palavras.length).toBeGreaterThan(2)
       expect(pior(c.palavras, p.palavras)).toBeLessThanOrEqual(1)
       const d = diferenca(c.imgs[0]!, p.imgs[0]!); expect(d.medio).toBeLessThan(2.5); expect(d.ruins).toBeLessThan(0.004)
-      if (process.env.PARIDADE_SALVA) { writeFileSync(join(process.env.PARIDADE_SALVA, `${nome.replace(/\W+/g, '-')}-chrome.png`), c.imgs[0]!); writeFileSync(join(process.env.PARIDADE_SALVA, `${nome.replace(/\W+/g, '-')}-pdf.png`), p.imgs[0]!) }
     })
   }
 
