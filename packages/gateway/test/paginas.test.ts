@@ -3,11 +3,14 @@ import { A, B, criaAmbiente, type Ambiente } from './ambiente'
 
 // O servidor de páginas: tenant (host/token) → rotas declarativas → página → HTML em streaming com dados do serviço, tema, CSP com nonce e hidratação.
 let e: Ambiente
+let previaReg: any
 const modo: { id: string | undefined } = { id: undefined }
 const P = (bloco: string, props: Record<string, unknown> = {}) => ({ bloco, props })
 const pag = (id: string, spec: Record<string, unknown>) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec })
 beforeAll(async () => {
-  e = await criaAmbiente({ gateway: { paginas: { tenantNo: (c: { tenantId: string }) => (modo.id ? modo.id : c.tenantId === A ? 'lojaa' : c.tenantId === B ? 'lojab' : undefined) } } })
+  const TOK_A = 'v1.aaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbb', TOK_B = 'v1.cccccccccccc.dddddddddddddddddddddddddddd'
+  const preview = { verifica: (t: string) => (t === TOK_A ? { tenantId: A, release: 3 } : t === TOK_B ? { tenantId: B, release: 1 } : null), registro: async (_t: string, r: number) => (r === 3 ? previaReg : null) }
+  e = await criaAmbiente({ gateway: { preview, paginas: { tenantNo: (c: { tenantId: string }) => (modo.id ? modo.id : c.tenantId === A ? 'lojaa' : c.tenantId === B ? 'lojab' : undefined) } } })
   await e.semear()
   const lista = { bloco: 'texto/paragrafo', props: { texto: 'Vitrine: {v.titulo}' }, repetir: { cada: 'vitrine', como: 'v' } }
   const nos = [
@@ -20,6 +23,7 @@ beforeAll(async () => {
     { kind: 'tenant', id: 'lojab', tenantId: B, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'lojab', segmento: 'varejo', modulos: ['loja'], paginas: ['p.home'] } },
   ]
   for (const n of nos) e.reg.registra(n as never)
+  previaReg = e.reg.derivado(); previaReg.registra({ ...pag('p.home', { rota: '/', titulo: 'Prévia', raiz: P('texto/paragrafo', { texto: 'Conteúdo só da release 3' }) }), versao: '2.0.0' }) // a release em pré-visualização: a mesma página, em versão maior
 })
 afterAll(async () => { await e.fim() })
 
@@ -109,6 +113,24 @@ describe('servidor de páginas', () => {
       e.reg.registra({ ...tenant('proprio'), versao: '1.0.1' } as never); e.reg.registra(no('p.colide', '/sobre') as never)
       expect((await e.req('GET', '/sobre', { host: 'a.loja.test' })).statusCode).toBe(200); expect((await e.req('GET', '/minha', { host: 'a.loja.test' })).statusCode).toBe(404)
     } finally { modo.id = undefined }
+  })
+  it('pré-visualização assinada: o link vira cookie HttpOnly, o site mostra a release do link com faixa e noindex, só para o tenant do link', async () => {
+    const TOK_A = 'v1.aaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbb', TOK_B = 'v1.cccccccccccc.dddddddddddddddddddddddddddd'
+    const normal = await e.req('GET', '/', { host: 'a.loja.test' }); expect(normal.body).not.toContain('Conteúdo só da release 3'); expect(normal.body).not.toContain('pl-preview')
+    const ativa = await e.req('GET', `/_polaris/preview?t=${TOK_A}`, { host: 'a.loja.test' }); expect([ativa.statusCode, ativa.headers.location]).toEqual([302, '/'])
+    const ck = String(ativa.headers['set-cookie']); expect(ck).toMatch(/^polaris_preview=v1\.[\w.-]+; Path=\/; HttpOnly; SameSite=Lax; Max-Age=\d+; Secure$/); const cookie = ck.split(';')[0]!
+    const p = await e.req('GET', '/', { host: 'a.loja.test', headers: { cookie } }); expect(p.statusCode).toBe(200); expect(p.body).toContain('Conteúdo só da release 3'); expect(p.body).toContain('Pré-visualização da release 3'); expect(p.body).toContain('/_polaris/preview/sair'); expect(p.headers['x-robots-tag']).toContain('noindex')
+    expect((await e.req('GET', '/', { host: 'a.loja.test' })).body).not.toContain('Conteúdo só da release 3') // sem o cookie, produção
+    // link inválido e link de OUTRO tenant não ativam
+    expect((await e.req('GET', '/_polaris/preview?t=v1.xxxxxxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyy', { host: 'a.loja.test' })).statusCode).toBe(401)
+    expect((await e.req('GET', `/_polaris/preview?t=${TOK_B}`, { host: 'a.loja.test' })).statusCode).toBe(403); expect((await e.req('GET', '/_polaris/preview', { host: 'a.loja.test' })).statusCode).toBe(401)
+    // cookie de um tenant no site de outro: ignorado e apagado (o outro tenant nunca vê a release do A)
+    const b = await e.req('GET', '/', { host: 'b.loja.test', headers: { cookie } }); expect(b.statusCode).toBe(200); expect(b.body).not.toContain('Conteúdo só da release 3'); expect(String(b.headers['set-cookie'])).toContain('Max-Age=0')
+    // release que não existe: some o cookie, volta à produção
+    const sumiu = await e.req('GET', '/', { host: 'a.loja.test', headers: { cookie: 'polaris_preview=' + TOK_B } }); expect(sumiu.body).not.toContain('pl-preview')
+    const sai = await e.req('GET', '/_polaris/preview/sair', { host: 'a.loja.test' }); expect([sai.statusCode, String(sai.headers['set-cookie'])]).toEqual([302, expect.stringContaining('Max-Age=0')])
+    // navegação no cliente: o pedido de navegação também usa a release (a faixa fica fora do conteúdo trocado)
+    const nav = await e.req('GET', '/', { host: 'a.loja.test', headers: { cookie, 'x-polaris-nav': '1' } }); expect(nav.body).toContain('Conteúdo só da release 3')
   })
   it('o favicon não vira 404 nem página', async () => { expect((await e.req('GET', '/favicon.ico', { host: 'a.loja.test' })).statusCode).toBe(204) })
   it('um tenant sem nó `tenant` não publica páginas (404) e host desconhecido é 400', async () => {

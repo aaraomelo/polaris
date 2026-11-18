@@ -32,6 +32,8 @@ export type OpcoesStudio = {
     rollback(tenantId: string, autor: string, para?: number, nota?: string): Promise<{ ok: true; producao: number; anterior: number | null } | { ok: false; erros: string[] }>
     diferenca(tenantId: string, de: number, para: number): Promise<{ adicionados: string[]; removidos: string[]; alterados: string[] } | null>
   }
+  /** emite o link assinado de pré-visualização de uma release (`criaPreview().emite`); sem ele, `POST /studio/releases/preview` é 501 */
+  previewEmite?: (tenantId: string, release: number, ttlSeg: number) => string
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
   previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; modo?: 'claro' | 'escuro'; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[] } | { ok: false; erros: string[] }
@@ -220,6 +222,18 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const de = Number(req.query.de), para = Number(req.query.para)
     if (!Number.isInteger(de) || !Number.isInteger(para) || de < 1 || para < 1) return erro(reply, 400, 'requisicao_invalida', 'de e para: números de release')
     const d = await o.releases.diferenca(s.tenantId, de, para); return d ?? erro(reply, 404, 'nao_encontrado', 'release inexistente')
+  })
+  // o link dá LEITURA do site daquela release, sem login, por pouco tempo (24 h por padrão, até 7 dias). Quem pode emitir: quem comenta (revisor), não só o editor.
+  app.post('/studio/releases/preview', { bodyLimit: 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.comentar', 3); if (!s) return reply
+    if (!o.releases || !o.previewEmite) return erro(reply, 501, 'nao_implementado', 'a pré-visualização por link não está habilitada')
+    const b = req.body ?? {}; if (!so(b, ['release', 'horas'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { release, horas? }')
+    const { release, horas } = b as { release?: unknown; horas?: unknown }
+    if (!Number.isInteger(release) || (release as number) < 1) return erro(reply, 400, 'requisicao_invalida', 'release: número de release')
+    if (horas !== undefined && (!Number.isInteger(horas) || (horas as number) < 1 || (horas as number) > 168)) return erro(reply, 400, 'requisicao_invalida', 'horas: de 1 a 168')
+    if (!(await o.releases.lista(s.tenantId, 200)).some((r) => r.numero === release)) return erro(reply, 404, 'nao_encontrado', 'release inexistente')
+    const h = (horas as number | undefined) ?? 24
+    return { caminho: `/_polaris/preview?t=${o.previewEmite(s.tenantId, release as number, h * 3600)}`, release, expiraEmHoras: h }
   })
   app.post('/studio/releases/voltar', { bodyLimit: 4 * 1024 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.editar', 5); if (!s) return reply

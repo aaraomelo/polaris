@@ -166,6 +166,19 @@ describe('API de autoria do Studio', () => {
     expect((await post({}, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'POST', url: '/studio/releases/voltar', payload: {} })).statusCode).toBe(401)
     falha = true; const r = await post({}); expect([r.statusCode, r.json().erro.codigo]).toEqual([422, 'rollback_recusado']); await a2.close()
   })
+  it('releases/preview: emite o link só de release que existe, para quem comenta; valida o corpo; o tenant vem da sessão', async () => {
+    const emitidos: any[] = []
+    const rel = { lista: async () => [{ numero: 2, autor: 'a', nota: null, criadoEm: '2026-01-01T00:00:00.000Z', nos: 1 }, { numero: 1, autor: 'a', nota: null, criadoEm: '2026-01-01T00:00:00.000Z', nos: 1 }], producao: async () => ({ producao: 2, anterior: 1 }), rollback: async () => ({ ok: true as const, producao: 1, anterior: 2 }), diferenca: async () => null }
+    const sem = Fastify(); rotasStudio(sem, { armazem, baseDe: async () => base, q, autentica: autentica as never, releases: rel })
+    expect((await sem.inject({ method: 'POST', url: '/studio/releases/preview', headers: h(A, 'ana'), payload: { release: 1 } })).statusCode).toBe(501); await sem.close()
+    const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, releases: rel, previewEmite: (t, r, ttl) => { emitidos.push([t, r, ttl]); return `v1.tok${r}.assinatura` } })
+    const post = (corpo: unknown, t = h(A, 'ana', 'com')) => a2.inject({ method: 'POST', url: '/studio/releases/preview', headers: t, payload: corpo as never })
+    const ok = await post({ release: 1 }); expect([ok.statusCode, ok.json()]).toEqual([200, { caminho: '/_polaris/preview?t=v1.tok1.assinatura', release: 1, expiraEmHoras: 24 }]); expect(emitidos[0]).toEqual([A, 1, 24 * 3600])
+    expect((await post({ release: 2, horas: 2 })).json().expiraEmHoras).toBe(2); expect(emitidos[1]).toEqual([A, 2, 7200])
+    expect((await post({ release: 9 })).statusCode).toBe(404)
+    for (const ruim of [{}, { release: 0 }, { release: 'x' }, { release: 1, horas: 0 }, { release: 1, horas: 169 }, { release: 1, horas: 1.5 }, { release: 1, tenantId: B }]) expect((await post(ruim)).statusCode, JSON.stringify(ruim)).toBe(400)
+    expect((await post({ release: 1 }, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'POST', url: '/studio/releases/preview', payload: { release: 1 } })).statusCode).toBe(401); await a2.close()
+  })
   it('publicar: 501 sem a função; exige editar; chama com tenant/autor/nota da SESSÃO; falha vira 422', async () => {
     expect((await app.inject({ method: 'POST', url: '/studio/publicar', headers: h(A, 'ana'), payload: {} })).statusCode).toBe(501)
     const chamadas: any[] = []; let falha = false; const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, publicar: async (x) => { chamadas.push(x); return falha ? { ok: false, erros: ['não fecha'] } : { ok: true, release: 7 } } })

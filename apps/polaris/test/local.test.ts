@@ -92,6 +92,28 @@ describe('ambiente local', () => {
     expect((await req(l, 'loja-demo', 'POST', '/studio/releases/voltar', await l.token('loja-demo', ['studio.leitor']), {})).status).toBe(403)
     expect(await (await get(l, 'loja-outra', '/')).text()).not.toContain('Segunda')
   })
+  it('preview assinado: o link de uma release antiga mostra aquele site (faixa, noindex) sem mexer na produção, só neste tenant', async () => {
+    const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana'), com = await l.token('loja-demo', ['studio.comentarista'], 'bia')
+    const publica = async (v: string) => { const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no; home.spec.raiz.slots.filhos[1].props.texto = v; await req(l, 'loja-demo', 'PUT', '/studio/nos/pagina/site.home', ed, { no: home }); await req(l, 'loja-demo', 'POST', '/studio/publicar', ed, {}) }
+    await publica('Versão antiga'); await publica('Versão nova')
+    const r = await req(l, 'loja-demo', 'POST', '/studio/releases/preview', com, { release: 1 }); expect(r.status).toBe(200) // quem comenta emite o link
+    const { caminho } = (await r.json()) as { caminho: string }; expect(caminho).toMatch(/^\/_polaris\/preview\?t=v1\./)
+    expect((await req(l, 'loja-demo', 'POST', '/studio/releases/preview', await l.token('loja-demo', ['studio.leitor']), { release: 1 })).status).toBe(403)
+    const nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const ctx = await nav.newContext(), p = await ctx.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.getByRole('heading', { name: 'Versão nova' }).waitFor() // produção
+      await p.goto(`http://loja-demo.polaris.localhost:${l.porta}${caminho}`); await p.getByRole('heading', { name: 'Versão antiga' }).waitFor(); await p.getByText(/Pré-visualização da release 1/).waitFor()
+      expect(p.url()).toBe(`http://loja-demo.polaris.localhost:${l.porta}/`); expect(await p.evaluate(() => document.cookie)).not.toContain('polaris_preview') // HttpOnly
+      await p.getByRole('link', { name: 'Sobre' }).click(); await p.getByRole('heading', { name: 'Sobre' }).waitFor(); await p.getByText(/Pré-visualização da release 1/).waitFor() // a navegação no cliente mantém a faixa
+      await p.getByRole('link', { name: 'sair' }).click(); await p.getByRole('heading', { name: 'Versão nova' }).waitFor(); await expect.poll(() => p.locator('#pl-preview').count()).toBe(0)
+      // sem o cookie, outro visitante vê a produção
+      const outro = await (await ctx.browser()!.newContext()).newPage(); await outro.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await outro.getByRole('heading', { name: 'Versão nova' }).waitFor()
+      // o link no site de OUTRO tenant é recusado
+      expect((await get(l, 'loja-outra', caminho)).status).toBe(403)
+      expect(erros.join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('tema do site: escolher no Studio, publicar e o site passa a usar o CSS do tema (só neste tenant)', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
     const css = async (alias: string) => { const h = await (await get(l, alias, '/')).text(); const href = /href="(\/_polaris\/a\/[\w.-]+\.css)"/.exec(h)![1]!; return (await get(l, alias, href)).text() }
@@ -198,6 +220,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/studio#token=${ed}`); await p.getByRole('button', { name: 'Releases' }).click()
       await p.getByText('Em produção: release 2').first().waitFor(); await p.getByText(/release 1 · ana/).waitFor()
       await p.getByRole('button', { name: 'Diferenças com a produção' }).click(); await p.getByText(/~ pagina:site\.home/).waitFor() // a diferença entre a produção e a release 1
+      await p.getByRole('button', { name: 'Link de pré-visualização' }).last().click(); await p.getByRole('link', { name: /Abrir a pré-visualização da release 1/ }).waitFor(); expect(await p.getByRole('link', { name: /Abrir a pré-visualização/ }).getAttribute('href')).toMatch(/^\/_polaris\/preview\?t=v1\./) // o link do Studio
       await p.getByRole('button', { name: 'Voltar para a anterior (release 1)' }).click(); await p.getByText(/Em produção: release 1\. O site já usa/).first().waitFor()
       expect(await (await get(l, 'loja-demo', '/')).text()).toContain('Versão um') // o site voltou
       await p.getByRole('button', { name: 'Voltar para esta' }).first().click(); await p.getByText('Em produção: release 2').first().waitFor()

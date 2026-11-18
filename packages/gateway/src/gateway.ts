@@ -276,7 +276,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
 
   // --- GraphQL gerado -----------------------------------------------------------------------------------------------------------------------------
   if (o.graphql !== false) instalaGraphql(app, { servicos: o.servicos, chamador, entra: (req, c) => entra(req, c), obs, traduz, opcoes: o.graphql ?? {}, cobraTaxa: (req, ctx, custo) => limita(req as Req, ctx, custo), cache, publicaDaFonte })
-  if (o.paginas) instalaPaginas(app, o.paginas, { entra, programaDe: (c, id) => programaDe(c, id), opcoesCarga: (c, p, r, e, f) => opcoesCarga(c, p, r, e, f), registroDe: (c, f) => c.registro ?? f, registro: o.registry, log })
+  if (o.paginas) instalaPaginas(app, o.paginas, { entra, programaDe: (c, id) => programaDe(c, id), opcoesCarga: (c, p, r, e, f) => opcoesCarga(c, p, r, e, f), registroDe: (c, f) => c.registro ?? f, registro: o.registry, ...(o.preview ? { preview: o.preview } : {}), log })
   o.estende?.(app, { sessao: async (req) => { try { const c = await autentica(req as Req); return c.anonimo ? null : c } catch { return null } } })
   return app
 }

@@ -38,7 +38,7 @@ export function montaGateway(c: ConfigGateway, reg: Registry) {
     return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
       void app.register(async (inst) => {
         rotasEstaticasStudio(inst, dir)
-        rotasStudio(inst, { previsualiza, ...(releases ? { releases: {
+        rotasStudio(inst, { previsualiza, ...(prev ? { previewEmite: (t: string, r: number, ttl: number) => prev.emite(t, r, ttl) } : {}), ...(releases ? { releases: {
           lista: (t: string, n?: number) => releases.lista(t, n), producao: (t: string) => releases.producao(t), diferenca: (t: string, de: number, para: number) => releases.diferenca(t, de, para),
           rollback: async (t: string, autor: string, para?: number, nota?: string) => { const r = await releases.rollback(t, autor, para, nota); if (r.ok) tenants?.invalida(); return r }, // o diretório guarda a release de produção em cache
         } } : {}), ...(paginas ? { tenantNo: (t: string) => paginas.tenantNo({ tenantId: t }) } : {}), ...(releases ? { publicar: async (a: { tenantId: string; autor: string; nota?: string }) => {

@@ -29,10 +29,13 @@ export type DepsPaginas = {
   opcoesCarga(ctx: CtxGw, programa: Programa, req: FastifyRequest, extra: { params?: Record<string, unknown>; consulta?: Record<string, unknown> }, falhas?: unknown[]): Record<string, unknown>
   registroDe(ctx: CtxGw, fallback: Registry): Registry
   registro: Registry
+  /** links de pré-visualização assinados (o mesmo do `x-polaris-preview` do BFF); sem isto, `/_polaris/preview` não existe */
+  preview?: { verifica(token: string): { tenantId: string; release: number } | null; registro(tenantId: string, release: number): Promise<Registry | null> }
   log: { warn(m: string, c?: Record<string, unknown>): void }
 }
 
 export const COOKIE_SESSAO = 'polaris_sessao'
+export const COOKIE_PREVIEW = 'polaris_preview'
 const SESSAO_SEGUNDOS = 8 * 3600
 const TOKEN = /^[A-Za-z0-9_-]{4,3000}(\.[A-Za-z0-9_-]{1,3000}){2}$/
 /** o cookie é `HttpOnly` (o JavaScript da página não o lê), `SameSite=Lax` (não vai em POST de outro site) e SEM `Domain` (vale só para o host do tenant) */
@@ -42,6 +45,14 @@ const lerCookie = (h: string | undefined): string | null => {
   for (const par of h.split(';')) { const i = par.indexOf('='); if (i > 0 && par.slice(0, i).trim() === COOKIE_SESSAO) { const v = par.slice(i + 1).trim(); return TOKEN.test(v) ? v : null } }
   return null
 }
+const PREVIEW_SEGUNDOS = 24 * 3600
+const cookiePreview = (token: string | null, seguro = true) => `${COOKIE_PREVIEW}=${token ?? ''}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${token ? PREVIEW_SEGUNDOS : 0}${seguro ? '; Secure' : ''}`
+const lerPreview = (h: string | undefined): string | null => {
+  if (!h || h.length > 8192) return null
+  for (const par of h.split(';')) { const i = par.indexOf('='); if (i > 0 && par.slice(0, i).trim() === COOKIE_PREVIEW) { const v = par.slice(i + 1).trim(); return /^v1\.[A-Za-z0-9_-]{4,1500}\.[A-Za-z0-9_-]{20,200}$/.test(v) ? v : null } }
+  return null
+}
+const faixaPreview = (n: number) => `<div id="pl-preview" style="position:sticky;top:0;z-index:2147483647;background:#f59e0b;color:#111;padding:6px 12px;font:14px system-ui,sans-serif">Pré-visualização da release ${n} (não é o site publicado) · <a href="/_polaris/preview/sair" style="color:#111">sair</a></div>`
 const RESERVADO = /^\/(api|bff|studio|graphql|_polaris|metricas|saude)(\/|$)/
 const sha = (s: string) => createHash('sha256').update(s).digest('hex').slice(0, 16)
 const CSP = (nonce: string) => `default-src 'none'; script-src 'nonce-${nonce}' 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`
@@ -89,7 +100,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
   }
   const texto = (reply: FastifyReply, status: number, msg = NEGADO_TXT(status)) => reply.status(status).header('content-security-policy', "default-src 'none'; frame-ancestors 'none'").type('text/plain; charset=utf-8').send(msg)
 
-  async function renderiza(reply: FastifyReply, req: FastifyRequest, ctx: CtxGw, tenantNo: string, paginaId: string, status: number, params: Record<string, unknown>, idioma: string | undefined, reg: Registry) {
+  async function renderiza(reply: FastifyReply, req: FastifyRequest, ctx: CtxGw, tenantNo: string, paginaId: string, status: number, params: Record<string, unknown>, idioma: string | undefined, reg: Registry, previa: number | null = null) {
     let programa: Programa
     try { programa = d.programaDe(ctx, paginaId).programa } catch { return texto(reply, 500, 'a página tem erros e não pode ser exibida') }
     const clienteSrc = await clienteDe(programa)
@@ -104,7 +115,8 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     let primeiro: IteratorResult<string>
     try { primeiro = await it.next() } catch (e) { d.log.warn('página fora do runtime', { pagina: paginaId, erro: (e as Error).message }); return texto(reply, 501, 'a página usa recursos que o navegador ainda não suporta') }
     async function* resto() {
-      const solta = (c: string) => c.endsWith('</body></html>') ? c.slice(0, -'</body></html>'.length) + `<script nonce="${nonce}" src="${roteadorSrc}" data-pl-router async></script></body></html>` : c // o roteador entra no fim do documento
+      const solta = (c0: string) => { const c = previa === null ? c0 : c0.replace('<div id="polaris">', `${faixaPreview(previa)}<div id="polaris">`); return soltaRoteador(c) }
+      const soltaRoteador = (c: string) => c.endsWith('</body></html>') ? c.slice(0, -'</body></html>'.length) + `<script nonce="${nonce}" src="${roteadorSrc}" data-pl-router async></script></body></html>` : c // o roteador entra no fim do documento
       if (!primeiro.done) yield solta(primeiro.value)
       for (;;) { const n = await it.next(); if (n.done) return; yield solta(n.value) }
     }
@@ -123,6 +135,17 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
   })
   app.post('/_polaris/sair', async (_req, reply) => reply.status(204).header('set-cookie', cookieDeSessao(null, seguro)).send())
 
+  // ativar a pré-visualização: o link assinado vira um cookie HttpOnly (as páginas não mandam cabeçalho), só para o tenant do link; `sair` apaga
+  app.get<{ Querystring: { t?: string } }>('/_polaris/preview', async (req, reply) => {
+    if (!d.preview) return texto(reply, 404)
+    const v = typeof req.query.t === 'string' && req.query.t.length <= 2048 ? d.preview.verifica(req.query.t) : null
+    if (!v) return texto(reply, 401, 'o link de pré-visualização é inválido ou expirou')
+    const ctx = await d.entra(req)
+    if (v.tenantId !== ctx.tenantId) return texto(reply, 403, 'este link de pré-visualização é de outra conta')
+    return reply.header('set-cookie', cookiePreview(req.query.t!, seguro)).header('x-robots-tag', 'noindex, nofollow').redirect('/', 302)
+  })
+  app.get('/_polaris/preview/sair', async (_req, reply) => reply.header('set-cookie', cookiePreview(null, seguro)).redirect('/', 302))
+
   const trata = async (req: FastifyRequest, reply: FastifyReply) => {
     const [caminho = '/', ...q] = req.url.split('?'), consulta = q.join('?')
     if (RESERVADO.test(caminho)) return reply.status(404).send({ erro: { codigo: 'rota_inexistente', mensagem: 'rota inexistente' } })
@@ -137,6 +160,14 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     }
     const tenantNo = await o.tenantNo(ctx)
     if (!tenantNo) return texto(reply, 404)
+    // pré-visualização: com o cookie (válido e DESTE tenant) as páginas são as da release do link, não as de produção
+    let previa: number | null = null
+    const pc = d.preview ? lerPreview(req.headers.cookie) : null
+    if (pc && d.preview) {
+      const v = d.preview.verifica(pc), regP = v && v.tenantId === ctx.tenantId ? await d.preview.registro(v.tenantId, v.release) : null
+      if (v && regP) { ctx = { ...ctx, registro: regP, releaseChave: `v${v.release}` }; previa = v.release; reply.header('x-robots-tag', 'noindex, nofollow') }
+      else reply.header('set-cookie', cookiePreview(null, seguro)) // expirou, é de outro tenant ou a release não existe: some
+    }
     const reg = d.registroDe(ctx, d.registro)
     const tabela = tabelaDe(reg, ctx, tenantNo, ctx.releaseChave ?? 'unico')
     if (!tabela) return texto(reply, 404)
@@ -144,9 +175,9 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     switch (r.tipo) {
       case 'redireciona': return reply.redirect(r.para, r.status)
       case 'invalida': return texto(reply, 400, 'requisição inválida')
-      case 'negado': return r.pagina ? renderiza(reply, req, ctx, tenantNo, r.pagina, r.status, {}, undefined, reg) : texto(reply, r.status)
-      case 'nao-encontrada': return r.pagina ? renderiza(reply, req, ctx, tenantNo, r.pagina, 404, {}, undefined, reg) : texto(reply, 404)
-      case 'pagina': return renderiza(reply, req, ctx, tenantNo, r.pagina, 200, r.params, r.idioma || undefined, reg)
+      case 'negado': return r.pagina ? renderiza(reply, req, ctx, tenantNo, r.pagina, r.status, {}, undefined, reg, previa) : texto(reply, r.status)
+      case 'nao-encontrada': return r.pagina ? renderiza(reply, req, ctx, tenantNo, r.pagina, 404, {}, undefined, reg, previa) : texto(reply, 404)
+      case 'pagina': return renderiza(reply, req, ctx, tenantNo, r.pagina, 200, r.params, r.idioma || undefined, reg, previa)
     }
   }
   app.get('/favicon.ico', async (_req, reply) => reply.status(204).header('cache-control', 'public, max-age=86400').send()) // sem ícone próprio ainda: 204, não um 404 em todo carregamento

@@ -21,6 +21,7 @@ export const DADOS = [
   dado('site', 'obterSite', {}, 'auto'),
   dado('definetema', 'definirTemaDoSite', { tema: campo('texto', { obrigatorio: true }) }),
   dado('releases', 'listarReleases', {}),
+  dado('linkprev', 'linkDePreview', { release: campo('inteiro', { obrigatorio: true }), horas: campo('inteiro') }),
   dado('voltar', 'voltarRelease', { para: campo('inteiro'), nota: campo('texto') }),
   dado('diffrel', 'compararReleases', { de: campo('inteiro', { obrigatorio: true }), para: campo('inteiro', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
@@ -178,8 +179,14 @@ const releasesVista = (): Inst => pilha([
   linha([
     texto('release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? " · " + r.nota : ""}{r.numero == releases.producao ? " · EM PRODUÇÃO" : ""}'),
     botao('Diferenças com a produção', [exe('diffrel', { de: '{releases.producao}', para: '{r.numero}' }, undefined, aviso('erro', 'erro'))], { se: 'releases.producao && r.numero != releases.producao' }),
+    botao('Link de pré-visualização', [exe('linkprev', { release: '{r.numero}' }, [def('linkPrevia', 'objeto([["release", r.numero], ["caminho", resultado.caminho], ["horas", resultado.expiraEmHoras]])')], aviso('erro', 'erro'))]),
     botao('Voltar para esta', [exe('voltar', { para: '{r.numero}' }, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { se: 'r.numero != releases.producao' }),
   ], { repetir: { cada: 'releases.releases ?? []', como: 'r', chave: 'texto(r.numero)' } }),
+  pilha([
+    texto('Pré-visualização da release {estado.linkPrevia.release}: abra o link (vale {estado.linkPrevia.horas} h; quem tiver o link vê o site dessa release, sem login). Para encerrar, abra /_polaris/preview/sair.'),
+    P('nav/link', { props: { href: '{estado.linkPrevia.caminho}', texto: 'Abrir a pré-visualização da release {estado.linkPrevia.release}' } }),
+    texto('{estado.linkPrevia.caminho}'),
+  ], { se: 'estado.linkPrevia', gap: 2 }),
   pilha([
     titulo('Diferenças (produção → esta)', 4),
     texto('Sem diferenças.', { se: 'tamanho(diffrel.adicionados ?? []) + tamanho(diffrel.removidos ?? []) + tamanho(diffrel.alterados ?? []) == 0' }),
@@ -241,10 +248,10 @@ const formCriar = (): Inst => linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
+  dados: { nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    painel: { tipo: 'texto', inicial: '' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    painel: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },

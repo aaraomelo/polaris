@@ -91,7 +91,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw)
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)
-    const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
+    const gw = montaGateway(configGateway({ ...jwt, POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_PREVIEW_SEGREDO: 'polaris-local-preview-segredo-de-desenvolvimento-0123', POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
     const chave = new TextEncoder().encode(SEGREDO_LOCAL)
     const token = async (alias: string, papeis: readonly string[], usuario = 'dev') => {
       const t = TENANTS_LOCAIS.find((x) => x.alias === alias); if (!t) throw new Error(`tenant desconhecido: ${alias}`)

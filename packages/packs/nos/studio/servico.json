@@ -192,6 +192,19 @@
             "tipo": "json"
           }
         }
+      },
+      "linkPreview": {
+        "campos": {
+          "caminho": {
+            "tipo": "texto"
+          },
+          "release": {
+            "tipo": "inteiro"
+          },
+          "expiraEmHoras": {
+            "tipo": "inteiro"
+          }
+        }
       }
     },
     "operacoes": {
@@ -470,6 +483,21 @@
           }
         },
         "saida": "diffReleases",
+        "permissao": "studio"
+      },
+      "linkDePreview": {
+        "metodo": "POST",
+        "caminho": "/releases/preview",
+        "entrada": {
+          "release": {
+            "tipo": "inteiro",
+            "obrigatorio": true
+          },
+          "horas": {
+            "tipo": "inteiro"
+          }
+        },
+        "saida": "linkPreview",
         "permissao": "studio"
       }
     }

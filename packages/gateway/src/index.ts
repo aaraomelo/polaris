@@ -5,4 +5,4 @@ export { ErroGw, criaGateway, traduz, type CtxGw, type Gateway, type OpcoesGatew
 export { geraSchema, type OpcoesGraphql } from './graphql'
 export { LimiteTaxa, type OpcoesTaxa } from './taxa'
 export type { InfoTenant, PreviewDeRelease, RegistrosDeTenant, ResolvedorTenant, StatusTenant } from './tenants'
-export { COOKIE_SESSAO, cookieDeSessao, type OpcoesPaginas } from './paginas'
+export { COOKIE_PREVIEW, COOKIE_SESSAO, cookieDeSessao, type OpcoesPaginas } from './paginas'

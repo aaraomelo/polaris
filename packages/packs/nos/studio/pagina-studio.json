@@ -317,6 +317,30 @@
  },
  {
   "kind": "dados",
+  "id": "studio.linkprev",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "linkDePreview"
+   },
+   "parametros": {
+    "release": {
+     "tipo": "inteiro",
+     "obrigatorio": true
+    },
+    "horas": {
+     "tipo": "inteiro"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.voltar",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -463,6 +487,7 @@
     "site": "studio.site",
     "releases": "studio.releases",
     "voltar": "studio.voltar",
+    "linkprev": "studio.linkprev",
     "diffrel": "studio.diffrel",
     "definetema": "studio.definetema"
    },
@@ -490,6 +515,9 @@
     "painel": {
      "tipo": "texto",
      "inicial": ""
+    },
+    "linkPrevia": {
+     "tipo": "json"
     },
     "modoPrevia": {
      "tipo": "texto",
@@ -1137,6 +1165,42 @@
             },
             {
              "bloco": "nav/botao",
+             "props": {
+              "texto": "Link de pré-visualização"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "linkprev",
+                "args": {
+                 "release": "{r.numero}"
+                },
+                "depois": [
+                 {
+                  "acao": "definir",
+                  "estado": "linkPrevia",
+                  "valor": "objeto([[\"release\", r.numero], [\"caminho\", resultado.caminho], [\"horas\", resultado.expiraEmHoras]])"
+                 }
+                ],
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "tipoAviso",
+                  "valor": "\"erro\""
+                 },
+                 {
+                  "acao": "definir",
+                  "estado": "aviso",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
              "se": "r.numero != releases.producao",
              "props": {
               "texto": "Voltar para esta"
@@ -1179,6 +1243,36 @@
                 ]
                }
               ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "layout/pilha",
+          "se": "estado.linkPrevia",
+          "props": {
+           "gap": 2
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/paragrafo",
+             "props": {
+              "texto": "Pré-visualização da release {estado.linkPrevia.release}: abra o link (vale {estado.linkPrevia.horas} h; quem tiver o link vê o site dessa release, sem login). Para encerrar, abra /_polaris/preview/sair."
+             }
+            },
+            {
+             "bloco": "nav/link",
+             "props": {
+              "href": "{estado.linkPrevia.caminho}",
+              "texto": "Abrir a pré-visualização da release {estado.linkPrevia.release}"
+             }
+            },
+            {
+             "bloco": "texto/paragrafo",
+             "props": {
+              "texto": "{estado.linkPrevia.caminho}"
              }
             }
            ]
