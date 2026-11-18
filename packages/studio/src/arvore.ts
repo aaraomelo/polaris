@@ -123,3 +123,9 @@ export function renomeiaId(raiz: Inst, c: Caminho, id: string | undefined): Resu
 }
 /** blocos que o slot aceita (para o menu "adicionar") */
 export const permitidos = (todos: string[], d: DefSlot | undefined): string[] => (d?.aceita ? todos.filter((b) => d.aceita!.includes(b)) : todos)
+
+/** um id ainda livre na página, a partir de uma base (`titulo` → `titulo-1`, `titulo-2`…) */
+export function idLivre(raiz: Inst, base: string): string {
+  const b = (base.split('/').pop() ?? 'bloco').replace(/[^A-Za-z0-9_-]/g, '') || 'bloco', usados = new Set([...percorre(raiz)].flatMap((x) => (x.inst.id !== undefined ? [x.inst.id] : [])))
+  const inicio = /^[A-Za-z]/.test(b) ? b : `b${b}`; let n = 1; while (usados.has(`${inicio}-${n}`)) n++; return `${inicio}-${n}`
+}

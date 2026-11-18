@@ -19,6 +19,8 @@ export async function migraPlataforma(o: { urlMigrador: string; papelPlataforma:
     // leitura e escrita nas tabelas de estado; as imutáveis (no_versao, release, release_evento) só ganham SELECT e INSERT (o gatilho já recusa o resto)
     await c.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON plataforma.tenant, plataforma.etapa, plataforma.modulo, plataforma.dominio, plataforma.release_ponteiro TO ${o.papelPlataforma}`)
     await c.query(`GRANT SELECT, INSERT ON plataforma.no_versao, plataforma.release, plataforma.release_evento TO ${o.papelPlataforma}`)
+    // comentários do Studio: criar e resolver (UPDATE); ninguém apaga
+    await c.query(`GRANT SELECT, INSERT, UPDATE ON plataforma.comentario TO ${o.papelPlataforma}`)
     const n = Number((await c.query(`SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = 'plataforma'`)).rows[0]!.n)
     await c.query('COMMIT'); return { tabelas: n }
   } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e } finally { await c.end() }

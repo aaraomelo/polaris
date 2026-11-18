@@ -5,21 +5,25 @@ import { criaAjv, traduzTodos, type Erro } from '@polaris/schema'
 export type TipoCampo = 'texto' | 'numero' | 'inteiro' | 'booleano' | 'escolha' | 'objeto' | 'lista' | 'json'
 export type Campo = {
   nome: string; caminho: string[]; tipo: TipoCampo; rotulo: string; obrigatorio: boolean
-  descricao?: string; padrao?: unknown; opcoes?: unknown[]; min?: number; max?: number; formato?: string
+  descricao?: string; padrao?: unknown; opcoes?: unknown[]; min?: number; max?: number; formato?: string; regex?: string
   filhos?: Campo[]; item?: Campo
 }
 type S = Record<string, any>
 
-const rotulo = (nome: string): string => { const s = nome.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1) }
+/** acentuação que não dá para deduzir do nome da propriedade (o schema pode dar `title`, que tem precedência) */
+const ROTULOS_PT: Record<string, string> = { nivel: 'Nível', descricao: 'Descrição', numero: 'Número', padrao: 'Padrão', acao: 'Ação', titulo: 'Título', conteudo: 'Conteúdo', endereco: 'Endereço', preco: 'Preço', codigo: 'Código', observacao: 'Observação', variacao: 'Variação', opcoes: 'Opções', quantidade: 'Quantidade', largura: 'Largura', altura: 'Altura', espacamento: 'Espaçamento', alinhamento: 'Alinhamento', rotulo: 'Rótulo', condicao: 'Condição', funcao: 'Função', secao: 'Seção', botao: 'Botão', imagem: 'Imagem', pagina: 'Página', usuario: 'Usuário', excecao: 'Exceção' }
+const rotulo = (nome: string): string => {
+  if (Object.hasOwn(ROTULOS_PT, nome)) return ROTULOS_PT[nome]!
+  const s = nome.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1) }
 const simples = (s: S): boolean => !(s.oneOf || s.anyOf || s.allOf || s.$ref || s.not || s.if || Array.isArray(s.type))
 
 function campoDe(nome: string, s: S, caminho: string[], obrigatorio: boolean, prof: number): Campo {
-  const base = { nome, caminho, rotulo: rotulo(nome), obrigatorio, ...(typeof s.description === 'string' ? { descricao: s.description } : {}), ...(s.default !== undefined ? { padrao: s.default } : {}) }
+  const base = { nome, caminho, rotulo: typeof s.title === 'string' && s.title ? s.title : rotulo(nome), obrigatorio, ...(typeof s.description === 'string' ? { descricao: s.description } : {}), ...(s.default !== undefined ? { padrao: s.default } : {}) }
   if (prof > 4 || !simples(s)) return { ...base, tipo: 'json' }
   if (Array.isArray(s.enum)) return { ...base, tipo: 'escolha', opcoes: s.enum }
   if (s.const !== undefined) return { ...base, tipo: 'escolha', opcoes: [s.const] }
   switch (s.type) {
-    case 'string': return { ...base, tipo: 'texto', ...(typeof s.format === 'string' ? { formato: s.format } : {}) }
+    case 'string': return { ...base, tipo: 'texto', ...(typeof s.format === 'string' ? { formato: s.format } : {}), ...(typeof s.pattern === 'string' ? { regex: s.pattern } : {}) }
     case 'number': case 'integer': return { ...base, tipo: s.type === 'integer' ? 'inteiro' : 'numero', ...(typeof s.minimum === 'number' ? { min: s.minimum } : {}), ...(typeof s.maximum === 'number' ? { max: s.maximum } : {}) }
     case 'boolean': return { ...base, tipo: 'booleano' }
     case 'object': return s.properties && typeof s.properties === 'object' ? { ...base, tipo: 'objeto', filhos: camposDe(s, caminho, prof + 1) } : { ...base, tipo: 'json' }
@@ -95,3 +99,20 @@ function tiraBindings(v: unknown, caminho: string[], achados: Set<string>): unkn
   return v
 }
 const paraErroCampo = (e: Erro): ErroCampo => ({ caminho: e.caminho.split('/').filter(Boolean), mensagem: e.mensagem, ...(e.dica ? { dica: e.dica } : {}) })
+
+/** props mínimas que fazem um bloco NOVO ser válido: os campos obrigatórios com um valor razoável (o schema manda: enum → primeira opção, número → mínimo, texto → o rótulo do campo) */
+export function propsIniciais(schema: S | undefined): Record<string, unknown> {
+  if (!schema) return {}
+  let out: Record<string, unknown> = {}
+  for (const c of camposDe(schema).filter((x) => x.obrigatorio)) {
+    const v = c.padrao !== undefined ? c.padrao : c.tipo === 'texto' ? textoQueCasa(c) : c.tipo === 'numero' || c.tipo === 'inteiro' ? (c.min ?? 0) : c.tipo === 'booleano' ? false : c.tipo === 'escolha' ? c.opcoes?.[0] : c.tipo === 'lista' ? [] : c.tipo === 'objeto' ? {} : undefined
+    if (v !== undefined) out = defineValor(out, c.caminho, v)
+  }
+  return out
+}
+
+function textoQueCasa(c: Campo): string {
+  if (!c.regex) return c.rotulo
+  let re: RegExp; try { re = new RegExp(c.regex) } catch { return c.rotulo }
+  return [c.rotulo, c.rotulo.toLowerCase(), 'exemplo', 'a', 'a1', 'a-1'].find((t) => re.test(t)) ?? c.rotulo
+}

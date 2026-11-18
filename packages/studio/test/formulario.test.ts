@@ -1,7 +1,7 @@
 import { Registry } from '@polaris/schema'
 import { registraBase } from '@polaris/engine'
 import { describe, expect, it } from 'vitest'
-import { camposDe, converte, defineValor, ehBinding, leValor, validaProps } from '../src'
+import { camposDe, converte, propsIniciais, defineValor, ehBinding, leValor, validaProps } from '../src'
 
 const reg = new Registry(); registraBase(reg)
 const blocos = reg.ids('bloco')
@@ -22,6 +22,10 @@ describe('formulário gerado do schema', () => {
     expect(cs.map((c) => [c.nome, c.tipo])).toEqual([['a', 'json'], ['b', 'json'], ['c', 'objeto'], ['d', 'lista'], ['e', 'json'], ['f', 'json'], ['g', 'json'], ['h', 'escolha']])
     expect(cs[2]!.filhos!.map((c) => c.caminho)).toEqual([['c', 'x'], ['c', 'y']]); expect(cs[3]!.item).toMatchObject({ tipo: 'texto', caminho: ['d', '*'] }); expect(cs[0]!.obrigatorio).toBe(true)
     expect(camposDe({}).length).toBe(0)
+  })
+  it('rótulo: `title` do schema, depois o dicionário acentuado, depois o nome separado em palavras', () => {
+    const r = camposDe({ type: 'object', properties: { nivel: { type: 'integer' }, corFundo: { type: 'string' }, x: { type: 'string', title: 'Meu campo' }, descricao: { type: 'string', title: 'Resumo' } } }).map((c) => c.rotulo)
+    expect(r).toEqual(['Nível', 'Cor fundo', 'Meu campo', 'Resumo'])
   })
   it('aninhamento profundo demais vira json (sem laço)', () => {
     let s: any = { type: 'string' }; for (let i = 0; i < 10; i++) s = { type: 'object', properties: { x: s } }
@@ -57,5 +61,10 @@ describe('formulário gerado do schema', () => {
     expect(validaProps(p, { texto: '{dados.t}', nivel: '{estado.n}' })).toEqual([]); expect(validaProps(p, { texto: { $expr: { var: 'x' } } })).toEqual([])
     expect(validaProps(p, { nivel: '{estado.n}' })[0]!.mensagem).toMatch(/obrigatório/) // texto continua faltando
     expect(validaProps(p, undefined).length).toBe(1)
+  })
+  it('propsIniciais: um bloco novo nasce válido (obrigatórios com valor razoável), para TODO bloco base', () => {
+    for (const id of blocos) { const p = props(id); if (!p) continue; const ini = propsIniciais(p); expect(validaProps(p, ini), id).toEqual([]) }
+    expect(propsIniciais(props('texto/titulo')!)).toEqual({ texto: 'Texto' }); expect(propsIniciais(undefined)).toEqual({})
+    expect(propsIniciais({ type: 'object', required: ['n', 'e', 'b', 'o', 'l'], properties: { n: { type: 'integer', minimum: 3 }, e: { enum: ['x', 'y'] }, b: { type: 'boolean' }, o: { type: 'object', properties: { a: { type: 'string' } } }, l: { type: 'array', items: { type: 'string' } } } })).toEqual({ n: 3, e: 'x', b: false, o: {}, l: [] })
   })
 })

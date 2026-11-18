@@ -1,0 +1,27 @@
+:root{--bg:#f6f7f9;--fg:#15181d;--mut:#5b6472;--bd:#d5d9e0;--card:#fff;--pri:#1d4ed8;--pri-fg:#fff;--err:#b42318;--ok:#067647;--warn:#b54708;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#10131a;--fg:#e8ebf0;--mut:#9aa4b2;--bd:#2c3340;--card:#171b24;--pri:#6b8cff;--pri-fg:#0b0f19;--err:#ff8a80;--ok:#5fd39a;--warn:#ffb86b}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}button{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;cursor:pointer}button:hover:not(:disabled){border-color:var(--pri)}button:disabled{opacity:.5;cursor:not-allowed}
+button.primario{background:var(--pri);color:var(--pri-fg);border-color:var(--pri)}button.perigo{color:var(--err)}button.mini{padding:0 6px;font-size:12px}
+input,select,textarea{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;max-width:100%}input[aria-invalid=true]{border-color:var(--err)}
+:focus-visible{outline:2px solid var(--pri);outline-offset:1px}
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.topo{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);flex-wrap:wrap}.topo h1{font-size:16px;margin:0 8px 0 0}.espaco{flex:1}.estado{color:var(--mut);min-width:170px}
+.abas{display:flex;gap:4px;padding:6px 12px 0}.abas button{border-bottom-left-radius:0;border-bottom-right-radius:0}.abas button[aria-selected=true]{background:var(--pri);color:var(--pri-fg);border-color:var(--pri)}
+.aviso-area{padding:0 12px;min-height:8px}.aviso{margin:6px 0;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--card)}.aviso.ok{border-color:var(--ok)}.aviso.erro,.aviso.conflito{border-color:var(--err);color:var(--err)}.aviso ul{margin:4px 0 0 18px}
+main{padding:8px 12px 24px}.vazio{color:var(--mut)}.desc,.ajuda{color:var(--mut);font-size:12px}.erro{color:var(--err)}.ok{color:var(--ok)}
+.tres-colunas{display:grid;grid-template-columns:minmax(220px,300px) minmax(280px,1fr) minmax(260px,340px);gap:12px;align-items:start}.duas-colunas{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:12px;align-items:start}
+@media (max-width:900px){.tres-colunas,.duas-colunas{grid-template-columns:1fr}}
+section[aria-label]{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px}
+.preview{width:100%;height:70vh;min-height:320px;border:0;background:#fff;border-radius:6px}.preview-erros{color:var(--err);padding:8px}
+.arvore-lista{max-height:50vh;overflow:auto;border:1px solid var(--bd);border-radius:6px}.no{padding:3px 8px;cursor:pointer;display:flex;gap:6px;align-items:center}.no:hover{background:color-mix(in srgb,var(--pri) 10%,transparent)}.no.ativo{background:var(--pri);color:var(--pri-fg)}
+.no-id{opacity:.75}.selo{font-size:12px;margin-left:auto}.barra{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}.adicionar{display:grid;gap:6px;margin-top:8px}
+.campo{display:grid;gap:2px;margin:8px 0}.campo label{font-weight:600}.grupo{border:1px solid var(--bd);border-radius:6px;margin:8px 0}.erros{color:var(--err);margin:8px 0;padding-left:18px}
+.props h2{font-size:15px;margin:0 0 4px}.props h2 small{color:var(--mut);font-weight:400}
+.versoes{width:100%;border-collapse:collapse}.versoes th,.versoes td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--bd)}.versoes .removida{opacity:.6}
+.diff .mud{margin:4px 0}.diff ins{background:color-mix(in srgb,var(--ok) 25%,transparent);text-decoration:none}.diff del{background:color-mix(in srgb,var(--err) 25%,transparent)}
+.mud.adicionado>strong{color:var(--ok)}.mud.removido>strong{color:var(--err)}.mud.movido>strong,.mud.reordenado>strong{color:var(--warn)}
+.fio{border:1px solid var(--bd);border-radius:6px;padding:6px 8px;margin:6px 0}.fio.resolvido{opacity:.65}.comentario{margin:4px 0}.orfao{color:var(--warn)}
+.token{display:flex;gap:6px;align-items:center;margin:4px 0;flex-wrap:wrap}.token label{min-width:110px}.token.herdado{opacity:.75}.amostra{width:20px;height:20px;border:1px solid var(--bd);border-radius:4px;display:inline-block}
+.novo-token,.novo-no{display:flex;gap:6px;align-items:end;flex-wrap:wrap;margin:8px 0;padding:8px 12px}.novo-no label{display:grid;gap:2px}
+.barra-modo{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.barra-modo button[aria-selected=true]{background:var(--pri);color:var(--pri-fg)}

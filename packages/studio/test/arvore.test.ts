@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { atualiza, caminhoDeId, contaNos, duplica, idsDuplicados, insere, LIMITES, move, noEm, percorre, remove, renomeiaId, trocaProps, type Caminho, type DefBloco, type Inst } from '../src'
+import { idLivre, atualiza, caminhoDeId, contaNos, duplica, idsDuplicados, insere, LIMITES, move, noEm, percorre, remove, renomeiaId, trocaProps, type Caminho, type DefBloco, type Inst } from '../src'
 
 const DEFS: Record<string, { slots?: Record<string, any> }> = {
   caixa: { slots: { filhos: {}, lado: { max: 1 } } }, folha: {}, so: { slots: { itens: { aceita: ['folha'] } } }, minimo: { slots: { filhos: { min: 1 } } },
@@ -65,6 +65,9 @@ describe('árvore de instâncias', () => {
     expect(noEm(ok(renomeiaId(raiz, c(['filhos', 0]), 'novo')), c(['filhos', 0]))!.id).toBe('novo'); expect(renomeiaId(raiz, c(['filhos', 0]), 'b')).toMatchObject({ ok: false }); expect(renomeiaId(raiz, c(['filhos', 0]), '1x')).toMatchObject({ ok: false })
     expect('id' in noEm(ok(renomeiaId(raiz, c(['filhos', 0]), undefined)), c(['filhos', 0]))!).toBe(false); expect(renomeiaId(raiz, c(['filhos', 0]), 'a')).toMatchObject({ ok: true })
     expect(atualiza(raiz, c(['filhos', 9]), (i) => i)).toMatchObject({ ok: false }); expect(caminhoDeId(raiz, 'd')).toEqual(c(['filhos', 1], ['filhos', 1])); expect(caminhoDeId(raiz, 'zz')).toBeUndefined()
+  })
+  it('idLivre: sufixo crescente, limpa o nome e não colide', () => {
+    expect(idLivre(raiz, 'texto/titulo')).toBe('titulo-1'); expect(idLivre(K('r', F('titulo-1'), F('titulo-2')), 'texto/titulo')).toBe('titulo-3'); expect(idLivre(raiz, '9x')).toBe('b9x-1'); expect(idLivre(raiz, '###')).toBe('bloco-1')
   })
   it('limites: profundidade e quantidade de blocos', () => {
     let fundo: Inst = F('f0'); for (let i = 1; i < LIMITES.profundidade; i++) fundo = K(`k${i}`, fundo)
