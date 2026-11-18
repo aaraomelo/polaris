@@ -1,6 +1,8 @@
 process.env.POLARIS_LOG_NIVEL = 'silencio'
 import { vi } from 'vitest'
 vi.setConfig({ testTimeout: 90_000, hookTimeout: 90_000 })
+import { registraBase } from '@polaris/engine'
+import { registraTemas } from '@polaris/engine/tema'
 import { PGlite } from '@electric-sql/pglite'
 import { criaAutenticadorJwt } from '@polaris/acesso'
 import type { Consulta, DbTenant } from '@polaris/eventos'
@@ -21,7 +23,8 @@ const erros = (o: Partial<PedidoCadastro>) => { const r = planoDeCadastro(reg, p
 
 describe('packs de fábrica: o catálogo de segmentos é íntegro', () => {
   it('toda referência resolve e toda semente bate com o contrato do serviço (se quebrasse, o cadastro quebraria em produção)', () => {
-    expect(reg.verificaTudo().filter((x) => x.erros.length)).toEqual([])
+    const completo = reg.derivado(); registraBase(completo); registraTemas(completo) // as páginas do pack studio usam os blocos base: a verificação vê o mesmo registro que o servidor
+    expect(completo.verificaTudo().filter((x) => x.erros.length)).toEqual([])
     for (const id of reg.ids('pack')) expect(validaEstrutura(reg, reg.resolve('pack', id)!.no), id).toEqual([])
   })
   it('o cadastro lista só os segmentos públicos, em ordem; a base financeira é oculta e o varejo vem pré-marcado', () => {
