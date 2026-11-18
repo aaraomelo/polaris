@@ -1434,6 +1434,38 @@ Aplica os patches em sequência. Atômico: qualquer patch inválido (forma, cami
 | `aplica(a, difere(a, b))` | `{"a":{"x":1},"b":{"x":2,"y":[1]}}` | `{"x":2,"y":[1]}` |
 | `aplica(a, ps)` | `{"a":{},"ps":[{"op":1}]}` | _(ausente)_ |
 
+### `percorre`
+
+`percorre(raiz, chave) → lista de { caminho, no, nivel }`
+
+Todos os nós de uma árvore em pré-ordem. Os filhos de um nó estão em `no[chave]`: uma lista de nós, ou um objeto cujas chaves levam a listas de nós (slots). `caminho` é o do nó DENTRO do documento, pronto para `obter`, `com`, `sem` e `insere`. Entrada que não é objeto, ou árvore grande demais, é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mapeia(percorre(r, "filhos"), n => n.no.id)` | `{"r":{"id":"a","filhos":[{"id":"b"},{"id":"c","filhos":[{"id":"d"}]}]}}` | `["a","b","c","d"]` |
+| `mapeia(percorre(r, "slots"), n => n.caminho)` | `{"r":{"id":"a","slots":{"x":[{"id":"b"}]}}}` | `[[],["slots","x",0]]` |
+| `mapeia(percorre(r, "filhos"), n => n.nivel)` | `{"r":{"filhos":[{"filhos":[{}]},{}]}}` | `[0,1,2,1]` |
+| `percorre(5, "filhos")` |  | _(ausente)_ |
+| `percorre(r, "__proto__")` | `{"r":{}}` | _(ausente)_ |
+
+**Leis** (testadas com entradas aleatórias):
+- `igual(percorre(r, "filhos")[0].no, r)`
+- `percorre(r, "filhos")[0].nivel == 0`
+
+### `camposDoSchema`
+
+`camposDoSchema(schema) → lista de campos`
+
+Os campos de um JSON Schema de objeto, na ordem de declaração, com objetos aninhados achatados (caminho completo; rótulo `Pai › Filho`): `{ nome, caminho, rotulo, tipo, obrigatorio, descricao?, padrao?, opcoes?, min?, max?, regex? }`. `tipo` é texto, numero, inteiro, booleano, escolha ou json (o que o schema não descreve com simplicidade vira json: nunca some). O `title` do schema vale como rótulo. Serve para gerar formulários.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mapeia(camposDoSchema(s), c => c.tipo)` | `{"s":{"type":"object","properties":{"a":{"type":"string"},"n":{"type":"integer","minimum":1},"b":{"type":"boolean"},"e":{"enum":["x","y"]},"z":{"oneOf":[{"type":"string"},{"type":"number"}]}}}}` | `["texto","inteiro","booleano","escolha","json"]` |
+| `mapeia(camposDoSchema(s), c => c.caminho)` | `{"s":{"type":"object","properties":{"o":{"type":"object","properties":{"x":{"type":"number"}}}}}}` | `[["o","x"]]` |
+| `camposDoSchema(s)[0].rotulo` | `{"s":{"type":"object","properties":{"nivel":{"type":"integer"}}}}` | `"Nível"` |
+| `camposDoSchema(s)[0].obrigatorio` | `{"s":{"type":"object","required":["t"],"properties":{"t":{"type":"string","title":"Texto"}}}}` | `true` |
+| `camposDoSchema(5)` |  | _(ausente)_ |
+
 ### `inverso`
 
 `inverso(patches) → patches`

@@ -274,6 +274,19 @@ export const REGISTRO: Def[] = [
   { nome: 'aplica', tipo: 'funcao', assinatura: "aplica(x, patches) → x'", descricao: 'Aplica os patches em sequência. Atômico: qualquer patch inválido (forma, caminho, tipo) torna o resultado ausente e nada é aplicado.', exemplos: [
     { expr: 'aplica(a, difere(a, b))', esc: { a: { x: 1 }, b: { x: 2, y: [1] } }, saida: { x: 2, y: [1] } }, { expr: 'aplica(a, ps)', esc: { a: {}, ps: [{ op: 1 }] }, indefinido: U },
   ] },
+  { nome: 'percorre', tipo: 'funcao', assinatura: 'percorre(raiz, chave) → lista de { caminho, no, nivel }', descricao: 'Todos os nós de uma árvore em pré-ordem. Os filhos de um nó estão em `no[chave]`: uma lista de nós, ou um objeto cujas chaves levam a listas de nós (slots). `caminho` é o do nó DENTRO do documento, pronto para `obter`, `com`, `sem` e `insere`. Entrada que não é objeto, ou árvore grande demais, é ausente.', exemplos: [
+    { expr: 'mapeia(percorre(r, "filhos"), n => n.no.id)', esc: { r: { id: "a", filhos: [{ id: "b" }, { id: "c", filhos: [{ id: "d" }] }] } }, saida: ['a', 'b', 'c', 'd'] },
+    { expr: 'mapeia(percorre(r, "slots"), n => n.caminho)', esc: { r: { id: 'a', slots: { x: [{ id: 'b' }] } } }, saida: [[], ['slots', 'x', 0]] },
+    { expr: 'mapeia(percorre(r, "filhos"), n => n.nivel)', esc: { r: { filhos: [{ filhos: [{}] }, {}] } }, saida: [0, 1, 2, 1] },
+    { expr: 'percorre(5, "filhos")', indefinido: U }, { expr: 'percorre(r, "__proto__")', esc: { r: {} }, indefinido: U },
+  ], leis: [{ expr: 'igual(percorre(r, "filhos")[0].no, r)', gera: { r: 'objeto' } }, { expr: 'percorre(r, "filhos")[0].nivel == 0', gera: { r: 'objeto' } }] },
+  { nome: 'camposDoSchema', tipo: 'funcao', assinatura: 'camposDoSchema(schema) → lista de campos', descricao: 'Os campos de um JSON Schema de objeto, na ordem de declaração, com objetos aninhados achatados (caminho completo; rótulo `Pai › Filho`): `{ nome, caminho, rotulo, tipo, obrigatorio, descricao?, padrao?, opcoes?, min?, max?, regex? }`. `tipo` é texto, numero, inteiro, booleano, escolha ou json (o que o schema não descreve com simplicidade vira json: nunca some). O `title` do schema vale como rótulo. Serve para gerar formulários.', exemplos: [
+    { expr: 'mapeia(camposDoSchema(s), c => c.tipo)', esc: { s: { type: 'object', properties: { a: { type: 'string' }, n: { type: 'integer', minimum: 1 }, b: { type: 'boolean' }, e: { enum: ['x', 'y'] }, z: { oneOf: [{ type: 'string' }, { type: 'number' }] } } } }, saida: ['texto', 'inteiro', 'booleano', 'escolha', 'json'] },
+    { expr: 'mapeia(camposDoSchema(s), c => c.caminho)', esc: { s: { type: 'object', properties: { o: { type: 'object', properties: { x: { type: 'number' } } } } } }, saida: [['o', 'x']] },
+    { expr: 'camposDoSchema(s)[0].rotulo', esc: { s: { type: 'object', properties: { nivel: { type: 'integer' } } } }, saida: 'Nível' },
+    { expr: 'camposDoSchema(s)[0].obrigatorio', esc: { s: { type: 'object', required: ['t'], properties: { t: { type: 'string', title: 'Texto' } } } }, saida: true },
+    { expr: 'camposDoSchema(5)', indefinido: U },
+  ] },
   { nome: 'inverso', tipo: 'funcao', assinatura: 'inverso(patches) → patches', descricao: 'Os patches que DESFAZEM: ordem inversa, `add` ↔ `remove`, `replace` troca `valor` e `antes`. Exige o valor antigo nos patches (os de `difere` já o trazem).', exemplos: [
     { expr: 'inverso(difere(a, b))', esc: { a: { x: 1 }, b: { x: 2 } }, saida: [{ op: 'replace', caminho: ['x'], valor: 1, antes: 2 }] },
   ], leis: [{ expr: 'igual(aplica(b, inverso(difere(a, b))), a)', gera: { a: 'json', b: 'json' } }] },

@@ -1,4 +1,5 @@
 import * as E from '../estado/caminho'
+import { camposDoSchema, percorre } from './arvore'
 import { LIMITES_EXPR, type Funcao } from './tipos'
 
 // Biblioteca padrão: funções puras e totais (nunca lançam; entrada inválida → undefined ou texto vazio).
@@ -85,6 +86,8 @@ function patchesDe(v: unknown, exigeAntes = false): E.Patch[] | undefined {
   return v as E.Patch[]
 }
 
+export const f_percorre: Funcao = { min: 2, max: 2, fn: (raiz, chave) => percorre(raiz, chave) }
+export const f_camposDoSchema: Funcao = { min: 1, max: 1, fn: (schema) => camposDoSchema(schema) }
 export const f_igual: Funcao = { min: 2, max: 2, fn: (a, b) => igualProfundo(a, b) }
 // árvore de estado imutável, por caminho (lista de chaves de texto e índices): ver src/estado/caminho.ts
 export const f_obter: Funcao = { min: 2, max: 3, fn: (x, c, d) => { if (!E.caminhoValido(c)) return undefined; const r = E.obter(x, c); return r === undefined || r === null ? d : r } }
