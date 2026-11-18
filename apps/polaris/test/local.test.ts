@@ -352,6 +352,8 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(await p.locator('header nav a[aria-current=page]').allInnerTexts()).toEqual(['Início']); expect(await h.locator(':scope > a').last().getAttribute('href')).toBe('/entrar')
       await p.evaluate(() => { (window as any).__marca = 'mesma' }); await p.getByRole('link', { name: 'Sobre' }).click(); await p.waitForURL(/\/sobre$/)
       await p.waitForFunction(() => document.querySelector('header nav a[aria-current=page]')?.textContent === 'Sobre'); expect(await p.evaluate(() => (window as any).__marca)).toBe('mesma') // trocou no cliente, o atual acompanhou
+      expect(await p.locator('footer nav').evaluateAll((ns) => ns.map((n) => n.getAttribute('aria-label')))).toEqual(['Loja', 'Ajuda']); expect(await p.locator('footer small').innerText()).toBe('© 2026 Minha loja')
+      expect(await p.evaluate(() => { const f = document.querySelector('footer')!, r = f.getBoundingClientRect(); return r.top > document.querySelector('header')!.getBoundingClientRect().bottom && !f.nextElementSibling && getComputedStyle(f).borderTopWidth === '1px' })).toBe(true) // o rodapé vem depois do conteúdo, por último, estilizado pelo tema
       const css = await p.evaluate(() => { const e = document.querySelector('header')!, c = getComputedStyle(e); return { display: c.display, borda: c.borderBottomWidth } }); expect(css).toEqual({ display: 'flex', borda: '1px' }) // o tema estiliza o cabeçalho
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }

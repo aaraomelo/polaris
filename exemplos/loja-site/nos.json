@@ -92,6 +92,41 @@
                 "cada": "destaques",
                 "como": "d"
               }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Página inicial",
+                        "href": "/"
+                      },
+                      {
+                        "texto": "Catálogo (gerente)",
+                        "href": "/produtos"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ],
+                "contato": "contato@exemplo.com",
+                "copyright": "© 2026 Minha loja"
+              }
             }
           ]
         }
@@ -161,6 +196,41 @@
               "props": {
                 "texto": "Esta página é declarada em JSON e renderizada pela plataforma, com os dados do tenant."
               }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Página inicial",
+                        "href": "/"
+                      },
+                      {
+                        "texto": "Catálogo (gerente)",
+                        "href": "/produtos"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ],
+                "contato": "contato@exemplo.com",
+                "copyright": "© 2026 Minha loja"
+              }
             }
           ]
         }
@@ -222,6 +292,41 @@
               "props": {
                 "texto": "Página não encontrada",
                 "nivel": 1
+              }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Página inicial",
+                        "href": "/"
+                      },
+                      {
+                        "texto": "Catálogo (gerente)",
+                        "href": "/produtos"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ],
+                "contato": "contato@exemplo.com",
+                "copyright": "© 2026 Minha loja"
               }
             }
           ]
@@ -361,6 +466,41 @@
               "repetir": {
                 "cada": "produtos",
                 "como": "p"
+              }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Página inicial",
+                        "href": "/"
+                      },
+                      {
+                        "texto": "Catálogo (gerente)",
+                        "href": "/produtos"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ],
+                "contato": "contato@exemplo.com",
+                "copyright": "© 2026 Minha loja"
               }
             }
           ]
@@ -528,6 +668,41 @@
               "bloco": "form/formulario",
               "props": {
                 "formulario": "contato"
+              }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Página inicial",
+                        "href": "/"
+                      },
+                      {
+                        "texto": "Catálogo (gerente)",
+                        "href": "/produtos"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ],
+                "contato": "contato@exemplo.com",
+                "copyright": "© 2026 Minha loja"
               }
             }
           ]

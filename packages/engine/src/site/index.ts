@@ -9,7 +9,7 @@ const instancia = (bloco: string, props: Record<string, unknown>, slots?: Record
 
 const linkProp = { type: 'object', properties: { texto: { type: 'string', maxLength: 80 }, href: { type: 'string', maxLength: 500 }, atual: { type: 'boolean', description: 'a página aberta (aria-current)' } }, required: ['texto', 'href'] }
 
-export const BLOCOS_SITE = [
+const BLOCOS_CABECALHO = [
   no('bloco', 'site.cabecalho', {
     interface: 'site/cabecalho', titulo: 'Cabeçalho do site',
     descricao: 'Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação (`links`, com `atual` na página aberta) e o slot `acoes` à direita (ex.: botão de entrar ou carrinho). `fixo` o mantém no topo ao rolar. Usa `<header>` e `<nav>` (pontos de referência para leitores de tela) e só variáveis do tema.',
@@ -36,4 +36,37 @@ export const BLOCOS_SITE = [
   }),
 ]
 
+const colunaProp = { type: 'object', properties: { titulo: { type: 'string', maxLength: 80 }, links: { type: 'array', maxItems: 12, items: linkProp } }, required: ['titulo'] }
+
+const BLOCOS_RODAPE = [
+  no('bloco', 'site.rodape', {
+    interface: 'site/rodape', titulo: 'Rodapé do site',
+    descricao: 'Fim da página: colunas de links (cada uma com título e um menu próprio, com nome acessível), uma linha de contato/endereço, o aviso legal (`copyright`) e o slot `extra` para o que a página quiser (ex.: um formulário de assinatura). Usa `<footer>` e `<nav>` e só variáveis do tema.',
+    props: { type: 'object', properties: {
+      colunas: { type: 'array', maxItems: 6, items: colunaProp, description: 'grupos de links' }, contato: { type: 'string', maxLength: 300, description: 'telefone, e-mail ou endereço, numa linha' },
+      copyright: { type: 'string', maxLength: 300, description: 'aviso legal, ex.: © 2026 Minha loja' },
+    } },
+    slots: { extra: {} },
+    exemplos: [
+      { titulo: 'Colunas e aviso', instancia: instancia('site/rodape', { colunas: [{ titulo: 'Loja', links: [{ texto: 'Produtos', href: '/produtos' }, { texto: 'Contato', href: '/contato' }] }, { titulo: 'Ajuda', links: [{ texto: 'Sobre', href: '/sobre' }] }], contato: 'contato@exemplo.com · (11) 4000-0000', copyright: '© 2026 Minha loja' }) },
+      { titulo: 'Só o aviso, com extra', instancia: instancia('site/rodape', { copyright: '© 2026 Minha loja' }, { extra: [{ bloco: 'nav/link', props: { href: '/termos', texto: 'Termos de uso' } }] }) },
+    ],
+    modelo: { bloco: 'layout/rodape', slots: { filhos: [
+      { bloco: 'layout/grade', se: 'tamanho(props.colunas ?? []) > 0', props: { colunas: '{tamanho(props.colunas ?? [])}', gap: 24 }, slots: { filhos: [
+        { bloco: 'layout/pilha', repetir: { cada: 'props.colunas ?? []', como: 'c', chave: 'c.titulo' }, props: { gap: 8 }, slots: { filhos: [
+          { bloco: 'texto/destaque', props: { texto: '{c.titulo}' } },
+          { bloco: 'nav/menu', se: 'tamanho(c.links ?? []) > 0', props: { rotulo: '{c.titulo}' }, slots: { filhos: [
+            { bloco: 'nav/link', repetir: { cada: 'c.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+          ] } },
+        ] } },
+      ] } },
+      { bloco: 'core/slot', props: { nome: 'extra' } },
+      { bloco: 'texto/paragrafo', se: 'props.contato', props: { texto: '{props.contato}' } },
+      { bloco: 'layout/divisor', se: 'props.copyright' },
+      { bloco: 'texto/pequeno', se: 'props.copyright', props: { texto: '{props.copyright}' } },
+    ] } },
+  }),
+]
+
+export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE]
 export function registraSite(reg: Registry): void { for (const n of BLOCOS_SITE) reg.registra(n as never) }

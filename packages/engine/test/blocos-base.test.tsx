@@ -43,6 +43,7 @@ const CASOS: Array<[string, object]> = [
   ['nav/link', P('nav/link', { id: 'b', props: { href: 'https://a.com', texto: 'a' } })],
   ['nav/link (atual)', P('nav/link', { id: 'b', props: { href: '/a', texto: 'a', atual: true } })],
   ['layout/cabecalho (fixo) com nav/menu', P('layout/cabecalho', { id: 'b', props: { fixo: true }, slots: { filhos: [P('nav/menu', { props: { rotulo: 'Seções' }, slots: { filhos: [P('nav/link', { props: { href: '/a', texto: 'A', atual: true } })] } })] } })],
+  ['layout/rodape', P('layout/rodape', { id: 'b', slots: { filhos: [par('© 2026')] } })],
   ['layout/cabecalho e nav/menu (padrões)', P('layout/pilha', { slots: { filhos: [P('layout/cabecalho', { id: 'b' }), P('nav/menu')] } })],
   ['entrada/texto', P('entrada/texto', { id: 'b', props: { valor: 'v', placeholder: 'p' } })],
   ['layout/linha', P('layout/linha', { id: 'b', props: { gap: 4, alinha: 'centro' }, slots: { filhos: [par('a'), par('b')] } })],

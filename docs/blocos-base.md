@@ -1,12 +1,13 @@
 # Biblioteca base de blocos
 
-28 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+29 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
 | layout | `layout/pilha`, `layout/linha` | `gap`, `alinha` | `filhos` | |
 | layout | `layout/grade` | `colunas` (1–12, padrão 2), `gap` | `filhos` | |
 | layout | `layout/cabecalho` | `fixo` (fica no topo ao rolar) | `filhos` | |
+| layout | `layout/rodape` | | `filhos` | |
 | layout | `layout/divisor` | | | |
 | layout | `layout/espacador` | `tamanho` (px, padrão 8) | | |
 | texto | `texto/titulo` | `texto`, `nivel` (1–6) | | |
@@ -43,10 +44,16 @@
 - inclui a seção do tema com as amostras de cor e a auditoria de contraste.
 Para documentar um bloco novo (ou de um tenant), basta pôr `titulo`, `descricao` e `exemplos` no nó; `--nos <dir>` inclui nós extras e `--tema <id>` escolhe o tema do preview.
 
-## Cabeçalho do site
+## Cabeçalho e rodapé do site
 `layout/cabecalho` emite `<header>` e `nav/menu` emite `<nav aria-label>`: pontos de referência para leitores de tela, estilizados pelo tema só com variáveis (`#polaris header`, `header[data-fixo]` sticky, `nav a[aria-current=page]` em negrito sublinhado). Em cima deles, o bloco **composto** `site/cabecalho` (`registraSite`, `@polaris/engine/site`, 100% declarativo: `modelo` sobre os blocos base):
 - `titulo` e/ou `logo` (URL segura) formam a **marca**, que leva a `href` (padrão `/`);
 - `links` (`[{ texto, href, atual? }]`, até 12) viram o menu; sem links não há `<nav>` vazio; `rotuloMenu` nomeia o menu; `fixo` o mantém no topo;
 - o slot `acoes` fica à direita (botão de entrar, carrinho…): o modelo não tem estado nem eventos, então o que depende da página entra por ali.
 Texto vem escapado e link inseguro (`javascript:`) perde o `href`. Há paridade React × runtime vivo × HTML estático, exemplos no catálogo e verificação no Chrome (console limpo, CSP, acessibilidade, celular, modo escuro) pelo E2E dos blocos. O site de exemplo (`exemplos/loja-site`) o usa em todas as páginas, marcando `atual` na rota aberta.
 **Limites**: `atual` é declarado (a página diz qual é a sua; o bloco não descobre a rota sozinho); sem menu recolhível no celular (os links quebram de linha); sem submenus; sem estado de sessão (o "Entrar"/"Sair" é uma ação que a página escolhe).
+
+**Rodapé**: `layout/rodape` emite `<footer>` (estilizado com variáveis do tema: `#polaris footer`, links em cor suave) e o composto `site/rodape` monta, sobre os blocos base:
+- `colunas` (até 6, `[{ titulo, links[{ texto, href }] }]`): cada uma vira um título e um `<nav>` próprio, **com o título como nome acessível** (leitor de tela anuncia "Loja, navegação"); a grade tem uma coluna por grupo; coluna sem links não gera `<nav>` vazio;
+- `contato` (uma linha: telefone, e-mail, endereço), um divisor e o aviso legal `copyright` (só aparecem se informados);
+- o slot `extra` para o que a página quiser (assinatura de e-mail, selos…).
+Mesmas garantias do cabeçalho (texto escapado, link inseguro sem `href`, paridade nas três saídas, exemplos verificados no Chrome). **Limites**: as colunas não se reorganizam por largura de tela (a grade é fixa; no celular ficam estreitas); sem ícones de redes sociais (use o slot `extra`); `contato` é texto simples, sem links automáticos.

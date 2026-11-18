@@ -39,7 +39,7 @@ describe('blocos nativos do cabeçalho', () => {
 
 describe('site/cabecalho', () => {
   it('é um nó válido; a marca liga ao início, o menu tem um link por item e só o `atual` leva aria-current', () => {
-    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho']); expect(novoReg().ids('bloco')).toContain('site/cabecalho')
+    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape']))
     const d = ssr(pagina(cab({ titulo: 'Loja Demo', links: LINKS })))
     const h = d.querySelector('header')!; expect(h).toBeTruthy(); const marca = h.querySelector(':scope > a')!; expect(marca.getAttribute('href')).toBe('/'); expect(marca.textContent).toBe('Loja Demo')
     const links = [...h.querySelectorAll('nav a')]; expect(links.map((a) => a.textContent)).toEqual(['Início', 'Produtos', 'Contato']); expect(links.map((a) => a.getAttribute('href'))).toEqual(['/', '/produtos', '/contato'])
@@ -66,4 +66,37 @@ describe('site/cabecalho', () => {
     const r = geraCatalogo(novoReg()); expect(r.erros).toEqual([]); expect(r.markdown).toContain('site/cabecalho'); expect(r.markdown).toContain('layout/cabecalho')
     const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/#polaris header\{[^}]*var\(--cor-superficie\)/); expect(css).toMatch(/#polaris nav a\[aria-current=page\]/); expect(css).toMatch(/header\[data-fixo\]\{position:sticky/)
   })
+})
+
+const rod = (props: object, extra?: object[]) => ({ bloco: 'site/rodape', props, ...(extra ? { slots: { extra } } : {}) })
+const COLUNAS = [{ titulo: 'Loja', links: [{ texto: 'Produtos', href: '/produtos' }, { texto: 'Contato', href: '/contato' }] }, { titulo: 'Ajuda', links: [{ texto: 'Sobre', href: '/sobre' }] }]
+
+describe('layout/rodape e site/rodape', () => {
+  it('layout/rodape é <footer> (landmark), com os filhos dentro', () => {
+    const d = ssr(pagina({ bloco: 'layout/pilha', slots: { filhos: [{ bloco: 'layout/rodape', id: 'r', slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: 'fim' } }] } }] } }))
+    const f = d.querySelector('footer')!; expect(f.id).toBe('r'); expect(f.textContent).toBe('fim')
+  })
+  it('colunas: um grupo por coluna (título + <nav> com o título como nome), links na ordem, contato, divisor e aviso legal', () => {
+    const d = ssr(pagina(rod({ colunas: COLUNAS, contato: 'contato@exemplo.com', copyright: '© 2026 Minha loja' })))
+    const f = d.querySelector('footer')!; const navs = [...f.querySelectorAll('nav')]
+    expect(navs.map((n) => n.getAttribute('aria-label'))).toEqual(['Loja', 'Ajuda']); expect(navs.map((n) => [...n.querySelectorAll('a')].map((a) => a.textContent).join('|'))).toEqual(['Produtos|Contato', 'Sobre'])
+    expect([...navs[0]!.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(['/produtos', '/contato'])
+    expect(f.querySelector('strong')!.textContent).toBe('Loja'); expect(f.textContent).toContain('contato@exemplo.com'); expect(f.querySelector('hr')).toBeTruthy(); expect(f.querySelector('small')!.textContent).toBe('© 2026 Minha loja')
+    expect(f.querySelector('div[style*="grid-template-columns:repeat(2"]')).toBeTruthy() // uma coluna de grade por grupo
+  })
+  it('só o que foi dado aparece: sem colunas não há grade nem <nav>, sem aviso não há divisor; o slot extra entra', () => {
+    const d = ssr(pagina(rod({ copyright: '© x' }, [{ bloco: 'nav/link', props: { href: '/termos', texto: 'Termos' } }])))
+    const f = d.querySelector('footer')!; expect(f.querySelector('nav')).toBeNull(); expect(f.querySelector('div[style*=grid]')).toBeNull(); expect(f.querySelector('a')!.textContent).toBe('Termos')
+    const v = ssr(pagina(rod({}))); expect(v.querySelector('footer')!.querySelector('hr')).toBeNull(); expect(v.querySelector('footer')!.textContent).toBe('')
+  })
+  it('texto escapado e link inseguro sem href; coluna sem links não gera <nav> vazio', () => {
+    const d = ssr(pagina(rod({ colunas: [{ titulo: '<b>x</b>', links: [{ texto: 'Ruim', href: 'javascript:alert(1)' }] }, { titulo: 'Vazia' }], copyright: '<img src=x onerror=alert(1)>' })))
+    expect(d.querySelector('b')).toBeNull(); expect(d.querySelector('img')).toBeNull(); expect(d.querySelector('nav a')!.hasAttribute('href')).toBe(false); expect(d.querySelectorAll('nav')).toHaveLength(1)
+  })
+  it('paridade React × runtime vivo × estático', () => {
+    const pg = pagina(rod({ colunas: COLUNAS, contato: 'a@b.c', copyright: '© 2026' }, [{ bloco: 'nav/link', props: { href: '/termos', texto: 'Termos' } }]))
+    const oraculo = [...ssr(pg).childNodes].map(canon).join(''), h = compilaHtmlVivo(pg); if (!h.ok) throw new Error(JSON.stringify(h.motivos))
+    expect(doHtml(h.pagina.render({}).corpo)).toBe(oraculo); const c = document.createElement('div'); montaVivo({ programa: pg, container: c }); expect([...c.childNodes].map(canon).join('')).toBe(oraculo)
+  })
+  it('o tema estiliza footer só com variáveis', () => { const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/#polaris footer\{[^}]*var\(--cor-superficie\)/); expect(css).toMatch(/#polaris footer a:hover/) })
 })

@@ -97,6 +97,9 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/cabecalho': { titulo: 'Cabeçalho', descricao: 'Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.', exemplos: [
     { titulo: 'Com título e menu', instancia: { bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Minha loja' } }, { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início' } }] } }] } } },
   ] },
+  'layout/rodape': { titulo: 'Rodapé', descricao: 'Faixa do fim da página (`<footer>`): ponto de referência para leitores de tela, com informações do site (contato, links, aviso legal).', exemplos: [
+    { titulo: 'Com aviso', instancia: { bloco: 'layout/rodape', slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: '© 2026 Minha loja' } }] } } },
+  ] },
   'nav/menu': { titulo: 'Menu', descricao: 'Grupo de links de navegação (`<nav>`), com nome acessível em `rotulo` (padrão "Principal"). Use `atual` no link da página aberta.', exemplos: [
     { titulo: 'Dois links', instancia: { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início', atual: true } }, { bloco: 'nav/link', props: { href: '/sobre', texto: 'Sobre' } }] } } },
   ] },
