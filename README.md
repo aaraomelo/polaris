@@ -29,7 +29,7 @@ O mesmo vale para um serviço (entidades, CRUD, operações → API HTTP, tabela
 | Multi-tenant: domínio próprio, módulos, overrides, releases, preview | `packages/packs`, `packages/gateway` | pronto |
 | Documentos declarativos (HTML e PDF com paridade testada) | `packages/documentos` | pronto |
 | Kernels (JS, WebAssembly, GLSL, PTX) com paridade entre backends | `packages/computacao` | pronto; **PTX nunca rodou em GPU real** |
-| Studio: editor de páginas e temas, histórico, diff semântico, comentários | `apps/studio`, `packages/studio` | funcional; **falta o fluxo de login** (veja `docs/studio.md`) |
+| Studio: editor de páginas e temas, histórico, diff semântico, comentários; **ele próprio é uma página da plataforma** | `apps/studio`, `packages/packs/nos/studio` | funcional; **falta o fluxo de login** e alguns recursos da versão anterior (veja `docs/studio.md`) |
 | Deploy (compose por ambiente, nginx/TLS, segredos por arquivo) | `docker/`, `scripts/deploy.sh` | escrito e testado em análise estática; **sem VPS real** e sem `nginx -t` real |
 
 O exemplo mínimo de ponta a ponta está em `exemplos/loja`.
