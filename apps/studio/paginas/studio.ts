@@ -81,9 +81,9 @@ const novoToken = (): Inst => linha([
 const editorDeTema = (): Inst => pilha([
   titulo('Tokens do tema {estado.aberto.id}', 3),
   linha([
-    texto('Tema do site: {site.tema ?? "padrao (o padrão da plataforma)"}'),
+    texto('Tema do site: {site.tema ?? "padrao (o padrão da plataforma)"}', { se: 'site.configuravel' }),
     botao('Usar este tema no site', [exe('definetema', { tema: '{estado.aberto.id}' }, [...aviso('sucesso', '"Tema do site: " + resultado.tema + ". Publique para o site mudar."'), exe('site')], aviso('erro', 'erro'))],
-      { se: 'igual(estado.no, estado.noSalvo) && estado.aberto.origem != "novo" && site.tema != estado.aberto.id' }),
+      { se: 'site.configuravel && igual(estado.no, estado.noSalvo) && estado.aberto.origem != "novo" && site.tema != estado.aberto.id' }),
   ], { props: { gap: 12 } }),
   P('layout/grade', { props: { colunas: 2, gap: 16 }, filhos: [
     pilha([pilha([titulo('{g}', 4), linhaToken(), novoToken()], { repetir: { cada: 'filtra(["cor", "espacamento", "raio"], g => estado.no.spec.tokens[g])', como: 'g', chave: 'g' }, gap: 4 })], { gap: 12 }),

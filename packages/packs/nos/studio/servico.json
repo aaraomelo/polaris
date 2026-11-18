@@ -135,6 +135,9 @@
           },
           "temas": {
             "tipo": "json"
+          },
+          "configuravel": {
+            "tipo": "booleano"
           }
         }
       },

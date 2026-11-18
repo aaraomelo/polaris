@@ -2255,13 +2255,14 @@
            "filhos": [
             {
              "bloco": "texto/paragrafo",
+             "se": "site.configuravel",
              "props": {
               "texto": "Tema do site: {site.tema ?? \"padrao (o padrão da plataforma)\"}"
              }
             },
             {
              "bloco": "nav/botao",
-             "se": "igual(estado.no, estado.noSalvo) && estado.aberto.origem != \"novo\" && site.tema != estado.aberto.id",
+             "se": "site.configuravel && igual(estado.no, estado.noSalvo) && estado.aberto.origem != \"novo\" && site.tema != estado.aberto.id",
              "props": {
               "texto": "Usar este tema no site"
              },

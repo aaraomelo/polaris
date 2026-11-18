@@ -131,18 +131,19 @@ describe('API de autoria do Studio', () => {
     await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(A, 'ana'), payload: { no: comDados } }); expect(JSON.stringify(chamadas.at(-1).blocosDoTenant)).toContain('rascunho do A')
     await a2.inject({ method: 'POST', url: '/studio/previa', headers: h(B, 'bia'), payload: { no: comDados } }); expect(JSON.stringify(chamadas.at(-1).blocosDoTenant)).not.toContain('rascunho do A'); await a2.close()
   })
-  it('site: lê e troca o tema do site (override do nó `tenant`, só `tema` muda); tema inexistente é 422; sem tenantNo é 501; só editor escreve', async () => {
-    expect((await app.inject({ url: '/studio/site', headers: h(A, 'ana') })).statusCode).toBe(501)
+  it('site: lê e troca o tema do site (override do nó `tenant`, só `tema` muda); tema inexistente é 422; sem tenantNo não é configurável; só editor escreve', async () => {
+    const sem = await app.inject({ url: '/studio/site', headers: h(A, 'ana') }); expect([sem.statusCode, sem.json().configuravel, sem.json().tema]).toEqual([200, false, null])
     base.registra({ kind: 'tenant', id: 'lojaa', versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'lojaa', segmento: 'varejo', modulos: ['loja'], paginas: [] } })
     base.registra({ kind: 'tema', id: 'azul', versao: '1.0.0', estatuto: 'publicado', spec: { tokens: { cor: { primaria: '#123456' } } } })
+    expect((await app.inject({ method: 'PUT', url: '/studio/site', headers: h(A, 'ana'), payload: { tema: 'azul' } })).statusCode).toBe(501) // sem tenantNo: nada a gravar
     const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, tenantNo: (t) => (t === A ? 'lojaa' : undefined) })
     const get = (t = h(A, 'ana', 'ver')) => a2.inject({ url: '/studio/site', headers: t }), put = (corpo: unknown, t = h(A, 'ana')) => a2.inject({ method: 'PUT', url: '/studio/site', headers: t, payload: corpo as never })
-    const g0 = (await get()).json(); expect(g0.tema).toBeNull(); expect(g0.temas).toContain('azul')
+    const g0 = (await get()).json(); expect(g0.tema).toBeNull(); expect(g0.configuravel).toBe(true); expect(g0.temas).toContain('azul')
     const ok = await put({ tema: 'azul' }); expect([ok.statusCode, ok.json().tema]).toEqual([200, 'azul'])
     expect((await get()).json().tema).toBe('azul')
     const cab = (await armazem.cabecas(A)).find((c) => c.kind === 'tenant' && c.id === 'lojaa')!; expect((cab.conteudo as any).spec).toMatchObject({ alias: 'lojaa', modulos: ['loja'], tema: 'azul' });
     expect((await put({ tema: 'nao-existe' })).statusCode).toBe(422); expect((await put({ tema: 'azul', modulos: [] })).statusCode).toBe(400); expect((await put({ tema: "x'; --" })).statusCode).toBe(400)
-    expect((await put({ tema: 'azul' }, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await get(h(B, 'bia', 'ver'))).statusCode).toBe(501) // B não tem nó de site
+    expect((await put({ tema: 'azul' }, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await get(h(B, 'bia', 'ver'))).json().configuravel).toBe(false) // B não tem nó de site
     // a rota genérica continua NÃO aceitando sobrescrever o nó `tenant`
     expect((await app.inject({ method: 'PUT', url: '/studio/nos/tenant/lojaa', headers: h(A, 'ana'), payload: { no: { kind: 'tenant', id: 'lojaa' } } })).statusCode).toBe(400); await a2.close()
   })

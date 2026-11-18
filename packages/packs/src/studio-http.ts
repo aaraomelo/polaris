@@ -182,10 +182,10 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   }
   app.get('/studio/site', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
-    const site = await noDoSite(s.tenantId); if (!site) return erro(reply, 501, 'nao_implementado', 'este tenant não tem site configurável')
+    const site = await noDoSite(s.tenantId) // sem nó de site (ou sem `tenantNo`) não é erro: o Studio só esconde a escolha
     const base = await o.baseDe(s.tenantId), cabs = await o.armazem.cabecas(s.tenantId)
     const temas = [...new Set([...base.ids('tema' as never), ...cabs.filter((c) => c.kind === 'tema').map((c) => c.id)])].filter((t) => !t.startsWith('studio.')).sort()
-    return { tema: ((site.no.spec as { tema?: string } | undefined)?.tema) ?? null, temas }
+    return { tema: ((site?.no.spec as { tema?: string } | undefined)?.tema) ?? null, temas, configuravel: !!site }
   })
   app.put('/studio/site', { bodyLimit: 1024 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply
