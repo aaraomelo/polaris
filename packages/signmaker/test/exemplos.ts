@@ -20,3 +20,6 @@ export const SPEC_VARIADO: Record<string, any> = {
 
 export const NO_ETIQUETA = JSON.parse(readFileSync(new URL('../../schema/test/exemplos/validos/cartaz-etiqueta.json', import.meta.url), 'utf8')) as { kind: string; id: string; spec: Record<string, any> }
 export const DADOS_ETIQUETA = { produto: { nome: 'Café Torrado e Moído 500 g', ean: '7891000100103' }, link: 'https://exemplo.com.br/p/7891000100103?ref=etiqueta' }
+
+export const NO_PRECO = JSON.parse(readFileSync(new URL('../../schema/test/exemplos/validos/cartaz-preco.json', import.meta.url), 'utf8')) as { kind: string; id: string; spec: Record<string, any> }
+export const DADOS_PRECO = { produto: { nome: 'Feijão Carioca Tipo 1 1kg', unidade: 'KG' }, preco: { de: '12.9', por: '1234.5' } }

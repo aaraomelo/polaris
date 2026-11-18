@@ -1,0 +1,7 @@
+[
+  {
+    "caminho": "/spec/elementos/2/centavos/escala",
+    "regra": "maximum",
+    "mensagem": "must be <= 1"
+  }
+]

@@ -630,6 +630,212 @@
                 "description": "fração do LADO (padrão 0,06)"
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tipo",
+              "caixa",
+              "valor"
+            ],
+            "properties": {
+              "tipo": {
+                "const": "preco"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][A-Za-z0-9_-]{0,40}$",
+                "description": "identificador do elemento (único na peça)"
+              },
+              "se": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "condição sobre os dados (caminho, ou !caminho): o elemento só aparece se verdadeira"
+              },
+              "caixa": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "topo",
+                  "largura",
+                  "altura"
+                ],
+                "properties": {
+                  "topo": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da ALTURA da peça"
+                  },
+                  "esquerda": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da esquerda)"
+                  },
+                  "direita": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 2,
+                    "description": "fração da LARGURA da peça (a partir da direita); use esquerda OU direita"
+                  },
+                  "largura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "altura": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  }
+                },
+                "description": "a caixa do elemento, em FRAÇÕES da peça (0 a 1): o mesmo layout serve a todos os tamanhos"
+              },
+              "rotacao": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "description": "graus, ANTI-HORÁRIO, em torno do meio da borda esquerda da caixa"
+              },
+              "alinhaH": {
+                "enum": [
+                  "esquerda",
+                  "centro",
+                  "direita"
+                ],
+                "default": "centro"
+              },
+              "alinhaV": {
+                "enum": [
+                  "topo",
+                  "meio",
+                  "base"
+                ],
+                "default": "meio"
+              },
+              "cor": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 255
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "description": "[R, G, B], 0 a 255"
+              },
+              "fonte": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "familia": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "peso": {
+                    "enum": [
+                      "normal",
+                      "negrito"
+                    ]
+                  }
+                }
+              },
+              "tamanho": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "min": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 400
+                  },
+                  "max": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 400
+                  }
+                },
+                "description": "limites do ajuste, em pt (padrão 6 a 300)"
+              },
+              "valor": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "modelo com o preço em decimal exato, ex.: {preco.por}; vira 1.234 + ,50 sem passar por número de ponto flutuante"
+              },
+              "separadorMilhar": {
+                "type": "string",
+                "maxLength": 1,
+                "default": "."
+              },
+              "centavos": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "escala": {
+                    "type": "number",
+                    "minimum": 0.2,
+                    "maximum": 1,
+                    "default": 0.6,
+                    "description": "tamanho dos centavos em relação aos reais"
+                  },
+                  "posicao": {
+                    "enum": [
+                      "alto",
+                      "base"
+                    ],
+                    "default": "alto",
+                    "description": "alto: o topo dos centavos alinha com o topo dos algarismos"
+                  }
+                }
+              },
+              "unidade": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "texto"
+                ],
+                "properties": {
+                  "texto": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "description": "ex.: {produto.unidade}; aparece miúda sob os centavos"
+                  },
+                  "escala": {
+                    "type": "number",
+                    "minimum": 0.05,
+                    "maximum": 1,
+                    "default": 0.22,
+                    "description": "em relação ao tamanho dos centavos"
+                  }
+                }
+              },
+              "riscado": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "espessura": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 50,
+                    "default": 2
+                  },
+                  "cor": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 255
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "[R, G, B], 0 a 255"
+                  }
+                },
+                "description": "traço em diagonal sobre o preço (preço antigo)"
+              }
+            }
           }
         ]
       }

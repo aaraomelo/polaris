@@ -6,7 +6,7 @@ import { PNG } from 'pngjs'
 import { chromium, type Browser } from 'playwright-core'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { fonteDe, htmlDe, largura, layoutCartaz, pdfDe, type Layout } from '../src'
-import { DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
+import { DADOS_PRECO, NO_PRECO, DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
 
 // PARIDADE: o MESMO cartaz sai em HTML e PDF; o HTML é aberto num Chrome de verdade e o PDF é rasterizado/lido pelo poppler, e os dois são comparados
 // (1) palavra a palavra, por posição (só texto SEM rotação: o poppler dá a caixa do texto girado de outro jeito) e (2) por pixel, que cobre o texto girado e as formas.
@@ -60,6 +60,12 @@ function doPdf(pdf: Uint8Array, girados: Regiao[]): { palavras: Palavra[]; imgs:
   for (let i = 1; ; i++) { const c = [`${base}-${i}.png`, `${base}-${String(i).padStart(2, '0')}.png`].find(existsSync); if (!c) break; imgs.push(readFileSync(c)) }
   return { palavras, imgs }
 }
+/** o poppler cola em UMA palavra pedaços que se tocam na mesma linha (os reais e os centavos ao lado: "12" + ",90"); o mesmo vale para o Chrome, para comparar igual */
+function junta(ws: Palavra[]): Palavra[] {
+  const out: Palavra[] = []
+  for (const w of ws) { const a = out.find((q) => q.pag === w.pag && Math.abs(q.y - w.y) < 0.05 && w.x0 - q.x1 >= -0.3 && w.x0 - q.x1 < 0.5); if (a) { a.t += w.t; a.x1 = w.x1 } else out.push({ ...w }) }
+  return out
+}
 const dist = (w: Palavra, q: Palavra) => Math.max(Math.abs(w.x0 - q.x0), Math.abs(w.x1 - q.x1), Math.abs(w.y - q.y))
 function pior(a: Palavra[], b: Palavra[]): number {
   if (a.length !== b.length) return Infinity
@@ -98,6 +104,10 @@ const CASOS: Array<[string, Record<string, any>, unknown]> = [
   ['etiqueta A6: EAN-13 e QR code', NO_ETIQUETA.spec, DADOS_ETIQUETA],
   ['etiqueta A4 retrato', { ...NO_ETIQUETA.spec, tamanho: 'A4', orientacao: 'retrato' }, DADOS_ETIQUETA],
   ['códigos girados em 90°', { ...NO_ETIQUETA.spec, elementos: NO_ETIQUETA.spec.elementos.map((e: any) => (e.tipo === 'texto' ? e : { ...e, rotacao: 90 })) }, DADOS_ETIQUETA],
+  ['preço: reais, centavos altos, unidade e preço antigo riscado', NO_PRECO.spec, DADOS_PRECO],
+  ['preço A4 retrato com milhar', { ...NO_PRECO.spec, tamanho: 'A4', orientacao: 'retrato' }, { ...DADOS_PRECO, preco: { de: '1999.9', por: '1499.99' } }],
+  ['preço girado em 90° (sem texto por perto)', { ...NO_PRECO.spec, elementos: NO_PRECO.spec.elementos.filter((e: any) => e.tipo === 'preco').map((e: any) => ({ ...e, rotacao: 90 })) }, DADOS_PRECO],
+  ['preço antigo girado em 20°', { ...NO_PRECO.spec, elementos: NO_PRECO.spec.elementos.map((e: any) => (e.id === 'antigo' ? { ...e, rotacao: 20 } : e)) }, DADOS_PRECO],
   ['variado: girado, translúcido, arredondado, alinhamentos, Roboto', SPEC_VARIADO, { nome: 'Promoção da Semana' }],
 ]
 
@@ -108,8 +118,8 @@ describe.skipIf(!PRONTO)('paridade HTML × PDF do cartaz', () => {
       const l = layoutCartaz(spec, dados), html = htmlDe(l), pdf = await pdfDe(l, new Date(0))
       const c = await doChrome(html), p = doPdf(pdf, palavrasGiradas(l))
       if (process.env.PARIDADE_SALVA) { writeFileSync(join(process.env.PARIDADE_SALVA, `${nome.replace(/\W+/g, '-')}-chrome.png`), c.imgs[0]!); writeFileSync(join(process.env.PARIDADE_SALVA, `${nome.replace(/\W+/g, '-')}-pdf.png`), p.imgs[0]!) }
-      expect(c.imgs.length).toBe(1); expect(p.imgs.length).toBe(1); expect(c.palavras.length).toBeGreaterThan(2)
-      expect(pior(c.palavras, p.palavras)).toBeLessThanOrEqual(1)
+      expect(c.imgs.length).toBe(1); expect(p.imgs.length).toBe(1); if (l.paginas[0]!.ops.some((o) => o.tipo === 'texto' && o.graus === 0)) expect(c.palavras.length).toBeGreaterThan(0) // sem texto reto, só o pixel vale
+            expect(pior(junta(c.palavras), junta(p.palavras))).toBeLessThanOrEqual(1)
       const d = diferenca(c.imgs[0]!, p.imgs[0]!); expect(d.medio).toBeLessThan(2.5); expect(d.ruins).toBeLessThan(0.004)
     })
   }

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { brl } from '@polaris/documentos'
 import { ajusta, caminhoRet, fonteDe, geraCartaz, gira, htmlDe, layoutCartaz, pdfDe, quebraLinhas, validaCartaz } from '../src'
 import { modulosBarras, matrizQr } from '../src/codigos'
-import { DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
+import { partesDoPreco } from '../src/texto'
+import { DADOS_PRECO, NO_PRECO, DADOS_ETIQUETA, DADOS_LONGO, DADOS_OFERTA, NO_ETIQUETA, NO_OFERTA, SPEC_VARIADO } from './exemplos'
 
 const f = fonteDe('Montserrat', 'negrito')
 
@@ -124,5 +126,35 @@ describe('código de barras e QR code', () => {
   })
   it('valor muito grande para QR é recusado com mensagem clara', () => {
     expect(() => matrizQr('x'.repeat(1001), 'L')).toThrow(/mais de 1000/)
+  })
+})
+
+describe('preço', () => {
+  it('partes EXATAS do decimal (sem Number): milhar, centavos com 2 dígitos, meio arredondado para cima; recusa negativo e lixo', () => {
+    const p = (t: string, m = '.') => partesDoPreco(t, m, brl)
+    expect(p('9.99')).toEqual({ real: '9', cent: '99' }); expect(p('1234.5')).toEqual({ real: '1.234', cent: '50' }); expect(p('0.105')).toEqual({ real: '0', cent: '11' })
+    expect(p('1234567.891')).toEqual({ real: '1.234.567', cent: '89' }); expect(p('9.999')).toEqual({ real: '10', cent: '00' }); expect(p('1000', ' ')).toEqual({ real: '1 000', cent: '00' })
+    expect(p('0.1')).toEqual({ real: '0', cent: '10' }); expect(p('12345678901234567890.01').real).toBe('12.345.678.901.234.567.890') // além da precisão de um double
+    for (const ruim of ['', '-1', 'abc', '1,5,5']) expect(() => p(ruim), ruim).toThrow(/preço inválido/)
+  })
+  const l = layoutCartaz(NO_PRECO.spec, DADOS_PRECO), textos = l.paginas[0]!.ops.filter((o) => o.tipo === 'texto') as Array<{ texto: string; tamanho: number; yTopo: number; x: number; ascender: number; cor: number[] }>
+  it('reais grandes, centavos menores e mais ALTOS (o topo dos centavos alinha com o dos algarismos), unidade miúda sob os centavos', () => {
+    const real = textos.find((t) => t.texto === '1.234')!, cent = textos.find((t) => t.texto === ',50')!, un = textos.find((t) => t.texto === 'KG')!
+    expect(cent.tamanho).toBeCloseTo(real.tamanho * 0.6, 2); expect(un.tamanho).toBeCloseTo(cent.tamanho * 0.22, 2)
+    const f = fonteDe('Montserrat', 'negrito'), dh = f.charToGlyph('0').getBoundingBox().y2 / f.unitsPerEm
+    const topo = (t: typeof real) => t.yTopo + t.ascender * t.tamanho - dh * t.tamanho // linha de base − altura dos algarismos
+    expect(topo(cent)).toBeCloseTo(topo(real), 1); expect(cent.x).toBeGreaterThan(real.x); expect(un.yTopo).toBeGreaterThan(cent.yTopo)
+  })
+  it('o tamanho é o MAIOR que cabe (largura do bloco e altura da linha na caixa) e `cor` vale para as três partes', () => {
+    const real = textos.find((t) => t.texto === '1.234')!; expect(real.cor).toEqual([200, 16, 46])
+    const maior = layoutCartaz({ ...NO_PRECO.spec, elementos: NO_PRECO.spec.elementos.map((e: any) => (e.id === 'atual' ? { ...e, tamanho: { min: real.tamanho + 0.25 } } : e)) }, DADOS_PRECO)
+    expect(maior.avisos.join()).toMatch(/não cabe nem no tamanho mínimo/)
+  })
+  it('riscado: um traço diagonal (caminho) do canto de baixo à esquerda ao topo dos algarismos à direita; sem `de`, o elemento some', () => {
+    const caminhos = l.paginas[0]!.ops.filter((o) => o.tipo === 'caminho'); expect(caminhos).toHaveLength(1)
+    const sem = layoutCartaz(NO_PRECO.spec, { ...DADOS_PRECO, preco: { de: '', por: '9.99' } }); expect(sem.paginas[0]!.ops.filter((o) => o.tipo === 'caminho')).toHaveLength(0)
+  })
+  it('preço inválido é recusado antes de gerar (nunca sai "R$ NaN")', () => {
+    expect(() => layoutCartaz(NO_PRECO.spec, { ...DADOS_PRECO, preco: { de: '', por: 'dez' } })).toThrow(/preço inválido/)
   })
 })

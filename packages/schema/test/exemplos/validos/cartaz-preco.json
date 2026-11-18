@@ -1,0 +1,88 @@
+{
+  "kind": "cartaz",
+  "id": "oferta-preco",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "tamanho": "A5",
+    "orientacao": "paisagem",
+    "titulo": "Oferta com preço",
+    "fundo": {
+      "cor": [
+        255,
+        255,
+        255
+      ]
+    },
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "dados": {
+      "produto": {
+        "tipo": "json"
+      },
+      "preco": {
+        "tipo": "json"
+      }
+    },
+    "elementos": [
+      {
+        "tipo": "texto",
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "caixa": {
+          "topo": 0.04,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "altura": 0.2
+        },
+        "alinhaV": "meio"
+      },
+      {
+        "tipo": "preco",
+        "id": "antigo",
+        "valor": "{preco.de}",
+        "se": "preco.de",
+        "caixa": {
+          "topo": 0.3,
+          "esquerda": 0.05,
+          "largura": 0.4,
+          "altura": 0.14
+        },
+        "alinhaH": "esquerda",
+        "centavos": {
+          "escala": 1,
+          "posicao": "base"
+        },
+        "riscado": {
+          "espessura": 2
+        },
+        "cor": [
+          120,
+          120,
+          120
+        ]
+      },
+      {
+        "tipo": "preco",
+        "id": "atual",
+        "valor": "{preco.por}",
+        "caixa": {
+          "topo": 0.48,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "altura": 0.42
+        },
+        "cor": [
+          200,
+          16,
+          46
+        ],
+        "unidade": {
+          "texto": "{produto.unidade}"
+        }
+      }
+    ]
+  }
+}

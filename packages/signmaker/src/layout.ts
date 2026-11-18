@@ -1,8 +1,8 @@
-import { DocumentoErro, confereDados, interpola, raizesDe, verdadeiro } from '@polaris/documentos'
+import { DocumentoErro, brl, confereDados, interpola, raizesDe, verdadeiro } from '@polaris/documentos'
 import { FONTES, FONTE_PADRAO, fonteDe } from './fontes'
 import { MM, TAMANHOS_MM, type Layout, type Op, type Peso, type Rgb } from './modelo'
 import { corridas, matrizQr, modulosBarras } from './codigos'
-import { ajusta, largura } from './texto'
+import { ajusta, alturaDigitos, largura, metricas, partesDoPreco } from './texto'
 
 type Obj = Record<string, any>
 const CAMINHO_SE = /^!?[a-z][A-Za-z0-9]*(\.[A-Za-z0-9_]+)*$/
@@ -18,6 +18,7 @@ export function validaCartaz(spec: Obj): string[] {
     if (e.fonte?.familia !== undefined && !Object.hasOwn(FONTES, e.fonte.familia)) erros.push(`${onde}: fonte desconhecida: ${e.fonte.familia}`)
     if (e.tamanho && e.tamanho.min !== undefined && e.tamanho.max !== undefined && e.tamanho.min > e.tamanho.max) erros.push(`${onde}: tamanho.min maior que tamanho.max`)
     if (e.se !== undefined) { if (!CAMINHO_SE.test(e.se)) erros.push(`${onde}: condição inválida: ${String(e.se).slice(0, 40)}`); else if (!dados.has(e.se.replace(/^!/, '').split('.')[0]!)) erros.push(`${onde}: a condição usa um dado não declarado em spec.dados`) }
+    if (e.tipo === 'preco') { try { for (const r of [...raizesDe(e.valor), ...(e.unidade?.texto ? raizesDe(e.unidade.texto) : [])]) if (!dados.has(r)) erros.push(`${onde}: o preço usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'codigoBarras' || e.tipo === 'qrcode') { try { for (const r of [...raizesDe(e.valor), ...(e.rotulo ? raizesDe(e.rotulo) : [])]) if (!dados.has(r)) erros.push(`${onde}: o valor usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'texto') { try { for (const r of raizesDe(e.texto)) if (!dados.has(r)) erros.push(`${onde}: o texto usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
   }
@@ -58,6 +59,32 @@ export function layoutCartaz(spec: Obj, dadosEntrada: unknown = {}): Layout {
     if (e.tipo === 'faixa') {
       const cor = (e.cor ?? [0, 0, 0]) as Rgb, opacidade = e.opacidade ?? 1, raio = (e.raio ?? 0) * Math.min(w, h)
       ops.push(raio > 0 || graus !== 0 ? { tipo: 'caminho', d: caminhoRet(x, y, w, h, raio, graus, ox, oy), cor, opacidade } : { tipo: 'ret', x, y, l: w, a: h, cor, opacidade })
+      continue
+    }
+    if (e.tipo === 'preco') {
+      const bruto = interpola(e.valor, dados).trim(); if (!bruto) continue
+      let partes: { real: string; cent: string }; try { partes = partesDoPreco(bruto, e.separadorMilhar ?? '.', brl) } catch (x) { throw new DocumentoErro((x as Error).message) }
+      const familia = e.fonte?.familia ?? spec.fonte?.familia ?? FONTE_PADRAO, peso = (e.fonte?.peso ?? spec.fonte?.peso ?? 'negrito') as Peso, f = fonteDe(familia, peso), m = metricas(f), dh = alturaDigitos(f)
+      const esc = e.centavos?.escala ?? 0.6, posicao = e.centavos?.posicao ?? 'alto', cor = (e.cor ?? [0, 0, 0]) as Rgb, textoCent = `,${partes.cent}`
+      const larg = (t: number) => largura(f, partes.real, t) + largura(f, textoCent, t * esc)
+      const cabe = (t: number) => larg(t) <= w + 1e-6 && m.alturaNatural * t <= h + 1e-6
+      const min = e.tamanho?.min ?? 6, max = e.tamanho?.max ?? 400
+      let lo = Math.round(min * 4), hi = Math.round(max * 4); if (!cabe(lo / 4)) avisos.push(`${e.id ?? 'preco'}: o preço não cabe nem no tamanho mínimo (${min} pt)`); else while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); if (cabe(mid / 4)) lo = mid; else hi = mid - 1 }
+      const t = lo / 4, bw = larg(t), bh = m.alturaNatural * t, ct = t * esc
+      const bx = x + ((e.alinhaH ?? 'centro') === 'centro' ? (w - bw) / 2 : e.alinhaH === 'direita' ? w - bw : 0), topo = y + ((e.alinhaV ?? 'meio') === 'meio' ? (h - bh) / 2 : e.alinhaV === 'base' ? h - bh : 0)
+      const baseReal = topo + m.ascender * t, baseCent = posicao === 'alto' ? baseReal - dh * t * (1 - esc) : baseReal
+      const pos = (px: number, py: number): [number, number] => (graus === 0 ? [px, py] : gira(px, py, ox, oy, graus))
+      const texto = (txt: string, tx: number, base: number, tam: number) => { const [px, py] = pos(tx, base - m.ascender * tam); ops.push({ tipo: 'texto', x: n(px), yTopo: n(py), texto: txt, familia, peso, tamanho: tam, cor, ascender: m.ascender, alturaLinha: n(m.alturaNatural * tam), graus }) }
+      texto(partes.real, bx, baseReal, t)
+      const wReal = largura(f, partes.real, t), wCent = largura(f, textoCent, ct)
+      texto(textoCent, bx + wReal, baseCent, ct)
+      const un = e.unidade?.texto ? interpola(e.unidade.texto, dados).trim() : ''
+      if (un) { const ut = ct * (e.unidade.escala ?? 0.22), uw = largura(f, un, ut); texto(un, bx + wReal + (wCent - uw) / 2, baseReal, ut) }
+      if (e.riscado) {
+        const esp = e.riscado.espessura ?? 2, dx = bw, dy = dh * t, comp = Math.hypot(dx, dy), ang = (Math.atan2(dy, dx) * 180) / Math.PI
+        const [px, py] = pos(bx, baseReal) // a ponta de baixo, já girada; o traço gira em torno dela pelo giro do elemento + a inclinação
+        ops.push({ tipo: 'caminho', d: caminhoRet(px, py - esp / 2, comp, esp, 0, graus + ang, px, py), cor: (e.riscado.cor ?? cor) as Rgb, opacidade: 1 })
+      }
       continue
     }
     if (e.tipo === 'codigoBarras' || e.tipo === 'qrcode') {

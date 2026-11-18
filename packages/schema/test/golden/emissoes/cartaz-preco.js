@@ -1,0 +1,92 @@
+// polaris: cartaz oferta-preco@1.0.0
+export const kind = "cartaz";
+export const id = "oferta-preco";
+export const versao = "1.0.0";
+export default {
+  "estatuto": "publicado",
+  "id": "oferta-preco",
+  "kind": "cartaz",
+  "spec": {
+    "dados": {
+      "preco": {
+        "tipo": "json"
+      },
+      "produto": {
+        "tipo": "json"
+      }
+    },
+    "elementos": [
+      {
+        "alinhaV": "meio",
+        "caixa": {
+          "altura": 0.2,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "topo": 0.04
+        },
+        "id": "nome",
+        "texto": "{produto.nome}",
+        "tipo": "texto"
+      },
+      {
+        "alinhaH": "esquerda",
+        "caixa": {
+          "altura": 0.14,
+          "esquerda": 0.05,
+          "largura": 0.4,
+          "topo": 0.3
+        },
+        "centavos": {
+          "escala": 1,
+          "posicao": "base"
+        },
+        "cor": [
+          120,
+          120,
+          120
+        ],
+        "id": "antigo",
+        "riscado": {
+          "espessura": 2
+        },
+        "se": "preco.de",
+        "tipo": "preco",
+        "valor": "{preco.de}"
+      },
+      {
+        "caixa": {
+          "altura": 0.42,
+          "esquerda": 0.05,
+          "largura": 0.9,
+          "topo": 0.48
+        },
+        "cor": [
+          200,
+          16,
+          46
+        ],
+        "id": "atual",
+        "tipo": "preco",
+        "unidade": {
+          "texto": "{produto.unidade}"
+        },
+        "valor": "{preco.por}"
+      }
+    ],
+    "fonte": {
+      "familia": "Montserrat",
+      "peso": "negrito"
+    },
+    "fundo": {
+      "cor": [
+        255,
+        255,
+        255
+      ]
+    },
+    "orientacao": "paisagem",
+    "tamanho": "A5",
+    "titulo": "Oferta com preço"
+  },
+  "versao": "1.0.0"
+};

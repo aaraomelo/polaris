@@ -34,3 +34,14 @@ export function ajusta(f: Font, texto: string, w: number, h: number, modo: 'norm
   const t = lo * PASSO
   return { tamanho: t, linhas: quebraLinhas(f, texto, t, w, modo), cabe: true, alturaLinha: m.alturaNatural * t, ascender: m.ascender }
 }
+
+/** a altura dos algarismos (do '0'), por pt de fonte: é a régua do preço (centavos alinhados ao topo dos números) */
+export const alturaDigitos = (f: Font) => f.charToGlyph('0').getBoundingBox().y2 / f.unitsPerEm
+
+/** `real` com separador de milhar e `cent` com 2 dígitos, a partir de um decimal em texto, SEM passar por Number (arredonda meio para cima; recusa negativo e lixo) */
+export function partesDoPreco(texto: string, milhar: string, brl: (v: unknown) => string): { real: string; cent: string } {
+  const t = texto.trim(), r = brl(t)
+  if (!t || !r || r.startsWith('-')) throw new Error(`preço inválido: "${t.slice(0, 30)}"`)
+  const [inteiro, cent] = r.replace(/^R\$\s*/, '').split(',') as [string, string]
+  return { real: inteiro.replace(/\./g, milhar), cent }
+}
