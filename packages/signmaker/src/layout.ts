@@ -1,15 +1,23 @@
-import { DocumentoErro, brl, confereDados, interpola, raizesDe, verdadeiro } from '@polaris/documentos'
+import { DocumentoErro, brl, confereDados, leCaminho, interpola, raizesDe } from '@polaris/documentos'
 import { FONTES, FONTE_PADRAO, fonteDe } from './fontes'
 import { MM, TAMANHOS_MM, type Layout, type Op, type Peso, type Rgb } from './modelo'
+import { avalia, analisaCondicao } from './condicao'
 import { corridas, matrizQr, modulosBarras } from './codigos'
+import { FUNCOES, aridade, calcula, type Funcao } from './decimal'
 import { ajusta, alturaDigitos, largura, metricas, partesDoPreco } from './texto'
 
 type Obj = Record<string, any>
-const CAMINHO_SE = /^!?[a-z][A-Za-z0-9]*(\.[A-Za-z0-9_]+)*$/
 
 /** problemas do cartaz que o schema não vê (ids únicos, lado da caixa, fonte conhecida, dados declarados); lista vazia = coerente */
 export function validaCartaz(spec: Obj): string[] {
   const erros: string[] = [], ids = new Set<string>(), dados = new Set(Object.keys(spec.dados ?? {}))
+  if (spec.calculos && Object.keys(spec.calculos).length) dados.add('calculo') // raiz implícita: os valores calculados
+  for (const [nome, c] of Object.entries<Obj>(spec.calculos ?? {})) {
+    if (!(FUNCOES as readonly string[]).includes(c.funcao)) erros.push(`calculos/${nome}: função desconhecida: ${c.funcao}`)
+    else if ((c.args ?? []).length !== aridade(c.funcao as Funcao)) erros.push(`calculos/${nome}: ${c.funcao} recebe ${aridade(c.funcao as Funcao)} argumento(s)`)
+    for (const a of c.args ?? []) { if (!dados.has(String(a).split('.')[0]!) || String(a).startsWith('calculo')) erros.push(`calculos/${nome}: o argumento "${a}" usa um dado não declarado em spec.dados`) }
+  }
+  if (spec.tamanhos && !spec.tamanhos.includes(spec.tamanho)) erros.push(`tamanho "${spec.tamanho}" não está em tamanhos`)
   const familia = spec.fonte?.familia; if (familia !== undefined && !Object.hasOwn(FONTES, familia)) erros.push(`fonte desconhecida: ${familia}`)
   for (const [i, e] of (spec.elementos ?? []).entries() as Iterable<[number, Obj]>) {
     const onde = `elementos/${i}`
@@ -17,7 +25,9 @@ export function validaCartaz(spec: Obj): string[] {
     const c = e.caixa ?? {}; if ((c.esquerda === undefined) === (c.direita === undefined)) erros.push(`${onde}: a caixa precisa de 'esquerda' OU 'direita' (exatamente um)`)
     if (e.fonte?.familia !== undefined && !Object.hasOwn(FONTES, e.fonte.familia)) erros.push(`${onde}: fonte desconhecida: ${e.fonte.familia}`)
     if (e.tamanho && e.tamanho.min !== undefined && e.tamanho.max !== undefined && e.tamanho.min > e.tamanho.max) erros.push(`${onde}: tamanho.min maior que tamanho.max`)
-    if (e.se !== undefined) { if (!CAMINHO_SE.test(e.se)) erros.push(`${onde}: condição inválida: ${String(e.se).slice(0, 40)}`); else if (!dados.has(e.se.replace(/^!/, '').split('.')[0]!)) erros.push(`${onde}: a condição usa um dado não declarado em spec.dados`) }
+    const confereSe = (se: string, onde2: string) => { try { const raiz = analisaCondicao(se).raiz; if (!dados.has(raiz)) erros.push(`${onde2}: a condição usa um dado não declarado em spec.dados`) } catch (x) { erros.push(`${onde2}: ${(x as Error).message}`) } }
+    if (e.se !== undefined) confereSe(e.se, onde)
+    for (const [j, c] of (e.cores ?? []).entries() as Iterable<[number, Obj]>) confereSe(c.se, `${onde}/cores/${j}`)
     if (e.tipo === 'validade') { try { for (const r of [...(e.rotulo ? raizesDe(e.rotulo) : []), ...(e.data ? raizesDe(e.data) : [])]) if (!dados.has(r)) erros.push(`${onde}: a validade usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'preco') { try { for (const r of [...raizesDe(e.valor), ...(e.unidade?.texto ? raizesDe(e.unidade.texto) : [])]) if (!dados.has(r)) erros.push(`${onde}: o preço usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
     if (e.tipo === 'codigoBarras' || e.tipo === 'qrcode') { try { for (const r of [...raizesDe(e.valor), ...(e.rotulo ? raizesDe(e.rotulo) : [])]) if (!dados.has(r)) erros.push(`${onde}: o valor usa o dado "${r}", não declarado em spec.dados`) } catch (x) { erros.push(`${onde}: ${(x as Error).message}`) } }
@@ -44,17 +54,24 @@ export function caminhoRet(x: number, y: number, l: number, a: number, raio: num
 /** vários retângulos num só caminho (cada um um subcaminho fechado); `girar` aplica a rotação do elemento */
 const caminhoRets = (rs: Array<[number, number, number, number]>, graus: number, ox: number, oy: number) => rs.map(([x, y, l, a]) => caminhoRet(x, y, l, a, 0, graus, ox, oy)).join('')
 
-export function layoutCartaz(spec: Obj, dadosEntrada: unknown = {}): Layout {
+export function layoutCartaz(specEntrada: Obj, dadosEntrada: unknown = {}, o: { tamanho?: string } = {}): Layout {
+  const spec: Obj = o.tamanho ? { ...specEntrada, tamanho: o.tamanho } : specEntrada
   const erros = validaCartaz(spec); if (erros.length) throw new DocumentoErro(`cartaz inválido: ${erros.slice(0, 3).join('; ')}`)
   confereDados(spec, dadosEntrada)
-  const dados = dadosEntrada as Obj, avisos: string[] = []
+  const bruto = dadosEntrada as Obj, avisos: string[] = [], calculo: Record<string, string> = {}
+  for (const [nome, c] of Object.entries<Obj>(spec.calculos ?? {})) {
+    const r = calcula(c.funcao as Funcao, (c.args as string[]).map((a) => leCaminho(bruto, a)))
+    if (r === null) { if (c.padrao === undefined) throw new DocumentoErro(`calculos/${nome}: os argumentos de ${c.funcao} não são números`); calculo[nome] = c.padrao } else calculo[nome] = r
+  }
+  const dados: Obj = Object.keys(calculo).length ? { ...bruto, calculo } : bruto
   const [wm, hm] = TAMANHOS_MM[spec.tamanho as 'A4'], paisagem = spec.orientacao === 'paisagem'
   const W = n((paisagem ? hm : wm) * MM), H = n((paisagem ? wm : hm) * MM)
   const ops: Op[] = []
   if (spec.fundo?.cor) ops.push({ tipo: 'ret', x: 0, y: 0, l: W, a: H, cor: spec.fundo.cor as Rgb, opacidade: 1 })
   if (spec.fundo?.imagem) ops.push({ tipo: 'imagem', x: 0, y: 0, l: W, a: H, src: spec.fundo.imagem, alt: '' })
-  for (const e of spec.elementos as Obj[]) {
-    if (e.se !== undefined && !verdadeiro(e.se, dados)) continue
+  for (let e of spec.elementos as Obj[]) {
+    if (e.se !== undefined && !avalia(analisaCondicao(e.se), dados)) continue
+    if (e.cores) { const c = (e.cores as Obj[]).find((x) => avalia(analisaCondicao(x.se), dados)); if (c) e = { ...e, cor: c.cor } }
     const c = e.caixa as Obj, w = n(c.largura * W), h = n(c.altura * H), x = n(c.esquerda !== undefined ? c.esquerda * W : W - c.direita * W - w), y = n(c.topo * H)
     const graus = e.rotacao ?? 0, ox = x, oy = n(y + h / 2) // pivô: meio da borda esquerda da caixa
     if (e.tipo === 'faixa') {
