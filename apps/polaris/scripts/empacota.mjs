@@ -2,4 +2,4 @@
 import { build } from 'esbuild'
 const comum = { bundle: true, platform: 'node', format: 'esm', target: 'node22', sourcemap: false, legalComments: 'none', logLevel: 'info', external: ['pg-native'],
   banner: { js: "import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);" } }
-await build({ ...comum, entryPoints: { servico: 'bin/servico.ts', gateway: 'bin/gateway.ts' }, outdir: 'dist', outExtension: { '.js': '.mjs' } })
+await build({ ...comum, entryPoints: { servico: 'bin/servico.ts', gateway: 'bin/gateway.ts', migra: 'bin/migra.ts' }, outdir: 'dist', outExtension: { '.js': '.mjs' } })

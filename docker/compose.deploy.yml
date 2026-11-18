@@ -1,0 +1,119 @@
+# Homologação e produção: `./scripts/deploy.sh <homolog|prod> up`. Diferente do dev (docker-compose.yml): imagem FIXADA (sem build na máquina), NODE_ENV=production,
+# JWT por chave PÚBLICA (JWKS), segredos por ARQUIVO (Docker secrets), nginx com TLS na frente, só o nginx publica porta, sistema de arquivos somente leitura.
+name: polaris-${POLARIS_AMBIENTE:?defina POLARIS_AMBIENTE}
+
+x-app: &app
+  image: ${POLARIS_IMAGEM:?defina POLARIS_IMAGEM}
+  restart: unless-stopped
+  # o contêiner roda com o uid/gid do DONO dos arquivos de segredo (bind mount preserva dono e modo; modo 0400 só é legível por esse uid)
+  user: "${POLARIS_UID:-1000}:${POLARIS_GID:-1000}"
+  read_only: true
+  tmpfs: ["/tmp:size=16m,mode=1777"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  pids_limit: 256
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "5" } }
+  networks: [interna, saida]
+  volumes: ["${POLARIS_NOS:?defina POLARIS_NOS}:/nos:ro"]
+  environment: &env
+    NODE_ENV: production
+    POLARIS_NOS: /nos
+    HOST: 0.0.0.0
+    JWT_EMISSOR: ${JWT_EMISSOR:?}
+    JWT_AUDIENCIA: ${JWT_AUDIENCIA:?}
+    JWT_JWKS_URL: ${JWT_JWKS_URL:?defina JWT_JWKS_URL}
+    POLARIS_METRICAS_TOKEN_FILE: /run/secrets/metricas_token
+    POLARIS_LOG_NIVEL: ${POLARIS_LOG_NIVEL:-info}
+
+services:
+  nginx:
+    image: ${NGINX_IMAGEM:-nginxinc/nginx-unprivileged:1.27-alpine} # roda sem root e escuta em 8080/8443 (a porta 80/443 do host é mapeada)
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp:size=16m,mode=1777", "/var/cache/nginx:size=32m", "/var/run:size=1m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "5" } }
+    networks: [interna, borda]
+    ports: ["80:8080", "443:8443"]
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ${POLARIS_CERTS:?defina POLARIS_CERTS}:/etc/nginx/certs:ro
+      - ${POLARIS_ACME:-./acme}:/var/www/acme:ro
+    depends_on: { gateway: { condition: service_healthy } }
+
+  gateway:
+    <<: *app
+    command: ["node", "dist/gateway.mjs"]
+    expose: ["3000"]
+    environment:
+      <<: *env
+      PORT: "3000"
+      POLARIS_SERVICOS: ${POLARIS_SERVICOS:?defina POLARIS_SERVICOS}
+      DATABASE_URL_PLATAFORMA_FILE: /run/secrets/plataforma_url
+      POLARIS_BASES_DOMINIO: ${POLARIS_DOMINIO:?defina POLARIS_DOMINIO}
+      POLARIS_PREVIEW_SEGREDO_FILE: /run/secrets/preview_segredo
+      POLARIS_GRAPHQL_INTROSPECCAO: ${POLARIS_GRAPHQL_INTROSPECCAO:-0}
+    secrets: [metricas_token, plataforma_url, preview_segredo]
+    healthcheck: { test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/saude').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 10s, timeout: 3s, retries: 6 }
+    cpus: 1.0
+    mem_limit: 512m
+
+  loja:
+    <<: *app
+    command: ["node", "dist/servico.mjs"]
+    expose: ["3001"]
+    environment:
+      <<: *env
+      POLARIS_SERVICO: loja
+      PORT: "3001"
+      POLARIS_MIGRAR: ${POLARIS_MIGRAR:-0}
+      DATABASE_URL_FILE: /run/secrets/loja_url_app
+      DATABASE_URL_MIGRADOR_FILE: /run/secrets/loja_url_migrador
+    secrets: [metricas_token, loja_url_app, loja_url_migrador]
+    healthcheck: { test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/pronto').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 10s, timeout: 3s, retries: 6 }
+    cpus: 1.0
+    mem_limit: 512m
+
+  # migração do esquema `plataforma` (diretório de tenants, releases): UM passo isolado, nunca no boot. `./scripts/deploy.sh <ambiente> migra`
+  migra:
+    <<: *app
+    profiles: ["migra"]
+    command: ["node", "dist/migra.mjs"]
+    restart: "no"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL_MIGRADOR_FILE: /run/secrets/plataforma_url_migrador
+      POLARIS_PAPEL_PLATAFORMA: ${POLARIS_PAPEL_PLATAFORMA:-polaris_plataforma}
+    secrets: [plataforma_url_migrador]
+    volumes: []
+
+  # Postgres no compose: SÓ homologação (perfil). Produção usa banco gerenciado/externo, com backup e réplica fora daqui.
+  postgres:
+    profiles: ["banco-local"]
+    image: ${POSTGRES_IMAGEM:-postgres:16}
+    restart: unless-stopped
+    networks: [interna]
+    environment: { POSTGRES_USER: postgres, POSTGRES_DB: polaris, POSTGRES_PASSWORD_FILE: /run/secrets/postgres_senha }
+    secrets: [postgres_senha]
+    volumes: ["pgdados:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U postgres -d polaris"], interval: 5s, timeout: 3s, retries: 20 }
+
+networks:
+  interna: { internal: true }   # o banco mora SÓ aqui: sem rota para fora, e nada fora do compose chega nele
+  saida: {}                     # saída à internet (JWKS do provedor de identidade, provedores de pagamento): restrinja por DESTINO no firewall do host
+  borda: {}
+
+volumes:
+  pgdados:
+
+# cada segredo é um ARQUIVO em docker/segredos/ (fora do git; modo 0400). O processo lê por `X_FILE`: o valor não fica no ambiente.
+secrets:
+  plataforma_url_migrador: { file: ./segredos/plataforma_url_migrador }
+  metricas_token: { file: ./segredos/metricas_token }
+  plataforma_url: { file: ./segredos/plataforma_url }
+  preview_segredo: { file: ./segredos/preview_segredo }
+  loja_url_app: { file: ./segredos/loja_url_app }
+  loja_url_migrador: { file: ./segredos/loja_url_migrador }
+  postgres_senha: { file: ./segredos/postgres_senha }

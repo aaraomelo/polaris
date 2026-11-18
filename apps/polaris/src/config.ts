@@ -1,12 +1,38 @@
 // Configuração por AMBIENTE, estrita: tudo é validado na partida e o processo NÃO sobe com configuração ruim (falha rápida, com TODOS os problemas listados).
 // Segredos (URL do banco com senha, chave, token) nunca aparecem em mensagens de erro nem em log.
 
+import { lstatSync, readFileSync } from 'node:fs'
+
 export type Env = Record<string, string | undefined>
+
+/**
+ * Segredo por ARQUIVO (o padrão dos Docker/Kubernetes secrets): `X_FILE=/run/secrets/x` faz `X` valer o conteúdo do arquivo (sem quebra de linha final). Assim o segredo não fica no ambiente
+ * do processo (`docker inspect`, /proc/<pid>/environ, dumps de erro). Regras: o arquivo precisa ser REGULAR (não link simbólico, não dispositivo), ter ≤ 64 KB e não ser vazio;
+ * `X` e `X_FILE` juntos são ambíguos e recusados; as mensagens dizem QUAL variável falhou, nunca o conteúdo.
+ */
+export function resolveArquivos(env: Env): { env: Env; problemas: string[] } {
+  const out: Env = { ...env }, problemas: string[] = []
+  for (const [k, caminho] of Object.entries(env)) {
+    if (!k.endsWith('_FILE') || k.length <= 5 || caminho === undefined || caminho === '') continue
+    const alvo = k.slice(0, -5)
+    if (env[alvo] !== undefined && env[alvo] !== '') { problemas.push(`${alvo} e ${k} juntas são ambíguas: defina só uma`); continue }
+    try {
+      const st = lstatSync(caminho)
+      if (!st.isFile()) { problemas.push(`${k}: o caminho deve ser um arquivo regular (não link simbólico nem dispositivo)`); continue }
+      if (st.size === 0 || st.size > 64 * 1024) { problemas.push(`${k}: o arquivo deve ter de 1 byte a 64 KB`); continue }
+      const v = readFileSync(caminho, 'utf8').replace(/\r?\n$/, '')
+      if (!v.trim()) { problemas.push(`${k}: o arquivo está vazio`); continue }
+      out[alvo] = v
+    } catch { problemas.push(`${k}: não foi possível ler o arquivo`) }
+  }
+  return { env: out, problemas }
+}
 export class ErroConfig extends Error { constructor(readonly problemas: string[]) { super(`configuração inválida:\n${problemas.map((p) => `  - ${p}`).join('\n')}`); this.name = 'ErroConfig' } }
 
 class Leitor {
-  readonly problemas: string[] = []
-  constructor(readonly env: Env) {}
+  readonly problemas: string[]
+  readonly env: Env
+  constructor(bruto: Env) { const r = resolveArquivos(bruto); this.env = r.env; this.problemas = [...r.problemas] }
   texto(nome: string, o: { obrigatorio?: boolean; padrao?: string } = {}): string | undefined {
     const v = this.env[nome]?.trim()
     if (v) return v

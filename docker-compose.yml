@@ -6,6 +6,7 @@
 name: polaris
 
 x-polaris: &polaris
+  image: polaris:dev
   build: { context: ., dockerfile: docker/Dockerfile }
   restart: unless-stopped
   read_only: true
@@ -13,6 +14,7 @@ x-polaris: &polaris
   security_opt: ["no-new-privileges:true"]
   volumes: ["./exemplos/loja:/nos:ro"]
   environment: &env
+    NODE_ENV: development # a imagem é `production`; o dev usa HS256 e o mapa estático de hosts (a produção recusa os dois)
     POLARIS_NOS: /nos
     HOST: 0.0.0.0
     JWT_EMISSOR: ${JWT_EMISSOR:-https://id.polaris.local}
@@ -22,7 +24,7 @@ x-polaris: &polaris
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE:-postgres:16}
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -52,7 +54,7 @@ services:
     <<: *polaris
     command: ["node", "dist/gateway.mjs"]
     depends_on: { loja: { condition: service_healthy } }
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:${POLARIS_PORTA:-3000}:3000"]
     environment:
       <<: *env
       PORT: "3000"

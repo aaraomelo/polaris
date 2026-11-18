@@ -13,6 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { configGateway, configServico } from '../src/config'
 import { montaGateway } from '../src/gateway'
 import { carregaNos } from '../src/nos'
+import { migraPlataforma } from '../src/migra'
 import { DDL_DIRETORIO, criaArmazemDeNos, criaPreview, criaReleases } from '@polaris/packs'
 import { montaServico } from '../src/servico'
 
@@ -104,6 +105,19 @@ describe('publicação de ponta a ponta: override → release → produção →
       expect((await get({ 'x-polaris-preview': criaPreview({ segredo: 'outro-segredo-diferente-com-mais-de-32-bytes' }).emite(T, n2) })).statusCode).toBe(401) // assinado com outro segredo
     } finally { await gw.close() }
     expect(() => configGateway({ POLARIS_NOS: dir, POLARIS_SERVICOS: JSON.stringify({ loja: urlSrv }), JWT_EMISSOR: ISS, JWT_AUDIENCIA: AUD, JWT_SEGREDO: SEG, POLARIS_PREVIEW_SEGREDO: segredo })).toThrow(/só vale com DATABASE_URL_PLATAFORMA/)
+  })
+})
+
+describe('migração do esquema `plataforma`', () => {
+  it('aplica, é idempotente (rodar de novo não muda nada) e concede só o necessário ao papel da plataforma', async () => {
+    await db.exec('RESET ROLE; DROP SCHEMA IF EXISTS plataforma CASCADE'); const porta = /:(\d+)/.exec(srv.getServerConn())![1]; const url = `postgres://postgres@127.0.0.1:${porta}/postgres`
+    expect(await migraPlataforma({ urlMigrador: url, papelPlataforma: 'polaris_app' })).toEqual({ tabelas: 8 }); expect(await migraPlataforma({ urlMigrador: url, papelPlataforma: 'polaris_app' })).toEqual({ tabelas: 8 })
+    const priv = (await db.query(`SELECT table_name, string_agg(privilege_type, ',' ORDER BY privilege_type) AS p FROM information_schema.role_table_grants WHERE grantee = 'polaris_app' AND table_schema = 'plataforma' GROUP BY 1 ORDER BY 1`)).rows as Array<{ table_name: string; p: string }>
+    expect(Object.fromEntries(priv.map((r) => [r.table_name, r.p]))).toMatchObject({ no_versao: 'INSERT,SELECT', release: 'INSERT,SELECT', release_evento: 'INSERT,SELECT', tenant: 'DELETE,INSERT,SELECT,UPDATE' }) // as imutáveis só leem e inserem
+  })
+  it('recusa papel malformado (injeção) e URL que não é postgres://; a mensagem não carrega a senha', async () => {
+    await expect(migraPlataforma({ urlMigrador: 'postgres://u:p@x/y', papelPlataforma: 'a; DROP SCHEMA plataforma' })).rejects.toThrow('papel da plataforma inválido'); await expect(migraPlataforma({ urlMigrador: 'http://u:SENHA-SECRETA@x/y', papelPlataforma: 'polaris_app' })).rejects.toThrow(/postgres/)
+    await expect(migraPlataforma({ urlMigrador: 'postgres://u:SENHA-SECRETA@127.0.0.1:1/y', papelPlataforma: 'polaris_app' })).rejects.toThrow(/ECONNREFUSED|connect/); try { await migraPlataforma({ urlMigrador: 'http://u:SENHA-SECRETA@x/y', papelPlataforma: 'polaris_app' }) } catch (e) { expect((e as Error).message).not.toContain('SENHA-SECRETA') }
   })
 })
 

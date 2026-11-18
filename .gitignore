@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.exemplo
+docker/*.env
+!docker/*.env.exemplo
 segredo/
 *.pem
 *.key
@@ -22,3 +24,9 @@ coverage/
 .turbo/
 .perfil/
 packages/engine/bench/navegador/saida/
+
+# segredos do deploy (arquivos): só o LEIA-ME entra
+docker/segredos/*
+!docker/segredos/LEIA-ME.md
+docker/*.env
+!docker/*.env.exemplo

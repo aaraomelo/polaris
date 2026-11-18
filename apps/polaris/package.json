@@ -17,7 +17,8 @@
     "@polaris/servico": "workspace:*",
     "@polaris/engine": "workspace:*",
     "fastify": "^5.2.0",
-    "@polaris/packs": "workspace:*"
+    "@polaris/packs": "workspace:*",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",
@@ -26,6 +27,7 @@
     "esbuild": "^0.24.2",
     "jose": "^5.9.6",
     "typescript": "~5.6.3",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "@types/pg": "^8.11.10"
   }
 }

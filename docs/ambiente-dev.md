@@ -1,8 +1,8 @@
 # Ambiente de desenvolvimento
 
 ```
-cp .env.exemplo .env          # valores de DEV; o .env nunca é versionado
-docker compose up --build     # postgres + loja (serviço) + gateway
+cp .env.exemplo docker/dev.env   # valores de DEV; fora do git (o .env da raiz NÃO é usado: ele guarda segredos pessoais do projeto)
+pnpm dev                          # = docker compose --env-file docker/dev.env up --build   (porta do gateway: POLARIS_PORTA, padrão 3000)
 curl localhost:3000/pronto
 ```
 
@@ -28,6 +28,7 @@ Gateway: `POLARIS_SERVICOS` (`{"loja":"http://loja:3001"}`), `POLARIS_TAXA_CAPAC
 Imagem multi-etapa, usuário não-root, sistema de arquivos somente leitura, `cap_drop: ALL`, `no-new-privileges`, nenhuma porta de serviço/banco publicada.
 
 ## O que NÃO está aqui (de propósito)
+- **Verificado**: `docker compose up` de verdade (imagem construída, Postgres 16 real, serviço migrado pelo driver `pg`, gateway), fluxo criar/listar/isolar por tenant/401. Deploy de homologação/produção: `docs/deploy.md`.
 - **Redis e barramento (NATS/Kafka)**: nenhum código usa hoje (cache do gateway é em memória e o barramento é a interface em memória de `@polaris/eventos`). Subir contêiner sem consumidor seria enfeite; entram junto com o adaptador, em E10.
 - Relay do outbox como processo próprio: o serviço grava no outbox; o runner do relay vem com o adaptador de barramento.
 - HTTPS/TLS: terminação fica no proxy da implantação (E10).

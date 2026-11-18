@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 import { configGateway, configServico, ErroConfig, type Env } from '../src/config'
 
 const T = '11111111-1111-1111-1111-111111111111'
@@ -82,4 +82,33 @@ describe('configGateway: preview', () => {
     const plat = { ...gw, DATABASE_URL_PLATAFORMA: 'postgres://u:p@db/x', POLARIS_BASES_DOMINIO: 'polaris.app' }
     expect(configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO: 'x'.repeat(40) }).previewSegredo).toBe('x'.repeat(40)); expect(problemas(() => configGateway({ ...plat, POLARIS_PREVIEW_SEGREDO: 'curto' })).join()).toMatch(/ao menos 32/); expect(problemas(() => configGateway({ ...gw, POLARIS_PREVIEW_SEGREDO: 'x'.repeat(40) })).join()).toMatch(/só vale com DATABASE_URL_PLATAFORMA/)
   })
+})
+
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { resolveArquivos } from '../src/config'
+
+describe('segredos por arquivo (X_FILE, como Docker secrets)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'polaris-seg-')); const arq = (nome: string, conteudo: string) => { const p = join(dir, nome); writeFileSync(p, conteudo); return p }
+  const SENHA = 'SENHA-NO-ARQUIVO'
+  it('o conteúdo vira a variável (sem a quebra de linha final); a configuração completa funciona só com arquivos', () => {
+    expect(resolveArquivos({ X_FILE: arq('x', 'valor\n') }).env.X).toBe('valor'); expect(resolveArquivos({ X_FILE: arq('x2', 'valor\r\n') }).env.X).toBe('valor'); expect(resolveArquivos({ X_FILE: arq('x3', ' com espaço ') }).env.X).toBe(' com espaço ') // só a quebra final sai
+    const c = configServico({ ...srv, DATABASE_URL: undefined, JWT_JWKS_URL: undefined, DATABASE_URL_FILE: arq('db', `postgres://app:${SENHA}@db:5432/polaris\n`), JWT_SEGREDO_FILE: arq('jwt', 'x'.repeat(40)) } as never)
+    expect(c.bancoUrl).toContain(SENHA); expect(c.jwt.chave).toEqual({ segredo: 'x'.repeat(40) })
+  })
+  it('ambiguidade (X e X_FILE), arquivo ausente/vazio/enorme/diretório/link simbólico são recusados — e a mensagem NUNCA mostra o conteúdo', () => {
+    const p = [
+      ...resolveArquivos({ X: 'a', X_FILE: arq('amb', SENHA) }).problemas, ...resolveArquivos({ Y_FILE: join(dir, 'nao-existe') }).problemas, ...resolveArquivos({ Z_FILE: arq('vazio', '') }).problemas, ...resolveArquivos({ W_FILE: arq('so-quebra', '\n') }).problemas,
+      ...resolveArquivos({ G_FILE: arq('grande', 'x'.repeat(70_000)) }).problemas, ...resolveArquivos({ D_FILE: dir }).problemas,
+    ]
+    symlinkSync(arq('alvo', SENHA), join(dir, 'link')); p.push(...resolveArquivos({ L_FILE: join(dir, 'link') }).problemas)
+    expect(p.length).toBe(7); expect(p.join('\n')).not.toContain(SENHA); expect(p.join('\n')).toMatch(/ambíguas/); expect(p.join('\n')).toMatch(/arquivo regular/)
+    expect(resolveArquivos({ L_FILE: join(dir, 'link') }).env.L).toBeUndefined() // o link simbólico NÃO é seguido (impede apontar para outro arquivo do host)
+  })
+  it('um X_FILE vazio é ignorado (variável não definida); variáveis que só terminam em _FILE sem alvo não quebram nada', () => { expect(resolveArquivos({ X_FILE: '' })).toEqual({ env: { X_FILE: '' }, problemas: [] }); expect(resolveArquivos({ _FILE: '/x' }).problemas).toEqual([]) })
+  it('o erro de configuração por arquivo aparece junto dos outros (falha rápida, tudo de uma vez) e sem o conteúdo', () => {
+    const p = problemas(() => configServico({ DATABASE_URL_FILE: join(dir, 'nao-existe'), POLARIS_NOS: '/n' } as never)).join('\n'); expect(p).toMatch(/DATABASE_URL_FILE: não foi possível ler/); expect(p).toMatch(/JWT_EMISSOR é obrigatória/)
+  })
+  afterAll(() => { rmSync(dir, { recursive: true, force: true }) })
 })
