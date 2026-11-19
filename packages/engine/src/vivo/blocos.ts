@@ -1,5 +1,5 @@
 import { px } from '../estatico/escape'
-import { cssUrl, urlSegura } from '../render/url'
+import { caminhoLocal, cssUrl, nomeDeParametro, urlSegura } from '../render/url'
 
 // Descritores DOM dos blocos base: dizem ao runtime vivo QUE elemento criar e como atualizá-lo a partir das props.
 // Têm de produzir exatamente o DOM que os componentes React (render/base.tsx) produzem: o oráculo confere.
@@ -153,6 +153,12 @@ const maxDe = (e: Event) => Number((e.target as HTMLElement).dataset.max) || 209
 /** `aoEscolher`: só quando o arquivo serve (lido); `aoRecusar`: só quando não serve, com `{ erro }`: assim a página não dispara um envio inútil */
 export const arquivoEscolhido = (e: Event): unknown => (recusaArquivo(e.target, maxDe(e)) ? PULA : lerArquivoEscolhido(e.target).then((v) => (typeof v === 'object' && 'erro' in v ? PULA : v)))
 export const arquivoRecusado = (e: Event): unknown => { const erro = recusaArquivo(e.target, maxDe(e)); return erro ? { erro } : PULA }
+export const d_form_busca: Descritor = { chave: () => 'form', tag: () => 'form', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'search', method: 'get', action: caminhoLocal(p.acao) }) }
+export const d_entrada_busca: Descritor = {
+  chave: () => 'input:search', tag: () => 'input',
+  attrs: (p, id) => ({ ...comId(id), type: 'search', name: nomeDeParametro(p.nome), ...rotulo(p.rotulo === undefined ? { rotulo: 'Buscar' } : p), ...(typeof p.placeholder === 'string' && p.placeholder ? { placeholder: p.placeholder } : {}), value: txt(p.valor).slice(0, 200), maxlength: '200', autocomplete: 'off' }),
+}
+export const d_nav_enviar: Descritor = { chave: () => 'button:submit', tag: () => 'button', attrs: (_, id) => ({ ...comId(id), type: 'submit' }), texto: (p) => txt(p.texto) || 'Enviar' }
 export const d_entrada_arquivo: Descritor = {
   chave: () => 'input:file', tag: () => 'input', attrs: (p, id) => ({ ...comId(id), type: 'file', ...rotulo(p), ...(typeof p.aceita === 'string' && p.aceita ? { accept: p.aceita.slice(0, 200) } : {}), ...(p.desabilitado === true ? { disabled: '' } : {}), 'data-max': String(inteiro(p.tamanhoMax, 1024, 8388608, 2097152)) }),
   eventos: { aoEscolher: { dom: 'change', payload: arquivoEscolhido }, aoRecusar: { dom: 'change', payload: arquivoRecusado } },
@@ -189,7 +195,7 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
-  'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
+  'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
   'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,

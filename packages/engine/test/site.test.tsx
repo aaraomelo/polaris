@@ -39,7 +39,7 @@ describe('blocos nativos do cabeçalho', () => {
 
 describe('site/cabecalho', () => {
   it('é um nó válido; a marca liga ao início, o menu tem um link por item e só o `atual` leva aria-current', () => {
-    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape', 'site.hero']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape', 'site/hero']))
+    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape', 'site.hero', 'site.busca']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape', 'site/hero', 'site/busca']))
     const d = ssr(pagina(cab({ titulo: 'Loja Demo', links: LINKS })))
     const h = d.querySelector('header')!; expect(h).toBeTruthy(); const marca = h.querySelector(':scope > a')!; expect(marca.getAttribute('href')).toBe('/'); expect(marca.textContent).toBe('Loja Demo')
     const links = [...h.querySelectorAll('nav a')]; expect(links.map((a) => a.textContent)).toEqual(['Início', 'Produtos', 'Contato']); expect(links.map((a) => a.getAttribute('href'))).toEqual(['/', '/produtos', '/contato'])
@@ -131,4 +131,29 @@ describe('layout/destaque e site/hero', () => {
   it('o tema estiliza section[data-alinha] e a[data-botao] só com variáveis (botão primário invertido sobre o fundo primário)', () => {
     const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/section\[data-fundo=primaria\]\{background-color:var\(--cor-primaria\)/); expect(css).toMatch(/section\[data-fundo=primaria\] a\[data-botao=primario\]\{background:var\(--cor-texto-sobre-primaria\)/); expect(css.indexOf('section[data-imagem] a[data-botao=primario]')).toBeGreaterThan(css.indexOf('section[data-fundo=primaria] a[data-botao=primario]')) // a regra da imagem vem DEPOIS (mesma especificidade: a última vale)
   })
+})
+
+const busca = (props: object) => ({ bloco: 'site/busca', props })
+
+describe('busca (form/busca, entrada/busca, nav/enviar, site/busca)', () => {
+  it('é um <form> GET com role=search, campo type=search com nome acessível e botão submit', () => {
+    const d = ssr(pagina(busca({}))), f = d.querySelector('form')!, i = f.querySelector('input')!, b = f.querySelector('button')!
+    expect([f.getAttribute('role'), f.getAttribute('method'), f.getAttribute('action')]).toEqual(['search', 'get', '/busca']); expect([i.type, i.name, i.getAttribute('aria-label'), i.getAttribute('placeholder'), i.getAttribute('maxlength'), i.getAttribute('autocomplete')]).toEqual(['search', 'q', 'Buscar', 'Buscar', '200', 'off']); expect([b.type, b.textContent]).toEqual(['submit', 'Buscar'])
+  })
+  it('props: destino, parâmetro, termo inicial, rótulo, placeholder e texto do botão', () => {
+    const f = ssr(pagina(busca({ acao: '/produtos', nome: 'termo', valor: 'café "quente"', placeholder: 'Buscar produtos', rotulo: 'Procurar na loja', botao: 'Ir' }))).querySelector('form')!, i = f.querySelector('input')!
+    expect([f.getAttribute('action'), i.name, i.getAttribute('value'), i.getAttribute('placeholder'), i.getAttribute('aria-label'), f.querySelector('button')!.textContent]).toEqual(['/produtos', 'termo', 'café "quente"', 'Buscar produtos', 'Procurar na loja', 'Ir'])
+  })
+  it('segurança: destino que não é caminho do próprio site vale /busca; nome de parâmetro inválido vale q; o termo é escapado e cortado em 200', () => {
+    for (const ruim of ['https://evil.com/x', '//evil.com', 'javascript:alert(1)', '\\evil', '/a b', '/x\ny', 'busca']) expect(ssr(pagina(busca({ acao: ruim }))).querySelector('form')!.getAttribute('action'), ruim).toBe('/busca')
+    expect(ssr(pagina(busca({ nome: '1 inválido' }))).querySelector('input')!.name).toBe('q'); expect(ssr(pagina(busca({ nome: 'a"><script>' }))).querySelector('input')!.name).toBe('q')
+    const d = ssr(pagina(busca({ valor: '"><img src=x onerror=alert(1)>' }))); expect(d.querySelector('img')).toBeNull(); expect(d.querySelector('input')!.getAttribute('value')).toBe('"><img src=x onerror=alert(1)>')
+    expect(() => pagina(busca({ valor: 'x'.repeat(201) }))).toThrow(/200/)
+  })
+  it('sem JavaScript: não é interativo (nenhum evento), então a página pode ser servida estática', () => { const html = renderPaginaHtml({ programa: pagina(busca({})), componentes: COMPONENTES_BASE }).corpo; expect(html).toContain('<form'); expect(html).not.toMatch(/onclick|data-evt/i) })
+  it('paridade React × runtime vivo', () => {
+    const pg = pagina(busca({ acao: '/p', nome: 'termo', valor: 'x', botao: 'Ir' })), oraculo = [...ssr(pg).childNodes].map(canon).join(''), h = compilaHtmlVivo(pg); if (!h.ok) throw new Error(JSON.stringify(h.motivos))
+    expect(doHtml(h.pagina.render({}).corpo)).toBe(oraculo); const c = document.createElement('div'); montaVivo({ programa: pg, container: c }); expect([...c.childNodes].map(canon).join('')).toBe(oraculo)
+  })
+  it('o tema estiliza form[role=search] e input[type=search] só com variáveis', () => { const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/form\[role=search\]\{display:flex/); expect(css).toMatch(/input\[type=search\]\{[^}]*var\(--cor-superficie\)/) })
 })

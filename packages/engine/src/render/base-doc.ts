@@ -97,6 +97,15 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/cabecalho': { titulo: 'Cabeçalho', descricao: 'Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.', exemplos: [
     { titulo: 'Com título e menu', instancia: { bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Minha loja' } }, { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início' } }] } }] } } },
   ] },
+  'form/busca': { titulo: 'Formulário de busca', descricao: 'Formulário `GET` (`role="search"`) que leva o termo para uma página do PRÓPRIO site (`acao`, padrão `/busca`): funciona sem JavaScript, o termo vai na URL (`?q=…`) e a página de resultados o lê em `consulta.q`. Destino que não é um caminho do site vale o padrão.', exemplos: [
+    { titulo: 'Campo e botão', instancia: { bloco: 'form/busca', slots: { filhos: [{ bloco: 'entrada/busca', props: { placeholder: 'Buscar produtos' } }, { bloco: 'nav/enviar', props: { texto: 'Buscar' } }] } } },
+  ] },
+  'entrada/busca': { titulo: 'Campo de busca', descricao: 'Campo `type="search"` com nome acessível (`rotulo`, padrão "Buscar"), `nome` do parâmetro (padrão `q`), `placeholder` e `valor` inicial (até 200 caracteres). Vai dentro de um `form/busca`.', exemplos: [
+    { titulo: 'Com termo', instancia: { bloco: 'entrada/busca', props: { valor: 'café', placeholder: 'Buscar' } } },
+  ] },
+  'nav/enviar': { titulo: 'Botão de envio', descricao: 'Botão `type="submit"` para formulários simples (sem JavaScript e sem evento); o texto padrão é "Enviar".', exemplos: [
+    { titulo: 'Padrão', instancia: { bloco: 'nav/enviar' } },
+  ] },
   'entrada/arquivo': { titulo: 'Arquivo', descricao: 'Seletor de UM arquivo. `aceita` filtra o seletor; `tamanhoMax` (bytes, padrão 2 MB) recusa antes de ler. `aoEscolher` roda só com arquivo que serve e recebe `{ nome, tipo, tamanho, dados }` (bytes em base64); `aoRecusar` roda só quando não serve (nenhum arquivo ou acima de `tamanhoMax`) e recebe `{ erro }`, sem ler o arquivo. O servidor deve revalidar tudo: o tipo declarado aqui não vale nada.', exemplos: [
     { titulo: 'Imagens', instancia: { bloco: 'entrada/arquivo', props: { rotulo: 'Escolha uma imagem', aceita: 'image/png,image/jpeg,image/gif,image/webp' } } },
   ] },

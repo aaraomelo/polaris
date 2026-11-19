@@ -22,3 +22,8 @@ export function urlSegura(v: unknown): string | undefined {
 
 /** uma URL já considerada segura, escrita como `url("…")` de CSS: aspas, parênteses e contrabarra viram escapes de URL (nada fecha o `url(` nem a declaração) */
 export const cssUrl = (u: string): string => `url("${encodeURI(u).replace(/["'()\\]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)}")`
+
+/** destino do envio de um formulário de busca: só um CAMINHO do próprio site (começa com uma barra, sem `//`, sem barra invertida nem controles); qualquer outra coisa vale o padrão. O CSP das páginas (`form-action 'self'`) é a segunda barreira. */
+export const caminhoLocal = (v: unknown, padrao = '/busca'): string => (typeof v === 'string' && /^\/(?!\/)[^\\\u0000-\u001f\u007f\s]{0,300}$/.test(v) ? v : padrao)
+/** nome do parâmetro da busca: identificador simples; senão `q` */
+export const nomeDeParametro = (v: unknown, padrao = 'q'): string => (typeof v === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,30}$/.test(v) ? v : padrao)

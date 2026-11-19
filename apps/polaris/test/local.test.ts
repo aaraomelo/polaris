@@ -390,6 +390,22 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403|404|422)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('barra de busca: o formulário GET leva o termo à página /busca, que lista o que combina (sem diferenciar maiúsculas) e mantém o termo no campo; sem termo e sem resultado têm mensagens', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      const base = `http://loja-demo.polaris.localhost:${l.porta}`
+      await p.goto(`${base}/sobre`); const campo = p.getByRole('searchbox', { name: 'Buscar' }); expect(await p.locator('form[role=search]').getAttribute('action')).toBe('/busca'); expect(await campo.inputValue()).toBe('')
+      await campo.fill('CAFÉ'); await campo.press('Enter'); await p.waitForURL(/\/busca\?q=CAF%C3%89$/); await p.getByRole('heading', { name: 'Resultados para "CAFÉ"' }).waitFor()
+      await p.getByText('Café de Loja Demo').waitFor(); expect(await p.getByText('Pão de Loja Demo').count()).toBe(0) // só o que combina; maiúsculas não importam ("CAFÉ" acha "Café")
+      expect(await p.getByRole('searchbox', { name: 'Buscar' }).inputValue()).toBe('CAFÉ') // o termo continua no campo
+      await p.getByRole('searchbox', { name: 'Buscar' }).fill('xyzzy'); await p.getByRole('button', { name: 'Buscar' }).click(); await p.getByText('Nada encontrado para este termo.').waitFor()
+      await p.goto(`${base}/busca`); await p.getByText('Digite um termo no campo de busca.').waitFor()
+      await p.goto(`${base}/busca?q=${encodeURIComponent('<img src=x onerror=alert(1)>')}`); await p.getByText('Nada encontrado para este termo.').waitFor(); expect(await p.locator('img[src=x]').count()).toBe(0) // o termo nunca vira marcação
+      const outra = await nav.newPage(); await outra.goto(`http://loja-outra.polaris.localhost:${l.porta}/busca?q=pão`); await outra.getByText('Pão de Outra Loja').waitFor(); expect(await outra.getByText('Pão de Loja Demo').count()).toBe(0) // os dados são do tenant do endereço
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('o Studio sem sessão manda ao login e volta para ele depois de entrar', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

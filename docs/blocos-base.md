@@ -1,12 +1,13 @@
 # Biblioteca base de blocos
 
-31 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+34 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
 | layout | `layout/pilha`, `layout/linha` | `gap`, `alinha` | `filhos` | |
 | layout | `layout/grade` | `colunas` (1–12, padrão 2), `gap` | `filhos` | |
 | layout | `layout/cabecalho` | `fixo` (fica no topo ao rolar) | `filhos` | |
+| form | `form/busca` | `acao` (caminho do próprio site, padrão `/busca`) | `filhos` | |
 | layout | `layout/destaque` | `imagem`, `altura` (120–800), `escurece` (0–0,8), `alinha`, `fundo` | `filhos` | |
 | layout | `layout/rodape` | | `filhos` | |
 | layout | `layout/divisor` | | | |
@@ -23,9 +24,11 @@
 | tabela | `tabela/celula` | `texto` ou filhos, `cabecalho` (th), `colunas`, `linhas` | `filhos` | |
 | entrada | `entrada/texto` | `valor`, `placeholder`, `desabilitado` | | `aoMudar` (texto) |
 | entrada | `entrada/numero` | `valor`, `min`, `max`, `passo`, `placeholder`, `desabilitado` | | `aoMudar` (número ou `null` se vazio) |
+| entrada | `entrada/busca` | `nome` (parâmetro, padrão `q`), `rotulo` (padrão "Buscar"), `placeholder`, `valor` (até 200) | | |
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| nav | `nav/enviar` | `texto` (padrão "Enviar") | | |
 | nav | `nav/menu` | `rotulo` (nome acessível; padrão "Principal") | `filhos` | |
 | nav | `nav/link` | `href` (só URLs seguras), `texto`, `atual` (`aria-current="page"`), `botao` (`primario`/`secundario`: aparência de botão) | `filhos` | |
 | feedback | `feedback/selo` | `texto`, `tom` | | |
@@ -68,3 +71,8 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 **Limites**: a imagem precisa ser **da mesma origem** (o CSP das páginas só carrega as do próprio site): use as imagens do tenant enviadas pelo Studio (`docs/imagens.md`); sem imagem de fundo responsiva (um só arquivo, `cover`); sem vídeo nem carrossel; `alinha` e `fundo` são texto (não enum) porque enum não aceita binding no modelo do composto.
 
 **Arquivo (`entrada/arquivo`)**: seletor de UM arquivo. O navegador lê o arquivo e entrega `{ nome, tipo, tamanho, dados }` (bytes em base64) a `aoEscolher`; arquivo que não serve (nenhum, ou acima de `tamanhoMax`) **nem é lido** e dispara `aoRecusar` com `{ erro }`, de modo que a página não faz um envio inútil. Os dois eventos usam o mesmo evento do DOM (`change`); o payload de cada um decide se se aplica (valor sentinela `PULA`), e as ações rodam quando a leitura assíncrona termina. **O servidor revalida tudo**: o tipo declarado pelo navegador não vale nada.
+
+**Busca**: `form/busca` (`<form role="search" method="get">`), `entrada/busca` (`<input type="search">`) e `nav/enviar` (`<button type="submit">`) são blocos **sem evento nem estado**: o composto `site/busca` os junta (campo + botão; `acao`, `nome`, `valor`, `placeholder`, `rotulo`, `botao`) e **funciona sem JavaScript**: o termo vai na URL (`/busca?q=café`) e a página de resultados o lê em **`consulta.q`** (o campo é preenchido de volta com `valor: '{consulta.q ?? ""}'`). Cabe no slot `acoes` do `site/cabecalho`.
+- **Segurança**: `acao` só vale se for um **caminho do próprio site** (começa com uma barra; `https://…`, `//host`, `javascript:`, barra invertida, espaço e controles caem em `/busca`), e o CSP das páginas (`form-action 'self'`) é a segunda barreira; `nome` do parâmetro é um identificador simples (senão `q`); o termo nunca vira marcação (escapado) e passa de 200 caracteres nem compila.
+- **Resultados** são da página: o site de exemplo (`site.busca`) filtra os destaques com `filtra(destaques, d => contem(minusculas(…), minusculas(consulta.q)))`, no tenant do endereço, com mensagens para "sem termo" e "nada encontrado".
+**Limites**: o filtro do exemplo é por **trecho do texto, sem diferenciar maiúsculas, mas diferenciando acentos** ("cafe" não acha "Café"); a busca roda sobre o que a página já carregou (não há busca no servidor, nem paginação, nem sugestões enquanto digita); o envio recarrega a página (o roteador do cliente só intercepta links).

@@ -97,5 +97,24 @@ const BLOCOS_HERO = [
   }),
 ]
 
-export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO]
+const BLOCOS_BUSCA = [
+  no('bloco', 'site.busca', {
+    interface: 'site/busca', titulo: 'Barra de busca',
+    descricao: 'Campo de busca com botão: um formulário `GET` que leva o termo (`?q=…`) a uma página do próprio site (`acao`, padrão `/busca`), que o lê em `consulta.q`. Funciona sem JavaScript. `valor` preenche o campo (use `{consulta.q}` na página de resultados) e `rotulo` dá o nome acessível. Cabe no slot `acoes` do `site/cabecalho`.',
+    props: { type: 'object', properties: {
+      acao: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site (padrão /busca)' }, nome: { type: 'string', maxLength: 31, description: 'parâmetro na URL (padrão q)' },
+      valor: { type: 'string', maxLength: 200 }, placeholder: { type: 'string', maxLength: 100, default: 'Buscar' }, rotulo: { type: 'string', maxLength: 100, default: 'Buscar' }, botao: { type: 'string', maxLength: 60, default: 'Buscar' },
+    } },
+    exemplos: [
+      { titulo: 'Padrão', instancia: instancia('site/busca', {}) },
+      { titulo: 'Com termo e outro destino', instancia: instancia('site/busca', { acao: '/produtos', valor: 'café', placeholder: 'Buscar produtos', botao: 'Procurar' }) },
+    ],
+    modelo: { bloco: 'form/busca', props: { acao: '{props.acao}' }, slots: { filhos: [
+      { bloco: 'entrada/busca', props: { nome: '{props.nome}', valor: '{props.valor}', placeholder: '{props.placeholder ?? "Buscar"}', rotulo: '{props.rotulo ?? "Buscar"}' } },
+      { bloco: 'nav/enviar', props: { texto: '{props.botao ?? "Buscar"}' } },
+    ] } },
+  }),
+]
+
+export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO, ...BLOCOS_BUSCA]
 export function registraSite(reg: Registry): void { for (const n of BLOCOS_SITE) reg.registra(n as never) }

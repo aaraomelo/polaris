@@ -62,6 +62,13 @@
               "slots": {
                 "acoes": [
                   {
+                    "bloco": "site/busca",
+                    "props": {
+                      "valor": "{consulta.q ?? \"\"}",
+                      "placeholder": "Buscar destaques"
+                    }
+                  },
+                  {
                     "bloco": "nav/link",
                     "props": {
                       "href": "/entrar",
@@ -188,6 +195,13 @@
               "slots": {
                 "acoes": [
                   {
+                    "bloco": "site/busca",
+                    "props": {
+                      "valor": "{consulta.q ?? \"\"}",
+                      "placeholder": "Buscar destaques"
+                    }
+                  },
+                  {
                     "bloco": "nav/link",
                     "props": {
                       "href": "/entrar",
@@ -208,6 +222,164 @@
               "bloco": "texto/paragrafo",
               "props": {
                 "texto": "Esta página é declarada em JSON e renderizada pela plataforma, com os dados do tenant."
+              }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Página inicial",
+                        "href": "/"
+                      },
+                      {
+                        "texto": "Catálogo (gerente)",
+                        "href": "/produtos"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ],
+                "contato": "contato@exemplo.com",
+                "copyright": "© 2026 Minha loja"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "site.busca",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/busca",
+      "titulo": "Busca",
+      "dados": {
+        "destaques": "site.destaques"
+      },
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 16
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "site/cabecalho",
+              "props": {
+                "titulo": "Minha loja",
+                "links": [
+                  {
+                    "texto": "Início",
+                    "href": "/"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  },
+                  {
+                    "texto": "Contato",
+                    "href": "/contato"
+                  },
+                  {
+                    "texto": "Produtos (gerente)",
+                    "href": "/produtos"
+                  }
+                ],
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+              },
+              "slots": {
+                "acoes": [
+                  {
+                    "bloco": "site/busca",
+                    "props": {
+                      "valor": "{consulta.q ?? \"\"}",
+                      "placeholder": "Buscar destaques"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/entrar",
+                      "texto": "Entrar"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Resultados para \"{consulta.q}\"",
+                "nivel": 1
+              },
+              "se": "consulta.q"
+            },
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Buscar",
+                "nivel": 1
+              },
+              "se": "!consulta.q"
+            },
+            {
+              "bloco": "texto/paragrafo",
+              "props": {
+                "texto": "Digite um termo no campo de busca."
+              },
+              "se": "!consulta.q"
+            },
+            {
+              "bloco": "texto/paragrafo",
+              "props": {
+                "texto": "Nada encontrado para este termo."
+              },
+              "se": "consulta.q && tamanho(filtra(destaques, d => contem(minusculas(d.titulo + \" \" + (d.descricao ?? \"\")), minusculas(consulta.q)))) == 0"
+            },
+            {
+              "bloco": "layout/pilha",
+              "props": {
+                "gap": 4
+              },
+              "repetir": {
+                "cada": "consulta.q ? filtra(destaques, d => contem(minusculas(d.titulo + \" \" + (d.descricao ?? \"\")), minusculas(consulta.q))) : []",
+                "como": "d",
+                "chave": "d.titulo"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "texto/destaque",
+                    "props": {
+                      "texto": "{d.titulo}"
+                    }
+                  },
+                  {
+                    "bloco": "texto/paragrafo",
+                    "props": {
+                      "texto": "{d.descricao}"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -292,6 +464,13 @@
               "slots": {
                 "acoes": [
                   {
+                    "bloco": "site/busca",
+                    "props": {
+                      "valor": "{consulta.q ?? \"\"}",
+                      "placeholder": "Buscar destaques"
+                    }
+                  },
+                  {
                     "bloco": "nav/link",
                     "props": {
                       "href": "/entrar",
@@ -366,7 +545,8 @@
         "site.sobre",
         "site.nao",
         "site.produtos",
-        "site.contato"
+        "site.contato",
+        "site.busca"
       ],
       "paginaNaoEncontrada": "site.nao"
     }
@@ -389,7 +569,8 @@
         "site.sobre",
         "site.nao",
         "site.produtos",
-        "site.contato"
+        "site.contato",
+        "site.busca"
       ],
       "paginaNaoEncontrada": "site.nao"
     }
@@ -456,6 +637,13 @@
               },
               "slots": {
                 "acoes": [
+                  {
+                    "bloco": "site/busca",
+                    "props": {
+                      "valor": "{consulta.q ?? \"\"}",
+                      "placeholder": "Buscar destaques"
+                    }
+                  },
                   {
                     "bloco": "nav/link",
                     "props": {
@@ -663,6 +851,13 @@
               },
               "slots": {
                 "acoes": [
+                  {
+                    "bloco": "site/busca",
+                    "props": {
+                      "valor": "{consulta.q ?? \"\"}",
+                      "placeholder": "Buscar destaques"
+                    }
+                  },
                   {
                     "bloco": "nav/link",
                     "props": {

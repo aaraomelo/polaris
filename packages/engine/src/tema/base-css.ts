@@ -10,7 +10,9 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris button{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75) calc(var(--espacamento-base) * 1.5);font:inherit;cursor:pointer}
 #polaris button:hover:not(:disabled){background:var(--cor-primaria-hover)}
 #polaris button:disabled{opacity:.55;cursor:not-allowed}
-#polaris input[type=text],#polaris input[type=number]{background:var(--cor-superficie);color:var(--cor-texto);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75);font:inherit}
+#polaris input[type=text],#polaris input[type=number],#polaris input[type=search]{background:var(--cor-superficie);color:var(--cor-texto);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75);font:inherit}
+#polaris form[role=search]{display:flex;align-items:center;gap:var(--espacamento-base);margin:0}
+#polaris form[role=search] input[type=search]{min-width:12ch;flex:1}
 #polaris input::placeholder{color:var(--cor-texto-suave)}
 #polaris input:disabled{opacity:.55}
 #polaris input[type=checkbox]{accent-color:var(--cor-primaria);width:1.1em;height:1.1em}
