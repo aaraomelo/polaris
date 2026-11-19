@@ -23,6 +23,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris ul[data-sugestoes-url] [data-s-texto]{display:flex;flex-direction:column;min-width:0}
 #polaris ul[data-sugestoes-url] [data-s-titulo]{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #polaris ul[data-sugestoes-url] [data-s-desc]{color:var(--cor-texto-suave);font-size:.875em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#polaris ul[data-sugestoes-url] mark{background:transparent;color:var(--cor-primaria);font-weight:700;text-decoration:underline;text-underline-offset:.15em}
 #polaris ul[data-sugestoes-url] [data-s-vazio]{padding:calc(var(--espacamento-base) * 0.75);color:var(--cor-texto-suave)}
 #polaris [data-s-status]{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #polaris input::placeholder{color:var(--cor-texto-suave)}

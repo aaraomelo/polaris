@@ -92,6 +92,18 @@ export const ROTEADOR_JS = `(function (w, d) {
   function sgLista(inp) { var f = inp.form; return f ? f.querySelector('ul[data-sugestoes-url]') : null; }
   function sgFecha(ul, inp) { if (!ul) return; ul.hidden = true; ul.setAttribute('hidden', ''); ul.textContent = ''; SG.ativo = -1; if (inp) { inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); } }
   function sgSeguro(u) { return typeof u === 'string' && /^\\/(?!\\/)[^\\\\\\s]{0,300}$/.test(u) ? u : null; }
+  // realce do trecho achado: compara sem acento nem maiúsculas (cada letra vira a letra-base; o que não vira uma só mantém o caractere) e monta o texto em pedaços (nós de texto e <mark>), nunca HTML
+  function sgBase(s) { var o = ''; for (var i = 0; i < s.length; i++) { var c = s.charAt(i), b = c.normalize ? c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : c; o += b.length === 1 ? b.toLowerCase() : c.toLowerCase().charAt(0) || c; } return o; }
+  function sgRealce(el, texto, termo) {
+    var base = sgBase(texto), marca = [], ps = sgBase(termo).split(/[^a-z0-9]+/).filter(function (p) { return p.length > 0; }).slice(0, 5);
+    for (var k = 0; k < texto.length; k++) marca[k] = false;
+    for (var j = 0; j < ps.length; j++) { var at = base.indexOf(ps[j]); while (at >= 0) { for (var m = at; m < at + ps[j].length; m++) marca[m] = true; at = base.indexOf(ps[j], at + ps[j].length); } }
+    var i = 0; while (i < texto.length) {
+      var f = i; while (f < texto.length && marca[f] === marca[i]) f++;
+      var pedaco = texto.slice(i, f); if (marca[i]) { var mk = d.createElement('mark'); mk.textContent = pedaco; el.appendChild(mk); } else el.appendChild(d.createTextNode(pedaco));
+      i = f;
+    }
+  }
   function sgItens(ul) { return ul.querySelectorAll('li[role="option"]'); }
   function sgMarca(ul, inp, i) {
     var l = sgItens(ul); if (!l.length) return; SG.ativo = (i + l.length) % l.length;
@@ -111,9 +123,9 @@ export const ROTEADOR_JS = `(function (w, d) {
       a.href = destino + (destino.indexOf('?') < 0 ? '?' : '&') + encodeURIComponent(nome) + '=' + encodeURIComponent(tit);
       var img = campo('imagem') ? sgSeguro(it[campo('imagem')]) : null;
       if (img) { var im = d.createElement('img'); im.src = img; im.alt = ''; im.width = 40; im.height = 40; im.loading = 'lazy'; a.appendChild(im); }
-      tx.setAttribute('data-s-texto', ''); st.setAttribute('data-s-titulo', ''); st.textContent = tit; tx.appendChild(st);
+      tx.setAttribute('data-s-texto', ''); st.setAttribute('data-s-titulo', ''); sgRealce(st, tit, termo); tx.appendChild(st);
       var dc = campo('descricao') ? it[campo('descricao')] : null;
-      if (typeof dc === 'string' && dc) { var sd = d.createElement('span'); sd.setAttribute('data-s-desc', ''); sd.textContent = dc; tx.appendChild(sd); }
+      if (typeof dc === 'string' && dc) { var sd = d.createElement('span'); sd.setAttribute('data-s-desc', ''); sgRealce(sd, dc, termo); tx.appendChild(sd); }
       a.appendChild(tx); li.appendChild(a); ul.appendChild(li);
     }
     var n = sgItens(ul).length;
