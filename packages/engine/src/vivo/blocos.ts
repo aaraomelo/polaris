@@ -28,12 +28,13 @@ const num = (v: unknown): number | undefined => (typeof v === 'number' && Number
 const ALINHA: Record<string, string> = { inicio: 'flex-start', centro: 'center', fim: 'flex-end', esticar: 'stretch' }
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
+const larguraCaixa = (v: unknown): string | undefined => (typeof v === 'number' && Number.isFinite(v) ? `${Math.min(2000, Math.max(40, Math.round(v)))}px` : undefined)
 const caixa = (direcao: 'column' | 'row'): Descritor => ({
   chave: () => 'div', tag: () => 'div', filhos: true,
   attrs: (p, id) => {
     const gap = num(p.gap)
     const alinha = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined
-    return { ...comId(id), ...(p.papel === 'toolbar' || p.papel === 'group' || p.papel === 'list' ? { role: p.papel } : {}), ...rotulo(p), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}` }
+    return { ...comId(id), ...(p.papel === 'toolbar' || p.papel === 'group' || p.papel === 'list' ? { role: p.papel } : {}), ...rotulo(p), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
   },
 })
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))
@@ -66,7 +67,7 @@ export const d_nav_botao: Descritor = {
 const rotulo = (p: Record<string, unknown>): Record<string, string> => (typeof p.rotulo === 'string' && p.rotulo.trim() ? { 'aria-label': p.rotulo.trim().slice(0, 200) } : {})
 export const d_entrada_texto: Descritor = {
     chave: () => 'input', tag: () => 'input', valor: (p) => txt(p.valor),
-    attrs: (p, id) => ({ ...comId(id), type: 'text', ...rotulo(p), placeholder: txt(p.placeholder), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
+    attrs: (p, id) => ({ ...comId(id), type: 'text', ...rotulo(p), placeholder: txt(p.placeholder), ...(p.desabilitado === true ? { disabled: '' } : {}), ...(idDeElemento(p.lista) ? { list: idDeElemento(p.lista)! } : {}) }),
     eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLInputElement).value } },
   }
 

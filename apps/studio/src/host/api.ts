@@ -22,6 +22,7 @@ export const OPERACOES: Record<string, (a: Record<string, unknown>) => Req> = {
   publicarSite: (a) => ({ metodo: 'POST', url: '/studio/publicar', corpo: sem({ nota: a.nota || undefined }) }),
   obterSite: () => ({ metodo: 'GET', url: '/studio/site' }),
   definirTemaDoSite: (a) => ({ metodo: 'PUT', url: '/studio/site', corpo: { tema: a.tema } }),
+  definirPaginaNoSite: (a) => ({ metodo: 'PUT', url: '/studio/site/paginas', corpo: { pagina: a.pagina, mostrar: a.mostrar } }),
   listarAtivos: () => ({ metodo: 'GET', url: '/studio/ativos' }),
   enviarAtivo: (a) => ({ metodo: 'POST', url: '/studio/ativos', corpo: { nome: a.nome, dados: a.dados } }),
   removerAtivo: (a) => ({ metodo: 'DELETE', url: `/studio/ativos/${e(String(a.hash))}` }),

@@ -15,6 +15,10 @@
           "base": {
             "tipo": "json",
             "descricao": "ids do core/segmento por kind"
+          },
+          "rotas": {
+            "tipo": "json",
+            "descricao": "as páginas do site com a rota de cada uma ({ id, rota }), para oferecer destinos em campos de link"
           }
         }
       },
@@ -140,6 +144,9 @@
           "temas": {
             "tipo": "json"
           },
+          "paginas": {
+            "tipo": "json"
+          },
           "configuravel": {
             "tipo": "booleano"
           }
@@ -152,6 +159,9 @@
           },
           "tema": {
             "tipo": "texto"
+          },
+          "paginas": {
+            "tipo": "json"
           },
           "versao": {
             "tipo": "inteiro"
@@ -516,6 +526,22 @@
         "entrada": {
           "tema": {
             "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "siteSalvo",
+        "permissao": "studio"
+      },
+      "definirPaginaNoSite": {
+        "metodo": "PUT",
+        "caminho": "/site/paginas",
+        "entrada": {
+          "pagina": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "mostrar": {
+            "tipo": "booleano",
             "obrigatorio": true
           }
         },

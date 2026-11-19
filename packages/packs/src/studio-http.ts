@@ -7,6 +7,21 @@ import { KINDS_DO_TENANT } from './overrides'
 
 // API de AUTORIA do Studio. O tenant e o autor vêm SEMPRE da sessão (`autentica`), nunca do corpo: não há como gravar, ler ou comentar em nome de outro tenant ou outra pessoa.
 // Tudo é gravado como versão imutável (E7); aqui só há leitura, gravação com controle de concorrência (409 se alguém salvou antes), histórico, diff e comentários.
+/** rótulos em português dos campos mais comuns dos blocos (o schema só tem o nome técnico, ex.: `tituloNivel`); o schema do bloco pode trazer o seu `title`, que vence */
+const TITULOS_PROP: Record<string, string> = {
+  titulo: 'Título', subtitulo: 'Subtítulo', texto: 'Texto', logo: 'Logo', href: 'Destino (link)', cta: 'Botão principal', cta2: 'Botão secundário', escurece: 'Escurecer a imagem (0 a 0,8)', fundo: 'Fundo', links: 'Links do menu', grupos: 'Submenus', colunas: 'Colunas', copyright: 'Aviso legal', contato: 'Contato', endereco: 'Endereço',
+  rotuloMenu: 'Nome do menu (leitor de tela)', rotuloAlternador: 'Nome do botão do menu', textoAlternador: 'Texto do botão do menu', fixo: 'Fixo no topo', menuRecolhivel: 'Menu recolhível no celular', tituloNivel: 'Nível do título',
+  imagem: 'Imagem de fundo', botoes: 'Botões', nivel: 'Nível', gap: 'Espaço entre itens', alinha: 'Alinhamento', quebra: 'Quebrar linha', papel: 'Papel (acessibilidade)', rotulo: 'Nome acessível', placeholder: 'Texto de exemplo',
+  valor: 'Valor', src: 'Origem da imagem', alt: 'Texto alternativo', largura: 'Largura', altura: 'Altura', aberta: 'Começa aberta', atual: 'Item atual', icone: 'Ícone', variante: 'Estilo', desabilitado: 'Desabilitado',
+  acao: 'Destino da busca', nome: 'Nome', sugestoesUrl: 'Fonte das sugestões (API)', sugestoesTitulo: 'Campo do título', sugestoesDescricao: 'Campo da descrição', sugestoesImagem: 'Campo da miniatura', sugestoesLimite: 'Máximo de sugestões',
+  sugestoesDestino: 'Página de destino', sugestoes: 'Sugestões fixas', tamanhos: 'Tamanhos (srcset)', tom: 'Tom', botao: 'Botão', cresce: 'Ocupar o espaço que sobra', url: 'Endereço', destino: 'Página de destino', limite: 'Quantidade', descricao: 'Descrição',
+}
+const comTitulos = (schema: unknown, prof = 0): unknown => {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema) || prof > 4) return schema
+  const s = schema as Record<string, unknown>, props = s.properties
+  if (!props || typeof props !== 'object') return schema
+  return { ...s, properties: Object.fromEntries(Object.entries(props as Record<string, unknown>).map(([k, v]) => { const f = v && typeof v === 'object' ? (v as Record<string, unknown>) : {}; const t = f.title === undefined && TITULOS_PROP[k] ? { ...f, title: TITULOS_PROP[k] } : f; return [k, prof < 3 ? comTitulos(t, prof + 1) : t] })) }
+}
 /** o ícone (família Grafite) de cada bloco: por padrão `a/b` → `a-b`; os compostos do site reaproveitam o do bloco que mais se parece */
 const ICONE_DE_BLOCO: Record<string, string> = { 'site/cabecalho': 'layout-cabecalho', 'site/rodape': 'layout-rodape', 'site/hero': 'layout-destaque', 'site/busca': 'form-busca', 'site/menu-lateral': 'layout-lateral' }
 
@@ -85,14 +100,18 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.get('/studio/blocos', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
     const { registro } = await o.armazem.registroDoTenant(s.tenantId)
-    const blocos = registro.ids('bloco').map((id) => { const no = registro.resolve('bloco', id)?.no; const sp = (no?.spec ?? {}) as Record<string, unknown>; const desc = typeof sp.descricao === 'string' ? sp.descricao : '', primeira = (desc.split(/(?<=[.!?])\s/)[0] ?? '').replace(/`/g, ''), resumo = primeira.length > 110 ? `${primeira.slice(0, 107).trimEnd()}…` : primeira; return { id, titulo: (sp.titulo as string | undefined) ?? id, ...(resumo ? { resumo } : {}), icone: ICONE_DE_BLOCO[id] ?? id.replace('/', '-'), ...(sp.descricao ? { descricao: sp.descricao } : {}), ...(sp.props ? { props: sp.props } : {}), slots: sp.slots ?? {}, composto: sp.modelo !== undefined, ...(sp.codigo !== undefined ? { codigo: true } : {}) } })
+    const blocos = registro.ids('bloco').map((id) => { const no = registro.resolve('bloco', id)?.no; const sp = (no?.spec ?? {}) as Record<string, unknown>; const desc = typeof sp.descricao === 'string' ? sp.descricao : '', primeira = (desc.split(/(?<=[.!?])\s/)[0] ?? '').replace(/`/g, ''), resumo = primeira.length > 110 ? `${primeira.slice(0, 107).trimEnd()}…` : primeira; return { id, titulo: (sp.titulo as string | undefined) ?? id, ...(resumo ? { resumo } : {}), icone: ICONE_DE_BLOCO[id] ?? id.replace('/', '-'), ...(sp.descricao ? { descricao: sp.descricao } : {}), ...(sp.props ? { props: comTitulos(sp.props) } : {}), slots: sp.slots ?? {}, composto: sp.modelo !== undefined, ...(sp.codigo !== undefined ? { codigo: true } : {}) } })
     return { blocos }
   })
 
   app.get('/studio/nos', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
     const base = await o.baseDe(s.tenantId)
-    return { nos: await o.armazem.lista(s.tenantId), base: Object.fromEntries(KINDS_DO_TENANT.map((k) => [k, base.ids(k as never)])) }
+    // as rotas do site (as páginas do padrão e as do tenant, que vencem): para o editor oferecer a lista de destinos em campos de link
+    const rotas = new Map<string, string>(); const rotaDe = (spec: unknown) => ((spec as { rota?: unknown } | undefined)?.rota)
+    for (const id of base.ids('pagina' as never)) { const r = rotaDe(base.resolve('pagina' as never, id)?.no.spec); if (typeof r === 'string' && !id.startsWith('studio.')) rotas.set(id, r) }
+    for (const c of (await o.armazem.cabecas(s.tenantId)).filter((x) => x.kind === 'pagina')) { const r = rotaDe((c.conteudo as { spec?: unknown }).spec); if (typeof r === 'string') rotas.set(c.id, r) }
+    return { nos: await o.armazem.lista(s.tenantId), base: Object.fromEntries(KINDS_DO_TENANT.map((k) => [k, base.ids(k as never)])), rotas: [...rotas].map(([id, rota]) => ({ id, rota })).sort((a, b) => a.rota.localeCompare(b.rota)) }
   })
 
   app.get<{ Params: { kind: string; '*': string } }>('/studio/nos/:kind/*', async (req, reply) => {
@@ -199,7 +218,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const site = await noDoSite(s.tenantId) // sem nó de site (ou sem `tenantNo`) não é erro: o Studio só esconde a escolha
     const base = await o.baseDe(s.tenantId), cabs = await o.armazem.cabecas(s.tenantId)
     const temas = [...new Set([...base.ids('tema' as never), ...cabs.filter((c) => c.kind === 'tema').map((c) => c.id)])].filter((t) => !t.startsWith('studio.')).sort()
-    return { tema: ((site?.no.spec as { tema?: string } | undefined)?.tema) ?? null, temas, configuravel: !!site }
+    return { tema: ((site?.no.spec as { tema?: string } | undefined)?.tema) ?? null, temas, paginas: ((site?.no.spec as { paginas?: string[] } | undefined)?.paginas) ?? [], configuravel: !!site }
   })
   app.put('/studio/site', { bodyLimit: 1024 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply
@@ -212,6 +231,28 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const { tenantId: _t, segmento: _g, ...resto } = site.no
     const r = await o.armazem.salva(s.tenantId, s.usuario, { ...resto, versao: proxima(String(site.no.versao ?? '1.0.0')), spec: { ...(site.no.spec as object), tema } }, `tema do site: ${tema}`, { configDoSite: true })
     return r.ok ? { ok: true, tema, versao: r.versao.seq } : erro(reply, 422, 'no_invalido', 'a configuração do site não passou na validação', { erros: r.erros })
+  })
+
+  /** mostrar (ou tirar) uma página NO SITE: a lista `paginas` do nó `tenant` é o que o gateway roteia; uma página criada no Studio só é servida depois de entrar nela (e de Publicar) */
+  app.put('/studio/site/paginas', { bodyLimit: 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply
+    const b = req.body; if (!so(b, ['pagina', 'mostrar'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { pagina, mostrar }')
+    const { pagina, mostrar } = b as { pagina?: unknown; mostrar?: unknown }
+    if (typeof pagina !== 'string' || !ANCORA_NO.test(pagina) || typeof mostrar !== 'boolean') return erro(reply, 400, 'requisicao_invalida', 'pagina: id da página; mostrar: verdadeiro ou falso')
+    const site = await noDoSite(s.tenantId); if (!site) return erro(reply, 501, 'nao_implementado', 'este tenant não tem site configurável')
+    const base = await o.baseDe(s.tenantId)
+    if (mostrar && !base.resolve('pagina' as never, pagina, { tenantId: s.tenantId }) && !(await o.armazem.cabecas(s.tenantId)).some((c) => c.kind === 'pagina' && c.id === pagina)) return erro(reply, 422, 'no_invalido', `a página '${pagina}' não existe: salve-a antes`)
+    // uma página criada no Studio nasce como rascunho e uma referência do site só enxerga nós publicados: ao mostrá-la no site ela passa a publicada (nova versão do nó, com nota; o histórico fica)
+    const cabPagina = mostrar ? (await o.armazem.cabecas(s.tenantId)).find((c) => c.kind === 'pagina' && c.id === pagina) : undefined
+    if (cabPagina && (cabPagina.conteudo as { estatuto?: string }).estatuto !== 'publicado') {
+      const p = await o.armazem.salva(s.tenantId, s.usuario, { ...(cabPagina.conteudo as object), estatuto: 'publicado' }, 'página publicada para entrar no site')
+      if (!p.ok) return erro(reply, 422, 'no_invalido', 'a página não passou na validação', { erros: p.erros })
+    }
+    const spec = site.no.spec as { paginas?: string[] }, atuais = spec.paginas ?? [], novas = mostrar ? (atuais.includes(pagina) ? atuais : [...atuais, pagina]) : atuais.filter((p) => p !== pagina)
+    if (novas.length === atuais.length && novas.every((p, i) => p === atuais[i])) return { ok: true, paginas: atuais }
+    const { tenantId: _t, segmento: _g, ...resto } = site.no
+    const r = await o.armazem.salva(s.tenantId, s.usuario, { ...resto, versao: proxima(String(site.no.versao ?? '1.0.0')), spec: { ...(site.no.spec as object), paginas: novas } }, `${mostrar ? 'mostra' : 'tira'} a página ${pagina} ${mostrar ? 'no' : 'do'} site`, { configDoSite: true })
+    return r.ok ? { ok: true, paginas: novas, versao: r.versao.seq } : erro(reply, 422, 'no_invalido', 'a configuração do site não passou na validação', { erros: r.erros })
   })
 
   // releases: o que está em produção, as anteriores, a diferença entre elas e o rollback (voltar é trocar o ponteiro: nada se apaga)

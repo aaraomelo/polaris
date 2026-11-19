@@ -25,3 +25,7 @@ section[aria-label]{background:var(--card);border:1px solid var(--bd);border-rad
 .token{display:flex;gap:6px;align-items:center;margin:4px 0;flex-wrap:wrap}.token label{min-width:110px}.token.herdado{opacity:.75}.amostra{width:20px;height:20px;border:1px solid var(--bd);border-radius:4px;display:inline-block}
 .novo-token,.novo-no{display:flex;gap:6px;align-items:end;flex-wrap:wrap;margin:8px 0;padding:8px 12px}.novo-no label{display:grid;gap:2px}
 .barra-modo{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.barra-modo button[aria-selected=true]{background:var(--pri);color:var(--pri-fg)}
+/* Studio: ajustes sobre o tema (carregado antes). A árvore de blocos e as listas de itens ficam à esquerda, como uma lista; o item atual tem o realce do menu lateral. */
+#polaris main button[data-icone][aria-current]{border-color:var(--cor-primaria)}
+#polaris main :is(h3,h4){margin-top:0}
+#polaris main [data-cartao] img{max-width:100%}

@@ -162,3 +162,4 @@ const BLOCOS_LATERAL = [
 
 export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO, ...BLOCOS_BUSCA, ...BLOCOS_LATERAL]
 export function registraSite(reg: Registry): void { for (const n of BLOCOS_SITE) reg.registra(n as never) }
+export { NOMES_ICONES } from '../icones/nomes'

@@ -543,6 +543,7 @@ Campo controlado pelo estado: `valor` vem do estado e `aoMudar` recebe o texto d
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `desabilitado` | booleano | não |  |  |
+| `lista` | texto | não |  | id de um `form/sugestoes` da página: o navegador oferece as opções ao digitar (a lista de valores disponíveis) |
 | `placeholder` | texto | não |  |  |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 | `valor` | texto | não |  |  |
@@ -1270,7 +1271,9 @@ Coloca os filhos lado a lado (flex row).
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  |  |
+| `cresce` | booleano | não |  | ocupa o espaço que sobra na linha (flex 1, sem estourar) |
 | `gap` | número ≥ 0 | não |  |  |
+| `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
 | `papel` | "toolbar" \| "group" \| "list" | não |  | papel ARIA do grupo (barra de ferramentas, grupo ou lista) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
@@ -1405,7 +1408,9 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  |  |
+| `cresce` | booleano | não |  | ocupa o espaço que sobra na linha (flex 1, sem estourar) |
 | `gap` | número ≥ 0 | não |  |  |
+| `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
 | `papel` | "toolbar" \| "group" \| "list" | não |  | papel ARIA do grupo (barra de ferramentas, grupo ou lista) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |

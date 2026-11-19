@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs'
 import { PGlite } from '@electric-sql/pglite'
 import { registraBase } from '@polaris/engine'
+import { registraSite } from '@polaris/engine/site'
 import { registraTemas } from '@polaris/engine/tema'
-import { DDL_DIRETORIO, criaArmazemDeNos, diretorioSql, registroDaPlataforma, type Sessao } from '@polaris/packs'
+import { DDL_DIRETORIO, criaArmazemDeNos, criaAtivos, diretorioSql, registroDaPlataforma, type Sessao } from '@polaris/packs'
 import type { FastifyInstance } from 'fastify'
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright-core'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -19,13 +20,14 @@ beforeAll(async () => {
   if (!CHROME) return
   pg = new PGlite(); await pg.exec(DDL_DIRETORIO)
   for (const [id, alias] of [[A, 'loja-a'], [B, 'loja-b']] as const) await diretorioSql(q).cria({ tenantId: id, alias, nome: alias, segmento: 'varejo', packs: ['varejo'], donoEmail: `${alias}@x.com`, chave: `chave-v2-${alias}-xxxxxxxxxxx` })
-  const base = registroDaPlataforma(); registraBase(base); registraTemas(base)
+  const base = registroDaPlataforma(); registraBase(base); registraTemas(base); registraSite(base)
+  base.registra({ kind: 'tenant', id: 'loja-a', versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'loja-a', segmento: 'varejo', modulos: [], paginas: [] } } as never) // o nó do site do tenant A: a lista de páginas que o gateway serve
   const armazem = criaArmazemDeNos({ q, base })
   await armazem.salva(A, 'seed', { kind: 'tema', id: 'marca', versao: '1.0.0', estatuto: 'publicado', spec: { tokens: { cor: { fundo: '#ffffff', texto: '#111111', primaria: '#1d4ed8' }, espacamento: { base: 8 } } } }, 'seed')
   const pg1 = (id: string) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota: `/${id}`, raiz: { bloco: 'layout/pilha', id: 'raiz', slots: { filhos: [{ bloco: 'texto/titulo', id: 'titulo', props: { texto: 'Bem-vindo', nivel: 1 } }, { bloco: 'texto/paragrafo', id: 'p1', props: { texto: 'Primeiro' } }, { bloco: 'texto/paragrafo', id: 'p2', props: { texto: 'Segundo' } }] } } } })
   for (const id of ['home', 'edita', 'estrutura', 'desfaz', 'hist', 'coment', 'conflito', 'xss']) await armazem.salva(A, 'seed', pg1(id), 'seed')
   const autentica = async (req: { headers: Record<string, unknown> }): Promise<Sessao | null> => { const m = /(?:^|;\s*)u=([a-z0-9-]+)\|([a-z]+)/.exec(String(req.headers.cookie ?? '')); return m ? { tenantId: m[2] === 'b' ? B : A, usuario: m[1]!, pode: () => true } : null }
-  app = criaServidorStudio({ armazem, baseDe: async () => base, q, autentica: autentica as never }); await app.listen({ port: 0, host: '127.0.0.1' })
+  app = criaServidorStudio({ armazem, baseDe: async () => base, q, ativos: criaAtivos({ q }), tenantNo: (t: string) => (t === A ? 'loja-a' : undefined), autentica: autentica as never }); await app.listen({ port: 0, host: '127.0.0.1' })
   url = `http://127.0.0.1:${(app.server.address() as { port: number }).port}`
   nav = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox'] })
 })
@@ -165,7 +167,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const boxes = await Promise.all(cats.map(async (_, i) => (await p.getByRole('button', { name: /^(Layout|Texto|Navegação|Formulário|Entrada|Mídia|Dados|Feedback|Site|Outros)\s\(\d+\)$/ }).nth(i).boundingBox())!)); expect(new Set(boxes.map((b) => Math.round(b!.y))).size).toBeLessThanOrEqual(2) // lado a lado (uma linha, no máximo quebra uma vez)
     await p.setViewportSize({ width: 1000, height: 800 }); expect(await p.evaluate(() => { const m = document.querySelector('main')!; return m.scrollWidth <= m.clientWidth })).toBe(true); await p.setViewportSize({ width: 1280, height: 720 }) // a paleta quebra em outra linha em vez de rolar o conteúdo para o lado
     await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0) // nada aberto: a lista longa de antes sumiu
-    await p.getByRole('button', { name: /^Layout\s\(/ }).click(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toBeVisible(); await expect(p.getByText('Empilha os filhos na vertical')).toBeVisible(); expect(await p.locator('button[data-icone]', { hasText: 'Pilha' }).getAttribute('data-icone')).toBe('layout-pilha') // título, resumo e ícone
+    await p.getByRole('button', { name: /^Layout\s\(/ }).click(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toBeVisible(); await expect(p.getByText('Empilha os filhos na vertical')).toBeVisible(); expect(await p.getByRole('group', { name: 'Blocos da categoria' }).locator('button[data-icone]', { hasText: 'Pilha' }).getAttribute('data-icone')).toBe('layout-pilha') // título, resumo e ícone
     await expect(p.getByRole('button', { name: /^Layout\s\(/ })).toHaveAttribute('aria-current', 'true'); await p.getByRole('button', { name: /^Layout\s\(/ }).click(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0) // abre e fecha
     await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('tabela'); await expect(p.getByRole('button', { name: 'Tabela', exact: true })).toBeVisible(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0)
     await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('zzzqqq'); await expect(p.getByText('Nenhum bloco para "zzzqqq".')).toBeVisible(); await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('')
@@ -211,7 +213,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   it('painéis de propriedades em seções recolhíveis com ícone: página, campo do formulário e elemento do cartaz', async () => {
     const { ctx, p } = await entra('ana'); const secoes = () => p.locator('details[data-secao] > summary').allInnerTexts(), aberta = (nome: string) => p.locator('details[data-secao]', { has: p.locator('summary', { hasText: nome }) })
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('secoes-pag'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/sc'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página secoes-pag')).toBeVisible(); await linhaDe(p, 'raiz').click()
-    expect(await secoes()).toEqual(['Identificação', 'Propriedades do bloco']); expect(await p.locator('details[data-secao][open]').count()).toBe(2); expect(await p.locator('details[data-secao] > summary[data-icone]').evaluateAll((l) => l.map((e) => e.getAttribute('data-icone')))).toEqual(['editar', 'layout-painel'])
+    expect(await secoes()).toEqual(['Identificação', 'Propriedades do bloco', 'Avançado (acessibilidade e layout)']); expect(await p.locator('details[data-secao][open]').count()).toBe(2); expect(await p.locator('details[data-secao] > summary[data-icone]').evaluateAll((l) => l.map((e) => e.getAttribute('data-icone')))).toEqual(['editar', 'layout-painel', 'releases']) // os campos técnicos (papel, nome acessível, largura…) ficam numa seção fechada
     await p.locator('summary', { hasText: 'Identificação' }).click(); await expect(p.getByRole('textbox', { name: 'Identificador' })).not.toBeVisible(); await p.locator('summary', { hasText: 'Identificação' }).click(); await expect(p.getByRole('textbox', { name: 'Identificador' })).toBeVisible() // recolhe e abre
     await p.getByRole('button', { name: 'Novo formulário' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('secoes-form'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Formulário secoes-form')).toBeVisible()
     await p.getByRole('button', { name: /^Texto\s\(/ }).click(); await p.getByRole('button', { name: 'Texto', exact: true }).click(); await p.getByRole('button', { name: /\(texto\)/ }).first().click()
@@ -219,6 +221,35 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect(p.getByRole('textbox', { name: 'Formato' })).not.toBeVisible(); await p.locator('summary', { hasText: 'Mensagens de erro' }).click(); await expect(p.getByRole('textbox', { name: 'Formato' })).toBeVisible()
     await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('secoes-cartaz'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Cartaz secoes-cartaz')).toBeVisible()
     await p.getByRole('button', { name: /^(▶ )?1\. / }).click(); expect(await secoes()).toEqual(['Identificação', 'Posição e tamanho (fração da peça, 0 a 1)', 'Conteúdo', 'Aparência']); expect(await p.locator('details[data-secao] > summary[data-icone]').evaluateAll((l) => l.map((e) => e.getAttribute('data-icone')))).toEqual(['editar', 'layout-grade', 'texto-paragrafo', 'layout-destaque'])
+    await ctx.close()
+  })
+  it('MONTAR UMA LANDING PAGE só pelo Studio: cabeçalho com links (JSON de lista), hero, rodapé; listas de valores disponíveis; JSON inválido não entra; salvar', async () => {
+    const { ctx, p } = await entra('ana'); const secao = async (nome: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${nome}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('lp'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/lp'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página lp')).toBeVisible(); await linhaDe(p, 'raiz').click()
+    const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]'); await p.getByRole('button', { name: 'Prévia ampla' }).click(); await expect(p.getByRole('button', { name: 'Prévia ampla' })).toHaveAttribute('aria-current', 'true') // a prévia da coluna é estreita (o menu do cabeçalho recolhe): a ampla mostra o site como no computador
+    // 1) cabeçalho: texto, lista de rotas (datalist) e a lista de links como JSON
+    await secao('Site', 'Cabeçalho do site'); await expect(p.getByRole('button', { name: /site\/cabecalho #b1$/ })).toBeVisible(); await p.getByRole('button', { name: /site\/cabecalho #b1$/ }).click()
+    await p.getByRole('textbox', { name: 'Título', exact: true }).fill('Minha loja'); await expect(frame().getByText('Minha loja')).toBeVisible()
+    const opcoes = (id: string) => p.evaluate((i) => [...document.querySelectorAll(`datalist#${i} option`)].map((o) => (o as HTMLOptionElement).value), id)
+    expect(await opcoes('dl-rotas')).toContain('/lp'); expect((await opcoes('dl-icones')).length).toBe(60); expect(await opcoes('dl-icones')).toContain('salvar'); expect(await opcoes('dl-temas')).toEqual(expect.arrayContaining(['padrao', 'marca'])); expect(await p.getByRole('combobox', { name: 'Destino (link)', exact: true }).getAttribute('list')).toBe('dl-rotas') // o campo de destino oferece as rotas do site
+    await expect(p.getByText('Valor estruturado: vazio').first()).toBeVisible(); await p.getByRole('button', { name: 'Editar JSON' }).first().click(); await p.waitForTimeout(300)
+    await p.getByRole('textbox', { name: /^JSON de / }).fill('[{"texto": "Início", "href": "/"}, {"texto": "Contato" ,'); await p.getByRole('button', { name: 'Aplicar JSON' }).click(); await expect(p.getByText('JSON inválido: confira vírgulas, aspas e colchetes.')).toBeVisible(); await expect(frame().getByRole('link', { name: 'Contato' })).toHaveCount(0) // inválido: avisa e NÃO entra no rascunho
+    await p.getByRole('textbox', { name: /^JSON de / }).fill('[{"texto": "Início", "href": "/"}, {"texto": "Contato", "href": "/contato"}]'); await p.getByRole('button', { name: 'Aplicar JSON' }).click(); await expect(frame().getByRole('link', { name: 'Contato' })).toBeVisible(); await expect(p.getByText('Valor estruturado: 2 item(ns)').first()).toBeVisible()
+    // 2) hero e rodapé (blocos do site), com o texto editado
+    await linhaDe(p, 'raiz').click(); await secao('Site', 'Hero (banner de destaque)'); await p.getByRole('button', { name: /site\/hero #b2$/ }).click(); await p.getByRole('textbox', { name: 'Título', exact: true }).fill('Bem-vindo à loja'); await expect(frame().getByText('Bem-vindo à loja')).toBeVisible()
+    await linhaDe(p, 'raiz').click(); await secao('Site', 'Rodapé do site'); await expect(p.getByRole('button', { name: /site\/rodape #b3$/ })).toBeVisible()
+    // 3) a ordem na árvore é a da página, e salvar grava
+    expect((await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => /#(\w+)$/.exec(t)![1])).toEqual(['raiz', 'b1', 'b2', 'b3'])
+    // 3b) valor incompleto (botão sem destino) invalida o nó: a prévia AVISA em vez de ficar em branco, e volta quando completa
+    await p.getByRole('button', { name: /site\/hero #b2$/ }).click(); await p.getByRole('textbox', { name: 'Botão principal › Texto', exact: true }).fill('Ver produtos'); await expect(p.getByText(/A prévia não foi atualizada|O preview não compila/).first()).toBeVisible()
+    await p.getByRole('combobox', { name: 'Botão principal › Destino (link)', exact: true }).fill('/produtos'); await expect(p.getByText(/A prévia não foi atualizada|O preview não compila/)).toHaveCount(0); await expect(frame().getByRole('link', { name: 'Ver produtos' })).toBeVisible()
+    await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText('Salvo como versão 1')).toBeVisible()
+    // 3c) uma página nova só tem endereço depois de entrar na lista de páginas do site: a caixa faz isso (e vale após Publicar)
+    await expect(p.getByText('Fora do site')).toBeVisible(); await p.getByRole('checkbox', { name: 'Mostrar esta página no site' }).click(); await expect(p.getByText(/A página entra no site em \/lp depois de Publicar\./)).toBeVisible(); await expect(p.getByText('No site', { exact: true })).toBeVisible()
+    expect(((await (await p.request.get(`${url}/studio/site`)).json()) as { paginas: string[] }).paginas).toContain('lp'); await expect.poll(() => p.getByRole('checkbox', { name: 'Mostrar esta página no site' }).isChecked()).toBe(true); await p.getByRole('checkbox', { name: 'Mostrar esta página no site' }).click(); await expect(p.getByText('Fora do site')).toBeVisible()
+    // 4) criar outra página com o MESMO identificador é bloqueado, com a explicação (antes dava conflito só ao salvar)
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('lp'); await expect(p.getByText(/Já existe um\(a\) pagina com o identificador "lp"/)).toBeVisible(); await expect(p.getByRole('button', { name: 'Criar', exact: true })).toHaveCount(0)
+    await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('lp-novo'); await expect(p.getByRole('button', { name: 'Criar', exact: true }).or(p.getByRole('button', { name: 'Descartar e criar' }))).toBeVisible()
     await ctx.close()
   })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
@@ -267,8 +298,8 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   it('prévia: alternar claro/escuro muda o modo do documento da prévia', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'home (personalizado)' }).click(); await expect(p.getByText('Página home')).toBeVisible()
     const modo = async () => (await p.locator('iframe[title="Pré-visualização da página"]').getAttribute('srcdoc')) ?? ''
-    await expect.poll(modo).toContain('data-modo="claro"'); await p.getByRole('button', { name: 'escuro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="escuro"')
-    await p.getByRole('button', { name: 'claro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="claro"'); await ctx.close()
+    await expect.poll(modo).toContain('data-modo="claro"'); await expect(p.getByRole('button', { name: 'Claro', exact: true })).toHaveAttribute('aria-current', 'true'); await p.getByRole('button', { name: 'Escuro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="escuro"'); await expect(p.getByRole('button', { name: 'Escuro', exact: true })).toHaveAttribute('aria-current', 'true')
+    await p.getByRole('button', { name: 'Claro', exact: true }).click(); await expect.poll(modo).toContain('data-modo="claro"'); await ctx.close()
   })
   it('criar nó com alterações não salvas pede confirmação; sem alterações cria direto', async () => {
     const { ctx, p } = await entra('ana')

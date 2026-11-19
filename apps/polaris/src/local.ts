@@ -77,6 +77,8 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_app') THEN CREATE ROLE polaris_app LOGIN; END IF;
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_migrador') THEN CREATE ROLE polaris_migrador LOGIN BYPASSRLS; END IF;
     END $$; GRANT CREATE ON DATABASE postgres TO polaris_migrador;`)
+    // o PGlite atende UMA sessão por vez e várias conexões se misturam: com o tempo (e com quedas) um ÍNDICE do banco persistido pode ficar errado e devolver linha de outro tenant (visto: `WHERE tenant_id = X` trazendo o nó de outro tenant, e a publicação recusada por isso). Refazer os índices ao subir custa milissegundos neste banco pequeno e evita o sintoma.
+    await db.exec(`DO $$ DECLARE s text; BEGIN FOR s IN SELECT nspname FROM pg_namespace WHERE nspname IN ('plataforma', 'loja') LOOP EXECUTE format('REINDEX SCHEMA %I', s); END LOOP; END $$;`).catch(() => { /* banco novo ou sem permissão: segue */ })
     const srv = new PGLiteSocketServer({ db, port: o.pgPorta ?? 0, host: '127.0.0.1', maxConnections: 20 }); await srv.start(); fecham.push(() => srv.stop())
     const pgPorta = /:(\d+)/.exec(srv.getServerConn())![1]!, pg = (papel: string) => `postgres://${papel}@127.0.0.1:${pgPorta}/postgres`
     // 2. esquema da plataforma (diretório de tenants, versões, releases, comentários) e os tenants de demonstração

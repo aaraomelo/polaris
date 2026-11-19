@@ -173,6 +173,21 @@ describe('API de autoria do Studio', () => {
     // a rota genérica continua NÃO aceitando sobrescrever o nó `tenant`
     expect((await app.inject({ method: 'PUT', url: '/studio/nos/tenant/lojaa', headers: h(A, 'ana'), payload: { no: { kind: 'tenant', id: 'lojaa' } } })).statusCode).toBe(400); await a2.close()
   })
+  it('site/paginas: mostrar e tirar uma página NO SITE (a lista `paginas` do nó tenant); repetir não cria versão; página inexistente é 422; só editor; GET traz a lista', async () => {
+    base.registra({ kind: 'tenant', id: 'lojab', versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'lojab', segmento: 'varejo', modulos: ['loja'], paginas: [] } })
+    const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, tenantNo: (t) => (t === A ? 'lojab' : undefined) })
+    const pSite = (corpo: unknown, t = h(A, 'ana')) => a2.inject({ method: 'PUT', url: '/studio/site/paginas', headers: t, payload: corpo as never }), get = async () => (await a2.inject({ url: '/studio/site', headers: h(A, 'ana', 'ver') })).json()
+    await put(A, { kind: 'pagina', id: 'landing', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/landing', raiz: { bloco: 'layout/pilha', slots: { filhos: [] } } } })
+    await put(A, { kind: 'pagina', id: 'rascunho-pg', versao: '1.0.0', estatuto: 'rascunho', spec: { rota: '/rascunho', raiz: { bloco: 'layout/pilha', slots: { filhos: [] } } } })
+    const rr = await pSite({ pagina: 'rascunho-pg', mostrar: true }); expect([rr.statusCode, rr.json().paginas]).toEqual([200, ['rascunho-pg']]); expect(((await armazem.cabecas(A)).find((c) => c.id === 'rascunho-pg')!.conteudo as any).estatuto).toBe('publicado') // uma página em rascunho vira publicada ao entrar no site
+    await pSite({ pagina: 'rascunho-pg', mostrar: false })
+    expect((await get()).paginas).toEqual([]); const r1 = await pSite({ pagina: 'landing', mostrar: true }); expect([r1.statusCode, r1.json().paginas]).toEqual([200, ['landing']]); expect((await get()).paginas).toEqual(['landing'])
+    const v1 = (await armazem.cabecas(A)).find((c) => c.kind === 'tenant' && c.id === 'lojab')!.seq; expect((await pSite({ pagina: 'landing', mostrar: true })).json().paginas).toEqual(['landing']); expect((await armazem.cabecas(A)).find((c) => c.kind === 'tenant' && c.id === 'lojab')!.seq).toBe(v1) // repetir: sem versão nova
+    const r2 = await pSite({ pagina: 'landing', mostrar: false }); expect([r2.statusCode, r2.json().paginas]).toEqual([200, []])
+    expect((await pSite({ pagina: 'nao-existe', mostrar: true })).statusCode).toBe(422); expect((await pSite({ pagina: 'landing' })).statusCode).toBe(400); expect((await pSite({ pagina: "x'; --", mostrar: true })).statusCode).toBe(400); expect((await pSite({ pagina: 'landing', mostrar: 'sim' })).statusCode).toBe(400)
+    expect((await pSite({ pagina: 'landing', mostrar: true }, h(A, 'leo', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'PUT', url: '/studio/site/paginas', headers: h(B, 'bia'), payload: { pagina: 'landing', mostrar: true } })).statusCode).toBe(501) // B não tem nó de site
+    await a2.close()
+  })
   it('releases: lista, diferença e voltar; valida os números; voltar exige editar; o tenant vem da sessão', async () => {
     expect((await app.inject({ url: '/studio/releases', headers: h(A, 'ana') })).statusCode).toBe(501)
     const chamadas: any[] = []; let falha = false
