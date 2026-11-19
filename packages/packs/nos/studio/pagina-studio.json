@@ -1576,7 +1576,7 @@
          {
           "bloco": "texto/paragrafo",
           "props": {
-           "texto": "Envie png, jpeg, gif ou webp (até 2 MB). Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
+           "texto": "Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
           }
          },
          {
@@ -1604,7 +1604,7 @@
               {
                "acao": "definir",
                "estado": "msgImagem",
-               "valor": "resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\""
+               "valor": "(resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\") + (resultado.removidos > 0 ? \" Removemos \" + resultado.removidos + \" bytes de metadados (localização, câmera, comentários).\" : \"\")"
               },
               {
                "acao": "executar",

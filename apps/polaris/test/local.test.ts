@@ -368,6 +368,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       p.on('response', (r) => { if (r.url().includes('/_polaris/img/')) imagens.push([r.status(), r.headers()['content-type'] ?? '']) })
       const base = `http://loja-demo.polaris.localhost:${l.porta}`
       await p.goto(`${base}/`); await p.getByRole('heading', { name: 'Bem-vindo à loja' }).waitFor()
+      expect(await p.locator('header img').evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth === 64)).toBe(true) // o logo do cabeçalho (imagem do tenant) carregou
       const fundo = await p.locator('section[data-alinha]').evaluate((e) => getComputedStyle(e).backgroundImage); expect(fundo).toMatch(/linear-gradient\(rgba\(0, 0, 0, 0\.35\).*url\("[^"]*\/_polaris\/img\/[0-9a-f]{64}\.png"\)/)
       await p.waitForFunction(() => performance.getEntriesByType('resource').some((r) => r.name.includes('/_polaris/img/'))); expect(imagens).toContainEqual([200, 'image/png'])
       expect(await p.locator('section[data-imagem]').evaluate((e) => { const c = getComputedStyle(e), b = getComputedStyle(e.querySelector('a[data-botao=primario]')!), s = getComputedStyle(e.querySelector('a[data-botao=secundario]')!); return [c.color, b.backgroundColor, b.color, s.color] })).toEqual(['rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)', 'rgb(255, 255, 255)']) // sobre a foto: texto e botões legíveis em qualquer tema
@@ -377,9 +378,14 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const PIXEL = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
       await p.locator('input[type=file]').setInputFiles({ name: 'meu-pixel.png', mimeType: 'image/png', buffer: PIXEL }); await p.getByText('Imagem enviada.').waitFor(); await p.getByText('meu-pixel.png · 1×1 · 70 bytes').waitFor()
       const caminho = await p.locator('code', { hasText: '/_polaris/img/' }).first().innerText(); expect((await get(l, 'loja-demo', caminho)).status).toBe(200)
+      const seg = (m: number, t: string) => Buffer.concat([Buffer.from([0xff, m, (t.length + 2) >> 8, (t.length + 2) & 255]), Buffer.from(t, 'latin1')]) // JPEG mínimo COM EXIF: o servidor tira a localização e conta quantos bytes saíram
+      const jpegSujo = Buffer.concat([Buffer.from([0xff, 0xd8]), seg(0xe1, 'Exif\0\0GPS -23.5,-46.6 Canon EOS'), Buffer.from([0xff, 0xc0, 0, 11, 8, 0, 10, 0, 20, 1, 1, 0x11, 0]), Buffer.from([0xff, 0xda, 0, 8, 1, 1, 0, 0, 0x3f, 0, 1, 2, 3, 0xff, 0xd9])])
+      await p.locator('input[type=file]').setInputFiles({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: jpegSujo }); await p.getByText(/Removemos \d+ bytes de metadados/).waitFor(); await p.getByText('foto.jpg · 20×10').waitFor()
+      const caminhoFoto = await p.locator('code', { hasText: /\.jpg$/ }).first().innerText(); const foto = await get(l, 'loja-demo', caminhoFoto); expect(foto.status).toBe(200); expect(await foto.text()).not.toMatch(/GPS|Canon/) // o que está no banco e é servido já não tem a localização
       await p.locator('input[type=file]').setInputFiles({ name: 'mal.png', mimeType: 'image/png', buffer: Buffer.from('<svg onload=alert(1)>') }); await p.getByText(/png, jpeg, gif ou webp/).waitFor() // o servidor lê o tipo dos bytes: o nome e o tipo declarado não valem
       await p.locator('input[type=file]').setInputFiles({ name: 'grande.png', mimeType: 'image/png', buffer: Buffer.alloc(2 * 1024 * 1024 + 10, 1) }); await p.getByText(/o arquivo passa de 2048 KB/).waitFor() // o navegador nem lê
-      await p.getByRole('button', { name: 'Remover' }).first().click(); /* a mais nova (o pixel) vem primeiro */ await p.getByText('Imagem removida.').waitFor(); expect((await get(l, 'loja-demo', caminho)).status).toBe(404)
+      await p.getByRole('button', { name: 'Remover' }).first().click(); /* a mais nova (a foto) vem primeiro */ await p.getByText('Imagem removida.').waitFor(); await expect.poll(async () => (await get(l, 'loja-demo', caminhoFoto)).status).toBe(404)
+      await p.getByRole('button', { name: 'Remover' }).first().click(); await expect.poll(async () => (await get(l, 'loja-demo', caminho)).status).toBe(404) // e depois o pixel
       expect(erros.filter((x) => !/status of (401|403|404|422)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })

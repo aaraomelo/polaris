@@ -240,6 +240,10 @@
           },
           "novo": {
             "tipo": "booleano"
+          },
+          "removidos": {
+            "tipo": "inteiro",
+            "descricao": "bytes de metadados (EXIF, XMP, comentários) tirados do arquivo"
           }
         }
       },

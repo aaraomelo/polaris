@@ -51,8 +51,68 @@ export function detectaImagem(b: Uint8Array): { tipo: TipoImagem; largura: numbe
   return null
 }
 
+/** tira os METADADOS que vazam (localização do EXIF, modelo da câmera, comentários, XMP, miniatura embutida) sem recodificar: a imagem em si fica byte a byte igual. null se a estrutura estiver quebrada.
+ * png: remove tEXt/zTXt/iTXt/eXIf/tIME; jpeg: remove APP1 (EXIF/XMP), APP13 (IPTC), COM e os APPn desconhecidos (mantém JFIF, ICC e Adobe); gif: remove comentários e extensões de texto; webp: remove EXIF e XMP e zera as flags. */
+export function limpaMetadados(b: Uint8Array, tipo: TipoImagem): Buffer | null {
+  const buf = Buffer.from(b)
+  if (tipo === 'image/png') {
+    const fora = new Set(['tEXt', 'zTXt', 'iTXt', 'eXIf', 'tIME']), partes: Buffer[] = [buf.subarray(0, 8)]; let o = 8, viuIend = false
+    while (o + 12 <= buf.length) {
+      const len = buf.readUInt32BE(o), fim = o + 12 + len; if (fim > buf.length || len > 0x7fffffff) return null
+      const nome = buf.toString('latin1', o + 4, o + 8); if (!/^[A-Za-z]{4}$/.test(nome)) return null
+      if (!fora.has(nome)) partes.push(buf.subarray(o, fim)); o = fim
+      if (nome === 'IEND') { viuIend = true; break }
+    }
+    return viuIend ? Buffer.concat(partes) : null
+  }
+  if (tipo === 'image/jpeg') {
+    const partes: Buffer[] = [buf.subarray(0, 2)]; let o = 2
+    while (o + 4 <= buf.length) {
+      if (buf[o] !== 0xff) return null
+      const m = buf[o + 1]!; if (m === 0xff) { o++; continue }
+      if (m === 0xd9) { partes.push(buf.subarray(o)); return Buffer.concat(partes) }
+      if (m === 0xda) { partes.push(buf.subarray(o)); return Buffer.concat(partes) } // dados da imagem: o resto vai como está
+      if (m === 0x01 || (m >= 0xd0 && m <= 0xd8)) { partes.push(buf.subarray(o, o + 2)); o += 2; continue }
+      const len = buf.readUInt16BE(o + 2); if (len < 2 || o + 2 + len > buf.length) return null
+      const mantem = !(m === 0xfe || m === 0xe1 || m === 0xed || (m >= 0xe3 && m <= 0xef && m !== 0xee)) // fora: COM, APP1, APP13 e APP3–APP15 (menos o Adobe, APP14); ficam APP0 (JFIF) e APP2 (ICC)
+      if (mantem) partes.push(buf.subarray(o, o + 2 + len)); o += 2 + len
+    }
+    return null
+  }
+  if (tipo === 'image/gif') {
+    const partes: Buffer[] = []; if (buf.length < 13) return null
+    const flags = buf[10]!, tabela = flags & 0x80 ? 3 * 2 ** ((flags & 7) + 1) : 0; let o = 13 + tabela; if (o > buf.length) return null
+    partes.push(buf.subarray(0, o))
+    const subBlocos = (i: number): number => { while (i < buf.length && buf[i] !== 0) i += 1 + buf[i]!; return i + 1 } // índice logo depois do terminador
+    while (o < buf.length) {
+      const t = buf[o]!
+      if (t === 0x3b) { partes.push(buf.subarray(o, o + 1)); return Buffer.concat(partes) }
+      if (t === 0x21) { // extensão: 0xFE comentário e 0x01 texto simples saem; as demais (gráficos, NETSCAPE) ficam
+        const rotulo = buf[o + 1]!, fim = rotulo === 0xf9 ? o + 8 : subBlocos(o + 2 + (rotulo === 0xff || rotulo === 0x01 ? 1 + buf[o + 2]! : 0)); if (fim > buf.length) return null
+        if (rotulo !== 0xfe && rotulo !== 0x01) partes.push(buf.subarray(o, fim)); o = fim; continue
+      }
+      if (t === 0x2c) { // imagem: descritor de 10 bytes, tabela local opcional, código mínimo e sub-blocos
+        if (o + 10 > buf.length) return null; const f = buf[o + 9]!, tab = f & 0x80 ? 3 * 2 ** ((f & 7) + 1) : 0, fim = subBlocos(o + 10 + tab + 1); if (fim > buf.length) return null
+        partes.push(buf.subarray(o, fim)); o = fim; continue
+      }
+      return null
+    }
+    return null
+  }
+  // webp (RIFF): reescreve a lista de pedaços sem EXIF e XMP e acerta o tamanho e as flags do VP8X
+  if (buf.length < 20 || buf.toString('latin1', 0, 4) !== 'RIFF' || buf.toString('latin1', 8, 12) !== 'WEBP') return null
+  const partes: Buffer[] = []; let o = 12
+  while (o + 8 <= buf.length) {
+    const nome = buf.toString('latin1', o, o + 4), len = buf.readUInt32LE(o + 4), fim = o + 8 + len + (len & 1); if (o + 8 + len > buf.length) return null
+    if (nome !== 'EXIF' && nome !== 'XMP ') { const p = Buffer.from(buf.subarray(o, Math.min(fim, buf.length))); if (nome === 'VP8X') p[8] = p[8]! & ~0x0c; partes.push(p) } // bits 3 (EXIF) e 2 (XMP) do VP8X
+    o = fim
+  }
+  const corpo = Buffer.concat(partes), cab = Buffer.from('RIFF\0\0\0\0WEBP', 'latin1'); cab.writeUInt32LE(corpo.length + 4, 4)
+  return Buffer.concat([cab, corpo])
+}
+
 export type Ativo = { id: string; nome: string; tipo: TipoImagem; largura: number; altura: number; tamanho: number; criadoEm: string; autor: string; caminho: string }
-export type ResultadoAtivo = { ok: true; ativo: Ativo; novo: boolean } | { ok: false; erro: string }
+export type ResultadoAtivo = { ok: true; ativo: Ativo; novo: boolean; /** bytes de metadados removidos (0 = nada a tirar) */ removidos: number } | { ok: false; erro: string }
 type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
 export const caminhoDoAtivo = (hash: string, tipo: TipoImagem) => `/_polaris/img/${hash}.${EXTENSAO[tipo]}`
 const NOME = /[\u0000-\u001f\u007f‪-‮⁦-⁩]/g
@@ -67,16 +127,18 @@ export function criaAtivos(o: { q: Q; limites?: Partial<typeof LIMITES_ATIVOS> }
       const nome = String(e.nome ?? '').replace(NOME, ' ').trim().slice(0, 120); if (!nome) return { ok: false, erro: 'dê um nome ao arquivo' }
       if (typeof e.dados !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(e.dados)) return { ok: false, erro: 'os dados do arquivo não são base64 válido' }
       if (e.dados.length > Math.ceil((lim.bytesPorArquivo * 4) / 3) + 8) return { ok: false, erro: `o arquivo passa de ${Math.round(lim.bytesPorArquivo / 1024)} KB` }
-      const bytes = Buffer.from(e.dados, 'base64'); if (!bytes.length || bytes.length > lim.bytesPorArquivo) return { ok: false, erro: `o arquivo precisa ter de 1 byte a ${Math.round(lim.bytesPorArquivo / 1024)} KB` }
-      const img = detectaImagem(bytes); if (!img) return { ok: false, erro: 'só imagens png, jpeg, gif ou webp (o tipo é lido do próprio arquivo)' }
+      const original = Buffer.from(e.dados, 'base64'); if (!original.length || original.length > lim.bytesPorArquivo) return { ok: false, erro: `o arquivo precisa ter de 1 byte a ${Math.round(lim.bytesPorArquivo / 1024)} KB` }
+      const img = detectaImagem(original); if (!img) return { ok: false, erro: 'só imagens png, jpeg, gif ou webp (o tipo é lido do próprio arquivo)' }
       if (img.largura < 1 || img.altura < 1 || img.largura > lim.ladoMax || img.altura > lim.ladoMax || img.largura * img.altura > lim.megapixelsMax * 1_000_000) return { ok: false, erro: `dimensões fora do limite (${img.largura}×${img.altura}; máximo ${lim.ladoMax} px de lado e ${lim.megapixelsMax} megapixels)` }
-      const hash = createHash('sha256').update(bytes).digest('hex')
-      const ja = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (ja) return { ok: true, ativo: linha(ja), novo: false }
+      const bytes = limpaMetadados(original, img.tipo); if (!bytes) return { ok: false, erro: 'o arquivo está corrompido (estrutura da imagem inválida)' }
+      const novaImg = detectaImagem(bytes); if (!novaImg || novaImg.tipo !== img.tipo || novaImg.largura !== img.largura || novaImg.altura !== img.altura) return { ok: false, erro: 'o arquivo está corrompido (estrutura da imagem inválida)' }
+      const removidos = original.length - bytes.length, hash = createHash('sha256').update(bytes).digest('hex') // o id é o hash do que FICA: o mesmo retrato com e sem EXIF é a mesma imagem
+      const ja = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (ja) return { ok: true, ativo: linha(ja), novo: false, removidos }
       const uso = (await q(`SELECT count(*)::int AS n, coalesce(sum(tamanho), 0)::bigint AS b FROM plataforma.ativo WHERE tenant_id = $1`, [tenantId])).rows[0]!
       if (Number(uso.n) >= lim.arquivosPorTenant) return { ok: false, erro: `limite de ${lim.arquivosPorTenant} imagens por loja` }
       if (Number(uso.b) + bytes.length > lim.bytesPorTenant) return { ok: false, erro: `limite de ${Math.round(lim.bytesPorTenant / 1048576)} MB de imagens por loja` }
       const r = (await q(`INSERT INTO plataforma.ativo (tenant_id, hash, nome, tipo, largura, altura, tamanho, conteudo, autor) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (tenant_id, hash) DO UPDATE SET nome = plataforma.ativo.nome RETURNING ${COLS}`, [tenantId, hash, nome, img.tipo, img.largura, img.altura, bytes.length, bytes, autor.slice(0, 200)])).rows[0]!
-      return { ok: true, ativo: linha(r), novo: true }
+      return { ok: true, ativo: linha(r), novo: true, removidos }
     },
     async lista(tenantId: string): Promise<Ativo[]> { return (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 ORDER BY criado_em DESC, hash LIMIT 500`, [tenantId])).rows.map(linha) },
     /** o conteúdo para servir; só do tenant dado */

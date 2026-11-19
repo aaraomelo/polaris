@@ -477,10 +477,10 @@ const diagramasVista = (): Inst => pilha([
 /** imagens do tenant: enviar (o arquivo é lido no navegador e o servidor confere o TIPO pelos bytes), listar com miniatura, copiar o caminho e remover */
 const imagensVista = (): Inst => pilha([
   titulo('Imagens', 3),
-  texto('Envie png, jpeg, gif ou webp (até 2 MB). Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site.'),
+  texto('Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site.'),
   P('entrada/arquivo', { props: { rotulo: 'Escolha uma imagem', aceita: 'image/png,image/jpeg,image/gif,image/webp', tamanhoMax: 2097152 }, eventos: { aoEscolher: [
     def('msgImagem', '"Enviando…"'),
-    exe('imgenviar', { nome: '{evento.nome}', dados: '{evento.dados}' }, [def('msgImagem', 'resultado.novo ? "Imagem enviada." : "Esta imagem já estava na lista."'), exe('ativos')], [def('msgImagem', 'erro')]),
+    exe('imgenviar', { nome: '{evento.nome}', dados: '{evento.dados}' }, [def('msgImagem', '(resultado.novo ? "Imagem enviada." : "Esta imagem já estava na lista.") + (resultado.removidos > 0 ? " Removemos " + resultado.removidos + " bytes de metadados (localização, câmera, comentários)." : "")'), exe('ativos')], [def('msgImagem', 'erro')]),
   ], aoRecusar: [def('msgImagem', 'evento.erro')] } }),
   texto('{estado.msgImagem}', { se: 'estado.msgImagem != ""' }),
   texto('Nenhuma imagem ainda.', { se: 'ativos && tamanho(ativos.ativos ?? []) == 0' }),
