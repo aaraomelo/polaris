@@ -390,6 +390,18 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403|404|422)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('cabeçalho: visitante vê "Entrar"; depois do login vê "Sair", que encerra a sessão (link, sem JavaScript)', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), base = `http://loja-outra.polaris.localhost:${l.porta}`
+      await p.goto(`${base}/sobre`);       expect(await p.locator('header a', { hasText: 'Entrar' }).count()).toBe(1); expect(await p.locator('header a', { hasText: 'Sair' }).count()).toBe(0)
+      await p.locator('header a', { hasText: 'Entrar' }).click(); await p.getByRole('heading', { name: 'Entrar' }).waitFor()
+      await p.getByLabel('E-mail').fill(emailLocal('loja-outra')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click(); await p.waitForURL((u) => !u.pathname.startsWith('/entrar'))
+      await p.goto(`${base}/sobre`); expect(await p.locator('header a', { hasText: 'Sair' }).count()).toBe(1); expect(await p.locator('header a', { hasText: 'Entrar' }).count()).toBe(0)
+      await p.locator('header a', { hasText: 'Sair' }).click(); await p.waitForURL(`${base}/`)
+      await p.goto(`${base}/sobre`); expect(await p.locator('header a', { hasText: 'Entrar' }).count()).toBe(1); expect(await p.locator('header a', { hasText: 'Sair' }).count()).toBe(0) // a sessão acabou
+    } finally { await nav.close() }
+  })
   it('menu recolhível do cabeçalho: no celular o menu e as ações ficam atrás do botão "Menu" (sem JavaScript), no computador tudo à vista', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

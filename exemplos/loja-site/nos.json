@@ -98,6 +98,15 @@
                     "props": {
                       "href": "/entrar",
                       "texto": "Entrar"
+                    },
+                    "se": "tenant.autenticado != true"
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tenant.autenticado == true",
+                    "props": {
+                      "href": "/_polaris/sair",
+                      "texto": "Sair"
                     }
                   }
                 ]
@@ -231,6 +240,15 @@
                     "props": {
                       "href": "/entrar",
                       "texto": "Entrar"
+                    },
+                    "se": "tenant.autenticado != true"
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tenant.autenticado == true",
+                    "props": {
+                      "href": "/_polaris/sair",
+                      "texto": "Sair"
                     }
                   }
                 ]
@@ -360,6 +378,15 @@
                     "props": {
                       "href": "/entrar",
                       "texto": "Entrar"
+                    },
+                    "se": "tenant.autenticado != true"
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tenant.autenticado == true",
+                    "props": {
+                      "href": "/_polaris/sair",
+                      "texto": "Sair"
                     }
                   }
                 ]
@@ -548,6 +575,15 @@
                     "props": {
                       "href": "/entrar",
                       "texto": "Entrar"
+                    },
+                    "se": "tenant.autenticado != true"
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tenant.autenticado == true",
+                    "props": {
+                      "href": "/_polaris/sair",
+                      "texto": "Sair"
                     }
                   }
                 ]
@@ -722,6 +758,15 @@
                     "props": {
                       "href": "/entrar",
                       "texto": "Entrar"
+                    },
+                    "se": "tenant.autenticado != true"
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tenant.autenticado == true",
+                    "props": {
+                      "href": "/_polaris/sair",
+                      "texto": "Sair"
                     }
                   }
                 ]
@@ -936,6 +981,15 @@
                     "props": {
                       "href": "/entrar",
                       "texto": "Entrar"
+                    },
+                    "se": "tenant.autenticado != true"
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tenant.autenticado == true",
+                    "props": {
+                      "href": "/_polaris/sair",
+                      "texto": "Sair"
                     }
                   }
                 ]

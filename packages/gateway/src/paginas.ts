@@ -165,6 +165,13 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     const ctx = await d.entra(req); if (ctx.anonimo) return texto(reply, 401)
     return reply.status(204).header('set-cookie', cookieDeSessao(token, seguro)).send()
   })
+  // "Sair" como LINK (GET): só desloga quando o pedido vem do próprio site ou digitado (`sec-fetch-site` same-origin/none, ou ausente em cliente sem o cabeçalho); de outro site, nada acontece (evita deslogar por <img>/link alheio)
+  app.get('/_polaris/sair', async (req, reply) => {
+    const de = req.headers['sec-fetch-site']
+    reply.header('cache-control', 'no-store').header('referrer-policy', 'no-referrer')
+    if (de === 'cross-site' || de === 'same-site') return reply.redirect('/', 303)
+    return reply.header('set-cookie', cookieDeSessao(null, seguro)).redirect('/', 303)
+  })
   app.post('/_polaris/sair', async (_req, reply) => reply.status(204).header('set-cookie', cookieDeSessao(null, seguro)).send())
 
   // ativar a pré-visualização: o link assinado vira um cookie HttpOnly (as páginas não mandam cabeçalho), só para o tenant do link; `sair` apaga

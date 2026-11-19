@@ -52,3 +52,8 @@ Cada tenant de demonstração tem o usuário `ana@<alias>.test` com a senha `sen
 - **Sem MFA, sem login social, sem "sair de todos os dispositivos"**, e **sem tela de administração de usuários** (hoje por código).
 - O compose de deploy ainda pressupõe um provedor externo (`JWT_JWKS_URL`): para o login próprio, ver a seção de configuração.
 - A caixa de e-mail de desenvolvimento e o atalho `/entrar/ir` não existem em produção.
+
+## "Entrar" e "Sair" no cabeçalho
+- As páginas enxergam a sessão em **`tenant.autenticado`** (`true` com sessão válida; ausente para visitante), no servidor e na hidratação. O exemplo `loja-site` usa `se: "tenant.autenticado != true"` no link "Entrar" e `se: "tenant.autenticado == true"` no link "Sair".
+- **`GET /_polaris/sair`** apaga o cookie de sessão e redireciona (303) para `/`; é um link, sem JavaScript. Pedido que o navegador marca como vindo de **outro site** (`sec-fetch-site: cross-site`/`same-site`) **não desloga** (redireciona sem apagar), contra `<img src>` ou link alheio. O `POST /_polaris/sair` (204) segue valendo para clientes com `fetch`.
+- **Limites**: a sessão é um JWT sem revogação no servidor (sair só apaga o cookie deste navegador); páginas estáticas (AOT) veem sempre "visitante"; navegador antigo sem `Sec-Fetch-Site` aceita o GET de qualquer origem (só desloga, sem outro efeito).

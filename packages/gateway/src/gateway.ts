@@ -208,7 +208,7 @@ export function criaGateway(o: OpcoesGateway): Gateway {
     return {
       provedores: { servico: async (p: { servico: string; operacao: string; args: Record<string, unknown>; signal: AbortSignal }) => (await chamador(p.servico, p.operacao, p.args, ctx.chamada, p.signal)).corpo },
       params: extra.params ?? {}, consulta: extra.consulta ?? {}, estado: extra.estado ?? {},
-      tenant: { id: ctx.tenantId }, ...(ctx.chamada.idioma ? { idioma: ctx.chamada.idioma } : {}), cache: visao,
+      tenant: { id: ctx.tenantId, ...(ctx.anonimo ? {} : { autenticado: true }) }, ...(ctx.chamada.idioma ? { idioma: ctx.chamada.idioma } : {}), cache: visao,
       timeoutPadraoMs: o.timeoutPadraoMs ?? 10_000,
       onErro: (e: { dados: string; fonte: string; erro: unknown }) => { falhas?.push(e.erro); log.warn('falha ao carregar dado da página', { dados: e.dados, fonte: e.fonte, requisicaoId: obsDe(req)?.reqId, erro: serializaErro(e.erro) }) },
     }

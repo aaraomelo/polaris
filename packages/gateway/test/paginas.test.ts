@@ -100,6 +100,9 @@ describe('servidor de páginas', () => {
     expect((await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: 'a.b.c' } })).statusCode).toBe(400)
     expect((await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: 'aaaa.bbbb.cccc' } })).statusCode).toBe(401)
     expect((await e.req('POST', '/_polaris/sessao', { host: 'a.loja.test', corpo: { token: tk } , headers: { 'content-type': 'text/plain' } })).statusCode).toBe(415)
+    const link = await e.req('GET', '/_polaris/sair', { host: 'a.loja.test' }); expect([link.statusCode, link.headers.location, String(link.headers['set-cookie'])]).toEqual([303, '/', expect.stringContaining('Max-Age=0')]) // "Sair" como link: apaga o cookie e volta ao início
+    const alheio = await e.req('GET', '/_polaris/sair', { host: 'a.loja.test', headers: { 'sec-fetch-site': 'cross-site' } }); expect([alheio.statusCode, alheio.headers['set-cookie']]).toEqual([303, undefined]) // vindo de outro site: não desloga
+    expect((await e.req('GET', '/_polaris/sair', { host: 'a.loja.test', headers: { 'sec-fetch-site': 'same-origin' } })).headers['set-cookie']).toBeDefined()
     const sai = await e.req('POST', '/_polaris/sair', { host: 'a.loja.test', corpo: {} }); expect([sai.statusCode, String(sai.headers['set-cookie'])]).toEqual([204, expect.stringContaining('Max-Age=0')])
   })
   it('a API segue sendo JSON (nada do prefixo reservado cai em página) e pedido malformado é 400', async () => {
