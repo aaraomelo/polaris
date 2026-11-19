@@ -275,7 +275,7 @@ describe('ícones (midia/icone e `icone` de botões e links)', () => {
     expect(um('nav/link', { href: '/x', texto: 'x', icone: 'entrar' }).querySelector('a')!.getAttribute('data-icone')).toBe('entrar')
   })
   it('o tema traz uma regra por ícone (duas imagens, só máscara: sem cor literal) e a estrutura dos três usos', () => {
-    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(60); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a)[data-icone]::before')
+    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(60); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a,summary)[data-icone]::before')
     for (const n of ['salvar', 'layout-pilha', 'cartaz', 'tema-escuro']) expect(css, n).toContain(`[data-icone=${n}]{--ic-base:url("data:image/svg+xml,`)
   })
 })
@@ -285,5 +285,13 @@ describe('lista de nomes dos ícones', () => {
     const { ICONES, FAMILIAS_ICONES } = await import('../src/icones/dados'), { NOMES_ICONES } = await import('../src/icones/nomes')
     expect([...NOMES_ICONES].sort()).toEqual(Object.keys(ICONES).sort()); expect(FAMILIAS_ICONES.flatMap((f) => f[1]).sort()).toEqual([...NOMES_ICONES].sort()); expect(NOMES_ICONES.length).toBe(60)
     for (const [n, i] of Object.entries(ICONES)) { expect(i.base.length + i.acento.length, n).toBeGreaterThan(10); expect(i.base + i.acento, n).not.toMatch(/<script|on[a-z]+=|href=|javascript:/i) }
+  })
+})
+
+describe('seção recolhível (layout/secao)', () => {
+  it('é um <details> com <summary> (título com ícone) e o conteúdo; `aberta` abre; o tema dá borda, seta e o ícone na cor primária', () => {
+    const d = ssr(pagina({ bloco: 'layout/pilha', slots: { filhos: [{ bloco: 'layout/secao', props: { aberta: true }, slots: { filhos: [{ bloco: 'layout/secao-titulo', props: { texto: 'Identificação', icone: 'editar' } }, { bloco: 'texto/paragrafo', props: { texto: 'x' } }] } }, { bloco: 'layout/secao', slots: { filhos: [{ bloco: 'layout/secao-titulo', props: { texto: 'Avançado' } }] } }] } } as never)).querySelectorAll('details[data-secao]')
+    expect([d[0]!.hasAttribute('open'), d[1]!.hasAttribute('open')]).toEqual([true, false]); const s = d[0]!.querySelector('summary')!; expect([s.textContent, s.getAttribute('data-icone'), d[0]!.firstElementChild === s, d[1]!.querySelector('summary')!.hasAttribute('data-icone')]).toEqual(['Identificação', 'editar', true, false])
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('details[data-secao][open]>summary::after{transform:rotate(180deg)}'); expect(css).toContain('details[data-secao]>summary[data-icone]::before{color:var(--cor-primaria)}')
   })
 })

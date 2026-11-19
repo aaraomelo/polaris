@@ -13,7 +13,7 @@ export const ICONES_CSS = [
   '#polaris span[data-icone]::before,#polaris span[data-icone]::after{content:"";position:absolute;inset:0;background:currentColor;-webkit-mask:var(--ic-base) center/contain no-repeat;mask:var(--ic-base) center/contain no-repeat}',
   '#polaris span[data-icone]::after{background:var(--icone-acento,currentColor);-webkit-mask-image:var(--ic-acento);mask-image:var(--ic-acento)}',
   '#polaris span[data-icone][data-acento]{--icone-acento:var(--cor-destaque)}',
-  '#polaris :is(button,a)[data-icone]{display:inline-flex;align-items:center;gap:calc(var(--espacamento-base) * 1)}',
-  '#polaris :is(button,a)[data-icone]::before{content:"";flex:none;width:1.25em;height:1.25em;background:currentColor;-webkit-mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat;mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat}',
+  '#polaris :is(button,a,summary)[data-icone]{display:inline-flex;align-items:center;gap:calc(var(--espacamento-base) * 1)}',
+  '#polaris :is(button,a,summary)[data-icone]::before{content:"";flex:none;width:1.25em;height:1.25em;background:currentColor;-webkit-mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat;mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat}',
   ...Object.entries(ICONES).map(([nome, i]) => `#polaris [data-icone=${nome}]{--ic-base:${svg(i.base)};--ic-acento:${i.acento ? svg(i.acento) : vazio}}`),
 ].join('\n')

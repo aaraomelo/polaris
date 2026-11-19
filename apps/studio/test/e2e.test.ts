@@ -208,6 +208,19 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.keyboard.press('Enter'); await expect.poll(n).toBe(antes + 1) // Enter adiciona
     await ctx.close()
   })
+  it('painéis de propriedades em seções recolhíveis com ícone: página, campo do formulário e elemento do cartaz', async () => {
+    const { ctx, p } = await entra('ana'); const secoes = () => p.locator('details[data-secao] > summary').allInnerTexts(), aberta = (nome: string) => p.locator('details[data-secao]', { has: p.locator('summary', { hasText: nome }) })
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('secoes-pag'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/sc'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página secoes-pag')).toBeVisible(); await linhaDe(p, 'raiz').click()
+    expect(await secoes()).toEqual(['Identificação', 'Propriedades do bloco']); expect(await p.locator('details[data-secao][open]').count()).toBe(2); expect(await p.locator('details[data-secao] > summary[data-icone]').evaluateAll((l) => l.map((e) => e.getAttribute('data-icone')))).toEqual(['editar', 'layout-painel'])
+    await p.locator('summary', { hasText: 'Identificação' }).click(); await expect(p.getByRole('textbox', { name: 'Identificador' })).not.toBeVisible(); await p.locator('summary', { hasText: 'Identificação' }).click(); await expect(p.getByRole('textbox', { name: 'Identificador' })).toBeVisible() // recolhe e abre
+    await p.getByRole('button', { name: 'Novo formulário' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('secoes-form'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Formulário secoes-form')).toBeVisible()
+    await p.getByRole('button', { name: /^Texto\s\(/ }).click(); await p.getByRole('button', { name: 'Texto', exact: true }).click(); await p.getByRole('button', { name: /\(texto\)/ }).first().click()
+    expect(await secoes()).toEqual(['Geral', 'Máscara', 'Validação', 'Mensagens de erro deste campo']); await expect(aberta('Geral')).toHaveAttribute('open', ''); await expect(aberta('Mensagens de erro')).not.toHaveAttribute('open', '') // as mensagens começam fechadas
+    await expect(p.getByRole('textbox', { name: 'Formato' })).not.toBeVisible(); await p.locator('summary', { hasText: 'Mensagens de erro' }).click(); await expect(p.getByRole('textbox', { name: 'Formato' })).toBeVisible()
+    await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('secoes-cartaz'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Cartaz secoes-cartaz')).toBeVisible()
+    await p.getByRole('button', { name: /^(▶ )?1\. / }).click(); expect(await secoes()).toEqual(['Identificação', 'Posição e tamanho (fração da peça, 0 a 1)', 'Conteúdo', 'Aparência']); expect(await p.locator('details[data-secao] > summary[data-icone]').evaluateAll((l) => l.map((e) => e.getAttribute('data-icone')))).toEqual(['editar', 'layout-grade', 'texto-paragrafo', 'layout-destaque'])
+    await ctx.close()
+  })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
     const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });
     const box = async (sel: string) => (await p.locator(sel).first().boundingBox())!, cab = await box('[data-painel] > header'), lat = await box('[data-painel] > aside'), prin = await box('[data-painel] > main')

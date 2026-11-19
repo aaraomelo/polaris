@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-60 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+62 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -1453,6 +1453,119 @@ Faixa do fim da página (`<footer>`): ponto de referência para leitores de tela
         "bloco": "texto/pequeno",
         "props": {
           "texto": "© 2026 Minha loja"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Seção recolhível (`layout/secao`)
+
+Grupo de conteúdo com título que abre e fecha (um `<details>` nativo, sem JavaScript): o primeiro filho é o `layout/secao-titulo` (o `<summary>`, com ícone) e o resto é o conteúdo. `aberta` faz a seção começar aberta. Boa para painéis de propriedades e formulários longos.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `aberta` | booleano | não |  | começa aberta (o leitor pode recolher) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Duas seções**
+
+```json
+{
+  "bloco": "layout/pilha",
+  "props": {
+    "gap": 8
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "layout/secao",
+        "props": {
+          "aberta": true
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "layout/secao-titulo",
+              "props": {
+                "texto": "Identificação",
+                "icone": "editar"
+              }
+            },
+            {
+              "bloco": "texto/paragrafo",
+              "props": {
+                "texto": "Nome e identificador do item."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bloco": "layout/secao",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "layout/secao-titulo",
+              "props": {
+                "texto": "Avançado",
+                "icone": "releases"
+              }
+            },
+            {
+              "bloco": "texto/paragrafo",
+              "props": {
+                "texto": "Fechada até alguém abrir."
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+### Título da seção (`layout/secao-titulo`)
+
+O `<summary>` de uma `layout/secao`: o texto clicável (`texto`) com um ícone opcional (`icone`) e a seta que gira ao abrir. Deve ser o primeiro filho da seção.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
+| `texto` | texto ≤ 120 caracteres | não |  |  |
+
+**Exemplo: Título com ícone**
+
+```json
+{
+  "bloco": "layout/secao",
+  "props": {
+    "aberta": true
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "layout/secao-titulo",
+        "props": {
+          "texto": "Aparência",
+          "icone": "layout-destaque"
+        }
+      },
+      {
+        "bloco": "texto/pequeno",
+        "props": {
+          "texto": "Conteúdo da seção"
         }
       }
     ]

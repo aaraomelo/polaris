@@ -179,11 +179,17 @@ const campoDeProp = (): Inst => pilha([
   texto('(valor estruturado: edite no JSON do nó)', { se: 'c.tipo == "json"' }),
 ], { repetir: { cada: `camposDoSchema((${DEFBLOCO}).props)`, como: 'c', chave: 'junta(c.caminho, ".")' }, gap: 2 })
 
+/** uma seção recolhível de um painel de propriedades: título com ícone e o conteúdo (começa aberta ou fechada) */
+const secao = (nome: string, icone: string, filhos: Inst[], o: { aberta?: boolean; se?: string } = {}): Inst =>
+  P('layout/secao', { ...(o.se ? { se: o.se } : {}), props: { aberta: o.aberta ?? true }, filhos: [P('layout/secao-titulo', { props: { texto: nome, icone } }), pilha(filhos, { gap: 6 })] })
+
 const propriedades = (): Inst => pilha([
   titulo('{(' + SELNO + ').bloco}', 4),
+  secao('Identificação', 'editar', [
   P('entrada/texto', { props: { valor: `{(${SELNO}).id ?? ""}`, rotulo: 'Identificador' }, eventos: { aoMudar: edita(`evento == "" ? sem(estado.no, concat(${DOCSEL}, ["id"])) : com(estado.no, concat(${DOCSEL}, ["id"]), evento)`, '"id:" + junta(estado.sel, ".")') } }),
   P('entrada/texto', { props: { valor: `{(${SELNO}).se ?? ""}`, rotulo: 'Exibir se (expressão)' }, eventos: { aoMudar: edita(`evento == "" ? sem(estado.no, concat(${DOCSEL}, ["se"])) : com(estado.no, concat(${DOCSEL}, ["se"]), evento)`, '"se:" + junta(estado.sel, ".")') } }),
-  campoDeProp(),
+  ]),
+  secao('Propriedades do bloco', 'layout-painel', [campoDeProp()]),
 ], { se: `estado.no && ${EH_PAGINA} && ${SELNO}`, gap: 6 })
 
 const barraDeBloco = (): Inst => linha([
@@ -281,30 +287,30 @@ const barraDeCampo = (): Inst => linha([
 
 const propriedadesDoCampo = (): Inst => pilha([
   titulo('Campo {(' + CAMPOSEL + ').nome}', 4),
+  secao('Geral', 'form-formulario', [
   propTexto('Nome (chave do valor)', ['nome']), propTexto('Rótulo', ['rotulo']), propTexto('Ajuda', ['ajuda']), propTexto('Placeholder', ['placeholder']),
   texto('Tipo', { props: {} }),
   P('layout/grade', { props: { colunas: 3, gap: 2 }, filhos: [botao('{t}{' + TIPO_C + ' == t ? " ✓" : ""}', edita(`com(estado.no, concat(${DOCC}, ["tipo"]), t)`), { repetir: { cada: lit(TIPOS_CAMPO), como: 't', chave: 't' } } as never)] }),
   propCaixa('Obrigatório', ['obrigatorio']), propTexto('Obrigatório se (expressão)', ['obrigatorioSe']), propTexto('Exibir se (expressão)', ['se']), propTexto('Valor padrão', ['padrao']),
-  pilha([
-    titulo('Máscara', 5),
+  ]),
+  secao('Máscara', 'texto-codigo', [
     P('entrada/texto', { props: { valor: `{(${CAMPOSEL}).mascara ? (tamanho(texto((${CAMPOSEL}).mascara.padrao)) > 0 && igual(texto((${CAMPOSEL}).mascara.padrao), (${CAMPOSEL}).mascara.padrao) ? (${CAMPOSEL}).mascara.padrao : junta((${CAMPOSEL}).mascara.padrao, " | ")) : ""}`, rotulo: 'Padrão (0 dígito · 9 opcional · A letra · a letra/dígito · * qualquer; várias separadas por |)' },
       eventos: { aoMudar: edita(`aparar(evento) == "" ? sem(estado.no, concat(${DOCC}, ["mascara"])) : com(estado.no, concat(${DOCC}, ["mascara", "padrao"]), tamanho(divide(evento, "|")) > 1 ? mapeia(divide(evento, "|"), t => aparar(t)) : aparar(evento))`, `"mp:" + junta(estado.selCampo, ".")`) } }),
     propCaixa('Enviar com os literais (ex.: 123.456.789-01)', ['mascara', 'enviaComLiterais'], { se: `${CAMPOSEL}.mascara` }),
-  ], { se: COM_MASCARA, gap: 2 }),
-  pilha([
-    titulo('Validação', 5),
+  ], { se: COM_MASCARA }),
+  secao('Validação', 'entrada-caixa', [
     propTexto('Tamanho mínimo', ['validacao', 'tamanhoMinimo'], { numero: true, se: TEXTUAIS }), propTexto('Tamanho máximo', ['validacao', 'tamanhoMaximo'], { numero: true, se: TEXTUAIS }),
     propTexto('Expressão regular (valor inteiro)', ['validacao', 'padrao'], { se: TEXTUAIS }),
     propTexto('Mínimo', ['validacao', 'minimo'], { se: NUMERICOS }), propTexto('Máximo', ['validacao', 'maximo'], { se: NUMERICOS }),
     propTexto('Deve ser igual ao campo', ['validacao', 'igualA']),
-  ], { gap: 2 }),
-  pilha([
-    titulo('Opções (uma por linha: valor | rótulo)', 5),
+  ]),
+  secao('Opções (uma por linha: valor | rótulo)', 'form-opcao', [
     P('entrada/area', { props: { valor: `{junta(mapeia(obter(${CAMPOSEL}, ["opcoes"]) ?? [], o => texto(o.valor) + " | " + (o.rotulo ?? "")), "\\n")}`, rotulo: 'Opções', linhas: 4 },
       eventos: { aoMudar: edita(`com(estado.no, concat(${DOCC}, ["opcoes"]), mapeia(filtra(divide(evento, "\\n"), l => aparar(l) != ""), l => mescla(objeto([["valor", aparar(divide(l, "|")[0])]]), tamanho(divide(l, "|")) > 1 && aparar(divide(l, "|")[1]) != "" ? objeto([["rotulo", aparar(divide(l, "|")[1])]]) : objeto([]))))`, `"op:" + junta(estado.selCampo, ".")`) } }),
-  ], { se: `${TIPO_C} == "escolha" || ${TIPO_C} == "multiescolha"`, gap: 2 }),
-  titulo('Mensagens de erro deste campo', 5),
+  ], { se: `${TIPO_C} == "escolha" || ${TIPO_C} == "multiescolha"` }),
+  secao('Mensagens de erro deste campo', 'feedback-alerta', [
   propTexto('Obrigatório', ['mensagens', 'obrigatorio']), propTexto('Formato', ['mensagens', 'formato']), propTexto('Tamanho mínimo', ['mensagens', 'tamanhoMinimo'], { se: TEXTUAIS }), propTexto('Mínimo', ['mensagens', 'minimo'], { se: NUMERICOS }),
+  ], { aberta: false }),
 ], { se: `estado.no && ${EH_FORM} && tamanho(estado.selCampo) > 0 && ${CAMPOSEL}`, gap: 4 })
 
 const propForm = (rotulo: string, caminho: string[]): Inst => P('entrada/texto', { props: { valor: `{texto(obter(estado.no.spec, ${lit(caminho)}) ?? "")}`, rotulo },
@@ -427,11 +433,14 @@ const barraDeElemento = (): Inst => linha([
 
 const propriedadesDoElemento = (): Inst => pilha([
   titulo('{(' + ELSEL + ').tipo} {(' + ELSEL + ').id}', 4),
+  secao('Identificação', 'editar', [
   propEl('Identificador', ['id']), propEl('Condição para aparecer (ex.: preco.de)', ['se']),
-  titulo('Posição e tamanho (fração da peça, 0 a 1)', 5),
+  ], { aberta: true }),
+  secao('Posição e tamanho (fração da peça, 0 a 1)', 'layout-grade', [
   propEl('Topo', ['caixa', 'topo'], { numero: true }), propEl('Esquerda', ['caixa', 'esquerda'], { numero: true }), propEl('Direita (use esquerda OU direita)', ['caixa', 'direita'], { numero: true }),
   propEl('Largura', ['caixa', 'largura'], { numero: true }), propEl('Altura', ['caixa', 'altura'], { numero: true }), propEl('Rotação (graus, anti-horário)', ['rotacao'], { numero: true }),
-  titulo('Conteúdo', 5),
+  ], { aberta: true }),
+  secao('Conteúdo', 'texto-paragrafo', [
   P('entrada/area', { se: eh('texto'), props: { valor: `{texto(obter(${ELSEL}, ["texto"]) ?? "")}`, rotulo: 'Texto (dado entre chaves: produto.nome)', linhas: 3 }, eventos: { aoMudar: edita(`com(estado.no, concat(${DOCEL}, ["texto"]), evento)`, '"ce:t"') } }),
   propEl('Valor (dado entre chaves: produto.nome)', ['valor'], { se: eh('preco', 'codigoBarras', 'qrcode') }), propEl('Rótulo do número', ['rotulo'], { se: eh('codigoBarras', 'validade') }), propEl('Data (dado entre chaves: produto.nome)', ['data'], { se: eh('validade') }),
   propEl('Unidade (dado entre chaves: produto.nome)', ['unidade', 'texto'], { se: eh('preco') }), propEl('Escala dos centavos (0,2 a 1)', ['centavos', 'escala'], { numero: true, se: eh('preco') }),
@@ -440,10 +449,13 @@ const propriedadesDoElemento = (): Inst => pilha([
   escolhaEl('Formato', ['formato'], ['code128', 'ean13'], 'code128', { se: eh('codigoBarras') }), escolhaEl('Número', ['numero'], ['cima', 'baixo', 'nenhum'], 'cima', { se: eh('codigoBarras') }),
   escolhaEl('Correção', ['nivel'], ['L', 'M', 'Q', 'H'], 'L', { se: eh('qrcode') }),
   escolhaEl('Alinhamento', ['alinhaH'], ['esquerda', 'centro', 'direita'], 'centro', { se: eh('texto', 'preco', 'validade') }), escolhaEl('Vertical', ['alinhaV'], ['topo', 'meio', 'base'], 'topo', { se: eh('texto', 'preco', 'validade') }),
-  titulo('Aparência', 5),
+  ], { aberta: true }),
+  secao('Aparência', 'layout-destaque', [
   propCorEl('Cor', ['cor']), propCorEl('Fundo do código/QR', ['fundo'], { se: eh('codigoBarras', 'qrcode') }),
   propEl('Opacidade (0 a 1)', ['opacidade'], { numero: true, se: eh('faixa') }), propEl('Canto arredondado (0 a 0,5)', ['raio'], { numero: true, se: eh('faixa', 'codigoBarras', 'qrcode') }),
   propEl('Fonte (Montserrat ou Roboto)', ['fonte', 'familia'], { se: eh('texto', 'preco', 'codigoBarras', 'validade') }), escolhaEl('Peso', ['fonte', 'peso'], ['normal', 'negrito'], 'normal', { se: eh('texto', 'preco', 'codigoBarras', 'validade') }),
+
+  ], { aberta: true }),
 ], { se: `estado.no && ${EH_CARTAZ} && ${COM_SEL}`, gap: 4 })
 
 const abaElementos = (): Inst => pilha([
