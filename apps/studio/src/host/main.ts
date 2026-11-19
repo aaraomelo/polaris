@@ -21,8 +21,8 @@ document.addEventListener('click', (e) => {
   const alvo = e.target as Element | null, lateral = alvo?.closest?.('aside[data-lateral]'); if (!lateral || !alvo!.closest('button, a[href]')) return
   const caixa = lateral.querySelector<HTMLInputElement>(':scope > input[data-alternador]'); if (caixa) caixa.checked = false
 })
-// Teclado da paleta de blocos (barra de ferramentas + lista): setas entre categorias e entre itens, Baixo abre/entra na lista, Esc fecha e volta à categoria. O resto (Enter, Espaço, Tab) é dos botões nativos.
-const BARRA = '[role=toolbar][aria-label="Paleta de blocos"]', LISTA = '[role=group][aria-label="Blocos da categoria"]'
+// Teclado das paletas (barra de ferramentas + lista): setas entre categorias e entre itens, Baixo abre/entra na lista, Esc fecha e volta à categoria. O resto (Enter, Espaço, Tab) é dos botões nativos.
+const BARRA = '[role=toolbar][aria-label^="Paleta de"]', LISTA = '[role=group][aria-label$=" da categoria"]' // as paletas do Studio: de blocos, de campos e de elementos (esta sem lista)
 const itensDaLista = (): HTMLButtonElement[] => [...document.querySelectorAll<HTMLButtonElement>(`${LISTA} button`)]
 const categoriaAberta = (): HTMLButtonElement | null => document.querySelector<HTMLButtonElement>(`${BARRA} button[aria-current]`)
 function focaPrimeiroItem(tentativas = 12): void { const it = itensDaLista(); if (it.length) it[0]!.focus(); else if (tentativas > 0) requestAnimationFrame(() => focaPrimeiroItem(tentativas - 1)) }
@@ -32,7 +32,7 @@ document.addEventListener('keydown', (e) => {
   if (barra && alvo.tagName === 'BUTTON') {
     const cats = [...barra.querySelectorAll<HTMLButtonElement>('button')], i = cats.indexOf(alvo as HTMLButtonElement)
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); cats[(i + (e.key === 'ArrowRight' ? 1 : -1) + cats.length) % cats.length]!.focus() }
-    else if (e.key === 'ArrowDown') { e.preventDefault(); if (alvo.getAttribute('aria-current') === 'true') focaPrimeiroItem(); else { (alvo as HTMLButtonElement).click(); focaPrimeiroItem() } }
+    else if (e.key === 'ArrowDown' && /blocos|campos/.test(barra.getAttribute('aria-label') ?? '')) { e.preventDefault(); if (alvo.getAttribute('aria-current') === 'true') focaPrimeiroItem(); else { (alvo as HTMLButtonElement).click(); focaPrimeiroItem() } }
     else if (e.key === 'Escape') { const aberta = categoriaAberta(); if (aberta) { e.preventDefault(); aberta.click(); aberta.focus() } }
   } else if (barra && alvo.tagName === 'INPUT') {
     if (e.key === 'ArrowDown' && itensDaLista().length) { e.preventDefault(); itensDaLista()[0]!.focus() }

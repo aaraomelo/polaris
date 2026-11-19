@@ -38,6 +38,8 @@ async function entra(usuario: string, tenant: 'a' | 'b' = 'a'): Promise<{ ctx: B
 const previa = (p: Page) => p.frameLocator('iframe[title="Pré-visualização da página"]')
 /** a paleta horizontal: abre a categoria (botão "Texto (n)") e escolhe o bloco pelo título */
 const adiciona = async (p: Page, categoria: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${categoria}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
+/** a paleta de campos do formulário: abre a categoria e escolhe o campo pelo título */
+const campo = async (p: Page, categoria: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${categoria}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
 const linhaDe = (p: Page, id: string) => p.getByRole('button', { name: new RegExp(`#${id}$`) })
 const quadro = (p: Page) => p.frameLocator('iframe[title="Amostra do tema"]')
 
@@ -190,6 +192,22 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('textbox', { name: 'Buscar bloco' }).focus(); await p.keyboard.press('Escape'); await expect(p.getByRole('textbox', { name: 'Buscar bloco' })).toHaveValue('') // Esc limpa a busca
     await ctx.close()
   })
+  it('paletas do formulário e do cartaz: categorias com ícone e contagem, lista com resumo, destino (dentro do grupo) e teclado; a do cartaz é uma barra de ícones sem lista', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Novo formulário' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('paleta-form'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
+    await expect(p.getByText('Formulário paleta-form')).toBeVisible(); expect(await p.getByRole('toolbar', { name: 'Paleta de campos' }).count()).toBe(1)
+    const cats = await p.getByRole('toolbar', { name: 'Paleta de campos' }).getByRole('button').allInnerTexts(); expect(cats.map((c) => c.replace(/\s\(\d+\)$/, ''))).toEqual(['Texto', 'Documentos', 'Números', 'Data', 'Escolha', 'Estrutura']); expect(cats.map((c) => /\((\d+)\)/.exec(c)![1])).toEqual(['5', '3', '2', '1', '3', '2'])
+    await expect(p.getByRole('button', { name: 'CPF', exact: true })).toHaveCount(0); await p.getByRole('button', { name: /^Documentos\s\(/ }).click(); await expect(p.getByRole('button', { name: 'CPF', exact: true })).toBeVisible(); await expect(p.getByText('Máscara de CEP.')).toBeVisible(); expect(await p.locator('button[data-icone]', { hasText: 'CPF' }).getAttribute('data-icone')).toBe('texto-codigo')
+    await expect(p.getByRole('button', { name: /^Documentos\s\(/ })).toHaveAttribute('aria-current', 'true'); await expect(p.getByRole('button', { name: 'E-mail', exact: true })).toHaveCount(0) // só a categoria aberta
+    await p.getByRole('button', { name: 'CPF', exact: true }).click(); await expect(p.getByRole('button', { name: /\(cpf\)/ })).toBeVisible(); await expect(p.getByRole('button', { name: 'CPF', exact: true })).toHaveCount(0) // adicionou e fechou
+    await p.getByRole('button', { name: /^Estrutura\s\(/ }).click(); await p.getByRole('button', { name: 'Grupo', exact: true }).click(); await p.getByRole('button', { name: /\(grupo\)/ }).click(); await expect(p.getByText(/Adicionar dentro de /)).toBeVisible() // o grupo selecionado recebe os próximos
+    await p.getByRole('button', { name: /^Texto\s\(/ }).click(); await p.getByRole('button', { name: 'E-mail', exact: true }).click(); await expect(p.getByRole('button', { name: /· .*\(email\)/ })).toBeVisible() // entrou dentro do grupo (com recuo)
+    await p.getByRole('button', { name: /^Texto\s\(/ }).focus(); await p.keyboard.press('ArrowRight'); expect(await p.evaluate(() => document.activeElement?.textContent)).toMatch(/^Documentos/); await p.keyboard.press('ArrowDown'); await expect(p.getByRole('group', { name: 'Campos da categoria' })).toBeVisible(); await expect.poll(() => p.evaluate(() => document.activeElement?.textContent)).toBe('CPF'); await p.keyboard.press('Escape'); await expect(p.getByRole('group', { name: 'Campos da categoria' })).toHaveCount(0)
+    await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('paleta-cartaz'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await p.getByRole('button', { name: 'Descartar e criar' }).click(); await expect(p.getByText('Cartaz paleta-cartaz')).toBeVisible()
+    const barra = p.getByRole('toolbar', { name: 'Paleta de elementos' }); expect(await barra.getByRole('button').allInnerTexts()).toEqual(['Texto', 'Faixa', 'Preço', 'Código de barras', 'QR code', 'Validade']); expect(await barra.locator('button[data-icone]').count()).toBe(6)
+    const n = async () => (await p.getByRole('button', { name: /^(▶ )?\d+\. / }).count()); const antes = await n(); await barra.getByRole('button', { name: 'Texto', exact: true }).focus(); await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowRight'); expect(await p.evaluate(() => document.activeElement?.textContent)).toBe('Faixa'); expect(await n()).toBe(antes) // setas só andam; Baixo não adiciona nada
+    await p.keyboard.press('Enter'); await expect.poll(n).toBe(antes + 1) // Enter adiciona
+    await ctx.close()
+  })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
     const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });
     const box = async (sel: string) => (await p.locator(sel).first().boundingBox())!, cab = await box('[data-painel] > header'), lat = await box('[data-painel] > aside'), prin = await box('[data-painel] > main')
@@ -258,16 +276,16 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect(p.getByText('Formulário contato2')).toBeVisible(); await expect(p.getByRole('button', { name: /nome \(texto\) \*/ })).toBeVisible(); await expect(prev().getByText('Nome')).toBeVisible()
     await expect(p.getByText('Definição coerente: sem problemas.')).toBeVisible()
     // adiciona um e-mail, seleciona, edita o rótulo e marca como obrigatório: lista e prévia seguem
-    await p.getByRole('button', { name: '+ email', exact: true }).click(); await p.getByRole('button', { name: /campo1 \(email\)/ }).click(); await expect(p.getByText('Campo campo1')).toBeVisible()
+    await campo(p, 'Texto', 'E-mail'); await p.getByRole('button', { name: /campo1 \(email\)/ }).click(); await expect(p.getByText('Campo campo1')).toBeVisible()
     await p.getByRole('textbox', { name: 'Rótulo', exact: true }).fill('E-mail de contato'); await expect(prev().getByText('E-mail de contato')).toBeVisible()
     await p.getByRole('checkbox', { name: 'Obrigatório', exact: true }).check(); await expect(p.getByRole('button', { name: /campo1 \(email\) \*/ })).toBeVisible()
     // CPF: a prévia mostra a dica da máscara padrão do tipo; máscara própria no campo de texto
-    await p.getByRole('button', { name: '+ cpf', exact: true }).click(); await expect(prev().locator('input[placeholder="000.000.000-00"]')).toBeVisible()
+    await campo(p, 'Documentos', 'CPF'); await expect(prev().locator('input[placeholder="000.000.000-00"]')).toBeVisible()
     // problema: nome repetido aparece na lista e some ao corrigir
     await p.getByRole('textbox', { name: 'Nome (chave do valor)', exact: true }).fill('nome'); await expect(p.getByText(/já existe um campo 'nome'/)).toBeVisible()
     await p.getByRole('textbox', { name: 'Nome (chave do valor)', exact: true }).fill('email'); await expect(p.getByText('Definição coerente: sem problemas.')).toBeVisible()
     // escolha: opções por linha (valor | rótulo) aparecem na prévia
-    await p.getByRole('button', { name: '+ escolha', exact: true }).click(); await p.getByRole('button', { name: /campo3 \(escolha\)/ }).click()
+    await campo(p, 'Escolha', 'Escolha'); await p.getByRole('button', { name: /campo3 \(escolha\)/ }).click()
     await p.getByRole('textbox', { name: 'Opções', exact: true }).fill('x | Ex\ny | Ypsilon\nz'); await expect(prev().locator('option', { hasText: 'Ypsilon' })).toHaveCount(1); await expect(prev().locator('option', { hasText: 'z' })).toHaveCount(1)
     // máscara do campo de texto: padrão vira {mascara:{padrao}} no JSON
     await p.getByRole('button', { name: /nome \(texto\)/ }).click(); await p.getByRole('textbox', { name: /^Padrão \(0 dígito/ }).fill('AAA-0000'); await expect(prev().locator('input[placeholder="xxx-0000"]')).toBeVisible()

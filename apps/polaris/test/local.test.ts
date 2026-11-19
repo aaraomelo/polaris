@@ -327,7 +327,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByLabel('Identificador do novo nó').fill('cartaz-teste'); await p.getByRole('button', { name: 'Criar' }).click()
       await p.getByRole('heading', { name: 'Cartaz cartaz-teste' }).waitFor(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Novo cartaz'))
       expect(await srcdoc()).toContain('<svg'); expect(await p.locator('iframe[title="Pré-visualização do cartaz"]').getAttribute('sandbox')).toBe('') // isolado, sem scripts
-      await p.getByRole('button', { name: '+ preco' }).click(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes(',99'))
+      await p.getByRole('button', { name: 'Preço', exact: true }).click(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes(',99'))
       await p.getByLabel('Escala dos centavos (0,2 a 1)').fill('1'); await p.waitForFunction(() => /font-size="([\d.]+)"[^>]*>,99/.test(document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? ''))
       await p.getByRole('button', { name: '1. texto titulo' }).click(); await p.getByLabel('Texto (dado entre chaves: produto.nome)').fill('Oferta {produto.nome}')
       await p.getByText(/o texto usa o dado "produto", não declarado em spec\.dados/).waitFor() // problema mostrado, sem quebrar a prévia

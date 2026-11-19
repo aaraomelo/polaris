@@ -626,6 +626,10 @@
      "tipo": "texto",
      "inicial": ""
     },
+    "catCampo": {
+     "tipo": "texto",
+     "inicial": ""
+    },
     "buscaBloco": {
      "tipo": "texto",
      "inicial": ""
@@ -6030,767 +6034,1279 @@
                                }
                               },
                               {
-                               "bloco": "texto/titulo",
+                               "bloco": "layout/pilha",
                                "props": {
-                                "texto": "Adicionar campo",
-                                "nivel": 5
-                               }
-                              },
-                              {
-                               "bloco": "layout/grade",
-                               "props": {
-                                "colunas": 2,
-                                "gap": 4
+                                "gap": 6
                                },
                                "slots": {
                                 "filhos": [
                                  {
-                                  "bloco": "nav/botao",
+                                  "bloco": "layout/linha",
                                   "props": {
-                                   "texto": "+ texto",
-                                   "variante": "secundario"
+                                   "gap": 6,
+                                   "alinha": "centro",
+                                   "quebra": true,
+                                   "papel": "toolbar",
+                                   "rotulo": "Paleta de campos"
                                   },
-                                  "eventos": {
-                                   "aoClicar": [
+                                  "slots": {
+                                   "filhos": [
                                     {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
+                                     "bloco": "texto/pequeno",
+                                     "props": {
+                                      "texto": "{\"Adicionar \" + (tamanho(estado.selCampo) > 0 && ((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\" || (obter(estado.no.spec, estado.selCampo)).tipo == \"lista\") ? \"dentro de \" + estado.selCampo[tamanho(estado.selCampo) - 2] : \"ao fim do formulário\")}"
+                                     }
                                     },
                                     {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Texto (5)",
+                                      "variante": "secundario",
+                                      "icone": "entrada-texto",
+                                      "atual": "{estado.catCampo == \"texto\"}"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "catCampo",
+                                        "valor": "estado.catCampo == \"texto\" ? \"\" : \"texto\""
+                                       }
+                                      ]
+                                     }
                                     },
                                     {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Documentos (3)",
+                                      "variante": "secundario",
+                                      "icone": "texto-codigo",
+                                      "atual": "{estado.catCampo == \"documento\"}"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "catCampo",
+                                        "valor": "estado.catCampo == \"documento\" ? \"\" : \"documento\""
+                                       }
+                                      ]
+                                     }
                                     },
                                     {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"texto\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Números (2)",
+                                      "variante": "secundario",
+                                      "icone": "entrada-numero",
+                                      "atual": "{estado.catCampo == \"numero\"}"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "catCampo",
+                                        "valor": "estado.catCampo == \"numero\" ? \"\" : \"numero\""
+                                       }
+                                      ]
+                                     }
                                     },
                                     {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Data (1)",
+                                      "variante": "secundario",
+                                      "icone": "historico",
+                                      "atual": "{estado.catCampo == \"data\"}"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "catCampo",
+                                        "valor": "estado.catCampo == \"data\" ? \"\" : \"data\""
+                                       }
+                                      ]
+                                     }
                                     },
                                     {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Escolha (3)",
+                                      "variante": "secundario",
+                                      "icone": "entrada-caixa",
+                                      "atual": "{estado.catCampo == \"escolha\"}"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "catCampo",
+                                        "valor": "estado.catCampo == \"escolha\" ? \"\" : \"escolha\""
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Estrutura (2)",
+                                      "variante": "secundario",
+                                      "icone": "layout-grade",
+                                      "atual": "{estado.catCampo == \"estrutura\"}"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "catCampo",
+                                        "valor": "estado.catCampo == \"estrutura\" ? \"\" : \"estrutura\""
+                                       }
+                                      ]
                                      }
                                     }
                                    ]
                                   }
                                  },
                                  {
-                                  "bloco": "nav/botao",
+                                  "bloco": "layout/pilha",
+                                  "se": "estado.catCampo != \"\"",
                                   "props": {
-                                   "texto": "+ textoLongo",
-                                   "variante": "secundario"
+                                   "gap": 0,
+                                   "papel": "group",
+                                   "rotulo": "Campos da categoria"
                                   },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"textoLongo\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ email",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"email\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ telefone",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"telefone\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ cpf",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"cpf\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ cnpj",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"cnpj\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ cep",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"cep\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ numero",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"numero\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ dinheiro",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"dinheiro\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ data",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"data\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ booleano",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"booleano\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ escolha",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"escolha\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"opcoes\", [objeto([[\"valor\", \"a\"], [\"rotulo\", \"Opção A\"]]), objeto([[\"valor\", \"b\"], [\"rotulo\", \"Opção B\"]])]]]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ multiescolha",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"multiescolha\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"opcoes\", [objeto([[\"valor\", \"a\"], [\"rotulo\", \"Opção A\"]]), objeto([[\"valor\", \"b\"], [\"rotulo\", \"Opção B\"]])]]]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ senha",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"senha\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ grupo",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"grupo\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"campos\", [objeto([[\"nome\", \"item\"], [\"tipo\", \"texto\"], [\"rotulo\", \"Item\"]])]]]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
-                                     }
-                                    }
-                                   ]
-                                  }
-                                 },
-                                 {
-                                  "bloco": "nav/botao",
-                                  "props": {
-                                   "texto": "+ lista",
-                                   "variante": "secundario"
-                                  },
-                                  "eventos": {
-                                   "aoClicar": [
-                                    {
-                                     "acao": "definir",
-                                     "estado": "chaveEdicao",
-                                     "valor": "\"\""
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "passado",
-                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "futuro",
-                                     "valor": "[]"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "no",
-                                     "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"lista\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"campos\", [objeto([[\"nome\", \"item\"], [\"tipo\", \"texto\"], [\"rotulo\", \"Item\"]])]]]))]))"
-                                    },
-                                    {
-                                     "acao": "definir",
-                                     "estado": "contador",
-                                     "valor": "estado.contador + 1"
-                                    },
-                                    {
-                                     "acao": "executar",
-                                     "dados": "previa",
-                                     "args": {
-                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                      "modo": "{estado.modoPrevia}"
+                                  "slots": {
+                                   "filhos": [
+                                    {
+                                     "bloco": "layout/grade",
+                                     "props": {
+                                      "colunas": 2,
+                                      "gap": 6
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"texto\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Texto",
+                                            "variante": "secundario",
+                                            "icone": "entrada-texto"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"texto\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Uma linha de texto."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"texto\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Texto longo",
+                                            "variante": "secundario",
+                                            "icone": "entrada-texto"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"textoLongo\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Várias linhas de texto."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"texto\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "E-mail",
+                                            "variante": "secundario",
+                                            "icone": "entrada-texto"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"email\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Confere o formato do endereço."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"texto\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Telefone",
+                                            "variante": "secundario",
+                                            "icone": "entrada-texto"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"telefone\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Com máscara de telefone."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"texto\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Senha",
+                                            "variante": "secundario",
+                                            "icone": "entrada-texto"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"senha\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Esconde o que se digita."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"documento\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "CPF",
+                                            "variante": "secundario",
+                                            "icone": "texto-codigo"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"cpf\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Máscara e dígitos verificadores."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"documento\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "CNPJ",
+                                            "variante": "secundario",
+                                            "icone": "texto-codigo"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"cnpj\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Máscara e dígitos verificadores."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"documento\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "CEP",
+                                            "variante": "secundario",
+                                            "icone": "texto-codigo"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"cep\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Máscara de CEP."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"numero\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Número",
+                                            "variante": "secundario",
+                                            "icone": "entrada-numero"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"numero\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Número com limites."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"numero\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Dinheiro",
+                                            "variante": "secundario",
+                                            "icone": "entrada-numero"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"dinheiro\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Valor em reais, exato."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"data\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Data",
+                                            "variante": "secundario",
+                                            "icone": "historico"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"data\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Dia, mês e ano."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"escolha\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Sim ou não",
+                                            "variante": "secundario",
+                                            "icone": "entrada-caixa"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"booleano\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Caixa de marcar."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"escolha\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Escolha",
+                                            "variante": "secundario",
+                                            "icone": "entrada-caixa"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"escolha\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"opcoes\", [objeto([[\"valor\", \"a\"], [\"rotulo\", \"Opção A\"]]), objeto([[\"valor\", \"b\"], [\"rotulo\", \"Opção B\"]])]]]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Uma opção de uma lista."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"escolha\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Múltipla escolha",
+                                            "variante": "secundario",
+                                            "icone": "entrada-caixa"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"multiescolha\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"opcoes\", [objeto([[\"valor\", \"a\"], [\"rotulo\", \"Opção A\"]]), objeto([[\"valor\", \"b\"], [\"rotulo\", \"Opção B\"]])]]]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Várias opções de uma lista."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"estrutura\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Grupo",
+                                            "variante": "secundario",
+                                            "icone": "layout-grade"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"grupo\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"campos\", [objeto([[\"nome\", \"item\"], [\"tipo\", \"texto\"], [\"rotulo\", \"Item\"]])]]]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Reúne campos relacionados."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "estado.catCampo == \"estrutura\"",
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Lista",
+                                            "variante": "secundario",
+                                            "icone": "layout-grade"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"]), concat(obter(estado.no, (tamanho(estado.selCampo) > 0 && (((obter(estado.no.spec, estado.selCampo)).tipo == \"grupo\") || ((obter(estado.no.spec, estado.selCampo)).tipo == \"lista\")) ? concat(concat([\"spec\"], estado.selCampo), [\"campos\"]) : [\"spec\", \"campos\"])) ?? [], [mescla(objeto([[\"nome\", \"campo\" + estado.contador], [\"tipo\", \"lista\"], [\"rotulo\", \"Campo \" + estado.contador]]), objeto([[\"campos\", [objeto([[\"nome\", \"item\"], [\"tipo\", \"texto\"], [\"rotulo\", \"Item\"]])]]]))]))"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "contador",
+                                              "valor": "estado.contador + 1"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "catCampo",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "Linhas que quem preenche adiciona."
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
                                      }
                                     }
                                    ]
@@ -8845,18 +9361,22 @@
                             }
                            },
                            {
-                            "bloco": "layout/grade",
+                            "bloco": "layout/linha",
                             "props": {
-                             "colunas": 2,
-                             "gap": 4
+                             "gap": 6,
+                             "alinha": "centro",
+                             "quebra": true,
+                             "papel": "toolbar",
+                             "rotulo": "Paleta de elementos"
                             },
                             "slots": {
                              "filhos": [
                               {
                                "bloco": "nav/botao",
                                "props": {
-                                "texto": "+ texto",
-                                "variante": "secundario"
+                                "texto": "Texto",
+                                "variante": "secundario",
+                                "icone": "texto-paragrafo"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -8907,8 +9427,9 @@
                               {
                                "bloco": "nav/botao",
                                "props": {
-                                "texto": "+ faixa",
-                                "variante": "secundario"
+                                "texto": "Faixa",
+                                "variante": "secundario",
+                                "icone": "layout-destaque"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -8959,8 +9480,9 @@
                               {
                                "bloco": "nav/botao",
                                "props": {
-                                "texto": "+ preco",
-                                "variante": "secundario"
+                                "texto": "Preço",
+                                "variante": "secundario",
+                                "icone": "feedback-selo"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -9011,8 +9533,9 @@
                               {
                                "bloco": "nav/botao",
                                "props": {
-                                "texto": "+ codigoBarras",
-                                "variante": "secundario"
+                                "texto": "Código de barras",
+                                "variante": "secundario",
+                                "icone": "cartaz"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -9063,8 +9586,9 @@
                               {
                                "bloco": "nav/botao",
                                "props": {
-                                "texto": "+ qrcode",
-                                "variante": "secundario"
+                                "texto": "QR code",
+                                "variante": "secundario",
+                                "icone": "layout-grade"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -9115,8 +9639,9 @@
                               {
                                "bloco": "nav/botao",
                                "props": {
-                                "texto": "+ validade",
-                                "variante": "secundario"
+                                "texto": "Validade",
+                                "variante": "secundario",
+                                "icone": "historico"
                                },
                                "eventos": {
                                 "aoClicar": [

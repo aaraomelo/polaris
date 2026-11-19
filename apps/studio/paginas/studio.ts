@@ -220,7 +220,6 @@ const editorDePaginas = (): Inst => pilha([
 const CAMPOSEL = 'obter(estado.no.spec, estado.selCampo)', DOCC = 'concat(["spec"], estado.selCampo)'
 const PAI_CAMPOS = 'fatia(estado.selCampo, 0, tamanho(estado.selCampo) - 1)'
 const TIPOS_CAMPO = ['texto', 'textoLongo', 'senha', 'email', 'telefone', 'url', 'numero', 'inteiro', 'dinheiro', 'percentual', 'booleano', 'escolha', 'multiescolha', 'data', 'hora', 'dataHora', 'cpf', 'cnpj', 'cep', 'arquivo', 'oculto', 'grupo', 'lista']
-const PALETA = ['texto', 'textoLongo', 'email', 'telefone', 'cpf', 'cnpj', 'cep', 'numero', 'dinheiro', 'data', 'booleano', 'escolha', 'multiescolha', 'senha', 'grupo', 'lista']
 const lit = (caminho: string[]) => `[${caminho.map(q).join(', ')}]`
 /** entrada de texto de uma propriedade do campo selecionado (caminho relativo ao campo); vazio remove a propriedade */
 const propTexto = (rotulo: string, caminho: string[], opc: { numero?: boolean; se?: string } = {}): Inst => P('entrada/texto', {
@@ -240,16 +239,35 @@ const NOVO_CAMPO = (t: string) => `mescla(objeto([["nome", "campo" + estado.cont
 /** onde o campo novo entra: dentro do grupo/lista selecionado, ou no fim da lista principal */
 const CAMINHO_NOVOS = `(tamanho(estado.selCampo) > 0 && ((${TIPO_C} == "grupo") || (${TIPO_C} == "lista")) ? concat(${DOCC}, ["campos"]) : ["spec", "campos"])`
 
+/** a paleta de campos: categorias com ícone e contagem, e a lista da aberta com título e resumo (mesmo padrão da paleta de blocos) */
+const CATEGORIAS_CAMPO: Array<{ id: string; nome: string; icone: string; itens: Array<[string, string, string]> }> = [
+  { id: 'texto', nome: 'Texto', icone: 'entrada-texto', itens: [['texto', 'Texto', 'Uma linha de texto.'], ['textoLongo', 'Texto longo', 'Várias linhas de texto.'], ['email', 'E-mail', 'Confere o formato do endereço.'], ['telefone', 'Telefone', 'Com máscara de telefone.'], ['senha', 'Senha', 'Esconde o que se digita.']] },
+  { id: 'documento', nome: 'Documentos', icone: 'texto-codigo', itens: [['cpf', 'CPF', 'Máscara e dígitos verificadores.'], ['cnpj', 'CNPJ', 'Máscara e dígitos verificadores.'], ['cep', 'CEP', 'Máscara de CEP.']] },
+  { id: 'numero', nome: 'Números', icone: 'entrada-numero', itens: [['numero', 'Número', 'Número com limites.'], ['dinheiro', 'Dinheiro', 'Valor em reais, exato.']] },
+  { id: 'data', nome: 'Data', icone: 'historico', itens: [['data', 'Data', 'Dia, mês e ano.']] },
+  { id: 'escolha', nome: 'Escolha', icone: 'entrada-caixa', itens: [['booleano', 'Sim ou não', 'Caixa de marcar.'], ['escolha', 'Escolha', 'Uma opção de uma lista.'], ['multiescolha', 'Múltipla escolha', 'Várias opções de uma lista.']] },
+  { id: 'estrutura', nome: 'Estrutura', icone: 'layout-grade', itens: [['grupo', 'Grupo', 'Reúne campos relacionados.'], ['lista', 'Lista', 'Linhas que quem preenche adiciona.']] },
+]
+const ADICIONA_CAMPO = (t: string): Acao[] => [
+  def('chaveEdicao', '""'), def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'),
+  def('no', `com(estado.no, ${CAMINHO_NOVOS}, concat(obter(estado.no, ${CAMINHO_NOVOS}) ?? [], [${NOVO_CAMPO(t)}]))`), def('contador', 'estado.contador + 1'), def('catCampo', '""'), atualizaPrevia,
+]
+const paletaDeCampos = (): Inst => pilha([
+  linha([
+    P('texto/pequeno', { props: { texto: `{"Adicionar " + (tamanho(estado.selCampo) > 0 && (${TIPO_C} == "grupo" || ${TIPO_C} == "lista") ? "dentro de " + estado.selCampo[tamanho(estado.selCampo) - 2] : "ao fim do formulário")}` } }),
+    ...CATEGORIAS_CAMPO.map((c) => botao(`${c.nome} (${c.itens.length})`, [def('catCampo', `estado.catCampo == ${q(c.id)} ? "" : ${q(c.id)}`)], { props: { icone: c.icone, atual: `{estado.catCampo == ${q(c.id)}}` } })),
+  ], { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de campos' } }),
+  pilha([P('layout/grade', { props: { colunas: 2, gap: 6 }, filhos: CATEGORIAS_CAMPO.flatMap((c) => c.itens.map(([tipo, nome, resumo]) => pilha([
+    botao(nome, ADICIONA_CAMPO(tipo), { props: { icone: c.icone } }), P('texto/pequeno', { props: { texto: resumo } }),
+  ], { se: `estado.catCampo == ${q(c.id)}`, gap: 2 }))) })], { se: 'estado.catCampo != ""', props: { papel: 'group', rotulo: 'Campos da categoria' }, gap: 0 }),
+], { gap: 6 })
+
 const listaDeCampos = (): Inst => pilha([
   titulo('Campos', 4),
   pilha([botao('{(tamanho(x.caminho) > 2 ? junta(mapeia(intervalo(0, tamanho(x.caminho) / 2 - 1), i => "· "), "") : "") + (igual(x.caminho, estado.selCampo) ? "▶ " : "") + x.no.nome + " (" + x.no.tipo + ")" + (x.no.obrigatorio ? " *" : "")}', [def('selCampo', 'x.caminho')])],
     { repetir: { cada: LISTA_CAMPOS, como: 'x', chave: 'junta(mapeia(x.caminho, p => texto(p)), ".")' }, gap: 2 }),
   texto('Nenhum campo ainda: use a paleta.', { se: `tamanho(estado.no.spec.campos ?? []) == 0` }),
-  titulo('Adicionar campo', 5),
-  P('layout/grade', { props: { colunas: 2, gap: 4 }, filhos: PALETA.map((t) => botao(`+ ${t}`, [
-    def('chaveEdicao', '""'), def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'),
-    def('no', `com(estado.no, ${CAMINHO_NOVOS}, concat(obter(estado.no, ${CAMINHO_NOVOS}) ?? [], [${NOVO_CAMPO(t)}]))`), def('contador', 'estado.contador + 1'), atualizaPrevia,
-  ])) }),
+  paletaDeCampos(),
 ], { gap: 4 })
 
 const barraDeCampo = (): Inst => linha([
@@ -367,6 +385,8 @@ const NOVO_EL: Record<string, string> = {
   qrcode: 'objeto([["tipo", "qrcode"], ["id", "el" + estado.contador], ["valor", "https://exemplo.com.br"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.6], ["largura", 0.25], ["altura", 0.35]])]])',
   validade: 'objeto([["tipo", "validade"], ["id", "el" + estado.contador], ["caixa", objeto([["topo", 0.85], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.1]])]])',
 }
+/** o título e o ícone de cada tipo de elemento do cartaz na paleta */
+const ROTULO_EL: Record<string, [string, string]> = { texto: ['Texto', 'texto-paragrafo'], faixa: ['Faixa', 'layout-destaque'], preco: ['Preço', 'feedback-selo'], codigoBarras: ['Código de barras', 'cartaz'], qrcode: ['QR code', 'layout-grade'], validade: ['Validade', 'historico'] }
 const guarda: Acao[] = [def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""')]
 /** entrada de texto/número do elemento selecionado (caminho relativo ao elemento); vazio remove */
 const propEl = (rotulo: string, caminho: string[], opc: { numero?: boolean; se?: string } = {}): Inst => P('entrada/texto', {
@@ -388,8 +408,8 @@ const listaDeElementos = (): Inst => pilha([
   pilha([botao('{(x.i == estado.selEl ? "▶ " : "") + (x.i + 1) + ". " + x.e.tipo + " " + (x.e.id ?? "")}', [def('selEl', 'x.i')])],
     { repetir: { cada: 'mapeia(estado.no.spec.elementos ?? [], (e, i) => objeto([["i", i], ["e", e]]))', como: 'x', chave: 'texto(x.i)' }, gap: 2 }),
   titulo('Adicionar', 5),
-  P('layout/grade', { props: { colunas: 2, gap: 4 }, filhos: Object.keys(NOVO_EL).map((t) => botao(`+ ${t}`, [...guarda,
-    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [${NOVO_EL[t]}]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia])) }),
+  linha(Object.keys(NOVO_EL).map((t) => botao(ROTULO_EL[t]![0], [...guarda,
+    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [${NOVO_EL[t]}]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { props: { icone: ROTULO_EL[t]![1] } })), { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de elementos' } }),
   titulo('Peça', 5),
   linha(['A4', 'A5', 'A6', 'A7'].map((t) => botao(`{estado.no.spec.tamanho == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "tamanho"], ${q(t)})`))), { props: { gap: 4 } }),
   linha(['retrato', 'paisagem'].map((t) => botao(`{(estado.no.spec.orientacao ?? "retrato") == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "orientacao"], ${q(t)})`))), { props: { gap: 4 } }),
@@ -590,7 +610,7 @@ export const PAGINA = no('pagina', 'studio.app', {
   dados: { ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
