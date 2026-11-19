@@ -109,6 +109,9 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       await db.exec('RESET ROLE')
       for (const t of TENANTS_LOCAIS) if (!(await db.query(`SELECT 1 FROM loja.destaque WHERE tenant_id = $1`, [t.id])).rows.length)
         await db.query(`INSERT INTO loja.destaque (tenant_id, titulo, descricao) VALUES ($1, $2, $3), ($1, $4, $5)`, [t.id, `Café de ${t.nome}`, 'Torra média, 250 g', `Pão de ${t.nome}`, 'Fermentação natural'])
+      // mais destaques (com acentos) para a busca e a paginação do site de exemplo: idempotente, por título
+      for (const [titulo, descricao] of [['Café coado', 'Feito na hora, com filtro de papel'], ['Cafeteira italiana', 'Alumínio, serve 6 xícaras'], ['Cafezinho de coador', 'Pó torrado e moído'], ['Café gelado', 'Com leite e caramelo'], ['Café especial', 'Grãos de altitude, notas de chocolate'], ['Açaí na tigela', 'Com granola e banana'], ['Pão de queijo', 'Receita mineira, 500 g'], ['Chá verde', 'Folhas selecionadas'], ['Bolo de fubá', 'Com erva-doce']] as const)
+        for (const t of TENANTS_LOCAIS) await db.query(`INSERT INTO loja.destaque (tenant_id, titulo, descricao) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM loja.destaque WHERE tenant_id = $1 AND titulo = $2)`, [t.id, titulo, descricao])
     }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw); registraSite(regGw)
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)

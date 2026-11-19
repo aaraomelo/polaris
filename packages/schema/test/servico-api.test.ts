@@ -107,3 +107,18 @@ describe('REGRESSÃO: o padrão de um campo NÃO vira filtro da listagem', () =>
     const c = esquemasHttp(criar).body!.properties as Record<string, { default?: unknown }>; expect(c.padrao!.default).toBe(false); expect(c.ativo!.default).toBe(true)
   })
 })
+
+describe('busca por texto da entidade (`busca: { campos }`)', () => {
+  const com = (busca: unknown, extra: object = {}) => svc({ entidades: { artigo: { campos: { titulo: { tipo: 'texto' }, resumo: { tipo: 'texto' }, nota: { tipo: 'inteiro' }, tags: { tipo: 'texto', lista: true }, ...extra }, busca, crud: { caminho: '/artigos', permissao: 'publica' } } } })
+  it('a listagem ganha o parâmetro `busca` (texto até 100 caracteres) ao lado de pagina e limite; só nela e só na entidade que declara', () => {
+    const r = rotasDe(com({ campos: ['titulo', 'resumo'] })), listar = r.find((x) => x.id === 'listarArtigo')!, q = esquemasHttp(listar).querystring as { properties: Record<string, { type: string; maxLength?: number }> }
+    expect(Object.keys(q.properties).sort()).toEqual(['busca', 'limite', 'nota', 'pagina', 'resumo', 'titulo']); expect(q.properties.busca).toMatchObject({ type: 'string', maxLength: 100 })
+    expect(Object.keys((esquemasHttp(r.find((x) => x.id === 'obterArtigo')!).querystring as { properties?: object } | undefined)?.properties ?? {})).not.toContain('busca')
+    expect(Object.keys((esquemasHttp(rotasDe(com(undefined)).find((x) => x.id === 'listarArtigo')!).querystring as { properties: object }).properties)).not.toContain('busca')
+  })
+  it('o OpenAPI documenta o parâmetro', () => { expect(emite(com({ campos: ['titulo'] }), 'openapi')).toContain('busca por palavras') })
+  it('recusa (EmissaoErro): campo inexistente, campo que não é texto, lista e campo real chamado `busca`', () => {
+    expect(() => rotasDe(com({ campos: ['nao-existe'] }))).toThrow(/campo inexistente/); expect(() => rotasDe(com({ campos: ['nota'] }))).toThrow(/campo de texto/); expect(() => rotasDe(com({ campos: ['tags'] }))).toThrow(/campo de texto/)
+    expect(() => rotasDe(com({ campos: ['titulo'] }, { busca: { tipo: 'texto' } }))).toThrow(/campo chamado 'busca'/)
+  })
+})

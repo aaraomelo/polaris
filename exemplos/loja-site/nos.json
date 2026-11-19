@@ -17,6 +17,31 @@
     }
   },
   {
+    "kind": "dados",
+    "id": "site.destaques-busca",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "fonte": {
+        "tipo": "servico",
+        "servico": "loja",
+        "operacao": "listarDestaque"
+      },
+      "parametros": {
+        "busca": {
+          "tipo": "texto"
+        },
+        "pagina": {
+          "tipo": "inteiro"
+        },
+        "limite": {
+          "tipo": "inteiro"
+        }
+      },
+      "carregar": "auto"
+    }
+  },
+  {
     "kind": "pagina",
     "id": "site.home",
     "versao": "1.0.0",
@@ -273,7 +298,22 @@
       "rota": "/busca",
       "titulo": "Busca",
       "dados": {
-        "destaques": "site.destaques"
+        "achados": {
+          "dados": "site.destaques-busca",
+          "args": {
+            "busca": "{consulta.q ?? \"\"}",
+            "pagina": "{(paraNumero(consulta.pagina) ?? 1)}",
+            "limite": 5
+          }
+        },
+        "proxima": {
+          "dados": "site.destaques-busca",
+          "args": {
+            "busca": "{consulta.q ?? \"\"}",
+            "pagina": "{(paraNumero(consulta.pagina) ?? 1) * 5 + 1}",
+            "limite": 1
+          }
+        }
       },
       "raiz": {
         "bloco": "layout/pilha",
@@ -353,7 +393,7 @@
               "props": {
                 "texto": "Nada encontrado para este termo."
               },
-              "se": "consulta.q && tamanho(filtra(destaques, d => contem(minusculas(d.titulo + \" \" + (d.descricao ?? \"\")), minusculas(consulta.q)))) == 0"
+              "se": "consulta.q && tamanho(achados) == 0"
             },
             {
               "bloco": "layout/pilha",
@@ -361,9 +401,9 @@
                 "gap": 4
               },
               "repetir": {
-                "cada": "consulta.q ? filtra(destaques, d => contem(minusculas(d.titulo + \" \" + (d.descricao ?? \"\")), minusculas(consulta.q))) : []",
+                "cada": "consulta.q ? achados : []",
                 "como": "d",
-                "chave": "d.titulo"
+                "chave": "d.id"
               },
               "slots": {
                 "filhos": [
@@ -377,6 +417,39 @@
                     "bloco": "texto/paragrafo",
                     "props": {
                       "texto": "{d.descricao}"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "nav/menu",
+              "props": {
+                "rotulo": "Páginas de resultados"
+              },
+              "se": "consulta.q && ((paraNumero(consulta.pagina) ?? 1) > 1 || tamanho(proxima) > 0)",
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "nav/link",
+                    "se": "(paraNumero(consulta.pagina) ?? 1) > 1",
+                    "props": {
+                      "href": "{\"/busca?q=\" + urlcodifica(consulta.q) + \"&pagina=\" + texto((paraNumero(consulta.pagina) ?? 1) - 1)}",
+                      "texto": "Anterior"
+                    }
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "Página {(paraNumero(consulta.pagina) ?? 1)}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "se": "tamanho(proxima) > 0",
+                    "props": {
+                      "href": "{\"/busca?q=\" + urlcodifica(consulta.q) + \"&pagina=\" + texto((paraNumero(consulta.pagina) ?? 1) + 1)}",
+                      "texto": "Próxima"
                     }
                   }
                 ]

@@ -167,6 +167,10 @@ export const f_objeto: Funcao = { min: 1, max: 1, fn: (l) => {
     return Object.fromEntries(l as Array<[string, unknown]>)
   } }
 export const f_tamanho: Funcao = { min: 1, max: 1, fn: (x) => (typeof x === 'string' || Array.isArray(x) ? x.length : x && typeof x === 'object' ? Object.keys(x).length : 0) }
+/** `encodeURIComponent` (UTF-8, tudo que não é seguro vira %XX): para montar `?q=` em um link. Texto muito longo (> 2000) e surrogate solto viram vazio, nunca erro. */
+export const f_urlcodifica: Funcao = { min: 1, max: 1, fn: (x) => { const t = txt(x); if (t.length > 2000) return ''; try { return encodeURIComponent(t) } catch { return '' } } }
+/** tira os acentos (decompõe e remove as marcas): "Café" → "Cafe", "ação" → "acao"; mantém maiúsculas e minúsculas */
+export const f_semAcentos: Funcao = { min: 1, max: 1, fn: (x) => txt(x).normalize('NFD').replace(/\p{M}+/gu, '') }
 export const f_maiusculas: Funcao = { min: 1, max: 1, fn: (x) => txt(x).toUpperCase() }
 export const f_minusculas: Funcao = { min: 1, max: 1, fn: (x) => txt(x).toLowerCase() }
 export const f_aparar: Funcao = { min: 1, max: 1, fn: (x) => txt(x).trim() }

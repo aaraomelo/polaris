@@ -70,6 +70,26 @@
                 "description": "publica (sem autenticação) | autenticada (qualquer autenticado) | qualquer outro valor, inclusive o padrão, é protegida: decidida pelas regras dos papéis (nunca abre por engano)"
               }
             }
+          },
+          "busca": {
+            "type": "object",
+            "required": [
+              "campos"
+            ],
+            "additionalProperties": false,
+            "description": "habilita o parâmetro `busca` na listagem gerada: palavras (até 5, todas devem aparecer) nos campos de texto indicados, sem diferenciar maiúsculas nem acentos",
+            "properties": {
+              "campos": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 5,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][A-Za-z0-9]*$"
+                }
+              }
+            }
           }
         },
         "additionalProperties": false

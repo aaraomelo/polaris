@@ -37,6 +37,12 @@
               "listar"
             ],
             "permissao": "publica"
+          },
+          "busca": {
+            "campos": [
+              "titulo",
+              "descricao"
+            ]
           }
         },
         "contato": {

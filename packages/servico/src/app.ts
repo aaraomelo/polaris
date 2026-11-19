@@ -5,6 +5,7 @@ import { codigoSucesso, esquemaDeEntidade, esquemasHttp, rotasDe, snake, type Ca
 import { aSql, avalia, camposPermitidos, permite, resolve, type Regra, type Resolvido, type Tipos } from '@polaris/acesso'
 import { criaPublicador } from '@polaris/eventos'
 import { criaObservabilidade, instalaObservabilidadeFastify, serializaErro, type ReqComObs } from '@polaris/observabilidade'
+import { condicaoDeBusca } from './busca'
 import { ErroApi, corpoErro, erroDoBanco } from './erros'
 import { colunas, ident, linhaParaApi, nomesDeCampos, tabela, tiposDe, type Ent } from './sql'
 import type { Contexto, OpcoesServico } from './tipos'
@@ -163,8 +164,9 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
     const noEscopo = (row: Record<string, unknown>) => cond === null || avalia(cond, linhaParaApi(ent, row), tipos as Tipos)
     switch (op) {
       case 'listar': {
-        const { pagina = 1, limite = 24, ...filtros } = e.entrada as { pagina?: number; limite?: number } & Record<string, unknown>
+        const { pagina = 1, limite = 24, busca, ...filtros } = e.entrada as { pagina?: number; limite?: number; busca?: string } & Record<string, unknown>
         const onde: string[] = [], ps: unknown[] = []
+        if (typeof busca === 'string' && ent.busca) { const c = condicaoDeBusca(ent.busca.campos, busca, coluna, ps); if (c) onde.push(`(${c})`) } // busca por texto (sem acento nem maiúsculas); termo sem palavra nenhuma não filtra
         for (const [k, v] of Object.entries(filtros)) { ps.push(v); onde.push(`${coluna(k)} = $${ps.length}`) }
         if (cond) onde.push(`(${aSql(cond, coluna, ps, tipos as Tipos)})`) // o alcance do papel entra no WHERE: o que está fora nem é lido
         ps.push(limite, (pagina - 1) * limite)

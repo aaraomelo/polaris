@@ -7,7 +7,7 @@ import type { No } from './index'
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
 export type CrudOp = 'listar' | 'obter' | 'criar' | 'atualizar' | 'remover'
-type Ent = { campos: Record<string, Campo & { descricao?: string }>; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
+type Ent = { campos: Record<string, Campo & { descricao?: string }>; busca?: { campos: string[] }; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
 type Op = { metodo: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; caminho: string; entrada?: Record<string, Campo>; saida?: string; lista?: boolean; permissao?: string; publica?: string[] }
 type Spec = { entidades: Record<string, Ent>; operacoes: Record<string, Op>; consome?: string[] }
 
@@ -102,7 +102,11 @@ export function rotasDe(no: No): Rota[] {
     const permissao = modoDeAcesso(ent.crud.permissao)
     const ops = ent.crud.operacoes ?? ['listar', 'obter', 'criar', 'atualizar', 'remover']
     const idParam = { id: { tipo: 'uuid', obrigatorio: true } } as Record<string, Campo>
-    const filtros = Object.fromEntries(Object.entries(ent.campos).filter(([, c]) => !c.lista && c.tipo !== 'json').map(([k, c]) => [k, { ...c, obrigatorio: false, padrao: undefined }])) as Record<string, Campo> // filtro NÃO herda o padrão: um default de campo aplicado como filtro escondia todo registro com outro valor (depósito padrão, inativos…)
+    if (ent.busca) {
+      if ('busca' in ent.campos) throw new EmissaoErro(`servico ${no.id}: a entidade '${nome}' tem um campo chamado 'busca', que é o nome do parâmetro de busca`)
+      for (const c of ent.busca.campos) { const def = ent.campos[c]; if (!def) throw new EmissaoErro(`servico ${no.id}: busca de '${nome}' usa o campo inexistente '${c}'`); if (def.tipo !== 'texto' || def.lista) throw new EmissaoErro(`servico ${no.id}: busca de '${nome}': '${c}' precisa ser um campo de texto (não lista)`) }
+    }
+    const filtros = { ...Object.fromEntries(Object.entries(ent.campos).filter(([, c]) => !c.lista && c.tipo !== 'json').map(([k, c]) => [k, { ...c, obrigatorio: false, padrao: undefined }])), ...(ent.busca ? { busca: { tipo: 'texto' } } : {}) } as Record<string, Campo> // filtro NÃO herda o padrão: um default de campo aplicado como filtro escondia todo registro com outro valor (depósito padrão, inativos…)
     const comum = { saida: nome, permissao, publica: [] as string[] }
     for (const op of ops) {
       const base = { origem: { tipo: 'crud', crud: op, entidade: nome } as const, ...comum }
@@ -118,6 +122,7 @@ export function rotasDe(no: No): Rota[] {
 }
 
 // ---- esquemas HTTP de uma rota (fonte ÚNICA: o serviço e o gateway validam IGUAL) ------------------------------------------------------------------
+const DESC_BUSCA = 'busca por palavras (até 5, todas devem aparecer), sem diferenciar maiúsculas nem acentos, nos campos declarados em `busca` da entidade'
 const PAGINA_HTTP = { pagina: { type: 'integer', minimum: 1, default: 1 }, limite: { type: 'integer', minimum: 1, maximum: 100, default: 24 } }
 /** JSON Schemas de `params`, `querystring` (GET/DELETE) e `body` (demais) de uma rota. Sempre `additionalProperties: false`: campo desconhecido é rejeitado, não ignorado. */
 export function esquemasHttp(r: Rota): { params?: Record<string, unknown>; querystring?: Record<string, unknown>; body?: Record<string, unknown> } {
@@ -129,7 +134,7 @@ export function esquemasHttp(r: Rota): { params?: Record<string, unknown>; query
   })
   return {
     ...(r.params.length ? { params: { type: 'object', properties: Object.fromEntries(r.params.map((p) => [p, { type: 'string', format: 'uuid' }])), required: r.params, additionalProperties: false } } : {}),
-    ...(emQuery ? { querystring: { type: 'object', ...props(r.entrada, crud), properties: { ...props(r.entrada, false).properties, ...(r.lista ? PAGINA_HTTP : {}) }, additionalProperties: false } } : {}),
+    ...(emQuery ? { querystring: { type: 'object', ...props(r.entrada, crud), properties: { ...props(r.entrada, false).properties, ...(crud && 'busca' in r.entrada ? { busca: { type: 'string', maxLength: 100, description: DESC_BUSCA } } : {}), ...(r.lista ? PAGINA_HTTP : {}) }, additionalProperties: false } } : {}),
     ...(!emQuery ? { body: { type: 'object', ...props(r.entrada, crud && r.origem.tipo === 'crud' && r.origem.crud === 'atualizar'), additionalProperties: false } } : {}),
   }
 }
@@ -154,7 +159,7 @@ export function emiteOpenApi(no: No): string {
     const emQuery = r.metodo === 'get' || r.metodo === 'delete'
     const parametros = [
       ...r.params.map((p) => ({ name: p, in: 'path', required: true, schema: { type: 'string', format: 'uuid' } })),
-      ...(emQuery ? Object.entries(r.entrada).map(([k, c]) => ({ name: k, in: 'query', required: !!c.obrigatorio, schema: esquemaDoCampo(c) })) : []),
+      ...(emQuery ? Object.entries(r.entrada).map(([k, c]) => (r.origem.tipo === 'crud' && k === 'busca' ? { name: k, in: 'query', required: false, description: DESC_BUSCA, schema: { type: 'string', maxLength: 100 } } : { name: k, in: 'query', required: !!c.obrigatorio, schema: esquemaDoCampo(c) })) : []),
       ...(r.lista ? [{ name: 'pagina', in: 'query', required: false, schema: { type: 'integer', minimum: 1, default: 1 } }, { name: 'limite', in: 'query', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 24 } }] : []),
     ]
     const entradaCorpo = r.origem.tipo === 'crud' && r.origem.crud === 'criar' ? ref(r.origem.entidade, 'Entrada') : r.origem.tipo === 'crud' && r.origem.crud === 'atualizar' ? ref(r.origem.entidade, 'Alteracao')

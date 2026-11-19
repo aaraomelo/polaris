@@ -1,0 +1,41 @@
+{
+  "kind": "servico",
+  "id": "vitrine-busca",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+    "entidades": {
+      "artigo": {
+        "campos": {
+          "titulo": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "resumo": {
+            "tipo": "texto"
+          },
+          "publicado": {
+            "tipo": "booleano",
+            "padrao": true
+          }
+        },
+        "busca": {
+          "campos": [
+            "titulo",
+            "resumo"
+          ],
+          "extra": 1
+        },
+        "crud": {
+          "caminho": "/artigos",
+          "operacoes": [
+            "listar",
+            "obter"
+          ],
+          "permissao": "publica"
+        }
+      }
+    },
+    "operacoes": {}
+  }
+}

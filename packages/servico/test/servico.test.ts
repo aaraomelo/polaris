@@ -11,7 +11,7 @@ const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-2
 const LOJA: No = { kind: 'servico', id: 'loja', versao: '1.0.0', estatuto: 'publicado', spec: {
   entidades: {
     cliente: { campos: { nome: { tipo: 'texto', obrigatorio: true }, email: { tipo: 'texto' } }, crud: { caminho: '/clientes' } },
-    produto: { campos: { sku: { tipo: 'texto', obrigatorio: true }, nome: { tipo: 'texto', obrigatorio: true }, preco: { tipo: 'dinheiro', obrigatorio: true }, estoque: { tipo: 'inteiro', padrao: 0 }, ativo: { tipo: 'booleano', padrao: true }, tags: { tipo: 'texto', lista: true }, extra: { tipo: 'json' }, lancadoEm: { tipo: 'data' }, peso: { tipo: 'decimal' } }, indices: [['sku']], crud: { caminho: '/produtos', permissao: 'catalogo' } },
+    produto: { campos: { sku: { tipo: 'texto', obrigatorio: true }, nome: { tipo: 'texto', obrigatorio: true }, preco: { tipo: 'dinheiro', obrigatorio: true }, estoque: { tipo: 'inteiro', padrao: 0 }, ativo: { tipo: 'booleano', padrao: true }, tags: { tipo: 'texto', lista: true }, extra: { tipo: 'json' }, lancadoEm: { tipo: 'data' }, peso: { tipo: 'decimal' } }, indices: [['sku']], busca: { campos: ['nome', 'sku'] }, crud: { caminho: '/produtos', permissao: 'catalogo' } },
     pedido: { campos: { clienteId: { tipo: 'uuid', obrigatorio: true, referencia: 'cliente' }, total: { tipo: 'dinheiro', obrigatorio: true }, situacao: { tipo: 'texto', padrao: 'aberto' } }, crud: { caminho: '/pedidos', operacoes: ['listar', 'obter', 'criar'] } },
     vitrine: { campos: { titulo: { tipo: 'texto' } }, crud: { caminho: '/vitrines', operacoes: ['listar'], permissao: 'publica' } },
     aviso: { campos: { texto: { tipo: 'texto' } }, crud: { caminho: '/avisos', operacoes: ['listar'], permissao: 'autenticada' } },
@@ -125,6 +125,20 @@ describe('CRUD gerado do schema', () => {
     const u = await req('tA', 'PATCH', `/produtos/${id}`, { preco: '55.00' }); expect(u.statusCode).toBe(200)
     expect(json(u)).toMatchObject({ preco: '55.0000', nome: 'Pão' })
     expect(new Date(json(u).atualizadoEm).getTime()).toBeGreaterThanOrEqual(new Date(json(u).criadoEm).getTime())
+  })
+  it('busca: por palavras (todas), sem diferenciar maiúsculas NEM acentos, só neste tenant, com paginação e junto de filtros; o termo nunca vira SQL nem curinga', async () => {
+    for (const [sku, nome] of [['B-1', 'Café Torrado Especial'], ['B-2', 'CAFEZINHO instantâneo'], ['B-3', 'Pão de Queijo'], ['B-4', 'Açaí 100% natural'], ['B-5', "Doce d'Água"], ['B-6', 'Cafe_Grão']] as const) await req('tA', 'POST', '/produtos', { sku, nome, preco: '10' })
+    await req('tB', 'POST', '/produtos', { sku: 'B-9', nome: 'Café da B', preco: '10' })
+    const b = async (q: string, tok = 'tA') => json(await req(tok, 'GET', `/produtos?busca=${encodeURIComponent(q)}&limite=50`)).map((x: { sku: string }) => x.sku).filter((k: string) => k.startsWith('B-')).sort()
+    expect(await b('cafe')).toEqual(['B-1', 'B-2', 'B-6']); expect(await b('CAFÉ')).toEqual(['B-1', 'B-2', 'B-6']); expect(await b('acai')).toEqual(['B-4']); expect(await b('pao queijo')).toEqual(['B-3']) // todas as palavras, em qualquer ordem
+    expect(await b('torrado cafe')).toEqual(['B-1']); expect(await b('b-3')).toEqual(['B-3']); expect(await b('agua')).toEqual(['B-5']); expect(await b('cafe', 'tB')).toEqual(['B-9']) // outro tenant
+    expect(await b('100%')).toEqual(['B-4']); expect(await b("' OR 'x'='x")).toEqual([]); expect(await b("' OR 1=1 --")).toEqual(['B-1']) // vira as palavras or, 1, 1 (que casam de verdade com B-1): é texto, nunca SQL; expect(await b('x"; DROP TABLE produto; --')).toEqual([]); expect(await b('natural 100 acai')).toEqual(['B-4'])
+    expect((await b('_')).length).toBeGreaterThan(5) // termo sem palavra (só pontuação) não filtra, em vez de virar curinga que casa com tudo "de propósito"
+    expect(await b('cafe')).toHaveLength(3); const p1 = json(await req('tA', 'GET', '/produtos?busca=cafe&limite=2&pagina=1')), p2 = json(await req('tA', 'GET', '/produtos?busca=cafe&limite=2&pagina=2')); const p3 = json(await req('tA', 'GET', '/produtos?busca=cafe&limite=2&pagina=3')); expect([p1.length, p2.length, p3.length]).toEqual([2, 2, 1]) // 5 no total (3 destes + os 2 "Café" dos testes anteriores)
+    expect(json(await req('tA', 'GET', `/produtos?busca=cafe&sku=B-2`)).map((x: { sku: string }) => x.sku)).toEqual(['B-2']) // junto de filtro por campo
+  })
+  it('busca: parâmetro acima de 100 caracteres → 400; entidade sem `busca` declarada recusa o parâmetro', async () => {
+    expect((await req('tA', 'GET', `/produtos?busca=${'a'.repeat(101)}`)).statusCode).toBe(400); expect((await req('tA', 'GET', `/clientes?busca=x`)).statusCode).toBe(400)
   })
   it('limites: limite > 100, pagina 0, parâmetro desconhecido e atualização vazia → 400', async () => {
     for (const q of ['limite=101', 'limite=0', 'pagina=0', 'pagina=abc', 'naoExiste=1']) expect((await req('tA', 'GET', `/produtos?${q}`)).statusCode, q).toBe(400)

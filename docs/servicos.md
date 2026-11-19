@@ -47,3 +47,10 @@ Sem implementação, uma operação declarada responde **501**. `dbDePglite` é 
 
 ## Fora desta entrega
 O gateway/BFF é um card seguinte; GraphQL; geração do serviço como **arquivos** de código (aqui o servidor é montado do schema em runtime, o equivalente do interpretador; o AOT do serviço seria emitir esse mesmo código especializado).
+
+## Busca por texto (`busca`)
+Uma entidade com `crud` pode declarar `busca: { campos: ["titulo", "descricao"] }` (1 a 5 campos de **texto**, não lista): a listagem gerada ganha o parâmetro **`busca`** (até 100 caracteres), que vale na REST, no GraphQL e no OpenAPI.
+- **Como casa**: o termo vira palavras (até 5, separadas por qualquer pontuação); **todas** precisam aparecer como **trecho** de pelo menos um dos campos; **maiúsculas e acentos não importam** (`cafe` acha "Café"; `acai` acha "Açaí"). Termo sem palavra alguma (só pontuação) não filtra. Combina com `pagina`, `limite` e com os filtros por campo.
+- **Como é feito**: Postgres puro, sem extensão `unaccent`: o termo é normalizado em JS e a coluna em SQL com `lower(translate(…))` usando a MESMA tabela de acentos (Latin-1 e Latin Estendido A/B), então os dois lados não divergem. O termo vai sempre como **parâmetro** com os curingas do `LIKE` escapados: `%`, `_`, aspas e `;` são só texto.
+- **Validação** (ao gerar as rotas): campo inexistente, que não seja texto, lista, ou entidade com um campo real chamado `busca` são recusados com mensagem clara.
+- **Limites**: varredura (`LIKE '%…%'`) sem índice: serve a tabelas de milhares de linhas; para mais, o próximo passo é `pg_trgm`/busca de texto completo. Sem relevância (ordem de criação), sem aproximação ortográfica e sem prefixo implícito.

@@ -714,6 +714,34 @@ Texto em maiúsculas (ausente vira vazio).
 **Leis** (testadas com entradas aleatórias):
 - `maiusculas(maiusculas(a)) == maiusculas(a)`
 
+### `urlcodifica`
+
+`urlcodifica(x) → texto`
+
+Codifica o texto para uso numa URL (UTF-8; `&`, `#`, `=`, espaço e acentos viram `%XX`). Use para montar `?q=` num link; texto acima de 2000 caracteres vira vazio.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `urlcodifica("café & chá")` |  | `"caf%C3%A9%20%26%20ch%C3%A1"` |
+| `urlcodifica("a/b?c=1#d")` |  | `"a%2Fb%3Fc%3D1%23d"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `tamanho(urlcodifica(a)) >= tamanho(a)`
+
+### `semAcentos`
+
+`semAcentos(x) → texto`
+
+Tira os acentos (Unicode decomposto sem as marcas): "Café" → "Cafe". Mantém maiúsculas e minúsculas; combine com `minusculas` para comparar.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `semAcentos("Ação, café, ÀÉ")` |  | `"Acao, cafe, AE"` |
+| `semAcentos("abc")` |  | `"abc"` |
+
+**Leis** (testadas com entradas aleatórias):
+- `semAcentos(semAcentos(a)) == semAcentos(a)`
+
 ### `minusculas`
 
 `minusculas(x) → texto`
