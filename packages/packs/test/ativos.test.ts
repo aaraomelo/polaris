@@ -100,6 +100,11 @@ describe('processamento da imagem (decodifica de verdade)', () => {
     expect((await a.lista(A)).find((x) => x.id === r.ativo.id)!.variantes).toEqual([160, 480, 960])
     const pequena = await a.salva(A, 'ana', { nome: 'p', dados: b64(await real(100, 100, 'png', 3005)) }) as { ativo: { variantes: number[]; miniatura: string; caminho: string } }; expect(pequena.ativo.variantes).toEqual([]); expect(pequena.ativo.miniatura).toBe(pequena.ativo.caminho)
   })
+  it('reenviar uma imagem que já existe COMPLETA as versões que faltam (enviada antes delas existirem, ou envio interrompido)', async () => {
+    const img = await real(900, 400, 'png', 3007), r = await a.salva(A, 'ana', { nome: 'antiga', dados: b64(img) }) as { ativo: { id: string; variantes: number[] } }; expect(r.ativo.variantes).toEqual([160, 480])
+    await q(`DELETE FROM plataforma.ativo_variante WHERE hash = $1`, [r.ativo.id]); expect((await a.lista(A)).find((x) => x.id === r.ativo.id)!.variantes).toEqual([])
+    const de_novo = await a.salva(A, 'ana', { nome: 'antiga', dados: b64(img) }); expect(de_novo).toMatchObject({ ok: true, novo: false, ativo: { id: r.ativo.id, variantes: [160, 480] } }); expect(await a.le(A, r.ativo.id, 480)).not.toBeNull()
+  })
   it('remover o ativo leva as versões junto', async () => {
     const r = await a.salva(A, 'ana', { nome: 'v2', dados: b64(await real(700, 300, 'png', 3006)) }) as { ativo: { id: string } }; expect(await a.le(A, r.ativo.id, 160)).not.toBeNull()
     expect(await a.remove(A, r.ativo.id)).toBe(true); expect(await a.le(A, r.ativo.id, 160)).toBeNull(); expect((await q(`SELECT count(*)::int AS n FROM plataforma.ativo_variante WHERE hash = $1`, [r.ativo.id])).rows[0]!.n).toBe(0)

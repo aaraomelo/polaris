@@ -176,7 +176,10 @@ export function criaAtivos(o: { q: Q; limites?: Partial<typeof LIMITES_ATIVOS> }
       }
       const removidos = Math.max(0, original.length - bytes.length), hash = createHash('sha256').update(bytes).digest('hex') // o id é o hash do que FICA: o mesmo retrato com e sem EXIF é a mesma imagem
       const variantesDe = async (h: string) => (await q(`SELECT largura FROM plataforma.ativo_variante WHERE tenant_id = $1 AND hash = $2 ORDER BY largura`, [tenantId, h])).rows.map((x) => Number(x.largura))
-      const ja = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (ja) return { ok: true, ativo: linha(ja, await variantesDe(hash)), novo: false, removidos, ajustada: proc.reencodou }
+      const ja = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (ja) { // já existe: completa as versões que faltam (imagem enviada antes das versões existirem, ou envio interrompido no meio)
+        for (const v of proc.variantes) await q(`INSERT INTO plataforma.ativo_variante (tenant_id, hash, largura, conteudo) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`, [tenantId, hash, v.largura, v.bytes])
+        return { ok: true, ativo: linha(ja, await variantesDe(hash)), novo: false, removidos, ajustada: proc.reencodou }
+      }
       const uso = (await q(`SELECT count(*)::int AS n, coalesce(sum(tamanho), 0)::bigint AS b FROM plataforma.ativo WHERE tenant_id = $1`, [tenantId])).rows[0]!
       if (Number(uso.n) >= lim.arquivosPorTenant) return { ok: false, erro: `limite de ${lim.arquivosPorTenant} imagens por loja` }
       const extra = bytes.length + proc.variantes.reduce((t, v) => t + v.bytes.length, 0)
