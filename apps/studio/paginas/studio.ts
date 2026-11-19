@@ -512,76 +512,86 @@ const editorDeCartazes = (): Inst => pilha([
 
 // ---- histórico, diff e comentários -------------------------------------------------------------------------------------------------------------
 const KI = { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}' }
+/** cartão (caixa com borda) e selo de estado */
+type OpP = NonNullable<Parameters<typeof P>[1]>
+const cartao = (filhos: Inst[], o: Omit<OpP, 'filhos' | 'slots'> = {}): Inst => P('layout/cartao', { ...o, filhos })
+const selo = (t: string, tom: 'neutro' | 'sucesso' | 'alerta' | 'erro', se?: string): Inst => P('feedback/selo', { ...(se ? { se } : {}), props: { texto: t, tom } })
+
 const releasesVista = (): Inst => pilha([
   titulo('Releases', 3),
-  texto('Em produção: {releases.producao ? "release " + releases.producao : "nenhuma (o site usa só o padrão da plataforma)"}'),
-  botao('Voltar para a anterior (release {releases.anterior})', [exe('voltar', {}, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { se: 'releases.anterior' }),
+  cartao([
+    linha([selo('Em produção', 'sucesso', 'releases.producao'), selo('Sem release', 'neutro', '!releases.producao'), texto('Em produção: {releases.producao ? "release " + releases.producao : "nenhuma (o site usa só o padrão da plataforma)"}')], { props: { gap: 8, quebra: true } }),
+  botao('Voltar para a anterior (release {releases.anterior})', [exe('voltar', {}, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { se: 'releases.anterior', props: { icone: 'desfazer' } }),
+  ]),
   texto('Nenhuma release ainda: use Publicar.', { se: 'tamanho(releases.releases ?? []) == 0' }),
+  cartao([linha([selo('Em produção', 'sucesso', 'r.numero == releases.producao'), texto('release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? " · " + r.nota : ""}')], { props: { gap: 8, quebra: true } }),
   linha([
-    texto('release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? " · " + r.nota : ""}{r.numero == releases.producao ? " · EM PRODUÇÃO" : ""}'),
-    botao('Diferenças com a produção', [exe('diffrel', { de: '{releases.producao}', para: '{r.numero}' }, undefined, aviso('erro', 'erro'))], { se: 'releases.producao && r.numero != releases.producao' }),
-    botao('Link de pré-visualização', [exe('linkprev', { release: '{r.numero}' }, [def('linkPrevia', 'objeto([["release", r.numero], ["caminho", resultado.caminho], ["horas", resultado.expiraEmHoras]])')], aviso('erro', 'erro'))]),
-    botao('Voltar para esta', [exe('voltar', { para: '{r.numero}' }, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { se: 'r.numero != releases.producao' }),
-  ], { repetir: { cada: 'releases.releases ?? []', como: 'r', chave: 'texto(r.numero)' } }),
-  pilha([
+    botao('Diferenças com a produção', [exe('diffrel', { de: '{releases.producao}', para: '{r.numero}' }, undefined, aviso('erro', 'erro'))], { se: 'releases.producao && r.numero != releases.producao', props: { icone: 'historico' } }),
+    botao('Link de pré-visualização', [exe('linkprev', { release: '{r.numero}' }, [def('linkPrevia', 'objeto([["release", r.numero], ["caminho", resultado.caminho], ["horas", resultado.expiraEmHoras]])')], aviso('erro', 'erro'))], { props: { icone: 'nav-link' } }),
+    botao('Voltar para esta', [exe('voltar', { para: '{r.numero}' }, [...aviso('sucesso', '"Em produção: release " + resultado.producao + ". O site já usa esta versão."'), exe('releases')], aviso('erro', 'erro'))], { props: { icone: 'desfazer' }, se: 'r.numero != releases.producao' }),
+  ], { props: { gap: 6, quebra: true } })], { repetir: { cada: 'releases.releases ?? []', como: 'r', chave: 'texto(r.numero)' } }),
+  cartao([
     texto('Pré-visualização da release {estado.linkPrevia.release}: abra o link (vale {estado.linkPrevia.horas} h; quem tiver o link vê o site dessa release, sem login). Para encerrar, abra /_polaris/preview/sair.'),
     P('nav/link', { props: { href: '{estado.linkPrevia.caminho}', texto: 'Abrir a pré-visualização da release {estado.linkPrevia.release}' } }),
     texto('{estado.linkPrevia.caminho}'),
-  ], { se: 'estado.linkPrevia', gap: 2 }),
-  pilha([
+  ], { se: 'estado.linkPrevia' }),
+  cartao([
     titulo('Diferenças (produção → esta)', 4),
     texto('Sem diferenças.', { se: 'tamanho(diffrel.adicionados ?? []) + tamanho(diffrel.removidos ?? []) + tamanho(diffrel.alterados ?? []) == 0' }),
     texto('+ {n}', { repetir: { cada: 'diffrel.adicionados ?? []', como: 'n', chave: 'n' } }), texto('− {n}', { repetir: { cada: 'diffrel.removidos ?? []', como: 'n', chave: 'n' } }), texto('~ {n}', { repetir: { cada: 'diffrel.alterados ?? []', como: 'n', chave: 'n' } }),
-  ], { se: 'diffrel', gap: 2 }),
+  ], { se: 'diffrel' }),
 ], { se: 'estado.painel == "releases" && releases', gap: 8 })
 
 /** diagramas gerados do JSON no servidor: o fluxo do site (páginas, formulários, dados, serviços) e os blocos da página aberta (o rascunho, com o bloco selecionado em destaque) */
 const diagramasVista = (): Inst => pilha([
   titulo('Diagramas', 3),
   linha([
-    botao('Fluxo da aplicação', [def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))]),
-    botao('Blocos da página aberta', [def('tipoDiagrama', '"blocos"'), exe('diagrama', { tipo: 'blocos', no: '{estado.no}', selecionado: `{${SELNO}.id ?? ""}` }, undefined, aviso('erro', 'erro'))], { se: `estado.no && ${EH_PAGINA}` }),
-  ]),
+    botao('Fluxo da aplicação', [def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))], { props: { icone: 'diagramas', atual: '{estado.tipoDiagrama == "fluxo"}' } }),
+    botao('Blocos da página aberta', [def('tipoDiagrama', '"blocos"'), exe('diagrama', { tipo: 'blocos', no: '{estado.no}', selecionado: `{${SELNO}.id ?? ""}` }, undefined, aviso('erro', 'erro'))], { se: `estado.no && ${EH_PAGINA}`, props: { icone: 'layout-painel', atual: '{estado.tipoDiagrama == "blocos"}' } }),
+  ], { props: { gap: 6, papel: 'toolbar', rotulo: 'Tipo de diagrama' } }),
   texto('{estado.tipoDiagrama == "fluxo" ? "Fluxo: " + diagrama.resumo.nos + " nó(s) e " + diagrama.resumo.ligacoes + " ligação(ões) — páginas → formulários → dados → serviços." : "Blocos: " + diagrama.resumo.blocos + " bloco(s) da página aberta (rascunho)."}{diagrama.resumo.truncado ? " O desenho foi cortado por ser grande." : ""}', { se: 'diagrama && diagrama.ok' }),
-  P('midia/quadro', { props: { titulo: 'Diagrama', html: '{diagrama.html}', altura: 560 }, se: 'diagrama && diagrama.ok' }),
-  texto('Atenção: {a}', { repetir: { cada: 'diagrama.resumo.avisos ?? []', como: 'a', chave: 'a' }, se: 'diagrama && diagrama.ok' }),
+  cartao([P('midia/quadro', { props: { titulo: 'Diagrama', html: '{diagrama.html}', altura: 560 } })], { se: 'diagrama && diagrama.ok' }),
+  P('feedback/alerta', { repetir: { cada: 'diagrama.resumo.avisos ?? []', como: 'a', chave: 'a' }, se: 'diagrama && diagrama.ok', props: { tom: 'alerta' }, filhos: [texto('Atenção: {a}')] }),
   texto('Abra um diagrama pelos botões acima.', { se: '!diagrama' }),
 ], { se: 'estado.painel == "diagramas"', gap: 8 })
 
 /** imagens do tenant: enviar (o arquivo é lido no navegador e o servidor confere o TIPO pelos bytes), listar com miniatura, copiar o caminho e remover */
 const imagensVista = (): Inst => pilha([
   titulo('Imagens', 3),
+  cartao([
+  titulo('Enviar uma imagem', 4),
   texto('Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos, a foto de celular é girada para o lado certo e as muito grandes são reduzidas a 2400 px. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site.'),
   P('entrada/arquivo', { props: { rotulo: 'Escolha uma imagem', aceita: 'image/png,image/jpeg,image/gif,image/webp', tamanhoMax: 2097152 }, eventos: { aoEscolher: [
     def('msgImagem', '"Enviando…"'),
     exe('imgenviar', { nome: '{evento.nome}', dados: '{evento.dados}' }, [def('msgImagem', '(resultado.novo ? "Imagem enviada." : "Esta imagem já estava na lista.") + (resultado.removidos > 0 ? " Removemos " + resultado.removidos + " bytes de metadados (localização, câmera, comentários)." : "") + (resultado.ajustada ? " A imagem foi girada e/ou reduzida a 2400 px." : "")'), exe('ativos')], [def('msgImagem', 'erro')]),
   ], aoRecusar: [def('msgImagem', 'evento.erro')] } }),
   texto('{estado.msgImagem}', { se: 'estado.msgImagem != ""' }),
+  ]),
   texto('Nenhuma imagem ainda.', { se: 'ativos && tamanho(ativos.ativos ?? []) == 0' }),
-  linha([
-    P('midia/imagem', { props: { src: '{a.miniatura}', alt: '{a.nome}', altura: 48 } }),
+  P('layout/grade', { props: { colunas: 3, gap: 12 }, filhos: [cartao([
+    P('midia/imagem', { props: { src: '{a.miniatura}', alt: '{a.nome}', altura: 96 } }),
     pilha([texto('{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes'), P('texto/codigo', { props: { texto: '{a.caminho}' } }), P('texto/pequeno', { se: 'tamanho(a.variantes ?? []) > 0', props: { texto: 'Versões menores: acrescente ?w=480 (ou 160, 960, 1920) ao caminho trocando a extensão por .webp' } })], { gap: 2 }),
-    botao('Remover', [exe('imgremover', { hash: '{a.id}' }, [def('msgImagem', '"Imagem removida."'), exe('ativos')], [def('msgImagem', 'erro')])]),
-  ], { repetir: { cada: 'ativos.ativos ?? []', como: 'a', chave: 'a.id' }, props: { gap: 12 } }),
+    botao('Remover', [exe('imgremover', { hash: '{a.id}' }, [def('msgImagem', '"Imagem removida."'), exe('ativos')], [def('msgImagem', 'erro')])], { props: { variante: 'fantasma', icone: 'apagar' } }),
+  ], { repetir: { cada: 'ativos.ativos ?? []', como: 'a', chave: 'a.id' } })] }),
 ], { se: 'estado.painel == "imagens"', gap: 8 })
 
-const diffVista = (): Inst => pilha([
+const diffVista = (): Inst => cartao([
   texto('Sem diferenças.', { se: 'diff.diff.igual' }),
   pilha([
-    texto('{m.tipo} {m.rotulo}{m.descendentes ? " (com " + m.descendentes + " bloco(s) dentro)" : ""}{m.tipo == "movido" ? " de " + m.de + " para " + m.para : ""}', { props: {} }),
+    linha([selo('{m.tipo}', 'sucesso', 'm.tipo == "adicionado"'), selo('{m.tipo}', 'erro', 'm.tipo == "removido"'), selo('{m.tipo}', 'alerta', 'm.tipo != "adicionado" && m.tipo != "removido"'), texto('{m.tipo} {m.rotulo}{m.descendentes ? " (com " + m.descendentes + " bloco(s) dentro)" : ""}{m.tipo == "movido" ? " de " + m.de + " para " + m.para : ""}', { props: {} })], { props: { gap: 8, quebra: true } }),
     texto('   {c.tipo} {junta(c.caminho, ".")}: {texto(c.antes)} → {texto(c.depois)}', { repetir: { cada: 'm.campos ?? []', como: 'c', chave: 'junta(c.caminho, ".") + c.tipo' } }),
   ], { repetir: { cada: 'diff.diff.blocos', como: 'm', chave: 'm.tipo + m.rotulo' }, gap: 0 }),
   texto('{c.tipo} {junta(c.caminho, ".")}: {texto(c.antes)} → {texto(c.depois)}', { repetir: { cada: 'diff.diff.campos', como: 'c', chave: 'junta(c.caminho, ".") + c.tipo' } }),
-], { se: 'diff && diff.diff', gap: 2 })
+], { se: 'diff && diff.diff' })
 
 const comentariosVista = (): Inst => pilha([
   titulo('Comentários', 4),
   texto('Nenhum comentário.', { se: 'tamanho(comentarios.comentarios ?? []) == 0' }),
-  linha([
+  cartao([linha([
     texto('{k.respondeA ? "↳ " : ""}{k.autor}{k.ancora ? " #" + k.ancora : ""}{k.resolvido ? " (resolvido)" : ""}: {k.texto}'),
-    botao('Responder', [def('respondendo', 'k.id')], { se: '!k.respondeA' }),
+    botao('Responder', [def('respondendo', 'k.id')], { se: '!k.respondeA', props: { icone: 'comentarios' } }),
     botao('{k.resolvido ? "Reabrir" : "Resolver"}', [exe('resolver', { cid: '{k.id}', resolvido: '{!k.resolvido}' }, [exe('comentarios', KI)], aviso('erro', 'erro'))], { se: '!k.respondeA' }),
-  ], { repetir: { cada: 'comentarios.comentarios ?? []', como: 'k', chave: 'k.id' } }),
+  ], { props: { gap: 8, quebra: true } })], { repetir: { cada: 'comentarios.comentarios ?? []', como: 'k', chave: 'k.id' } }),
   texto('Respondendo a um comentário.', { se: 'estado.respondendo != ""' }),
   P('entrada/area', { props: { valor: '{estado.novoComentario}', rotulo: 'Comentário', linhas: 3 }, eventos: { aoMudar: [def('novoComentario', 'evento')] } }),
   botao('Comentar', [exe('comentar', { ...KI, texto: '{estado.novoComentario}', ancora: `{estado.respondendo == "" && ${EH_PAGINA} ? (${SELNO}.id ?? "") : ""}`, respondeA: '{estado.respondendo}' }, [def('novoComentario', '""'), def('respondendo', '""'), exe('comentarios', KI)], aviso('erro', 'erro'))], { se: 'estado.novoComentario != ""' }),
@@ -590,13 +600,12 @@ const comentariosVista = (): Inst => pilha([
 const historicoVista = (): Inst => pilha([
   titulo('Versões de {estado.aberto.id}', 3),
   texto('Sem versões do tenant: o nó é o padrão da plataforma.', { se: 'tamanho(versoes.versoes ?? []) == 0' }),
-  linha([
-    texto('v{v.seq} · {v.autor} · {v.criadoEm} · {v.nota ?? ""}{v.removido ? " (restaurou o padrão)" : ""}'),
-    botao('De', [def('de', 'texto(v.seq)')]), botao('Para', [def('para', 'texto(v.seq)')]),
-    botao('Restaurar no editor', [exe('versao', { ...KI, seq: '{v.seq}' }, [...edita('com(resultado.no, ["versao"], estado.no.versao)'), def('aba', '"editor"')], aviso('erro', 'erro'))], { se: '!v.removido' }),
-  ], { repetir: { cada: 'versoes.versoes ?? []', como: 'v', chave: 'texto(v.seq)' } }),
+  cartao([texto('v{v.seq} · {v.autor} · {v.criadoEm} · {v.nota ?? ""}{v.removido ? " (restaurou o padrão)" : ""}'), linha([
+    botao('De', [def('de', 'texto(v.seq)')], { props: { atual: '{estado.de == texto(v.seq)}' } }), botao('Para', [def('para', 'texto(v.seq)')], { props: { atual: '{estado.para == texto(v.seq)}' } }),
+    botao('Restaurar no editor', [exe('versao', { ...KI, seq: '{v.seq}' }, [...edita('com(resultado.no, ["versao"], estado.no.versao)'), def('aba', '"editor"')], aviso('erro', 'erro'))], { se: '!v.removido', props: { icone: 'desfazer' } }),
+  ], { props: { gap: 6, quebra: true } })], { repetir: { cada: 'versoes.versoes ?? []', como: 'v', chave: 'texto(v.seq)' } }),
   texto('Comparar: {estado.de == "base" ? "o padrão" : "v" + estado.de} → {estado.para == "base" ? "o padrão" : "v" + estado.para}', { se: 'estado.de != "" || estado.para != ""' }),
-  botao('Comparar versões', [exe('diff', { ...KI, de: '{estado.de}', para: '{estado.para}' }, undefined, aviso('erro', 'erro'))], { se: 'estado.de != "" && estado.para != ""' }),
+  botao('Comparar versões', [exe('diff', { ...KI, de: '{estado.de}', para: '{estado.para}' }, undefined, aviso('erro', 'erro'))], { se: 'estado.de != "" && estado.para != ""', props: { variante: 'primario', icone: 'historico' } }),
   botao('Comparar com o padrão', [def('de', '"base"'), def('para', 'texto(estado.aberto.seq)'), exe('diff', { ...KI, de: 'base', para: '{estado.aberto.seq}' }, undefined, aviso('erro', 'erro'))], { se: 'estado.aberto.origem == "tenant"' }),
   diffVista(),
   comentariosVista(),

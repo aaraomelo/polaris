@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-62 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+63 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -932,6 +932,80 @@ Faixa do topo da página (`<header>`): ponto de referência para leitores de tel
               "props": {
                 "href": "/",
                 "texto": "Início"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+### Cartão (`layout/cartao`)
+
+Caixa com borda, fundo de superfície e espaçamento interno, para agrupar um item (uma imagem com seus dados, uma versão, um resumo). Em grade ou em lista, vários cartões ficam alinhados. `papel` e `rotulo` dão nome e papel ARIA ao cartão quando ele é um grupo.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `papel` | "toolbar" \| "group" \| "list" | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Dois cartões**
+
+```json
+{
+  "bloco": "layout/grade",
+  "props": {
+    "colunas": 2,
+    "gap": 12
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "layout/cartao",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Release 12",
+                "nivel": 4
+              }
+            },
+            {
+              "bloco": "feedback/selo",
+              "props": {
+                "texto": "Em produção",
+                "tom": "sucesso"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bloco": "layout/cartao",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Release 11",
+                "nivel": 4
+              }
+            },
+            {
+              "bloco": "texto/pequeno",
+              "props": {
+                "texto": "Anterior"
               }
             }
           ]

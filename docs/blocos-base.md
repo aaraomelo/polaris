@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-46 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+47 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -29,6 +29,7 @@
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
 | midia | `midia/icone` | `nome`, `tamanho`, `rotulo`, `acento` | | |
+| layout | `layout/cartao` | `papel`, `rotulo` | | |
 | layout | `layout/secao` | `aberta` | | |
 | layout | `layout/secao-titulo` | `texto`, `icone` | | |
 | layout | `layout/painel` | (só filhos) | | |
@@ -121,3 +122,5 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 **`papel` e `rotulo` em `layout/linha` e `layout/pilha`**: `papel` (`toolbar`, `group` ou `list`) e `rotulo` (nome acessível) viram `role` e `aria-label` do grupo; sem eles nada muda.
 
 **Seção recolhível (`layout/secao`)**: um `<details>` nativo (sem JavaScript) com borda, o título (`layout/secao-titulo`: texto e `icone`, mais uma seta que gira ao abrir) e o conteúdo; `aberta` faz a seção começar aberta e o leitor pode recolher. Serve a painéis de propriedades e formulários longos. **Limites**: o estado aberto/fechado é do navegador (volta ao inicial se a página for refeita do zero); o título deve ser o primeiro filho; uma seção não lembra o estado entre uma seleção e outra no Studio.
+
+**Cartão (`layout/cartao`)**: caixa com borda, fundo de superfície e espaçamento interno, que empilha os filhos; em `layout/grade` vários cartões ficam alinhados. `papel` e `rotulo` (como em `layout/linha`) dão nome e papel ARIA quando o cartão é um grupo.

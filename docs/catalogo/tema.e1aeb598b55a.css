@@ -126,6 +126,8 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris [data-lateral]>label[for]{display:inline-block}
 #polaris [data-lateral]>input[data-alternador]:not(:checked)~*:not(label){display:none}
 }
+#polaris [data-cartao]{display:flex;flex-direction:column;gap:var(--espacamento-base);min-width:0;padding:calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-grande)}
+#polaris [data-cartao]>*{margin:0}
 #polaris details[data-secao]{border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-grande);background:var(--cor-superficie)}
 #polaris details[data-secao]>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:calc(var(--espacamento-base) * 1.25);padding:calc(var(--espacamento-base) * 1.25) calc(var(--espacamento-base) * 2);font-weight:600;user-select:none;border-radius:var(--raio-grande)}
 #polaris details[data-secao]>summary::-webkit-details-marker{display:none}

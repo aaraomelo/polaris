@@ -3043,166 +3043,57 @@
                 }
                },
                {
-                "bloco": "texto/paragrafo",
-                "props": {
-                 "texto": "Em produção: {releases.producao ? \"release \" + releases.producao : \"nenhuma (o site usa só o padrão da plataforma)\"}"
-                }
-               },
-               {
-                "bloco": "nav/botao",
-                "se": "releases.anterior",
-                "props": {
-                 "texto": "Voltar para a anterior (release {releases.anterior})",
-                 "variante": "secundario"
-                },
-                "eventos": {
-                 "aoClicar": [
-                  {
-                   "acao": "executar",
-                   "dados": "voltar",
-                   "args": {},
-                   "depois": [
-                    {
-                     "acao": "definir",
-                     "estado": "tipoAviso",
-                     "valor": "\"sucesso\""
-                    },
-                    {
-                     "acao": "definir",
-                     "estado": "aviso",
-                     "valor": "\"Em produção: release \" + resultado.producao + \". O site já usa esta versão.\""
-                    },
-                    {
-                     "acao": "executar",
-                     "dados": "releases"
-                    }
-                   ],
-                   "emErro": [
-                    {
-                     "acao": "definir",
-                     "estado": "tipoAviso",
-                     "valor": "\"erro\""
-                    },
-                    {
-                     "acao": "definir",
-                     "estado": "aviso",
-                     "valor": "erro"
-                    }
-                   ]
-                  }
-                 ]
-                }
-               },
-               {
-                "bloco": "texto/paragrafo",
-                "se": "tamanho(releases.releases ?? []) == 0",
-                "props": {
-                 "texto": "Nenhuma release ainda: use Publicar."
-                }
-               },
-               {
-                "bloco": "layout/linha",
-                "repetir": {
-                 "cada": "releases.releases ?? []",
-                 "como": "r",
-                 "chave": "texto(r.numero)"
-                },
-                "props": {
-                 "gap": 8,
-                 "alinha": "centro"
-                },
+                "bloco": "layout/cartao",
                 "slots": {
                  "filhos": [
                   {
-                   "bloco": "texto/paragrafo",
+                   "bloco": "layout/linha",
                    "props": {
-                    "texto": "release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? \" · \" + r.nota : \"\"}{r.numero == releases.producao ? \" · EM PRODUÇÃO\" : \"\"}"
-                   }
-                  },
-                  {
-                   "bloco": "nav/botao",
-                   "se": "releases.producao && r.numero != releases.producao",
-                   "props": {
-                    "texto": "Diferenças com a produção",
-                    "variante": "secundario"
+                    "gap": 8,
+                    "alinha": "centro",
+                    "quebra": true
                    },
-                   "eventos": {
-                    "aoClicar": [
+                   "slots": {
+                    "filhos": [
                      {
-                      "acao": "executar",
-                      "dados": "diffrel",
-                      "args": {
-                       "de": "{releases.producao}",
-                       "para": "{r.numero}"
-                      },
-                      "emErro": [
-                       {
-                        "acao": "definir",
-                        "estado": "tipoAviso",
-                        "valor": "\"erro\""
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "aviso",
-                        "valor": "erro"
-                       }
-                      ]
+                      "bloco": "feedback/selo",
+                      "se": "releases.producao",
+                      "props": {
+                       "texto": "Em produção",
+                       "tom": "sucesso"
+                      }
+                     },
+                     {
+                      "bloco": "feedback/selo",
+                      "se": "!releases.producao",
+                      "props": {
+                       "texto": "Sem release",
+                       "tom": "neutro"
+                      }
+                     },
+                     {
+                      "bloco": "texto/paragrafo",
+                      "props": {
+                       "texto": "Em produção: {releases.producao ? \"release \" + releases.producao : \"nenhuma (o site usa só o padrão da plataforma)\"}"
+                      }
                      }
                     ]
                    }
                   },
                   {
                    "bloco": "nav/botao",
+                   "se": "releases.anterior",
                    "props": {
-                    "texto": "Link de pré-visualização",
-                    "variante": "secundario"
-                   },
-                   "eventos": {
-                    "aoClicar": [
-                     {
-                      "acao": "executar",
-                      "dados": "linkprev",
-                      "args": {
-                       "release": "{r.numero}"
-                      },
-                      "depois": [
-                       {
-                        "acao": "definir",
-                        "estado": "linkPrevia",
-                        "valor": "objeto([[\"release\", r.numero], [\"caminho\", resultado.caminho], [\"horas\", resultado.expiraEmHoras]])"
-                       }
-                      ],
-                      "emErro": [
-                       {
-                        "acao": "definir",
-                        "estado": "tipoAviso",
-                        "valor": "\"erro\""
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "aviso",
-                        "valor": "erro"
-                       }
-                      ]
-                     }
-                    ]
-                   }
-                  },
-                  {
-                   "bloco": "nav/botao",
-                   "se": "r.numero != releases.producao",
-                   "props": {
-                    "texto": "Voltar para esta",
-                    "variante": "secundario"
+                    "texto": "Voltar para a anterior (release {releases.anterior})",
+                    "variante": "secundario",
+                    "icone": "desfazer"
                    },
                    "eventos": {
                     "aoClicar": [
                      {
                       "acao": "executar",
                       "dados": "voltar",
-                      "args": {
-                       "para": "{r.numero}"
-                      },
+                      "args": {},
                       "depois": [
                        {
                         "acao": "definir",
@@ -3239,11 +3130,184 @@
                 }
                },
                {
-                "bloco": "layout/pilha",
-                "se": "estado.linkPrevia",
+                "bloco": "texto/paragrafo",
+                "se": "tamanho(releases.releases ?? []) == 0",
                 "props": {
-                 "gap": 2
+                 "texto": "Nenhuma release ainda: use Publicar."
+                }
+               },
+               {
+                "bloco": "layout/cartao",
+                "repetir": {
+                 "cada": "releases.releases ?? []",
+                 "como": "r",
+                 "chave": "texto(r.numero)"
                 },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "layout/linha",
+                   "props": {
+                    "gap": 8,
+                    "alinha": "centro",
+                    "quebra": true
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "feedback/selo",
+                      "se": "r.numero == releases.producao",
+                      "props": {
+                       "texto": "Em produção",
+                       "tom": "sucesso"
+                      }
+                     },
+                     {
+                      "bloco": "texto/paragrafo",
+                      "props": {
+                       "texto": "release {r.numero} · {r.autor} · {r.criadoEm} · {r.nos} nós{r.nota ? \" · \" + r.nota : \"\"}"
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "props": {
+                    "gap": 6,
+                    "alinha": "centro",
+                    "quebra": true
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "nav/botao",
+                      "se": "releases.producao && r.numero != releases.producao",
+                      "props": {
+                       "texto": "Diferenças com a produção",
+                       "variante": "secundario",
+                       "icone": "historico"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "diffrel",
+                         "args": {
+                          "de": "{releases.producao}",
+                          "para": "{r.numero}"
+                         },
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Link de pré-visualização",
+                       "variante": "secundario",
+                       "icone": "nav-link"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "linkprev",
+                         "args": {
+                          "release": "{r.numero}"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "linkPrevia",
+                           "valor": "objeto([[\"release\", r.numero], [\"caminho\", resultado.caminho], [\"horas\", resultado.expiraEmHoras]])"
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Voltar para esta",
+                       "variante": "secundario",
+                       "icone": "desfazer"
+                      },
+                      "se": "r.numero != releases.producao",
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "voltar",
+                         "args": {
+                          "para": "{r.numero}"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"sucesso\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "\"Em produção: release \" + resultado.producao + \". O site já usa esta versão.\""
+                          },
+                          {
+                           "acao": "executar",
+                           "dados": "releases"
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "layout/cartao",
+                "se": "estado.linkPrevia",
                 "slots": {
                  "filhos": [
                   {
@@ -3269,11 +3333,8 @@
                 }
                },
                {
-                "bloco": "layout/pilha",
+                "bloco": "layout/cartao",
                 "se": "diffrel",
-                "props": {
-                 "gap": 2
-                },
                 "slots": {
                  "filhos": [
                   {
@@ -3345,144 +3406,48 @@
                 }
                },
                {
-                "bloco": "texto/paragrafo",
-                "props": {
-                 "texto": "Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos, a foto de celular é girada para o lado certo e as muito grandes são reduzidas a 2400 px. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
-                }
-               },
-               {
-                "bloco": "entrada/arquivo",
-                "props": {
-                 "rotulo": "Escolha uma imagem",
-                 "aceita": "image/png,image/jpeg,image/gif,image/webp",
-                 "tamanhoMax": 2097152
-                },
-                "eventos": {
-                 "aoEscolher": [
-                  {
-                   "acao": "definir",
-                   "estado": "msgImagem",
-                   "valor": "\"Enviando…\""
-                  },
-                  {
-                   "acao": "executar",
-                   "dados": "imgenviar",
-                   "args": {
-                    "nome": "{evento.nome}",
-                    "dados": "{evento.dados}"
-                   },
-                   "depois": [
-                    {
-                     "acao": "definir",
-                     "estado": "msgImagem",
-                     "valor": "(resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\") + (resultado.removidos > 0 ? \" Removemos \" + resultado.removidos + \" bytes de metadados (localização, câmera, comentários).\" : \"\") + (resultado.ajustada ? \" A imagem foi girada e/ou reduzida a 2400 px.\" : \"\")"
-                    },
-                    {
-                     "acao": "executar",
-                     "dados": "ativos"
-                    }
-                   ],
-                   "emErro": [
-                    {
-                     "acao": "definir",
-                     "estado": "msgImagem",
-                     "valor": "erro"
-                    }
-                   ]
-                  }
-                 ],
-                 "aoRecusar": [
-                  {
-                   "acao": "definir",
-                   "estado": "msgImagem",
-                   "valor": "evento.erro"
-                  }
-                 ]
-                }
-               },
-               {
-                "bloco": "texto/paragrafo",
-                "se": "estado.msgImagem != \"\"",
-                "props": {
-                 "texto": "{estado.msgImagem}"
-                }
-               },
-               {
-                "bloco": "texto/paragrafo",
-                "se": "ativos && tamanho(ativos.ativos ?? []) == 0",
-                "props": {
-                 "texto": "Nenhuma imagem ainda."
-                }
-               },
-               {
-                "bloco": "layout/linha",
-                "repetir": {
-                 "cada": "ativos.ativos ?? []",
-                 "como": "a",
-                 "chave": "a.id"
-                },
-                "props": {
-                 "gap": 12,
-                 "alinha": "centro"
-                },
+                "bloco": "layout/cartao",
                 "slots": {
                  "filhos": [
                   {
-                   "bloco": "midia/imagem",
+                   "bloco": "texto/titulo",
                    "props": {
-                    "src": "{a.miniatura}",
-                    "alt": "{a.nome}",
-                    "altura": 48
+                    "texto": "Enviar uma imagem",
+                    "nivel": 4
                    }
                   },
                   {
-                   "bloco": "layout/pilha",
+                   "bloco": "texto/paragrafo",
                    "props": {
-                    "gap": 2
-                   },
-                   "slots": {
-                    "filhos": [
-                     {
-                      "bloco": "texto/paragrafo",
-                      "props": {
-                       "texto": "{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes"
-                      }
-                     },
-                     {
-                      "bloco": "texto/codigo",
-                      "props": {
-                       "texto": "{a.caminho}"
-                      }
-                     },
-                     {
-                      "bloco": "texto/pequeno",
-                      "se": "tamanho(a.variantes ?? []) > 0",
-                      "props": {
-                       "texto": "Versões menores: acrescente ?w=480 (ou 160, 960, 1920) ao caminho trocando a extensão por .webp"
-                      }
-                     }
-                    ]
+                    "texto": "Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos, a foto de celular é girada para o lado certo e as muito grandes são reduzidas a 2400 px. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
                    }
                   },
                   {
-                   "bloco": "nav/botao",
+                   "bloco": "entrada/arquivo",
                    "props": {
-                    "texto": "Remover",
-                    "variante": "secundario"
+                    "rotulo": "Escolha uma imagem",
+                    "aceita": "image/png,image/jpeg,image/gif,image/webp",
+                    "tamanhoMax": 2097152
                    },
                    "eventos": {
-                    "aoClicar": [
+                    "aoEscolher": [
+                     {
+                      "acao": "definir",
+                      "estado": "msgImagem",
+                      "valor": "\"Enviando…\""
+                     },
                      {
                       "acao": "executar",
-                      "dados": "imgremover",
+                      "dados": "imgenviar",
                       "args": {
-                       "hash": "{a.id}"
+                       "nome": "{evento.nome}",
+                       "dados": "{evento.dados}"
                       },
                       "depois": [
                        {
                         "acao": "definir",
                         "estado": "msgImagem",
-                        "valor": "\"Imagem removida.\""
+                        "valor": "(resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\") + (resultado.removidos > 0 ? \" Removemos \" + resultado.removidos + \" bytes de metadados (localização, câmera, comentários).\" : \"\") + (resultado.ajustada ? \" A imagem foi girada e/ou reduzida a 2400 px.\" : \"\")"
                        },
                        {
                         "acao": "executar",
@@ -3496,6 +3461,124 @@
                         "valor": "erro"
                        }
                       ]
+                     }
+                    ],
+                    "aoRecusar": [
+                     {
+                      "acao": "definir",
+                      "estado": "msgImagem",
+                      "valor": "evento.erro"
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "texto/paragrafo",
+                   "se": "estado.msgImagem != \"\"",
+                   "props": {
+                    "texto": "{estado.msgImagem}"
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "texto/paragrafo",
+                "se": "ativos && tamanho(ativos.ativos ?? []) == 0",
+                "props": {
+                 "texto": "Nenhuma imagem ainda."
+                }
+               },
+               {
+                "bloco": "layout/grade",
+                "props": {
+                 "colunas": 3,
+                 "gap": 12
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "layout/cartao",
+                   "repetir": {
+                    "cada": "ativos.ativos ?? []",
+                    "como": "a",
+                    "chave": "a.id"
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "midia/imagem",
+                      "props": {
+                       "src": "{a.miniatura}",
+                       "alt": "{a.nome}",
+                       "altura": 96
+                      }
+                     },
+                     {
+                      "bloco": "layout/pilha",
+                      "props": {
+                       "gap": 2
+                      },
+                      "slots": {
+                       "filhos": [
+                        {
+                         "bloco": "texto/paragrafo",
+                         "props": {
+                          "texto": "{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes"
+                         }
+                        },
+                        {
+                         "bloco": "texto/codigo",
+                         "props": {
+                          "texto": "{a.caminho}"
+                         }
+                        },
+                        {
+                         "bloco": "texto/pequeno",
+                         "se": "tamanho(a.variantes ?? []) > 0",
+                         "props": {
+                          "texto": "Versões menores: acrescente ?w=480 (ou 160, 960, 1920) ao caminho trocando a extensão por .webp"
+                         }
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Remover",
+                       "variante": "fantasma",
+                       "icone": "apagar"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "imgremover",
+                         "args": {
+                          "hash": "{a.id}"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "msgImagem",
+                           "valor": "\"Imagem removida.\""
+                          },
+                          {
+                           "acao": "executar",
+                           "dados": "ativos"
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "msgImagem",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
                      }
                     ]
                    }
@@ -4016,8 +4099,10 @@
                {
                 "bloco": "layout/linha",
                 "props": {
-                 "gap": 8,
-                 "alinha": "centro"
+                 "gap": 6,
+                 "alinha": "centro",
+                 "papel": "toolbar",
+                 "rotulo": "Tipo de diagrama"
                 },
                 "slots": {
                  "filhos": [
@@ -4025,7 +4110,9 @@
                    "bloco": "nav/botao",
                    "props": {
                     "texto": "Fluxo da aplicação",
-                    "variante": "secundario"
+                    "variante": "secundario",
+                    "icone": "diagramas",
+                    "atual": "{estado.tipoDiagrama == \"fluxo\"}"
                    },
                    "eventos": {
                     "aoClicar": [
@@ -4061,7 +4148,9 @@
                    "se": "estado.no && estado.aberto.kind == \"pagina\"",
                    "props": {
                     "texto": "Blocos da página aberta",
-                    "variante": "secundario"
+                    "variante": "secundario",
+                    "icone": "layout-painel",
+                    "atual": "{estado.tipoDiagrama == \"blocos\"}"
                    },
                    "eventos": {
                     "aoClicar": [
@@ -4105,16 +4194,23 @@
                 }
                },
                {
-                "bloco": "midia/quadro",
-                "props": {
-                 "titulo": "Diagrama",
-                 "html": "{diagrama.html}",
-                 "altura": 560
-                },
-                "se": "diagrama && diagrama.ok"
+                "bloco": "layout/cartao",
+                "se": "diagrama && diagrama.ok",
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "midia/quadro",
+                   "props": {
+                    "titulo": "Diagrama",
+                    "html": "{diagrama.html}",
+                    "altura": 560
+                   }
+                  }
+                 ]
+                }
                },
                {
-                "bloco": "texto/paragrafo",
+                "bloco": "feedback/alerta",
                 "repetir": {
                  "cada": "diagrama.resumo.avisos ?? []",
                  "como": "a",
@@ -4122,7 +4218,17 @@
                 },
                 "se": "diagrama && diagrama.ok",
                 "props": {
-                 "texto": "Atenção: {a}"
+                 "tom": "alerta"
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/paragrafo",
+                   "props": {
+                    "texto": "Atenção: {a}"
+                   }
+                  }
+                 ]
                 }
                },
                {
@@ -12483,15 +12589,11 @@
                 }
                },
                {
-                "bloco": "layout/linha",
+                "bloco": "layout/cartao",
                 "repetir": {
                  "cada": "versoes.versoes ?? []",
                  "como": "v",
                  "chave": "texto(v.seq)"
-                },
-                "props": {
-                 "gap": 8,
-                 "alinha": "centro"
                 },
                 "slots": {
                  "filhos": [
@@ -12502,104 +12604,119 @@
                    }
                   },
                   {
-                   "bloco": "nav/botao",
+                   "bloco": "layout/linha",
                    "props": {
-                    "texto": "De",
-                    "variante": "secundario"
+                    "gap": 6,
+                    "alinha": "centro",
+                    "quebra": true
                    },
-                   "eventos": {
-                    "aoClicar": [
+                   "slots": {
+                    "filhos": [
                      {
-                      "acao": "definir",
-                      "estado": "de",
-                      "valor": "texto(v.seq)"
-                     }
-                    ]
-                   }
-                  },
-                  {
-                   "bloco": "nav/botao",
-                   "props": {
-                    "texto": "Para",
-                    "variante": "secundario"
-                   },
-                   "eventos": {
-                    "aoClicar": [
-                     {
-                      "acao": "definir",
-                      "estado": "para",
-                      "valor": "texto(v.seq)"
-                     }
-                    ]
-                   }
-                  },
-                  {
-                   "bloco": "nav/botao",
-                   "se": "!v.removido",
-                   "props": {
-                    "texto": "Restaurar no editor",
-                    "variante": "secundario"
-                   },
-                   "eventos": {
-                    "aoClicar": [
-                     {
-                      "acao": "executar",
-                      "dados": "versao",
-                      "args": {
-                       "kind": "{estado.aberto.kind}",
-                       "id": "{estado.aberto.id}",
-                       "seq": "{v.seq}"
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "De",
+                       "variante": "secundario",
+                       "atual": "{estado.de == texto(v.seq)}"
                       },
-                      "depois": [
-                       {
-                        "acao": "definir",
-                        "estado": "passado",
-                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "futuro",
-                        "valor": "[]"
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "chaveEdicao",
-                        "valor": "\"\""
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "no",
-                        "valor": "com(resultado.no, [\"versao\"], estado.no.versao)"
-                       },
-                       {
-                        "acao": "executar",
-                        "dados": "previa",
-                        "args": {
-                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                         "modo": "{estado.modoPrevia}"
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "de",
+                         "valor": "texto(v.seq)"
                         }
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "aba",
-                        "valor": "\"editor\""
-                       }
-                      ],
-                      "emErro": [
-                       {
-                        "acao": "definir",
-                        "estado": "tipoAviso",
-                        "valor": "\"erro\""
-                       },
-                       {
-                        "acao": "definir",
-                        "estado": "aviso",
-                        "valor": "erro"
-                       }
-                      ]
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Para",
+                       "variante": "secundario",
+                       "atual": "{estado.para == texto(v.seq)}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "para",
+                         "valor": "texto(v.seq)"
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "se": "!v.removido",
+                      "props": {
+                       "texto": "Restaurar no editor",
+                       "variante": "secundario",
+                       "icone": "desfazer"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "versao",
+                         "args": {
+                          "kind": "{estado.aberto.kind}",
+                          "id": "{estado.aberto.id}",
+                          "seq": "{v.seq}"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "passado",
+                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "futuro",
+                           "valor": "[]"
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "chaveEdicao",
+                           "valor": "\"\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "no",
+                           "valor": "com(resultado.no, [\"versao\"], estado.no.versao)"
+                          },
+                          {
+                           "acao": "executar",
+                           "dados": "previa",
+                           "args": {
+                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                            "modo": "{estado.modoPrevia}"
+                           }
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aba",
+                           "valor": "\"editor\""
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
                      }
                     ]
                    }
@@ -12619,7 +12736,8 @@
                 "se": "estado.de != \"\" && estado.para != \"\"",
                 "props": {
                  "texto": "Comparar versões",
-                 "variante": "secundario"
+                 "variante": "primario",
+                 "icone": "historico"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -12693,11 +12811,8 @@
                 }
                },
                {
-                "bloco": "layout/pilha",
+                "bloco": "layout/cartao",
                 "se": "diff && diff.diff",
-                "props": {
-                 "gap": 2
-                },
                 "slots": {
                  "filhos": [
                   {
@@ -12720,9 +12835,45 @@
                    "slots": {
                     "filhos": [
                      {
-                      "bloco": "texto/paragrafo",
+                      "bloco": "layout/linha",
                       "props": {
-                       "texto": "{m.tipo} {m.rotulo}{m.descendentes ? \" (com \" + m.descendentes + \" bloco(s) dentro)\" : \"\"}{m.tipo == \"movido\" ? \" de \" + m.de + \" para \" + m.para : \"\"}"
+                       "gap": 8,
+                       "alinha": "centro",
+                       "quebra": true
+                      },
+                      "slots": {
+                       "filhos": [
+                        {
+                         "bloco": "feedback/selo",
+                         "se": "m.tipo == \"adicionado\"",
+                         "props": {
+                          "texto": "{m.tipo}",
+                          "tom": "sucesso"
+                         }
+                        },
+                        {
+                         "bloco": "feedback/selo",
+                         "se": "m.tipo == \"removido\"",
+                         "props": {
+                          "texto": "{m.tipo}",
+                          "tom": "erro"
+                         }
+                        },
+                        {
+                         "bloco": "feedback/selo",
+                         "se": "m.tipo != \"adicionado\" && m.tipo != \"removido\"",
+                         "props": {
+                          "texto": "{m.tipo}",
+                          "tom": "alerta"
+                         }
+                        },
+                        {
+                         "bloco": "texto/paragrafo",
+                         "props": {
+                          "texto": "{m.tipo} {m.rotulo}{m.descendentes ? \" (com \" + m.descendentes + \" bloco(s) dentro)\" : \"\"}{m.tipo == \"movido\" ? \" de \" + m.de + \" para \" + m.para : \"\"}"
+                         }
+                        }
+                       ]
                       }
                      },
                      {
@@ -12775,79 +12926,88 @@
                    }
                   },
                   {
-                   "bloco": "layout/linha",
+                   "bloco": "layout/cartao",
                    "repetir": {
                     "cada": "comentarios.comentarios ?? []",
                     "como": "k",
                     "chave": "k.id"
                    },
-                   "props": {
-                    "gap": 8,
-                    "alinha": "centro"
-                   },
                    "slots": {
                     "filhos": [
                      {
-                      "bloco": "texto/paragrafo",
+                      "bloco": "layout/linha",
                       "props": {
-                       "texto": "{k.respondeA ? \"↳ \" : \"\"}{k.autor}{k.ancora ? \" #\" + k.ancora : \"\"}{k.resolvido ? \" (resolvido)\" : \"\"}: {k.texto}"
-                      }
-                     },
-                     {
-                      "bloco": "nav/botao",
-                      "se": "!k.respondeA",
-                      "props": {
-                       "texto": "Responder",
-                       "variante": "secundario"
+                       "gap": 8,
+                       "alinha": "centro",
+                       "quebra": true
                       },
-                      "eventos": {
-                       "aoClicar": [
+                      "slots": {
+                       "filhos": [
                         {
-                         "acao": "definir",
-                         "estado": "respondendo",
-                         "valor": "k.id"
-                        }
-                       ]
-                      }
-                     },
-                     {
-                      "bloco": "nav/botao",
-                      "se": "!k.respondeA",
-                      "props": {
-                       "texto": "{k.resolvido ? \"Reabrir\" : \"Resolver\"}",
-                       "variante": "secundario"
-                      },
-                      "eventos": {
-                       "aoClicar": [
+                         "bloco": "texto/paragrafo",
+                         "props": {
+                          "texto": "{k.respondeA ? \"↳ \" : \"\"}{k.autor}{k.ancora ? \" #\" + k.ancora : \"\"}{k.resolvido ? \" (resolvido)\" : \"\"}: {k.texto}"
+                         }
+                        },
                         {
-                         "acao": "executar",
-                         "dados": "resolver",
-                         "args": {
-                          "cid": "{k.id}",
-                          "resolvido": "{!k.resolvido}"
+                         "bloco": "nav/botao",
+                         "se": "!k.respondeA",
+                         "props": {
+                          "texto": "Responder",
+                          "variante": "secundario",
+                          "icone": "comentarios"
                          },
-                         "depois": [
-                          {
-                           "acao": "executar",
-                           "dados": "comentarios",
-                           "args": {
-                            "kind": "{estado.aberto.kind}",
-                            "id": "{estado.aberto.id}"
+                         "eventos": {
+                          "aoClicar": [
+                           {
+                            "acao": "definir",
+                            "estado": "respondendo",
+                            "valor": "k.id"
                            }
-                          }
-                         ],
-                         "emErro": [
-                          {
-                           "acao": "definir",
-                           "estado": "tipoAviso",
-                           "valor": "\"erro\""
-                          },
-                          {
-                           "acao": "definir",
-                           "estado": "aviso",
-                           "valor": "erro"
-                          }
-                         ]
+                          ]
+                         }
+                        },
+                        {
+                         "bloco": "nav/botao",
+                         "se": "!k.respondeA",
+                         "props": {
+                          "texto": "{k.resolvido ? \"Reabrir\" : \"Resolver\"}",
+                          "variante": "secundario"
+                         },
+                         "eventos": {
+                          "aoClicar": [
+                           {
+                            "acao": "executar",
+                            "dados": "resolver",
+                            "args": {
+                             "cid": "{k.id}",
+                             "resolvido": "{!k.resolvido}"
+                            },
+                            "depois": [
+                             {
+                              "acao": "executar",
+                              "dados": "comentarios",
+                              "args": {
+                               "kind": "{estado.aberto.kind}",
+                               "id": "{estado.aberto.id}"
+                              }
+                             }
+                            ],
+                            "emErro": [
+                             {
+                              "acao": "definir",
+                              "estado": "tipoAviso",
+                              "valor": "\"erro\""
+                             },
+                             {
+                              "acao": "definir",
+                              "estado": "aviso",
+                              "valor": "erro"
+                             }
+                            ]
+                           }
+                          ]
+                         }
                         }
                        ]
                       }

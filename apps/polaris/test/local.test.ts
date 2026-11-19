@@ -220,6 +220,8 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/studio#token=${ed}`); await p.getByRole('button', { name: 'Releases' }).click()
       await p.getByText('Em produção: release 2').first().waitFor(); await p.getByText(/release 1 · ana/).waitFor()
+      expect(await p.locator('main [data-cartao]').count()).toBeGreaterThanOrEqual(3); expect(await p.locator('main [data-cartao] span[data-tom=sucesso]', { hasText: 'Em produção' }).count()).toBeGreaterThanOrEqual(2) // a produção e a release atual em cartões, com o selo
+      expect(await p.locator('button[data-icone=desfazer]', { hasText: 'Voltar para esta' }).count()).toBeGreaterThan(0); expect(await p.locator('button[data-icone=nav-link]', { hasText: 'Link de pré-visualização' }).count()).toBeGreaterThan(0)
       await p.getByRole('button', { name: 'Diferenças com a produção' }).click(); await p.getByText(/~ pagina:site\.home/).waitFor() // a diferença entre a produção e a release 1
       await p.getByRole('button', { name: 'Link de pré-visualização' }).last().click(); await p.getByRole('link', { name: /Abrir a pré-visualização da release 1/ }).waitFor(); expect(await p.getByRole('link', { name: /Abrir a pré-visualização/ }).getAttribute('href')).toMatch(/^\/_polaris\/preview\?t=v1\./) // o link do Studio
       await p.getByRole('button', { name: 'Voltar para a anterior (release 1)' }).click(); await p.getByText(/Em produção: release 1\. O site já usa/).first().waitFor()
@@ -311,7 +313,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const quadro = p.frameLocator('iframe[title="Diagrama"]'); await quadro.locator('svg').waitFor()
       for (const t of ['Páginas', 'Formulários', 'Dados', 'Serviços', '/produtos', '/contato']) await quadro.getByText(t, { exact: true }).first().waitFor() // o fluxo do site de exemplo
       expect(await quadro.locator('path.lig').count()).toBeGreaterThan(5)
-      await p.getByText(/Fluxo: \d+ nó\(s\) e \d+ ligação/).waitFor()
+      await p.getByText(/Fluxo: \d+ nó\(s\) e \d+ ligação/).waitFor(); expect(await p.getByRole('toolbar', { name: 'Tipo de diagrama' }).getByRole('button', { name: 'Fluxo da aplicação' }).getAttribute('aria-current')).toBe('true'); expect(await p.locator('main [data-cartao] iframe').count()).toBe(1) // o botão do tipo aberto fica marcado e o desenho vem num cartão
       await p.getByRole('button', { name: 'site.home (padrão)' }).click(); await p.getByRole('button', { name: 'Salvar' }).waitFor(); await p.getByRole('button', { name: 'Blocos da página aberta' }).click()
       await p.getByText(/Blocos: \d+ bloco\(s\) da página aberta/).waitFor(); await quadro.getByText('layout/pilha').first().waitFor(); await quadro.getByText('nav/link').first().waitFor()
       expect(await p.locator('iframe[title="Diagrama"]').getAttribute('sandbox')).toBe('') // sem scripts, sem formulários, origem opaca
@@ -377,6 +379,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Imagens' }).click(); await p.getByText('banner-de-exemplo · 1600×500').waitFor()
       const PIXEL = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
       await p.locator('input[type=file]').setInputFiles({ name: 'meu-pixel.png', mimeType: 'image/png', buffer: PIXEL }); await p.getByText('Imagem enviada.').waitFor(); await p.getByText('meu-pixel.png · 1×1 · 70 bytes').waitFor()
+      expect(await p.locator('main [data-cartao]', { hasText: 'meu-pixel.png' }).locator('img').count()).toBe(1); expect(await p.locator('main [data-cartao] button[data-icone=apagar]', { hasText: 'Remover' }).count()).toBeGreaterThan(0) // cada imagem num cartão (miniatura, dados e o botão de remover com ícone)
       const caminho = await p.locator('code', { hasText: '/_polaris/img/' }).first().innerText(); expect((await get(l, 'loja-demo', caminho)).status).toBe(200)
       // foto de celular de verdade: 300×200 com EXIF (orientação "gire 90°", câmera, GPS): o servidor gira, tira os metadados e conta
       const foto = readFileSync(join(import.meta.dirname, '../../../packages/packs/test/fixtures/foto-celular.jpg')); expect(foto.toString('latin1')).toContain('Canon')
