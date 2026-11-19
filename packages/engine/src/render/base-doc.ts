@@ -97,6 +97,9 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/cabecalho': { titulo: 'Cabeçalho', descricao: 'Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.', exemplos: [
     { titulo: 'Com título e menu', instancia: { bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Minha loja' } }, { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início' } }] } }] } } },
   ] },
+  'nav/alternador': { titulo: 'Alternador (abre e fecha sem JavaScript)', descricao: 'Caixa de marcar com `role="switch"` e nome acessível (`rotulo`, padrão "Abrir o menu") que o CSS usa para mostrar ou esconder o que vem depois (`input:checked ~ …`): é a base do menu recolhível. Precisa de um `id` na instância e de um `texto/rotulo` com `para` apontando para ele (o clique no rótulo marca a caixa). Sem estado nem evento no runtime.', exemplos: [
+    { titulo: 'Com rótulo', instancia: { bloco: 'layout/pilha', slots: { filhos: [{ bloco: 'nav/alternador', id: 'alt-exemplo', props: { rotulo: 'Abrir o menu' } }, { bloco: 'texto/rotulo', props: { texto: 'Menu', para: 'alt-exemplo' } }] } } },
+  ] },
   'form/busca': { titulo: 'Formulário de busca', descricao: 'Formulário `GET` (`role="search"`) que leva o termo para uma página do PRÓPRIO site (`acao`, padrão `/busca`): funciona sem JavaScript, o termo vai na URL (`?q=…`) e a página de resultados o lê em `consulta.q`. Destino que não é um caminho do site vale o padrão.', exemplos: [
     { titulo: 'Campo e botão', instancia: { bloco: 'form/busca', slots: { filhos: [{ bloco: 'entrada/busca', props: { placeholder: 'Buscar produtos' } }, { bloco: 'nav/enviar', props: { texto: 'Buscar' } }] } } },
   ] },

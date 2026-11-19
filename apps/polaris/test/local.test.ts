@@ -390,6 +390,23 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403|404|422)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('menu recolhível do cabeçalho: no celular o menu e as ações ficam atrás do botão "Menu" (sem JavaScript), no computador tudo à vista', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      const visivel = (sel: string) => p.locator(sel).first().evaluate((e) => { const c = getComputedStyle(e), r = e.getBoundingClientRect(); return c.display !== 'none' && c.visibility !== 'hidden' && r.width > 0 && r.height > 0 })
+      await p.setViewportSize({ width: 1200, height: 800 }); await p.goto(`http://loja-outra.polaris.localhost:${l.porta}/sobre`)
+      expect(await visivel('header nav')).toBe(true); expect(await visivel('header form[role=search]')).toBe(true); expect(await visivel('header > label[for]')).toBe(false) // computador: tudo à vista, sem botão
+      await p.setViewportSize({ width: 390, height: 800 })
+      expect(await visivel('header > label[for]')).toBe(true); expect(await visivel('header nav')).toBe(false); expect(await visivel('header form[role=search]')).toBe(false); expect(await visivel('header > a')).toBe(true) // celular: só a marca e o botão
+      expect(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true) // sem rolagem horizontal
+      await p.getByText('Menu', { exact: true }).click(); expect(await p.getByRole('switch', { name: 'Abrir o menu' }).isChecked()).toBe(true)
+      expect(await visivel('header nav')).toBe(true); expect(await visivel('header form[role=search]')).toBe(true); expect(await p.locator('header nav a').allInnerTexts()).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
+      await p.getByRole('link', { name: 'Contato' }).first().click(); await p.waitForURL(/\/contato$/); expect(await visivel('header nav')).toBe(false) // a página nova começa com o menu fechado
+      await p.keyboard.press('Tab'); await p.getByRole('switch', { name: 'Abrir o menu' }).focus(); await p.keyboard.press('Space'); expect(await visivel('header nav')).toBe(true) // pelo teclado (o campo recebe o foco; Espaço abre)
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('barra de busca: o formulário GET leva o termo à /busca, que busca NO SERVIDOR (sem acento nem maiúsculas, por palavras), pagina, mantém o termo e isola por tenant; sem termo e sem resultado têm mensagens', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

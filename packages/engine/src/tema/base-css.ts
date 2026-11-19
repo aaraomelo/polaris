@@ -24,6 +24,17 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris header>a{display:flex;align-items:center;gap:var(--espacamento-base);color:var(--cor-texto);text-decoration:none}
 #polaris nav{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--espacamento-base) * 2)}
 #polaris header>nav{flex:1}
+#polaris header>input[data-alternador]{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+#polaris header>label[for]{display:none;cursor:pointer;margin-left:auto;padding:calc(var(--espacamento-base) * 0.75) calc(var(--espacamento-base) * 1.5);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);user-select:none}
+#polaris header>input[data-alternador]:focus-visible+label[for]{outline:2px solid var(--cor-destaque);outline-offset:2px}
+@media (max-width:40rem){
+#polaris header{flex-wrap:wrap}
+#polaris header>label[for]{display:inline-block}
+#polaris header>input[data-alternador]:not(:checked)~*:not(label){display:none}
+#polaris header>input[data-alternador]:checked~*:not(label){flex:1 0 100%;flex-direction:column;align-items:flex-start}
+#polaris header>input[data-alternador]:checked~nav{display:flex}
+#polaris header>input[data-alternador]:checked~form{display:flex;width:100%}
+}
 #polaris nav a{text-decoration:none}
 #polaris nav a[aria-current=page]{color:var(--cor-texto);font-weight:600;text-decoration:underline}
 #polaris section[data-alinha]{display:flex;flex-direction:column;justify-content:center;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 6) calc(var(--espacamento-base) * 3);background-size:cover;background-position:center;border-radius:var(--raio-grande)}

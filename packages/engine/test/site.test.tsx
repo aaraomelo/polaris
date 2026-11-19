@@ -49,7 +49,7 @@ describe('site/cabecalho', () => {
     const d = ssr(pagina(cab({ titulo: 'X', logo: 'https://exemplo.com/l.png', href: '/inicio', rotuloMenu: 'Seções', fixo: true, links: LINKS.slice(0, 1) }, [{ bloco: 'nav/link', props: { href: '/entrar', texto: 'Entrar' } }])))
     const h = d.querySelector('header')!; expect(h.hasAttribute('data-fixo')).toBe(true); expect(h.querySelector('img')!.getAttribute('src')).toBe('https://exemplo.com/l.png'); expect(h.querySelector('img')!.getAttribute('alt')).toBe('')
     expect(h.querySelector(':scope > a')!.getAttribute('href')).toBe('/inicio'); expect(h.querySelector('nav')!.getAttribute('aria-label')).toBe('Seções')
-    const filhos = [...h.children].map((c) => c.tagName.toLowerCase()); expect(filhos).toEqual(['a', 'nav', 'a']); expect(h.lastElementChild!.textContent).toBe('Entrar')
+    const filhos = [...h.children].map((c) => c.tagName.toLowerCase()); expect(filhos).toEqual(['a', 'input', 'label', 'nav', 'a']); expect(h.lastElementChild!.textContent).toBe('Entrar')
   })
   it('sem links não há <nav> vazio; sem logo não há imagem; link inseguro é recusado (sem href), nada vira marcação', () => {
     const d = ssr(pagina(cab({ titulo: 'Só marca' }))); expect(d.querySelector('nav')).toBeNull(); expect(d.querySelector('img')).toBeNull()
@@ -156,4 +156,21 @@ describe('busca (form/busca, entrada/busca, nav/enviar, site/busca)', () => {
     expect(doHtml(h.pagina.render({}).corpo)).toBe(oraculo); const c = document.createElement('div'); montaVivo({ programa: pg, container: c }); expect([...c.childNodes].map(canon).join('')).toBe(oraculo)
   })
   it('o tema estiliza form[role=search] e input[type=search] só com variáveis', () => { const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/form\[role=search\]\{display:flex/); expect(css).toMatch(/input\[type=search\]\{[^}]*var\(--cor-superficie\)/) })
+})
+
+describe('menu recolhível do cabeçalho (nav/alternador)', () => {
+  it('o cabeçalho leva um alternador (checkbox role=switch com nome) e o rótulo "Menu" ligado a ele, entre a marca e o menu', () => {
+    const h = ssr(pagina(cab({ titulo: 'Loja', links: LINKS }))).querySelector('header')!, ks = [...h.children].map((c) => c.tagName.toLowerCase())
+    expect(ks).toEqual(['a', 'input', 'label', 'nav']); const i = h.querySelector('input')!, l = h.querySelector('label')!
+    expect([i.type, i.getAttribute('role'), i.getAttribute('aria-label'), i.hasAttribute('data-alternador'), i.id]).toEqual(['checkbox', 'switch', 'Abrir o menu', true, 'cabecalho-alternador']); expect([l.getAttribute('for'), l.textContent]).toEqual(['cabecalho-alternador', 'Menu'])
+    expect(i.nextElementSibling).toBe(l) // o CSS usa `input:focus-visible + label` e `input:checked ~ …`
+  })
+  it('`menuRecolhivel: false` não põe alternador nem rótulo; `rotuloAlternador` muda o nome acessível', () => {
+    const sem = ssr(pagina(cab({ titulo: 'x', links: LINKS, menuRecolhivel: false }))).querySelector('header')!; expect(sem.querySelector('input')).toBeNull(); expect(sem.querySelector('label')).toBeNull()
+    expect(ssr(pagina(cab({ titulo: 'x', rotuloAlternador: 'Mostrar a navegação' }))).querySelector('input')!.getAttribute('aria-label')).toBe('Mostrar a navegação')
+  })
+  it('o tema esconde o menu e as ações no celular enquanto o alternador não está marcado, e mostra o botão só lá', () => {
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/header>label\[for\]\{display:none/); expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*header>label\[for\]\{display:inline-block\}/)
+    expect(css).toContain('header>input[data-alternador]:not(:checked)~*:not(label){display:none}'); expect(css).toContain('header>input[data-alternador]:checked~nav{display:flex}'); expect(css).toMatch(/input\[data-alternador\]:focus-visible\+label/)
+  })
 })

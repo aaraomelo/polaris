@@ -12,11 +12,12 @@ const linkProp = { type: 'object', properties: { texto: { type: 'string', maxLen
 const BLOCOS_CABECALHO = [
   no('bloco', 'site.cabecalho', {
     interface: 'site/cabecalho', titulo: 'Cabeçalho do site',
-    descricao: 'Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação (`links`, com `atual` na página aberta) e o slot `acoes` à direita (ex.: botão de entrar ou carrinho). `fixo` o mantém no topo ao rolar. Usa `<header>` e `<nav>` (pontos de referência para leitores de tela) e só variáveis do tema.',
+    descricao: 'Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação (`links`, com `atual` na página aberta) e o slot `acoes` à direita (ex.: botão de entrar ou carrinho). `fixo` o mantém no topo ao rolar. No celular o menu e as ações ficam atrás de um botão "Menu" (`nav/alternador`, sem JavaScript; `menuRecolhivel: false` desliga). Usa `<header>` e `<nav>` (pontos de referência para leitores de tela) e só variáveis do tema. Uma por página (o `id` do alternador é fixo).',
     props: { type: 'object', properties: {
       titulo: { type: 'string', maxLength: 80, description: 'nome da marca' }, logo: { type: 'string', maxLength: 500, description: 'URL segura da imagem da marca' },
       href: { type: 'string', maxLength: 500, default: '/', description: 'para onde a marca leva' }, links: { type: 'array', maxItems: 12, items: linkProp, description: 'o menu' },
       rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false },
+      menuRecolhivel: { type: 'boolean', default: true, description: 'no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista' }, rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir o menu' },
     } },
     slots: { acoes: {} },
     exemplos: [
@@ -28,6 +29,8 @@ const BLOCOS_CABECALHO = [
         { bloco: 'midia/imagem', se: 'props.logo', props: { src: '{props.logo}', alt: '', altura: 32 } },
         { bloco: 'texto/destaque', se: 'props.titulo', props: { texto: '{props.titulo}' } },
       ] } },
+      { bloco: 'nav/alternador', id: 'cabecalho-alternador', se: 'props.menuRecolhivel != false', props: { rotulo: '{props.rotuloAlternador ?? "Abrir o menu"}' } },
+      { bloco: 'texto/rotulo', se: 'props.menuRecolhivel != false', props: { texto: 'Menu', para: 'cabecalho-alternador' } },
       { bloco: 'nav/menu', se: 'tamanho(props.links ?? []) > 0', props: { rotulo: '{props.rotuloMenu ?? "Principal"}' }, slots: { filhos: [
         { bloco: 'nav/link', repetir: { cada: 'props.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
       ] } },

@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-34 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+35 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -28,6 +28,7 @@
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| nav | `nav/alternador` | `rotulo` (padrão "Abrir o menu") | | |
 | nav | `nav/enviar` | `texto` (padrão "Enviar") | | |
 | nav | `nav/menu` | `rotulo` (nome acessível; padrão "Principal") | `filhos` | |
 | nav | `nav/link` | `href` (só URLs seguras), `texto`, `atual` (`aria-current="page"`), `botao` (`primario`/`secundario`: aparência de botão) | `filhos` | |
@@ -77,3 +78,6 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 - **Resultados** são da página. O site de exemplo busca **no servidor**: a entidade `destaque` do serviço declara `busca: { campos: ['titulo', 'descricao'] }` e a listagem gerada ganha o parâmetro `busca` (`docs/servicos.md`); a página (`site.busca`) passa `busca: '{consulta.q ?? ""}'`, `pagina` e `limite: 5` ao dado `site.destaques-busca`, e um segundo dado (`proxima`, `limite: 1`, `pagina: 5p+1`: o primeiro item depois da página) diz se existe "Próxima". Os links de página montam a URL com `urlcodifica(consulta.q)` (`&`, `#` e acentos no termo não quebram nada). Há mensagens para "sem termo" e "nada encontrado".
 **Busca aproximada**: o serviço de exemplo declara `modo: aproximada` na entidade `destaque`: `cafetera` acha "Cafeteira italiana" e os resultados vêm por **relevância** ("Café gelado" antes de "Café de Loja Demo"), com índice trigrama (`docs/servicos.md`).
 **Limites**: a paginação é por página numerada (a API não devolve o total: "Próxima" aparece se há um item depois, e o número da página é o único contexto); sem sugestões enquanto digita nem destaque do trecho achado; o envio recarrega a página (o roteador do cliente só intercepta links).
+
+**Menu recolhível (celular)**: `nav/alternador` é uma **caixa de marcar** (`role="switch"`, nome acessível em `rotulo`) que o CSS do tema usa como interruptor: `header>input:not(:checked)~*:not(label){display:none}` esconde, até 40 rem de largura, o menu e as ações (inclusive a busca); marcar a caixa (pelo rótulo "Menu" ligado por `para`, ou pelo teclado: Tab e Espaço) mostra tudo em coluna. Acima de 40 rem o botão some e tudo fica à vista. **Sem JavaScript e sem estado no runtime** (o modelo de um bloco não tem eventos), então funciona até com a página estática. O `site/cabecalho` o põe sozinho (`menuRecolhivel`, padrão ligado; `false` mantém tudo à vista; `rotuloAlternador` muda o nome acessível).
+**Limites**: o `id` do alternador é fixo (`cabecalho-alternador`): **um `site/cabecalho` por página**; não fecha com Esc nem ao clicar fora (só ao desmarcar ou navegar: a página nova nasce fechada); a caixa fica visualmente oculta (1 px, transparente) e o foco aparece no botão "Menu"; o ponto de corte (40 rem) é fixo no CSS base, não um token do tema.

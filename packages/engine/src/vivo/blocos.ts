@@ -153,6 +153,7 @@ const maxDe = (e: Event) => Number((e.target as HTMLElement).dataset.max) || 209
 /** `aoEscolher`: só quando o arquivo serve (lido); `aoRecusar`: só quando não serve, com `{ erro }`: assim a página não dispara um envio inútil */
 export const arquivoEscolhido = (e: Event): unknown => (recusaArquivo(e.target, maxDe(e)) ? PULA : lerArquivoEscolhido(e.target).then((v) => (typeof v === 'object' && 'erro' in v ? PULA : v)))
 export const arquivoRecusado = (e: Event): unknown => { const erro = recusaArquivo(e.target, maxDe(e)); return erro ? { erro } : PULA }
+export const d_nav_alternador: Descritor = { chave: () => 'input:alternador', tag: () => 'input', attrs: (p, id) => ({ ...comId(id), type: 'checkbox', role: 'switch', 'data-alternador': '', ...rotulo(p.rotulo === undefined ? { rotulo: 'Abrir o menu' } : p) }) }
 export const d_form_busca: Descritor = { chave: () => 'form', tag: () => 'form', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'search', method: 'get', action: caminhoLocal(p.acao) }) }
 export const d_entrada_busca: Descritor = {
   chave: () => 'input:search', tag: () => 'input',
@@ -195,7 +196,7 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
-  'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
+  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu,
   'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,

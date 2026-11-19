@@ -43,6 +43,8 @@ const CASOS: Array<[string, object]> = [
   ['nav/link', P('nav/link', { id: 'b', props: { href: 'https://a.com', texto: 'a' } })],
   ['nav/link (atual)', P('nav/link', { id: 'b', props: { href: '/a', texto: 'a', atual: true } })],
   ['layout/cabecalho (fixo) com nav/menu', P('layout/cabecalho', { id: 'b', props: { fixo: true }, slots: { filhos: [P('nav/menu', { props: { rotulo: 'Seções' }, slots: { filhos: [P('nav/link', { props: { href: '/a', texto: 'A', atual: true } })] } })] } })],
+  ['nav/alternador com rótulo', P('layout/pilha', { slots: { filhos: [P('nav/alternador', { id: 'alt', props: { rotulo: 'Abrir o menu do site' } }), P('texto/rotulo', { props: { texto: 'Menu', para: 'alt' } })] } })],
+  ['nav/alternador (rótulo padrão)', P('nav/alternador', { id: 'alt2' })],
   ['form/busca com campo e botão', P('form/busca', { id: 'b', props: { acao: '/procurar' }, slots: { filhos: [P('entrada/busca', { props: { nome: 'termo', rotulo: 'Procurar', placeholder: 'Digite', valor: 'café "quente"' } }), P('nav/enviar', { props: { texto: 'Ir' } })] } })],
   ['form/busca (padrões; destino de fora vale o padrão)', P('layout/pilha', { slots: { filhos: [P('form/busca', { props: { acao: 'https://evil.com/x' }, slots: { filhos: [P('entrada/busca'), P('nav/enviar')] } }), P('form/busca', { props: { acao: '//evil.com' } }), P('entrada/busca', { props: { nome: '1 inválido' } })] } })],
   ['entrada/arquivo', P('entrada/arquivo', { id: 'b', props: { rotulo: 'Imagem', aceita: 'image/png,image/jpeg', tamanhoMax: 5000, desabilitado: true } })],
