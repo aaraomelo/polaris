@@ -216,3 +216,18 @@ describe('sugestões da barra de busca (datalist)', () => {
     expect(ssr(pagina({ bloco: 'entrada/busca', props: { lista: '1 "><x' } })).querySelector('input')!.hasAttribute('list')).toBe(false)
   })
 })
+
+describe('sugestões ao vivo (form/sugestoes-ao-vivo)', () => {
+  const busca = (props: Record<string, unknown>) => ssr(pagina({ bloco: 'site/busca', props })).querySelector('form')!
+  it('com `sugestoesUrl`: uma lista oculta (listbox) logo depois do campo, com os dados que o cliente lê; limite entre 1 e 10; destino padrão é a ação', () => {
+    const u = busca({ sugestoesUrl: '/api/loja/destaques', sugestoesDescricao: 'descricao', sugestoesImagem: 'imagem', sugestoesLimite: 5, acao: '/achar' }).querySelector('ul')!
+    expect([u.hasAttribute('hidden'), u.getAttribute('role'), u.getAttribute('aria-label')]).toEqual([true, 'listbox', 'Sugestões']); expect(Object.fromEntries([...u.attributes].filter((a) => a.name.startsWith('data-')).map((a) => [a.name, a.value]))).toEqual({ 'data-sugestoes-url': '/api/loja/destaques', 'data-titulo': 'titulo', 'data-descricao': 'descricao', 'data-imagem': 'imagem', 'data-limite': '5', 'data-destino': '/achar', 'data-nome': 'q' })
+    expect(u.previousElementSibling!.tagName).toBe('INPUT')
+  })
+  it('sem url, ou com url de fora do site: nada de lista; nome de campo malformado cai no padrão', () => {
+    expect(busca({}).querySelector('ul')).toBeNull()
+    for (const url of ['https://x.test/a', '//x.test/a', 'javascript:alert(1)', '/a b']) expect(ssr(pagina({ bloco: 'form/sugestoes-ao-vivo', props: { url } })).querySelector('ul'), url).toBeNull()
+    const u = ssr(pagina({ bloco: 'form/sugestoes-ao-vivo', props: { url: '/x', titulo: 'a b', imagem: '"><x', limite: 10 } })).querySelector('ul')!; expect([u.getAttribute('data-titulo'), u.hasAttribute('data-imagem') ? 'tem' : 'nao', u.getAttribute('data-limite')]).toEqual(['titulo', 'tem', '10']) // nome de campo malformado cai no padrão (`titulo`, `imagem`); nada do valor vai ao atributo
+  })
+  it('o tema estiliza a lista (fundo, borda, miniatura) só com variáveis do tema', () => { const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('ul[data-sugestoes-url]'); expect(css).toContain('[data-s-titulo]'); expect(css).toContain('ul[data-sugestoes-url] img{width:2.5rem') })
+})

@@ -13,6 +13,18 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris input[type=text],#polaris input[type=number],#polaris input[type=search]{background:var(--cor-superficie);color:var(--cor-texto);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75);font:inherit}
 #polaris form[role=search]{display:flex;align-items:center;gap:var(--espacamento-base);margin:0}
 #polaris form[role=search] input[type=search]{min-width:12ch;flex:1}
+#polaris form[role=search]{position:relative}
+#polaris form[role=search]>ul[data-sugestoes-url]{position:absolute;top:100%;left:0;right:0;z-index:20;margin:calc(var(--espacamento-base) * 0.5) 0 0;padding:calc(var(--espacamento-base) * 0.5);list-style:none;background:var(--cor-superficie);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);box-shadow:0 8px 24px color-mix(in srgb, var(--cor-texto) 22%, transparent);max-height:70vh;overflow:auto}
+#polaris form[role=search]>ul[data-sugestoes-url][hidden]{display:none}
+#polaris ul[data-sugestoes-url]>li>a{display:flex;align-items:center;gap:calc(var(--espacamento-base) * 1.5);padding:calc(var(--espacamento-base) * 0.75);border-radius:var(--raio-pequeno);color:var(--cor-texto);text-decoration:none}
+#polaris ul[data-sugestoes-url]>li>a:hover,#polaris ul[data-sugestoes-url]>li[aria-selected=true]>a{background:var(--cor-superficie-alt)}
+#polaris ul[data-sugestoes-url]>li[aria-selected=true]>a{outline:2px solid var(--cor-destaque);outline-offset:-2px}
+#polaris ul[data-sugestoes-url] img{width:2.5rem;height:2.5rem;flex:none;object-fit:cover;border-radius:var(--raio-pequeno);background:var(--cor-superficie-alt)}
+#polaris ul[data-sugestoes-url] [data-s-texto]{display:flex;flex-direction:column;min-width:0}
+#polaris ul[data-sugestoes-url] [data-s-titulo]{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#polaris ul[data-sugestoes-url] [data-s-desc]{color:var(--cor-texto-suave);font-size:.875em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#polaris ul[data-sugestoes-url] [data-s-vazio]{padding:calc(var(--espacamento-base) * 0.75);color:var(--cor-texto-suave)}
+#polaris [data-s-status]{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #polaris input::placeholder{color:var(--cor-texto-suave)}
 #polaris input:disabled{opacity:.55}
 #polaris input[type=checkbox]{accent-color:var(--cor-primaria);width:1.1em;height:1.1em}

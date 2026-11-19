@@ -29,6 +29,9 @@
             },
             "descricao": {
               "tipo": "texto"
+            },
+            "imagem": {
+              "tipo": "texto"
             }
           },
           "crud": {

@@ -111,10 +111,12 @@ const BLOCOS_BUSCA = [
     props: { type: 'object', properties: {
       acao: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site (padrão /busca)' }, nome: { type: 'string', maxLength: 31, description: 'parâmetro na URL (padrão q)' },
       valor: { type: 'string', maxLength: 200 }, placeholder: { type: 'string', maxLength: 100, default: 'Buscar' }, rotulo: { type: 'string', maxLength: 100, default: 'Buscar' }, botao: { type: 'string', maxLength: 60, default: 'Buscar' },
+      sugestoesUrl: { type: 'string', maxLength: 300, description: 'sugestões AO VIVO: caminho do próprio site que devolve JSON (ex.: /api/loja/destaques); o cliente busca `busca=<termo>` a cada pausa na digitação. Precisa de JavaScript' }, sugestoesTitulo: { type: 'string', maxLength: 41, default: 'titulo' }, sugestoesDescricao: { type: 'string', maxLength: 41 }, sugestoesImagem: { type: 'string', maxLength: 41, description: 'campo com o caminho da miniatura' }, sugestoesLimite: { type: 'integer', minimum: 1, maximum: 10, default: 6 }, sugestoesDestino: { type: 'string', maxLength: 300, description: 'página aberta ao escolher (padrão: a própria `acao`)' },
       sugestoes: { type: 'array', maxItems: 20, items: { type: 'string', maxLength: 100 }, description: 'termos que o navegador oferece enquanto se digita (lista nativa, sem JavaScript; fixos na página). Uma barra com sugestões por página (o id da lista é fixo)' },
     } },
     exemplos: [
       { titulo: 'Padrão', instancia: instancia('site/busca', {}) },
+      { titulo: 'Com sugestões ao vivo', instancia: instancia('site/busca', { sugestoesUrl: '/api/loja/destaques', sugestoesImagem: 'imagem' }) },
       { titulo: 'Com sugestões', instancia: instancia('site/busca', { sugestoes: ['Café', 'Cafeteira italiana', 'Chá verde'] }) },
       { titulo: 'Com termo e outro destino', instancia: instancia('site/busca', { acao: '/produtos', valor: 'café', placeholder: 'Buscar produtos', botao: 'Procurar' }) },
     ],
@@ -123,6 +125,7 @@ const BLOCOS_BUSCA = [
       { bloco: 'form/sugestoes', id: 'busca-sugestoes', se: 'tamanho(props.sugestoes ?? []) > 0', slots: { filhos: [
         { bloco: 'form/opcao', repetir: { cada: 'props.sugestoes ?? []', como: 's', chave: 's' }, props: { valor: '{s}' } },
       ] } },
+      { bloco: 'form/sugestoes-ao-vivo', se: 'props.sugestoesUrl', props: { url: '{props.sugestoesUrl}', titulo: '{props.sugestoesTitulo ?? "titulo"}', descricao: '{props.sugestoesDescricao ?? ""}', imagem: '{props.sugestoesImagem ?? ""}', limite: '{props.sugestoesLimite ?? 6}', destino: '{props.sugestoesDestino ?? props.acao ?? "/busca"}', nome: '{props.nome}' } },
       { bloco: 'nav/enviar', props: { texto: '{props.botao ?? "Buscar"}' } },
     ] } },
   }),

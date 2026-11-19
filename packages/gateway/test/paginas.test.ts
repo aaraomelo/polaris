@@ -154,3 +154,10 @@ describe('servidor de páginas', () => {
     expect((await e.req('GET', '/', { host: 'fantasma.test' })).statusCode).toBe(400)
   })
 })
+
+describe('o script do roteador (navegacao.ts)', () => {
+  it('é JavaScript válido (um erro de sintaxe derrubaria navegação, menu e sugestões ao vivo de uma vez)', async () => {
+    const { ROTEADOR_JS } = await import('../src/navegacao'); expect(() => new Function(ROTEADOR_JS)).not.toThrow()
+    const sg = ROTEADOR_JS.slice(ROTEADOR_JS.indexOf('SUGESTÕES AO VIVO'), ROTEADOR_JS.indexOf('menu recolhível do cabeçalho')); expect(sg.length).toBeGreaterThan(500); expect(sg).not.toMatch(/innerHTML|insertAdjacentHTML|document\.write/) // o que vem do servidor entra só como texto
+  })
+})

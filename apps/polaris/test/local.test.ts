@@ -445,9 +445,34 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.goto(`http://loja-outra.polaris.localhost:${l.porta}/sobre`); await p.waitForFunction(() => (window as any).Polaris?.inicia); const alt = p.getByRole('switch', { name: 'Abrir o menu' })
       await p.getByText('Menu', { exact: true }).click(); expect(await alt.isChecked()).toBe(true); await p.keyboard.press('Escape'); expect(await alt.isChecked()).toBe(false); expect(await visivel('header nav')).toBe(false)
       expect(await p.evaluate(() => document.activeElement?.getAttribute('role'))).toBe('switch') // o foco voltou para o interruptor
-      await p.getByText('Menu', { exact: true }).click(); await p.getByRole('combobox', { name: 'Buscar' }).click(); expect(await alt.isChecked()).toBe(true) // dentro do cabeçalho: continua aberto
+      await p.getByText('Menu', { exact: true }).click(); await p.locator('header input[type=search]').click(); expect(await alt.isChecked()).toBe(true) // dentro do cabeçalho: continua aberto
       await p.getByRole('heading', { name: 'Sobre' }).click(); expect(await alt.isChecked()).toBe(false); expect(await visivel('header nav')).toBe(false) // fora: fecha
       await p.getByText('Menu', { exact: true }).click(); await p.evaluate(() => { const a = document.createElement('a'); a.href = '#fim'; a.id = 'ancora-teste'; a.textContent = 'ancora'; document.querySelector('header nav')!.appendChild(a) }); await p.locator('#ancora-teste').click(); expect(await alt.isChecked()).toBe(false) // âncora do próprio menu: fecha
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
+  it('sugestões ao vivo na busca: lista do servidor (com erro de digitação), título, descrição e miniatura; teclado, Esc e clique fora', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(`${m.text()} ${m.location().url}`) })
+      await p.setViewportSize({ width: 1200, height: 800 }); const base = `http://loja-outra.polaris.localhost:${l.porta}`; await p.goto(`${base}/sobre`); await p.waitForFunction(() => (window as any).Polaris?.inicia)
+      const ul = p.locator('header form[role=search] ul[data-sugestoes-url]'), campo = p.locator('header form[role=search] input[type=search]')
+      expect(await ul.isVisible()).toBe(false); expect(await campo.getAttribute('list')).toBeNull() // sem digitar: nada aparece
+      await campo.click(); await p.keyboard.type('c'); await p.waitForTimeout(500); expect(await ul.isVisible()).toBe(false) // uma letra não busca
+      await p.keyboard.type('afetera'); await ul.waitFor({ state: 'visible' }) // "cafetera": erro de digitação, achado pela busca aproximada
+      expect(await ul.locator('li[role=option]').allInnerTexts()).toEqual([expect.stringContaining('Cafeteira italiana')]); expect(await ul.locator('li a [data-s-desc]').innerText()).toBe('Alumínio, serve 6 xícaras')
+      expect(await campo.getAttribute('role')).toBe('combobox'); expect(await campo.getAttribute('aria-expanded')).toBe('true')
+      await p.waitForFunction(() => { const i = document.querySelector('header ul[data-sugestoes-url] img') as HTMLImageElement | null; return !!i && i.complete && i.naturalWidth > 0 }); // a miniatura carregou
+      const b = await ul.boundingBox(), bc = await campo.boundingBox(); expect(b!.y).toBeGreaterThanOrEqual(bc!.y + bc!.height - 1) // a lista abre sob o campo
+      expect(await ul.evaluate((e) => getComputedStyle(e).backgroundColor !== 'rgba(0, 0, 0, 0)')).toBe(true) // com o fundo do tema (não a lista do navegador)
+      await campo.fill(''); await campo.pressSequentially('cafe'); await p.waitForFunction(() => document.querySelectorAll('header ul[data-sugestoes-url] li[role=option]').length === 5) // limite 5 de 6 que casam
+      await p.keyboard.press('ArrowDown'); expect(await ul.locator('li[aria-selected=true]').count()).toBe(1); const ativo = await ul.locator('li[aria-selected=true] [data-s-titulo]').innerText(); expect(await campo.getAttribute('aria-activedescendant')).toBeTruthy()
+      await p.keyboard.press('Escape'); expect(await ul.isVisible()).toBe(false); expect(p.url()).toBe(`${base}/sobre`) // Esc fecha sem navegar
+      await campo.fill(''); await campo.pressSequentially('cafe'); await ul.waitFor({ state: 'visible' }); await p.keyboard.press('ArrowDown'); const escolhido = await ul.locator('li[aria-selected=true] [data-s-titulo]').innerText(); await p.keyboard.press('Enter')
+      await p.waitForURL((u) => u.pathname === '/busca'); expect(new URL(p.url()).searchParams.get('q')).toBe(escolhido); expect(escolhido.length).toBeGreaterThan(2); void ativo // Enter no item ativo abre a busca pelo título
+      await campo.fill(''); await campo.pressSequentially('zzzqq'); await p.getByText('Nenhuma sugestão para "zzzqq"').waitFor() // sem resultado: mensagem
+      await campo.fill('<img src=x onerror=alert(1)>'); await p.getByText('Nenhuma sugestão para').waitFor(); expect(await p.locator('header ul img').count()).toBe(0) // o termo aparece como texto
+      await p.mouse.click(1100, 600); expect(await ul.isVisible()).toBe(false) // clique fora fecha
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
@@ -456,10 +481,9 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
     try {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
       const base = `http://loja-demo.polaris.localhost:${l.porta}`, titulos = () => p.locator('main strong, #polaris > div > div > strong').allInnerTexts()
-      await p.goto(`${base}/sobre`); const campo = p.getByRole('combobox', { name: 'Buscar' }); expect(await p.locator('form[role=search]').getAttribute('action')).toBe('/busca'); expect(await campo.inputValue()).toBe('')
-      expect(await campo.evaluate((e: HTMLInputElement) => [e.getAttribute('list'), [...(e.list?.options ?? [])].map((o) => o.value)])).toEqual(['busca-sugestoes', ['Café', 'Cafeteira italiana', 'Pão de queijo']]) // sugestões nativas (datalist) ligadas ao campo
+      await p.goto(`${base}/sobre`); const campo = p.locator('header input[type=search]'); expect(await p.locator('form[role=search]').getAttribute('action')).toBe('/busca'); expect(await campo.inputValue()).toBe('')
       await campo.fill('cafe'); await campo.press('Enter'); await p.waitForURL(/\/busca\?q=cafe$/); await p.getByRole('heading', { name: 'Resultados para "cafe"' }).waitFor() // "cafe" sem acento acha "Café" (o servidor ignora acentos)
-      await p.getByText('Página 1').waitFor(); const doCafe = async () => (await p.locator('strong').allInnerTexts()).filter((t) => /caf/i.test(t)); const pag1 = await doCafe(); expect(pag1).toHaveLength(5); expect(await p.getByText('Pão de Loja Demo').count()).toBe(0); expect(await p.getByRole('combobox', { name: 'Buscar' }).inputValue()).toBe('cafe') // o termo continua no campo
+      await p.getByText('Página 1').waitFor(); const doCafe = async () => (await p.locator('strong').allInnerTexts()).filter((t) => /caf/i.test(t)); const pag1 = await doCafe(); expect(pag1).toHaveLength(5); expect(await p.getByText('Pão de Loja Demo').count()).toBe(0); expect(await p.locator('header input[type=search]').inputValue()).toBe('cafe') // o termo continua no campo
       expect(await p.getByRole('link', { name: 'Anterior' }).count()).toBe(0); expect(pag1[0]).toBe('Café gelado') // RELEVÂNCIA: entre os que contêm "café" no título, o mais curto e focado vem primeiro
       await p.getByRole('link', { name: 'Próxima' }).click(); await p.waitForURL(/\/busca\?q=cafe&pagina=2$/); await p.getByText('Página 2').waitFor(); const pag2 = await doCafe(); expect(pag2).toHaveLength(1); expect(pag1.includes(pag2[0]!)).toBe(false) // outra página, sem repetir
       expect(new Set([...pag1, ...pag2])).toEqual(new Set(['Café coado', 'Café de Loja Demo', 'Café especial', 'Café gelado', 'Cafeteira italiana', 'Cafezinho de coador']))

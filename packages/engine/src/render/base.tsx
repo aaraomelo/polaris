@@ -9,7 +9,7 @@ import { QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valo
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
 
 export { urlSegura } from './url'
-import { caminhoLocal, cssUrl, idDeElemento, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from './url'
+import { caminhoLocal, cssUrl, idDeElemento, nomeDeParametro, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 /** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
@@ -70,6 +70,7 @@ export const COMPONENTES_BASE: Componentes = {
   'nav/alternador': ({ props, id }) => createElement('input', { ...(id ? { id } : {}), type: 'checkbox', role: 'switch', 'data-alternador': '', ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Abrir o menu' } : props) }),
   'form/busca': ({ props, slots, id }) => createElement('form', { ...(id ? { id } : {}), role: 'search', method: 'get', action: caminhoLocal(props.acao) }, slots.filhos),
   'entrada/busca': ({ props, id }) => createElement('input', { ...(id ? { id } : {}), type: 'search', name: nomeDeParametro(props.nome), ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Buscar' } : props), ...(typeof props.placeholder === 'string' && props.placeholder ? { placeholder: props.placeholder } : {}), defaultValue: txt(props.valor).slice(0, 200), maxLength: 200, autoComplete: 'off', ...(idDeElemento(props.lista) ? { list: idDeElemento(props.lista) } : {}) }),
+  'form/sugestoes-ao-vivo': ({ props, id }) => { const a = sugestoesAoVivo(props); return a ? createElement('ul', { ...(id ? { id } : {}), role: 'listbox', 'aria-label': typeof props.rotulo === 'string' && props.rotulo.trim() ? props.rotulo.trim().slice(0, 100) : 'Sugestões', hidden: true, ...a }) : null },
   'form/sugestoes': ({ slots, id }) => createElement('datalist', { ...(id ? { id } : {}) }, slots.filhos),
   'form/opcao': ({ props, id }) => createElement('option', { ...(id ? { id } : {}), value: txt(props.valor).slice(0, 100) }),
   'nav/enviar': ({ props, id }) => createElement('button', { ...(id ? { id } : {}), type: 'submit' }, txt(props.texto) || 'Enviar'),
@@ -142,6 +143,7 @@ export const BLOCOS_BASE = [
   bloco('nav/alternador', { props: { type: 'object', properties: { rotulo: ROTULO } } }),
   bloco('form/busca', { slots: { filhos: {} }, props: { type: 'object', properties: { acao: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site que recebe a busca (padrão /busca); outro valor vale o padrão' } } } }),
   bloco('entrada/busca', { props: { type: 'object', properties: { nome: { type: 'string', maxLength: 31, description: 'nome do parâmetro na URL (padrão q)' }, rotulo: ROTULO, placeholder: { type: 'string', maxLength: 100 }, valor: { type: 'string', maxLength: 200, description: 'texto inicial (ex.: o termo buscado, `{consulta.q}`)' }, lista: { type: 'string', maxLength: 64, description: 'id de um `form/sugestoes` da página: o navegador oferece as opções enquanto se digita' } } } }),
+  bloco('form/sugestoes-ao-vivo', { props: { type: 'object', properties: { url: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site que lista (JSON) as sugestões, ex.: /api/loja/destaques; o cliente acrescenta `busca=<termo>&limite=<n>`' }, titulo: { type: 'string', maxLength: 41, description: 'campo do JSON com o título (padrão titulo)' }, descricao: { type: 'string', maxLength: 41 }, imagem: { type: 'string', maxLength: 41, description: 'campo com o caminho da miniatura (só caminhos do próprio site)' }, limite: { type: 'integer', minimum: 1, maximum: 10, description: 'quantas sugestões (padrão 6)' }, destino: { type: 'string', maxLength: 300, description: 'página da escolha (padrão /busca): abre `destino?q=<título>`' }, nome: { type: 'string', maxLength: 31, description: 'parâmetro do destino (padrão q)' }, rotulo: { type: 'string', maxLength: 100 } }, required: ['url'] } }),
   bloco('form/sugestoes', { slots: { filhos: {} } }),
   bloco('form/opcao', { props: { type: 'object', properties: { valor: { type: 'string', maxLength: 100 } } } }),
   bloco('nav/enviar', { props: { type: 'object', properties: { texto: { type: 'string', maxLength: 60, default: 'Enviar' } } } }),

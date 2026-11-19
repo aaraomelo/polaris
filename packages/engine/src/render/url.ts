@@ -39,3 +39,12 @@ export const tamanhosDe = (declarado: unknown, largura: number | undefined): str
 
 /** id de um elemento da própria página (para `list`, `for`…): letra e até 64 caracteres seguros; senão undefined */
 export const idDeElemento = (v: unknown): string | undefined => (typeof v === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(v) ? v : undefined)
+
+/** nome de campo do JSON de uma sugestão (`titulo`, `imagem`…): identificador simples; senão o padrão */
+export const nomeDeCampo = (v: unknown, padrao: string): string => (typeof v === 'string' && /^[A-Za-z][A-Za-z0-9_]{0,40}$/.test(v) ? v : padrao)
+/** os atributos `data-*` de uma lista de sugestões ao vivo (o cliente lê); undefined se a `url` não é um caminho do próprio site */
+export function sugestoesAoVivo(p: Record<string, unknown>): Record<string, string> | undefined {
+  const url = caminhoLocal(p.url, ''); if (!url) return undefined
+  const lim = typeof p.limite === 'number' && Number.isFinite(p.limite) ? Math.min(10, Math.max(1, Math.trunc(p.limite))) : 6
+  return { 'data-sugestoes-url': url, 'data-titulo': nomeDeCampo(p.titulo, 'titulo'), ...(typeof p.descricao === 'string' && p.descricao ? { 'data-descricao': nomeDeCampo(p.descricao, 'descricao') } : {}), ...(typeof p.imagem === 'string' && p.imagem ? { 'data-imagem': nomeDeCampo(p.imagem, 'imagem') } : {}), 'data-limite': String(lim), 'data-destino': caminhoLocal(p.destino), 'data-nome': nomeDeParametro(p.nome) }
+}

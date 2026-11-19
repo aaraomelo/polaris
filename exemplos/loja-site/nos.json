@@ -106,11 +106,10 @@
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
                       "placeholder": "Buscar destaques",
-                      "sugestoes": [
-                        "Café",
-                        "Cafeteira italiana",
-                        "Pão de queijo"
-                      ]
+                      "sugestoesUrl": "/api/loja/destaques",
+                      "sugestoesDescricao": "descricao",
+                      "sugestoesImagem": "imagem",
+                      "sugestoesLimite": 5
                     }
                   },
                   {
@@ -268,11 +267,10 @@
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
                       "placeholder": "Buscar destaques",
-                      "sugestoes": [
-                        "Café",
-                        "Cafeteira italiana",
-                        "Pão de queijo"
-                      ]
+                      "sugestoesUrl": "/api/loja/destaques",
+                      "sugestoesDescricao": "descricao",
+                      "sugestoesImagem": "imagem",
+                      "sugestoesLimite": 5
                     }
                   },
                   {
@@ -426,11 +424,10 @@
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
                       "placeholder": "Buscar destaques",
-                      "sugestoes": [
-                        "Café",
-                        "Cafeteira italiana",
-                        "Pão de queijo"
-                      ]
+                      "sugestoesUrl": "/api/loja/destaques",
+                      "sugestoesDescricao": "descricao",
+                      "sugestoesImagem": "imagem",
+                      "sugestoesLimite": 5
                     }
                   },
                   {
@@ -643,11 +640,10 @@
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
                       "placeholder": "Buscar destaques",
-                      "sugestoes": [
-                        "Café",
-                        "Cafeteira italiana",
-                        "Pão de queijo"
-                      ]
+                      "sugestoesUrl": "/api/loja/destaques",
+                      "sugestoesDescricao": "descricao",
+                      "sugestoesImagem": "imagem",
+                      "sugestoesLimite": 5
                     }
                   },
                   {
@@ -846,11 +842,10 @@
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
                       "placeholder": "Buscar destaques",
-                      "sugestoes": [
-                        "Café",
-                        "Cafeteira italiana",
-                        "Pão de queijo"
-                      ]
+                      "sugestoesUrl": "/api/loja/destaques",
+                      "sugestoesDescricao": "descricao",
+                      "sugestoesImagem": "imagem",
+                      "sugestoesLimite": 5
                     }
                   },
                   {
@@ -1089,11 +1084,10 @@
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
                       "placeholder": "Buscar destaques",
-                      "sugestoes": [
-                        "Café",
-                        "Cafeteira italiana",
-                        "Pão de queijo"
-                      ]
+                      "sugestoesUrl": "/api/loja/destaques",
+                      "sugestoesDescricao": "descricao",
+                      "sugestoesImagem": "imagem",
+                      "sugestoesLimite": 5
                     }
                   },
                   {

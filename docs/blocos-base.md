@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-39 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+40 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -28,6 +28,7 @@
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| form | `form/sugestoes-ao-vivo` | `url`, `titulo`, `descricao`, `imagem`, `limite`, `destino`, `nome`, `rotulo` | | |
 | form | `form/sugestoes` | (só filhos; `id` liga ao campo) | | |
 | form | `form/opcao` | `valor` | | |
 | nav | `nav/submenu` | (só filhos) | | |
@@ -91,3 +92,9 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 
 **Busca com lista de sugestões**: o `site/busca` aceita `sugestoes` (até 20 termos de até 100 caracteres): vira um `<datalist>` nativo (`form/sugestoes` com `form/opcao`) ligado ao campo por `lista` (`entrada/busca`). **Sem JavaScript**: o navegador filtra as opções pelo que foi digitado e oferece a lista; escolher uma preenche o campo (o envio continua sendo do botão ou do Enter). Com a lista, o navegador passa a anunciar o campo como **caixa de combinação** (`combobox`), não mais `searchbox`.
 **Limites**: as sugestões são **fixas na página** (declaradas no JSON), **não vêm do servidor a cada tecla** (isso pediria um endpoint de sugestões e JavaScript no cliente); o casamento é do navegador (prefixo/trecho, sem garantia de ignorar acento); a aparência da lista é do navegador (não segue o tema); **uma barra com sugestões por página** (o id da lista é fixo, `busca-sugestoes`).
+
+**Sugestões ao vivo (`form/sugestoes-ao-vivo`)**: lista **do servidor** sob o campo de busca, no estilo do tema, com **título, descrição e miniatura**. No `site/busca`: `sugestoesUrl` (caminho do próprio site que devolve JSON, ex.: `/api/loja/destaques`), `sugestoesTitulo` (padrão `titulo`), `sugestoesDescricao`, `sugestoesImagem` (campo com o caminho da miniatura), `sugestoesLimite` (1 a 10, padrão 6) e `sugestoesDestino` (padrão: a `acao`). Como funciona (script do roteador do gateway, `navegacao.ts`): a partir de **2 letras** e a cada pausa de 180 ms o cliente chama `url?busca=<termo>&limite=<n>` (cancela a chamada anterior e guarda o resultado por termo); com o serviço em `busca.modo: aproximada` (`docs/servicos.md`) a lista **tolera erro de digitação e vem por relevância** ("cafetera" acha "Cafeteira italiana"). Escolher um item abre `destino?q=<título>`.
+- **Teclado e leitor de tela**: o campo vira `combobox` (`aria-autocomplete`, `aria-expanded`, `aria-activedescendant`), a lista é `listbox` com itens `option`; **setas** movem, **Enter** abre o item ativo (sem item ativo, é o envio normal da busca), **Esc** fecha, clique fora fecha; um aviso `role=status` diz quantas sugestões há.
+- **Segurança**: o que vem do servidor entra **só como texto** (`textContent`, nunca HTML); a miniatura só vale se for **caminho do próprio site** (`/…`, nunca `//` nem URL de fora; o CSP também só carrega imagens do próprio site); `url` precisa ser caminho do próprio site; nomes de campo são identificadores simples.
+- **Miniatura**: o campo da entidade guarda o caminho de uma imagem hospedada (`/_polaris/img/<hash>.webp?w=160` é a versão de 160 px, `docs/imagens.md`). O exemplo `loja` ganhou o campo `imagem` na entidade `destaque`.
+- **Limites**: **precisa de JavaScript** (sem ele a lista fica oculta e a busca normal segue funcionando; use `sugestoes`, a lista nativa, se quiser algo sem JS); o termo vai na chamada pública da API (a taxa do gateway vale), então a rota precisa ser **pública** para visitantes; a lista só mostra o que a rota já expõe; sem destaque do trecho achado; uma barra com sugestões ao vivo por página para o teclado (os ids são gerados); campo novo em banco existente exige migração (o DDL gerado só cria tabelas novas; o ambiente local faz o `ALTER` sozinho).
