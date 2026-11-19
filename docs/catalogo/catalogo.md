@@ -1197,6 +1197,7 @@ Coloca os filhos lado a lado (flex row).
 |---|---|---|---|---|
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  |  |
 | `gap` | número ≥ 0 | não |  |  |
+| `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
 
 **Slots**
 
@@ -1329,6 +1330,7 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
 |---|---|---|---|---|
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  |  |
 | `gap` | número ≥ 0 | não |  |  |
+| `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
 
 **Slots**
 
@@ -1810,7 +1812,7 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 |---|---|---|---|---|
 | `atual` | booleano | não |  | o item escolhido (aria-current), ex.: no menu lateral |
 | `desabilitado` | booleano | não |  |  |
-| `icone` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" | não |  | ícone da família Grafite antes do texto (ver `midia/icone`) |
+| `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
 | `texto` | texto | sim |  |  |
 | `variante` | "primario" \| "secundario" \| "fantasma" | não |  | primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto |
 
@@ -1898,7 +1900,7 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 | `atual` | booleano | não |  | a página atual: o link leva aria-current="page" |
 | `botao` | texto ≤ 12 caracteres | não |  | primario ou secundario: o link com aparência de botão |
 | `href` | texto | sim |  |  |
-| `icone` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" | não |  | ícone da família Grafite antes do texto (ver `midia/icone`) |
+| `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
 | `texto` | texto | não |  |  |
 
 **Slots**

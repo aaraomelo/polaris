@@ -7,6 +7,9 @@ import { KINDS_DO_TENANT } from './overrides'
 
 // API de AUTORIA do Studio. O tenant e o autor vêm SEMPRE da sessão (`autentica`), nunca do corpo: não há como gravar, ler ou comentar em nome de outro tenant ou outra pessoa.
 // Tudo é gravado como versão imutável (E7); aqui só há leitura, gravação com controle de concorrência (409 se alguém salvou antes), histórico, diff e comentários.
+/** o ícone (família Grafite) de cada bloco: por padrão `a/b` → `a-b`; os compostos do site reaproveitam o do bloco que mais se parece */
+const ICONE_DE_BLOCO: Record<string, string> = { 'site/cabecalho': 'layout-cabecalho', 'site/rodape': 'layout-rodape', 'site/hero': 'layout-destaque', 'site/busca': 'form-busca', 'site/menu-lateral': 'layout-lateral' }
+
 export type Sessao = { tenantId: string; usuario: string; pode(permissao: 'studio.ver' | 'studio.comentar' | 'studio.editar'): boolean }
 const ACAO: Record<Parameters<Sessao['pode']>[0], string> = { 'studio.ver': 'ver', 'studio.comentar': 'comentar', 'studio.editar': 'editar' }
 /** a sessão do Studio a partir do token do gateway: as permissões vêm dos PAPÉIS (`studio.leitor` ⊂ `studio.comentarista` ⊂ `studio.editor`), com a mesma semântica de acesso dos serviços (negar vence, falha fechada). Papel desconhecido = sem nenhuma permissão. */
@@ -82,7 +85,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.get('/studio/blocos', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
     const { registro } = await o.armazem.registroDoTenant(s.tenantId)
-    const blocos = registro.ids('bloco').map((id) => { const no = registro.resolve('bloco', id)?.no; const sp = (no?.spec ?? {}) as Record<string, unknown>; return { id, titulo: (sp.titulo as string | undefined) ?? id, ...(sp.descricao ? { descricao: sp.descricao } : {}), ...(sp.props ? { props: sp.props } : {}), slots: sp.slots ?? {}, composto: sp.modelo !== undefined, ...(sp.codigo !== undefined ? { codigo: true } : {}) } })
+    const blocos = registro.ids('bloco').map((id) => { const no = registro.resolve('bloco', id)?.no; const sp = (no?.spec ?? {}) as Record<string, unknown>; const desc = typeof sp.descricao === 'string' ? sp.descricao : '', primeira = (desc.split(/(?<=[.!?])\s/)[0] ?? '').replace(/`/g, ''), resumo = primeira.length > 110 ? `${primeira.slice(0, 107).trimEnd()}…` : primeira; return { id, titulo: (sp.titulo as string | undefined) ?? id, ...(resumo ? { resumo } : {}), icone: ICONE_DE_BLOCO[id] ?? id.replace('/', '-'), ...(sp.descricao ? { descricao: sp.descricao } : {}), ...(sp.props ? { props: sp.props } : {}), slots: sp.slots ?? {}, composto: sp.modelo !== undefined, ...(sp.codigo !== undefined ? { codigo: true } : {}) } })
     return { blocos }
   })
 

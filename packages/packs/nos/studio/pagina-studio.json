@@ -607,6 +607,29 @@
      "tipo": "texto",
      "inicial": ""
     },
+    "tmpBloco": {
+     "tipo": "json"
+    },
+    "tmpDentro": {
+     "tipo": "booleano",
+     "inicial": false
+    },
+    "tmpCaminho": {
+     "tipo": "json",
+     "inicial": []
+    },
+    "tmpPos": {
+     "tipo": "inteiro",
+     "inicial": 0
+    },
+    "catBloco": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "buscaBloco": {
+     "tipo": "texto",
+     "inicial": ""
+    },
     "painel": {
      "tipo": "texto",
      "inicial": ""
@@ -4457,6 +4480,415 @@
                 }
                },
                {
+                "bloco": "layout/pilha",
+                "se": "estado.no && estado.aberto.kind == \"pagina\" && obter(estado.no.spec.raiz, estado.sel)",
+                "props": {
+                 "gap": 6
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "layout/linha",
+                   "props": {
+                    "gap": 6,
+                    "alinha": "centro",
+                    "quebra": true
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "texto/pequeno",
+                      "props": {
+                       "texto": "{\"Adicionar \" + (tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0 ? \"dentro de \" : \"depois de \") + (obter(estado.no.spec.raiz, estado.sel)).bloco}"
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Layout (\" + tamanho(filtra(blocos.blocos, bd => algum([\"layout/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "layout-painel",
+                       "atual": "{estado.catBloco == \"layout\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"layout\" ? \"\" : \"layout\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Texto (\" + tamanho(filtra(blocos.blocos, bd => algum([\"texto/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "texto-paragrafo",
+                       "atual": "{estado.catBloco == \"texto\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"texto\" ? \"\" : \"texto\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Navegação (\" + tamanho(filtra(blocos.blocos, bd => algum([\"nav/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "nav-menu",
+                       "atual": "{estado.catBloco == \"nav\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"nav\" ? \"\" : \"nav\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Formulário (\" + tamanho(filtra(blocos.blocos, bd => algum([\"form/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "form-formulario",
+                       "atual": "{estado.catBloco == \"form\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"form\" ? \"\" : \"form\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Entrada (\" + tamanho(filtra(blocos.blocos, bd => algum([\"entrada/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "entrada-texto",
+                       "atual": "{estado.catBloco == \"entrada\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"entrada\" ? \"\" : \"entrada\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Mídia (\" + tamanho(filtra(blocos.blocos, bd => algum([\"midia/\", \"computacao/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "midia-imagem",
+                       "atual": "{estado.catBloco == \"midia\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"midia\" ? \"\" : \"midia\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Dados (\" + tamanho(filtra(blocos.blocos, bd => algum([\"lista/\", \"tabela/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "tabela-tabela",
+                       "atual": "{estado.catBloco == \"dados\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"dados\" ? \"\" : \"dados\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Feedback (\" + tamanho(filtra(blocos.blocos, bd => algum([\"feedback/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "feedback-alerta",
+                       "atual": "{estado.catBloco == \"feedback\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"feedback\" ? \"\" : \"feedback\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Site (\" + tamanho(filtra(blocos.blocos, bd => algum([\"site/\"], pf => comeca(bd.id, pf)))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "layout-destaque",
+                       "atual": "{estado.catBloco == \"site\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"site\" ? \"\" : \"site\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{\"Outros (\" + tamanho(filtra(blocos.blocos, bd => !(algum([\"layout/\", \"texto/\", \"nav/\", \"form/\", \"entrada/\", \"midia/\", \"computacao/\", \"lista/\", \"tabela/\", \"feedback/\", \"site/\"], pf => comeca(bd.id, pf))))) + \")\"}",
+                       "variante": "secundario",
+                       "icone": "mais",
+                       "atual": "{estado.catBloco == \"outros\" && estado.buscaBloco == \"\"}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "estado.catBloco == \"outros\" ? \"\" : \"outros\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "entrada/texto",
+                      "props": {
+                       "valor": "{estado.buscaBloco}",
+                       "rotulo": "Buscar bloco",
+                       "placeholder": "Buscar bloco"
+                      },
+                      "eventos": {
+                       "aoMudar": [
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "evento"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "\"\""
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "layout/pilha",
+                   "se": "estado.catBloco != \"\" || estado.buscaBloco != \"\"",
+                   "props": {
+                    "gap": 6
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "layout/grade",
+                      "props": {
+                       "colunas": 3,
+                       "gap": 8
+                      },
+                      "slots": {
+                       "filhos": [
+                        {
+                         "bloco": "layout/pilha",
+                         "repetir": {
+                          "cada": "filtra(blocos.blocos, bd => estado.buscaBloco != \"\" ? contem(semAcentos(minusculas(bd.id + \" \" + bd.titulo + \" \" + (bd.resumo ?? \"\"))), semAcentos(minusculas(estado.buscaBloco))) : estado.catBloco == \"outros\" ? !(algum([\"layout/\", \"texto/\", \"nav/\", \"form/\", \"entrada/\", \"midia/\", \"computacao/\", \"lista/\", \"tabela/\", \"feedback/\", \"site/\"], pf => comeca(bd.id, pf))) : algum(obter(objeto([[\"layout\", [\"layout/\"]], [\"texto\", [\"texto/\"]], [\"nav\", [\"nav/\"]], [\"form\", [\"form/\"]], [\"entrada\", [\"entrada/\"]], [\"midia\", [\"midia/\", \"computacao/\"]], [\"dados\", [\"lista/\", \"tabela/\"]], [\"feedback\", [\"feedback/\"]], [\"site\", [\"site/\"]]]), [estado.catBloco]) ?? [], pf => comeca(bd.id, pf)))",
+                          "como": "bd",
+                          "chave": "bd.id"
+                         },
+                         "props": {
+                          "gap": 2
+                         },
+                         "slots": {
+                          "filhos": [
+                           {
+                            "bloco": "nav/botao",
+                            "props": {
+                             "texto": "{bd.titulo}",
+                             "variante": "secundario",
+                             "icone": "{bd.icone}"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "chaveEdicao",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "passado",
+                               "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "futuro",
+                               "valor": "[]"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "tmpBloco",
+                               "valor": "mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + estado.contador]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "tmpDentro",
+                               "valor": "tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "tmpCaminho",
+                               "valor": "estado.tmpDentro ? concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]) : concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "tmpPos",
+                               "valor": "estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "no",
+                               "valor": "com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "contador",
+                               "valor": "estado.contador + 1"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "catBloco",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "buscaBloco",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ]
+                            }
+                           },
+                           {
+                            "bloco": "texto/pequeno",
+                            "props": {
+                             "texto": "{bd.resumo ?? bd.id}"
+                            }
+                           }
+                          ]
+                         }
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "texto/paragrafo",
+                      "se": "estado.buscaBloco != \"\" && tamanho(filtra(blocos.blocos, bd => estado.buscaBloco != \"\" ? contem(semAcentos(minusculas(bd.id + \" \" + bd.titulo + \" \" + (bd.resumo ?? \"\"))), semAcentos(minusculas(estado.buscaBloco))) : estado.catBloco == \"outros\" ? !(algum([\"layout/\", \"texto/\", \"nav/\", \"form/\", \"entrada/\", \"midia/\", \"computacao/\", \"lista/\", \"tabela/\", \"feedback/\", \"site/\"], pf => comeca(bd.id, pf))) : algum(obter(objeto([[\"layout\", [\"layout/\"]], [\"texto\", [\"texto/\"]], [\"nav\", [\"nav/\"]], [\"form\", [\"form/\"]], [\"entrada\", [\"entrada/\"]], [\"midia\", [\"midia/\", \"computacao/\"]], [\"dados\", [\"lista/\", \"tabela/\"]], [\"feedback\", [\"feedback/\"]], [\"site\", [\"site/\"]]]), [estado.catBloco]) ?? [], pf => comeca(bd.id, pf)))) == 0",
+                      "props": {
+                       "texto": "Nenhum bloco para \"{estado.buscaBloco}\"."
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               },
+               {
                 "bloco": "layout/grade",
                 "props": {
                  "colunas": 3,
@@ -4798,7 +5230,8 @@
                          "se": "c.tipo == \"escolha\"",
                          "props": {
                           "gap": 4,
-                          "alinha": "centro"
+                          "alinha": "centro",
+                          "quebra": true
                          },
                          "slots": {
                           "filhos": [
@@ -4864,75 +5297,6 @@
                          "se": "c.tipo == \"json\"",
                          "props": {
                           "texto": "(valor estruturado: edite no JSON do nó)"
-                         }
-                        }
-                       ]
-                      }
-                     },
-                     {
-                      "bloco": "texto/titulo",
-                      "props": {
-                       "texto": "Adicionar dentro",
-                       "nivel": 5
-                      }
-                     },
-                     {
-                      "bloco": "layout/linha",
-                      "props": {
-                       "gap": 4
-                      },
-                      "repetir": {
-                       "cada": "filtra(blocos.blocos, bd => !acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco).slots || (acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos || tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)) > 0)",
-                       "como": "bd",
-                       "chave": "bd.id"
-                      },
-                      "slots": {
-                       "filhos": [
-                        {
-                         "bloco": "nav/botao",
-                         "props": {
-                          "texto": "+ {bd.id}",
-                          "variante": "secundario"
-                         },
-                         "eventos": {
-                          "aoClicar": [
-                           {
-                            "acao": "definir",
-                            "estado": "chaveEdicao",
-                            "valor": "\"\""
-                           },
-                           {
-                            "acao": "definir",
-                            "estado": "passado",
-                            "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                           },
-                           {
-                            "acao": "definir",
-                            "estado": "futuro",
-                            "valor": "[]"
-                           },
-                           {
-                            "acao": "definir",
-                            "estado": "no",
-                            "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]), concat(obter(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))])) ?? [], [mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + estado.contador]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))]))"
-                           },
-                           {
-                            "acao": "definir",
-                            "estado": "contador",
-                            "valor": "estado.contador + 1"
-                           },
-                           {
-                            "acao": "executar",
-                            "dados": "previa",
-                            "args": {
-                             "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                             "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                             "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                             "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                             "modo": "{estado.modoPrevia}"
-                            }
-                           }
-                          ]
                          }
                         }
                        ]

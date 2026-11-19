@@ -36,6 +36,8 @@ async function entra(usuario: string, tenant: 'a' | 'b' = 'a'): Promise<{ ctx: B
   await p.goto(`${url}/studio`); await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); return { ctx, p }
 }
 const previa = (p: Page) => p.frameLocator('iframe[title="Pré-visualização da página"]')
+/** a paleta horizontal: abre a categoria (botão "Texto (n)") e escolhe o bloco pelo título */
+const adiciona = async (p: Page, categoria: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${categoria}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
 const linhaDe = (p: Page, id: string) => p.getByRole('button', { name: new RegExp(`#${id}$`) })
 const quadro = (p: Page) => p.frameLocator('iframe[title="Amostra do tema"]')
 
@@ -86,7 +88,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   })
   it('estrutura: adicionar bloco (nasce válido), mover, remover; salvar grava e a recarga traz o salvo', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'estrutura (personalizado)' }).click(); await linhaDe(p, 'raiz').click()
-    await p.getByRole('button', { name: '+ texto/pequeno' }).click(); await expect(linhaDe(p, 'b1')).toBeVisible(); await expect(previa(p).getByText('Texto', { exact: true })).toBeVisible()
+    await adiciona(p, 'Texto', 'Texto pequeno'); await expect(linhaDe(p, 'b1')).toBeVisible(); await expect(previa(p).getByText('Texto', { exact: true })).toBeVisible()
     await linhaDe(p, 'p2').click(); await p.getByRole('button', { name: 'Subir' }).click(); const ids = async () => (await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => /#(\w+)$/.exec(t)?.[1]).filter(Boolean).join(',')
     expect(await ids()).toBe('raiz,titulo,p2,p1,b1')
     await p.getByRole('button', { name: 'Remover' }).click(); expect(await ids()).toBe('raiz,titulo,p1,b1')
@@ -107,14 +109,14 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   })
   it('nova página: nasce no rascunho, compila, ganha blocos e salva como versão 1', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('criada-no-v2'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/criada'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
-    await expect(p.getByText('Página criada-no-v2')).toBeVisible(); await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: '+ texto/titulo' }).click(); await expect(previa(p).locator('h1')).toHaveText('Texto')
+    await expect(p.getByText('Página criada-no-v2')).toBeVisible(); await linhaDe(p, 'raiz').click(); await adiciona(p, 'Texto', 'Título'); await expect(previa(p).locator('h1')).toHaveText('Texto')
     await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText('Salvo como versão 1')).toBeVisible(); expect((await app.inject({ url: '/studio/nos/pagina/criada-no-v2', headers: { cookie: 'u=ana|a' } })).json()).toMatchObject({ origem: 'tenant', seq: 1 })
     await ctx.close()
   })
   it('histórico: versões, diff semântico entre elas, restaurar no editor e salvar como nova versão', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'hist (personalizado)' }).click(); await linhaDe(p, 'p1').click()
     await p.getByRole('textbox', { name: 'Texto', exact: true }).fill('Primeiro editado'); await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText('Salvo como versão 2')).toBeVisible()
-    await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: '+ feedback/selo' }).click(); await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText('Salvo como versão 3')).toBeVisible()
+    await linhaDe(p, 'raiz').click(); await adiciona(p, 'Feedback', 'Selo'); await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText('Salvo como versão 3')).toBeVisible()
     await p.getByRole('button', { name: 'Histórico e comentários' }).click(); await expect(p.getByText(/^v1 · seed/)).toBeVisible(); await expect(p.getByText(/^v3 · ana/)).toBeVisible()
     await p.getByRole('button', { name: 'De' }).last().click(); await p.getByRole('button', { name: 'Para' }).first().click(); await p.getByRole('button', { name: 'Comparar versões' }).click()
     await expect(p.getByText(/^adicionado .*b1/)).toBeVisible(); await expect(p.getByText(/alterado .*p1/)).toBeVisible(); await expect(p.getByText(/props\.texto: "?Primeiro"? → "?Primeiro editado"?/)).toBeVisible()
@@ -151,6 +153,26 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     for (const i of await p.getByRole('textbox').all()) expect(((await i.getAttribute('aria-label')) ?? (await i.getAttribute('id')) ?? '').length, 'campo sem nome acessível').toBeGreaterThan(0)
     for (const f of await p.locator('iframe').all()) expect((await f.getAttribute('title')) ?? '').not.toBe('')
     await p.getByRole('button', { name: 'home (personalizado)' }).focus(); await p.keyboard.press('Enter'); await expect(p.getByText('Página home')).toBeVisible()
+    await ctx.close()
+  })
+  it('paleta de blocos: categorias na horizontal com contagem, lista com título e resumo, busca em todas, entra DENTRO do que aceita filhos e DEPOIS do que não aceita', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('paleta-teste'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/paleta'); await p.getByRole('button', { name: 'Criar', exact: true }).click() // página nova e vazia: o teste não depende do que os outros deixaram nas páginas de exemplo
+    await expect(p.getByText('Página paleta-teste')).toBeVisible(); await linhaDe(p, 'raiz').click()
+    const cats = await p.getByRole('button', { name: /^(Layout|Texto|Navegação|Formulário|Entrada|Mídia|Dados|Feedback|Site|Outros)\s\(\d+\)$/ }).allInnerTexts(); expect(cats.map((c) => c.replace(/\s\(\d+\)$/, ''))).toEqual(['Layout', 'Texto', 'Navegação', 'Formulário', 'Entrada', 'Mídia', 'Dados', 'Feedback', 'Site', 'Outros'])
+    await expect(p.getByText('Adicionar dentro de layout/pilha')).toBeVisible()
+    const boxes = await Promise.all(cats.map(async (_, i) => (await p.getByRole('button', { name: /^(Layout|Texto|Navegação|Formulário|Entrada|Mídia|Dados|Feedback|Site|Outros)\s\(\d+\)$/ }).nth(i).boundingBox())!)); expect(new Set(boxes.map((b) => Math.round(b!.y))).size).toBeLessThanOrEqual(2) // lado a lado (uma linha, no máximo quebra uma vez)
+    await p.setViewportSize({ width: 1000, height: 800 }); expect(await p.evaluate(() => { const m = document.querySelector('main')!; return m.scrollWidth <= m.clientWidth })).toBe(true); await p.setViewportSize({ width: 1280, height: 720 }) // a paleta quebra em outra linha em vez de rolar o conteúdo para o lado
+    await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0) // nada aberto: a lista longa de antes sumiu
+    await p.getByRole('button', { name: /^Layout\s\(/ }).click(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toBeVisible(); await expect(p.getByText('Empilha os filhos na vertical')).toBeVisible(); expect(await p.locator('button[data-icone]', { hasText: 'Pilha' }).getAttribute('data-icone')).toBe('layout-pilha') // título, resumo e ícone
+    await expect(p.getByRole('button', { name: /^Layout\s\(/ })).toHaveAttribute('aria-current', 'true'); await p.getByRole('button', { name: /^Layout\s\(/ }).click(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0) // abre e fecha
+    await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('tabela'); await expect(p.getByRole('button', { name: 'Tabela', exact: true })).toBeVisible(); await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0)
+    await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('zzzqqq'); await expect(p.getByText('Nenhum bloco para "zzzqqq".')).toBeVisible(); await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('')
+    const ids = async () => (await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => /#(\w+)$/.exec(t)?.[1]).filter(Boolean)
+    await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Texto', 'Título') // dois filhos dentro do raiz (o raiz continua selecionado)
+    const [primeiro, segundo] = (await ids()).filter((x) => x !== 'raiz'); expect(await ids()).toEqual(['raiz', primeiro, segundo]); await linhaDe(p, primeiro!).click();  await expect(p.getByText('Adicionar depois de texto/paragrafo')).toBeVisible(); const antes = await ids(); await adiciona(p, 'Texto', 'Texto pequeno'); const depois = await ids()
+    const novo = depois.filter((x) => !antes.includes(x)); expect(novo).toHaveLength(1); expect(depois).toEqual(['raiz', primeiro, novo[0], segundo]) // DEPOIS do selecionado, no mesmo pai (entre os dois)
+    await linhaDe(p, 'raiz').click(); await adiciona(p, 'Feedback', 'Alerta'); const fim = await ids(); expect(fim.length).toBe(depois.length + 1); expect(fim[fim.length - 1]).toBe(fim.filter((x) => !depois.includes(x))[0]) // no raiz: entra dentro, no fim
+    await expect(p.getByRole('button', { name: 'Alerta', exact: true })).toHaveCount(0) // a lista fecha depois de adicionar
     await ctx.close()
   })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {

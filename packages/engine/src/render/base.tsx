@@ -15,7 +15,7 @@ import { caminhoLocal, cssUrl, idDeElemento, nomeDeIcone, nomeDeParametro, taman
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 /** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
 const rotuloDe = (props: Record<string, unknown>): Record<string, string> => (typeof props.rotulo === 'string' && props.rotulo.trim() ? { 'aria-label': props.rotulo.trim().slice(0, 200) } : {})
-const ICONE_PROP = { type: 'string', enum: NOMES_ICONES, description: 'ícone da família Grafite antes do texto (ver `midia/icone`)' }
+const ICONE_PROP = { type: 'string', description: 'ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada' }
 const ROTULO = { type: 'string', maxLength: 200, description: 'nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para`' }
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
 const tomDe = (p: Record<string, unknown>): string => (typeof p.tom === 'string' && ['neutro', 'sucesso', 'alerta', 'erro'].includes(p.tom) ? p.tom : 'neutro')
@@ -24,7 +24,7 @@ const ALINHA: Record<string, CSSProperties['alignItems']> = { inicio: 'flex-star
 const caixa = (direcao: 'column' | 'row'): Componentes[string] => ({ props, slots, id }) =>
   createElement('div', {
     ...(id ? { id } : {}),
-    style: { display: 'flex', flexDirection: direcao, ...(num(props.gap) !== undefined ? { gap: num(props.gap) } : {}), ...(typeof props.alinha === 'string' && ALINHA[props.alinha] ? { alignItems: ALINHA[props.alinha] } : {}) },
+    style: { display: 'flex', flexDirection: direcao, ...(num(props.gap) !== undefined ? { gap: num(props.gap) } : {}), ...(typeof props.alinha === 'string' && ALINHA[props.alinha] ? { alignItems: ALINHA[props.alinha] } : {}), ...(props.quebra === true ? { flexWrap: 'wrap' } : {}) },
   }, slots.filhos)
 
 export const COMPONENTES_BASE: Componentes = {
@@ -133,8 +133,8 @@ export const COMPONENTES_BASE: Componentes = {
 const bloco = (iface: string, spec: object = {}) => ({ kind: 'bloco', id: iface.replace('/', '.'), versao: '1.0.0', estatuto: 'publicado', spec: { interface: iface, ...(DOCS_BASE[iface] ?? {}), ...spec } })
 
 export const BLOCOS_BASE = [
-  bloco('layout/pilha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] } } } }),
-  bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] } } } }),
+  bloco('layout/pilha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap)' } } } }),
+  bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura' } } } }),
   bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6, default: 1 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 }, tamanhos: { type: 'string', maxLength: 200 } }, required: ['src'] } }),

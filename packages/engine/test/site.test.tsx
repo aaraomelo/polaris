@@ -270,7 +270,7 @@ describe('ícones (midia/icone e `icone` de botões e links)', () => {
   })
   it('o runtime só aceita o FORMATO do nome (minúsculas e hífens): nada que escape do seletor chega ao atributo; a lista fechada vale na compilação e no CSS; botão e link levam data-icone só com nome bem formado', () => {
     for (const n of ['"] , body{x:y}', '__proto__', 'Salvar', 'salvar<', '', 'a b', 'x'.repeat(40), 'a-b-c-d']) expect(nomeDeIcone(n), n).toBeUndefined(); expect(nomeDeIcone('salvar')).toBe('salvar'); expect(nomeDeIcone('layout-pilha')).toBe('layout-pilha'); expect(nomeDeIcone(7)).toBeUndefined()
-    expect(() => um('midia/icone', { nome: 'nao-existe' })).toThrow(/não é permitido/); expect(() => um('nav/botao', { texto: 'x', icone: 'salvar<' })).toThrow(/não é permitido/)
+    expect(() => um('midia/icone', { nome: 'nao-existe' })).toThrow(/não é permitido/); expect(um('nav/botao', { texto: 'x', icone: 'salvar<' }).querySelector('button')!.hasAttribute('data-icone')).toBe(false) // no botão e no link o nome pode vir de um dado: o runtime só aceita o formato
     expect(um('nav/botao', { texto: 'x', icone: 'salvar' }).querySelector('button')!.getAttribute('data-icone')).toBe('salvar'); expect(um('nav/botao', { texto: 'x' }).querySelector('button')!.hasAttribute('data-icone')).toBe(false)
     expect(um('nav/link', { href: '/x', texto: 'x', icone: 'entrar' }).querySelector('a')!.getAttribute('data-icone')).toBe('entrar')
   })

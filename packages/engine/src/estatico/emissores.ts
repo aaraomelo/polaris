@@ -18,7 +18,7 @@ const idAttr = (id: string | undefined) => (id ? ` id="${escHtml(id)}"` : '')
 const caixa = (direcao: 'column' | 'row'): Emissor => ({ props, filhos, id }) => {
   const gap = num(props.gap)
   const alinha = typeof props.alinha === 'string' ? ALINHA[props.alinha] : undefined
-  return `<div${idAttr(id)} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}">${filhos.filhos ?? ''}</div>`
+  return `<div${idAttr(id)} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${props.quebra === true ? ';flex-wrap:wrap' : ''}">${filhos.filhos ?? ''}</div>`
 }
 
 const MAO: Emissores = {
