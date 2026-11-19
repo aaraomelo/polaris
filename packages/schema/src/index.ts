@@ -64,6 +64,7 @@ export function criaValidador() {
 }
 
 export * from './registry'
+export { ACENTOS, SCHEMA_EXTENSOES, SEM_ACENTO, ddlExtensaoBusca, exprDeBusca, normalizaTermo, palavrasDe, paraLike } from './busca'
 export * from './migracao'
 export * from './estrutura'
 export * from './mensagens'

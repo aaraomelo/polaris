@@ -77,7 +77,7 @@
               "campos"
             ],
             "additionalProperties": false,
-            "description": "habilita o parâmetro `busca` na listagem gerada: palavras (até 5, todas devem aparecer) nos campos de texto indicados, sem diferenciar maiúsculas nem acentos",
+            "description": "habilita o parâmetro `busca` na listagem gerada: palavras (até 5, todas devem aparecer) nos campos de texto indicados, sem diferenciar maiúsculas nem acentos; `modo: aproximada` acrescenta tolerância a erros de digitação e relevância",
             "properties": {
               "campos": {
                 "type": "array",
@@ -88,6 +88,14 @@
                   "type": "string",
                   "pattern": "^[a-z][A-Za-z0-9]*$"
                 }
+              },
+              "modo": {
+                "enum": [
+                  "exata",
+                  "aproximada"
+                ],
+                "default": "exata",
+                "description": "exata: trechos de palavras, sem acento nem maiúsculas. aproximada: também erros de digitação e ordena por RELEVÂNCIA, com índice trigrama (exige a extensão pg_trgm no Postgres)"
               }
             }
           }

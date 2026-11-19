@@ -3,6 +3,6 @@
     "caminho": "/spec/entidades/artigo/busca/extra",
     "regra": "additionalProperties",
     "mensagem": "o campo 'extra' não existe aqui",
-    "dica": "campos válidos: campos"
+    "dica": "campos válidos: campos, modo"
   }
 ]

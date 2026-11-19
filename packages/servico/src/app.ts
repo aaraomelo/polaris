@@ -166,11 +166,12 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
       case 'listar': {
         const { pagina = 1, limite = 24, busca, ...filtros } = e.entrada as { pagina?: number; limite?: number; busca?: string } & Record<string, unknown>
         const onde: string[] = [], ps: unknown[] = []
-        if (typeof busca === 'string' && ent.busca) { const c = condicaoDeBusca(ent.busca.campos, busca, coluna, ps); if (c) onde.push(`(${c})`) } // busca por texto (sem acento nem maiúsculas); termo sem palavra nenhuma não filtra
+        let relevancia: string | undefined
+        if (typeof busca === 'string' && ent.busca) { const c = condicaoDeBusca(ent.busca, busca, coluna, ps); if (c) { onde.push(`(${c.onde})`); relevancia = c.relevancia } } // busca por texto (sem acento nem maiúsculas); termo sem palavra nenhuma não filtra; no modo aproximado, por relevância
         for (const [k, v] of Object.entries(filtros)) { ps.push(v); onde.push(`${coluna(k)} = $${ps.length}`) }
         if (cond) onde.push(`(${aSql(cond, coluna, ps, tipos as Tipos)})`) // o alcance do papel entra no WHERE: o que está fora nem é lido
         ps.push(limite, (pagina - 1) * limite)
-        const r = await e.q(`SELECT ${colunas(ent, leitura)} FROM ${t}${onde.length ? ` WHERE ${onde.join(' AND ')}` : ''} ORDER BY criado_em, id LIMIT $${ps.length - 1} OFFSET $${ps.length}`, ps)
+        const r = await e.q(`SELECT ${colunas(ent, leitura)} FROM ${t}${onde.length ? ` WHERE ${onde.join(' AND ')}` : ''} ORDER BY ${relevancia ? `(${relevancia}) DESC, ` : ''}criado_em, id LIMIT $${ps.length - 1} OFFSET $${ps.length}`, ps)
         return r.rows.map(projeta)
       }
       case 'obter': {

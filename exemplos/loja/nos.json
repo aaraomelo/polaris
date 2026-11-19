@@ -42,7 +42,8 @@
             "campos": [
               "titulo",
               "descricao"
-            ]
+            ],
+            "modo": "aproximada"
           }
         },
         "contato": {

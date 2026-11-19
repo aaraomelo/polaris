@@ -3,7 +3,7 @@ import { snake, type Campo } from '@polaris/schema'
 // SQL do CRUD, montado SÓ com nomes que vêm do schema do serviço (identificadores citados) e valores por parâmetro ($n). Nada da requisição vira texto de SQL.
 
 export const ident = (s: string) => `"${s.replace(/"/g, '""')}"`
-export type Ent = { campos: Record<string, Campo>; busca?: { campos: string[] } }
+export type Ent = { campos: Record<string, Campo>; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' } }
 
 /** A expressão que lê a coluna já no formato do JSON da API (o driver devolveria bigint/numeric como texto, data como Date…). */
 function leitura(nome: string, c: Campo): string {

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm'
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
 import { registraBase, voltaSegura } from '@polaris/engine'
 import { registraSite } from '@polaris/engine/site'
@@ -71,7 +72,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       if (existsSync(trava)) { const pid = Number(readFileSync(trava, 'utf8')); let vivo = false; try { process.kill(pid, 0); vivo = pid !== process.pid } catch { /* processo morto: trava velha */ } if (vivo) throw new Error(`já há um ambiente local usando estes dados (pid ${pid}); encerre-o antes`) }
       writeFileSync(trava, String(process.pid)); fecham.push(async () => { rmSync(trava, { force: true }) })
     }
-    const db = new PGlite(o.dados ?? undefined); await db.waitReady; fecham.push(() => db.close())
+    const db = new PGlite({ ...(o.dados ? { dataDir: o.dados } : {}), extensions: { pg_trgm } }); await db.waitReady; fecham.push(() => db.close())
     await db.exec(`DO $$ BEGIN
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_app') THEN CREATE ROLE polaris_app LOGIN; END IF;
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'polaris_migrador') THEN CREATE ROLE polaris_migrador LOGIN BYPASSRLS; END IF;

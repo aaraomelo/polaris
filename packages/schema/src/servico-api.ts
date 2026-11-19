@@ -7,7 +7,7 @@ import type { No } from './index'
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
 export type CrudOp = 'listar' | 'obter' | 'criar' | 'atualizar' | 'remover'
-type Ent = { campos: Record<string, Campo & { descricao?: string }>; busca?: { campos: string[] }; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
+type Ent = { campos: Record<string, Campo & { descricao?: string }>; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' }; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
 type Op = { metodo: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; caminho: string; entrada?: Record<string, Campo>; saida?: string; lista?: boolean; permissao?: string; publica?: string[] }
 type Spec = { entidades: Record<string, Ent>; operacoes: Record<string, Op>; consome?: string[] }
 

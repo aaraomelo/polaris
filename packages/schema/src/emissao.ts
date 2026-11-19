@@ -1,3 +1,4 @@
+import { SCHEMA_EXTENSOES, ddlExtensaoBusca, exprDeBusca } from './busca'
 import { emiteOpenApi } from './servico-api'
 import type { No } from './index'
 import type { Contexto, Registry } from './registry'
@@ -183,7 +184,7 @@ export function colunaSql(nome: string, c: Campo): string {
   return partes.join(' ')
 }
 
-type EntidadeSql = { campos: Record<string, Campo>; indices?: string[][]; unicos?: string[][] }
+type EntidadeSql = { campos: Record<string, Campo>; indices?: string[][]; unicos?: string[][]; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' } }
 const RESERVADOS = ['id', 'tenant_id', 'criado_em', 'atualizado_em']
 
 /** Nome da FK composta de um campo. */
@@ -283,6 +284,10 @@ export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, ent
     for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: único de '${nome}' usa campo inexistente '${c}'`)
     tabela.push(sqlIndice(servico, nome, cols, true))
   }
+  if (ent.busca?.modo === 'aproximada') { // índice trigrama sobre a MESMA expressão da consulta: acelera o LIKE '%palavra%' e a busca aproximada
+    for (const c of ent.busca.campos) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: busca de '${nome}' usa campo inexistente '${c}'`)
+    tabela.push(`CREATE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_busca_trgm`)} ON ${tab} USING gin ((${exprDeBusca(ent.busca.campos, (c) => identSql(snake(c)))}) ${SCHEMA_EXTENSOES}.gin_trgm_ops);`)
+  }
   tabela.push(...sqlRls(tab, snake(nome)))
   return { tabela, fks }
 }
@@ -294,6 +299,7 @@ export const sqlIndice = (servico: string, entidade: string, cols: string[], uni
 function emiteSql(no: No): string {
   const spec = no.spec as { entidades: Record<string, EntidadeSql>; operacoes?: Record<string, { publica?: string[] }>; consome?: string[] }
   const out: string[] = [`-- polaris: servico ${no.id}@${no.versao}`, `CREATE SCHEMA IF NOT EXISTS ${identSql(no.id)};`]
+  if (Object.values(spec.entidades).some((e) => e.busca?.modo === 'aproximada')) out.push(...ddlExtensaoBusca())
   const fks: string[] = [] // FKs vão DEPOIS de todas as tabelas (ordem e ciclos deixam de importar)
   for (const nome of Object.keys(spec.entidades).sort()) {
     const d = ddlEntidade(no.id, nome, spec.entidades[nome]!, spec.entidades)

@@ -1,21 +1,21 @@
-// Busca de texto das entidades que declaram `busca: { campos }`: por palavra (até 5, todas precisam aparecer), sem diferenciar maiúsculas NEM acentos, em Postgres puro (sem extensão `unaccent`).
-// A normalização é a MESMA no termo (aqui, em JS) e na coluna (em SQL, com `translate`): por isso a tabela de acentos é gerada uma vez e usada nos dois lados.
+import { SCHEMA_EXTENSOES, exprDeBusca, paraLike, palavrasDe } from '@polaris/schema'
 
-const BASE = (c: string) => c.normalize('NFD').replace(/\p{M}+/gu, '')
-const pares: Array<[string, string]> = []
-for (let cp = 0xc0; cp <= 0x24f; cp++) { const c = String.fromCodePoint(cp), b = BASE(c); if (b !== c && /^[A-Za-z]$/.test(b)) pares.push([c, b.toLowerCase()]) } // Latin-1, Latin Extended-A e B: á é ç ñ ü ø…
-export const ACENTOS = pares.map(([c]) => c).join(''), SEM_ACENTO = pares.map(([, b]) => b).join('')
+// Busca de texto das entidades que declaram `busca: { campos, modo }` (as regras de normalização e a expressão da coluna são do pacote schema, a mesma do índice).
+// modo `exata`: cada palavra (até 5) precisa ser um TRECHO do texto. modo `aproximada`: a palavra também pode ser PARECIDA (erro de digitação: `pg_trgm`, `word_similarity`), e o resultado sai por RELEVÂNCIA.
+// o limiar da aproximação é o padrão do pg_trgm para `<%` (`pg_trgm.word_similarity_threshold` = 0,6): abaixo disso é ruído
 
-/** o termo como a coluna fica depois de `lower(translate(…))`: sem acento e em minúsculas */
-export const normalizaTermo = (s: string): string => BASE(s).toLowerCase()
-export const palavrasDe = (s: string, max = 5): string[] => normalizaTermo(String(s).slice(0, 100)).split(/[^\p{L}\p{N}]+/u).filter(Boolean).slice(0, max)
-/** `%palavra%` com os curingas do LIKE escapados */
-const paraLike = (p: string) => `%${p.replace(/[\\%_]/g, (c) => `\\${c}`)}%`
-
-/** condição SQL (AND de palavras; cada uma em OR entre os campos) e acrescenta os parâmetros; null se o termo não tem palavra alguma */
-export function condicaoDeBusca(campos: string[], termo: string, coluna: (c: string) => string, ps: unknown[]): string | null {
+/** condição SQL (AND das palavras) e, no modo aproximado, a expressão de relevância; acrescenta os parâmetros. null se o termo não tem palavra alguma. */
+export function condicaoDeBusca(busca: { campos: string[]; modo?: 'exata' | 'aproximada' }, termo: string, coluna: (c: string) => string, ps: unknown[]): { onde: string; relevancia?: string } | null {
   const palavras = palavrasDe(termo); if (!palavras.length) return null
-  const lit = (s: string) => `'${s.replace(/'/g, "''")}'`
-  const norm = (c: string) => `lower(translate(coalesce(${coluna(c)}, ''), ${lit(ACENTOS)}, ${lit(SEM_ACENTO)}))`
-  return palavras.map((p) => { ps.push(paraLike(p)); return `(${campos.map((c) => `${norm(c)} LIKE $${ps.length} ESCAPE '\\'`).join(' OR ')})` }).join(' AND ')
+  const col = exprDeBusca(busca.campos, coluna), aprox = busca.modo === 'aproximada', e = SCHEMA_EXTENSOES
+  const partes: string[] = [], pontos: string[] = []
+  for (const p of palavras) {
+    ps.push(paraLike(p)); const like = `$${ps.length}`
+    if (!aprox) { partes.push(`(${col} LIKE ${like} ESCAPE '\\')`); continue }
+    ps.push(p); const palavra = `$${ps.length}::text`
+    partes.push(`(${col} LIKE ${like} ESCAPE '\\' OR ${palavra} OPERATOR(${e}.<%) ${col})`) // `<%` usa o índice trigrama (e o LIKE também)
+    const primeiro = busca.campos.length > 1 ? ` + CASE WHEN ${exprDeBusca(busca.campos.slice(0, 1), coluna)} LIKE ${like} ESCAPE '\\' THEN 0.5 ELSE 0 END` : '' // achar no PRIMEIRO campo (o título) vale mais
+    pontos.push(`(${e}.word_similarity(${palavra}, ${col}) + CASE WHEN ${col} LIKE ${like} ESCAPE '\\' THEN 1 ELSE 0 END + 0.5 * ${e}.similarity(${palavra}, ${col})${primeiro})`) // parecido < contém < contém e parecido; o texto mais curto e focado (`similarity`) desempata
+  }
+  return { onde: partes.join(' AND '), ...(aprox ? { relevancia: pontos.join(' + ') } : {}) }
 }
