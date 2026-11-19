@@ -129,6 +129,6 @@ describe('layout/destaque e site/hero', () => {
     expect(doHtml(h.pagina.render({}).corpo)).toBe(oraculo); const c = document.createElement('div'); montaVivo({ programa: pg, container: c }); expect([...c.childNodes].map(canon).join('')).toBe(oraculo)
   })
   it('o tema estiliza section[data-alinha] e a[data-botao] só com variáveis (botão primário invertido sobre o fundo primário)', () => {
-    const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/section\[data-fundo=primaria\]\{background-color:var\(--cor-primaria\)/); expect(css).toMatch(/section\[data-fundo=primaria\] a\[data-botao=primario\]\{background:var\(--cor-texto-sobre-primaria\)/)
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toMatch(/section\[data-fundo=primaria\]\{background-color:var\(--cor-primaria\)/); expect(css).toMatch(/section\[data-fundo=primaria\] a\[data-botao=primario\]\{background:var\(--cor-texto-sobre-primaria\)/); expect(css.indexOf('section[data-imagem] a[data-botao=primario]')).toBeGreaterThan(css.indexOf('section[data-fundo=primaria] a[data-botao=primario]')) // a regra da imagem vem DEPOIS (mesma especificidade: a última vale)
   })
 })

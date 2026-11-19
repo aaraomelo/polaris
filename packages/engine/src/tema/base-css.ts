@@ -31,16 +31,16 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris section[data-alinha=esquerda]{align-items:flex-start;text-align:left}
 #polaris section[data-alinha] h1,#polaris section[data-alinha] h2,#polaris section[data-alinha] p{margin:0}
 #polaris section[data-alinha] a:not([data-botao]){color:inherit}
-/* com imagem de fundo o véu (scrim) é SEMPRE preto, então o texto é branco em qualquer tema: a cor sobre-primária seria escura no modo escuro e sumiria na foto. É o par fixo do véu, não uma cor da marca (por isso as palavras-chave, e não variáveis) */
-#polaris section[data-imagem]{color:white}
-#polaris section[data-imagem] a[data-botao=primario]{background:white;color:black}
-#polaris section[data-imagem] a[data-botao=secundario]{color:white}
 #polaris a[data-botao]{display:inline-block;padding:calc(var(--espacamento-base) * 1.25) calc(var(--espacamento-base) * 2.5);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);font-weight:600;text-decoration:none}
 #polaris a[data-botao=primario]{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=primario]:hover{background:var(--cor-primaria-hover);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=secundario]{background:transparent;color:var(--cor-primaria);border-color:currentColor}
 #polaris section[data-fundo=primaria] a[data-botao=primario]{background:var(--cor-texto-sobre-primaria);color:var(--cor-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=secundario]{color:var(--cor-texto-sobre-primaria)}
+/* com imagem de fundo o véu (scrim) é SEMPRE preto, então o texto é branco em qualquer tema: a cor sobre-primária seria escura no modo escuro e sumiria na foto. É o par fixo do véu, não uma cor da marca (por isso as palavras-chave, e não variáveis) */
+#polaris section[data-imagem]{color:white}
+#polaris section[data-imagem] a[data-botao=primario]{background:white;color:black}
+#polaris section[data-imagem] a[data-botao=secundario]{color:white}
 #polaris footer{display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 3) calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border-top:var(--espacamento-borda) solid var(--cor-borda);color:var(--cor-texto-suave)}
 #polaris footer a{color:var(--cor-texto-suave)}
 #polaris footer a:hover{color:var(--cor-texto)}
