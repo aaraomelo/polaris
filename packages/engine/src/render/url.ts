@@ -48,3 +48,8 @@ export function sugestoesAoVivo(p: Record<string, unknown>): Record<string, stri
   const lim = typeof p.limite === 'number' && Number.isFinite(p.limite) ? Math.min(10, Math.max(1, Math.trunc(p.limite))) : 6
   return { 'data-sugestoes-url': url, 'data-titulo': nomeDeCampo(p.titulo, 'titulo'), ...(typeof p.descricao === 'string' && p.descricao ? { 'data-descricao': nomeDeCampo(p.descricao, 'descricao') } : {}), ...(typeof p.imagem === 'string' && p.imagem ? { 'data-imagem': nomeDeCampo(p.imagem, 'imagem') } : {}), 'data-limite': String(lim), 'data-destino': caminhoLocal(p.destino), 'data-nome': nomeDeParametro(p.nome) }
 }
+
+/** o nome de um ícone da família (`midia/icone`, `icone` de botões e links): só o FORMATO (minúsculas e hífens); quem existe de fato é a lista fechada do CSS do tema e o `enum` do schema do bloco (compilação). Um nome que não existe não pinta nada. */
+export const nomeDeIcone = (v: unknown): string | undefined => (typeof v === 'string' && /^[a-z]{2,12}(-[a-z]{2,12}){0,2}$/.test(v) ? v : undefined)
+/** o `--icone-tamanho` (px) de um `midia/icone`: 8 a 96, senão o padrão (1,25 em) */
+export const tamanhoDeIcone = (v: unknown): string | undefined => (typeof v === 'number' && Number.isFinite(v) ? `${Math.min(96, Math.max(8, Math.round(v)))}px` : undefined)

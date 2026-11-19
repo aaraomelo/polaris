@@ -75,15 +75,16 @@ const barraPendente = (): Inst => linha([
 ], { se: 'estado.pendente && ' + SUJO, props: { gap: 8 } })
 /** a seção de um tipo no menu lateral: os nós do tenant e os padrões da plataforma (o aberto fica marcado) e o botão de criar um novo */
 const secaoDeNos = (kind: 'tema' | 'pagina' | 'formulario' | 'cartaz'): Inst => {
+  const icone = { pagina: 'layout-principal', tema: 'tema-escuro', formulario: 'form-formulario', cartaz: 'cartaz' }[kind]
   const marca = (idExpr: string) => `{estado.aberto.kind == ${q(kind)} && estado.aberto.id == ${idExpr}}`
   const meus = `filtra(nos.nos, n => n.kind == ${q(kind)})`, base = `filtra(nos.base.${kind}, b => !comeca(b, "studio.") && tamanho(filtra(nos.nos, n => n.kind == ${q(kind)} && n.id == b)) == 0)`
   return pilha([
     P('texto/pequeno', { props: { texto: kind === 'tema' ? 'Temas' : kind === 'pagina' ? 'Páginas' : kind === 'cartaz' ? 'Cartazes' : 'Formulários' } }),
-    P('nav/botao', { se: `!(${SUJO})`, repetir: { cada: meus, como: 'n', chave: 'n.id' }, props: { texto: '{n.id} (personalizado)', atual: marca('n.id') }, eventos: { aoClicar: [abrir(kind, 'n.id')] } }),
-    P('nav/botao', { se: SUJO, repetir: { cada: meus, como: 'n', chave: 'n.id' }, props: { texto: '{n.id} (personalizado)', atual: marca('n.id') }, eventos: { aoClicar: [pede(kind, 'n.id')] } }),
-    P('nav/botao', { se: `!(${SUJO})`, repetir: { cada: base, como: 'b', chave: 'b' }, props: { texto: '{b} (padrão)', atual: marca('b') }, eventos: { aoClicar: [abrir(kind, 'b')] } }),
-    P('nav/botao', { se: SUJO, repetir: { cada: base, como: 'b', chave: 'b' }, props: { texto: '{b} (padrão)', atual: marca('b') }, eventos: { aoClicar: [pede(kind, 'b')] } }),
-    botao(kind === 'pagina' ? 'Nova página' : kind === 'tema' ? 'Novo tema' : kind === 'cartaz' ? 'Novo cartaz' : 'Novo formulário', [def('criando', q(kind))], { props: { atual: `{estado.criando == ${q(kind)}}` } }),
+    P('nav/botao', { se: `!(${SUJO})`, repetir: { cada: meus, como: 'n', chave: 'n.id' }, props: { texto: '{n.id} (personalizado)', atual: marca('n.id'), icone }, eventos: { aoClicar: [abrir(kind, 'n.id')] } }),
+    P('nav/botao', { se: SUJO, repetir: { cada: meus, como: 'n', chave: 'n.id' }, props: { texto: '{n.id} (personalizado)', atual: marca('n.id'), icone }, eventos: { aoClicar: [pede(kind, 'n.id')] } }),
+    P('nav/botao', { se: `!(${SUJO})`, repetir: { cada: base, como: 'b', chave: 'b' }, props: { texto: '{b} (padrão)', atual: marca('b'), icone }, eventos: { aoClicar: [abrir(kind, 'b')] } }),
+    P('nav/botao', { se: SUJO, repetir: { cada: base, como: 'b', chave: 'b' }, props: { texto: '{b} (padrão)', atual: marca('b'), icone }, eventos: { aoClicar: [pede(kind, 'b')] } }),
+    botao(kind === 'pagina' ? 'Nova página' : kind === 'tema' ? 'Novo tema' : kind === 'cartaz' ? 'Novo cartaz' : 'Novo formulário', [def('criando', q(kind))], { props: { atual: `{estado.criando == ${q(kind)}}`, icone: 'mais' } }),
   ], { gap: 0 })
 }
 
@@ -561,11 +562,11 @@ export const PAGINA = no('pagina', 'studio.app', {
   raiz: P('layout/painel', { filhos: [
     // cabeçalho: a marca e as ações do rascunho aberto (desfazer, refazer, salvar, publicar, estado)
     P('site/cabecalho', { props: { titulo: 'Polaris Studio', tituloNivel: 1, href: '/studio', menuRecolhivel: false }, slots: { acoes: [
-      botao('Desfazer', desfaz, { se: 'estado.no && tamanho(estado.passado) > 0' }), botao('Refazer', refaz, { se: 'estado.no && tamanho(estado.futuro) > 0' }),
+      botao('Desfazer', desfaz, { se: 'estado.no && tamanho(estado.passado) > 0', props: { icone: 'desfazer' } }), botao('Refazer', refaz, { se: 'estado.no && tamanho(estado.futuro) > 0', props: { icone: 'refazer' } }),
       botao('Salvar', [exe('salvar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}', no: '{estado.no}', baseSeq: '{estado.aberto.seq}' }, [
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
-      ], aviso('erro', 'erro'))], { se: 'estado.no', props: { variante: 'primario' } }),
-      botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))], { props: { variante: 'primario' } }),
+      ], aviso('erro', 'erro'))], { se: 'estado.no', props: { variante: 'primario', icone: 'salvar' } }),
+      botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))], { props: { variante: 'primario', icone: 'publicar' } }),
       texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
     ] } }),
     // menu lateral: os nós de cada tipo (o aberto fica marcado) e as ferramentas
@@ -573,9 +574,9 @@ export const PAGINA = no('pagina', 'studio.app', {
       P('nav/menu', { props: { rotulo: 'Nós e ferramentas' }, filhos: [
         pilha([
           P('texto/pequeno', { props: { texto: 'Ferramentas' } }),
-          botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "releases"}' } }),
-          botao('Imagens', [def('painel', 'estado.painel == "imagens" ? "" : "imagens"'), def('msgImagem', '""'), exe('ativos', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "imagens"}' } }),
-          botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "diagramas"}' } }),
+          botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "releases"}', icone: 'releases' } }),
+          botao('Imagens', [def('painel', 'estado.painel == "imagens" ? "" : "imagens"'), def('msgImagem', '""'), exe('ativos', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "imagens"}', icone: 'imagens' } }),
+          botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "diagramas"}', icone: 'diagramas' } }),
         ], { gap: 0 }),
         ...(['pagina', 'tema', 'formulario', 'cartaz'] as const).map(secaoDeNos),
       ] }),
@@ -595,7 +596,7 @@ export const PAGINA = no('pagina', 'studio.app', {
         botao('Sim, restaurar', [exe('restaurar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}' }, [...aviso('sucesso', '"Restaurado o padrão de " + estado.aberto.id + ". Publique para o site mudar."'), exe('nos'), def('no', 'null'), def('noSalvo', 'null'), def('aberto', 'null'), def('passado', '[]'), def('futuro', '[]'), def('confirmaRestaurar', 'false')], aviso('erro', 'erro'))], { se: 'estado.confirmaRestaurar' }),
         botao('Cancelar', [def('confirmaRestaurar', 'false')], { se: 'estado.confirmaRestaurar' }),
       ], { se: 'estado.no && estado.aberto.origem == "tenant"', props: { gap: 8 } }),
-      linha([botao('Editor', [def('aba', '"editor"')]), botao('Histórico e comentários', [def('aba', '"historico"')])], { se: 'estado.no && estado.aberto.origem != "novo"' }),
+      linha([botao('Editor', [def('aba', '"editor"')], { props: { icone: 'editar' } }), botao('Histórico e comentários', [def('aba', '"historico"')], { props: { icone: 'historico' } })], { se: 'estado.no && estado.aberto.origem != "novo"' }),
       editorDePaginas(),
       editorDeTema(),
       editorDeFormularios(),

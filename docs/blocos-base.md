@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-43 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+44 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -28,6 +28,7 @@
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| midia | `midia/icone` | `nome`, `tamanho`, `rotulo`, `acento` | | |
 | layout | `layout/painel` | (só filhos) | | |
 | layout | `layout/lateral` | `rotulo` | | |
 | layout | `layout/principal` | (só filhos) | | |
@@ -109,3 +110,7 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 - **Limites**: **um `site/menu-lateral` por página** (o `id` do alternador é fixo); a lateral não é recolhível no computador (largura fixa); o painel ocupa a janela inteira (`100vh`): não use dentro de outra página com rodapé.
 
 **Tema padrão: paleta Grafite**: escolhida num estudo de três direções (Estrela, Floresta, Grafite; protótipo com contraste calculado por par). Neutros quentes (`fundo` #F6F6F5, `superficie` #FFFFFF, `texto` #1C1C1A), primária de cinza-azulado (#2D3A4F), apoio em violeta (#6B4FBB) e **laranja de acento (#D9580B), usado no anel de foco e nas ofertas**; no modo escuro a primária vira #B8C6E0 sobre `fundo` #101011. Os estados (`sucesso`, `alerta`, `erro`) mantêm o mesmo matiz nos dois modos. Todos os pares de texto passam AA (4,5:1) e o foco passa 3:1 (`auditaTema` e o teste de tema). Os presets antigos do Tiffany (`patria-blue`, `nco-red`, `graphite`) continuam registrados e um tenant pode escolher qualquer um.
+
+**Ícones (`midia/icone`)**: família **Grafite** de 60 ícones (grade de 24 px, traço de 1,75 px, pontas arredondadas): um por bloco (`layout-pilha`, `nav-menu`, `form-busca`, `cartaz`…) e por ação do Studio (`salvar`, `desfazer`, `refazer`, `publicar`, `imagens`, `diagramas`, `releases`, `editar`, `apagar`, `previa`, `historico`, `comentarios`, `usuario`, `entrar`, `sair`, `tema-escuro`, `mais`, `fechar`, `chevron`). `nome` é uma lista fechada (validada na compilação); `tamanho` de 8 a 96 px (padrão 1,25 em, acompanha o texto); `rotulo` dá nome acessível (sem ele o ícone é decorativo, `aria-hidden`); `acento` pinta o detalhe na cor de destaque do tema. **Botões e links** aceitam `icone` e põem o ícone antes do texto (uma cor só, a do texto).
+- **Como é feito**: cada ícone é um par de imagens SVG usadas como **máscara** (CSS do tema, uma regra por ícone), então a cor é `currentColor`, nada pede rede, funciona sem JavaScript e igual no React, no runtime vivo e no estático. As imagens ficam em `packages/engine/src/icones/dados.ts` (só o CSS do tema as lê); o navegador só carrega a validação do **formato** do nome, para não pesar o pacote do cliente.
+- **Limites**: traço fixo (1,75 px na grade de 24: em tamanhos pequenos fica mais fino); só uma cor mais o acento; sem animação; o CSS do tema cresce ~16 KB (cacheado por hash); um nome bem formado que não existe não pinta nada (no `nome` literal, a compilação recusa).

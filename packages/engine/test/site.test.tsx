@@ -5,6 +5,7 @@ import { COMPONENTES_BASE, compilaHtmlVivo, compilaPrograma, montaVivo, registra
 import { BLOCOS_SITE, registraSite } from '../src/site/index'
 import { geraCatalogo } from '../src/catalogo/index'
 import { cssDoTema, registraTemas, TEMA_PADRAO } from '../src/tema/index'
+import { nomeDeIcone, tamanhoDeIcone } from '../src/render/url'
 
 const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0.0', estatuto: 'publicado', spec }) as any
 const novoReg = () => { const r = new Registry(); registraBase(r); registraTemas(r); registraSite(r); return r }
@@ -257,5 +258,32 @@ describe('título da marca como heading (tituloNivel)', () => {
   it('com `tituloNivel` a marca é um h1 (dentro do link); sem ele, texto em destaque', () => {
     const a = ssr(pagina(cab({ titulo: 'App', tituloNivel: 1 }))).querySelector('header > a')!; expect([a.querySelector('h1')!.textContent, a.querySelector('strong')]).toEqual(['App', null])
     const b = ssr(pagina(cab({ titulo: 'App' }))).querySelector('header > a')!; expect([b.querySelector('h1'), b.querySelector('strong')!.textContent]).toEqual([null, 'App'])
+  })
+})
+
+describe('ícones (midia/icone e `icone` de botões e links)', () => {
+  const um = (bloco: string, props: Record<string, unknown>) => ssr(pagina({ bloco, props } as never))
+  it('midia/icone: um <span data-icone> decorativo por padrão; com `rotulo` vira imagem com nome; tamanho limitado e acento opcional', () => {
+    const d = um('midia/icone', { nome: 'salvar' }).querySelector('span[data-icone]')!; expect([d.getAttribute('data-icone'), d.getAttribute('aria-hidden'), d.hasAttribute('role'), d.hasAttribute('data-acento'), d.hasAttribute('style')]).toEqual(['salvar', 'true', false, false, false])
+    const r = um('midia/icone', { nome: 'layout-pilha', rotulo: 'Pilha', tamanho: 24, acento: true }).querySelector('span[data-icone]')!; expect([r.getAttribute('role'), r.getAttribute('aria-label'), r.hasAttribute('aria-hidden'), r.hasAttribute('data-acento'), r.getAttribute('style')]).toEqual(['img', 'Pilha', false, true, '--icone-tamanho:24px'])
+    expect([tamanhoDeIcone(5000), tamanhoDeIcone(2), tamanhoDeIcone(20.4), tamanhoDeIcone('x'), tamanhoDeIcone(NaN)]).toEqual(['96px', '8px', '20px', undefined, undefined]) // o limite vale também para valor que vem de um dado
+  })
+  it('o runtime só aceita o FORMATO do nome (minúsculas e hífens): nada que escape do seletor chega ao atributo; a lista fechada vale na compilação e no CSS; botão e link levam data-icone só com nome bem formado', () => {
+    for (const n of ['"] , body{x:y}', '__proto__', 'Salvar', 'salvar<', '', 'a b', 'x'.repeat(40), 'a-b-c-d']) expect(nomeDeIcone(n), n).toBeUndefined(); expect(nomeDeIcone('salvar')).toBe('salvar'); expect(nomeDeIcone('layout-pilha')).toBe('layout-pilha'); expect(nomeDeIcone(7)).toBeUndefined()
+    expect(() => um('midia/icone', { nome: 'nao-existe' })).toThrow(/não é permitido/); expect(() => um('nav/botao', { texto: 'x', icone: 'salvar<' })).toThrow(/não é permitido/)
+    expect(um('nav/botao', { texto: 'x', icone: 'salvar' }).querySelector('button')!.getAttribute('data-icone')).toBe('salvar'); expect(um('nav/botao', { texto: 'x' }).querySelector('button')!.hasAttribute('data-icone')).toBe(false)
+    expect(um('nav/link', { href: '/x', texto: 'x', icone: 'entrar' }).querySelector('a')!.getAttribute('data-icone')).toBe('entrar')
+  })
+  it('o tema traz uma regra por ícone (duas imagens, só máscara: sem cor literal) e a estrutura dos três usos', () => {
+    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(60); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a)[data-icone]::before')
+    for (const n of ['salvar', 'layout-pilha', 'cartaz', 'tema-escuro']) expect(css, n).toContain(`[data-icone=${n}]{--ic-base:url("data:image/svg+xml,`)
+  })
+})
+
+describe('lista de nomes dos ícones', () => {
+  it('nomes.ts (o que o navegador carrega) coincide com dados.ts (as imagens que só o CSS usa)', async () => {
+    const { ICONES, FAMILIAS_ICONES } = await import('../src/icones/dados'), { NOMES_ICONES } = await import('../src/icones/nomes')
+    expect([...NOMES_ICONES].sort()).toEqual(Object.keys(ICONES).sort()); expect(FAMILIAS_ICONES.flatMap((f) => f[1]).sort()).toEqual([...NOMES_ICONES].sort()); expect(NOMES_ICONES.length).toBe(60)
+    for (const [n, i] of Object.entries(ICONES)) { expect(i.base.length + i.acento.length, n).toBeGreaterThan(10); expect(i.base + i.acento, n).not.toMatch(/<script|on[a-z]+=|href=|javascript:/i) }
   })
 })

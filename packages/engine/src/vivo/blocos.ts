@@ -1,5 +1,5 @@
 import { px } from '../estatico/escape'
-import { caminhoLocal, cssUrl, idDeElemento, nomeDeParametro, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
+import { caminhoLocal, cssUrl, idDeElemento, nomeDeIcone, nomeDeParametro, tamanhoDeIcone, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 
 // Descritores DOM dos blocos base: dizem ao runtime vivo QUE elemento criar e como atualizá-lo a partir das props.
 // Têm de produzir exatamente o DOM que os componentes React (render/base.tsx) produzem: o oráculo confere.
@@ -53,13 +53,13 @@ export const d_nav_link: Descritor = {
     chave: (p) => (p.texto !== undefined ? 'a:t' : 'a:f'), tag: () => 'a', filhos: true,
     attrs: (p, id) => {
       const href = urlSegura(p.href)
-      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.botao === 'primario' || p.botao === 'secundario' ? { 'data-botao': p.botao } : {}) }
+      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.botao === 'primario' || p.botao === 'secundario' ? { 'data-botao': p.botao } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }
     },
     texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
   }
 export const d_nav_botao: Descritor = {
     chave: () => 'button', tag: () => 'button', texto: (p) => txt(p.texto),
-    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}) }),
+    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }),
     eventos: { aoClicar: { dom: 'click' } },
   }
 /** nome acessível do campo: `rotulo` vira `aria-label` (sem ele, o único jeito era um `texto/rotulo` ligado por `para`/`id`) */
@@ -83,6 +83,10 @@ export const d_layout_grade: Descritor = {
   attrs: (p, id) => { const gap = num(p.gap); return { ...comId(id), style: `display:grid;grid-template-columns:repeat(${inteiro(p.colunas, 1, 12, 2)},minmax(0,1fr))${gap !== undefined ? `;gap:${px(gap)}` : ''}` } },
 }
 export const d_layout_cabecalho: Descritor = { chave: () => 'header', tag: () => 'header', filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.fixo === true ? { 'data-fixo': '' } : {}) }) }
+export const d_midia_icone: Descritor = {
+  chave: (p) => (nomeDeIcone(p.nome) ? 'span:icone' : null), tag: () => 'span',
+  attrs: (p, id) => { const t = tamanhoDeIcone(p.tamanho), r = typeof p.rotulo === 'string' && p.rotulo.trim() ? p.rotulo.trim().slice(0, 200) : ''; return { ...comId(id), 'data-icone': nomeDeIcone(p.nome)!, ...(p.acento === true ? { 'data-acento': '' } : {}), ...(t ? { style: `--icone-tamanho:${t}` } : {}), ...(r ? { role: 'img', 'aria-label': r } : { 'aria-hidden': 'true' }) } },
+}
 export const d_layout_painel: Descritor = { chave: () => 'div:painel', tag: () => 'div', filhos: true, attrs: (_p, id) => ({ ...comId(id), 'data-painel': '' }) }
 export const d_layout_lateral: Descritor = { chave: () => 'aside', tag: () => 'aside', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-lateral': '', ...rotulo(p.rotulo === undefined ? { rotulo: 'Navegação lateral' } : p) }) }
 export const d_layout_principal: Descritor = { chave: () => 'main', tag: () => 'main', filhos: true, attrs: (_p, id) => ({ ...comId(id), 'data-principal': '' }) }
@@ -204,7 +208,7 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
-  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
+  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'midia/icone': d_midia_icone, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
   'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,

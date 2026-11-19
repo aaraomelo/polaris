@@ -813,7 +813,8 @@
           "se": "estado.no && tamanho(estado.passado) > 0",
           "props": {
            "texto": "Desfazer",
-           "variante": "secundario"
+           "variante": "secundario",
+           "icone": "desfazer"
           },
           "eventos": {
            "aoClicar": [
@@ -856,7 +857,8 @@
           "se": "estado.no && tamanho(estado.futuro) > 0",
           "props": {
            "texto": "Refazer",
-           "variante": "secundario"
+           "variante": "secundario",
+           "icone": "refazer"
           },
           "eventos": {
            "aoClicar": [
@@ -899,7 +901,8 @@
           "se": "estado.no",
           "props": {
            "texto": "Salvar",
-           "variante": "primario"
+           "variante": "primario",
+           "icone": "salvar"
           },
           "eventos": {
            "aoClicar": [
@@ -974,7 +977,8 @@
           "bloco": "nav/botao",
           "props": {
            "texto": "Publicar",
-           "variante": "primario"
+           "variante": "primario",
+           "icone": "publicar"
           },
           "eventos": {
            "aoClicar": [
@@ -1053,7 +1057,8 @@
                 "props": {
                  "texto": "Releases",
                  "variante": "secundario",
-                 "atual": "{estado.painel == \"releases\"}"
+                 "atual": "{estado.painel == \"releases\"}",
+                 "icone": "releases"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1087,7 +1092,8 @@
                 "props": {
                  "texto": "Imagens",
                  "variante": "secundario",
-                 "atual": "{estado.painel == \"imagens\"}"
+                 "atual": "{estado.painel == \"imagens\"}",
+                 "icone": "imagens"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1126,7 +1132,8 @@
                 "props": {
                  "texto": "Diagramas",
                  "variante": "secundario",
-                 "atual": "{estado.painel == \"diagramas\"}"
+                 "atual": "{estado.painel == \"diagramas\"}",
+                 "icone": "diagramas"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1188,7 +1195,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == n.id}",
+                 "icone": "layout-principal"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1354,7 +1362,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == n.id}",
+                 "icone": "layout-principal"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1376,7 +1385,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == b}",
+                 "icone": "layout-principal"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1542,7 +1552,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"pagina\" && estado.aberto.id == b}",
+                 "icone": "layout-principal"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1559,7 +1570,8 @@
                 "props": {
                  "texto": "Nova página",
                  "variante": "secundario",
-                 "atual": "{estado.criando == \"pagina\"}"
+                 "atual": "{estado.criando == \"pagina\"}",
+                 "icone": "mais"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1597,7 +1609,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == n.id}",
+                 "icone": "tema-escuro"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1763,7 +1776,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == n.id}",
+                 "icone": "tema-escuro"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1785,7 +1799,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == b}",
+                 "icone": "tema-escuro"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1951,7 +1966,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"tema\" && estado.aberto.id == b}",
+                 "icone": "tema-escuro"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -1968,7 +1984,8 @@
                 "props": {
                  "texto": "Novo tema",
                  "variante": "secundario",
-                 "atual": "{estado.criando == \"tema\"}"
+                 "atual": "{estado.criando == \"tema\"}",
+                 "icone": "mais"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2006,7 +2023,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == n.id}",
+                 "icone": "form-formulario"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2172,7 +2190,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == n.id}",
+                 "icone": "form-formulario"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2194,7 +2213,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == b}",
+                 "icone": "form-formulario"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2360,7 +2380,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"formulario\" && estado.aberto.id == b}",
+                 "icone": "form-formulario"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2377,7 +2398,8 @@
                 "props": {
                  "texto": "Novo formulário",
                  "variante": "secundario",
-                 "atual": "{estado.criando == \"formulario\"}"
+                 "atual": "{estado.criando == \"formulario\"}",
+                 "icone": "mais"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2415,7 +2437,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == n.id}",
+                 "icone": "cartaz"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2581,7 +2604,8 @@
                 },
                 "props": {
                  "texto": "{n.id} (personalizado)",
-                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == n.id}"
+                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == n.id}",
+                 "icone": "cartaz"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2603,7 +2627,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == b}",
+                 "icone": "cartaz"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2769,7 +2794,8 @@
                 },
                 "props": {
                  "texto": "{b} (padrão)",
-                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == b}"
+                 "atual": "{estado.aberto.kind == \"cartaz\" && estado.aberto.id == b}",
+                 "icone": "cartaz"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -2786,7 +2812,8 @@
                 "props": {
                  "texto": "Novo cartaz",
                  "variante": "secundario",
-                 "atual": "{estado.criando == \"cartaz\"}"
+                 "atual": "{estado.criando == \"cartaz\"}",
+                 "icone": "mais"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -4225,7 +4252,8 @@
                 "bloco": "nav/botao",
                 "props": {
                  "texto": "Editor",
-                 "variante": "secundario"
+                 "variante": "secundario",
+                 "icone": "editar"
                 },
                 "eventos": {
                  "aoClicar": [
@@ -4241,7 +4269,8 @@
                 "bloco": "nav/botao",
                 "props": {
                  "texto": "Histórico e comentários",
-                 "variante": "secundario"
+                 "variante": "secundario",
+                 "icone": "historico"
                 },
                 "eventos": {
                  "aoClicar": [

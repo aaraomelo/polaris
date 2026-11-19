@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-59 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+60 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -1614,6 +1614,101 @@ Lista de itens; `ordenada` numera. Só aceita `lista/item`.
 
 ## midia
 
+### Ícone (`midia/icone`)
+
+Ícone da família Grafite (60: um por bloco e por ação do Studio; grade de 24 px, traço de 1,75 px). `nome` escolhe o ícone; `tamanho` (8 a 96 px) ou, sem ele, 1,25 em (acompanha o texto); `acento` pinta o detalhe na cor de destaque do tema. Sem `rotulo` o ícone é decorativo (`aria-hidden`); com `rotulo` vira uma imagem com nome acessível. A cor é a do texto ao redor (`currentColor`). É feito por CSS (máscara), sem JavaScript e sem pedido de rede. Botões e links aceitam `icone` e põem o ícone antes do texto.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `acento` | booleano | não |  | o detalhe de acento na cor de destaque do tema |
+| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível; sem ele o ícone é decorativo (aria-hidden) |
+| `tamanho` | número ≥ 8 ≤ 96 | não |  | lado em px (padrão 1,25 em, acompanha o texto) |
+
+**Exemplo: Ícones em linha**
+
+```json
+{
+  "bloco": "layout/linha",
+  "props": {
+    "gap": 12
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "midia/icone",
+        "props": {
+          "nome": "salvar",
+          "tamanho": 24
+        }
+      },
+      {
+        "bloco": "midia/icone",
+        "props": {
+          "nome": "publicar",
+          "tamanho": 24,
+          "acento": true
+        }
+      },
+      {
+        "bloco": "midia/icone",
+        "props": {
+          "nome": "feedback-alerta",
+          "tamanho": 24,
+          "rotulo": "Atenção"
+        }
+      },
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Ícones de 24 px"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Exemplo: No botão e no link**
+
+```json
+{
+  "bloco": "layout/linha",
+  "props": {
+    "gap": 12
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Salvar",
+          "icone": "salvar"
+        }
+      },
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Desfazer",
+          "icone": "desfazer",
+          "variante": "secundario"
+        }
+      },
+      {
+        "bloco": "nav/link",
+        "props": {
+          "href": "/entrar",
+          "texto": "Entrar",
+          "icone": "entrar"
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Imagem (`midia/imagem`)
 
 Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas); outras somem. Se `src` é uma imagem hospedada pela plataforma (`/_polaris/img/<hash>.png|jpg|webp`), e há `tamanhos` ou `largura`, ganha `srcset` automático com as versões de 160, 480, 960 e 1920 px e `sizes` (`tamanhos`, ou "até `largura` px"): o navegador baixa só a versão que cabe na tela. Sem nenhum dos dois, não há como saber o espaço da imagem e ela segue só com `src`.
@@ -1715,6 +1810,7 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 |---|---|---|---|---|
 | `atual` | booleano | não |  | o item escolhido (aria-current), ex.: no menu lateral |
 | `desabilitado` | booleano | não |  |  |
+| `icone` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" | não |  | ícone da família Grafite antes do texto (ver `midia/icone`) |
 | `texto` | texto | sim |  |  |
 | `variante` | "primario" \| "secundario" \| "fantasma" | não |  | primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto |
 
@@ -1802,6 +1898,7 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 | `atual` | booleano | não |  | a página atual: o link leva aria-current="page" |
 | `botao` | texto ≤ 12 caracteres | não |  | primario ou secundario: o link com aparência de botão |
 | `href` | texto | sim |  |  |
+| `icone` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" | não |  | ícone da família Grafite antes do texto (ver `midia/icone`) |
 | `texto` | texto | não |  |  |
 
 **Slots**

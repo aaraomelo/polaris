@@ -1,3 +1,5 @@
+import { ICONES_CSS } from '../icones/css'
+
 // Folha de estilo dos blocos base, escrita SÓ com variáveis do tema (nenhuma cor/medida fixa): trocar o tema ou o modo reestiliza tudo.
 // Os blocos emitem tags semânticas (e `data-tom`, `role`), então o estilo se prende a elas dentro do contêiner `#polaris`.
 export const BASE_CSS = `/* polaris: estilos base dos blocos (usa só variáveis do tema) */
@@ -49,7 +51,9 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris [data-lateral] nav{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:2px}
 #polaris [data-lateral] nav>div{display:flex;flex-direction:column;gap:2px;margin-bottom:calc(var(--espacamento-base) * 1.5)}
 #polaris [data-lateral] nav small,#polaris [data-lateral] nav p{margin:calc(var(--espacamento-base) * 1) 0 calc(var(--espacamento-base) * 0.5);padding:0 calc(var(--espacamento-base) * 1);text-transform:uppercase;letter-spacing:.06em;font-size:.75em;font-weight:700;color:var(--cor-texto-suave)}
-#polaris [data-lateral] nav a,#polaris [data-lateral] nav button{display:block;width:100%;text-align:left;background:transparent;color:var(--cor-texto);border:0;border-left:3px solid transparent;border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * 0.75) calc(var(--espacamento-base) * 1.25);font:inherit;text-decoration:none;cursor:pointer;overflow:hidden;text-overflow:ellipsis}
+#polaris [data-lateral] nav a,#polaris [data-lateral] nav button{display:flex;align-items:center;gap:calc(var(--espacamento-base) * 1.25);overflow-wrap:anywhere;width:100%;text-align:left;background:transparent;color:var(--cor-texto);border:0;border-left:3px solid transparent;border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * 0.75) calc(var(--espacamento-base) * 1.25);font:inherit;text-decoration:none;cursor:pointer}
+#polaris [data-lateral] nav :is(a,button)[data-icone]::before{color:var(--cor-texto-suave)}
+#polaris [data-lateral] nav :is(a,button)[aria-current][data-icone]::before{color:var(--cor-primaria)}
 #polaris [data-lateral] nav a:hover,#polaris [data-lateral] nav button:hover:not(:disabled){background:var(--cor-superficie-alt);color:var(--cor-texto)}
 #polaris [data-lateral] nav a[aria-current],#polaris [data-lateral] nav button[aria-current]{background:var(--cor-superficie-alt);border-left-color:var(--cor-primaria);font-weight:600}
 #polaris [data-lateral] nav a:focus-visible,#polaris [data-lateral] nav button:focus-visible{outline:2px solid var(--cor-destaque);outline-offset:-2px}
@@ -126,4 +130,5 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris div[role=alert][data-tom=sucesso]{border-left-color:var(--cor-sucesso)}
 #polaris div[role=alert][data-tom=alerta]{border-left-color:var(--cor-alerta)}
 #polaris div[role=alert][data-tom=erro]{border-left-color:var(--cor-erro)}
+${ICONES_CSS}
 `

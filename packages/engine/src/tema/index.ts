@@ -114,4 +114,7 @@ export function auditaTema(no: No): AvisoTema[] {
 }
 
 /** Os nomes `--x` usados na folha base: o tema precisa declarar todos (conferido em teste). */
-export const variaveisDaBase = (): string[] => [...new Set([...BASE_CSS.matchAll(/var\((--[a-z0-9-]+)\)/g)].map((m) => m[1]!))].sort()
+export const variaveisDaBase = (): string[] => {
+  const proprias = new Set([...BASE_CSS.matchAll(/[{;](--[a-z0-9-]+):/g)].map((m) => m[1]!)) // as que a própria folha declara (as imagens dos ícones), não são do tema
+  return [...new Set([...BASE_CSS.matchAll(/var\((--[a-z0-9-]+)\)/g)].map((m) => m[1]!))].filter((v) => !proprias.has(v)).sort()
+}

@@ -1,4 +1,4 @@
-import { srcsetDe, tamanhosDe, urlSegura } from '../render/url'
+import { nomeDeIcone, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 import { emissoresDe } from '../vivo/emissor'
 import { DESCRITORES_BASE } from '../vivo/blocos'
 import { escHtml, px } from './escape'
@@ -39,7 +39,7 @@ const MAO: Emissores = {
   'nav/link': ({ props, filhos, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
-    return `<a${idAttr(id)}${href ? ` href="${escHtml(href)}"` : ''}${externo ? ' rel="noopener noreferrer"' : ''}${props.atual === true ? ' aria-current="page"' : ''}${props.botao === 'primario' || props.botao === 'secundario' ? ` data-botao="${props.botao}"` : ''}>${props.texto !== undefined ? escHtml(txt(props.texto)) : (filhos.filhos ?? '')}</a>`
+    return `<a${idAttr(id)}${href ? ` href="${escHtml(href)}"` : ''}${externo ? ' rel="noopener noreferrer"' : ''}${props.atual === true ? ' aria-current="page"' : ''}${props.botao === 'primario' || props.botao === 'secundario' ? ` data-botao="${props.botao}"` : ''}${nomeDeIcone(props.icone) ? ` data-icone="${nomeDeIcone(props.icone)}"` : ''}>${props.texto !== undefined ? escHtml(txt(props.texto)) : (filhos.filhos ?? '')}</a>`
   },
 }
 

@@ -9,11 +9,13 @@ import { QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valo
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
 
 export { urlSegura } from './url'
-import { caminhoLocal, cssUrl, idDeElemento, nomeDeParametro, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from './url'
+import { NOMES_ICONES } from '../icones/nomes'
+import { caminhoLocal, cssUrl, idDeElemento, nomeDeIcone, nomeDeParametro, tamanhoDeIcone, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 /** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
 const rotuloDe = (props: Record<string, unknown>): Record<string, string> => (typeof props.rotulo === 'string' && props.rotulo.trim() ? { 'aria-label': props.rotulo.trim().slice(0, 200) } : {})
+const ICONE_PROP = { type: 'string', enum: NOMES_ICONES, description: 'ícone da família Grafite antes do texto (ver `midia/icone`)' }
 const ROTULO = { type: 'string', maxLength: 200, description: 'nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para`' }
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
 const tomDe = (p: Record<string, unknown>): string => (typeof p.tom === 'string' && ['neutro', 'sucesso', 'alerta', 'erro'].includes(p.tom) ? p.tom : 'neutro')
@@ -52,7 +54,7 @@ export const COMPONENTES_BASE: Componentes = {
     return createElement('div', { ...(id ? { id } : {}), 'data-polaris-formulario': f, ...(valores ? { 'data-polaris-valores': valores } : {}), ...(idioma ? { 'data-polaris-idioma': idioma } : {}), role: 'group', 'aria-busy': 'true' }, 'Carregando formulário…')
   },
   'nav/botao': ({ props, on, id }) =>
-    createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, ...(props.atual === true ? { 'aria-current': 'true' } : {}), ...(props.variante === 'secundario' || props.variante === 'fantasma' ? { 'data-variante': props.variante } : {}), onClick: () => on.aoClicar?.() }, txt(props.texto)),
+    createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, ...(props.atual === true ? { 'aria-current': 'true' } : {}), ...(props.variante === 'secundario' || props.variante === 'fantasma' ? { 'data-variante': props.variante } : {}), ...(nomeDeIcone(props.icone) ? { 'data-icone': nomeDeIcone(props.icone) } : {}), onClick: () => on.aoClicar?.() }, txt(props.texto)),
   'entrada/texto': ({ props, on, id }) =>
     createElement('input', {
       ...(id ? { id } : {}), type: 'text', ...rotuloDe(props), value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
@@ -117,10 +119,14 @@ export const COMPONENTES_BASE: Componentes = {
     createElement('input', { ...(id ? { id } : {}), type: 'checkbox', ...rotuloDe(props), checked: props.marcado === true, disabled: props.desabilitado === true, onChange: (e: { target: { checked: boolean } }) => on.aoMudar?.(e.target.checked) }),
   'feedback/selo': ({ props, id }) => createElement('span', { ...(id ? { id } : {}), 'data-tom': tomDe(props) }, txt(props.texto)),
   'feedback/alerta': ({ props, slots, id }) => createElement('div', { ...(id ? { id } : {}), role: 'alert', 'data-tom': tomDe(props) }, slots.filhos),
+  'midia/icone': ({ props, id }) => {
+    const n = nomeDeIcone(props.nome); if (!n) return null; const t = tamanhoDeIcone(props.tamanho), r = typeof props.rotulo === 'string' && props.rotulo.trim() ? props.rotulo.trim().slice(0, 200) : ''
+    return createElement('span', { ...(id ? { id } : {}), 'data-icone': n, ...(props.acento === true ? { 'data-acento': '' } : {}), ...(t ? { style: { '--icone-tamanho': t } } : {}), ...(r ? { role: 'img', 'aria-label': r } : { 'aria-hidden': 'true' }) })
+  },
   'nav/link': ({ props, slots, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
-    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}), ...(props.botao === 'primario' || props.botao === 'secundario' ? { 'data-botao': props.botao } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
+    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}), ...(props.botao === 'primario' || props.botao === 'secundario' ? { 'data-botao': props.botao } : {}), ...(nomeDeIcone(props.icone) ? { 'data-icone': nomeDeIcone(props.icone) } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
   },
 }
 
@@ -136,7 +142,7 @@ export const BLOCOS_BASE = [
   bloco('entrada/area', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, linhas: { type: 'integer', minimum: 1, maximum: 40, default: 4 }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('midia/quadro', { props: { type: 'object', properties: { html: { type: 'string', maxLength: 262144, description: 'documento HTML completo a exibir' }, titulo: { type: 'string', maxLength: 200, description: 'nome acessível do quadro (obrigatório)' }, altura: { type: 'integer', minimum: 40, maximum: 4000, default: 320 } }, required: ['html', 'titulo'] } }),
   bloco('form/formulario', { props: { type: 'object', properties: { formulario: { type: 'string', pattern: '^[a-z0-9][a-z0-9._-]{0,127}$', description: 'id do nó `formulario` (do tenant ou da plataforma)' }, valores: { type: 'object', description: 'valores iniciais por campo (edição); só primitivos e listas deles' }, idioma: { type: 'string', pattern: '^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$', description: 'idioma das mensagens (padrão: o do visitante)' } }, required: ['formulario'] }, eventos: { aoEnviado: { payload: 'json' }, aoErro: { payload: 'json' } } }),
-  bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' }, atual: { type: 'boolean', description: 'o item escolhido (aria-current), ex.: no menu lateral' }, variante: { type: 'string', enum: ['primario', 'secundario', 'fantasma'], description: 'primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
+  bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' }, atual: { type: 'boolean', description: 'o item escolhido (aria-current), ex.: no menu lateral' }, icone: ICONE_PROP, variante: { type: 'string', enum: ['primario', 'secundario', 'fantasma'], description: 'primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
@@ -173,7 +179,8 @@ export const BLOCOS_BASE = [
   bloco('entrada/caixa', { props: { type: 'object', properties: { marcado: { type: 'boolean' }, rotulo: ROTULO, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'booleano' } } }),
   bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } }, required: ['texto'] } }),
   bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } } } }),
-  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, botao: { type: 'string', maxLength: 12, description: 'primario ou secundario: o link com aparência de botão' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' } }, required: ['href'] } }),
+  bloco('midia/icone', { props: { type: 'object', properties: { nome: { type: 'string', enum: NOMES_ICONES, description: 'o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…)' }, tamanho: { type: 'number', minimum: 8, maximum: 96, description: 'lado em px (padrão 1,25 em, acompanha o texto)' }, rotulo: { type: 'string', maxLength: 200, description: 'nome acessível; sem ele o ícone é decorativo (aria-hidden)' }, acento: { type: 'boolean', description: 'o detalhe de acento na cor de destaque do tema' } }, required: ['nome'] } }),
+  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, botao: { type: 'string', maxLength: 12, description: 'primario ou secundario: o link com aparência de botão' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' }, icone: ICONE_PROP }, required: ['href'] } }),
 ]
 
 /** Registra no Registry o core/slot e os blocos base. */
