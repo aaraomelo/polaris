@@ -87,6 +87,19 @@ export const ROTEADOR_JS = `(function (w, d) {
     if (w.location.pathname + w.location.search === ult) return; // só mudou a âncora
     vai(w.location.href, false, function () { w.location.reload(); });
   });
+  // menu recolhível do cabeçalho (nav/alternador, que já funciona sem JavaScript): com o script, Esc e o clique FORA do cabeçalho também o fecham, e clicar numa âncora (#…) do próprio menu o fecha
+  function abertos() { return d.querySelectorAll('input[data-alternador]:checked'); }
+  d.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var l = abertos(); for (var i = 0; i < l.length; i++) { l[i].checked = false; if (i === 0 && l[i].focus) l[i].focus(); } // o foco volta para o interruptor (o botão "Menu" mostra o anel de foco)
+  });
+  d.addEventListener('click', function (e) {
+    var l = abertos(), alvo = e.target; if (!l.length || !alvo) return;
+    for (var i = 0; i < l.length; i++) {
+      var h = l[i].closest ? l[i].closest('header') : null; if (!h) continue;
+      if (!h.contains(alvo) || (alvo.closest && alvo.closest('a[href^="#"]'))) l[i].checked = false;
+    }
+  });
   if (w.history && w.history.scrollRestoration) w.history.scrollRestoration = 'manual';
 })(window, document);
 `

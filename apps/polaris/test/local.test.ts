@@ -404,6 +404,13 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(await visivel('header nav')).toBe(true); expect(await visivel('header form[role=search]')).toBe(true); expect(await p.locator('header nav a').allInnerTexts()).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
       await p.getByRole('link', { name: 'Contato' }).first().click(); await p.waitForURL(/\/contato$/); expect(await visivel('header nav')).toBe(false) // a página nova começa com o menu fechado
       await p.keyboard.press('Tab'); await p.getByRole('switch', { name: 'Abrir o menu' }).focus(); await p.keyboard.press('Space'); expect(await visivel('header nav')).toBe(true) // pelo teclado (o campo recebe o foco; Espaço abre)
+      // com o roteador carregado (JavaScript): Esc e o clique fora fecham; clicar DENTRO (no campo de busca) não fecha
+      await p.goto(`http://loja-outra.polaris.localhost:${l.porta}/sobre`); await p.waitForFunction(() => (window as any).Polaris?.inicia); const alt = p.getByRole('switch', { name: 'Abrir o menu' })
+      await p.getByText('Menu', { exact: true }).click(); expect(await alt.isChecked()).toBe(true); await p.keyboard.press('Escape'); expect(await alt.isChecked()).toBe(false); expect(await visivel('header nav')).toBe(false)
+      expect(await p.evaluate(() => document.activeElement?.getAttribute('role'))).toBe('switch') // o foco voltou para o interruptor
+      await p.getByText('Menu', { exact: true }).click(); await p.getByRole('searchbox', { name: 'Buscar' }).click(); expect(await alt.isChecked()).toBe(true) // dentro do cabeçalho: continua aberto
+      await p.getByRole('heading', { name: 'Sobre' }).click(); expect(await alt.isChecked()).toBe(false); expect(await visivel('header nav')).toBe(false) // fora: fecha
+      await p.getByText('Menu', { exact: true }).click(); await p.evaluate(() => { const a = document.createElement('a'); a.href = '#fim'; a.id = 'ancora-teste'; a.textContent = 'ancora'; document.querySelector('header nav')!.appendChild(a) }); await p.locator('#ancora-teste').click(); expect(await alt.isChecked()).toBe(false) // âncora do próprio menu: fecha
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
