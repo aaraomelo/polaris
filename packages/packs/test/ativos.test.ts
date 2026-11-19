@@ -96,7 +96,8 @@ describe('processamento da imagem (decodifica de verdade)', () => {
     const r = await a.salva(A, 'ana', { nome: 'v', dados: b64(await real(1000, 500, 'jpeg', 3004)) }) as { ativo: { id: string; variantes: number[]; miniatura: string } }
     expect(r.ativo.variantes).toEqual([160, 480, 960]); expect(r.ativo.miniatura).toBe(`/_polaris/img/${r.ativo.id}.webp?w=160`)
     const v = await a.le(A, r.ativo.id, 480); expect(v!.tipo).toBe('image/webp'); const m = await sharp(v!.bytes).metadata(); expect([m.format, m.width, m.height]).toEqual(['webp', 480, 240])
-    expect(await a.le(A, r.ativo.id, 1920)).toBeNull(); expect(await a.le(A, r.ativo.id, 123)).toBeNull(); expect(await a.le(B, r.ativo.id, 480)).toBeNull() // fora da lista, não gerada, e outro tenant
+    const orig = await a.le(A, r.ativo.id); expect(await a.le(A, r.ativo.id, 1920)).toEqual(orig) // largura válida mas sem versão (a imagem é menor): o ORIGINAL, para o srcset automático nunca quebrar
+    expect(await a.le(A, r.ativo.id, 123)).toBeNull(); expect(await a.le(B, r.ativo.id, 480)).toBeNull(); expect(await a.le(B, r.ativo.id, 1920)).toBeNull() // fora da lista, e outro tenant (nem o original vaza)
     expect((await a.lista(A)).find((x) => x.id === r.ativo.id)!.variantes).toEqual([160, 480, 960])
     const pequena = await a.salva(A, 'ana', { nome: 'p', dados: b64(await real(100, 100, 'png', 3005)) }) as { ativo: { variantes: number[]; miniatura: string; caminho: string } }; expect(pequena.ativo.variantes).toEqual([]); expect(pequena.ativo.miniatura).toBe(pequena.ativo.caminho)
   })

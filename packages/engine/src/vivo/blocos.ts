@@ -1,5 +1,5 @@
 import { px } from '../estatico/escape'
-import { caminhoLocal, cssUrl, nomeDeParametro, urlSegura } from '../render/url'
+import { caminhoLocal, cssUrl, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 
 // Descritores DOM dos blocos base: dizem ao runtime vivo QUE elemento criar e como atualizá-lo a partir das props.
 // Têm de produzir exatamente o DOM que os componentes React (render/base.tsx) produzem: o oráculo confere.
@@ -45,8 +45,8 @@ export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', 
 export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
-      const w = num(p.largura), h = num(p.altura)
-      return { ...comId(id), src: urlSegura(p.src) ?? '', alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: 'max-width:100%;height:auto' } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
+      const w = num(p.largura), h = num(p.altura), src = urlSegura(p.src) ?? '', sz = tamanhosDe(p.tamanhos, w), ss = sz ? srcsetDe(src) : undefined
+      return { ...comId(id), src, ...(ss ? { srcset: ss, sizes: sz! } : {}), alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: 'max-width:100%;height:auto' } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
     },
   }
 export const d_nav_link: Descritor = {

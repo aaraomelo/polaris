@@ -41,7 +41,7 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'texto/rotulo': { titulo: 'Rótulo', descricao: 'Rótulo de campo. `para` liga ao `id` do campo (clicar no rótulo foca o campo).', exemplos: [
     { titulo: 'Rótulo de um campo', instancia: { bloco: 'layout/pilha', props: { gap: 4 }, slots: { filhos: [{ bloco: 'texto/rotulo', props: { texto: 'Nome', para: 'nome' } }, { bloco: 'entrada/texto', id: 'nome', props: { placeholder: 'Seu nome' } }] } } },
   ] },
-  'midia/imagem': { titulo: 'Imagem', descricao: 'Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas); outras somem.', exemplos: [
+  'midia/imagem': { titulo: 'Imagem', descricao: 'Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas); outras somem. Se `src` é uma imagem hospedada pela plataforma (`/_polaris/img/<hash>.png|jpg|webp`), e há `tamanhos` ou `largura`, ganha `srcset` automático com as versões de 160, 480, 960 e 1920 px e `sizes` (`tamanhos`, ou "até `largura` px"): o navegador baixa só a versão que cabe na tela. Sem nenhum dos dois, não há como saber o espaço da imagem e ela segue só com `src`.', exemplos: [
     { titulo: 'Com tamanho', instancia: { bloco: 'midia/imagem', props: { src: 'exemplos/produto.svg', alt: 'Foto do produto', largura: 120, altura: 80 } } },
   ] },
   'lista/lista': { titulo: 'Lista', descricao: 'Lista de itens; `ordenada` numera. Só aceita `lista/item`.', exemplos: [

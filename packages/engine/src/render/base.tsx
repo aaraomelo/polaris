@@ -9,7 +9,7 @@ import { QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valo
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
 
 export { urlSegura } from './url'
-import { caminhoLocal, cssUrl, nomeDeParametro, urlSegura } from './url'
+import { caminhoLocal, cssUrl, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 /** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
@@ -36,7 +36,8 @@ export const COMPONENTES_BASE: Componentes = {
   'midia/imagem': ({ props, id }) => {
     const src = urlSegura(props.src)
     if (!src) return null
-    return createElement('img', { ...(id ? { id } : {}), src, alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto' } })
+    const sz = tamanhosDe(props.tamanhos, num(props.largura)), ss = sz ? srcsetDe(src) : undefined // sem `tamanhos` nem `largura` o navegador não sabe o espaço da imagem: sem srcset
+    return createElement('img', { ...(id ? { id } : {}), src, ...(ss ? { srcSet: ss, sizes: sz } : {}), alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto' } })
   },
   'computacao/canvas-gl': ({ props, id }) => (ident(props.kernel) ? createElement('canvas', { ...(id ? { id } : {}), width: dimensao(props.largura), height: dimensao(props.altura), role: 'img', 'aria-label': txt(props.alt), 'data-polaris-kernel': ident(props.kernel), 'data-polaris-entradas': entradasJson(props.entradas) }, txt(props.alt)) : null),
   'entrada/area': ({ props, on, id }) =>
@@ -122,7 +123,7 @@ export const BLOCOS_BASE = [
   bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] } } } }),
   bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6, default: 1 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
-  bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 } }, required: ['src'] } }),
+  bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 }, tamanhos: { type: 'string', maxLength: 200 } }, required: ['src'] } }),
   bloco('computacao/canvas-gl', { props: { type: 'object', properties: { kernel: { type: 'string', pattern: '^[a-z][A-Za-z0-9._-]{0,63}$', description: 'id do nó kernel (o artefato é servido em /kernels/<id>.json)' }, largura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, altura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, alt: { type: 'string' }, entradas: { type: 'object', description: 'valores das entradas escalares do kernel (número ou booleano)' } }, required: ['kernel', 'alt'] } }),
   bloco('entrada/area', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, linhas: { type: 'integer', minimum: 1, maximum: 40, default: 4 }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('midia/quadro', { props: { type: 'object', properties: { html: { type: 'string', maxLength: 262144, description: 'documento HTML completo a exibir' }, titulo: { type: 'string', maxLength: 200, description: 'nome acessível do quadro (obrigatório)' }, altura: { type: 'integer', minimum: 40, maximum: 4000, default: 320 } }, required: ['html', 'titulo'] } }),

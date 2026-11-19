@@ -27,3 +27,12 @@ export const cssUrl = (u: string): string => `url("${encodeURI(u).replace(/["'()
 export const caminhoLocal = (v: unknown, padrao = '/busca'): string => (typeof v === 'string' && /^\/(?!\/)[^\\\u0000-\u001f\u007f\s]{0,300}$/.test(v) ? v : padrao)
 /** nome do parâmetro da busca: identificador simples; senão `q` */
 export const nomeDeParametro = (v: unknown, padrao = 'q'): string => (typeof v === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,30}$/.test(v) ? v : padrao)
+
+/** larguras das versões menores que o envio gera (`packages/packs/src/ativos.ts`, `LARGURAS_VARIANTES`) */
+export const LARGURAS_SRCSET = [160, 480, 960, 1920] as const
+const IMAGEM_DO_TENANT = /^\/_polaris\/img\/([0-9a-f]{64})\.(?:png|jpg|webp)$/
+/** `srcset` automático para uma imagem hospedada pela plataforma (`/_polaris/img/<hash>.png|jpg|webp`): as versões webp de 160/480/960/1920 px; undefined para qualquer outra URL (e para gif, que pode ser animado). O servidor devolve o original quando a versão não existe (imagem menor que a largura). */
+export const srcsetDe = (src: string | undefined): string | undefined => { const m = src ? IMAGEM_DO_TENANT.exec(src) : null; return m ? LARGURAS_SRCSET.map((w) => `/_polaris/img/${m[1]}.webp?w=${w} ${w}w`).join(', ') : undefined }
+/** `sizes`: o que a página declarou (só caracteres de expressão de mídia) ou, com `largura`, "até N px"; sem nada, undefined (e então o bloco NÃO emite srcset: assumir 100vw mudaria o tamanho natural da imagem) */
+export const tamanhosDe = (declarado: unknown, largura: number | undefined): string | undefined =>
+  typeof declarado === 'string' && /^[A-Za-z0-9\s().,%:+*/-]{1,200}$/.test(declarado) ? declarado : largura !== undefined ? `(max-width: ${largura}px) 100vw, ${largura}px` : undefined

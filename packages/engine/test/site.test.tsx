@@ -174,3 +174,17 @@ describe('menu recolhível do cabeçalho (nav/alternador)', () => {
     expect(css).toContain('header>input[data-alternador]:not(:checked)~*:not(label){display:none}'); expect(css).toContain('header>input[data-alternador]:checked~nav{display:flex}'); expect(css).toMatch(/input\[data-alternador\]:focus-visible\+label/)
   })
 })
+
+describe('srcset automático (midia/imagem)', () => {
+  const H = '/_polaris/img/abababababababababababababababababababababababababababababababab', img = (props: Record<string, unknown>) => ssr(pagina({ bloco: 'midia/imagem', props })).querySelector('img')!
+  it('imagem hospedada png/jpg/webp ganha as quatro versões webp e sizes; o src segue o original', () => {
+    const i = img({ src: `${H}.png`, alt: 'a', largura: 600 })
+    expect(i.getAttribute('src')).toBe(`${H}.png`); expect(i.getAttribute('srcset')).toBe([160, 480, 960, 1920].map((w) => `${H}.webp?w=${w} ${w}w`).join(', ')); expect(i.getAttribute('sizes')).toBe('(max-width: 600px) 100vw, 600px')
+    expect(img({ src: `${H}.jpg`, alt: 'a', tamanhos: '(min-width: 800px) 50vw, 100vw' }).getAttribute('sizes')).toBe('(min-width: 800px) 50vw, 100vw'); expect(img({ src: `${H}.webp`, alt: 'a', largura: 300 }).getAttribute('sizes')).toBe('(max-width: 300px) 100vw, 300px')
+  })
+  it('não gera srcset para gif, outras URLs, outro caminho nem hash malformado; `tamanhos` com caracteres fora da lista é ignorado', () => {
+    expect(img({ src: `${H}.png`, alt: 'a' }).hasAttribute('srcset')).toBe(false) // sem largura nem tamanhos: sem srcset (o tamanho natural não muda)
+    for (const src of [`${H}.gif`, 'https://x.test/a.png', '/a.png', '/_polaris/img/zz.png', `${H}.png?x=1`, `/_polaris/img/${'ab'.repeat(32)}.svg`]) expect(img({ src, alt: 'a', largura: 100 }).hasAttribute('srcset'), src).toBe(false)
+    expect(img({ src: `${H}.png`, alt: 'a', tamanhos: '"><script>' }).hasAttribute('srcset')).toBe(false) // sem largura e com tamanhos inválidos: sem srcset
+  })
+})

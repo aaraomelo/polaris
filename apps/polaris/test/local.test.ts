@@ -390,6 +390,11 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403|404|422)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('srcset automático: as quatro larguras do logo (menor que todas) respondem 200 com o ORIGINAL; largura fora da lista é 404', async () => {
+    const l = await sobe(null), H = 'c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385'
+    for (const w of [160, 480, 960, 1920]) { const r = await get(l, 'loja-outra', `/_polaris/img/${H}.webp?w=${w}`); expect(r.status, String(w)).toBe(200); expect(r.headers.get('content-type')).toMatch(/^image\//); expect((await r.text()).length).toBeGreaterThan(100) }
+    expect((await get(l, 'loja-outra', `/_polaris/img/${H}.webp?w=123`)).status).toBe(404)
+  })
   it('cabeçalho: visitante vê "Entrar"; depois do login vê "Sair", que encerra a sessão (link, sem JavaScript)', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

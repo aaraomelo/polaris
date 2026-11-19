@@ -198,7 +198,9 @@ export function criaAtivos(o: { q: Q; limites?: Partial<typeof LIMITES_ATIVOS> }
       if (!/^[0-9a-f]{64}$/.test(hash)) return null
       if (largura !== undefined) { // a versão menor (sempre webp): só as larguras geradas
         if (!(LARGURAS_VARIANTES as readonly number[]).includes(largura)) return null
-        const v = (await q(`SELECT conteudo FROM plataforma.ativo_variante WHERE tenant_id = $1 AND hash = $2 AND largura = $3`, [tenantId, hash, largura])).rows[0]; return v ? { tipo: 'image/webp', bytes: Buffer.from(v.conteudo as Uint8Array), hash } : null
+        const v = (await q(`SELECT conteudo FROM plataforma.ativo_variante WHERE tenant_id = $1 AND hash = $2 AND largura = $3`, [tenantId, hash, largura])).rows[0]; if (v) return { tipo: 'image/webp', bytes: Buffer.from(v.conteudo as Uint8Array), hash }
+        const o = (await q(`SELECT tipo, conteudo FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0] // sem a versão (imagem menor que a largura, ou animada): o ORIGINAL, para o `srcset` automático nunca quebrar
+        return o ? { tipo: o.tipo as TipoImagem, bytes: Buffer.from(o.conteudo as Uint8Array), hash } : null
       }
       const r = (await q(`SELECT tipo, conteudo FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (!r) return null
       return { tipo: r.tipo as TipoImagem, bytes: Buffer.from(r.conteudo as Uint8Array), hash }
