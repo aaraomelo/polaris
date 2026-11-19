@@ -89,11 +89,15 @@ export const ROTEADOR_JS = `(function (w, d) {
   });
   // menu recolhível do cabeçalho (nav/alternador, que já funciona sem JavaScript): com o script, Esc e o clique FORA do cabeçalho também o fecham, e clicar numa âncora (#…) do próprio menu o fecha
   function abertos() { return d.querySelectorAll('input[data-alternador]:checked'); }
+  function subAbertos() { return d.querySelectorAll('details[data-submenu][open]'); }
   d.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
+    var sm = subAbertos(); for (var j = 0; j < sm.length; j++) { sm[j].removeAttribute('open'); var sv = sm[j].querySelector('summary'); if (j === 0 && sv && sv.focus) sv.focus(); }
     var l = abertos(); for (var i = 0; i < l.length; i++) { l[i].checked = false; if (i === 0 && l[i].focus) l[i].focus(); } // o foco volta para o interruptor (o botão "Menu" mostra o anel de foco)
   });
   d.addEventListener('click', function (e) {
+    var sm = subAbertos(), alvo0 = e.target;
+    for (var j = 0; j < sm.length; j++) if (alvo0 && !sm[j].contains(alvo0)) sm[j].removeAttribute('open'); // clique fora do submenu (ou num link dele, que navega) o fecha
     var l = abertos(), alvo = e.target; if (!l.length || !alvo) return;
     for (var i = 0; i < l.length; i++) {
       var h = l[i].closest ? l[i].closest('header') : null; if (!h) continue;

@@ -188,3 +188,19 @@ describe('srcset automático (midia/imagem)', () => {
     expect(img({ src: `${H}.png`, alt: 'a', tamanhos: '"><script>' }).hasAttribute('srcset')).toBe(false) // sem largura e com tamanhos inválidos: sem srcset
   })
 })
+
+describe('submenu do cabeçalho (grupos)', () => {
+  const G = [{ titulo: 'Ajuda', links: [{ texto: 'Sobre', href: '/sobre', atual: true }, { texto: 'Contato', href: '/contato' }] }]
+  it('cada grupo é um <details> com <summary> e os links, depois dos links do menu', () => {
+    const nav = ssr(pagina(cab({ titulo: 'x', links: LINKS, grupos: G }))).querySelector('header nav')!, d = nav.querySelector('details[data-submenu]')!
+    expect([...nav.children].map((c) => c.tagName.toLowerCase()).slice(-1)).toEqual(['details']); expect(d.querySelector('summary')!.textContent).toBe('Ajuda'); expect([...d.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(['/sobre', '/contato']); expect(d.querySelector('a[aria-current=page]')!.textContent).toBe('Sobre')
+    expect(d.firstElementChild!.tagName).toBe('SUMMARY'); expect(d.hasAttribute('open')).toBe(false) // fechado de início
+  })
+  it('só grupos (sem links) já mostra o menu; sem nenhum dos dois não há <nav>; texto do grupo é escapado', () => {
+    const so = ssr(pagina(cab({ titulo: 'x', grupos: [{ titulo: '<i>x</i>', links: [] }] }))).querySelector('header')!; expect(so.querySelector('nav details summary')!.textContent).toBe('<i>x</i>'); expect(so.querySelector('nav i')).toBeNull()
+    expect(ssr(pagina(cab({ titulo: 'x' }))).querySelector('header nav')).toBeNull()
+  })
+  it('o tema posiciona o painel com ::details-content (computador) e deixa em linha no celular', () => {
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('nav>details[data-submenu]::details-content{position:absolute'); expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*details-content\{position:static/)
+  })
+})

@@ -8,7 +8,7 @@ export async function lintA11y(page: Page): Promise<string[]> {
     const p: string[] = []
     const nome = (e: Element): string => { const a = e.getAttribute('aria-label')?.trim(); if (a) return a; const lb = e.getAttribute('aria-labelledby'); if (lb) { const t = lb.split(/\s+/).map((i) => document.getElementById(i)?.textContent?.trim() ?? '').join(' ').trim(); if (t) return t } return (e as HTMLElement).innerText?.trim() || e.getAttribute('title')?.trim() || '' }
     const raiz = document.getElementById('polaris') ?? document.body
-    for (const b of raiz.querySelectorAll('button, [role="button"], a[href]')) if (!nome(b) && !b.querySelector('img[alt]:not([alt=""])')) p.push(`${b.tagName.toLowerCase()} sem nome acessível`)
+    for (const b of raiz.querySelectorAll('button, [role="button"], a[href]')) if (!b.closest('details:not([open])') /* conteúdo de <details> fechado não é renderizado nem exposto: não tem nome calculável */ && !nome(b) && !b.querySelector('img[alt]:not([alt=""])')) p.push(`${b.tagName.toLowerCase()} sem nome acessível`)
     for (const i of raiz.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]), select, textarea')) {
       const id = i.getAttribute('id'), tem = nome(i) || (id && document.querySelector(`label[for="${CSS.escape(id)}"]`)?.textContent?.trim()) || i.closest('label')?.textContent?.trim()
       if (!tem) p.push(`${i.tagName.toLowerCase()} sem rótulo`)

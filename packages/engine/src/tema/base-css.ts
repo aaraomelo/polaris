@@ -24,6 +24,19 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris header>a{display:flex;align-items:center;gap:var(--espacamento-base);color:var(--cor-texto);text-decoration:none}
 #polaris nav{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--espacamento-base) * 2)}
 #polaris header>nav{flex:1}
+#polaris nav>details[data-submenu]{position:relative}
+#polaris nav>details[data-submenu]>summary{cursor:pointer;list-style:none;color:var(--cor-texto);user-select:none}
+#polaris nav>details[data-submenu]>summary::-webkit-details-marker{display:none}
+#polaris nav>details[data-submenu]>summary::after{content:"";display:inline-block;margin-left:calc(var(--espacamento-base) * 0.5);border:0.3em solid transparent;border-top-color:currentColor;border-bottom-width:0;vertical-align:middle}
+#polaris nav>details[data-submenu][open]>summary::after{transform:rotate(180deg)}
+#polaris nav>details[data-submenu]>summary:focus-visible{outline:2px solid var(--cor-destaque);outline-offset:2px}
+#polaris nav>details[data-submenu]>a{display:block;padding:calc(var(--espacamento-base) * 0.75) 0}
+@supports selector(::details-content){
+#polaris header nav>details[data-submenu]::details-content{position:absolute;top:100%;left:0;z-index:10;min-width:12rem;padding:var(--espacamento-base) calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno)}
+}
+@media (max-width:40rem){
+#polaris header nav>details[data-submenu]::details-content{position:static;min-width:0;padding:0 0 0 calc(var(--espacamento-base) * 2);border:0;background:transparent}
+}
 #polaris header>input[data-alternador]{position:absolute;opacity:0;width:1px;height:1px;margin:0}
 #polaris header>label[for]{display:none;cursor:pointer;margin-left:auto;padding:calc(var(--espacamento-base) * 0.75) calc(var(--espacamento-base) * 1.5);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);user-select:none}
 #polaris header>input[data-alternador]:focus-visible+label[for]{outline:2px solid var(--cor-destaque);outline-offset:2px}

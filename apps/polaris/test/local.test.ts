@@ -348,7 +348,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/`); await p.waitForFunction(() => (window as any).Polaris?.inicia)
       const h = p.locator('header'); expect(await h.count()).toBe(1); expect(await h.locator(':scope > a').first().innerText()).toBe('Minha loja')
-      expect(await p.locator('header nav').getAttribute('aria-label')).toBe('Principal'); expect(await p.locator('header nav a').allInnerTexts()).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
+      expect(await p.locator('header nav').getAttribute('aria-label')).toBe('Principal'); expect(await p.locator('header nav').evaluate((n) => [...n.children].filter((c) => c.tagName === 'A').map((c) => c.textContent))).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
       expect(await p.locator('header nav a[aria-current=page]').allInnerTexts()).toEqual(['Início']); expect(await h.locator(':scope > a').last().getAttribute('href')).toBe('/entrar')
       const hero = p.locator('section[data-alinha]'); expect(await hero.count()).toBe(1); expect(await hero.locator('h1').innerText()).toBe('Bem-vindo à loja'); expect(await hero.locator('a[data-botao]').allInnerTexts()).toEqual(['Conheça a loja', 'Fale com a gente'])
       expect(await hero.evaluate((e) => { const c = getComputedStyle(e); return c.display === 'flex' && c.textAlign === 'center' && e.getBoundingClientRect().height >= 240 && c.backgroundColor !== 'rgba(0, 0, 0, 0)' })).toBe(true) // o tema pinta o destaque; a altura mínima vale
@@ -395,6 +395,25 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
     for (const w of [160, 480, 960, 1920]) { const r = await get(l, 'loja-outra', `/_polaris/img/${H}.webp?w=${w}`); expect(r.status, String(w)).toBe(200); expect(r.headers.get('content-type')).toMatch(/^image\//); expect((await r.text()).length).toBeGreaterThan(100) }
     expect((await get(l, 'loja-outra', `/_polaris/img/${H}.webp?w=123`)).status).toBe(404)
   })
+  it('submenu do cabeçalho: abre e fecha pelo título (mouse e teclado), painel sob o título no computador, Esc e clique fora fecham', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      await p.setViewportSize({ width: 1200, height: 800 }); await p.goto(`http://loja-outra.polaris.localhost:${l.porta}/sobre`); await p.waitForFunction(() => (window as any).Polaris?.inicia)
+      const sm = p.locator('header nav details[data-submenu]'), sumario = sm.locator('summary'), item = sm.getByRole('link', { name: 'Fale conosco' })
+      expect(await sumario.innerText()).toBe('Ajuda'); expect(await sm.getAttribute('open')).toBeNull(); expect(await item.isVisible()).toBe(false) // fechado: os links não aparecem
+      await sumario.click(); expect(await sm.getAttribute('open')).not.toBeNull(); expect(await item.isVisible()).toBe(true)
+      const [bs, bi] = await Promise.all([sumario.boundingBox(), item.boundingBox()]); expect(bi!.y).toBeGreaterThanOrEqual(bs!.y + bs!.height - 1) // o painel abre ABAIXO do título
+      expect(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+      await p.keyboard.press('Escape'); expect(await sm.getAttribute('open')).toBeNull(); expect(await p.evaluate(() => document.activeElement?.tagName)).toBe('SUMMARY') // Esc fecha e o foco fica no título
+      await p.keyboard.press('Enter'); expect(await sm.getAttribute('open')).not.toBeNull() // teclado: Enter abre
+      await p.mouse.click(1100, 600); expect(await sm.getAttribute('open')).toBeNull() // clique fora fecha (o painel cobre o meio do título, por isso o clique vai à direita)
+      await sumario.click(); await item.click(); await p.waitForURL(/\/contato$/); await p.getByRole('heading', { name: 'Contato' }).waitFor(); expect(await p.locator('header nav details[data-submenu]').getAttribute('open')).toBeNull() // o link do submenu navega, e a página nova nasce fechada
+      await p.setViewportSize({ width: 390, height: 800 }); await p.getByText('Menu', { exact: true }).click(); await p.locator('header nav details summary').click()
+      const sub = p.locator('header nav details').getByRole('link', { name: 'Quem somos' }); expect(await sub.isVisible()).toBe(true); expect((await sub.boundingBox())!.x + (await sub.boundingBox())!.width).toBeLessThanOrEqual(390) // no celular: em linha, dentro da tela
+      expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('cabeçalho: visitante vê "Entrar"; depois do login vê "Sair", que encerra a sessão (link, sem JavaScript)', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {
@@ -418,7 +437,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(await visivel('header > label[for]')).toBe(true); expect(await visivel('header nav')).toBe(false); expect(await visivel('header form[role=search]')).toBe(false); expect(await visivel('header > a')).toBe(true) // celular: só a marca e o botão
       expect(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true) // sem rolagem horizontal
       await p.getByText('Menu', { exact: true }).click(); expect(await p.getByRole('switch', { name: 'Abrir o menu' }).isChecked()).toBe(true)
-      expect(await visivel('header nav')).toBe(true); expect(await visivel('header form[role=search]')).toBe(true); expect(await p.locator('header nav a').allInnerTexts()).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
+      expect(await visivel('header nav')).toBe(true); expect(await visivel('header form[role=search]')).toBe(true); expect(await p.locator('header nav').evaluate((n) => [...n.children].filter((c) => c.tagName === 'A').map((c) => c.textContent))).toEqual(['Início', 'Sobre', 'Contato', 'Produtos (gerente)'])
       await p.getByRole('link', { name: 'Contato' }).first().click(); await p.waitForURL(/\/contato$/); expect(await visivel('header nav')).toBe(false) // a página nova começa com o menu fechado
       await p.keyboard.press('Tab'); await p.getByRole('switch', { name: 'Abrir o menu' }).focus(); await p.keyboard.press('Space'); expect(await visivel('header nav')).toBe(true) // pelo teclado (o campo recebe o foco; Espaço abre)
       // com o roteador carregado (JavaScript): Esc e o clique fora fecham; clicar DENTRO (no campo de busca) não fecha

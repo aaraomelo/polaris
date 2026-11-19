@@ -8,14 +8,15 @@ const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0
 const instancia = (bloco: string, props: Record<string, unknown>, slots?: Record<string, Inst[]>): Inst => ({ bloco, props, ...(slots ? { slots } : {}) })
 
 const linkProp = { type: 'object', properties: { texto: { type: 'string', maxLength: 80 }, href: { type: 'string', maxLength: 500 }, atual: { type: 'boolean', description: 'a página aberta (aria-current)' } }, required: ['texto', 'href'] }
+const colunaProp = { type: 'object', properties: { titulo: { type: 'string', maxLength: 80 }, links: { type: 'array', maxItems: 12, items: linkProp } }, required: ['titulo'] }
 
 const BLOCOS_CABECALHO = [
   no('bloco', 'site.cabecalho', {
     interface: 'site/cabecalho', titulo: 'Cabeçalho do site',
-    descricao: 'Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação (`links`, com `atual` na página aberta) e o slot `acoes` à direita (ex.: botão de entrar ou carrinho). `fixo` o mantém no topo ao rolar. No celular o menu e as ações ficam atrás de um botão "Menu" (`nav/alternador`, sem JavaScript; `menuRecolhivel: false` desliga). Usa `<header>` e `<nav>` (pontos de referência para leitores de tela) e só variáveis do tema. Uma por página (o `id` do alternador é fixo).',
+    descricao: 'Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação (`links`, com `atual` na página aberta, e `grupos`: submenus recolhíveis, sem JavaScript) e o slot `acoes` à direita (ex.: botão de entrar ou carrinho). `fixo` o mantém no topo ao rolar. No celular o menu e as ações ficam atrás de um botão "Menu" (`nav/alternador`, sem JavaScript; `menuRecolhivel: false` desliga). Usa `<header>` e `<nav>` (pontos de referência para leitores de tela) e só variáveis do tema. Uma por página (o `id` do alternador é fixo).',
     props: { type: 'object', properties: {
       titulo: { type: 'string', maxLength: 80, description: 'nome da marca' }, logo: { type: 'string', maxLength: 500, description: 'URL segura da imagem da marca' },
-      href: { type: 'string', maxLength: 500, default: '/', description: 'para onde a marca leva' }, links: { type: 'array', maxItems: 12, items: linkProp, description: 'o menu' },
+      href: { type: 'string', maxLength: 500, default: '/', description: 'para onde a marca leva' }, links: { type: 'array', maxItems: 12, items: linkProp, description: 'o menu' }, grupos: { type: 'array', maxItems: 6, items: colunaProp, description: 'submenus: cada grupo (`titulo` e `links`) é um item recolhível que abre uma lista de links, depois dos `links`; um nível só' },
       rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false },
       menuRecolhivel: { type: 'boolean', default: true, description: 'no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista' }, rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir o menu' },
     } },
@@ -31,15 +32,18 @@ const BLOCOS_CABECALHO = [
       ] } },
       { bloco: 'nav/alternador', id: 'cabecalho-alternador', se: 'props.menuRecolhivel != false', props: { rotulo: '{props.rotuloAlternador ?? "Abrir o menu"}' } },
       { bloco: 'texto/rotulo', se: 'props.menuRecolhivel != false', props: { texto: 'Menu', para: 'cabecalho-alternador' } },
-      { bloco: 'nav/menu', se: 'tamanho(props.links ?? []) > 0', props: { rotulo: '{props.rotuloMenu ?? "Principal"}' }, slots: { filhos: [
+      { bloco: 'nav/menu', se: 'tamanho(props.links ?? []) + tamanho(props.grupos ?? []) > 0', props: { rotulo: '{props.rotuloMenu ?? "Principal"}' }, slots: { filhos: [
         { bloco: 'nav/link', repetir: { cada: 'props.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+        { bloco: 'nav/submenu', repetir: { cada: 'props.grupos ?? []', como: 'g', chave: 'g.titulo' }, slots: { filhos: [
+          { bloco: 'nav/submenu-titulo', props: { texto: '{g.titulo}' } },
+          { bloco: 'nav/link', repetir: { cada: 'g.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+        ] } },
       ] } },
       { bloco: 'core/slot', props: { nome: 'acoes' } },
     ] } },
   }),
 ]
 
-const colunaProp = { type: 'object', properties: { titulo: { type: 'string', maxLength: 80 }, links: { type: 'array', maxItems: 12, items: linkProp } }, required: ['titulo'] }
 
 const BLOCOS_RODAPE = [
   no('bloco', 'site.rodape', {

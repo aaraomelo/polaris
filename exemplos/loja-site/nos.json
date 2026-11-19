@@ -82,7 +82,22 @@
                     "href": "/produtos"
                   }
                 ],
-                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png",
+                "grupos": [
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ]
               },
               "slots": {
                 "acoes": [
@@ -224,7 +239,22 @@
                     "href": "/produtos"
                   }
                 ],
-                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png",
+                "grupos": [
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ]
               },
               "slots": {
                 "acoes": [
@@ -362,7 +392,22 @@
                     "href": "/produtos"
                   }
                 ],
-                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png",
+                "grupos": [
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ]
               },
               "slots": {
                 "acoes": [
@@ -559,7 +604,22 @@
                     "href": "/produtos"
                   }
                 ],
-                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png",
+                "grupos": [
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ]
               },
               "slots": {
                 "acoes": [
@@ -742,7 +802,22 @@
                     "atual": true
                   }
                 ],
-                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png",
+                "grupos": [
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ]
               },
               "slots": {
                 "acoes": [
@@ -965,7 +1040,22 @@
                     "href": "/produtos"
                   }
                 ],
-                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png"
+                "logo": "/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png",
+                "grupos": [
+                  {
+                    "titulo": "Ajuda",
+                    "links": [
+                      {
+                        "texto": "Quem somos",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Fale conosco",
+                        "href": "/contato"
+                      }
+                    ]
+                  }
+                ]
               },
               "slots": {
                 "acoes": [

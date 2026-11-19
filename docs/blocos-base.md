@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-35 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+37 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -28,6 +28,8 @@
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| nav | `nav/submenu` | (só filhos) | | |
+| nav | `nav/submenu-titulo` | `texto` | | |
 | nav | `nav/alternador` | `rotulo` (padrão "Abrir o menu") | | |
 | nav | `nav/enviar` | `texto` (padrão "Enviar") | | |
 | nav | `nav/menu` | `rotulo` (nome acessível; padrão "Principal") | `filhos` | |
@@ -81,3 +83,6 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 
 **Menu recolhível (celular)**: `nav/alternador` é uma **caixa de marcar** (`role="switch"`, nome acessível em `rotulo`) que o CSS do tema usa como interruptor: `header>input:not(:checked)~*:not(label){display:none}` esconde, até 40 rem de largura, o menu e as ações (inclusive a busca); marcar a caixa (pelo rótulo "Menu" ligado por `para`, ou pelo teclado: Tab e Espaço) mostra tudo em coluna. Acima de 40 rem o botão some e tudo fica à vista. **Sem JavaScript e sem estado no runtime** (o modelo de um bloco não tem eventos), então funciona até com a página estática. O `site/cabecalho` o põe sozinho (`menuRecolhivel`, padrão ligado; `false` mantém tudo à vista; `rotuloAlternador` muda o nome acessível).
 **Limites**: o `id` do alternador é fixo (`cabecalho-alternador`): **um `site/cabecalho` por página**; Esc e o clique fora do cabeçalho só fecham **com o roteador do gateway carregado** (JavaScript, em `packages/gateway/src/navegacao.ts`; o foco volta ao interruptor, e clicar numa âncora `#…` do menu também fecha); sem JavaScript, ou em página estática, só fecha ao desmarcar ou navegar (a página nova nasce fechada); a caixa fica visualmente oculta (1 px, transparente) e o foco aparece no botão "Menu"; o ponto de corte (40 rem) é fixo no CSS base, não um token do tema.
+
+**Submenus (`nav/submenu`)**: um `<details>` nativo com o `nav/submenu-titulo` (`<summary>`) e os links. **Sem JavaScript**: abre e fecha pelo título, com mouse, Tab, Enter e Espaço. No computador a lista aparece como um **painel sob o título** (`::details-content`, onde o navegador suporta; nos outros, abre em linha e empurra o conteúdo); no celular, em linha, dentro do menu recolhível. Com o roteador do gateway, **Esc** (foco volta ao título) e o **clique fora** também fecham, e a página nova nasce fechada. O `site/cabecalho` monta os submenus a partir de **`grupos`**: `[{ titulo, links: [{ texto, href }] }]` (até 6 grupos de 12 links).
+**Limites**: os grupos vêm **depois** dos `links` (a linguagem não deixa um `se` ver a variável do `repetir`, então o menu não mistura as duas listas em ordem livre; para outra ordem, monte o `nav/menu` à mão); **um nível só** (sem submenu dentro de submenu); abrir um submenu não fecha os outros sem JavaScript (com o roteador, o clique fora do aberto fecha); não abre por passar o mouse (só por clique), de propósito, por acessibilidade em telas de toque.

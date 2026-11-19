@@ -64,6 +64,8 @@ export const COMPONENTES_BASE: Componentes = {
     return createElement('div', { ...(id ? { id } : {}), style: { display: 'grid', gridTemplateColumns: `repeat(${cols},minmax(0,1fr))`, ...(gap !== undefined ? { gap } : {}) } }, slots.filhos)
   },
   'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}) }, slots.filhos),
+  'nav/submenu': ({ slots, id }) => createElement('details', { ...(id ? { id } : {}), 'data-submenu': '' }, slots.filhos),
+  'nav/submenu-titulo': ({ props, id }) => createElement('summary', { ...(id ? { id } : {}) }, txt(props.texto)),
   'nav/menu': ({ props, slots, id }) => createElement('nav', { ...(id ? { id } : {}), 'aria-label': typeof props.rotulo === 'string' && props.rotulo ? props.rotulo : 'Principal' }, slots.filhos),
   'nav/alternador': ({ props, id }) => createElement('input', { ...(id ? { id } : {}), type: 'checkbox', role: 'switch', 'data-alternador': '', ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Abrir o menu' } : props) }),
   'form/busca': ({ props, slots, id }) => createElement('form', { ...(id ? { id } : {}), role: 'search', method: 'get', action: caminhoLocal(props.acao) }, slots.filhos),
@@ -132,6 +134,8 @@ export const BLOCOS_BASE = [
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
+  bloco('nav/submenu', { slots: { filhos: {} } }),
+  bloco('nav/submenu-titulo', { props: { type: 'object', properties: { texto: { type: 'string', maxLength: 80 } } } }),
   bloco('nav/menu', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80 } } } }),
   bloco('nav/alternador', { props: { type: 'object', properties: { rotulo: ROTULO } } }),
   bloco('form/busca', { slots: { filhos: {} }, props: { type: 'object', properties: { acao: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site que recebe a busca (padrão /busca); outro valor vale o padrão' } } } }),

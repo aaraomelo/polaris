@@ -119,6 +119,12 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/rodape': { titulo: 'Rodapé', descricao: 'Faixa do fim da página (`<footer>`): ponto de referência para leitores de tela, com informações do site (contato, links, aviso legal).', exemplos: [
     { titulo: 'Com aviso', instancia: { bloco: 'layout/rodape', slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: '© 2026 Minha loja' } }] } } },
   ] },
+  'nav/submenu': { titulo: 'Submenu (recolhível, sem JavaScript)', descricao: 'Grupo recolhível de links dentro de um `nav/menu`: um `<details>` nativo que leva um `nav/submenu-titulo` (o `<summary>`, que abre e fecha) seguido dos links. Funciona por teclado (Tab, Enter e Espaço) sem JavaScript; no computador a lista abre como um painel sob o título (onde o navegador suporta `::details-content`; nos outros, abre em linha), e no celular, em linha. Com o roteador do gateway, Esc e o clique fora o fecham.', exemplos: [
+    { titulo: 'Com dois links', instancia: { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/submenu', slots: { filhos: [{ bloco: 'nav/submenu-titulo', props: { texto: 'Produtos' } }, { bloco: 'nav/link', props: { href: '/cafes', texto: 'Cafés' } }, { bloco: 'nav/link', props: { href: '/cha', texto: 'Chás' } }] } }] } } },
+  ] },
+  'nav/submenu-titulo': { titulo: 'Título do submenu', descricao: 'O `<summary>` de um `nav/submenu`: o texto clicável que abre e fecha o grupo (`texto`). Deve ser o primeiro filho do submenu.', exemplos: [
+    { titulo: 'Título', instancia: { bloco: 'nav/submenu', slots: { filhos: [{ bloco: 'nav/submenu-titulo', props: { texto: 'Mais' } }, { bloco: 'nav/link', props: { href: '/sobre', texto: 'Sobre' } }] } } },
+  ] },
   'nav/menu': { titulo: 'Menu', descricao: 'Grupo de links de navegação (`<nav>`), com nome acessível em `rotulo` (padrão "Principal"). Use `atual` no link da página aberta.', exemplos: [
     { titulo: 'Dois links', instancia: { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início', atual: true } }, { bloco: 'nav/link', props: { href: '/sobre', texto: 'Sobre' } }] } } },
   ] },
