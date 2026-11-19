@@ -3,7 +3,7 @@ import type { Registry } from '@polaris/schema'
 import { registraNativos } from '../ir/nativos'
 import type { Componentes } from './tipos'
 import { DOCS_BASE } from './base-doc'
-import { QUADRO_MAX, idFormulario, valoresIniciaisJson, dimensao, entradasJson, ident } from '../vivo/blocos'
+import { QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valoresIniciaisJson, dimensao, entradasJson, ident } from '../vivo/blocos'
 
 // Biblioteca nativa mínima (layout, texto, mídia, link). Serve de base e de prova do contrato;
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
@@ -64,6 +64,12 @@ export const COMPONENTES_BASE: Componentes = {
   },
   'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}) }, slots.filhos),
   'nav/menu': ({ props, slots, id }) => createElement('nav', { ...(id ? { id } : {}), 'aria-label': typeof props.rotulo === 'string' && props.rotulo ? props.rotulo : 'Principal' }, slots.filhos),
+  'entrada/arquivo': ({ props, on, id }) =>
+    createElement('input', {
+      ...(id ? { id } : {}), type: 'file', ...rotuloDe(props), ...(typeof props.aceita === 'string' && props.aceita ? { accept: props.aceita.slice(0, 200) } : {}), disabled: props.desabilitado === true,
+      'data-max': String(Math.min(8388608, Math.max(1024, Math.trunc(num(props.tamanhoMax) ?? 2097152)))),
+      onChange: (e: { target: HTMLInputElement }) => { const ev = e as unknown as Event; void Promise.resolve(arquivoRecusado(ev)).then((v) => { if (v !== PULA) on.aoRecusar?.(v) }); void Promise.resolve(arquivoEscolhido(ev)).then((v) => { if (v !== PULA) on.aoEscolher?.(v) }) },
+    }),
   'layout/destaque': ({ props, slots, id }) => {
     const img = urlSegura(props.imagem), a = Math.min(800, Math.max(120, Math.trunc(num(props.altura) ?? 320))), e = Math.min(0.8, Math.max(0, num(props.escurece) ?? 0.45))
     return createElement('section', { ...(id ? { id } : {}), 'data-alinha': props.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': props.fundo === 'suave' ? 'suave' : 'primaria', style: { minHeight: a, ...(img ? { backgroundImage: `linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` } : {}) } }, slots.filhos)
@@ -122,6 +128,7 @@ export const BLOCOS_BASE = [
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
   bloco('nav/menu', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80 } } } }),
+  bloco('entrada/arquivo', { props: { type: 'object', properties: { rotulo: ROTULO, aceita: { type: 'string', maxLength: 200, description: 'tipos aceitos pelo seletor (atributo accept), ex.: image/png,image/jpeg' }, tamanhoMax: { type: 'integer', minimum: 1024, maximum: 8388608, default: 2097152, description: 'bytes; acima disso o evento traz `erro` e o arquivo nem é lido' }, desabilitado: { type: 'boolean' } } }, eventos: { aoEscolher: { payload: 'json' }, aoRecusar: { payload: 'json' } } }),
   bloco('layout/destaque', { slots: { filhos: {} }, props: { type: 'object', properties: { imagem: { type: 'string', maxLength: 500, description: 'URL segura (mesma origem: o CSP das páginas só carrega imagens do próprio site)' }, altura: { type: 'number', minimum: 120, maximum: 800, default: 320, description: 'altura mínima em px' }, escurece: { type: 'number', minimum: 0, maximum: 0.8, default: 0.45, description: 'véu escuro sobre a imagem, para o texto ler' }, alinha: { type: 'string', description: 'centro (padrão) ou esquerda (outro valor vale centro)' }, fundo: { type: 'string', description: 'sem imagem: primaria (padrão) ou suave (outro valor vale primaria)' } } } }),
   bloco('layout/rodape', { slots: { filhos: {} } }),
   bloco('layout/divisor'),

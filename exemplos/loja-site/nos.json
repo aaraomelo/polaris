@@ -75,7 +75,7 @@
               "props": {
                 "titulo": "Bem-vindo à loja",
                 "subtitulo": "Ofertas novas toda semana, com atendimento de gente de verdade.",
-                "altura": 240,
+                "altura": 300,
                 "cta": {
                   "texto": "Conheça a loja",
                   "href": "/sobre"
@@ -83,7 +83,9 @@
                 "cta2": {
                   "texto": "Fale com a gente",
                   "href": "/contato"
-                }
+                },
+                "imagem": "/_polaris/img/96898dfdb1b73039f83a5f27f9e13bd533e63b543a343bcc5771ed7c6f47aa5a.png",
+                "escurece": 0.35
               }
             },
             {

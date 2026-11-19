@@ -436,6 +436,67 @@
  },
  {
   "kind": "dados",
+  "id": "studio.ativos",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarAtivos"
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.imgenviar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "enviarAtivo"
+   },
+   "parametros": {
+    "nome": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "dados": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.imgremover",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "removerAtivo"
+   },
+   "parametros": {
+    "hash": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.previa",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -501,6 +562,9 @@
    "rota": "/studio",
    "titulo": "Polaris Studio",
    "dados": {
+    "ativos": "studio.ativos",
+    "imgenviar": "studio.imgenviar",
+    "imgremover": "studio.imgremover",
     "diagrama": "studio.diagrama",
     "nos": "studio.nos",
     "blocos": "studio.blocos",
@@ -550,6 +614,10 @@
     "tipoDiagrama": {
      "tipo": "texto",
      "inicial": "fluxo"
+    },
+    "msgImagem": {
+     "tipo": "texto",
+     "inicial": ""
     },
     "selCampo": {
      "tipo": "json",
@@ -922,6 +990,43 @@
             {
              "acao": "executar",
              "dados": "releases",
+             "args": {},
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "tipoAviso",
+               "valor": "\"erro\""
+              },
+              {
+               "acao": "definir",
+               "estado": "aviso",
+               "valor": "erro"
+              }
+             ]
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "nav/botao",
+          "props": {
+           "texto": "Imagens"
+          },
+          "eventos": {
+           "aoClicar": [
+            {
+             "acao": "definir",
+             "estado": "painel",
+             "valor": "estado.painel == \"imagens\" ? \"\" : \"imagens\""
+            },
+            {
+             "acao": "definir",
+             "estado": "msgImagem",
+             "valor": "\"\""
+            },
+            {
+             "acao": "executar",
+             "dados": "ativos",
              "args": {},
              "emErro": [
               {
@@ -1445,6 +1550,175 @@
              },
              "props": {
               "texto": "~ {n}"
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "bloco": "layout/pilha",
+       "se": "estado.painel == \"imagens\"",
+       "props": {
+        "gap": 8
+       },
+       "slots": {
+        "filhos": [
+         {
+          "bloco": "texto/titulo",
+          "props": {
+           "texto": "Imagens",
+           "nivel": 3
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "props": {
+           "texto": "Envie png, jpeg, gif ou webp (até 2 MB). Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
+          }
+         },
+         {
+          "bloco": "entrada/arquivo",
+          "props": {
+           "rotulo": "Escolha uma imagem",
+           "aceita": "image/png,image/jpeg,image/gif,image/webp",
+           "tamanhoMax": 2097152
+          },
+          "eventos": {
+           "aoEscolher": [
+            {
+             "acao": "definir",
+             "estado": "msgImagem",
+             "valor": "\"Enviando…\""
+            },
+            {
+             "acao": "executar",
+             "dados": "imgenviar",
+             "args": {
+              "nome": "{evento.nome}",
+              "dados": "{evento.dados}"
+             },
+             "depois": [
+              {
+               "acao": "definir",
+               "estado": "msgImagem",
+               "valor": "resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\""
+              },
+              {
+               "acao": "executar",
+               "dados": "ativos"
+              }
+             ],
+             "emErro": [
+              {
+               "acao": "definir",
+               "estado": "msgImagem",
+               "valor": "erro"
+              }
+             ]
+            }
+           ],
+           "aoRecusar": [
+            {
+             "acao": "definir",
+             "estado": "msgImagem",
+             "valor": "evento.erro"
+            }
+           ]
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "estado.msgImagem != \"\"",
+          "props": {
+           "texto": "{estado.msgImagem}"
+          }
+         },
+         {
+          "bloco": "texto/paragrafo",
+          "se": "ativos && tamanho(ativos.ativos ?? []) == 0",
+          "props": {
+           "texto": "Nenhuma imagem ainda."
+          }
+         },
+         {
+          "bloco": "layout/linha",
+          "repetir": {
+           "cada": "ativos.ativos ?? []",
+           "como": "a",
+           "chave": "a.id"
+          },
+          "props": {
+           "gap": 12,
+           "alinha": "centro"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "midia/imagem",
+             "props": {
+              "src": "{a.caminho}",
+              "alt": "{a.nome}",
+              "altura": 48
+             }
+            },
+            {
+             "bloco": "layout/pilha",
+             "props": {
+              "gap": 2
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/paragrafo",
+                "props": {
+                 "texto": "{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes"
+                }
+               },
+               {
+                "bloco": "texto/codigo",
+                "props": {
+                 "texto": "{a.caminho}"
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "nav/botao",
+             "props": {
+              "texto": "Remover"
+             },
+             "eventos": {
+              "aoClicar": [
+               {
+                "acao": "executar",
+                "dados": "imgremover",
+                "args": {
+                 "hash": "{a.id}"
+                },
+                "depois": [
+                 {
+                  "acao": "definir",
+                  "estado": "msgImagem",
+                  "valor": "\"Imagem removida.\""
+                 },
+                 {
+                  "acao": "executar",
+                  "dados": "ativos"
+                 }
+                ],
+                "emErro": [
+                 {
+                  "acao": "definir",
+                  "estado": "msgImagem",
+                  "valor": "erro"
+                 }
+                ]
+               }
+              ]
              }
             }
            ]

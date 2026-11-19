@@ -12,7 +12,7 @@ import { configGateway, configServico } from './config'
 import { montaGatewayComChave } from './gateway'
 import { migraPlataforma } from './migra'
 import { carregaNos } from './nos'
-import { criaIdentidade } from '@polaris/packs'
+import { criaAtivos, criaIdentidade } from '@polaris/packs'
 import { geraCartaz } from '@polaris/signmaker'
 import { montaServico } from './servico'
 
@@ -87,6 +87,10 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     // usuários de DEMONSTRAÇÃO (idempotente): o login real do site e do Studio no ambiente local. A senha vale só aqui.
     const ident = criaIdentidade({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } } })
     for (const t of TENANTS_LOCAIS) await ident.criaUsuario({ tenantId: t.id, email: emailLocal(t.alias), nome: 'Ana (demonstração)', papeis: ['studio.editor', 'gerente'], senha: SENHA_LOCAL })
+    // a imagem do banner do site de exemplo (a home aponta para ela pelo SHA-256): idempotente, uma por tenant
+    const ativos = criaAtivos({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } } })
+    const bannerArq = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site', 'banner.png') : o.site ? join(o.site, 'banner.png') : ''
+    if (bannerArq && existsSync(bannerArq)) { const dados = readFileSync(bannerArq).toString('base64'); for (const t of TENANTS_LOCAIS) await ativos.salva(t.id, 'sistema', { nome: 'banner-de-exemplo', dados }) }
     // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
     const reg = carregaNos(nosDir)
     // chave de ASSINATURA da sessão: ES256, como em produção (quem verifica só tem a pública). Persiste em .polaris-local/ para os logins sobreviverem a reinícios; em memória, uma nova a cada subida.

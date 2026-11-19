@@ -8,7 +8,7 @@ import { executaAcoes } from '../render/acoes'
 import type { Programa } from '../render/programa'
 import type { AcaoStore, Store } from '../render/store'
 import { LIMITES_RUNTIME, type ErroRuntime } from '../render/tipos'
-import type { DescritoresDom } from './blocos'
+import { PULA, type DescritoresDom } from './blocos'
 import { descritoresPadrao } from '../expr/padrao'
 import { caminhosMudados } from '../estado/caminho'
 import { chavesDeCaminhos, cruza, depsCabeca, depsValor, MARCA, raizDe, usaTotal } from './dep'
@@ -409,7 +409,14 @@ function constroiNativo(no: IRElemento, cx: Cx, dono: Dono, amb: Amb, pos: Pos):
       const h: Record<string, (e: Event) => void> = {}
       for (const [evento, acoes] of Object.entries(no.eventos)) {
         const ev = d.eventos[evento]
-        if (ev) h[ev.dom] = (e) => { void executaAcoes(acoes, esc as Escopo, { evento: ev.payload?.(e) }, amb.modelo.cx) }
+        if (ev) {
+          const anterior = h[ev.dom]
+          h[ev.dom] = (e) => {
+            anterior?.(e) // dois eventos do mesmo bloco no mesmo evento do DOM (aoEscolher e aoRecusar): cada um decide, pelo payload, se se aplica
+            const p = ev.payload?.(e), roda = (evento: unknown) => (evento === PULA ? undefined : executaAcoes(acoes, esc as Escopo, { evento }, amb.modelo.cx))
+            if (p instanceof Promise) void p.then(roda, () => roda({ erro: 'não foi possível ler o arquivo' })).then(() => amb.modelo.flush()); else void roda(p) // payload assíncrono (ler arquivo): as ações rodam quando ele chega
+          }
+        }
       }
       const entrada: Entrada = { h }
       if (d.valor) entrada.sync = () => { const v = d.valor!(props); if ((el as HTMLInputElement).value !== v) (el as HTMLInputElement).value = v }
@@ -523,7 +530,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
       if (fn) { fn(e); modelo.flush(); ent!.sync?.() }
     }
   }
-  const tipos = ['click', 'input']
+  const tipos = ['click', 'input', 'change']
   for (const t of tipos) o.container.addEventListener(t, ouve)
 
   return {

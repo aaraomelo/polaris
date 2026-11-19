@@ -361,6 +361,27 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
   })
+  it('imagens: o banner do hero é servido do próprio site (CSP ok) e, no Studio, enviar, listar, usar e remover uma imagem funciona', async () => {
+    const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
+    try {
+      const p = await nav.newPage(), erros: string[] = [], imagens: Array<[number, string]> = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
+      p.on('response', (r) => { if (r.url().includes('/_polaris/img/')) imagens.push([r.status(), r.headers()['content-type'] ?? '']) })
+      const base = `http://loja-demo.polaris.localhost:${l.porta}`
+      await p.goto(`${base}/`); await p.getByRole('heading', { name: 'Bem-vindo à loja' }).waitFor()
+      const fundo = await p.locator('section[data-alinha]').evaluate((e) => getComputedStyle(e).backgroundImage); expect(fundo).toMatch(/linear-gradient\(rgba\(0, 0, 0, 0\.35\).*url\("[^"]*\/_polaris\/img\/[0-9a-f]{64}\.png"\)/)
+      await p.waitForFunction(() => performance.getEntriesByType('resource').some((r) => r.name.includes('/_polaris/img/'))); expect(imagens).toContainEqual([200, 'image/png'])
+      expect((await get(l, 'loja-outra', new URL(fundo.match(/url\("([^"]*)"\)/)![1]!).pathname)).status).toBe(200) // o seed põe a imagem em cada tenant (conteúdo igual, ativos separados)
+      await p.goto(`${base}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
+      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Imagens' }).click(); await p.getByText('banner-de-exemplo · 1600×500').waitFor()
+      const PIXEL = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
+      await p.locator('input[type=file]').setInputFiles({ name: 'meu-pixel.png', mimeType: 'image/png', buffer: PIXEL }); await p.getByText('Imagem enviada.').waitFor(); await p.getByText('meu-pixel.png · 1×1 · 70 bytes').waitFor()
+      const caminho = await p.locator('code', { hasText: '/_polaris/img/' }).first().innerText(); expect((await get(l, 'loja-demo', caminho)).status).toBe(200)
+      await p.locator('input[type=file]').setInputFiles({ name: 'mal.png', mimeType: 'image/png', buffer: Buffer.from('<svg onload=alert(1)>') }); await p.getByText(/png, jpeg, gif ou webp/).waitFor() // o servidor lê o tipo dos bytes: o nome e o tipo declarado não valem
+      await p.locator('input[type=file]').setInputFiles({ name: 'grande.png', mimeType: 'image/png', buffer: Buffer.alloc(2 * 1024 * 1024 + 10, 1) }); await p.getByText(/o arquivo passa de 2048 KB/).waitFor() // o navegador nem lê
+      await p.getByRole('button', { name: 'Remover' }).first().click(); /* a mais nova (o pixel) vem primeiro */ await p.getByText('Imagem removida.').waitFor(); expect((await get(l, 'loja-demo', caminho)).status).toBe(404)
+      expect(erros.filter((x) => !/status of (401|403|404|422)/.test(x)).join(' | ')).toBe('')
+    } finally { await nav.close() }
+  })
   it('o Studio sem sessão manda ao login e volta para ele depois de entrar', async () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {

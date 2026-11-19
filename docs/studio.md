@@ -21,6 +21,9 @@ packages/studio       diff semântico, auditoria/validação de tema, âncoras d
 - **Histórico e diff**: lista de versões (quem, quando, nota), **diff semântico** entre duas versões ou contra o padrão, restaurar uma versão no editor (vira edição desfazível; só grava ao salvar). Criar página ou tema novo (rascunho que só existe no servidor depois de salvar).
 - **Comentários**: do nó ou **ancorados no bloco selecionado** (pelo id), com respostas e "resolvido". Se o bloco some, o comentário continua legível (nunca é reancorado por posição).
 
+## Imagens
+O botão **Imagens** abre o envio e a lista das imagens do tenant (miniatura, dimensões, caminho para usar no hero, remover): veja `docs/imagens.md`.
+
 ## Cartazes (Sign Maker)
 O Studio edita o kind `cartaz` com prévia ao vivo: veja a seção "No Studio" de `docs/sign-maker.md`.
 

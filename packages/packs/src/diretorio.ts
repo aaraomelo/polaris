@@ -1,3 +1,4 @@
+import { DDL_ATIVOS } from './ativos'
 import { DDL_IDENTIDADE } from './identidade'
 import type { Diretorio, Status } from './provisiona'
 
@@ -107,7 +108,7 @@ CREATE TABLE IF NOT EXISTS plataforma.modulo (
   servico text NOT NULL,
   habilitado_em timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (tenant_id, servico)
-);` + DDL_IDENTIDADE
+);` + DDL_IDENTIDADE + DDL_ATIVOS
 
 type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
 /** Implementação sobre SQL. `q` deve falar com o banco da plataforma (papel com acesso ao schema `plataforma`). */

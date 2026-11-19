@@ -37,6 +37,8 @@ export type OpcoesStudio = {
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
   previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; modo?: 'claro' | 'escuro'; dados?: unknown; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[]; problemas?: string[] } | { ok: false; erros: string[] }
+  /** imagens do tenant (`criaAtivos`); sem isto, `/studio/ativos*` é 501 */
+  ativos?: import('./ativos').Ativos
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
 }
 const ID = /^[a-z][A-Za-z0-9._/-]{0,127}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, ANCORA = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
@@ -253,6 +255,26 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const nota = (b as { nota?: unknown }).nota; if (nota !== undefined && (typeof nota !== 'string' || nota.length > 300)) return erro(reply, 400, 'requisicao_invalida', 'nota: texto de até 300 caracteres')
     const r = await o.publicar({ tenantId: s.tenantId, autor: s.usuario, ...(nota ? { nota } : {}) })
     return r.ok ? { ok: true, release: r.release } : erro(reply, 422, 'publicacao_recusada', r.erros.slice(0, 5).join('; '))
+  })
+
+  // imagens do tenant: o Studio envia JSON com o arquivo em base64 (o cliente declarativo só fala JSON); o servidor lê o TIPO dos bytes e aplica os limites (`criaAtivos`)
+  app.get('/studio/ativos', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.ativos) return erro(reply, 501, 'nao_implementado', 'este servidor não guarda imagens')
+    return { ativos: await o.ativos.lista(s.tenantId) }
+  })
+  app.post('/studio/ativos', { bodyLimit: 3 * 1024 * 1024 + 4096 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 5); if (!s) return reply
+    if (!o.ativos) return erro(reply, 501, 'nao_implementado', 'este servidor não guarda imagens')
+    const b = req.body; if (!so(b, ['nome', 'dados']) || typeof (b as { nome?: unknown }).nome !== 'string' || typeof (b as { dados?: unknown }).dados !== 'string') return erro(reply, 400, 'requisicao_invalida', 'corpo: { nome, dados (base64) }')
+    const r = await o.ativos.salva(s.tenantId, s.usuario, b as { nome: string; dados: string })
+    if (!r.ok) return erro(reply, 422, 'ativo_recusado', r.erro)
+    return reply.status(r.novo ? 201 : 200).send({ ativo: r.ativo, novo: r.novo })
+  })
+  app.delete<{ Params: { hash: string } }>('/studio/ativos/:hash', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 2); if (!s) return reply
+    if (!o.ativos) return erro(reply, 501, 'nao_implementado', 'este servidor não guarda imagens')
+    return (await o.ativos.remove(s.tenantId, req.params.hash)) ? { ok: true } : erro(reply, 404, 'nao_encontrado', 'imagem inexistente')
   })
 
   app.post('/studio/previa', { bodyLimit: 512 * 1024 }, async (req, reply) => {

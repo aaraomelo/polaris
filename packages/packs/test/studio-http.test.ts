@@ -3,7 +3,7 @@ import { registraBase } from '@polaris/engine'
 import { registraTemas } from '@polaris/engine/tema'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { DDL_DIRETORIO, criaArmazemDeNos, diretorioSql, registroDaPlataforma, rotasStudio, sessaoDeToken, type Sessao } from '../src/index'
+import { DDL_DIRETORIO, criaArmazemDeNos, criaAtivos, diretorioSql, registroDaPlataforma, rotasStudio, sessaoDeToken, type Sessao } from '../src/index'
 
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222'
 let pg: PGlite
@@ -109,6 +109,21 @@ describe('API de autoria do Studio', () => {
     expect(pode(['studio.leitor'])).toEqual([true, false, false]); expect(pode(['studio.comentarista'])).toEqual([true, true, false]); expect(pode(['studio.editor'])).toEqual([true, true, true])
     expect(pode([])).toEqual([false, false, false]); expect(pode(['gerente', 'catalogo.gerente'])).toEqual([false, false, false]); expect(pode(['studio.inexistente'])).toEqual([false, false, false]); expect(pode(['studio.leitor', 'studio.inexistente'])).toEqual([false, false, false])
     expect(sessaoDeToken(base, { tenantId: A, usuario: 'u', papeis: ['studio.editor'] })).toMatchObject({ tenantId: A, usuario: 'u' })
+  })
+  it('imagens: sem armazém é 501; enviar (201, depois 200), listar, remover; tipo pelos bytes; permissões e isolamento por tenant', async () => {
+    expect((await app.inject({ url: '/studio/ativos', headers: h(A, 'ana') })).statusCode).toBe(501)
+    const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, ativos: criaAtivos({ q }) }); await a2.ready()
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64').toString('base64')
+    const envia = (corpo: object, t = h(A, 'ana')) => a2.inject({ method: 'POST', url: '/studio/ativos', headers: t, payload: corpo })
+    const r1 = await envia({ nome: 'pixel', dados: png }); expect(r1.statusCode).toBe(201); const id = r1.json().ativo.id; expect(r1.json()).toMatchObject({ novo: true, ativo: { nome: 'pixel', tipo: 'image/png', largura: 1, altura: 1, caminho: `/_polaris/img/${id}.png` } })
+    expect((await envia({ nome: 'de novo', dados: png })).statusCode).toBe(200)
+    expect((await a2.inject({ url: '/studio/ativos', headers: h(A, 'ana', 'ver') })).json().ativos.map((x: any) => x.id)).toContain(id); expect((await a2.inject({ url: '/studio/ativos', headers: h(B, 'bia') })).json().ativos).toEqual([])
+    const ruim = await envia({ nome: 'x', dados: Buffer.from('<svg onload=alert(1)>').toString('base64') }); expect(ruim.statusCode).toBe(422); expect(ruim.json().erro.mensagem).toMatch(/png, jpeg, gif ou webp/)
+    for (const corpo of [{}, { nome: 'x' }, { nome: 5, dados: 'a' }, { nome: 'x', dados: png, extra: 1 }]) expect((await envia(corpo)).statusCode, JSON.stringify(corpo)).toBe(400)
+    expect((await envia({ nome: 'x', dados: png }, h(A, 'ana', 'ver'))).statusCode).toBe(403); expect((await a2.inject({ method: 'DELETE', url: `/studio/ativos/${id}`, headers: h(A, 'ana', 'ver') })).statusCode).toBe(403)
+    expect((await a2.inject({ method: 'POST', url: '/studio/ativos', payload: { nome: 'x', dados: png } })).statusCode).toBe(401)
+    expect((await a2.inject({ method: 'DELETE', url: `/studio/ativos/${id}`, headers: h(B, 'bia') })).statusCode).toBe(404) // o outro tenant não apaga
+    expect((await a2.inject({ method: 'DELETE', url: `/studio/ativos/${id}`, headers: h(A, 'ana') })).json()).toEqual({ ok: true }); expect((await a2.inject({ method: 'DELETE', url: `/studio/ativos/${id}`, headers: h(A, 'ana') })).statusCode).toBe(404); await a2.close()
   })
   it('diagrama: blocos do rascunho enviado e fluxo do tenant (cabeças sobre a base), isolado por tenant, com validação do corpo', async () => {
     const post = (corpo: object, t = h(A, 'ana', 'ver')) => app.inject({ method: 'POST', url: '/studio/diagrama', headers: t, payload: corpo })

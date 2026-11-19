@@ -46,4 +46,4 @@ const MAO: Emissores = {
 export const EMISSORES_BASE: Emissores = { ...emissoresDe(DESCRITORES_BASE), ...MAO }
 
 /** Blocos que só fazem sentido com JavaScript (têm eventos/estado no cliente): uma página que os usa não é estática. */
-export const INTERATIVOS = new Set(['nav/botao', 'entrada/texto', 'entrada/numero', 'entrada/caixa'])
+export const INTERATIVOS = new Set(['entrada/arquivo', 'nav/botao', 'entrada/texto', 'entrada/numero', 'entrada/caixa'])

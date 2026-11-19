@@ -138,6 +138,25 @@ export const d_entrada_area: Descritor = {
   attrs: (p, id) => ({ ...comId(id), ...rotulo(p), placeholder: txt(p.placeholder), rows: String(inteiro(p.linhas, 1, 40, 4)), ...(p.desabilitado === true ? { disabled: '' } : {}), spellcheck: 'false' }),
   eventos: { aoMudar: { dom: 'input', payload: (e) => (e.target as HTMLTextAreaElement).value } },
 }
+/** valor que um `payload` devolve para dizer "este evento não se aplica agora": as ações dele não rodam (ex.: `aoEscolher` quando o arquivo foi recusado) */
+export const PULA = Symbol.for('polaris.pula')
+/** recusa de imediato (sem ler) o que não serve: nenhum arquivo ou acima do limite; null = pode ler */
+export const recusaArquivo = (alvo: EventTarget | null, maxBytes: number): string | null => { const f = (alvo as HTMLInputElement | null)?.files?.[0]; return !f ? 'nenhum arquivo escolhido' : f.size > maxBytes ? `o arquivo passa de ${Math.round(maxBytes / 1024)} KB` : null }
+/** lê o arquivo escolhido (um só) no navegador: `{ nome, tipo, tamanho, dados }` com os bytes em base64. O servidor revalida TUDO (o tipo vem dos bytes). */
+export const lerArquivoEscolhido = (alvo: EventTarget | null): Promise<Record<string, unknown> | symbol> => new Promise((ok) => {
+  const f = (alvo as HTMLInputElement | null)?.files?.[0]; if (!f) return ok(PULA)
+  const r = new FileReader(); r.onerror = () => ok({ nome: f.name, tipo: f.type, tamanho: f.size, dados: '', erro: 'não foi possível ler o arquivo' })
+  r.onload = () => { const u = String(r.result), i = u.indexOf(','); ok({ nome: f.name, tipo: f.type, tamanho: f.size, dados: i >= 0 ? u.slice(i + 1) : '' }) }
+  r.readAsDataURL(f)
+})
+const maxDe = (e: Event) => Number((e.target as HTMLElement).dataset.max) || 2097152
+/** `aoEscolher`: só quando o arquivo serve (lido); `aoRecusar`: só quando não serve, com `{ erro }`: assim a página não dispara um envio inútil */
+export const arquivoEscolhido = (e: Event): unknown => (recusaArquivo(e.target, maxDe(e)) ? PULA : lerArquivoEscolhido(e.target).then((v) => (typeof v === 'object' && 'erro' in v ? PULA : v)))
+export const arquivoRecusado = (e: Event): unknown => { const erro = recusaArquivo(e.target, maxDe(e)); return erro ? { erro } : PULA }
+export const d_entrada_arquivo: Descritor = {
+  chave: () => 'input:file', tag: () => 'input', attrs: (p, id) => ({ ...comId(id), type: 'file', ...rotulo(p), ...(typeof p.aceita === 'string' && p.aceita ? { accept: p.aceita.slice(0, 200) } : {}), ...(p.desabilitado === true ? { disabled: '' } : {}), 'data-max': String(inteiro(p.tamanhoMax, 1024, 8388608, 2097152)) }),
+  eventos: { aoEscolher: { dom: 'change', payload: arquivoEscolhido }, aoRecusar: { dom: 'change', payload: arquivoRecusado } },
+}
 /** Formulário declarativo (`kind: formulario`): o servidor entrega só o ponto de montagem; o carregador `@polaris/engine/formulario-cliente` (a "ilha") busca a definição, monta os campos com máscaras e validação e envia. Sem JavaScript fica o texto. */
 export const idFormulario = (v: unknown): string => (typeof v === 'string' && /^[a-z0-9][a-z0-9._-]{0,127}$/.test(v) ? v : '')
 /** valores iniciais: só primitivos (e listas deles) de chaves seguras, até 20 KB: é transporte para o carregador, que valida contra o formulário */
@@ -183,7 +202,7 @@ export const DESCRITORES_BASE: DescritoresDom = {
   'texto/paragrafo': d_texto_paragrafo,
   'midia/imagem': d_midia_imagem,
   'computacao/canvas-gl': d_computacao_canvas_gl,
-  'entrada/area': d_entrada_area,
+  'entrada/area': d_entrada_area, 'entrada/arquivo': d_entrada_arquivo,
   'midia/quadro': d_midia_quadro,
   'form/formulario': d_form_formulario,
   'nav/link': d_nav_link,

@@ -224,6 +224,31 @@
             "descricao": "quantos blocos/nós/ligações, se foi cortado e os avisos (ex.: link para rota sem página)"
           }
         }
+      },
+      "listaAtivos": {
+        "campos": {
+          "ativos": {
+            "tipo": "json",
+            "descricao": "imagens do tenant: id (sha-256), nome, tipo, largura, altura, tamanho, caminho"
+          }
+        }
+      },
+      "ativoEnviado": {
+        "campos": {
+          "ativo": {
+            "tipo": "json"
+          },
+          "novo": {
+            "tipo": "booleano"
+          }
+        }
+      },
+      "ativoRemovido": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          }
+        }
       }
     },
     "operacoes": {
@@ -538,6 +563,41 @@
           }
         },
         "saida": "linkPreview",
+        "permissao": "studio"
+      },
+      "listarAtivos": {
+        "metodo": "GET",
+        "caminho": "/ativos",
+        "saida": "listaAtivos",
+        "permissao": "studio"
+      },
+      "enviarAtivo": {
+        "metodo": "POST",
+        "caminho": "/ativos",
+        "entrada": {
+          "nome": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "dados": {
+            "tipo": "texto",
+            "obrigatorio": true,
+            "descricao": "o arquivo em base64"
+          }
+        },
+        "saida": "ativoEnviado",
+        "permissao": "studio"
+      },
+      "removerAtivo": {
+        "metodo": "DELETE",
+        "caminho": "/ativos/:hash",
+        "entrada": {
+          "hash": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "ativoRemovido",
         "permissao": "studio"
       }
     }

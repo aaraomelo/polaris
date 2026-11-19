@@ -22,6 +22,8 @@ export type OpcoesPaginas = {
   cookieSeguro?: boolean
   /** permissões da sessão para as `guarda` das páginas (padrão: os papéis do token) */
   permissoes?(ctx: CtxGw): readonly string[]
+  /** as imagens do tenant (`/_polaris/img/<sha256>.<ext>`): o tenant vem do ENDEREÇO, nunca da URL; sem isto a rota não existe */
+  imagens?: { le(tenantId: string, hash: string): Promise<{ tipo: string; bytes: Uint8Array } | null> }
 }
 export type DepsPaginas = {
   entra(req: FastifyRequest): Promise<CtxGw>
@@ -69,6 +71,19 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     if (!a) return reply.status(404).type('text/plain').send('não encontrado')
     return reply.header('cache-control', 'public, max-age=31536000, immutable').type(a.tipo).send(a.corpo) // o nome é o hash do conteúdo
   })
+
+  if (o.imagens) {
+    const EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
+    app.get<{ Params: { arq: string } }>('/_polaris/img/:arq', async (req, reply) => {
+      const m = /^([0-9a-f]{64})\.(png|jpg|gif|webp)$/.exec(req.params.arq); if (!m) return reply.status(404).type('text/plain').send('não encontrado')
+      const ctx = await d.entra(req), a = await o.imagens!.le(ctx.tenantId, m[1]!)
+      if (!a || EXT[a.tipo] !== m[2]) return reply.status(404).type('text/plain').send('não encontrado') // outro tenant, hash inexistente ou extensão que não é a do tipo: o mesmo 404
+      const etag = `"${m[1]}"`
+      reply.header('etag', etag).header('cache-control', 'public, max-age=31536000, immutable').header('x-content-type-options', 'nosniff').header('content-security-policy', "default-src 'none'; sandbox") // sem Cross-Origin-Resource-Policy: a prévia do Studio (iframe sandbox, origem opaca) precisa carregar a imagem; ela é pública de qualquer jeito
+      if (req.headers['if-none-match'] === etag) return reply.status(304).send()
+      return reply.type(a.tipo).send(Buffer.from(a.bytes)) // o conteúdo nunca muda (o nome é o hash): cache eterno
+    })
+  }
 
   const roteadorSrc = guarda(`${sha(ROTEADOR_JS)}.js`, 'text/javascript; charset=utf-8', ROTEADOR_JS)
   const clienteDe = (programa: Programa): Promise<string | null> => {

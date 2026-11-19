@@ -22,7 +22,7 @@ export async function migraPlataforma(o: { urlMigrador: string; papelPlataforma:
     // comentários do Studio: criar e resolver (UPDATE); ninguém apaga
     await c.query(`GRANT SELECT, INSERT, UPDATE ON plataforma.comentario TO ${o.papelPlataforma}`)
     // identidade: usuários e tokens (atualizados e apagados: uso único, expiração, bloqueio por tentativas) e a caixa de saída de e-mail (um trabalhador marca `enviado_em`)
-    await c.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON plataforma.usuario, plataforma.login_tentativa, plataforma.token_senha, plataforma.email_saida TO ${o.papelPlataforma}`)
+    await c.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON plataforma.usuario, plataforma.login_tentativa, plataforma.token_senha, plataforma.email_saida, plataforma.ativo TO ${o.papelPlataforma}`)
     await c.query(`GRANT USAGE ON SEQUENCE plataforma.email_saida_id_seq TO ${o.papelPlataforma}`)
     const n = Number((await c.query(`SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = 'plataforma'`)).rows[0]!.n)
     await c.query('COMMIT'); return { tabelas: n }

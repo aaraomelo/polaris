@@ -43,6 +43,8 @@ const CASOS: Array<[string, object]> = [
   ['nav/link', P('nav/link', { id: 'b', props: { href: 'https://a.com', texto: 'a' } })],
   ['nav/link (atual)', P('nav/link', { id: 'b', props: { href: '/a', texto: 'a', atual: true } })],
   ['layout/cabecalho (fixo) com nav/menu', P('layout/cabecalho', { id: 'b', props: { fixo: true }, slots: { filhos: [P('nav/menu', { props: { rotulo: 'Seções' }, slots: { filhos: [P('nav/link', { props: { href: '/a', texto: 'A', atual: true } })] } })] } })],
+  ['entrada/arquivo', P('entrada/arquivo', { id: 'b', props: { rotulo: 'Imagem', aceita: 'image/png,image/jpeg', tamanhoMax: 5000, desabilitado: true } })],
+  ['entrada/arquivo (padrões)', P('entrada/arquivo', { id: 'b' })],
   ['layout/destaque (padrões)', P('layout/destaque', { id: 'b', slots: { filhos: [par('a')] } })],
   ['layout/destaque (imagem, véu, esquerda, altura)', P('layout/destaque', { id: 'b', props: { imagem: '/img/banner (1).jpg', altura: 400, escurece: 0.6, alinha: 'esquerda' }, slots: { filhos: [par('a')] } })],
   ['layout/destaque (suave; imagem insegura some; valores no limite)', P('layout/destaque', { id: 'b', props: { imagem: 'javascript:alert(1)', altura: 120, escurece: 0.8, fundo: 'suave', alinha: 'xx' }, slots: { filhos: [par('a')] } })],

@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-30 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+31 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -23,6 +23,7 @@
 | tabela | `tabela/celula` | `texto` ou filhos, `cabecalho` (th), `colunas`, `linhas` | `filhos` | |
 | entrada | `entrada/texto` | `valor`, `placeholder`, `desabilitado` | | `aoMudar` (texto) |
 | entrada | `entrada/numero` | `valor`, `min`, `max`, `passo`, `placeholder`, `desabilitado` | | `aoMudar` (número ou `null` se vazio) |
+| entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
 | nav | `nav/menu` | `rotulo` (nome acessível; padrão "Principal") | `filhos` | |
@@ -64,4 +65,6 @@ Mesmas garantias do cabeçalho (texto escapado, link inseguro sem `href`, parida
 - fundo: a cor primária do tema (`fundo: primaria`, padrão) ou `suave`; ou uma `imagem` com **véu escuro** (`escurece`, 0 a 0,8, padrão 0,45) para o texto ler; `altura` mínima (120 a 800 px, padrão 320); `alinha`: `centro` (padrão) ou `esquerda`. Valor desconhecido de `alinha`/`fundo` vale o padrão; altura e véu fora do limite nem compilam;
 - sobre o fundo primário o botão primário é **invertido** (claro sobre a cor da marca) para ter contraste, e o secundário usa o texto sobre-primária; tudo por variáveis do tema.
 A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas, parênteses e contrabarra viram escapes: nada fecha o `url()` nem a declaração).
-**Limites**: a imagem precisa ser **da mesma origem**: o CSP das páginas (`img-src 'self' data:`) bloqueia as de outros sites, e ainda não há hospedagem de arquivos do tenant; sem imagem de fundo responsiva (um só arquivo, `cover`); sem vídeo nem carrossel; `alinha` e `fundo` são texto (não enum) porque enum não aceita binding no modelo do composto.
+**Limites**: a imagem precisa ser **da mesma origem** (o CSP das páginas só carrega as do próprio site): use as imagens do tenant enviadas pelo Studio (`docs/imagens.md`); sem imagem de fundo responsiva (um só arquivo, `cover`); sem vídeo nem carrossel; `alinha` e `fundo` são texto (não enum) porque enum não aceita binding no modelo do composto.
+
+**Arquivo (`entrada/arquivo`)**: seletor de UM arquivo. O navegador lê o arquivo e entrega `{ nome, tipo, tamanho, dados }` (bytes em base64) a `aoEscolher`; arquivo que não serve (nenhum, ou acima de `tamanhoMax`) **nem é lido** e dispara `aoRecusar` com `{ erro }`, de modo que a página não faz um envio inútil. Os dois eventos usam o mesmo evento do DOM (`change`); o payload de cada um decide se se aplica (valor sentinela `PULA`), e as ações rodam quando a leitura assíncrona termina. **O servidor revalida tudo**: o tipo declarado pelo navegador não vale nada.

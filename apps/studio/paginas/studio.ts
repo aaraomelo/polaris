@@ -26,6 +26,9 @@ export const DADOS = [
   dado('diffrel', 'compararReleases', { de: campo('inteiro', { obrigatorio: true }), para: campo('inteiro', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
   dado('diagrama', 'diagramar', { tipo: campo('texto', { obrigatorio: true }), no: campo('json'), selecionado: campo('texto') }),
+  dado('ativos', 'listarAtivos'),
+  dado('imgenviar', 'enviarAtivo', { nome: campo('texto', { obrigatorio: true }), dados: campo('texto', { obrigatorio: true }) }),
+  dado('imgremover', 'removerAtivo', { hash: campo('texto', { obrigatorio: true }) }),
   dado('previa', 'previsualizar', { dados: campo('json'), no: campo('json', { obrigatorio: true }), tema: campo('json'), selecionado: campo('texto'), modo: campo('texto') }),
   dado('restaurar', 'restaurarPadrao', { kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }) }),
 ]
@@ -471,6 +474,23 @@ const diagramasVista = (): Inst => pilha([
   texto('Abra um diagrama pelos botões acima.', { se: '!diagrama' }),
 ], { se: 'estado.painel == "diagramas"', gap: 8 })
 
+/** imagens do tenant: enviar (o arquivo é lido no navegador e o servidor confere o TIPO pelos bytes), listar com miniatura, copiar o caminho e remover */
+const imagensVista = (): Inst => pilha([
+  titulo('Imagens', 3),
+  texto('Envie png, jpeg, gif ou webp (até 2 MB). Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site.'),
+  P('entrada/arquivo', { props: { rotulo: 'Escolha uma imagem', aceita: 'image/png,image/jpeg,image/gif,image/webp', tamanhoMax: 2097152 }, eventos: { aoEscolher: [
+    def('msgImagem', '"Enviando…"'),
+    exe('imgenviar', { nome: '{evento.nome}', dados: '{evento.dados}' }, [def('msgImagem', 'resultado.novo ? "Imagem enviada." : "Esta imagem já estava na lista."'), exe('ativos')], [def('msgImagem', 'erro')]),
+  ], aoRecusar: [def('msgImagem', 'evento.erro')] } }),
+  texto('{estado.msgImagem}', { se: 'estado.msgImagem != ""' }),
+  texto('Nenhuma imagem ainda.', { se: 'ativos && tamanho(ativos.ativos ?? []) == 0' }),
+  linha([
+    P('midia/imagem', { props: { src: '{a.caminho}', alt: '{a.nome}', altura: 48 } }),
+    pilha([texto('{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes'), P('texto/codigo', { props: { texto: '{a.caminho}' } })], { gap: 2 }),
+    botao('Remover', [exe('imgremover', { hash: '{a.id}' }, [def('msgImagem', '"Imagem removida."'), exe('ativos')], [def('msgImagem', 'erro')])]),
+  ], { repetir: { cada: 'ativos.ativos ?? []', como: 'a', chave: 'a.id' }, props: { gap: 12 } }),
+], { se: 'estado.painel == "imagens"', gap: 8 })
+
 const diffVista = (): Inst => pilha([
   texto('Sem diferenças.', { se: 'diff.diff.igual' }),
   pilha([
@@ -528,10 +548,10 @@ const formCriar = (): Inst => linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
+  dados: { ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
@@ -543,6 +563,7 @@ export const PAGINA = no('pagina', 'studio.app', {
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
       ], aviso('erro', 'erro'))], { se: 'estado.no' }),
       botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))]),
+      botao('Imagens', [def('painel', 'estado.painel == "imagens" ? "" : "imagens"'), def('msgImagem', '""'), exe('ativos', {}, undefined, aviso('erro', 'erro'))]),
       botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))]),
       botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))]),
       texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
@@ -550,6 +571,7 @@ export const PAGINA = no('pagina', 'studio.app', {
     ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),
     linha([texto('Prévia:'), botao('claro', [def('modoPrevia', '"claro"'), atualizaPrevia], { se: 'estado.modoPrevia != "claro"' }), botao('escuro', [def('modoPrevia', '"escuro"'), atualizaPrevia], { se: 'estado.modoPrevia != "escuro"' }), texto('({estado.modoPrevia})')], { se: 'estado.no', props: { gap: 8 } }),
     releasesVista(),
+    imagensVista(),
     linha([criar('pagina'), criar('tema'), criar('formulario'), criar('cartaz')]), formCriar(),
     barraPendente(),
     seletorDeNos('pagina'),
