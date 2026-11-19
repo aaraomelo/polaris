@@ -14,18 +14,20 @@
   "dependencies": {
     "@polaris/acesso": "workspace:*",
     "@polaris/eventos": "workspace:*",
-    "@polaris/schema": "workspace:*", "@polaris/studio": "workspace:*",
-    "@polaris/servico": "workspace:*"
+    "@polaris/schema": "workspace:*",
+    "@polaris/servico": "workspace:*",
+    "@polaris/studio": "workspace:*",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",
+    "@electric-sql/pglite-socket": "^0.2.19",
+    "@polaris/engine": "workspace:*",
+    "@polaris/pg": "workspace:*",
     "@types/node": "^26.6.6",
     "fastify": "^5.2.0",
     "jose": "^6.2.17",
     "typescript": "^7.0.2",
-    "vitest": "^5.1.0",
-    "@polaris/engine": "workspace:*",
-    "@polaris/pg": "workspace:*",
-    "@electric-sql/pglite-socket": "^0.2.19"
+    "vitest": "^5.1.0"
   }
 }

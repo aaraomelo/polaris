@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import sharp from 'sharp'
 
 // ATIVOS do tenant (imagens), no plano de controle. Conteúdo endereçado pelo SHA-256 (o mesmo arquivo é um só, e a URL nunca muda de conteúdo: cache eterno).
 // Regras que valem como contrato: (1) o TIPO vem dos bytes (assinatura do arquivo), nunca do nome nem do que o cliente disser; (2) só png, jpeg, gif e webp (SVG fica de fora: carrega script);
@@ -18,10 +19,20 @@ CREATE TABLE IF NOT EXISTS plataforma.ativo (
   criado_em timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (tenant_id, hash)
 );
+CREATE TABLE IF NOT EXISTS plataforma.ativo_variante (
+  tenant_id uuid NOT NULL,
+  hash text NOT NULL,
+  largura integer NOT NULL CHECK (largura BETWEEN 16 AND 4096),
+  conteudo bytea NOT NULL,
+  PRIMARY KEY (tenant_id, hash, largura),
+  FOREIGN KEY (tenant_id, hash) REFERENCES plataforma.ativo (tenant_id, hash) ON DELETE CASCADE
+);
 `
 
 export type TipoImagem = 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp'
 export const EXTENSAO: Record<TipoImagem, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
+export const LARGURAS_VARIANTES = [160, 480, 960, 1920] as const
+export const LADO_MAXIMO_SERVIDO = 2400
 export const LIMITES_ATIVOS = { bytesPorArquivo: 2 * 1024 * 1024, arquivosPorTenant: 200, bytesPorTenant: 50 * 1024 * 1024, ladoMax: 8000, megapixelsMax: 40 }
 
 /** o que o arquivo É (pelos bytes) e as dimensões do cabeçalho; null se não for uma das quatro imagens ou o cabeçalho estiver truncado/ruim */
@@ -111,12 +122,37 @@ export function limpaMetadados(b: Uint8Array, tipo: TipoImagem): Buffer | null {
   return Buffer.concat([cab, corpo])
 }
 
-export type Ativo = { id: string; nome: string; tipo: TipoImagem; largura: number; altura: number; tamanho: number; criadoEm: string; autor: string; caminho: string }
-export type ResultadoAtivo = { ok: true; ativo: Ativo; novo: boolean; /** bytes de metadados removidos (0 = nada a tirar) */ removidos: number } | { ok: false; erro: string }
+
+export type Processada = { bytes: Buffer; largura: number; altura: number; variantes: Array<{ largura: number; bytes: Buffer }>; reencodou: boolean }
+/** decodifica DE VERDADE (sharp/libvips): recusa o que não decodifica, gira conforme a orientação EXIF (a limpeza a apagou), reduz o que passa de 2400 px de lado e gera as versões menores (webp, larguras de `LARGURAS_VARIANTES` menores que a imagem).
+ * Só recodifica quando precisa (orientação ou tamanho): do contrário o arquivo segue byte a byte como veio. Animações (gif/webp com vários quadros) não são tocadas. null = não decodifica. */
+export async function processaImagem(bytes: Buffer, tipo: TipoImagem, megapixelsMax = LIMITES_ATIVOS.megapixelsMax): Promise<Processada | null> {
+  try {
+    const abre = (b: Buffer, animado = false) => sharp(b, { limitInputPixels: megapixelsMax * 1_000_000, failOn: 'error', animated: animado })
+    const meta = await abre(bytes, true).metadata()
+    if (!meta.width || !meta.height) return null
+    if ((meta.pages ?? 1) > 1) return { bytes, largura: meta.width, altura: meta.pageHeight ?? meta.height, variantes: [], reencodou: false }
+    const orient = meta.orientation ?? 1, troca = orient >= 5, l0 = troca ? meta.height : meta.width, a0 = troca ? meta.width : meta.height
+    const reduz = Math.max(l0, a0) > LADO_MAXIMO_SERVIDO, reencodou = orient > 1 || reduz
+    let final = bytes, largura = l0, altura = a0
+    if (reencodou) {
+      let p = abre(bytes).rotate(); if (reduz) p = p.resize({ width: LADO_MAXIMO_SERVIDO, height: LADO_MAXIMO_SERVIDO, fit: 'inside', withoutEnlargement: true })
+      p = tipo === 'image/jpeg' ? p.jpeg({ quality: 88 }) : tipo === 'image/png' ? p.png({ compressionLevel: 9 }) : tipo === 'image/webp' ? p.webp({ quality: 88 }) : p.gif()
+      const r = await p.toBuffer({ resolveWithObject: true }); final = r.data; largura = r.info.width; altura = r.info.height // sem `withMetadata`: o resultado nasce sem metadados
+    }
+    const variantes: Processada['variantes'] = []
+    for (const w of LARGURAS_VARIANTES) if (w < largura) variantes.push({ largura: w, bytes: await abre(final).resize({ width: w }).webp({ quality: 78 }).toBuffer() })
+    return { bytes: final, largura, altura, variantes, reencodou }
+  } catch { return null }
+}
+
+export type Ativo = { id: string; nome: string; tipo: TipoImagem; largura: number; altura: number; tamanho: number; criadoEm: string; autor: string; caminho: string; /** larguras (px) das versões menores (`<hash>.webp?w=<largura>`) */ variantes: number[]; /** a versão pequena para listas (ou o próprio arquivo, se não há) */ miniatura: string }
+export type ResultadoAtivo = { ok: true; ativo: Ativo; novo: boolean; /** bytes de metadados removidos (0 = nada a tirar) */ removidos: number; /** a imagem foi girada (orientação EXIF) e/ou reduzida a 2400 px */ ajustada: boolean } | { ok: false; erro: string }
 type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>>; rowCount: number }>
 export const caminhoDoAtivo = (hash: string, tipo: TipoImagem) => `/_polaris/img/${hash}.${EXTENSAO[tipo]}`
+export const caminhoDaVariante = (hash: string, largura: number) => `/_polaris/img/${hash}.webp?w=${largura}`
 const NOME = /[\u0000-\u001f\u007f‪-‮⁦-⁩]/g
-const linha = (r: Record<string, unknown>): Ativo => ({ id: r.hash as string, nome: r.nome as string, tipo: r.tipo as TipoImagem, largura: Number(r.largura), altura: Number(r.altura), tamanho: Number(r.tamanho), criadoEm: new Date(r.criado_em as string).toISOString(), autor: r.autor as string, caminho: caminhoDoAtivo(r.hash as string, r.tipo as TipoImagem) })
+const linha = (r: Record<string, unknown>, variantes: number[] = []): Ativo => ({ id: r.hash as string, nome: r.nome as string, tipo: r.tipo as TipoImagem, largura: Number(r.largura), altura: Number(r.altura), tamanho: Number(r.tamanho), criadoEm: new Date(r.criado_em as string).toISOString(), autor: r.autor as string, caminho: caminhoDoAtivo(r.hash as string, r.tipo as TipoImagem), variantes, miniatura: variantes.includes(160) ? caminhoDaVariante(r.hash as string, 160) : caminhoDoAtivo(r.hash as string, r.tipo as TipoImagem) })
 const COLS = 'hash, nome, tipo, largura, altura, tamanho, autor, criado_em'
 
 export function criaAtivos(o: { q: Q; limites?: Partial<typeof LIMITES_ATIVOS> }) {
@@ -130,20 +166,37 @@ export function criaAtivos(o: { q: Q; limites?: Partial<typeof LIMITES_ATIVOS> }
       const original = Buffer.from(e.dados, 'base64'); if (!original.length || original.length > lim.bytesPorArquivo) return { ok: false, erro: `o arquivo precisa ter de 1 byte a ${Math.round(lim.bytesPorArquivo / 1024)} KB` }
       const img = detectaImagem(original); if (!img) return { ok: false, erro: 'só imagens png, jpeg, gif ou webp (o tipo é lido do próprio arquivo)' }
       if (img.largura < 1 || img.altura < 1 || img.largura > lim.ladoMax || img.altura > lim.ladoMax || img.largura * img.altura > lim.megapixelsMax * 1_000_000) return { ok: false, erro: `dimensões fora do limite (${img.largura}×${img.altura}; máximo ${lim.ladoMax} px de lado e ${lim.megapixelsMax} megapixels)` }
-      const bytes = limpaMetadados(original, img.tipo); if (!bytes) return { ok: false, erro: 'o arquivo está corrompido (estrutura da imagem inválida)' }
-      const novaImg = detectaImagem(bytes); if (!novaImg || novaImg.tipo !== img.tipo || novaImg.largura !== img.largura || novaImg.altura !== img.altura) return { ok: false, erro: 'o arquivo está corrompido (estrutura da imagem inválida)' }
-      const removidos = original.length - bytes.length, hash = createHash('sha256').update(bytes).digest('hex') // o id é o hash do que FICA: o mesmo retrato com e sem EXIF é a mesma imagem
-      const ja = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (ja) return { ok: true, ativo: linha(ja), novo: false, removidos }
+      // 1º decodifica o ORIGINAL (a orientação EXIF só existe nele) e, se precisar, gira/reduz e recodifica sem metadados; 2º o que não foi recodificado passa pela limpeza byte a byte
+      const proc = await processaImagem(original, img.tipo, lim.megapixelsMax); if (!proc) return { ok: false, erro: 'não foi possível ler a imagem (arquivo corrompido ou formato inválido)' }
+      let bytes = proc.bytes
+      if (!proc.reencodou) {
+        const limpo = limpaMetadados(original, img.tipo); if (!limpo) return { ok: false, erro: 'o arquivo está corrompido (estrutura da imagem inválida)' }
+        const novaImg = detectaImagem(limpo); if (!novaImg || novaImg.tipo !== img.tipo || novaImg.largura !== img.largura || novaImg.altura !== img.altura) return { ok: false, erro: 'o arquivo está corrompido (estrutura da imagem inválida)' }
+        bytes = limpo
+      }
+      const removidos = Math.max(0, original.length - bytes.length), hash = createHash('sha256').update(bytes).digest('hex') // o id é o hash do que FICA: o mesmo retrato com e sem EXIF é a mesma imagem
+      const variantesDe = async (h: string) => (await q(`SELECT largura FROM plataforma.ativo_variante WHERE tenant_id = $1 AND hash = $2 ORDER BY largura`, [tenantId, h])).rows.map((x) => Number(x.largura))
+      const ja = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (ja) return { ok: true, ativo: linha(ja, await variantesDe(hash)), novo: false, removidos, ajustada: proc.reencodou }
       const uso = (await q(`SELECT count(*)::int AS n, coalesce(sum(tamanho), 0)::bigint AS b FROM plataforma.ativo WHERE tenant_id = $1`, [tenantId])).rows[0]!
       if (Number(uso.n) >= lim.arquivosPorTenant) return { ok: false, erro: `limite de ${lim.arquivosPorTenant} imagens por loja` }
-      if (Number(uso.b) + bytes.length > lim.bytesPorTenant) return { ok: false, erro: `limite de ${Math.round(lim.bytesPorTenant / 1048576)} MB de imagens por loja` }
-      const r = (await q(`INSERT INTO plataforma.ativo (tenant_id, hash, nome, tipo, largura, altura, tamanho, conteudo, autor) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (tenant_id, hash) DO UPDATE SET nome = plataforma.ativo.nome RETURNING ${COLS}`, [tenantId, hash, nome, img.tipo, img.largura, img.altura, bytes.length, bytes, autor.slice(0, 200)])).rows[0]!
-      return { ok: true, ativo: linha(r), novo: true, removidos }
+      const extra = bytes.length + proc.variantes.reduce((t, v) => t + v.bytes.length, 0)
+      if (Number(uso.b) + extra > lim.bytesPorTenant) return { ok: false, erro: `limite de ${Math.round(lim.bytesPorTenant / 1048576)} MB de imagens por loja` }
+      const r = (await q(`INSERT INTO plataforma.ativo (tenant_id, hash, nome, tipo, largura, altura, tamanho, conteudo, autor) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (tenant_id, hash) DO UPDATE SET nome = plataforma.ativo.nome RETURNING ${COLS}`, [tenantId, hash, nome, img.tipo, proc.largura, proc.altura, bytes.length, bytes, autor.slice(0, 200)])).rows[0]!
+      for (const v of proc.variantes) await q(`INSERT INTO plataforma.ativo_variante (tenant_id, hash, largura, conteudo) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`, [tenantId, hash, v.largura, v.bytes])
+      return { ok: true, ativo: linha(r, proc.variantes.map((v) => v.largura)), novo: true, removidos, ajustada: proc.reencodou }
     },
-    async lista(tenantId: string): Promise<Ativo[]> { return (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 ORDER BY criado_em DESC, hash LIMIT 500`, [tenantId])).rows.map(linha) },
+    async lista(tenantId: string): Promise<Ativo[]> {
+      const rows = (await q(`SELECT ${COLS} FROM plataforma.ativo WHERE tenant_id = $1 ORDER BY criado_em DESC, hash LIMIT 500`, [tenantId])).rows
+      const v = new Map<string, number[]>(); for (const x of (await q(`SELECT hash, largura FROM plataforma.ativo_variante WHERE tenant_id = $1 ORDER BY largura`, [tenantId])).rows) v.set(x.hash as string, [...(v.get(x.hash as string) ?? []), Number(x.largura)])
+      return rows.map((r) => linha(r, v.get(r.hash as string) ?? []))
+    },
     /** o conteúdo para servir; só do tenant dado */
-    async le(tenantId: string, hash: string): Promise<{ tipo: TipoImagem; bytes: Buffer; hash: string } | null> {
+    async le(tenantId: string, hash: string, largura?: number): Promise<{ tipo: TipoImagem; bytes: Buffer; hash: string } | null> {
       if (!/^[0-9a-f]{64}$/.test(hash)) return null
+      if (largura !== undefined) { // a versão menor (sempre webp): só as larguras geradas
+        if (!(LARGURAS_VARIANTES as readonly number[]).includes(largura)) return null
+        const v = (await q(`SELECT conteudo FROM plataforma.ativo_variante WHERE tenant_id = $1 AND hash = $2 AND largura = $3`, [tenantId, hash, largura])).rows[0]; return v ? { tipo: 'image/webp', bytes: Buffer.from(v.conteudo as Uint8Array), hash } : null
+      }
       const r = (await q(`SELECT tipo, conteudo FROM plataforma.ativo WHERE tenant_id = $1 AND hash = $2`, [tenantId, hash])).rows[0]; if (!r) return null
       return { tipo: r.tipo as TipoImagem, bytes: Buffer.from(r.conteudo as Uint8Array), hash }
     },

@@ -115,7 +115,7 @@ describe('API de autoria do Studio', () => {
     const a2 = Fastify(); rotasStudio(a2, { armazem, baseDe: async () => base, q, autentica: autentica as never, ativos: criaAtivos({ q }) }); await a2.ready()
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64').toString('base64')
     const envia = (corpo: object, t = h(A, 'ana')) => a2.inject({ method: 'POST', url: '/studio/ativos', headers: t, payload: corpo })
-    const r1 = await envia({ nome: 'pixel', dados: png }); expect(r1.statusCode).toBe(201); const id = r1.json().ativo.id; expect(r1.json()).toMatchObject({ novo: true, ativo: { nome: 'pixel', tipo: 'image/png', largura: 1, altura: 1, caminho: `/_polaris/img/${id}.png` } })
+    const r1 = await envia({ nome: 'pixel', dados: png }); expect(r1.statusCode).toBe(201); const id = r1.json().ativo.id; expect(r1.json()).toMatchObject({ novo: true, ajustada: false, ativo: { nome: 'pixel', tipo: 'image/png', largura: 1, altura: 1, caminho: `/_polaris/img/${id}.png`, variantes: [], miniatura: `/_polaris/img/${id}.png` } })
     expect((await envia({ nome: 'de novo', dados: png })).statusCode).toBe(200)
     expect((await a2.inject({ url: '/studio/ativos', headers: h(A, 'ana', 'ver') })).json().ativos.map((x: any) => x.id)).toContain(id); expect((await a2.inject({ url: '/studio/ativos', headers: h(B, 'bia') })).json().ativos).toEqual([])
     const ruim = await envia({ nome: 'x', dados: Buffer.from('<svg onload=alert(1)>').toString('base64') }); expect(ruim.statusCode).toBe(422); expect(ruim.json().erro.mensagem).toMatch(/png, jpeg, gif ou webp/)

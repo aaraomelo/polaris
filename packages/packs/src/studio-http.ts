@@ -269,7 +269,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const b = req.body; if (!so(b, ['nome', 'dados']) || typeof (b as { nome?: unknown }).nome !== 'string' || typeof (b as { dados?: unknown }).dados !== 'string') return erro(reply, 400, 'requisicao_invalida', 'corpo: { nome, dados (base64) }')
     const r = await o.ativos.salva(s.tenantId, s.usuario, b as { nome: string; dados: string })
     if (!r.ok) return erro(reply, 422, 'ativo_recusado', r.erro)
-    return reply.status(r.novo ? 201 : 200).send({ ativo: r.ativo, novo: r.novo, removidos: r.removidos })
+    return reply.status(r.novo ? 201 : 200).send({ ativo: r.ativo, novo: r.novo, removidos: r.removidos, ajustada: r.ajustada })
   })
   app.delete<{ Params: { hash: string } }>('/studio/ativos/:hash', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.editar', 2); if (!s) return reply

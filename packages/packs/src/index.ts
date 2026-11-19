@@ -12,7 +12,7 @@ export { KINDS_DO_TENANT, criaArmazemDeNos, type KindDoTenant, type Limites as L
 export { rotasStudio, sessaoDeToken, type OpcoesStudio, type Sessao } from './studio-http'
 export { criaGestorDominios, criaResolvedorTenant, mudaStatusTenant, normalizaHost, validaDominio, type Dns, type InfoTenant, type OpcoesResolvedor, type Reivindicacao } from './dominios'
 export { DDL_DIRETORIO, diretorioSql } from './diretorio'
-export { DDL_ATIVOS, EXTENSAO, limpaMetadados, LIMITES_ATIVOS, caminhoDoAtivo, criaAtivos, detectaImagem, type Ativo, type Ativos, type ResultadoAtivo, type TipoImagem } from './ativos'
+export { DDL_ATIVOS, EXTENSAO, LADO_MAXIMO_SERVIDO, LARGURAS_VARIANTES, caminhoDaVariante, limpaMetadados, processaImagem, LIMITES_ATIVOS, caminhoDoAtivo, criaAtivos, detectaImagem, type Ativo, type Ativos, type ResultadoAtivo, type TipoImagem } from './ativos'
 export { DDL_IDENTIDADE, criaConviteDoDono, criaIdentidade, normalizaEmail, type Identidade, type OpcoesIdentidade, type Usuario } from './identidade'
 export { CUSTO_PADRAO, confereSenha, hashSenha, politicaDeSenha, type CustoSenha } from './senha'
 export { registroDaPlataforma } from './plataforma'

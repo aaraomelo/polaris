@@ -1,4 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
+import sharp from 'sharp'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { DDL_DIRETORIO, caminhoDoAtivo, criaAtivos, detectaImagem, diretorioSql, limpaMetadados } from '../src/index'
 
@@ -32,42 +33,85 @@ describe('detecção pelos bytes', () => {
     for (const ruim of [Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'), Buffer.from('<html><script>alert(1)</script>'), Buffer.from('MZ\x90\x00\x03'), Buffer.from('oi'), new Uint8Array(0), png(1, 1).subarray(0, 12), bytes(0xff, 0xd8, 0xff, 0xe0, 0, 4, 0, 0, 0xff, 0xd9, 0, 0, 0, 0)]) expect(detectaImagem(ruim)).toBeNull()
   })
   it('o nome e o que o cliente diz não importam: só os bytes', async () => {
-    const a = criaAtivos({ q }), r = await a.salva(A, 'ana', { nome: 'foto.svg', dados: b64(png(10, 10)) }); expect(r).toMatchObject({ ok: true, ativo: { tipo: 'image/png' } })
+    const a = criaAtivos({ q }), r = await a.salva(A, 'ana', { nome: 'foto.svg', dados: b64(await real(10, 10, 'png', 4001)) }); expect(r).toMatchObject({ ok: true, ativo: { tipo: 'image/png' } })
     expect((r as { ativo: { caminho: string } }).ativo.caminho).toMatch(/^\/_polaris\/img\/[0-9a-f]{64}\.png$/)
   })
 })
 
+/** imagens REAIS (decodificáveis), cada `semente` dando bytes diferentes */
+let sem = 0
+const real = async (w: number, h: number, formato: 'png' | 'jpeg' | 'webp' | 'gif' = 'png', semente = sem++, orient?: number) => {
+  const base = sharp({ create: { width: w, height: h, channels: 3, background: { r: (semente * 37) % 256, g: (semente * 91) % 256, b: (semente * 53) % 256 } } })
+  const out = base[formato](); return orient ? out.withMetadata({ orientation: orient }).toBuffer() : out.toBuffer()
+}
+
 describe('ativos do tenant', () => {
   const a = criaAtivos({ q })
   it('salva, lista e lê; o mesmo conteúdo no mesmo tenant é UM ativo só (idempotente); o id é o SHA-256 e a URL leva a extensão do TIPO', async () => {
-    const r1 = await a.salva(A, 'ana', { nome: 'banner', dados: b64(png(1600, 500, 40)) }); expect(r1).toMatchObject({ ok: true, novo: true, ativo: { nome: 'banner', largura: 1600, altura: 500, autor: 'ana' } })
-    const r2 = await a.salva(A, 'bia', { nome: 'outro nome', dados: b64(png(1600, 500, 40)) }); expect(r2).toMatchObject({ ok: true, novo: false, ativo: { nome: 'banner' } })
+    const img = await real(1600, 500, 'png', 1001)
+    const r1 = await a.salva(A, 'ana', { nome: 'banner', dados: b64(img) }); expect(r1).toMatchObject({ ok: true, novo: true, ativo: { nome: 'banner', largura: 1600, altura: 500, autor: 'ana' } })
+    const r2 = await a.salva(A, 'bia', { nome: 'outro nome', dados: b64(img) }); expect(r2).toMatchObject({ ok: true, novo: false, ativo: { nome: 'banner' } })
     const id = (r1 as { ativo: { id: string } }).ativo.id; expect(id).toMatch(/^[0-9a-f]{64}$/)
-    expect((await a.lista(A)).map((x) => x.id)).toContain(id); const lido = await a.le(A, id); expect(lido!.tipo).toBe('image/png'); expect(Buffer.from(lido!.bytes).equals(Buffer.from(png(1600, 500, 40)))).toBe(true)
+    expect((await a.lista(A)).map((x) => x.id)).toContain(id); const lido = await a.le(A, id); expect(lido!.tipo).toBe('image/png'); expect(Buffer.from(lido!.bytes).equals(img)).toBe(true) // sem orientação nem excesso de tamanho: o arquivo segue byte a byte
     expect(caminhoDoAtivo(id, 'image/jpeg')).toBe(`/_polaris/img/${id}.jpg`)
   })
   it('ISOLAMENTO: o outro tenant não lista nem lê; o mesmo arquivo no outro tenant é um ativo dele', async () => {
-    const r = await a.salva(A, 'ana', { nome: 'só da A', dados: b64(png(20, 20, 3)) }); const id = (r as { ativo: { id: string } }).ativo.id
+    const img = await real(20, 20, 'png', 1002), r = await a.salva(A, 'ana', { nome: 'só da A', dados: b64(img) }); const id = (r as { ativo: { id: string } }).ativo.id
     expect(await a.le(B, id)).toBeNull(); expect((await a.lista(B)).map((x) => x.id)).not.toContain(id); expect(await a.remove(B, id)).toBe(false); expect(await a.le(A, id)).not.toBeNull()
-    expect(await a.salva(B, 'bia', { nome: 'da B', dados: b64(png(20, 20, 3)) })).toMatchObject({ ok: true, novo: true, ativo: { nome: 'da B' } })
+    expect(await a.salva(B, 'bia', { nome: 'da B', dados: b64(img) })).toMatchObject({ ok: true, novo: true, ativo: { nome: 'da B' } })
   })
   it('remove só no próprio tenant; hash malformado é recusado sem tocar o banco', async () => {
-    const r = await a.salva(A, 'ana', { nome: 'apagar', dados: b64(gif(5, 5)) }); const id = (r as { ativo: { id: string } }).ativo.id
+    const r = await a.salva(A, 'ana', { nome: 'apagar', dados: b64(await real(5, 5, 'gif', 1003)) }); const id = (r as { ativo: { id: string } }).ativo.id
     expect(await a.remove(A, id)).toBe(true); expect(await a.le(A, id)).toBeNull(); expect(await a.remove(A, id)).toBe(false)
     for (const ruim of ['', 'x', "'; DROP TABLE plataforma.ativo; --", '../../etc/passwd', 'A'.repeat(64)]) { expect(await a.le(A, ruim)).toBeNull(); expect(await a.remove(A, ruim)).toBe(false) }
   })
-  it('recusa com mensagem clara: não é base64, vazio, sem nome, não é imagem, grande demais, dimensões absurdas (bomba de descompressão)', async () => {
+  it('recusa com mensagem clara: não é base64, vazio, sem nome, não é imagem, grande demais, dimensões absurdas (bomba de descompressão), imagem que não decodifica', async () => {
     const e = async (x: { nome: string; dados: string }) => { const r = await a.salva(A, 'ana', x); return r.ok ? 'ok' : r.erro }
-    expect(await e({ nome: 'x', dados: 'não é base64!' })).toMatch(/base64/); expect(await e({ nome: 'x', dados: '' })).toMatch(/base64/); expect(await e({ nome: '  ', dados: b64(png(1, 1)) })).toMatch(/nome/)
+    expect(await e({ nome: 'x', dados: 'não é base64!' })).toMatch(/base64/); expect(await e({ nome: 'x', dados: '' })).toMatch(/base64/); expect(await e({ nome: '  ', dados: b64(await real(2, 2)) })).toMatch(/nome/)
     expect(await e({ nome: 'x', dados: Buffer.from('<svg onload=alert(1)>').toString('base64') })).toMatch(/png, jpeg, gif ou webp/)
     expect(await e({ nome: 'x', dados: b64(png(1, 1, 2 * 1024 * 1024)) })).toMatch(/passa de|precisa ter/); expect(await e({ nome: 'x', dados: b64(png(20000, 20000)) })).toMatch(/dimensões fora do limite/); expect(await e({ nome: 'x', dados: b64(png(8000, 8000)) })).toMatch(/dimensões/) // 64 MP > 40 MP
     expect(await e({ nome: 'x', dados: b64(png(0, 5)) })).toMatch(/dimensões/)
+    expect(await e({ nome: 'x', dados: b64(png(30, 30, 50)) })).toMatch(/não foi possível ler a imagem/) // cabeçalho certo, dados de imagem que não decodificam
   })
   it('limites por tenant: arquivos e bytes; o nome perde controles e marcas bidirecionais', async () => {
-    const p = criaAtivos({ q, limites: { arquivosPorTenant: 2, bytesPorTenant: 400 } })
-    expect(await p.salva(B, 'bia', { nome: 'a‮b\nc', dados: b64(png(3, 3, 90)) })).toMatchObject({ ok: true, ativo: { nome: 'a b c' } }) // B já tinha 1 ativo (o do teste anterior): este é o 2º
-    expect(await p.salva(B, 'bia', { nome: 'terceiro', dados: b64(png(4, 4)) })).toMatchObject({ ok: false, erro: expect.stringMatching(/limite de 2 imagens/) })
-    const q2 = criaAtivos({ q, limites: { arquivosPorTenant: 100, bytesPorTenant: 100 } }); expect(await q2.salva(A, 'ana', { nome: 'estoura', dados: b64(png(9, 9, 500)) })).toMatchObject({ ok: false, erro: expect.stringMatching(/MB de imagens|limite/) })
+    const p = criaAtivos({ q, limites: { arquivosPorTenant: 2 } }), img = (n: number) => real(30, 30, 'png', 2000 + n)
+    expect(await p.salva(B, 'bia', { nome: 'a\u202eb\nc', dados: b64(await img(1)) })).toMatchObject({ ok: true, ativo: { nome: 'a b c' } }) // B já tinha 1 ativo (o do teste anterior): este é o 2º
+    expect(await p.salva(B, 'bia', { nome: 'terceiro', dados: b64(await img(2)) })).toMatchObject({ ok: false, erro: expect.stringMatching(/limite de 2 imagens/) })
+    const q2 = criaAtivos({ q, limites: { arquivosPorTenant: 100, bytesPorTenant: 100 } }); expect(await q2.salva(A, 'ana', { nome: 'estoura', dados: b64(await real(200, 200, 'png', 2003)) })).toMatchObject({ ok: false, erro: expect.stringMatching(/MB de imagens|limite/) })
+  })
+})
+
+describe('processamento da imagem (decodifica de verdade)', () => {
+  const a = criaAtivos({ q })
+  it('orientação EXIF: a foto é GIRADA (a limpeza apagaria a informação) e sai sem metadados; só então ganha o id', async () => {
+    const foto = await real(300, 200, 'jpeg', 3001, 6) // 300×200 com "gire 90°": a foto de verdade é 200×300
+    const r = await a.salva(A, 'ana', { nome: 'celular', dados: b64(foto) }); expect(r).toMatchObject({ ok: true, ajustada: true, ativo: { largura: 200, altura: 300 } })
+    const lido = await a.le(A, (r as { ativo: { id: string } }).ativo.id), m = await sharp(lido!.bytes).metadata(); expect([m.width, m.height, m.orientation ?? 1]).toEqual([200, 300, 1])
+  })
+  it('foto enorme é reduzida a 2400 px no maior lado (mantendo a proporção); a menor que isso não é recodificada', async () => {
+    const r = await a.salva(A, 'ana', { nome: 'grande', dados: b64(await real(4800, 1200, 'png', 3002)) }); expect(r).toMatchObject({ ok: true, ajustada: true, ativo: { largura: 2400, altura: 600 } })
+    const p = await a.salva(A, 'ana', { nome: 'cabe', dados: b64(await real(2400, 100, 'png', 3003)) }); expect(p).toMatchObject({ ok: true, ajustada: false, ativo: { largura: 2400, altura: 100 } })
+  })
+  it('versões menores em webp, só das larguras MENORES que a imagem; servem por largura e só as geradas; a miniatura é a de 160', async () => {
+    const r = await a.salva(A, 'ana', { nome: 'v', dados: b64(await real(1000, 500, 'jpeg', 3004)) }) as { ativo: { id: string; variantes: number[]; miniatura: string } }
+    expect(r.ativo.variantes).toEqual([160, 480, 960]); expect(r.ativo.miniatura).toBe(`/_polaris/img/${r.ativo.id}.webp?w=160`)
+    const v = await a.le(A, r.ativo.id, 480); expect(v!.tipo).toBe('image/webp'); const m = await sharp(v!.bytes).metadata(); expect([m.format, m.width, m.height]).toEqual(['webp', 480, 240])
+    expect(await a.le(A, r.ativo.id, 1920)).toBeNull(); expect(await a.le(A, r.ativo.id, 123)).toBeNull(); expect(await a.le(B, r.ativo.id, 480)).toBeNull() // fora da lista, não gerada, e outro tenant
+    expect((await a.lista(A)).find((x) => x.id === r.ativo.id)!.variantes).toEqual([160, 480, 960])
+    const pequena = await a.salva(A, 'ana', { nome: 'p', dados: b64(await real(100, 100, 'png', 3005)) }) as { ativo: { variantes: number[]; miniatura: string; caminho: string } }; expect(pequena.ativo.variantes).toEqual([]); expect(pequena.ativo.miniatura).toBe(pequena.ativo.caminho)
+  })
+  it('remover o ativo leva as versões junto', async () => {
+    const r = await a.salva(A, 'ana', { nome: 'v2', dados: b64(await real(700, 300, 'png', 3006)) }) as { ativo: { id: string } }; expect(await a.le(A, r.ativo.id, 160)).not.toBeNull()
+    expect(await a.remove(A, r.ativo.id)).toBe(true); expect(await a.le(A, r.ativo.id, 160)).toBeNull(); expect((await q(`SELECT count(*)::int AS n FROM plataforma.ativo_variante WHERE hash = $1`, [r.ativo.id])).rows[0]!.n).toBe(0)
+  })
+  it('animação (gif com vários quadros) NÃO é recodificada nem ganha versões (o arquivo segue como veio, sem metadados)', async () => {
+    const q1 = await sharp({ create: { width: 60, height: 40, channels: 3, background: '#f00' } }).png().toBuffer(), q2 = await sharp({ create: { width: 60, height: 40, channels: 3, background: '#00f' } }).png().toBuffer()
+    const gifAnim = await sharp([q1, q2], { join: { animated: true } }).gif({ delay: [100, 100], loop: 0 }).toBuffer(); expect((await sharp(gifAnim, { animated: true }).metadata()).pages).toBe(2)
+    const r = await a.salva(A, 'ana', { nome: 'anim', dados: b64(gifAnim) }) as { ok: true; ativo: { id: string; variantes: number[] }; ajustada: boolean }; expect(r.ok).toBe(true); expect(r.ajustada).toBe(false); expect(r.ativo.variantes).toEqual([])
+    const lido = await a.le(A, r.ativo.id); expect((await sharp(lido!.bytes, { animated: true }).metadata()).pages).toBe(2)
+  })
+  it('png e webp reais também passam (e o webp animado de um quadro só é uma imagem comum)', async () => {
+    for (const f of ['png', 'webp', 'gif'] as const) expect(await a.salva(A, 'ana', { nome: `f-${f}`, dados: b64(await real(80, 60, f, 3100 + f.length)) }), f).toMatchObject({ ok: true })
   })
 })
 
@@ -98,7 +142,9 @@ describe('metadados que vazam', () => {
     expect(limpaMetadados(png(5, 5).subarray(0, 40), 'image/png')).toBeNull(); expect(limpaMetadados(bytes(0xff, 0xd8, 0xff, 0xe1, 0xff, 0xff, 1, 2, 3), 'image/jpeg')).toBeNull(); expect(limpaMetadados(webp(5, 5).subarray(0, 25), 'image/webp')).toBeNull(); expect(limpaMetadados(gif(5, 5).subarray(0, 20), 'image/gif')).toBeNull()
   })
   it('salva: o hash é do arquivo LIMPO (com e sem EXIF é a mesma imagem), informa quantos bytes saíram, e o que fica no banco não tem segredo', async () => {
-    const a = criaAtivos({ q }), limpo = jpeg(123, 45), sujo = jpeg(123, 45, [seg(0xe1, 'Exif\0\0GPS coordenadas Canon EOS')])
+    const a = criaAtivos({ q }), base = sharp({ create: { width: 123, height: 45, channels: 3, background: '#369' } })
+    const limpo = await base.clone().jpeg().toBuffer(), sujo = await base.clone().jpeg().withExif({ IFD0: { Make: 'Canon', Model: 'Canon EOS segredo', Copyright: 'segredo-do-autor' }, IFD3: { GPSLatitudeRef: 'S', GPSLatitude: '23/1 30/1 0/1' } }).toBuffer()
+    expect(tem(sujo).length).toBeGreaterThan(0); expect(tem(limpo)).toEqual([])
     const r1 = await a.salva(A, 'ana', { nome: 'foto-suja', dados: b64(sujo) }); expect(r1).toMatchObject({ ok: true, novo: true }); expect((r1 as { removidos: number }).removidos).toBeGreaterThan(20)
     const r2 = await a.salva(A, 'ana', { nome: 'foto-limpa', dados: b64(limpo) }); expect(r2).toMatchObject({ ok: true, novo: false, removidos: 0 }); expect((r2 as { ativo: { id: string } }).ativo.id).toBe((r1 as { ativo: { id: string } }).ativo.id)
     const guardado = await a.le(A, (r1 as { ativo: { id: string } }).ativo.id); expect(tem(guardado!.bytes)).toEqual([])

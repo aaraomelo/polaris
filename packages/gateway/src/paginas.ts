@@ -23,7 +23,7 @@ export type OpcoesPaginas = {
   /** permissões da sessão para as `guarda` das páginas (padrão: os papéis do token) */
   permissoes?(ctx: CtxGw): readonly string[]
   /** as imagens do tenant (`/_polaris/img/<sha256>.<ext>`): o tenant vem do ENDEREÇO, nunca da URL; sem isto a rota não existe */
-  imagens?: { le(tenantId: string, hash: string): Promise<{ tipo: string; bytes: Uint8Array } | null> }
+  imagens?: { le(tenantId: string, hash: string, largura?: number): Promise<{ tipo: string; bytes: Uint8Array } | null> }
 }
 export type DepsPaginas = {
   entra(req: FastifyRequest): Promise<CtxGw>
@@ -74,11 +74,12 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
 
   if (o.imagens) {
     const EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
-    app.get<{ Params: { arq: string } }>('/_polaris/img/:arq', async (req, reply) => {
+    app.get<{ Params: { arq: string }; Querystring: { w?: string } }>('/_polaris/img/:arq', async (req, reply) => {
       const m = /^([0-9a-f]{64})\.(png|jpg|gif|webp)$/.exec(req.params.arq); if (!m) return reply.status(404).type('text/plain').send('não encontrado')
-      const ctx = await d.entra(req), a = await o.imagens!.le(ctx.tenantId, m[1]!)
-      if (!a || EXT[a.tipo] !== m[2]) return reply.status(404).type('text/plain').send('não encontrado') // outro tenant, hash inexistente ou extensão que não é a do tipo: o mesmo 404
-      const etag = `"${m[1]}"`
+      const w = req.query.w; if (w !== undefined && (!/^[0-9]{2,4}$/.test(w) || m[2] !== 'webp')) return reply.status(404).type('text/plain').send('não encontrado') // as versões menores são sempre `.webp?w=<largura>`
+      const ctx = await d.entra(req), a = await o.imagens!.le(ctx.tenantId, m[1]!, w === undefined ? undefined : Number(w))
+      if (!a || (w === undefined && EXT[a.tipo] !== m[2])) return reply.status(404).type('text/plain').send('não encontrado') // outro tenant, hash inexistente ou extensão que não é a do tipo: o mesmo 404
+      const etag = `"${m[1]}${w === undefined ? '' : `-${w}`}"`
       reply.header('etag', etag).header('cache-control', 'public, max-age=31536000, immutable').header('x-content-type-options', 'nosniff').header('content-security-policy', "default-src 'none'; sandbox") // sem Cross-Origin-Resource-Policy: a prévia do Studio (iframe sandbox, origem opaca) precisa carregar a imagem; ela é pública de qualquer jeito
       if (req.headers['if-none-match'] === etag) return reply.status(304).send()
       return reply.type(a.tipo).send(Buffer.from(a.bytes)) // o conteúdo nunca muda (o nome é o hash): cache eterno

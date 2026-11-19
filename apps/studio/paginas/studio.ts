@@ -477,16 +477,16 @@ const diagramasVista = (): Inst => pilha([
 /** imagens do tenant: enviar (o arquivo é lido no navegador e o servidor confere o TIPO pelos bytes), listar com miniatura, copiar o caminho e remover */
 const imagensVista = (): Inst => pilha([
   titulo('Imagens', 3),
-  texto('Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site.'),
+  texto('Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos, a foto de celular é girada para o lado certo e as muito grandes são reduzidas a 2400 px. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site.'),
   P('entrada/arquivo', { props: { rotulo: 'Escolha uma imagem', aceita: 'image/png,image/jpeg,image/gif,image/webp', tamanhoMax: 2097152 }, eventos: { aoEscolher: [
     def('msgImagem', '"Enviando…"'),
-    exe('imgenviar', { nome: '{evento.nome}', dados: '{evento.dados}' }, [def('msgImagem', '(resultado.novo ? "Imagem enviada." : "Esta imagem já estava na lista.") + (resultado.removidos > 0 ? " Removemos " + resultado.removidos + " bytes de metadados (localização, câmera, comentários)." : "")'), exe('ativos')], [def('msgImagem', 'erro')]),
+    exe('imgenviar', { nome: '{evento.nome}', dados: '{evento.dados}' }, [def('msgImagem', '(resultado.novo ? "Imagem enviada." : "Esta imagem já estava na lista.") + (resultado.removidos > 0 ? " Removemos " + resultado.removidos + " bytes de metadados (localização, câmera, comentários)." : "") + (resultado.ajustada ? " A imagem foi girada e/ou reduzida a 2400 px." : "")'), exe('ativos')], [def('msgImagem', 'erro')]),
   ], aoRecusar: [def('msgImagem', 'evento.erro')] } }),
   texto('{estado.msgImagem}', { se: 'estado.msgImagem != ""' }),
   texto('Nenhuma imagem ainda.', { se: 'ativos && tamanho(ativos.ativos ?? []) == 0' }),
   linha([
-    P('midia/imagem', { props: { src: '{a.caminho}', alt: '{a.nome}', altura: 48 } }),
-    pilha([texto('{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes'), P('texto/codigo', { props: { texto: '{a.caminho}' } })], { gap: 2 }),
+    P('midia/imagem', { props: { src: '{a.miniatura}', alt: '{a.nome}', altura: 48 } }),
+    pilha([texto('{a.nome} · {a.largura}×{a.altura} · {a.tamanho} bytes'), P('texto/codigo', { props: { texto: '{a.caminho}' } }), P('texto/pequeno', { se: 'tamanho(a.variantes ?? []) > 0', props: { texto: 'Versões menores: acrescente ?w=480 (ou 160, 960, 1920) ao caminho trocando a extensão por .webp' } })], { gap: 2 }),
     botao('Remover', [exe('imgremover', { hash: '{a.id}' }, [def('msgImagem', '"Imagem removida."'), exe('ativos')], [def('msgImagem', 'erro')])]),
   ], { repetir: { cada: 'ativos.ativos ?? []', como: 'a', chave: 'a.id' }, props: { gap: 12 } }),
 ], { se: 'estado.painel == "imagens"', gap: 8 })

@@ -1576,7 +1576,7 @@
          {
           "bloco": "texto/paragrafo",
           "props": {
-           "texto": "Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
+           "texto": "Envie png, jpeg, gif ou webp (até 2 MB); a localização, o modelo da câmera e os comentários embutidos no arquivo são removidos, a foto de celular é girada para o lado certo e as muito grandes são reduzidas a 2400 px. Depois copie o caminho e use no campo `imagem` do hero (ou em qualquer bloco de imagem): as imagens são servidas pelo próprio site."
           }
          },
          {
@@ -1604,7 +1604,7 @@
               {
                "acao": "definir",
                "estado": "msgImagem",
-               "valor": "(resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\") + (resultado.removidos > 0 ? \" Removemos \" + resultado.removidos + \" bytes de metadados (localização, câmera, comentários).\" : \"\")"
+               "valor": "(resultado.novo ? \"Imagem enviada.\" : \"Esta imagem já estava na lista.\") + (resultado.removidos > 0 ? \" Removemos \" + resultado.removidos + \" bytes de metadados (localização, câmera, comentários).\" : \"\") + (resultado.ajustada ? \" A imagem foi girada e/ou reduzida a 2400 px.\" : \"\")"
               },
               {
                "acao": "executar",
@@ -1659,7 +1659,7 @@
             {
              "bloco": "midia/imagem",
              "props": {
-              "src": "{a.caminho}",
+              "src": "{a.miniatura}",
               "alt": "{a.nome}",
               "altura": 48
              }
@@ -1681,6 +1681,13 @@
                 "bloco": "texto/codigo",
                 "props": {
                  "texto": "{a.caminho}"
+                }
+               },
+               {
+                "bloco": "texto/pequeno",
+                "se": "tamanho(a.variantes ?? []) > 0",
+                "props": {
+                 "texto": "Versões menores: acrescente ?w=480 (ou 160, 960, 1920) ao caminho trocando a extensão por .webp"
                 }
                }
               ]

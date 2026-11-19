@@ -1,7 +1,7 @@
 process.env.POLARIS_LOG_NIVEL = 'silencio'
 import { vi } from 'vitest'
 vi.setConfig({ testTimeout: 120_000, hookTimeout: 120_000 })
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { request as httpRequest } from 'node:http'
 import { join } from 'node:path'
@@ -378,10 +378,11 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const PIXEL = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
       await p.locator('input[type=file]').setInputFiles({ name: 'meu-pixel.png', mimeType: 'image/png', buffer: PIXEL }); await p.getByText('Imagem enviada.').waitFor(); await p.getByText('meu-pixel.png · 1×1 · 70 bytes').waitFor()
       const caminho = await p.locator('code', { hasText: '/_polaris/img/' }).first().innerText(); expect((await get(l, 'loja-demo', caminho)).status).toBe(200)
-      const seg = (m: number, t: string) => Buffer.concat([Buffer.from([0xff, m, (t.length + 2) >> 8, (t.length + 2) & 255]), Buffer.from(t, 'latin1')]) // JPEG mínimo COM EXIF: o servidor tira a localização e conta quantos bytes saíram
-      const jpegSujo = Buffer.concat([Buffer.from([0xff, 0xd8]), seg(0xe1, 'Exif\0\0GPS -23.5,-46.6 Canon EOS'), Buffer.from([0xff, 0xc0, 0, 11, 8, 0, 10, 0, 20, 1, 1, 0x11, 0]), Buffer.from([0xff, 0xda, 0, 8, 1, 1, 0, 0, 0x3f, 0, 1, 2, 3, 0xff, 0xd9])])
-      await p.locator('input[type=file]').setInputFiles({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: jpegSujo }); await p.getByText(/Removemos \d+ bytes de metadados/).waitFor(); await p.getByText('foto.jpg · 20×10').waitFor()
-      const caminhoFoto = await p.locator('code', { hasText: /\.jpg$/ }).first().innerText(); const foto = await get(l, 'loja-demo', caminhoFoto); expect(foto.status).toBe(200); expect(await foto.text()).not.toMatch(/GPS|Canon/) // o que está no banco e é servido já não tem a localização
+      // foto de celular de verdade: 300×200 com EXIF (orientação "gire 90°", câmera, GPS): o servidor gira, tira os metadados e conta
+      const foto = readFileSync(join(import.meta.dirname, '../../../packages/packs/test/fixtures/foto-celular.jpg')); expect(foto.toString('latin1')).toContain('Canon')
+      await p.locator('input[type=file]').setInputFiles({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: foto }); await p.getByText(/foi girada e\/ou reduzida a 2400 px/).waitFor(); await p.getByText('foto.jpg · 200×300').waitFor()
+      const caminhoFoto = await p.locator('code', { hasText: /\.jpg$/ }).first().innerText(); const servida = await get(l, 'loja-demo', caminhoFoto); expect(servida.status).toBe(200); expect(await servida.text()).not.toMatch(/GPS|Canon/) // o que está no banco e é servido já não tem a localização
+      const mini = await p.locator('img[alt="foto.jpg"]').getAttribute('src'); expect(mini).toMatch(/\.webp\?w=160$/); expect((await get(l, 'loja-demo', mini!)).headers.get('content-type')).toBe('image/webp') // a lista usa a miniatura
       await p.locator('input[type=file]').setInputFiles({ name: 'mal.png', mimeType: 'image/png', buffer: Buffer.from('<svg onload=alert(1)>') }); await p.getByText(/png, jpeg, gif ou webp/).waitFor() // o servidor lê o tipo dos bytes: o nome e o tipo declarado não valem
       await p.locator('input[type=file]').setInputFiles({ name: 'grande.png', mimeType: 'image/png', buffer: Buffer.alloc(2 * 1024 * 1024 + 10, 1) }); await p.getByText(/o arquivo passa de 2048 KB/).waitFor() // o navegador nem lê
       await p.getByRole('button', { name: 'Remover' }).first().click(); /* a mais nova (a foto) vem primeiro */ await p.getByText('Imagem removida.').waitFor(); await expect.poll(async () => (await get(l, 'loja-demo', caminhoFoto)).status).toBe(404)
