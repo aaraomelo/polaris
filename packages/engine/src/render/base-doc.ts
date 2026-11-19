@@ -103,7 +103,13 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'form/busca': { titulo: 'Formulário de busca', descricao: 'Formulário `GET` (`role="search"`) que leva o termo para uma página do PRÓPRIO site (`acao`, padrão `/busca`): funciona sem JavaScript, o termo vai na URL (`?q=…`) e a página de resultados o lê em `consulta.q`. Destino que não é um caminho do site vale o padrão.', exemplos: [
     { titulo: 'Campo e botão', instancia: { bloco: 'form/busca', slots: { filhos: [{ bloco: 'entrada/busca', props: { placeholder: 'Buscar produtos' } }, { bloco: 'nav/enviar', props: { texto: 'Buscar' } }] } } },
   ] },
-  'entrada/busca': { titulo: 'Campo de busca', descricao: 'Campo `type="search"` com nome acessível (`rotulo`, padrão "Buscar"), `nome` do parâmetro (padrão `q`), `placeholder` e `valor` inicial (até 200 caracteres). Vai dentro de um `form/busca`.', exemplos: [
+  'form/sugestoes': { titulo: 'Sugestões (lista do campo)', descricao: 'Lista de opções (`<datalist>`) que um campo oferece enquanto se digita, ligada pelo `id` da instância ao `lista` do `entrada/busca`. Sem JavaScript: o navegador filtra pelo que foi digitado. As opções são fixas na página (`form/opcao`); não vêm do servidor a cada tecla.', exemplos: [
+    { titulo: 'Campo com sugestões', instancia: { bloco: 'form/busca', slots: { filhos: [{ bloco: 'entrada/busca', props: { lista: 'sugestoes-exemplo' } }, { bloco: 'form/sugestoes', id: 'sugestoes-exemplo', slots: { filhos: [{ bloco: 'form/opcao', props: { valor: 'Café' } }, { bloco: 'form/opcao', props: { valor: 'Chá' } }] } }, { bloco: 'nav/enviar', props: { texto: 'Buscar' } }] } } },
+  ] },
+  'form/opcao': { titulo: 'Opção de sugestão', descricao: 'Uma opção (`<option value>`) de um `form/sugestoes`; `valor` é o texto sugerido (até 100 caracteres).', exemplos: [
+    { titulo: 'Opção dentro da lista', instancia: { bloco: 'form/busca', slots: { filhos: [{ bloco: 'entrada/busca', props: { lista: 'opcoes-exemplo', placeholder: 'Digite c…' } }, { bloco: 'form/sugestoes', id: 'opcoes-exemplo', slots: { filhos: [{ bloco: 'form/opcao', props: { valor: 'Café' } }] } }, { bloco: 'nav/enviar', props: { texto: 'Buscar' } }] } } },
+  ] },
+  'entrada/busca': { titulo: 'Campo de busca', descricao: 'Campo `type="search"` com nome acessível (`rotulo`, padrão "Buscar"), `nome` do parâmetro (padrão `q`), `placeholder` e `valor` inicial (até 200 caracteres) e `lista` (id de um `form/sugestoes` da página, com as opções que o navegador oferece ao digitar). Vai dentro de um `form/busca`.', exemplos: [
     { titulo: 'Com termo', instancia: { bloco: 'entrada/busca', props: { valor: 'café', placeholder: 'Buscar' } } },
   ] },
   'nav/enviar': { titulo: 'Botão de envio', descricao: 'Botão `type="submit"` para formulários simples (sem JavaScript e sem evento); o texto padrão é "Enviar".', exemplos: [

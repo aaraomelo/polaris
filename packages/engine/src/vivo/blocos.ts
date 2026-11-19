@@ -1,5 +1,5 @@
 import { px } from '../estatico/escape'
-import { caminhoLocal, cssUrl, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
+import { caminhoLocal, cssUrl, idDeElemento, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 
 // Descritores DOM dos blocos base: dizem ao runtime vivo QUE elemento criar e como atualizá-lo a partir das props.
 // Têm de produzir exatamente o DOM que os componentes React (render/base.tsx) produzem: o oráculo confere.
@@ -159,8 +159,10 @@ export const d_nav_alternador: Descritor = { chave: () => 'input:alternador', ta
 export const d_form_busca: Descritor = { chave: () => 'form', tag: () => 'form', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'search', method: 'get', action: caminhoLocal(p.acao) }) }
 export const d_entrada_busca: Descritor = {
   chave: () => 'input:search', tag: () => 'input',
-  attrs: (p, id) => ({ ...comId(id), type: 'search', name: nomeDeParametro(p.nome), ...rotulo(p.rotulo === undefined ? { rotulo: 'Buscar' } : p), ...(typeof p.placeholder === 'string' && p.placeholder ? { placeholder: p.placeholder } : {}), value: txt(p.valor).slice(0, 200), maxlength: '200', autocomplete: 'off' }),
+  attrs: (p, id) => ({ ...comId(id), type: 'search', name: nomeDeParametro(p.nome), ...rotulo(p.rotulo === undefined ? { rotulo: 'Buscar' } : p), ...(typeof p.placeholder === 'string' && p.placeholder ? { placeholder: p.placeholder } : {}), value: txt(p.valor).slice(0, 200), maxlength: '200', autocomplete: 'off', ...(idDeElemento(p.lista) ? { list: idDeElemento(p.lista)! } : {}) }),
 }
+export const d_form_sugestoes: Descritor = { chave: () => 'datalist', tag: () => 'datalist', filhos: true, attrs: (_p, id) => ({ ...comId(id) }) }
+export const d_form_opcao: Descritor = { chave: () => 'option', tag: () => 'option', attrs: (p, id) => ({ ...comId(id), value: txt(p.valor).slice(0, 100) }) }
 export const d_nav_enviar: Descritor = { chave: () => 'button:submit', tag: () => 'button', attrs: (_, id) => ({ ...comId(id), type: 'submit' }), texto: (p) => txt(p.texto) || 'Enviar' }
 export const d_entrada_arquivo: Descritor = {
   chave: () => 'input:file', tag: () => 'input', attrs: (p, id) => ({ ...comId(id), type: 'file', ...rotulo(p), ...(typeof p.aceita === 'string' && p.aceita ? { accept: p.aceita.slice(0, 200) } : {}), ...(p.desabilitado === true ? { disabled: '' } : {}), 'data-max': String(inteiro(p.tamanhoMax, 1024, 8388608, 2097152)) }),
@@ -198,7 +200,7 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
-  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
+  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
   'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,

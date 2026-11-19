@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-37 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+39 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -28,6 +28,8 @@
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| form | `form/sugestoes` | (só filhos; `id` liga ao campo) | | |
+| form | `form/opcao` | `valor` | | |
 | nav | `nav/submenu` | (só filhos) | | |
 | nav | `nav/submenu-titulo` | `texto` | | |
 | nav | `nav/alternador` | `rotulo` (padrão "Abrir o menu") | | |
@@ -86,3 +88,6 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 
 **Submenus (`nav/submenu`)**: um `<details>` nativo com o `nav/submenu-titulo` (`<summary>`) e os links. **Sem JavaScript**: abre e fecha pelo título, com mouse, Tab, Enter e Espaço. No computador a lista aparece como um **painel sob o título** (`::details-content`, onde o navegador suporta; nos outros, abre em linha e empurra o conteúdo); no celular, em linha, dentro do menu recolhível. Com o roteador do gateway, **Esc** (foco volta ao título) e o **clique fora** também fecham, e a página nova nasce fechada. O `site/cabecalho` monta os submenus a partir de **`grupos`**: `[{ titulo, links: [{ texto, href }] }]` (até 6 grupos de 12 links).
 **Limites**: os grupos vêm **depois** dos `links` (a linguagem não deixa um `se` ver a variável do `repetir`, então o menu não mistura as duas listas em ordem livre; para outra ordem, monte o `nav/menu` à mão); **um nível só** (sem submenu dentro de submenu); abrir um submenu não fecha os outros sem JavaScript (com o roteador, o clique fora do aberto fecha); não abre por passar o mouse (só por clique), de propósito, por acessibilidade em telas de toque.
+
+**Busca com lista de sugestões**: o `site/busca` aceita `sugestoes` (até 20 termos de até 100 caracteres): vira um `<datalist>` nativo (`form/sugestoes` com `form/opcao`) ligado ao campo por `lista` (`entrada/busca`). **Sem JavaScript**: o navegador filtra as opções pelo que foi digitado e oferece a lista; escolher uma preenche o campo (o envio continua sendo do botão ou do Enter). Com a lista, o navegador passa a anunciar o campo como **caixa de combinação** (`combobox`), não mais `searchbox`.
+**Limites**: as sugestões são **fixas na página** (declaradas no JSON), **não vêm do servidor a cada tecla** (isso pediria um endpoint de sugestões e JavaScript no cliente); o casamento é do navegador (prefixo/trecho, sem garantia de ignorar acento); a aparência da lista é do navegador (não segue o tema); **uma barra com sugestões por página** (o id da lista é fixo, `busca-sugestoes`).

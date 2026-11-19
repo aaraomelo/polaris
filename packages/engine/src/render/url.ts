@@ -36,3 +36,6 @@ export const srcsetDe = (src: string | undefined): string | undefined => { const
 /** `sizes`: o que a página declarou (só caracteres de expressão de mídia) ou, com `largura`, "até N px"; sem nada, undefined (e então o bloco NÃO emite srcset: assumir 100vw mudaria o tamanho natural da imagem) */
 export const tamanhosDe = (declarado: unknown, largura: number | undefined): string | undefined =>
   typeof declarado === 'string' && /^[A-Za-z0-9\s().,%:+*/-]{1,200}$/.test(declarado) ? declarado : largura !== undefined ? `(max-width: ${largura}px) 100vw, ${largura}px` : undefined
+
+/** id de um elemento da própria página (para `list`, `for`…): letra e até 64 caracteres seguros; senão undefined */
+export const idDeElemento = (v: unknown): string | undefined => (typeof v === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(v) ? v : undefined)

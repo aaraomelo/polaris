@@ -9,7 +9,7 @@ import { QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valo
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
 
 export { urlSegura } from './url'
-import { caminhoLocal, cssUrl, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from './url'
+import { caminhoLocal, cssUrl, idDeElemento, nomeDeParametro, srcsetDe, tamanhosDe, urlSegura } from './url'
 
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 /** nome acessível do campo (`aria-label`): sem ele o campo só tem nome se houver um `texto/rotulo` ligado por `para`/`id` */
@@ -69,7 +69,9 @@ export const COMPONENTES_BASE: Componentes = {
   'nav/menu': ({ props, slots, id }) => createElement('nav', { ...(id ? { id } : {}), 'aria-label': typeof props.rotulo === 'string' && props.rotulo ? props.rotulo : 'Principal' }, slots.filhos),
   'nav/alternador': ({ props, id }) => createElement('input', { ...(id ? { id } : {}), type: 'checkbox', role: 'switch', 'data-alternador': '', ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Abrir o menu' } : props) }),
   'form/busca': ({ props, slots, id }) => createElement('form', { ...(id ? { id } : {}), role: 'search', method: 'get', action: caminhoLocal(props.acao) }, slots.filhos),
-  'entrada/busca': ({ props, id }) => createElement('input', { ...(id ? { id } : {}), type: 'search', name: nomeDeParametro(props.nome), ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Buscar' } : props), ...(typeof props.placeholder === 'string' && props.placeholder ? { placeholder: props.placeholder } : {}), defaultValue: txt(props.valor).slice(0, 200), maxLength: 200, autoComplete: 'off' }),
+  'entrada/busca': ({ props, id }) => createElement('input', { ...(id ? { id } : {}), type: 'search', name: nomeDeParametro(props.nome), ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Buscar' } : props), ...(typeof props.placeholder === 'string' && props.placeholder ? { placeholder: props.placeholder } : {}), defaultValue: txt(props.valor).slice(0, 200), maxLength: 200, autoComplete: 'off', ...(idDeElemento(props.lista) ? { list: idDeElemento(props.lista) } : {}) }),
+  'form/sugestoes': ({ slots, id }) => createElement('datalist', { ...(id ? { id } : {}) }, slots.filhos),
+  'form/opcao': ({ props, id }) => createElement('option', { ...(id ? { id } : {}), value: txt(props.valor).slice(0, 100) }),
   'nav/enviar': ({ props, id }) => createElement('button', { ...(id ? { id } : {}), type: 'submit' }, txt(props.texto) || 'Enviar'),
   'entrada/arquivo': ({ props, on, id }) =>
     createElement('input', {
@@ -139,7 +141,9 @@ export const BLOCOS_BASE = [
   bloco('nav/menu', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80 } } } }),
   bloco('nav/alternador', { props: { type: 'object', properties: { rotulo: ROTULO } } }),
   bloco('form/busca', { slots: { filhos: {} }, props: { type: 'object', properties: { acao: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site que recebe a busca (padrão /busca); outro valor vale o padrão' } } } }),
-  bloco('entrada/busca', { props: { type: 'object', properties: { nome: { type: 'string', maxLength: 31, description: 'nome do parâmetro na URL (padrão q)' }, rotulo: ROTULO, placeholder: { type: 'string', maxLength: 100 }, valor: { type: 'string', maxLength: 200, description: 'texto inicial (ex.: o termo buscado, `{consulta.q}`)' } } } }),
+  bloco('entrada/busca', { props: { type: 'object', properties: { nome: { type: 'string', maxLength: 31, description: 'nome do parâmetro na URL (padrão q)' }, rotulo: ROTULO, placeholder: { type: 'string', maxLength: 100 }, valor: { type: 'string', maxLength: 200, description: 'texto inicial (ex.: o termo buscado, `{consulta.q}`)' }, lista: { type: 'string', maxLength: 64, description: 'id de um `form/sugestoes` da página: o navegador oferece as opções enquanto se digita' } } } }),
+  bloco('form/sugestoes', { slots: { filhos: {} } }),
+  bloco('form/opcao', { props: { type: 'object', properties: { valor: { type: 'string', maxLength: 100 } } } }),
   bloco('nav/enviar', { props: { type: 'object', properties: { texto: { type: 'string', maxLength: 60, default: 'Enviar' } } } }),
   bloco('entrada/arquivo', { props: { type: 'object', properties: { rotulo: ROTULO, aceita: { type: 'string', maxLength: 200, description: 'tipos aceitos pelo seletor (atributo accept), ex.: image/png,image/jpeg' }, tamanhoMax: { type: 'integer', minimum: 1024, maximum: 8388608, default: 2097152, description: 'bytes; acima disso o evento traz `erro` e o arquivo nem é lido' }, desabilitado: { type: 'boolean' } } }, eventos: { aoEscolher: { payload: 'json' }, aoRecusar: { payload: 'json' } } }),
   bloco('layout/destaque', { slots: { filhos: {} }, props: { type: 'object', properties: { imagem: { type: 'string', maxLength: 500, description: 'URL segura (mesma origem: o CSP das páginas só carrega imagens do próprio site)' }, altura: { type: 'number', minimum: 120, maximum: 800, default: 320, description: 'altura mínima em px' }, escurece: { type: 'number', minimum: 0, maximum: 0.8, default: 0.45, description: 'véu escuro sobre a imagem, para o texto ler' }, alinha: { type: 'string', description: 'centro (padrão) ou esquerda (outro valor vale centro)' }, fundo: { type: 'string', description: 'sem imagem: primaria (padrão) ou suave (outro valor vale primaria)' } } } }),

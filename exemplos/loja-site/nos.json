@@ -105,7 +105,12 @@
                     "bloco": "site/busca",
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
-                      "placeholder": "Buscar destaques"
+                      "placeholder": "Buscar destaques",
+                      "sugestoes": [
+                        "Café",
+                        "Cafeteira italiana",
+                        "Pão de queijo"
+                      ]
                     }
                   },
                   {
@@ -262,7 +267,12 @@
                     "bloco": "site/busca",
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
-                      "placeholder": "Buscar destaques"
+                      "placeholder": "Buscar destaques",
+                      "sugestoes": [
+                        "Café",
+                        "Cafeteira italiana",
+                        "Pão de queijo"
+                      ]
                     }
                   },
                   {
@@ -415,7 +425,12 @@
                     "bloco": "site/busca",
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
-                      "placeholder": "Buscar destaques"
+                      "placeholder": "Buscar destaques",
+                      "sugestoes": [
+                        "Café",
+                        "Cafeteira italiana",
+                        "Pão de queijo"
+                      ]
                     }
                   },
                   {
@@ -627,7 +642,12 @@
                     "bloco": "site/busca",
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
-                      "placeholder": "Buscar destaques"
+                      "placeholder": "Buscar destaques",
+                      "sugestoes": [
+                        "Café",
+                        "Cafeteira italiana",
+                        "Pão de queijo"
+                      ]
                     }
                   },
                   {
@@ -825,7 +845,12 @@
                     "bloco": "site/busca",
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
-                      "placeholder": "Buscar destaques"
+                      "placeholder": "Buscar destaques",
+                      "sugestoes": [
+                        "Café",
+                        "Cafeteira italiana",
+                        "Pão de queijo"
+                      ]
                     }
                   },
                   {
@@ -1063,7 +1088,12 @@
                     "bloco": "site/busca",
                     "props": {
                       "valor": "{consulta.q ?? \"\"}",
-                      "placeholder": "Buscar destaques"
+                      "placeholder": "Buscar destaques",
+                      "sugestoes": [
+                        "Café",
+                        "Cafeteira italiana",
+                        "Pão de queijo"
+                      ]
                     }
                   },
                   {

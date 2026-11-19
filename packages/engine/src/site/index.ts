@@ -111,13 +111,18 @@ const BLOCOS_BUSCA = [
     props: { type: 'object', properties: {
       acao: { type: 'string', maxLength: 300, description: 'caminho do PRÓPRIO site (padrão /busca)' }, nome: { type: 'string', maxLength: 31, description: 'parâmetro na URL (padrão q)' },
       valor: { type: 'string', maxLength: 200 }, placeholder: { type: 'string', maxLength: 100, default: 'Buscar' }, rotulo: { type: 'string', maxLength: 100, default: 'Buscar' }, botao: { type: 'string', maxLength: 60, default: 'Buscar' },
+      sugestoes: { type: 'array', maxItems: 20, items: { type: 'string', maxLength: 100 }, description: 'termos que o navegador oferece enquanto se digita (lista nativa, sem JavaScript; fixos na página). Uma barra com sugestões por página (o id da lista é fixo)' },
     } },
     exemplos: [
       { titulo: 'Padrão', instancia: instancia('site/busca', {}) },
+      { titulo: 'Com sugestões', instancia: instancia('site/busca', { sugestoes: ['Café', 'Cafeteira italiana', 'Chá verde'] }) },
       { titulo: 'Com termo e outro destino', instancia: instancia('site/busca', { acao: '/produtos', valor: 'café', placeholder: 'Buscar produtos', botao: 'Procurar' }) },
     ],
     modelo: { bloco: 'form/busca', props: { acao: '{props.acao}' }, slots: { filhos: [
-      { bloco: 'entrada/busca', props: { nome: '{props.nome}', valor: '{props.valor}', placeholder: '{props.placeholder ?? "Buscar"}', rotulo: '{props.rotulo ?? "Buscar"}' } },
+      { bloco: 'entrada/busca', props: { nome: '{props.nome}', valor: '{props.valor}', placeholder: '{props.placeholder ?? "Buscar"}', rotulo: '{props.rotulo ?? "Buscar"}', lista: '{tamanho(props.sugestoes ?? []) > 0 ? "busca-sugestoes" : ""}' } },
+      { bloco: 'form/sugestoes', id: 'busca-sugestoes', se: 'tamanho(props.sugestoes ?? []) > 0', slots: { filhos: [
+        { bloco: 'form/opcao', repetir: { cada: 'props.sugestoes ?? []', como: 's', chave: 's' }, props: { valor: '{s}' } },
+      ] } },
       { bloco: 'nav/enviar', props: { texto: '{props.botao ?? "Buscar"}' } },
     ] } },
   }),

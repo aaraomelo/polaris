@@ -204,3 +204,15 @@ describe('submenu do cabeçalho (grupos)', () => {
     const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('nav>details[data-submenu][open]::details-content{position:absolute'); expect(css).toContain('details[data-submenu]:not([open])::details-content{display:none}'); // fechado: nada do painel (borda, padding) aparece expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*details-content\{position:static/)
   })
 })
+
+describe('sugestões da barra de busca (datalist)', () => {
+  const busca = (props: Record<string, unknown>) => ssr(pagina({ bloco: 'site/busca', props })).querySelector('form')!
+  it('com `sugestoes`: o campo aponta (list) para um <datalist> com uma <option> por termo, escapada', () => {
+    const f = busca({ sugestoes: ['Café', 'Chá <b>', 'Pão'] }), i = f.querySelector('input[type=search]')!, dl = f.querySelector('datalist')!
+    expect([i.getAttribute('list'), dl.id]).toEqual(['busca-sugestoes', 'busca-sugestoes']); expect([...dl.querySelectorAll('option')].map((o) => o.getAttribute('value'))).toEqual(['Café', 'Chá <b>', 'Pão']); expect(dl.querySelector('b')).toBeNull()
+  })
+  it('sem `sugestoes` (ou vazio): nem list nem datalist; `lista` inválida no bloco nativo é ignorada', () => {
+    for (const p of [{}, { sugestoes: [] }]) { const f = busca(p); expect(f.querySelector('input')!.hasAttribute('list')).toBe(false); expect(f.querySelector('datalist')).toBeNull() }
+    expect(ssr(pagina({ bloco: 'entrada/busca', props: { lista: '1 "><x' } })).querySelector('input')!.hasAttribute('list')).toBe(false)
+  })
+})
