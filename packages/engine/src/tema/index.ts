@@ -59,15 +59,21 @@ export const PRESETS_TIFFANY: Record<string, ConfigTiffany> = {
   graphite: { ...base, presetId: 'graphite', primary: '#37474f', primaryHover: '#263238', primaryLight: '#eceff1', secondary: '#546e7a', accent: '#26a69a', bg: '#f4f5f7', surface: '#ffffff', surfaceAlt: '#eef0f3', border: '#d7dbe0', text: '#222222', textMuted: '#5b6066', success: '#2E7D32', warn: '#B45309', danger: '#c0392b', textOnPrimary: '#ffffff' },
 }
 
-/** Modo escuro do tema padrão (cores escolhidas para passar AA: ver `auditaTema` e o teste). */
+/** Paleta GRAFITE (a escolhida no estudo de paleta): neutros quentes, primária de cinza-azulado e laranja de acento. Todos os pares de texto passam AA (4,5:1) e o anel de foco passa 3:1, nos dois modos (ver `auditaTema` e o teste). */
+const GRAFITE_CLARO: ConfigTiffany = {
+  ...base, presetId: 'grafite', primary: '#2D3A4F', primaryHover: '#1F2A3B', primaryLight: '#E6E9EF', secondary: '#6B4FBB', accent: '#D9580B',
+  bg: '#F6F6F5', surface: '#FFFFFF', surfaceAlt: '#EEEEEC', border: '#DAD9D5', text: '#1C1C1A', textMuted: '#5C5C57',
+  success: '#1B7243', warn: '#8F5300', danger: '#B3261E', textOnPrimary: '#FFFFFF',
+}
+/** Modo escuro do tema padrão (Grafite). */
 const ESCURO_PADRAO: ConfigTiffany = {
-  ...base, presetId: 'padrao-escuro', primary: '#6aa9e0', primaryHover: '#8bbcea', primaryLight: '#1d3347', secondary: '#4fb3d9', accent: '#ffb74d',
-  bg: '#0f1720', surface: '#17212b', surfaceAlt: '#1f2b37', border: '#33465a', text: '#e8edf2', textMuted: '#9fb0c0',
-  success: '#4cc38a', warn: '#e6a23c', danger: '#f27a6c', textOnPrimary: '#0b1620',
+  ...base, presetId: 'grafite-escuro', primary: '#B8C6E0', primaryHover: '#D0DBEE', primaryLight: '#252C39', secondary: '#B7A3F0', accent: '#FF9A4D',
+  bg: '#101011', surface: '#18181A', surfaceAlt: '#212124', border: '#303034', text: '#ECECEA', textMuted: '#A0A09A',
+  success: '#62CE8D', warn: '#F2B25C', danger: '#FF8F86', textOnPrimary: '#0C0F16',
 }
 
-/** Tema do core: claro (patria-blue do Tiffany) + modo `escuro`. Um tenant o substitui registrando um `tema` com o mesmo id no seu escopo. */
-export const TEMA_PADRAO: No = temaDeConfig('padrao', PRESETS_TIFFANY['patria-blue']!, { escuro: ESCURO_PADRAO })
+/** Tema do core: Grafite claro + modo `escuro`. Um tenant o substitui registrando um `tema` com o mesmo id no seu escopo. */
+export const TEMA_PADRAO: No = temaDeConfig('padrao', GRAFITE_CLARO, { escuro: ESCURO_PADRAO })
 
 /** Registra o tema padrão e os presets do Tiffany (`tema.<preset>`) no core. */
 export function registraTemas(reg: Registry): void {

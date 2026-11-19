@@ -46,7 +46,7 @@ describe('catálogo gerado do registry', () => {
   })
   it('mostra o tema com amostras de cor e o resultado da auditoria AA', () => {
     expect(c.html.claro).toContain('Todos os pares críticos passam AA')
-    expect(c.html.claro).toContain('<span class="cat-amostra" style="background:#1F4E79"></span>')
+    expect(c.html.claro).toContain('<span class="cat-amostra" style="background:#2D3A4F"></span>')
     expect(c.html.claro).toContain('Modo escuro')
   })
 })

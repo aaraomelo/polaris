@@ -35,7 +35,7 @@ describe('tema: do tiffany-erp para o nó `tema` do Polaris', () => {
     const r = new Registry(); registraTemas(r)
     expect(r.ids('tema').sort()).toEqual(['graphite', 'nco-red', 'padrao', 'patria-blue'])
     const css = emite(TEMA_PADRAO, 'css')
-    expect(css).toMatch(/--cor-primaria: #1F4E79;/); expect(css).toMatch(/--espacamento-base: 0\.5rem;/); expect(css).toMatch(/--raio-pequeno: 6px;/); expect(css).toMatch(/--espacamento-borda: 1px;/)
+    expect(css).toMatch(/--cor-primaria: #2D3A4F;/); expect(css).toMatch(/--espacamento-base: 0\.5rem;/); expect(css).toMatch(/--raio-pequeno: 6px;/); expect(css).toMatch(/--espacamento-borda: 1px;/)
     expect(css).toContain('[data-modo="escuro"]'); expect(css).toContain('@media (prefers-color-scheme: dark)')
     expect(emite(TEMA_PADRAO, 'css')).toBe(css) // determinístico
   })
@@ -112,7 +112,7 @@ describe('integração: o CSS do tema chega à página', () => {
     const dir = join(raiz, 'a2')
     await construirAot(r, { destino: dir, contextos: [{}, { tenantId: 'acme' }] })
     const css = (ctx: string) => { const m = JSON.parse(readFileSync(join(dir, ctx, 'manifesto.json'), 'utf8')) as Manifesto; return readFileSync(join(dir, ctx, m.paginas.inicio!.arquivos.tema!.nome), 'utf8') }
-    expect(css('core')).toContain('#1F4E79'); expect(css('t-acme')).toContain('--cor-primaria: #00AA00'); expect(css('t-acme')).not.toContain('#1F4E79')
+    expect(css('core')).toContain('#2D3A4F'); expect(css('t-acme')).toContain('--cor-primaria: #00AA00'); expect(css('t-acme')).not.toContain('#2D3A4F')
   })
   it('reconstruir sem mudar o tema não reescreve o arquivo (build incremental e determinístico)', async () => {
     const dir = join(raiz, 'a3')

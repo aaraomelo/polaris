@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-37 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+59 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -396,6 +396,64 @@ Texto de várias linhas, controlado pelo estado como o campo de texto: `valor` v
 }
 ```
 
+### Arquivo (`entrada/arquivo`)
+
+Seletor de UM arquivo. `aceita` filtra o seletor; `tamanhoMax` (bytes, padrão 2 MB) recusa antes de ler. `aoEscolher` roda só com arquivo que serve e recebe `{ nome, tipo, tamanho, dados }` (bytes em base64); `aoRecusar` roda só quando não serve (nenhum arquivo ou acima de `tamanhoMax`) e recebe `{ erro }`, sem ler o arquivo. O servidor deve revalidar tudo: o tipo declarado aqui não vale nada.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `aceita` | texto ≤ 200 caracteres | não |  | tipos aceitos pelo seletor (atributo accept), ex.: image/png,image/jpeg |
+| `desabilitado` | booleano | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
+| `tamanhoMax` | inteiro ≥ 1024 ≤ 8388608 | não | 2097152 | bytes; acima disso o evento traz `erro` e o arquivo nem é lido |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoEscolher` | json |
+| `aoRecusar` | json |
+
+**Exemplo: Imagens**
+
+```json
+{
+  "bloco": "entrada/arquivo",
+  "props": {
+    "rotulo": "Escolha uma imagem",
+    "aceita": "image/png,image/jpeg,image/gif,image/webp"
+  }
+}
+```
+
+### Campo de busca (`entrada/busca`)
+
+Campo `type="search"` com nome acessível (`rotulo`, padrão "Buscar"), `nome` do parâmetro (padrão `q`), `placeholder` e `valor` inicial (até 200 caracteres) e `lista` (id de um `form/sugestoes` da página, com as opções que o navegador oferece ao digitar). Vai dentro de um `form/busca`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `lista` | texto ≤ 64 caracteres | não |  | id de um `form/sugestoes` da página: o navegador oferece as opções enquanto se digita |
+| `nome` | texto ≤ 31 caracteres | não |  | nome do parâmetro na URL (padrão q) |
+| `placeholder` | texto ≤ 100 caracteres | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
+| `valor` | texto ≤ 200 caracteres | não |  | texto inicial (ex.: o termo buscado, `{consulta.q}`) |
+
+**Exemplo: Com termo**
+
+```json
+{
+  "bloco": "entrada/busca",
+  "props": {
+    "valor": "café",
+    "placeholder": "Buscar"
+  }
+}
+```
+
 ### Caixa de seleção (`entrada/caixa`)
 
 Checkbox controlado: `marcado` vem do estado e `aoMudar` recebe um booleano.
@@ -597,6 +655,46 @@ Etiqueta curta de estado. `tom`: neutro, sucesso, alerta ou erro (a cor vem do t
 
 ## form
 
+### Formulário de busca (`form/busca`)
+
+Formulário `GET` (`role="search"`) que leva o termo para uma página do PRÓPRIO site (`acao`, padrão `/busca`): funciona sem JavaScript, o termo vai na URL (`?q=…`) e a página de resultados o lê em `consulta.q`. Destino que não é um caminho do site vale o padrão.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `acao` | texto ≤ 300 caracteres | não |  | caminho do PRÓPRIO site que recebe a busca (padrão /busca); outro valor vale o padrão |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Campo e botão**
+
+```json
+{
+  "bloco": "form/busca",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "entrada/busca",
+        "props": {
+          "placeholder": "Buscar produtos"
+        }
+      },
+      {
+        "bloco": "nav/enviar",
+        "props": {
+          "texto": "Buscar"
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Formulário (`form/formulario`)
 
 Monta um formulário declarativo (`kind: formulario`) com máscaras, validação, mensagens e envio (`docs/formularios.md`). O servidor entrega só o ponto de montagem; o carregador do formulário (a "ilha") busca a definição e desenha os campos no navegador, validando com o mesmo motor do servidor. `aoEnviado` recebe `{ resultado, sucesso }` quando o serviço aceita; `aoErro`, `{ erros }`.
@@ -643,7 +741,271 @@ Monta um formulário declarativo (`kind: formulario`) com máscaras, validação
 }
 ```
 
+### Opção de sugestão (`form/opcao`)
+
+Uma opção (`<option value>`) de um `form/sugestoes`; `valor` é o texto sugerido (até 100 caracteres).
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `valor` | texto ≤ 100 caracteres | não |  |  |
+
+**Exemplo: Opção dentro da lista**
+
+```json
+{
+  "bloco": "form/busca",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "entrada/busca",
+        "props": {
+          "lista": "opcoes-exemplo",
+          "placeholder": "Digite c…"
+        }
+      },
+      {
+        "bloco": "form/sugestoes",
+        "id": "opcoes-exemplo",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "form/opcao",
+              "props": {
+                "valor": "Café"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bloco": "nav/enviar",
+        "props": {
+          "texto": "Buscar"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Sugestões (lista do campo) (`form/sugestoes`)
+
+Lista de opções (`<datalist>`) que um campo oferece enquanto se digita, ligada pelo `id` da instância ao `lista` do `entrada/busca`. Sem JavaScript: o navegador filtra pelo que foi digitado. As opções são fixas na página (`form/opcao`); não vêm do servidor a cada tecla.
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Campo com sugestões**
+
+```json
+{
+  "bloco": "form/busca",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "entrada/busca",
+        "props": {
+          "lista": "sugestoes-exemplo"
+        }
+      },
+      {
+        "bloco": "form/sugestoes",
+        "id": "sugestoes-exemplo",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "form/opcao",
+              "props": {
+                "valor": "Café"
+              }
+            },
+            {
+              "bloco": "form/opcao",
+              "props": {
+                "valor": "Chá"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bloco": "nav/enviar",
+        "props": {
+          "texto": "Buscar"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Sugestões ao vivo (busca) (`form/sugestoes-ao-vivo`)
+
+Lista de sugestões que aparece sob o campo de busca enquanto se digita, buscadas no servidor (`url`, um caminho do próprio site que devolve JSON, ex.: `/api/loja/destaques`; o cliente acrescenta `busca=<termo>&limite=<n>`). Cada item mostra o `titulo`, a `descricao` e a miniatura (`imagem`, só caminho do próprio site) e leva a `destino?q=<título>`. Vai dentro do `form/busca`, depois do campo. Teclado: setas, Enter e Esc; o campo vira uma caixa de combinação (`combobox`). Precisa de JavaScript; sem ele, a lista fica oculta e a busca normal segue funcionando.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `descricao` | texto ≤ 41 caracteres | não |  |  |
+| `destino` | texto ≤ 300 caracteres | não |  | página da escolha (padrão /busca): abre `destino?q=<título>` |
+| `imagem` | texto ≤ 41 caracteres | não |  | campo com o caminho da miniatura (só caminhos do próprio site) |
+| `limite` | inteiro ≥ 1 ≤ 10 | não |  | quantas sugestões (padrão 6) |
+| `nome` | texto ≤ 31 caracteres | não |  | parâmetro do destino (padrão q) |
+| `rotulo` | texto ≤ 100 caracteres | não |  |  |
+| `titulo` | texto ≤ 41 caracteres | não |  | campo do JSON com o título (padrão titulo) |
+| `url` | texto ≤ 300 caracteres | sim |  | caminho do PRÓPRIO site que lista (JSON) as sugestões, ex.: /api/loja/destaques; o cliente acrescenta `busca=<termo>&limite=<n>` |
+
+**Exemplo: Campo com sugestões ao vivo**
+
+```json
+{
+  "bloco": "form/busca",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "entrada/busca",
+        "props": {
+          "placeholder": "Buscar"
+        }
+      },
+      {
+        "bloco": "form/sugestoes-ao-vivo",
+        "props": {
+          "url": "/api/loja/destaques",
+          "imagem": "imagem"
+        }
+      },
+      {
+        "bloco": "nav/enviar",
+        "props": {
+          "texto": "Buscar"
+        }
+      }
+    ]
+  }
+}
+```
+
 ## layout
+
+### Cabeçalho (`layout/cabecalho`)
+
+Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `fixo` | booleano | não | false |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Com título e menu**
+
+```json
+{
+  "bloco": "layout/cabecalho",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/destaque",
+        "props": {
+          "texto": "Minha loja"
+        }
+      },
+      {
+        "bloco": "nav/menu",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/",
+                "texto": "Início"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+### Destaque (`layout/destaque`)
+
+Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou uma `imagem` de fundo com véu escuro (`escurece`) para o texto ler. `alinha`: centro ou esquerda; `altura` mínima em px. O texto e os botões ficam nos filhos; a imagem precisa ser do próprio site (o CSP das páginas só carrega imagens da mesma origem).
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `alinha` | texto | não |  | centro (padrão) ou esquerda (outro valor vale centro) |
+| `altura` | número ≥ 120 ≤ 800 | não | 320 | altura mínima em px |
+| `escurece` | número ≥ 0 ≤ 0.8 | não | 0.45 | véu escuro sobre a imagem, para o texto ler |
+| `fundo` | texto | não |  | sem imagem: primaria (padrão) ou suave (outro valor vale primaria) |
+| `imagem` | texto ≤ 500 caracteres | não |  | URL segura (mesma origem: o CSP das páginas só carrega imagens do próprio site) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Fundo do tema**
+
+```json
+{
+  "bloco": "layout/destaque",
+  "props": {
+    "altura": 200
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/titulo",
+        "props": {
+          "texto": "Oferta da semana",
+          "nivel": 2
+        }
+      }
+    ]
+  }
+}
+```
+
+**Exemplo: Suave, à esquerda**
+
+```json
+{
+  "bloco": "layout/destaque",
+  "props": {
+    "fundo": "suave",
+    "alinha": "esquerda",
+    "altura": 160
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Entrega grátis acima de R$ 99"
+        }
+      }
+    ]
+  }
+}
+```
 
 ### Divisor (`layout/divisor`)
 
@@ -779,6 +1141,52 @@ Distribui os filhos em colunas iguais (1 a 12). Padrão: 2 colunas.
 }
 ```
 
+### Lateral (menu lateral) (`layout/lateral`)
+
+Coluna lateral (`<aside>`) do `layout/painel`, com nome acessível em `rotulo` (padrão "Navegação lateral"). Costuma levar um `nav/menu` com links ou botões (`atual` marca o escolhido). Prefira o composto `site/menu-lateral`, que já traz o botão que a recolhe no celular.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Com menu**
+
+```json
+{
+  "bloco": "layout/lateral",
+  "props": {
+    "rotulo": "Seções"
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/menu",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/",
+                "texto": "Início",
+                "atual": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Linha (`layout/linha`)
 
 Coloca os filhos lado a lado (flex row).
@@ -823,6 +1231,87 @@ Coloca os filhos lado a lado (flex row).
         "bloco": "texto/paragrafo",
         "props": {
           "texto": "C"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Painel (cabeçalho, lateral e conteúdo) (`layout/painel`)
+
+Estrutura de aplicação: uma grade com o cabeçalho (`site/cabecalho`) no topo, o menu lateral (`site/menu-lateral` ou `layout/lateral`) à esquerda e o `layout/principal` à direita; ocupa a altura da janela, a lateral e o conteúdo rolam sozinhos. Até 40 rem de largura vira uma coluna e a lateral fica atrás do botão "Seções".
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Cabeçalho, lateral e conteúdo**
+
+```json
+{
+  "bloco": "layout/painel",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "layout/cabecalho",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "texto/destaque",
+              "props": {
+                "texto": "Painel"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bloco": "layout/lateral",
+        "props": {
+          "rotulo": "Seções"
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "nav/menu",
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/",
+                      "texto": "Início",
+                      "atual": true
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/a",
+                      "texto": "Relatórios"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bloco": "layout/principal",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "texto/titulo",
+              "props": {
+                "texto": "Visão geral",
+                "nivel": 1
+              }
+            }
+          ]
         }
       }
     ]
@@ -901,6 +1390,63 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
         "bloco": "texto/paragrafo",
         "props": {
           "texto": "Um texto bem mais comprido"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Principal (conteúdo) (`layout/principal`)
+
+A área de conteúdo (`<main>`) do `layout/painel`: o ponto de referência "principal" para leitores de tela, com rolagem própria.
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Com título**
+
+```json
+{
+  "bloco": "layout/principal",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/titulo",
+        "props": {
+          "texto": "Conteúdo",
+          "nivel": 1
+        }
+      }
+    ]
+  }
+}
+```
+
+### Rodapé (`layout/rodape`)
+
+Faixa do fim da página (`<footer>`): ponto de referência para leitores de tela, com informações do site (contato, links, aviso legal).
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Com aviso**
+
+```json
+{
+  "bloco": "layout/rodape",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/pequeno",
+        "props": {
+          "texto": "© 2026 Minha loja"
         }
       }
     ]
@@ -1070,7 +1616,7 @@ Lista de itens; `ordenada` numera. Só aceita `lista/item`.
 
 ### Imagem (`midia/imagem`)
 
-Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas); outras somem.
+Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas); outras somem. Se `src` é uma imagem hospedada pela plataforma (`/_polaris/img/<hash>.png|jpg|webp`), e há `tamanhos` ou `largura`, ganha `srcset` automático com as versões de 160, 480, 960 e 1920 px e `sizes` (`tamanhos`, ou "até `largura` px"): o navegador baixa só a versão que cabe na tela. Sem nenhum dos dois, não há como saber o espaço da imagem e ela segue só com `src`.
 
 **Props**
 
@@ -1080,6 +1626,7 @@ Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas)
 | `altura` | número ≥ 1 | não |  |  |
 | `largura` | número ≥ 1 | não |  |  |
 | `src` | texto | sim |  |  |
+| `tamanhos` | texto ≤ 200 caracteres | não |  |  |
 
 **Exemplo: Com tamanho**
 
@@ -1122,6 +1669,42 @@ Exibe um documento HTML num iframe **sempre** isolado (`sandbox` vazio: sem scri
 
 ## nav
 
+### Alternador (abre e fecha sem JavaScript) (`nav/alternador`)
+
+Caixa de marcar com `role="switch"` e nome acessível (`rotulo`, padrão "Abrir o menu") que o CSS usa para mostrar ou esconder o que vem depois (`input:checked ~ …`): é a base do menu recolhível. Precisa de um `id` na instância e de um `texto/rotulo` com `para` apontando para ele (o clique no rótulo marca a caixa). Sem estado nem evento no runtime.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
+
+**Exemplo: Com rótulo**
+
+```json
+{
+  "bloco": "layout/pilha",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/alternador",
+        "id": "alt-exemplo",
+        "props": {
+          "rotulo": "Abrir o menu"
+        }
+      },
+      {
+        "bloco": "texto/rotulo",
+        "props": {
+          "texto": "Menu",
+          "para": "alt-exemplo"
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Botão (`nav/botao`)
 
 Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
@@ -1130,8 +1713,10 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `atual` | booleano | não |  | o item escolhido (aria-current), ex.: no menu lateral |
 | `desabilitado` | booleano | não |  |  |
 | `texto` | texto | sim |  |  |
+| `variante` | "primario" \| "secundario" \| "fantasma" | não |  | primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto |
 
 **Eventos**
 
@@ -1162,6 +1747,50 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 }
 ```
 
+**Exemplo: Secundário e fantasma**
+
+```json
+{
+  "bloco": "layout/linha",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Cancelar",
+          "variante": "secundario"
+        }
+      },
+      {
+        "bloco": "nav/botao",
+        "props": {
+          "texto": "Mais",
+          "variante": "fantasma"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Botão de envio (`nav/enviar`)
+
+Botão `type="submit"` para formulários simples (sem JavaScript e sem evento); o texto padrão é "Enviar".
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `texto` | texto ≤ 60 caracteres | não | "Enviar" |  |
+
+**Exemplo: Padrão**
+
+```json
+{
+  "bloco": "nav/enviar"
+}
+```
+
 ### Link (`nav/link`)
 
 Link para uma URL segura (javascript:, data: e similares são recusados). Links externos levam `rel="noopener noreferrer"`.
@@ -1170,6 +1799,8 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `atual` | booleano | não |  | a página atual: o link leva aria-current="page" |
+| `botao` | texto ≤ 12 caracteres | não |  | primario ou secundario: o link com aparência de botão |
 | `href` | texto | sim |  |  |
 | `texto` | texto | não |  |  |
 
@@ -1191,6 +1822,19 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 }
 ```
 
+**Exemplo: Como botão**
+
+```json
+{
+  "bloco": "nav/link",
+  "props": {
+    "href": "/produtos",
+    "texto": "Ver produtos",
+    "botao": "primario"
+  }
+}
+```
+
 **Exemplo: Com blocos dentro**
 
 ```json
@@ -1205,6 +1849,482 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
         "bloco": "texto/destaque",
         "props": {
           "texto": "Ver carrinho"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Menu (`nav/menu`)
+
+Grupo de links de navegação (`<nav>`), com nome acessível em `rotulo` (padrão "Principal"). Use `atual` no link da página aberta.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `rotulo` | texto ≤ 80 caracteres | não |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Dois links**
+
+```json
+{
+  "bloco": "nav/menu",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/link",
+        "props": {
+          "href": "/",
+          "texto": "Início",
+          "atual": true
+        }
+      },
+      {
+        "bloco": "nav/link",
+        "props": {
+          "href": "/sobre",
+          "texto": "Sobre"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Submenu (recolhível, sem JavaScript) (`nav/submenu`)
+
+Grupo recolhível de links dentro de um `nav/menu`: um `<details>` nativo que leva um `nav/submenu-titulo` (o `<summary>`, que abre e fecha) seguido dos links. Funciona por teclado (Tab, Enter e Espaço) sem JavaScript; no computador a lista abre como um painel sob o título (onde o navegador suporta `::details-content`; nos outros, abre em linha), e no celular, em linha. Com o roteador do gateway, Esc e o clique fora o fecham.
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Com dois links**
+
+```json
+{
+  "bloco": "nav/menu",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/submenu",
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "nav/submenu-titulo",
+              "props": {
+                "texto": "Produtos"
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/cafes",
+                "texto": "Cafés"
+              }
+            },
+            {
+              "bloco": "nav/link",
+              "props": {
+                "href": "/cha",
+                "texto": "Chás"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+### Título do submenu (`nav/submenu-titulo`)
+
+O `<summary>` de um `nav/submenu`: o texto clicável que abre e fecha o grupo (`texto`). Deve ser o primeiro filho do submenu.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `texto` | texto ≤ 80 caracteres | não |  |  |
+
+**Exemplo: Título**
+
+```json
+{
+  "bloco": "nav/submenu",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "nav/submenu-titulo",
+        "props": {
+          "texto": "Mais"
+        }
+      },
+      {
+        "bloco": "nav/link",
+        "props": {
+          "href": "/sobre",
+          "texto": "Sobre"
+        }
+      }
+    ]
+  }
+}
+```
+
+## site
+
+### Barra de busca (`site/busca`)
+
+Campo de busca com botão: um formulário `GET` que leva o termo (`?q=…`) a uma página do próprio site (`acao`, padrão `/busca`), que o lê em `consulta.q`. Funciona sem JavaScript. `valor` preenche o campo (use `{consulta.q}` na página de resultados) e `rotulo` dá o nome acessível. Cabe no slot `acoes` do `site/cabecalho`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `acao` | texto ≤ 300 caracteres | não |  | caminho do PRÓPRIO site (padrão /busca) |
+| `botao` | texto ≤ 60 caracteres | não | "Buscar" |  |
+| `nome` | texto ≤ 31 caracteres | não |  | parâmetro na URL (padrão q) |
+| `placeholder` | texto ≤ 100 caracteres | não | "Buscar" |  |
+| `rotulo` | texto ≤ 100 caracteres | não | "Buscar" |  |
+| `sugestoes` | lista | não |  | termos que o navegador oferece enquanto se digita (lista nativa, sem JavaScript; fixos na página). Uma barra com sugestões por página (o id da lista é fixo) |
+| `sugestoesDescricao` | texto ≤ 41 caracteres | não |  |  |
+| `sugestoesDestino` | texto ≤ 300 caracteres | não |  | página aberta ao escolher (padrão: a própria `acao`) |
+| `sugestoesImagem` | texto ≤ 41 caracteres | não |  | campo com o caminho da miniatura |
+| `sugestoesLimite` | inteiro ≥ 1 ≤ 10 | não | 6 |  |
+| `sugestoesTitulo` | texto ≤ 41 caracteres | não | "titulo" |  |
+| `sugestoesUrl` | texto ≤ 300 caracteres | não |  | sugestões AO VIVO: caminho do próprio site que devolve JSON (ex.: /api/loja/destaques); o cliente busca `busca=<termo>` a cada pausa na digitação. Precisa de JavaScript |
+| `valor` | texto ≤ 200 caracteres | não |  |  |
+
+**Exemplo: Padrão**
+
+```json
+{
+  "bloco": "site/busca",
+  "props": {}
+}
+```
+
+**Exemplo: Com sugestões ao vivo**
+
+```json
+{
+  "bloco": "site/busca",
+  "props": {
+    "sugestoesUrl": "/api/loja/destaques",
+    "sugestoesImagem": "imagem"
+  }
+}
+```
+
+**Exemplo: Com sugestões**
+
+```json
+{
+  "bloco": "site/busca",
+  "props": {
+    "sugestoes": [
+      "Café",
+      "Cafeteira italiana",
+      "Chá verde"
+    ]
+  }
+}
+```
+
+**Exemplo: Com termo e outro destino**
+
+```json
+{
+  "bloco": "site/busca",
+  "props": {
+    "acao": "/produtos",
+    "valor": "café",
+    "placeholder": "Buscar produtos",
+    "botao": "Procurar"
+  }
+}
+```
+
+### Cabeçalho do site (`site/cabecalho`)
+
+Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação (`links`, com `atual` na página aberta, e `grupos`: submenus recolhíveis, sem JavaScript) e o slot `acoes` à direita (ex.: botão de entrar ou carrinho). `fixo` o mantém no topo ao rolar. No celular o menu e as ações ficam atrás de um botão "Menu" (`nav/alternador`, sem JavaScript; `menuRecolhivel: false` desliga). Usa `<header>` e `<nav>` (pontos de referência para leitores de tela) e só variáveis do tema. Uma por página (o `id` do alternador é fixo).
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `fixo` | booleano | não | false |  |
+| `grupos` | lista | não |  | submenus: cada grupo (`titulo` e `links`) é um item recolhível que abre uma lista de links, depois dos `links`; um nível só |
+| `href` | texto ≤ 500 caracteres | não | "/" | para onde a marca leva |
+| `links` | lista | não |  | o menu |
+| `logo` | texto ≤ 500 caracteres | não |  | URL segura da imagem da marca |
+| `menuRecolhivel` | booleano | não | true | no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista |
+| `rotuloAlternador` | texto ≤ 60 caracteres | não | "Abrir o menu" |  |
+| `rotuloMenu` | texto ≤ 80 caracteres | não | "Principal" |  |
+| `titulo` | texto ≤ 80 caracteres | não |  | nome da marca |
+| `tituloNivel` | inteiro ≥ 1 ≤ 6 | não |  | faz do nome da marca um título (h1…h6) em vez de texto em destaque: use 1 em aplicações cujo painel não tem outro h1 |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `acoes` | qualquer bloco |  |  |
+
+**Exemplo: Marca e menu**
+
+```json
+{
+  "bloco": "site/cabecalho",
+  "props": {
+    "titulo": "Loja Demo",
+    "links": [
+      {
+        "texto": "Início",
+        "href": "/",
+        "atual": true
+      },
+      {
+        "texto": "Produtos",
+        "href": "/produtos"
+      },
+      {
+        "texto": "Contato",
+        "href": "/contato"
+      }
+    ]
+  }
+}
+```
+
+**Exemplo: Com ação e fixo**
+
+```json
+{
+  "bloco": "site/cabecalho",
+  "props": {
+    "titulo": "Loja Demo",
+    "fixo": true,
+    "links": [
+      {
+        "texto": "Início",
+        "href": "/"
+      }
+    ]
+  },
+  "slots": {
+    "acoes": [
+      {
+        "bloco": "nav/link",
+        "props": {
+          "href": "/entrar",
+          "texto": "Entrar"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Hero (banner de destaque) (`site/hero`)
+
+Faixa de abertura da página: `titulo` (o `<h1>`), `subtitulo`, até dois botões de ação (`cta` primário e `cta2` secundário) e o slot `extra`. O fundo é a cor primária do tema (ou `suave`), ou uma `imagem` do próprio site com véu escuro (`escurece`) para o texto ler. `alinha`: centro (padrão) ou esquerda. O título deve ser o único `<h1>` da página.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `alinha` | texto ≤ 10 caracteres | não |  | centro ou esquerda |
+| `altura` | número ≥ 120 ≤ 800 | não | 320 |  |
+| `cta` | objeto | não |  |  |
+| `cta2` | objeto | não |  |  |
+| `escurece` | número ≥ 0 ≤ 0.8 | não | 0.45 |  |
+| `fundo` | texto ≤ 10 caracteres | não |  | sem imagem: primaria ou suave |
+| `imagem` | texto ≤ 500 caracteres | não |  | URL segura da MESMA origem (o CSP das páginas só carrega imagens do próprio site) |
+| `subtitulo` | texto ≤ 300 caracteres | não |  |  |
+| `titulo` | texto ≤ 140 caracteres | sim |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `extra` | qualquer bloco |  |  |
+
+**Exemplo: Título, subtítulo e dois botões**
+
+```json
+{
+  "bloco": "site/hero",
+  "props": {
+    "titulo": "Tudo para a sua casa",
+    "subtitulo": "Ofertas novas toda semana, com entrega rápida.",
+    "cta": {
+      "texto": "Ver ofertas",
+      "href": "/produtos"
+    },
+    "cta2": {
+      "texto": "Falar conosco",
+      "href": "/contato"
+    }
+  }
+}
+```
+
+**Exemplo: À esquerda, fundo suave**
+
+```json
+{
+  "bloco": "site/hero",
+  "props": {
+    "titulo": "Frete grátis",
+    "subtitulo": "Em compras acima de R$ 99.",
+    "alinha": "esquerda",
+    "fundo": "suave",
+    "altura": 200,
+    "cta": {
+      "texto": "Aproveitar",
+      "href": "/produtos"
+    }
+  }
+}
+```
+
+### Menu lateral (`site/menu-lateral`)
+
+Coluna lateral de navegação para aplicações e painéis (use dentro de um `layout/painel`, ao lado do `layout/principal`): grupos de links com título (`grupos`, `atual` marca a página aberta) e os slots `topo` (antes do menu, ex.: marca ou busca) e `filhos` (depois: qualquer conteúdo, como botões de ação num `nav/menu`). No celular a lateral fica atrás de um botão ("Seções", `rotuloAlternador`), sem JavaScript. Usa `<aside>` e `<nav>` com nome acessível e só variáveis do tema. Uma por página (o `id` do alternador é fixo).
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `grupos` | lista | não |  | grupos de links: `titulo` e `links` (`texto`, `href`, `atual`) |
+| `rotulo` | texto ≤ 80 caracteres | não | "Navegação lateral" | nome acessível da lateral |
+| `rotuloAlternador` | texto ≤ 60 caracteres | não | "Abrir as seções" |  |
+| `rotuloMenu` | texto ≤ 80 caracteres | não | "Seções" | nome acessível do menu de links |
+| `textoAlternador` | texto ≤ 40 caracteres | não | "Seções" | o texto do botão no celular |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+| `topo` | qualquer bloco |  |  |
+
+**Exemplo: Grupos de links**
+
+```json
+{
+  "bloco": "site/menu-lateral",
+  "props": {
+    "grupos": [
+      {
+        "titulo": "Conta",
+        "links": [
+          {
+            "texto": "Perfil",
+            "href": "/perfil",
+            "atual": true
+          },
+          {
+            "texto": "Segurança",
+            "href": "/seguranca"
+          }
+        ]
+      },
+      {
+        "titulo": "Loja",
+        "links": [
+          {
+            "texto": "Pedidos",
+            "href": "/pedidos"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Rodapé do site (`site/rodape`)
+
+Fim da página: colunas de links (cada uma com título e um menu próprio, com nome acessível), uma linha de contato/endereço, o aviso legal (`copyright`) e o slot `extra` para o que a página quiser (ex.: um formulário de assinatura). Usa `<footer>` e `<nav>` e só variáveis do tema.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `colunas` | lista | não |  | grupos de links |
+| `contato` | texto ≤ 300 caracteres | não |  | telefone, e-mail ou endereço, numa linha |
+| `copyright` | texto ≤ 300 caracteres | não |  | aviso legal, ex.: © 2026 Minha loja |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `extra` | qualquer bloco |  |  |
+
+**Exemplo: Colunas e aviso**
+
+```json
+{
+  "bloco": "site/rodape",
+  "props": {
+    "colunas": [
+      {
+        "titulo": "Loja",
+        "links": [
+          {
+            "texto": "Produtos",
+            "href": "/produtos"
+          },
+          {
+            "texto": "Contato",
+            "href": "/contato"
+          }
+        ]
+      },
+      {
+        "titulo": "Ajuda",
+        "links": [
+          {
+            "texto": "Sobre",
+            "href": "/sobre"
+          }
+        ]
+      }
+    ],
+    "contato": "contato@exemplo.com · (11) 4000-0000",
+    "copyright": "© 2026 Minha loja"
+  }
+}
+```
+
+**Exemplo: Só o aviso, com extra**
+
+```json
+{
+  "bloco": "site/rodape",
+  "props": {
+    "copyright": "© 2026 Minha loja"
+  },
+  "slots": {
+    "extra": [
+      {
+        "bloco": "nav/link",
+        "props": {
+          "href": "/termos",
+          "texto": "Termos de uso"
         }
       }
     ]

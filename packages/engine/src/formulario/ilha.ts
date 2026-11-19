@@ -64,7 +64,7 @@ export const CSS_FORMULARIO = `.pl-form{display:flex;flex-direction:column;gap:v
 .pl-campo{display:flex;flex-direction:column;gap:2px}.pl-campo[hidden]{display:none}.pl-campo input:not([type=checkbox]):not([type=radio]),.pl-campo select,.pl-campo textarea{padding:6px;border:1px solid var(--cor-borda,#ccc);border-radius:var(--raio-pequeno,4px);font:inherit}
 .pl-campo [aria-invalid=true]{border-color:var(--cor-erro,#c0392b)}.pl-erro{color:var(--cor-erro,#c0392b);font-size:.9em}.pl-ajuda{color:var(--cor-texto-suave,#666);font-size:.9em}
 .pl-acoes{display:flex;gap:var(--espacamento-base,8px);flex-wrap:wrap}.pl-acoes button{padding:6px 12px;border:1px solid var(--cor-borda,#ccc);border-radius:var(--raio-pequeno,4px);background:var(--cor-superficie,#fff);color:inherit;font:inherit;cursor:pointer}
-.pl-acoes button[data-estilo=primario]{background:var(--cor-primaria,#1f4e79);color:var(--cor-texto-sobre-primaria,#fff);border-color:transparent}.pl-acoes button[data-estilo=perigo]{background:var(--cor-erro,#c0392b);color:#fff;border-color:transparent}.pl-acoes button:disabled{opacity:.6;cursor:default}
+.pl-acoes button[data-estilo=primario]{background:var(--cor-primaria,#2d3a4f);color:var(--cor-texto-sobre-primaria,#fff);border-color:transparent}.pl-acoes button[data-estilo=perigo]{background:var(--cor-erro,#c0392b);color:#fff;border-color:transparent}.pl-acoes button:disabled{opacity:.6;cursor:default}
 .pl-status{padding:6px;border-radius:var(--raio-pequeno,4px)}.pl-status[data-tom=sucesso]{border:1px solid var(--cor-sucesso,#2e7d32)}.pl-status[data-tom=erro]{border:1px solid var(--cor-erro,#c0392b)}.pl-passos{display:flex;gap:8px;padding:0;list-style:none}.pl-passos [aria-current=step]{font-weight:bold}`
 
 let uidSeq = 0
