@@ -116,8 +116,8 @@ describe('layout/destaque e site/hero', () => {
   })
   it('imagem: fundo com véu escuro, URL escapada (nada fecha o url() nem a declaração); inseguro some; altura e véu limitados; alinha e fundo desconhecidos caem no padrão', () => {
     const d = ssr(pagina(hero({ titulo: 'x', imagem: '/img/a b"c)d;e.jpg', altura: 480, escurece: 0.6, alinha: 'esquerda', fundo: 'suave' }))), st = d.querySelector('section')!.getAttribute('style')!
-    expect(st).toBe('min-height:480px;background-image:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),url("/img/a%20b%22c%29d;e.jpg")'); expect(d.querySelector('section')!.getAttribute('data-alinha')).toBe('esquerda')
-    const v = ssr(pagina(hero({ titulo: 'x', imagem: 'javascript:alert(1)', altura: 800, escurece: 0.8, alinha: 'zz', fundo: 'zz' }))).querySelector('section')!; expect(v.getAttribute('style')).toBe('min-height:800px'); expect([v.getAttribute('data-alinha'), v.getAttribute('data-fundo')]).toEqual(['centro', 'primaria'])
+    expect(st).toBe('min-height:480px;background-image:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),url("/img/a%20b%22c%29d;e.jpg")'); expect(d.querySelector('section')!.getAttribute('data-alinha')).toBe('esquerda'); expect(d.querySelector('section')!.hasAttribute('data-imagem')).toBe(true)
+    const v = ssr(pagina(hero({ titulo: 'x', imagem: 'javascript:alert(1)', altura: 800, escurece: 0.8, alinha: 'zz', fundo: 'zz' }))).querySelector('section')!; expect(v.getAttribute('style')).toBe('min-height:800px'); expect(v.hasAttribute('data-imagem')).toBe(false); expect([v.getAttribute('data-alinha'), v.getAttribute('data-fundo')]).toEqual(['centro', 'primaria'])
     expect(() => pagina(hero({ titulo: 'x', altura: 5000 }))).toThrow(/must be <= 800/); expect(() => pagina(hero({ titulo: 'x', escurece: 9 }))).toThrow(/must be <= 0.8/) // fora do limite nem compila
   })
   it('texto escapado e link inseguro do botão sem href', () => {

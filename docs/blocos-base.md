@@ -63,7 +63,7 @@ Mesmas garantias do cabeçalho (texto escapado, link inseguro sem `href`, parida
 **Hero (banner de destaque)**: `layout/destaque` emite `<section data-alinha data-fundo>` e o composto `site/hero` monta, sobre ele:
 - `titulo` (o `<h1>`: deve ser o único da página), `subtitulo`, até dois botões (`cta` primário e `cta2` secundário, links com aparência de botão via `nav/link` `botao`) e o slot `extra`;
 - fundo: a cor primária do tema (`fundo: primaria`, padrão) ou `suave`; ou uma `imagem` com **véu escuro** (`escurece`, 0 a 0,8, padrão 0,45) para o texto ler; `altura` mínima (120 a 800 px, padrão 320); `alinha`: `centro` (padrão) ou `esquerda`. Valor desconhecido de `alinha`/`fundo` vale o padrão; altura e véu fora do limite nem compilam;
-- sobre o fundo primário o botão primário é **invertido** (claro sobre a cor da marca) para ter contraste, e o secundário usa o texto sobre-primária; tudo por variáveis do tema.
+- com **imagem** de fundo (véu sempre escuro) o texto é branco e o botão primário branco, em qualquer tema; sobre o fundo primário o botão primário é **invertido** (claro sobre a cor da marca) para ter contraste, e o secundário usa o texto sobre-primária; tudo por variáveis do tema.
 A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas, parênteses e contrabarra viram escapes: nada fecha o `url()` nem a declaração).
 **Limites**: a imagem precisa ser **da mesma origem** (o CSP das páginas só carrega as do próprio site): use as imagens do tenant enviadas pelo Studio (`docs/imagens.md`); sem imagem de fundo responsiva (um só arquivo, `cover`); sem vídeo nem carrossel; `alinha` e `fundo` são texto (não enum) porque enum não aceita binding no modelo do composto.
 

@@ -88,7 +88,7 @@ export const d_layout_destaque: Descritor = {
   chave: () => 'section', tag: () => 'section', filhos: true,
   attrs: (p, id) => {
     const img = urlSegura(p.imagem), a = inteiro(p.altura, 120, 800, 320), e = Math.min(0.8, Math.max(0, num(p.escurece) ?? 0.45))
-    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', style: `min-height:${a}px${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
+    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), style: `min-height:${a}px${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
   },
 }
 export const d_layout_rodape: Descritor = { chave: () => 'footer', tag: () => 'footer', filhos: true, attrs: (_, id) => comId(id) }

@@ -72,7 +72,7 @@ export const COMPONENTES_BASE: Componentes = {
     }),
   'layout/destaque': ({ props, slots, id }) => {
     const img = urlSegura(props.imagem), a = Math.min(800, Math.max(120, Math.trunc(num(props.altura) ?? 320))), e = Math.min(0.8, Math.max(0, num(props.escurece) ?? 0.45))
-    return createElement('section', { ...(id ? { id } : {}), 'data-alinha': props.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': props.fundo === 'suave' ? 'suave' : 'primaria', style: { minHeight: a, ...(img ? { backgroundImage: `linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` } : {}) } }, slots.filhos)
+    return createElement('section', { ...(id ? { id } : {}), 'data-alinha': props.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': props.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), style: { minHeight: a, ...(img ? { backgroundImage: `linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` } : {}) } }, slots.filhos)
   },
   'layout/rodape': ({ slots, id }) => createElement('footer', id ? { id } : null, slots.filhos),
   'layout/divisor': ({ id }) => createElement('hr', id ? { id } : null),
