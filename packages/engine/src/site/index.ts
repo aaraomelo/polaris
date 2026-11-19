@@ -18,7 +18,7 @@ const BLOCOS_CABECALHO = [
       titulo: { type: 'string', maxLength: 80, description: 'nome da marca' }, logo: { type: 'string', maxLength: 500, description: 'URL segura da imagem da marca' },
       href: { type: 'string', maxLength: 500, default: '/', description: 'para onde a marca leva' }, links: { type: 'array', maxItems: 12, items: linkProp, description: 'o menu' }, grupos: { type: 'array', maxItems: 6, items: colunaProp, description: 'submenus: cada grupo (`titulo` e `links`) é um item recolhível que abre uma lista de links, depois dos `links`; um nível só' },
       rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false },
-      menuRecolhivel: { type: 'boolean', default: true, description: 'no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista' }, rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir o menu' },
+      tituloNivel: { type: 'integer', minimum: 1, maximum: 6, description: 'faz do nome da marca um título (h1…h6) em vez de texto em destaque: use 1 em aplicações cujo painel não tem outro h1' }, menuRecolhivel: { type: 'boolean', default: true, description: 'no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista' }, rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir o menu' },
     } },
     slots: { acoes: {} },
     exemplos: [
@@ -28,7 +28,8 @@ const BLOCOS_CABECALHO = [
     modelo: { bloco: 'layout/cabecalho', props: { fixo: '{props.fixo}' }, slots: { filhos: [
       { bloco: 'nav/link', props: { href: '{props.href ?? "/"}' }, slots: { filhos: [
         { bloco: 'midia/imagem', se: 'props.logo', props: { src: '{props.logo}', alt: '', altura: 32 } },
-        { bloco: 'texto/destaque', se: 'props.titulo', props: { texto: '{props.titulo}' } },
+        { bloco: 'texto/destaque', se: 'props.titulo && !props.tituloNivel', props: { texto: '{props.titulo}' } },
+        { bloco: 'texto/titulo', se: 'props.titulo && props.tituloNivel', props: { texto: '{props.titulo}', nivel: '{props.tituloNivel}' } },
       ] } },
       { bloco: 'nav/alternador', id: 'cabecalho-alternador', se: 'props.menuRecolhivel != false', props: { rotulo: '{props.rotuloAlternador ?? "Abrir o menu"}' } },
       { bloco: 'texto/rotulo', se: 'props.menuRecolhivel != false', props: { texto: 'Menu', para: 'cabecalho-alternador' } },
@@ -131,5 +132,33 @@ const BLOCOS_BUSCA = [
   }),
 ]
 
-export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO, ...BLOCOS_BUSCA]
+const BLOCOS_LATERAL = [
+  no('bloco', 'site.menu-lateral', {
+    interface: 'site/menu-lateral', titulo: 'Menu lateral',
+    descricao: 'Coluna lateral de navegação para aplicações e painéis (use dentro de um `layout/painel`, ao lado do `layout/principal`): grupos de links com título (`grupos`, `atual` marca a página aberta) e os slots `topo` (antes do menu, ex.: marca ou busca) e `filhos` (depois: qualquer conteúdo, como botões de ação num `nav/menu`). No celular a lateral fica atrás de um botão ("Seções", `rotuloAlternador`), sem JavaScript. Usa `<aside>` e `<nav>` com nome acessível e só variáveis do tema. Uma por página (o `id` do alternador é fixo).',
+    props: { type: 'object', properties: {
+      rotulo: { type: 'string', maxLength: 80, default: 'Navegação lateral', description: 'nome acessível da lateral' }, rotuloMenu: { type: 'string', maxLength: 80, default: 'Seções', description: 'nome acessível do menu de links' },
+      rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir as seções' }, textoAlternador: { type: 'string', maxLength: 40, default: 'Seções', description: 'o texto do botão no celular' },
+      grupos: { type: 'array', maxItems: 12, items: colunaProp, description: 'grupos de links: `titulo` e `links` (`texto`, `href`, `atual`)' },
+    } },
+    slots: { topo: {}, filhos: {} },
+    exemplos: [
+      { titulo: 'Grupos de links', instancia: instancia('site/menu-lateral', { grupos: [{ titulo: 'Conta', links: [{ texto: 'Perfil', href: '/perfil', atual: true }, { texto: 'Segurança', href: '/seguranca' }] }, { titulo: 'Loja', links: [{ texto: 'Pedidos', href: '/pedidos' }] }] }) },
+    ],
+    modelo: { bloco: 'layout/lateral', props: { rotulo: '{props.rotulo ?? "Navegação lateral"}' }, slots: { filhos: [
+      { bloco: 'nav/alternador', id: 'lateral-alternador', props: { rotulo: '{props.rotuloAlternador ?? "Abrir as seções"}' } },
+      { bloco: 'texto/rotulo', props: { texto: '{props.textoAlternador ?? "Seções"}', para: 'lateral-alternador' } },
+      { bloco: 'core/slot', props: { nome: 'topo' } },
+      { bloco: 'nav/menu', se: 'tamanho(props.grupos ?? []) > 0', props: { rotulo: '{props.rotuloMenu ?? "Seções"}' }, slots: { filhos: [
+        { bloco: 'layout/pilha', repetir: { cada: 'props.grupos ?? []', como: 'g', chave: 'g.titulo' }, props: { gap: 0 }, slots: { filhos: [
+          { bloco: 'texto/pequeno', props: { texto: '{g.titulo}' } },
+          { bloco: 'nav/link', repetir: { cada: 'g.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+        ] } },
+      ] } },
+      { bloco: 'core/slot', props: { nome: 'filhos' } },
+    ] } },
+  }),
+]
+
+export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO, ...BLOCOS_BUSCA, ...BLOCOS_LATERAL]
 export function registraSite(reg: Registry): void { for (const n of BLOCOS_SITE) reg.registra(n as never) }

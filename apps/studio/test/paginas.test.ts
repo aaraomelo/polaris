@@ -1,11 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { compilaPrograma, registraBase, renderPaginaHtml, COMPONENTES_BASE } from '@polaris/engine'
+import { registraSite } from '@polaris/engine/site'
 import { registraTemas } from '@polaris/engine/tema'
 import { registroDaPlataforma } from '@polaris/packs'
 import { describe, expect, it } from 'vitest'
 import { SAIDA, conteudo } from '../scripts/gera-paginas'
 
-const reg = registroDaPlataforma(); registraBase(reg); registraTemas(reg)
+const reg = registroDaPlataforma(); registraBase(reg); registraTemas(reg); registraSite(reg)
 describe('as páginas do Studio (nós da plataforma)', () => {
   it('o JSON commitado é exatamente o gerado do DSL (rode `pnpm --filter @polaris/studio-app paginas`)', () => { expect(readFileSync(SAIDA, 'utf8')).toBe(conteudo()) })
   it('a página studio.app compila sem erro contra o registro da plataforma', () => {

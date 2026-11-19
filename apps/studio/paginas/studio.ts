@@ -73,13 +73,19 @@ const barraPendente = (): Inst => linha([
   texto('Há alterações não salvas em {estado.aberto.id}. Descartar e abrir {estado.pendente.id}?'),
   botao('Descartar e abrir', [abrirX('estado.pendente.kind', 'estado.pendente.id')]), botao('Continuar editando', [def('pendente', 'null')]),
 ], { se: 'estado.pendente && ' + SUJO, props: { gap: 8 } })
-const seletorDeNos = (kind: 'tema' | 'pagina' | 'formulario' | 'cartaz'): Inst => pilha([
-  titulo(kind === 'tema' ? 'Temas' : kind === 'pagina' ? 'Páginas' : kind === 'cartaz' ? 'Cartazes' : 'Formulários', 3),
-  linha([
-    P('layout/linha', { repetir: { cada: `filtra(nos.nos, n => n.kind == ${q(kind)})`, como: 'n', chave: 'n.id' }, props: { gap: 4 }, filhos: [botao('{n.id} (personalizado)', [abrir(kind, 'n.id')], { se: `!(${SUJO})` }), botao('{n.id} (personalizado)', [pede(kind, 'n.id')], { se: SUJO })] }),
-    P('layout/linha', { repetir: { cada: `filtra(nos.base.${kind}, b => !comeca(b, "studio.") && tamanho(filtra(nos.nos, n => n.kind == ${q(kind)} && n.id == b)) == 0)`, como: 'b', chave: 'b' }, props: { gap: 4 }, filhos: [botao('{b} (padrão)', [abrir(kind, 'b')], { se: `!(${SUJO})` }), botao('{b} (padrão)', [pede(kind, 'b')], { se: SUJO })] }),
-  ], { props: { gap: 8 } }),
-], { gap: 4 })
+/** a seção de um tipo no menu lateral: os nós do tenant e os padrões da plataforma (o aberto fica marcado) e o botão de criar um novo */
+const secaoDeNos = (kind: 'tema' | 'pagina' | 'formulario' | 'cartaz'): Inst => {
+  const marca = (idExpr: string) => `{estado.aberto.kind == ${q(kind)} && estado.aberto.id == ${idExpr}}`
+  const meus = `filtra(nos.nos, n => n.kind == ${q(kind)})`, base = `filtra(nos.base.${kind}, b => !comeca(b, "studio.") && tamanho(filtra(nos.nos, n => n.kind == ${q(kind)} && n.id == b)) == 0)`
+  return pilha([
+    P('texto/pequeno', { props: { texto: kind === 'tema' ? 'Temas' : kind === 'pagina' ? 'Páginas' : kind === 'cartaz' ? 'Cartazes' : 'Formulários' } }),
+    P('nav/botao', { se: `!(${SUJO})`, repetir: { cada: meus, como: 'n', chave: 'n.id' }, props: { texto: '{n.id} (personalizado)', atual: marca('n.id') }, eventos: { aoClicar: [abrir(kind, 'n.id')] } }),
+    P('nav/botao', { se: SUJO, repetir: { cada: meus, como: 'n', chave: 'n.id' }, props: { texto: '{n.id} (personalizado)', atual: marca('n.id') }, eventos: { aoClicar: [pede(kind, 'n.id')] } }),
+    P('nav/botao', { se: `!(${SUJO})`, repetir: { cada: base, como: 'b', chave: 'b' }, props: { texto: '{b} (padrão)', atual: marca('b') }, eventos: { aoClicar: [abrir(kind, 'b')] } }),
+    P('nav/botao', { se: SUJO, repetir: { cada: base, como: 'b', chave: 'b' }, props: { texto: '{b} (padrão)', atual: marca('b') }, eventos: { aoClicar: [pede(kind, 'b')] } }),
+    botao(kind === 'pagina' ? 'Nova página' : kind === 'tema' ? 'Novo tema' : kind === 'cartaz' ? 'Novo cartaz' : 'Novo formulário', [def('criando', q(kind))], { props: { atual: `{estado.criando == ${q(kind)}}` } }),
+  ], { gap: 0 })
+}
 
 // ---- editor de tema ----------------------------------------------------------------------------------------------------------------------------
 const linhaToken = (): Inst => linha([
@@ -529,9 +535,6 @@ const historicoVista = (): Inst => pilha([
 ], { se: 'estado.no && estado.aberto.origem != "novo" && estado.aba == "historico"', gap: 8 })
 
 // ---- criar nós novos ----------------------------------------------------------------------------------------------------------------------------
-const criar = (kind: 'pagina' | 'tema' | 'formulario' | 'cartaz'): Inst => linha([
-  botao(kind === 'pagina' ? 'Nova página' : kind === 'tema' ? 'Novo tema' : kind === 'cartaz' ? 'Novo cartaz' : 'Novo formulário', [def('criando', q(kind))]),
-], { props: { gap: 4 } })
 const ACOES_CRIAR: Acao[] = [
     def('aberto', 'objeto([["kind", estado.criando], ["id", estado.novoId], ["origem", "novo"], ["seq", null]])'),
     def('no', 'estado.criando == "cartaz" ? objeto([["kind", "cartaz"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tamanho", "A5"], ["orientacao", "paisagem"], ["titulo", estado.novoId], ["fundo", objeto([["cor", [255, 255, 255]]])], ["fonte", objeto([["familia", "Montserrat"], ["peso", "negrito"]])], ["exemplo", objeto([])], ["elementos", [objeto([["tipo", "texto"], ["id", "titulo"], ["texto", "Novo cartaz"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.3]])], ["alinhaV", "meio"]])]]])]]) : estado.criando == "formulario" ? objeto([["kind", "formulario"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["titulo", estado.novoId], ["campos", [objeto([["nome", "nome"], ["tipo", "texto"], ["rotulo", "Nome"], ["obrigatorio", true]])]]])]]) : estado.criando == "pagina" ? objeto([["kind", "pagina"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["rota", estado.novaRota], ["raiz", objeto([["bloco", "layout/pilha"], ["id", "raiz"]])]])]]) : objeto([["kind", "tema"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tokens", objeto([["cor", objeto([["fundo", "#ffffff"], ["texto", "#111111"], ["primaria", "#1d4ed8"]])]])]])]])'),
@@ -539,7 +542,7 @@ const ACOES_CRIAR: Acao[] = [
 const formCriar = (): Inst => linha([
   P('entrada/texto', { props: { valor: '{estado.novoId}', rotulo: 'Identificador do novo nó', placeholder: 'identificador' }, eventos: { aoMudar: [def('novoId', 'evento')] } }),
   P('entrada/texto', { se: 'estado.criando == "pagina"', props: { valor: '{estado.novaRota}', rotulo: 'Rota da nova página', placeholder: '/rota' }, eventos: { aoMudar: [def('novaRota', 'evento')] } }),
-  botao('Criar', ACOES_CRIAR, { se: `estado.novoId != "" && !(${SUJO})` }),
+  botao('Criar', ACOES_CRIAR, { se: `estado.novoId != "" && !(${SUJO})`, props: { variante: 'primario' } }),
   botao('Criar', [def('confirmaCriar', 'true')], { se: `estado.novoId != "" && (${SUJO}) && !estado.confirmaCriar` }), // com alterações não salvas no editor, criar as descartaria: pede confirmação
   texto('Há alterações não salvas em {estado.aberto.id}; criar um novo nó as descarta.', { se: 'estado.confirmaCriar' }),
   botao('Descartar e criar', ACOES_CRIAR, { se: 'estado.novoId != "" && estado.confirmaCriar' }),
@@ -555,43 +558,51 @@ export const PAGINA = no('pagina', 'studio.app', {
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
-  raiz: pilha([
-    linha([
-      titulo('Polaris Studio', 1),
+  raiz: P('layout/painel', { filhos: [
+    // cabeçalho: a marca e as ações do rascunho aberto (desfazer, refazer, salvar, publicar, estado)
+    P('site/cabecalho', { props: { titulo: 'Polaris Studio', tituloNivel: 1, href: '/studio', menuRecolhivel: false }, slots: { acoes: [
       botao('Desfazer', desfaz, { se: 'estado.no && tamanho(estado.passado) > 0' }), botao('Refazer', refaz, { se: 'estado.no && tamanho(estado.futuro) > 0' }),
       botao('Salvar', [exe('salvar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}', no: '{estado.no}', baseSeq: '{estado.aberto.seq}' }, [
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
-      ], aviso('erro', 'erro'))], { se: 'estado.no' }),
-      botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))]),
-      botao('Imagens', [def('painel', 'estado.painel == "imagens" ? "" : "imagens"'), def('msgImagem', '""'), exe('ativos', {}, undefined, aviso('erro', 'erro'))]),
-      botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))]),
-      botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))]),
+      ], aviso('erro', 'erro'))], { se: 'estado.no', props: { variante: 'primario' } }),
+      botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))], { props: { variante: 'primario' } }),
       texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
-    ]),
-    ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),
-    linha([texto('Prévia:'), botao('claro', [def('modoPrevia', '"claro"'), atualizaPrevia], { se: 'estado.modoPrevia != "claro"' }), botao('escuro', [def('modoPrevia', '"escuro"'), atualizaPrevia], { se: 'estado.modoPrevia != "escuro"' }), texto('({estado.modoPrevia})')], { se: 'estado.no', props: { gap: 8 } }),
-    releasesVista(),
-    imagensVista(),
-    linha([criar('pagina'), criar('tema'), criar('formulario'), criar('cartaz')]), formCriar(),
-    barraPendente(),
-    seletorDeNos('pagina'),
-    seletorDeNos('tema'),
-    seletorDeNos('formulario'),
-    seletorDeNos('cartaz'),
-    diagramasVista(),
-    linha([
-      botao('Restaurar o padrão', [def('confirmaRestaurar', 'true')], { se: 'estado.no && estado.aberto.origem == "tenant" && !estado.confirmaRestaurar' }),
-      texto('Voltar {estado.aberto.id} ao padrão da plataforma? O histórico fica; vale no site após Publicar.', { se: 'estado.confirmaRestaurar' }),
-      botao('Sim, restaurar', [exe('restaurar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}' }, [...aviso('sucesso', '"Restaurado o padrão de " + estado.aberto.id + ". Publique para o site mudar."'), exe('nos'), def('no', 'null'), def('noSalvo', 'null'), def('aberto', 'null'), def('passado', '[]'), def('futuro', '[]'), def('confirmaRestaurar', 'false')], aviso('erro', 'erro'))], { se: 'estado.confirmaRestaurar' }),
-      botao('Cancelar', [def('confirmaRestaurar', 'false')], { se: 'estado.confirmaRestaurar' }),
-    ], { se: 'estado.no && estado.aberto.origem == "tenant"', props: { gap: 8 } }),
-    linha([botao('Editor', [def('aba', '"editor"')]), botao('Histórico e comentários', [def('aba', '"historico"')])], { se: 'estado.no && estado.aberto.origem != "novo"' }),
-    editorDePaginas(),
-    editorDeTema(),
-    editorDeFormularios(),
-    editorDeCartazes(),
-    historicoVista(),
-  ], { gap: 12 }),
+    ] } }),
+    // menu lateral: os nós de cada tipo (o aberto fica marcado) e as ferramentas
+    P('site/menu-lateral', { props: { rotulo: 'Navegação do Studio', textoAlternador: 'Nós e ferramentas', rotuloAlternador: 'Abrir os nós e as ferramentas' }, slots: { filhos: [
+      P('nav/menu', { props: { rotulo: 'Nós e ferramentas' }, filhos: [
+        pilha([
+          P('texto/pequeno', { props: { texto: 'Ferramentas' } }),
+          botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "releases"}' } }),
+          botao('Imagens', [def('painel', 'estado.painel == "imagens" ? "" : "imagens"'), def('msgImagem', '""'), exe('ativos', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "imagens"}' } }),
+          botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "diagramas"}' } }),
+        ], { gap: 0 }),
+        ...(['pagina', 'tema', 'formulario', 'cartaz'] as const).map(secaoDeNos),
+      ] }),
+    ] } }),
+    P('layout/principal', { filhos: [pilha([
+      ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),
+      pilha([titulo('Bem-vindo ao Studio', 2), texto('Escolha uma página, um tema, um formulário ou um cartaz no menu à esquerda para editar, ou abra uma ferramenta (releases, imagens, diagramas).')], { se: '!estado.no && !estado.painel && estado.criando == ""', props: { gap: 8 } }),
+      linha([texto('Prévia:'), botao('claro', [def('modoPrevia', '"claro"'), atualizaPrevia], { se: 'estado.modoPrevia != "claro"' }), botao('escuro', [def('modoPrevia', '"escuro"'), atualizaPrevia], { se: 'estado.modoPrevia != "escuro"' }), texto('({estado.modoPrevia})')], { se: 'estado.no', props: { gap: 8 } }),
+      releasesVista(),
+      imagensVista(),
+      formCriar(),
+      barraPendente(),
+      diagramasVista(),
+      linha([
+        botao('Restaurar o padrão', [def('confirmaRestaurar', 'true')], { se: 'estado.no && estado.aberto.origem == "tenant" && !estado.confirmaRestaurar' }),
+        texto('Voltar {estado.aberto.id} ao padrão da plataforma? O histórico fica; vale no site após Publicar.', { se: 'estado.confirmaRestaurar' }),
+        botao('Sim, restaurar', [exe('restaurar', { kind: '{estado.aberto.kind}', id: '{estado.aberto.id}' }, [...aviso('sucesso', '"Restaurado o padrão de " + estado.aberto.id + ". Publique para o site mudar."'), exe('nos'), def('no', 'null'), def('noSalvo', 'null'), def('aberto', 'null'), def('passado', '[]'), def('futuro', '[]'), def('confirmaRestaurar', 'false')], aviso('erro', 'erro'))], { se: 'estado.confirmaRestaurar' }),
+        botao('Cancelar', [def('confirmaRestaurar', 'false')], { se: 'estado.confirmaRestaurar' }),
+      ], { se: 'estado.no && estado.aberto.origem == "tenant"', props: { gap: 8 } }),
+      linha([botao('Editor', [def('aba', '"editor"')]), botao('Histórico e comentários', [def('aba', '"historico"')])], { se: 'estado.no && estado.aberto.origem != "novo"' }),
+      editorDePaginas(),
+      editorDeTema(),
+      editorDeFormularios(),
+      editorDeCartazes(),
+      historicoVista(),
+    ], { gap: 12 })] }),
+  ] }),
 })
 
 export const NOS_DO_STUDIO = [...DADOS, PAGINA]

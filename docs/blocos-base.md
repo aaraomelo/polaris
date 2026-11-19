@@ -1,6 +1,6 @@
 # Biblioteca base de blocos
 
-40 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
+43 blocos nativos (mais o `core/slot`). Cada um tem **schema** (`BLOCOS_BASE`, em `render/base.tsx`), **componente React** (oráculo) e **descritor DOM** (`vivo/blocos.ts`, usado pelo servidor e pelo cliente do runtime vivo; o emissor estático deriva dele). `test/blocos-base.test.tsx` confere, por bloco: React × HTML estático × HTML do vivo × montagem no cliente × hidratação (mesmos nós), e as props dinâmicas.
 
 | Grupo | Bloco | Props | Slots | Eventos |
 |---|---|---|---|---|
@@ -28,6 +28,9 @@
 | entrada | `entrada/arquivo` | `rotulo`, `aceita`, `tamanhoMax` (bytes, padrão 2 MB), `desabilitado` | | `aoEscolher` (`{nome, tipo, tamanho, dados base64}`), `aoRecusar` (`{erro}`) |
 | entrada | `entrada/caixa` | `marcado`, `desabilitado` | | `aoMudar` (booleano) |
 | nav | `nav/botao` | `texto`, `desabilitado` | | `aoClicar` |
+| layout | `layout/painel` | (só filhos) | | |
+| layout | `layout/lateral` | `rotulo` | | |
+| layout | `layout/principal` | (só filhos) | | |
 | form | `form/sugestoes-ao-vivo` | `url`, `titulo`, `descricao`, `imagem`, `limite`, `destino`, `nome`, `rotulo` | | |
 | form | `form/sugestoes` | (só filhos; `id` liga ao campo) | | |
 | form | `form/opcao` | `valor` | | |
@@ -99,3 +102,8 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 - **Miniatura**: o campo da entidade guarda o caminho de uma imagem hospedada (`/_polaris/img/<hash>.webp?w=160` é a versão de 160 px, `docs/imagens.md`). O exemplo `loja` ganhou o campo `imagem` na entidade `destaque`.
 - **Trecho achado**: as palavras digitadas aparecem **realçadas** (`<mark>`, cor primária, negrito e sublinhado) no título e na descrição, **sem diferenciar acento nem maiúsculas** ("acai" realça "Açaí"; o texto mantém o acento). Montado por pedaços de texto, nunca HTML. Só realça o que casa **por trecho**: quando a sugestão veio por aproximação (erro de digitação, "cafetera"), não há trecho igual e nada é realçado.
 - **Limites**: **precisa de JavaScript** (sem ele a lista fica oculta e a busca normal segue funcionando; use `sugestoes`, a lista nativa, se quiser algo sem JS); o termo vai na chamada pública da API (a taxa do gateway vale), então a rota precisa ser **pública** para visitantes; a lista só mostra o que a rota já expõe; uma barra com sugestões ao vivo por página para o teclado (os ids são gerados); campo novo em banco existente exige migração (o DDL gerado só cria tabelas novas; o ambiente local faz o `ALTER` sozinho).
+
+**Menu lateral e painel de aplicação**: `layout/painel` é a estrutura de uma **aplicação**: grade com o cabeçalho (`site/cabecalho`) no topo, a lateral (`site/menu-lateral`) à esquerda e o `layout/principal` à direita, na altura da janela, com **rolagem própria** na lateral e no conteúdo (largura da lateral: variável `--largura-lateral`, padrão 16 rem). O `site/menu-lateral` aceita `grupos` (`titulo` e `links`, `atual` na página aberta) e os slots `topo` e `filhos` (para botões e outros itens: no Studio, `nav/botao` com `atual` marca o item aberto). `<aside>` e `<nav>` com nome acessível, só variáveis do tema.
+- **Celular** (até 40 rem): vira uma coluna e a lateral fica atrás de um botão (`textoAlternador`, padrão "Seções"), com a mesma técnica do cabeçalho: caixa de marcar, sem JavaScript; com o roteador do gateway (ou o hospedeiro do Studio), escolher um item a recolhe.
+- **`nav/botao`** ganhou `atual` (`aria-current`) e **`variante`** (`primario` cheio, `secundario` contorno, `fantasma` só texto); **`site/cabecalho`** ganhou `tituloNivel` (a marca vira h1…h6, útil quando a aplicação não tem outro h1).
+- **Limites**: **um `site/menu-lateral` por página** (o `id` do alternador é fixo); a lateral não é recolhível no computador (largura fixa); o painel ocupa a janela inteira (`100vh`): não use dentro de outra página com rodapé.

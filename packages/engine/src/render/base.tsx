@@ -52,7 +52,7 @@ export const COMPONENTES_BASE: Componentes = {
     return createElement('div', { ...(id ? { id } : {}), 'data-polaris-formulario': f, ...(valores ? { 'data-polaris-valores': valores } : {}), ...(idioma ? { 'data-polaris-idioma': idioma } : {}), role: 'group', 'aria-busy': 'true' }, 'Carregando formulário…')
   },
   'nav/botao': ({ props, on, id }) =>
-    createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, onClick: () => on.aoClicar?.() }, txt(props.texto)),
+    createElement('button', { ...(id ? { id } : {}), type: 'button', disabled: props.desabilitado === true, ...(props.atual === true ? { 'aria-current': 'true' } : {}), ...(props.variante === 'secundario' || props.variante === 'fantasma' ? { 'data-variante': props.variante } : {}), onClick: () => on.aoClicar?.() }, txt(props.texto)),
   'entrada/texto': ({ props, on, id }) =>
     createElement('input', {
       ...(id ? { id } : {}), type: 'text', ...rotuloDe(props), value: txt(props.valor), placeholder: txt(props.placeholder), disabled: props.desabilitado === true,
@@ -64,6 +64,9 @@ export const COMPONENTES_BASE: Componentes = {
     return createElement('div', { ...(id ? { id } : {}), style: { display: 'grid', gridTemplateColumns: `repeat(${cols},minmax(0,1fr))`, ...(gap !== undefined ? { gap } : {}) } }, slots.filhos)
   },
   'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}) }, slots.filhos),
+  'layout/painel': ({ slots, id }) => createElement('div', { ...(id ? { id } : {}), 'data-painel': '' }, slots.filhos),
+  'layout/lateral': ({ props, slots, id }) => createElement('aside', { ...(id ? { id } : {}), 'data-lateral': '', ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Navegação lateral' } : props) }, slots.filhos),
+  'layout/principal': ({ slots, id }) => createElement('main', { ...(id ? { id } : {}), 'data-principal': '' }, slots.filhos),
   'nav/submenu': ({ slots, id }) => createElement('details', { ...(id ? { id } : {}), 'data-submenu': '' }, slots.filhos),
   'nav/submenu-titulo': ({ props, id }) => createElement('summary', { ...(id ? { id } : {}) }, txt(props.texto)),
   'nav/menu': ({ props, slots, id }) => createElement('nav', { ...(id ? { id } : {}), 'aria-label': typeof props.rotulo === 'string' && props.rotulo ? props.rotulo : 'Principal' }, slots.filhos),
@@ -133,10 +136,13 @@ export const BLOCOS_BASE = [
   bloco('entrada/area', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, linhas: { type: 'integer', minimum: 1, maximum: 40, default: 4 }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('midia/quadro', { props: { type: 'object', properties: { html: { type: 'string', maxLength: 262144, description: 'documento HTML completo a exibir' }, titulo: { type: 'string', maxLength: 200, description: 'nome acessível do quadro (obrigatório)' }, altura: { type: 'integer', minimum: 40, maximum: 4000, default: 320 } }, required: ['html', 'titulo'] } }),
   bloco('form/formulario', { props: { type: 'object', properties: { formulario: { type: 'string', pattern: '^[a-z0-9][a-z0-9._-]{0,127}$', description: 'id do nó `formulario` (do tenant ou da plataforma)' }, valores: { type: 'object', description: 'valores iniciais por campo (edição); só primitivos e listas deles' }, idioma: { type: 'string', pattern: '^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$', description: 'idioma das mensagens (padrão: o do visitante)' } }, required: ['formulario'] }, eventos: { aoEnviado: { payload: 'json' }, aoErro: { payload: 'json' } } }),
-  bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
+  bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' }, atual: { type: 'boolean', description: 'o item escolhido (aria-current), ex.: no menu lateral' }, variante: { type: 'string', enum: ['primario', 'secundario', 'fantasma'], description: 'primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
   bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
+  bloco('layout/painel', { slots: { filhos: {} } }),
+  bloco('layout/lateral', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: ROTULO } } }),
+  bloco('layout/principal', { slots: { filhos: {} } }),
   bloco('nav/submenu', { slots: { filhos: {} } }),
   bloco('nav/submenu-titulo', { props: { type: 'object', properties: { texto: { type: 'string', maxLength: 80 } } } }),
   bloco('nav/menu', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80 } } } }),

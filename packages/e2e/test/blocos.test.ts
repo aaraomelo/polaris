@@ -11,7 +11,7 @@ beforeAll(async () => { if (!CHROME) return; site = await criaSite(); nav = awai
 afterAll(async () => { await nav?.close(); await site?.fecha() })
 
 describe.skipIf(!CHROME)('os exemplos dos blocos, no navegador', () => {
-  it('há cenário para TODOS os exemplos do catálogo (o que o catálogo documenta é o que o E2E exercita)', () => { expect(site.cenarios.length).toBe(75); expect(new Set(site.cenarios.map((c) => c.interface)).size).toBeGreaterThanOrEqual(30); expect(site.cenarios.some((c) => c.modo === 'vivo')).toBe(true); expect(site.cenarios.some((c) => c.modo === 'estatico')).toBe(true) })
+  it('há cenário para TODOS os exemplos do catálogo (o que o catálogo documenta é o que o E2E exercita)', () => { expect(site.cenarios.length).toBe(80); expect(new Set(site.cenarios.map((c) => c.interface)).size).toBeGreaterThanOrEqual(30); expect(site.cenarios.some((c) => c.modo === 'vivo')).toBe(true); expect(site.cenarios.some((c) => c.modo === 'estatico')).toBe(true) })
 
   // os cenários são GERADOS do registry: um `it` por exemplo, com o nome do bloco e do exemplo
   it('cada exemplo de cada bloco passa em TODAS as verificações (console limpo, CSP estrita, hidratação igual ao servidor, acessível, sem overflow no celular, modo escuro)', async () => {

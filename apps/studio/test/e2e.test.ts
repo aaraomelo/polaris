@@ -33,7 +33,7 @@ afterAll(async () => { await nav?.close(); await app?.close(); await pg?.close()
 async function entra(usuario: string, tenant: 'a' | 'b' = 'a'): Promise<{ ctx: BrowserContext; p: Page }> {
   const ctx = await nav.newContext({ viewport: { width: 1400, height: 900 } }); await ctx.addCookies([{ name: 'u', value: `${usuario}|${tenant}`, url }])
   const p = await ctx.newPage(); p.on('console', (m) => { if (m.type() === 'error' && !/status of (400|409|422)/.test(m.text())) erros.push(`${usuario}: ${m.text()} (${m.location().url})`) }); p.on('pageerror', (e) => erros.push(`${usuario}: ${e.message}`))
-  await p.goto(`${url}/studio`); await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); return { ctx, p }
+  await p.goto(`${url}/studio`); await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); return { ctx, p }
 }
 const previa = (p: Page) => p.frameLocator('iframe[title="Pré-visualização da página"]')
 const linhaDe = (p: Page, id: string) => p.getByRole('button', { name: new RegExp(`#${id}$`) })
@@ -151,6 +151,21 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     for (const i of await p.getByRole('textbox').all()) expect(((await i.getAttribute('aria-label')) ?? (await i.getAttribute('id')) ?? '').length, 'campo sem nome acessível').toBeGreaterThan(0)
     for (const f of await p.locator('iframe').all()) expect((await f.getAttribute('title')) ?? '').not.toBe('')
     await p.getByRole('button', { name: 'home (personalizado)' }).focus(); await p.keyboard.press('Enter'); await expect(p.getByText('Página home')).toBeVisible()
+    await ctx.close()
+  })
+  it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
+    const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });
+    const box = async (sel: string) => (await p.locator(sel).first().boundingBox())!, cab = await box('[data-painel] > header'), lat = await box('[data-painel] > aside'), prin = await box('[data-painel] > main')
+    expect(lat.x).toBeLessThan(prin.x); expect(lat.y).toBeGreaterThanOrEqual(cab.y + cab.height - 1); expect(prin.y).toBeGreaterThanOrEqual(cab.y + cab.height - 1); expect(cab.width).toBeGreaterThan(1200) // cabeçalho no topo, lateral à esquerda, conteúdo à direita
+    expect(await p.getByRole('complementary', { name: 'Navegação do Studio' }).count()).toBe(1); expect(await p.getByRole('main').count()).toBe(1); expect(await p.getByRole('banner').count()).toBe(1)
+    expect(await p.locator('[data-painel] > aside button[aria-current]').count()).toBe(0); await p.getByRole('button', { name: 'home (personalizado)' }).click(); await p.getByText('Página home').waitFor();
+    expect(await p.locator('[data-painel] > aside button[aria-current]').allInnerTexts()).toEqual(['home (personalizado)']) // o nó aberto fica marcado
+    await p.getByRole('button', { name: 'Diagramas' }).click(); expect(await p.locator('[data-painel] > aside button[aria-current]').allInnerTexts()).toEqual(['Diagramas', 'home (personalizado)']) // ferramenta aberta também (as ferramentas ficam no topo do menu)
+    expect(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+    await p.setViewportSize({ width: 390, height: 800 }); const sw = p.getByRole('switch', { name: 'Abrir os nós e as ferramentas' })
+    expect(await p.locator('[data-painel] > aside nav').isVisible()).toBe(false); expect(await p.locator('[data-painel] > aside > label').isVisible()).toBe(true) // celular: só o botão
+    await p.locator('[data-painel] > aside > label').click(); expect(await sw.isChecked()).toBe(true); expect(await p.locator('[data-painel] > aside nav').isVisible()).toBe(true)
+    await p.getByRole('button', { name: 'Diagramas' }).click(); expect(await sw.isChecked()).toBe(false) // escolher um item recolhe a lateral
     await ctx.close()
   })
   it('isolamento: o tenant B não vê o tema do A', async () => {

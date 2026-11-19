@@ -85,3 +85,6 @@ O Studio também edita `kind: formulario` (campos, máscaras, validação, mensa
 
 ## Login
 O Studio usa a **sessão do cookie** do site (o cabeçalho `x-polaris-studio: 1` autoriza o cookie na API do Studio, que continua aceitando o token no fragmento em desenvolvimento). Sem sessão, manda ao `/entrar` e volta. As permissões vêm dos papéis `studio.*` do usuário (`docs/identidade.md`).
+
+## Redesenho (painel com menu lateral)
+O Studio agora é montado com os blocos do site: `layout/painel` com o **cabeçalho** (`site/cabecalho`: marca e as ações do rascunho aberto: Desfazer, Refazer, Salvar, Publicar e o estado) e o **menu lateral** (`site/menu-lateral`) com as **ferramentas** (Releases, Imagens, Diagramas) e uma seção por tipo de nó (páginas, temas, formulários, cartazes): os nós do tenant e os padrões, o **aberto marcado** (`aria-current`) e o botão de criar. O conteúdo fica no `layout/principal`. Os botões usam as **variantes** do tema (cheio só em Salvar, Publicar e Criar). O hospedeiro carrega o **CSS do tema** (`dist/tema.css`, gerado no build) e monta a página em `#polaris`, como o site do tenant. No celular a lateral recolhe atrás do botão "Nós e ferramentas".

@@ -15,4 +15,4 @@ export const pilha = (filhos: Inst[], o: Omit<Op, 'filhos'> & { gap?: number } =
 export const linha = (filhos: Inst[], o: Omit<Op, 'filhos'> & { gap?: number } = {}) => { const { gap, ...r } = o; return P('layout/linha', { ...r, props: { gap: gap ?? 8, alinha: 'centro', ...(r.props ?? {}) }, filhos }) }
 export const texto = (t: string, o: Op = {}) => P('texto/paragrafo', { ...o, props: { texto: t, ...(o.props ?? {}) } })
 export const titulo = (t: string, nivel = 2, o: Op = {}) => P('texto/titulo', { ...o, props: { texto: t, nivel, ...(o.props ?? {}) } })
-export const botao = (t: string, eventos: Acao[], o: Op = {}) => P('nav/botao', { ...o, props: { texto: t, ...(o.props ?? {}) }, eventos: { aoClicar: eventos } })
+export const botao = (t: string, eventos: Acao[], o: Op = {}) => P('nav/botao', { ...o, props: { texto: t, variante: 'secundario', ...(o.props ?? {}) }, eventos: { aoClicar: eventos } }) // secundário por padrão: só as ações principais (Salvar, Publicar, Criar…) são cheias

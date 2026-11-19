@@ -93,6 +93,7 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'nav/botao': { titulo: 'Botão', descricao: 'Botão de ação. `aoClicar` executa a lista de ações declarada na instância.', exemplos: [
     { titulo: 'Padrão', instancia: { bloco: 'nav/botao', props: { texto: 'Comprar' } } },
     { titulo: 'Desabilitado', instancia: { bloco: 'nav/botao', props: { texto: 'Esgotado', desabilitado: true } } },
+    { titulo: 'Secundário e fantasma', instancia: { bloco: 'layout/linha', slots: { filhos: [{ bloco: 'nav/botao', props: { texto: 'Cancelar', variante: 'secundario' } }, { bloco: 'nav/botao', props: { texto: 'Mais', variante: 'fantasma' } }] } } },
   ] },
   'layout/cabecalho': { titulo: 'Cabeçalho', descricao: 'Faixa do topo da página (`<header>`): ponto de referência para leitores de tela. `fixo` o mantém visível ao rolar.', exemplos: [
     { titulo: 'Com título e menu', instancia: { bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Minha loja' } }, { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início' } }] } }] } } },
@@ -127,6 +128,15 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   ] },
   'layout/rodape': { titulo: 'Rodapé', descricao: 'Faixa do fim da página (`<footer>`): ponto de referência para leitores de tela, com informações do site (contato, links, aviso legal).', exemplos: [
     { titulo: 'Com aviso', instancia: { bloco: 'layout/rodape', slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: '© 2026 Minha loja' } }] } } },
+  ] },
+  'layout/painel': { titulo: 'Painel (cabeçalho, lateral e conteúdo)', descricao: 'Estrutura de aplicação: uma grade com o cabeçalho (`site/cabecalho`) no topo, o menu lateral (`site/menu-lateral` ou `layout/lateral`) à esquerda e o `layout/principal` à direita; ocupa a altura da janela, a lateral e o conteúdo rolam sozinhos. Até 40 rem de largura vira uma coluna e a lateral fica atrás do botão "Seções".', exemplos: [
+    { titulo: 'Cabeçalho, lateral e conteúdo', instancia: { bloco: 'layout/painel', slots: { filhos: [{ bloco: 'layout/cabecalho', slots: { filhos: [{ bloco: 'texto/destaque', props: { texto: 'Painel' } }] } }, { bloco: 'layout/lateral', props: { rotulo: 'Seções' }, slots: { filhos: [{ bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início', atual: true } }, { bloco: 'nav/link', props: { href: '/a', texto: 'Relatórios' } }] } }] } }, { bloco: 'layout/principal', slots: { filhos: [{ bloco: 'texto/titulo', props: { texto: 'Visão geral', nivel: 1 } }] } }] } } },
+  ] },
+  'layout/lateral': { titulo: 'Lateral (menu lateral)', descricao: 'Coluna lateral (`<aside>`) do `layout/painel`, com nome acessível em `rotulo` (padrão "Navegação lateral"). Costuma levar um `nav/menu` com links ou botões (`atual` marca o escolhido). Prefira o composto `site/menu-lateral`, que já traz o botão que a recolhe no celular.', exemplos: [
+    { titulo: 'Com menu', instancia: { bloco: 'layout/lateral', props: { rotulo: 'Seções' }, slots: { filhos: [{ bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/link', props: { href: '/', texto: 'Início', atual: true } }] } }] } } },
+  ] },
+  'layout/principal': { titulo: 'Principal (conteúdo)', descricao: 'A área de conteúdo (`<main>`) do `layout/painel`: o ponto de referência "principal" para leitores de tela, com rolagem própria.', exemplos: [
+    { titulo: 'Com título', instancia: { bloco: 'layout/principal', slots: { filhos: [{ bloco: 'texto/titulo', props: { texto: 'Conteúdo', nivel: 1 } }] } } },
   ] },
   'nav/submenu': { titulo: 'Submenu (recolhível, sem JavaScript)', descricao: 'Grupo recolhível de links dentro de um `nav/menu`: um `<details>` nativo que leva um `nav/submenu-titulo` (o `<summary>`, que abre e fecha) seguido dos links. Funciona por teclado (Tab, Enter e Espaço) sem JavaScript; no computador a lista abre como um painel sob o título (onde o navegador suporta `::details-content`; nos outros, abre em linha), e no celular, em linha. Com o roteador do gateway, Esc e o clique fora o fecham.', exemplos: [
     { titulo: 'Com dois links', instancia: { bloco: 'nav/menu', slots: { filhos: [{ bloco: 'nav/submenu', slots: { filhos: [{ bloco: 'nav/submenu-titulo', props: { texto: 'Produtos' } }, { bloco: 'nav/link', props: { href: '/cafes', texto: 'Cafés' } }, { bloco: 'nav/link', props: { href: '/cha', texto: 'Chás' } }] } }] } } },

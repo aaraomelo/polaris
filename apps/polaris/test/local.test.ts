@@ -307,7 +307,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
     try {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
-      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Diagramas' }).click()
+      await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Diagramas' }).click()
       const quadro = p.frameLocator('iframe[title="Diagrama"]'); await quadro.locator('svg').waitFor()
       for (const t of ['Páginas', 'Formulários', 'Dados', 'Serviços', '/produtos', '/contato']) await quadro.getByText(t, { exact: true }).first().waitFor() // o fluxo do site de exemplo
       expect(await quadro.locator('path.lig').count()).toBeGreaterThan(5)
@@ -324,7 +324,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
       const srcdoc = () => p.evaluate(() => document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '')
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
-      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByLabel('Identificador do novo nó').fill('cartaz-teste'); await p.getByRole('button', { name: 'Criar' }).click()
+      await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByLabel('Identificador do novo nó').fill('cartaz-teste'); await p.getByRole('button', { name: 'Criar' }).click()
       await p.getByRole('heading', { name: 'Cartaz cartaz-teste' }).waitFor(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Novo cartaz'))
       expect(await srcdoc()).toContain('<svg'); expect(await p.locator('iframe[title="Pré-visualização do cartaz"]').getAttribute('sandbox')).toBe('') // isolado, sem scripts
       await p.getByRole('button', { name: '+ preco' }).click(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes(',99'))
@@ -337,7 +337,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Feijão'))
       await p.getByRole('button', { name: 'A6' }).click(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('size:419.528pt'))
       await p.getByRole('button', { name: 'Salvar' }).click(); await p.getByText('Salvo como versão 1').waitFor()
-      await p.reload(); await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'cartaz-teste (personalizado)' }).click()
+      await p.reload(); await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'cartaz-teste (personalizado)' }).click()
       await p.getByRole('heading', { name: 'Cartaz cartaz-teste' }).waitFor(); await p.waitForFunction(() => (document.querySelector('iframe[title="Pré-visualização do cartaz"]')?.getAttribute('srcdoc') ?? '').includes('Feijão'))
       expect(erros.filter((x) => !/status of (401|403)/.test(x)).join(' | ')).toBe('')
     } finally { await nav.close() }
@@ -374,7 +374,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       expect(await p.locator('section[data-imagem]').evaluate((e) => { const c = getComputedStyle(e), b = getComputedStyle(e.querySelector('a[data-botao=primario]')!), s = getComputedStyle(e.querySelector('a[data-botao=secundario]')!); return [c.color, b.backgroundColor, b.color, s.color] })).toEqual(['rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)', 'rgb(255, 255, 255)']) // sobre a foto: texto e botões legíveis em qualquer tema
       expect((await get(l, 'loja-outra', new URL(fundo.match(/url\("([^"]*)"\)/)![1]!).pathname)).status).toBe(200) // o seed põe a imagem em cada tenant (conteúdo igual, ativos separados)
       await p.goto(`${base}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
-      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Imagens' }).click(); await p.getByText('banner-de-exemplo · 1600×500').waitFor()
+      await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'Imagens' }).click(); await p.getByText('banner-de-exemplo · 1600×500').waitFor()
       const PIXEL = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
       await p.locator('input[type=file]').setInputFiles({ name: 'meu-pixel.png', mimeType: 'image/png', buffer: PIXEL }); await p.getByText('Imagem enviada.').waitFor(); await p.getByText('meu-pixel.png · 1×1 · 70 bytes').waitFor()
       const caminho = await p.locator('code', { hasText: '/_polaris/img/' }).first().innerText(); expect((await get(l, 'loja-demo', caminho)).status).toBe(200)
@@ -505,7 +505,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
     const l = await sobe(null), nav = await chromium.launch({ executablePath: CHROME!, args: ['--no-sandbox', '--host-resolver-rules=MAP *.polaris.localhost 127.0.0.1'] })
     try {
       const p = await nav.newPage(); await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/studio`); await p.waitForURL(/\/entrar\?volta=%2Fstudio$/)
-      await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click(); await p.waitForURL(/\/studio$/); await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByText('site.home (padrão)').waitFor()
+      await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click(); await p.waitForURL(/\/studio$/); await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByText('site.home (padrão)').waitFor()
     } finally { await nav.close() }
   })
   it('login real no site abre o Studio do tenant pela sessão (cookie): lista os temas e abre o padrão', async () => {
@@ -514,7 +514,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       const p = await nav.newPage(), erros: string[] = []; p.on('pageerror', (e) => erros.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()) })
       await p.goto(`http://loja-demo.polaris.localhost:${l.porta}/entrar?volta=%2Fstudio`); await p.getByLabel('E-mail').fill(emailLocal('loja-demo')); await p.getByLabel('Senha').fill(SENHA_LOCAL); await p.getByRole('button', { name: 'Entrar' }).click()
       await p.waitForURL(/\/studio$/); expect(p.url()).not.toContain('token') // o Studio usa a sessão do cookie: sem token na barra de endereço
-      await p.getByRole('heading', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'padrao (padrão)' }).click(); await p.getByText('Tokens do tema padrao').waitFor()
+      await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); await p.getByRole('button', { name: 'padrao (padrão)' }).click(); await p.getByText('Tokens do tema padrao').waitFor()
       await p.getByRole('button', { name: 'Salvar' }).click(); await p.getByText('Salvo como versão 1').waitFor()
       await p.getByRole('button', { name: 'Publicar' }).click(); await p.getByText(/Publicado: release 1/).waitFor() // o botão do Studio põe os rascunhos em produção
       await p.getByRole('button', { name: 'site.home (padrão)' }).click(); await p.locator('iframe').waitFor(); await p.waitForFunction(() => (document.querySelector('iframe')?.getAttribute('srcdoc') ?? '').includes('Bem-vindo à loja')) // a prévia de página com dados (sem isso ficava em branco)

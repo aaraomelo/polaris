@@ -175,6 +175,7 @@ export const ROTEADOR_JS = `(function (w, d) {
     for (var j = 0; j < sm.length; j++) if (alvo0 && !sm[j].contains(alvo0)) sm[j].removeAttribute('open'); // clique fora do submenu (ou num link dele, que navega) o fecha
     var l = abertos(), alvo = e.target; if (!l.length || !alvo) return;
     for (var i = 0; i < l.length; i++) {
+      var as = l[i].parentNode; if (as && as.hasAttribute && as.hasAttribute('data-lateral')) { if (as.contains(alvo) && alvo.closest && alvo.closest('button, a[href]')) l[i].checked = false; continue; } // lateral do painel (celular): escolher um item a recolhe
       var h = l[i].closest ? l[i].closest('header') : null; if (!h) continue;
       if (!h.contains(alvo) || (alvo.closest && alvo.closest('a[href^="#"]'))) l[i].checked = false;
     }

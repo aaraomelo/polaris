@@ -16,7 +16,7 @@ export const previsualiza: NonNullable<OpcoesStudio['previsualiza']> = (a) => {
 
 // O cliente do Studio (dist/) e a API de autoria. Quem AUTENTICA é injetado: no gateway, o JWT dele; em dev/teste, um stub. O servidor nunca decide identidade sozinho.
 export const DIST_PADRAO = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
-const ARQUIVOS: Record<string, string> = { 'studio.js': 'application/javascript; charset=utf-8', 'studio.css': 'text/css; charset=utf-8', 'studio.programa.json': 'application/json; charset=utf-8' }
+const ARQUIVOS: Record<string, string> = { 'studio.js': 'application/javascript; charset=utf-8', 'studio.css': 'text/css; charset=utf-8', 'tema.css': 'text/css; charset=utf-8', 'studio.programa.json': 'application/json; charset=utf-8' }
 // CSP do Studio: scripts só 'self' e SEM `unsafe-eval` (as expressões da plataforma viram closures; não há Ajv no navegador). `unsafe-inline` só em estilo: o runtime usa `style` em atributos
 // e o iframe da pré-visualização (`sandbox=""`, sem scripts) herda esta política e precisa do <style> do tema.
 export const CSP_STUDIO = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src data:; connect-src 'self'; frame-src 'self' about:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"

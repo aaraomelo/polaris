@@ -39,7 +39,7 @@ describe('blocos nativos do cabeçalho', () => {
 
 describe('site/cabecalho', () => {
   it('é um nó válido; a marca liga ao início, o menu tem um link por item e só o `atual` leva aria-current', () => {
-    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape', 'site.hero', 'site.busca']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape', 'site/hero', 'site/busca']))
+    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape', 'site.hero', 'site.busca', 'site.menu-lateral']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape', 'site/hero', 'site/busca', 'site/menu-lateral']))
     const d = ssr(pagina(cab({ titulo: 'Loja Demo', links: LINKS })))
     const h = d.querySelector('header')!; expect(h).toBeTruthy(); const marca = h.querySelector(':scope > a')!; expect(marca.getAttribute('href')).toBe('/'); expect(marca.textContent).toBe('Loja Demo')
     const links = [...h.querySelectorAll('nav a')]; expect(links.map((a) => a.textContent)).toEqual(['Início', 'Produtos', 'Contato']); expect(links.map((a) => a.getAttribute('href'))).toEqual(['/', '/produtos', '/contato'])
@@ -230,4 +230,32 @@ describe('sugestões ao vivo (form/sugestoes-ao-vivo)', () => {
     const u = ssr(pagina({ bloco: 'form/sugestoes-ao-vivo', props: { url: '/x', titulo: 'a b', imagem: '"><x', limite: 10 } })).querySelector('ul')!; expect([u.getAttribute('data-titulo'), u.hasAttribute('data-imagem') ? 'tem' : 'nao', u.getAttribute('data-limite')]).toEqual(['titulo', 'tem', '10']) // nome de campo malformado cai no padrão (`titulo`, `imagem`); nada do valor vai ao atributo
   })
   it('o tema estiliza a lista (fundo, borda, miniatura) só com variáveis do tema', () => { const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('ul[data-sugestoes-url]'); expect(css).toContain('[data-s-titulo]'); expect(css).toContain('ul[data-sugestoes-url] img{width:2.5rem') })
+})
+
+describe('menu lateral e painel (aplicação)', () => {
+  const GRUPOS = [{ titulo: 'Conta', links: [{ texto: 'Perfil', href: '/perfil', atual: true }, { texto: 'Segurança', href: '/seguranca' }] }, { titulo: 'Loja', links: [{ texto: 'Pedidos', href: '/pedidos' }] }]
+  const lateral = (props: Record<string, unknown>, slots?: Record<string, unknown>) => ssr(pagina({ bloco: 'site/menu-lateral', props, ...(slots ? { slots } : {}) } as never)).querySelector('aside')!
+  it('é um <aside> com nome acessível, o botão "Seções" (alternador + rótulo) e um grupo por título, com aria-current na página aberta', () => {
+    const a = lateral({ grupos: GRUPOS }); expect([a.getAttribute('aria-label'), a.hasAttribute('data-lateral')]).toEqual(['Navegação lateral', true])
+    expect([a.firstElementChild!.tagName, a.firstElementChild!.getAttribute('role'), a.firstElementChild!.id, a.children[1]!.getAttribute('for'), a.children[1]!.textContent]).toEqual(['INPUT', 'switch', 'lateral-alternador', 'lateral-alternador', 'Seções'])
+    const nav = a.querySelector('nav')!; expect(nav.getAttribute('aria-label')).toBe('Seções'); expect([...nav.querySelectorAll('small')].map((x) => x.textContent)).toEqual(['Conta', 'Loja']); expect([...nav.querySelectorAll('a')].map((x) => x.textContent)).toEqual(['Perfil', 'Segurança', 'Pedidos'])
+    expect([...nav.querySelectorAll('a[aria-current]')].map((x) => x.textContent)).toEqual(['Perfil'])
+  })
+  it('os slots `topo` (antes do menu) e `filhos` (depois) recebem o que a página mandar; sem grupos não há <nav>', () => {
+    const a = lateral({ grupos: GRUPOS }, { topo: [{ bloco: 'texto/titulo', props: { texto: 'Marca', nivel: 2 } }], filhos: [{ bloco: 'texto/paragrafo', props: { texto: 'Rodapé da lateral' } }] }); const k = [...a.children].map((c) => c.tagName.toLowerCase())
+    expect(k).toEqual(['input', 'label', 'h2', 'nav', 'p']); expect(lateral({}).querySelector('nav')).toBeNull()
+  })
+  it('o painel ligado: layout/painel > header + aside + main; o tema faz a grade e recolhe a lateral no celular', () => {
+    const d = ssr(pagina({ bloco: 'layout/painel', slots: { filhos: [{ bloco: 'site/cabecalho', props: { titulo: 'App' } }, { bloco: 'site/menu-lateral', props: { grupos: GRUPOS } }, { bloco: 'layout/principal', slots: { filhos: [{ bloco: 'texto/titulo', props: { texto: 'Olá', nivel: 1 } }] } }] } } as never)).querySelector('[data-painel]')!
+    expect([...d.children].map((c) => c.tagName.toLowerCase())).toEqual(['header', 'aside', 'main'])
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('[data-painel]{display:grid'); expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*\[data-lateral\]>input\[data-alternador\]:not\(:checked\)~\*:not\(label\)\{display:none\}/); expect(css).toContain('[data-lateral] nav button[aria-current]')
+  })
+  it('nav/botao com `atual` leva aria-current', () => { expect(ssr(pagina({ bloco: 'nav/botao', props: { texto: 'x', atual: true } })).querySelector('button')!.getAttribute('aria-current')).toBe('true'); expect(ssr(pagina({ bloco: 'nav/botao', props: { texto: 'x' } })).querySelector('button')!.hasAttribute('aria-current')).toBe(false) })
+})
+
+describe('título da marca como heading (tituloNivel)', () => {
+  it('com `tituloNivel` a marca é um h1 (dentro do link); sem ele, texto em destaque', () => {
+    const a = ssr(pagina(cab({ titulo: 'App', tituloNivel: 1 }))).querySelector('header > a')!; expect([a.querySelector('h1')!.textContent, a.querySelector('strong')]).toEqual(['App', null])
+    const b = ssr(pagina(cab({ titulo: 'App' }))).querySelector('header > a')!; expect([b.querySelector('h1'), b.querySelector('strong')!.textContent]).toEqual([null, 'App'])
+  })
 })
