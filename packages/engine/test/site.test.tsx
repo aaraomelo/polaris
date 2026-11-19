@@ -201,6 +201,6 @@ describe('submenu do cabeçalho (grupos)', () => {
     expect(ssr(pagina(cab({ titulo: 'x' }))).querySelector('header nav')).toBeNull()
   })
   it('o tema posiciona o painel com ::details-content (computador) e deixa em linha no celular', () => {
-    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('nav>details[data-submenu]::details-content{position:absolute'); expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*details-content\{position:static/)
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('nav>details[data-submenu][open]::details-content{position:absolute'); expect(css).toContain('details[data-submenu]:not([open])::details-content{display:none}'); // fechado: nada do painel (borda, padding) aparece expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*details-content\{position:static/)
   })
 })

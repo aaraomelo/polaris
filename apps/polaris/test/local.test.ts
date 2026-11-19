@@ -402,6 +402,7 @@ describe.skipIf(!CHROME)('ambiente local no navegador', () => {
       await p.setViewportSize({ width: 1200, height: 800 }); await p.goto(`http://loja-outra.polaris.localhost:${l.porta}/sobre`); await p.waitForFunction(() => (window as any).Polaris?.inicia)
       const sm = p.locator('header nav details[data-submenu]'), sumario = sm.locator('summary'), item = sm.getByRole('link', { name: 'Fale conosco' })
       expect(await sumario.innerText()).toBe('Ajuda'); expect(await sm.getAttribute('open')).toBeNull(); expect(await item.isVisible()).toBe(false) // fechado: os links não aparecem
+      expect(await sm.evaluate((e) => { const c = getComputedStyle(e, '::details-content'); return [c.display, c.borderTopWidth] })).toEqual(['none', '0px']) // fechado: nenhum painel vazio (borda ou fundo) sob o título
       await sumario.click(); expect(await sm.getAttribute('open')).not.toBeNull(); expect(await item.isVisible()).toBe(true)
       const [bs, bi] = await Promise.all([sumario.boundingBox(), item.boundingBox()]); expect(bi!.y).toBeGreaterThanOrEqual(bs!.y + bs!.height - 1) // o painel abre ABAIXO do título
       expect(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
