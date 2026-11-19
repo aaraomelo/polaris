@@ -152,14 +152,14 @@ const paletaDeBlocos = (): Inst => pilha([
     ...CATEGORIAS.map((c) => botaoCategoria(c.id, c.nome, c.icone, emPrefixos(c.prefixos))),
     botaoCategoria('outros', 'Outros', 'mais', `!(${emPrefixos(TODOS_PREFIXOS)})`),
     P('entrada/texto', { props: { valor: '{estado.buscaBloco}', rotulo: 'Buscar bloco', placeholder: 'Buscar bloco' }, eventos: { aoMudar: [def('buscaBloco', 'evento'), def('catBloco', '""')] } }),
-  ], { props: { gap: 6, quebra: true } }),
+  ], { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de blocos' } }),
   pilha([
-    P('layout/grade', { props: { colunas: 3, gap: 8 }, filhos: [
+    pilha([P('layout/grade', { props: { colunas: 3, gap: 8 }, filhos: [
       pilha([
         botao('{bd.titulo}', ADICIONA, { props: { icone: '{bd.icone}' } }),
         P('texto/pequeno', { props: { texto: '{bd.resumo ?? bd.id}' } }),
       ], { repetir: { cada: `filtra(blocos.blocos, bd => ${DA_LISTA})`, como: 'bd', chave: 'bd.id' }, gap: 2 }),
-    ] }),
+    ] })], { props: { papel: 'group', rotulo: 'Blocos da categoria' }, gap: 0 }),
     texto('Nenhum bloco para "{estado.buscaBloco}".', { se: `estado.buscaBloco != "" && tamanho(filtra(blocos.blocos, bd => ${DA_LISTA})) == 0` }),
   ], { se: 'estado.catBloco != "" || estado.buscaBloco != ""', gap: 6 }),
 ], { se: `estado.no && ${EH_PAGINA} && ${SELNO}`, gap: 6 })

@@ -33,7 +33,7 @@ const caixa = (direcao: 'column' | 'row'): Descritor => ({
   attrs: (p, id) => {
     const gap = num(p.gap)
     const alinha = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined
-    return { ...comId(id), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}` }
+    return { ...comId(id), ...(p.papel === 'toolbar' || p.papel === 'group' || p.papel === 'list' ? { role: p.papel } : {}), ...rotulo(p), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}` }
   },
 })
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))

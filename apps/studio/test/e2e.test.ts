@@ -175,6 +175,21 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect(p.getByRole('button', { name: 'Alerta', exact: true })).toHaveCount(0) // a lista fecha depois de adicionar
     await ctx.close()
   })
+  it('paleta de blocos pelo teclado: setas entre categorias, Baixo abre e entra na lista, setas entre itens, Enter adiciona, Esc fecha e volta à categoria; papéis ARIA', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('paleta-teclado'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/pt'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
+    await expect(p.getByText('Página paleta-teclado')).toBeVisible(); await linhaDe(p, 'raiz').click()
+    expect(await p.getByRole('toolbar', { name: 'Paleta de blocos' }).count()).toBe(1)
+    const foco = () => p.evaluate(() => (document.activeElement as HTMLElement | null)?.textContent?.trim() ?? ''); const cat = (n: string) => p.getByRole('button', { name: new RegExp(`^${n}\\s\\(\\d+\\)$`) })
+    await cat('Layout').focus(); await p.keyboard.press('ArrowRight'); expect(await foco()).toMatch(/^Texto\s\(/); await p.keyboard.press('ArrowLeft'); await p.keyboard.press('ArrowLeft'); expect(await foco()).toMatch(/^Outros\s\(/) // anda e dá a volta
+    await cat('Texto').focus(); await p.keyboard.press('ArrowDown'); await expect(p.getByRole('group', { name: 'Blocos da categoria' })).toBeVisible(); const nomes = await p.locator('[role=group][aria-label="Blocos da categoria"] button').allInnerTexts(); expect(nomes.length).toBe(6)
+    await expect.poll(foco).toBe(nomes[0]) // abre a lista e entra no primeiro item
+    await p.keyboard.press('ArrowRight'); await expect.poll(foco).toBe(nomes[1]); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe(nomes[2]); await p.keyboard.press('ArrowUp'); await p.keyboard.press('ArrowLeft'); await expect.poll(foco).toBe(nomes[0]); await p.keyboard.press('End'); await expect.poll(foco).toBe(nomes[5]); await p.keyboard.press('Home'); await expect.poll(foco).toBe(nomes[0])
+    await p.keyboard.press('Escape'); await expect(p.getByRole('group', { name: 'Blocos da categoria' })).toHaveCount(0); expect(await foco()).toMatch(/^Texto\s\(/) // Esc fecha e volta à categoria
+    await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe(nomes[1]); await p.keyboard.press('Enter'); await expect(p.getByRole('button', { name: /#b1$/ })).toBeVisible(); await expect(p.getByRole('group', { name: 'Blocos da categoria' })).toHaveCount(0) // Enter adiciona e fecha
+    await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('selo'); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe('Selo'); await p.keyboard.press('ArrowUp'); expect(await p.evaluate(() => (document.activeElement as HTMLElement).tagName)).toBe('INPUT') // da busca para a lista e de volta
+    await p.getByRole('textbox', { name: 'Buscar bloco' }).focus(); await p.keyboard.press('Escape'); await expect(p.getByRole('textbox', { name: 'Buscar bloco' })).toHaveValue('') // Esc limpa a busca
+    await ctx.close()
+  })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
     const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });
     const box = async (sel: string) => (await p.locator(sel).first().boundingBox())!, cab = await box('[data-painel] > header'), lat = await box('[data-painel] > aside'), prin = await box('[data-painel] > main')

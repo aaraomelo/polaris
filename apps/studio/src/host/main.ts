@@ -21,4 +21,28 @@ document.addEventListener('click', (e) => {
   const alvo = e.target as Element | null, lateral = alvo?.closest?.('aside[data-lateral]'); if (!lateral || !alvo!.closest('button, a[href]')) return
   const caixa = lateral.querySelector<HTMLInputElement>(':scope > input[data-alternador]'); if (caixa) caixa.checked = false
 })
+// Teclado da paleta de blocos (barra de ferramentas + lista): setas entre categorias e entre itens, Baixo abre/entra na lista, Esc fecha e volta à categoria. O resto (Enter, Espaço, Tab) é dos botões nativos.
+const BARRA = '[role=toolbar][aria-label="Paleta de blocos"]', LISTA = '[role=group][aria-label="Blocos da categoria"]'
+const itensDaLista = (): HTMLButtonElement[] => [...document.querySelectorAll<HTMLButtonElement>(`${LISTA} button`)]
+const categoriaAberta = (): HTMLButtonElement | null => document.querySelector<HTMLButtonElement>(`${BARRA} button[aria-current]`)
+function focaPrimeiroItem(tentativas = 12): void { const it = itensDaLista(); if (it.length) it[0]!.focus(); else if (tentativas > 0) requestAnimationFrame(() => focaPrimeiroItem(tentativas - 1)) }
+document.addEventListener('keydown', (e) => {
+  const alvo = e.target as HTMLElement | null; if (!alvo || e.altKey || e.ctrlKey || e.metaKey) return
+  const barra = alvo.closest(BARRA), lista = alvo.closest(LISTA)
+  if (barra && alvo.tagName === 'BUTTON') {
+    const cats = [...barra.querySelectorAll<HTMLButtonElement>('button')], i = cats.indexOf(alvo as HTMLButtonElement)
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); cats[(i + (e.key === 'ArrowRight' ? 1 : -1) + cats.length) % cats.length]!.focus() }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); if (alvo.getAttribute('aria-current') === 'true') focaPrimeiroItem(); else { (alvo as HTMLButtonElement).click(); focaPrimeiroItem() } }
+    else if (e.key === 'Escape') { const aberta = categoriaAberta(); if (aberta) { e.preventDefault(); aberta.click(); aberta.focus() } }
+  } else if (barra && alvo.tagName === 'INPUT') {
+    if (e.key === 'ArrowDown' && itensDaLista().length) { e.preventDefault(); itensDaLista()[0]!.focus() }
+    else if (e.key === 'Escape' && (alvo as HTMLInputElement).value) { e.preventDefault(); (alvo as HTMLInputElement).value = ''; alvo.dispatchEvent(new Event('input', { bubbles: true })) }
+  } else if (lista && alvo.tagName === 'BUTTON') {
+    const it = itensDaLista(), i = it.indexOf(alvo as HTMLButtonElement)
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); it[(i + 1) % it.length]!.focus() }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); if (i === 0 && e.key === 'ArrowUp') (categoriaAberta() ?? document.querySelector<HTMLElement>(`${BARRA} input`))?.focus(); else it[(i - 1 + it.length) % it.length]!.focus() }
+    else if (e.key === 'Home') { e.preventDefault(); it[0]!.focus() } else if (e.key === 'End') { e.preventDefault(); it[it.length - 1]!.focus() }
+    else if (e.key === 'Escape') { const aberta = categoriaAberta(); if (aberta) { e.preventDefault(); aberta.click(); aberta.focus() } else { const b = document.querySelector<HTMLInputElement>(`${BARRA} input`); if (b) { e.preventDefault(); b.value = ''; b.dispatchEvent(new Event('input', { bubbles: true })); b.focus() } } }
+  }
+})
 void inicia()

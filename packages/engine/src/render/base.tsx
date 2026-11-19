@@ -21,9 +21,12 @@ const num = (v: unknown): number | undefined => (typeof v === 'number' && Number
 const tomDe = (p: Record<string, unknown>): string => (typeof p.tom === 'string' && ['neutro', 'sucesso', 'alerta', 'erro'].includes(p.tom) ? p.tom : 'neutro')
 const ALINHA: Record<string, CSSProperties['alignItems']> = { inicio: 'flex-start', centro: 'center', fim: 'flex-end', esticar: 'stretch' }
 
+/** `papel` (toolbar, group ou list) e `rotulo` de uma caixa: dão ao grupo de itens um nome e um papel para leitores de tela e para o teclado */
+const PAPEIS_CAIXA = ['toolbar', 'group', 'list'] as const
+const papelDe = (props: Record<string, unknown>): Record<string, string> => ({ ...((PAPEIS_CAIXA as readonly unknown[]).includes(props.papel) ? { role: props.papel as string } : {}), ...(typeof props.rotulo === 'string' && props.rotulo.trim() ? { 'aria-label': props.rotulo.trim().slice(0, 200) } : {}) })
 const caixa = (direcao: 'column' | 'row'): Componentes[string] => ({ props, slots, id }) =>
   createElement('div', {
-    ...(id ? { id } : {}),
+    ...(id ? { id } : {}), ...papelDe(props),
     style: { display: 'flex', flexDirection: direcao, ...(num(props.gap) !== undefined ? { gap: num(props.gap) } : {}), ...(typeof props.alinha === 'string' && ALINHA[props.alinha] ? { alignItems: ALINHA[props.alinha] } : {}), ...(props.quebra === true ? { flexWrap: 'wrap' } : {}) },
   }, slots.filhos)
 
@@ -133,8 +136,8 @@ export const COMPONENTES_BASE: Componentes = {
 const bloco = (iface: string, spec: object = {}) => ({ kind: 'bloco', id: iface.replace('/', '.'), versao: '1.0.0', estatuto: 'publicado', spec: { interface: iface, ...(DOCS_BASE[iface] ?? {}), ...spec } })
 
 export const BLOCOS_BASE = [
-  bloco('layout/pilha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap)' } } } }),
-  bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura' } } } }),
+  bloco('layout/pilha', { slots: { filhos: {} }, props: { type: 'object', properties: { papel: { enum: ['toolbar', 'group', 'list'], description: 'papel ARIA do grupo (barra de ferramentas, grupo ou lista)' }, rotulo: { type: 'string', maxLength: 200, description: 'nome acessível do grupo (aria-label)' }, gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap)' } } } }),
+  bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { papel: { enum: ['toolbar', 'group', 'list'], description: 'papel ARIA do grupo (barra de ferramentas, grupo ou lista)' }, rotulo: { type: 'string', maxLength: 200, description: 'nome acessível do grupo (aria-label)' }, gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura' } } } }),
   bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6, default: 1 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 }, tamanhos: { type: 'string', maxLength: 200 } }, required: ['src'] } }),

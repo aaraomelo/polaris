@@ -1197,7 +1197,9 @@ Coloca os filhos lado a lado (flex row).
 |---|---|---|---|---|
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  |  |
 | `gap` | número ≥ 0 | não |  |  |
+| `papel` | "toolbar" \| "group" \| "list" | não |  | papel ARIA do grupo (barra de ferramentas, grupo ou lista) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
 
 **Slots**
 
@@ -1330,7 +1332,9 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
 |---|---|---|---|---|
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  |  |
 | `gap` | número ≥ 0 | não |  |  |
+| `papel` | "toolbar" \| "group" \| "list" | não |  | papel ARIA do grupo (barra de ferramentas, grupo ou lista) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
 
 **Slots**
 

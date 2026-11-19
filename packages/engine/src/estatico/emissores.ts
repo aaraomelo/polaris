@@ -18,7 +18,8 @@ const idAttr = (id: string | undefined) => (id ? ` id="${escHtml(id)}"` : '')
 const caixa = (direcao: 'column' | 'row'): Emissor => ({ props, filhos, id }) => {
   const gap = num(props.gap)
   const alinha = typeof props.alinha === 'string' ? ALINHA[props.alinha] : undefined
-  return `<div${idAttr(id)} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${props.quebra === true ? ';flex-wrap:wrap' : ''}">${filhos.filhos ?? ''}</div>`
+  const papel = props.papel === 'toolbar' || props.papel === 'group' || props.papel === 'list' ? ` role="${props.papel}"` : '', nome = typeof props.rotulo === 'string' && props.rotulo.trim() ? ` aria-label="${escHtml(props.rotulo.trim().slice(0, 200))}"` : ''
+  return `<div${idAttr(id)}${papel}${nome} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${props.quebra === true ? ';flex-wrap:wrap' : ''}">${filhos.filhos ?? ''}</div>`
 }
 
 const MAO: Emissores = {

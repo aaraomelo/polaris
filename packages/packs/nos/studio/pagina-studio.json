@@ -4492,7 +4492,9 @@
                    "props": {
                     "gap": 6,
                     "alinha": "centro",
-                    "quebra": true
+                    "quebra": true,
+                    "papel": "toolbar",
+                    "rotulo": "Paleta de blocos"
                    },
                    "slots": {
                     "filhos": [
@@ -4766,107 +4768,119 @@
                    "slots": {
                     "filhos": [
                      {
-                      "bloco": "layout/grade",
+                      "bloco": "layout/pilha",
                       "props": {
-                       "colunas": 3,
-                       "gap": 8
+                       "gap": 0,
+                       "papel": "group",
+                       "rotulo": "Blocos da categoria"
                       },
                       "slots": {
                        "filhos": [
                         {
-                         "bloco": "layout/pilha",
-                         "repetir": {
-                          "cada": "filtra(blocos.blocos, bd => estado.buscaBloco != \"\" ? contem(semAcentos(minusculas(bd.id + \" \" + bd.titulo + \" \" + (bd.resumo ?? \"\"))), semAcentos(minusculas(estado.buscaBloco))) : estado.catBloco == \"outros\" ? !(algum([\"layout/\", \"texto/\", \"nav/\", \"form/\", \"entrada/\", \"midia/\", \"computacao/\", \"lista/\", \"tabela/\", \"feedback/\", \"site/\"], pf => comeca(bd.id, pf))) : algum(obter(objeto([[\"layout\", [\"layout/\"]], [\"texto\", [\"texto/\"]], [\"nav\", [\"nav/\"]], [\"form\", [\"form/\"]], [\"entrada\", [\"entrada/\"]], [\"midia\", [\"midia/\", \"computacao/\"]], [\"dados\", [\"lista/\", \"tabela/\"]], [\"feedback\", [\"feedback/\"]], [\"site\", [\"site/\"]]]), [estado.catBloco]) ?? [], pf => comeca(bd.id, pf)))",
-                          "como": "bd",
-                          "chave": "bd.id"
-                         },
+                         "bloco": "layout/grade",
                          "props": {
-                          "gap": 2
+                          "colunas": 3,
+                          "gap": 8
                          },
                          "slots": {
                           "filhos": [
                            {
-                            "bloco": "nav/botao",
-                            "props": {
-                             "texto": "{bd.titulo}",
-                             "variante": "secundario",
-                             "icone": "{bd.icone}"
+                            "bloco": "layout/pilha",
+                            "repetir": {
+                             "cada": "filtra(blocos.blocos, bd => estado.buscaBloco != \"\" ? contem(semAcentos(minusculas(bd.id + \" \" + bd.titulo + \" \" + (bd.resumo ?? \"\"))), semAcentos(minusculas(estado.buscaBloco))) : estado.catBloco == \"outros\" ? !(algum([\"layout/\", \"texto/\", \"nav/\", \"form/\", \"entrada/\", \"midia/\", \"computacao/\", \"lista/\", \"tabela/\", \"feedback/\", \"site/\"], pf => comeca(bd.id, pf))) : algum(obter(objeto([[\"layout\", [\"layout/\"]], [\"texto\", [\"texto/\"]], [\"nav\", [\"nav/\"]], [\"form\", [\"form/\"]], [\"entrada\", [\"entrada/\"]], [\"midia\", [\"midia/\", \"computacao/\"]], [\"dados\", [\"lista/\", \"tabela/\"]], [\"feedback\", [\"feedback/\"]], [\"site\", [\"site/\"]]]), [estado.catBloco]) ?? [], pf => comeca(bd.id, pf)))",
+                             "como": "bd",
+                             "chave": "bd.id"
                             },
-                            "eventos": {
-                             "aoClicar": [
+                            "props": {
+                             "gap": 2
+                            },
+                            "slots": {
+                             "filhos": [
                               {
-                               "acao": "definir",
-                               "estado": "chaveEdicao",
-                               "valor": "\"\""
+                               "bloco": "nav/botao",
+                               "props": {
+                                "texto": "{bd.titulo}",
+                                "variante": "secundario",
+                                "icone": "{bd.icone}"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "chaveEdicao",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "passado",
+                                  "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "futuro",
+                                  "valor": "[]"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + estado.contador]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpDentro",
+                                  "valor": "tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpCaminho",
+                                  "valor": "estado.tmpDentro ? concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]) : concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpPos",
+                                  "valor": "estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "no",
+                                  "valor": "com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "contador",
+                                  "valor": "estado.contador + 1"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "catBloco",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "buscaBloco",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
+                               }
                               },
                               {
-                               "acao": "definir",
-                               "estado": "passado",
-                               "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "futuro",
-                               "valor": "[]"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "tmpBloco",
-                               "valor": "mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + estado.contador]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "tmpDentro",
-                               "valor": "tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "tmpCaminho",
-                               "valor": "estado.tmpDentro ? concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]) : concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1))"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "tmpPos",
-                               "valor": "estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "no",
-                               "valor": "com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "contador",
-                               "valor": "estado.contador + 1"
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "catBloco",
-                               "valor": "\"\""
-                              },
-                              {
-                               "acao": "definir",
-                               "estado": "buscaBloco",
-                               "valor": "\"\""
-                              },
-                              {
-                               "acao": "executar",
-                               "dados": "previa",
-                               "args": {
-                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                "modo": "{estado.modoPrevia}"
+                               "bloco": "texto/pequeno",
+                               "props": {
+                                "texto": "{bd.resumo ?? bd.id}"
                                }
                               }
                              ]
-                            }
-                           },
-                           {
-                            "bloco": "texto/pequeno",
-                            "props": {
-                             "texto": "{bd.resumo ?? bd.id}"
                             }
                            }
                           ]

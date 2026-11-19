@@ -116,3 +116,4 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 - **Limites**: traço fixo (1,75 px na grade de 24: em tamanhos pequenos fica mais fino); só uma cor mais o acento; sem animação; o CSS do tema cresce ~16 KB (cacheado por hash); um nome bem formado que não existe não pinta nada (no `nome` literal, a compilação recusa).
 
 **`quebra` em `layout/linha` e `layout/pilha`**: `true` acrescenta `flex-wrap: wrap` (a linha passa para outra linha quando falta espaço, em vez de estourar a largura). O padrão continua sem quebra.
+**`papel` e `rotulo` em `layout/linha` e `layout/pilha`**: `papel` (`toolbar`, `group` ou `list`) e `rotulo` (nome acessível) viram `role` e `aria-label` do grupo; sem eles nada muda.
