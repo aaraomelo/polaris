@@ -5545,7 +5545,7 @@
                             "bloco": "nav/botao",
                             "se": "x.v == null",
                             "props": {
-                             "texto": "{x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}",
+                             "texto": "{((acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).titulo ?? x.no.bloco) + (x.no.id ? \" #\" + x.no.id : \"\")}",
                              "variante": "secundario",
                              "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
                              "atual": "{estado.selElemento == null && igual(x.caminho, estado.sel)}",
@@ -9677,7 +9677,7 @@
                                "bloco": "nav/botao",
                                "se": "x.v == null",
                                "props": {
-                                "texto": "{x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}",
+                                "texto": "{((acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).titulo ?? x.no.bloco) + (x.no.id ? \" #\" + x.no.id : \"\")}",
                                 "variante": "secundario",
                                 "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
                                 "atual": "{estado.selElemento == null && igual(x.caminho, estado.sel)}",

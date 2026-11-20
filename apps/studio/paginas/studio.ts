@@ -194,7 +194,7 @@ const arvore = (): Inst => pilha([
   pilha([
     linha([
       setaDaLinha(`x.v == null && (${TEM_FILHOS} || ${DEFX}.composto == true)`), marcadorDaLinha(`x.v == null && !(${TEM_FILHOS} || ${DEFX}.composto == true)`),
-      botao('{x.no.bloco + (x.no.id ? " #" + x.no.id : "")}', [def('sel', 'x.caminho'), def('selElemento', 'null'), def('abaCel', '"props"'), atualizaPrevia], { se: 'x.v == null', props: { icone: `{${DEFX}.icone}`, atual: '{estado.selElemento == null && igual(x.caminho, estado.sel)}', variante: 'secundario', alvo: `{${ALVO_DO_BLOCO}}` } }),
+      botao(`{(${DEFX}.titulo ?? x.no.bloco) + (x.no.id ? " #" + x.no.id : "")}`, [def('sel', 'x.caminho'), def('selElemento', 'null'), def('abaCel', '"props"'), atualizaPrevia], { se: 'x.v == null', props: { icone: `{${DEFX}.icone}`, atual: '{estado.selElemento == null && igual(x.caminho, estado.sel)}', variante: 'secundario', alvo: `{${ALVO_DO_BLOCO}}` } }),
       // as ações do bloco selecionado ficam num grupo que quebra de linha por dentro (a linha do bloco não estoura sobre a prévia)
       linha(botoesDaSelecao(), { se: 'x.v == null && igual(x.caminho, estado.sel) && estado.selElemento == null', props: { gap: 2, quebra: true, cresce: true } }),
       setaDaLinha('x.v != null && x.v.tem'), marcadorDaLinha('x.v != null && !x.v.tem'),
