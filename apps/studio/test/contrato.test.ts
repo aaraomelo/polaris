@@ -35,6 +35,16 @@ describe('o hospedeiro e o contrato `servico studio`', () => {
     const prog = { pagina: { dados: { x: { id: 'd.x' }, y: { id: 'd.y' } }, fontes: { 'd.x': { fonte: { servico: 'studio', operacao: 'listarNos' }, carregar: 'auto' }, 'd.y': { fonte: { servico: 'outro', operacao: 'o' }, carregar: 'manual' } } } }
     const c = criaCarregador(prog as never, { fetch: f, token: 't' }); expect(await c({ dados: 'x', args: {}, estado: {} })).toEqual({ ok: 1 }); await expect(c({ dados: 'y', args: {}, estado: {} })).rejects.toThrow(/não é do serviço studio/); await expect(c({ dados: 'z', args: {}, estado: {} })).rejects.toThrow(); await expect(c({ dados: 'constructor', args: {}, estado: {} })).rejects.toThrow()
   })
+  it('a prévia espera um instante: uma rajada de chamadas faz UMA requisição (a última), as superadas devolvem ausente; operações comuns saem na hora', async () => {
+    const vistos: string[] = []
+    const f = (async (url: string, init: any) => { vistos.push(String(JSON.parse(init.body ?? '{}').no ?? url)); return new Response(JSON.stringify({ ok: true }), { status: 200 }) }) as never
+    const prog = { pagina: { dados: { p: { id: 'd.p' }, l: { id: 'd.l' } }, fontes: { 'd.p': { fonte: { servico: 'studio', operacao: 'previsualizar' }, carregar: 'manual' }, 'd.l': { fonte: { servico: 'studio', operacao: 'listarNos' }, carregar: 'auto' } } } }
+    const c = criaCarregador(prog as never, { fetch: f, token: 't' })
+    const rajada = ['a', 'b', 'c'].map((no) => c({ dados: 'p', args: { no }, estado: {} }))
+    expect(await Promise.all(rajada)).toEqual([undefined, undefined, { ok: true }]); expect(vistos).toEqual(['c'])
+    vistos.length = 0; expect(await c({ dados: 'l', args: {}, estado: {} })).toEqual({ ok: true }); expect(vistos).toEqual(['/studio/nos']) // sem atraso
+    expect(await c({ dados: 'p', args: { no: 'd' }, estado: {} })).toEqual({ ok: true }); expect(vistos).toEqual(['/studio/nos', 'd']) // chamadas separadas no tempo não se fundem
+  })
   it('toda `dados` do pack studio aponta para uma operação que existe no contrato', () => {
     const nos = JSON.parse(readFileSync(new URL('../../../packages/packs/nos/studio/pagina-studio.json', import.meta.url), 'utf8')) as Array<{ kind: string; id: string; spec: { fonte?: { servico?: string; operacao?: string } } }>
     const dados = nos.filter((n) => n.kind === 'dados'); expect(dados.length).toBeGreaterThan(8)

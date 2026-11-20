@@ -59,9 +59,20 @@ export async function chama(operacao: string, args: Record<string, unknown>, o: 
 /** o carregador que o runtime usa na ação `executar`: descobre a operação pela declaração do dado no programa */
 type ProgramaDados = { pagina: { dados: Record<string, { id: string }>; fontes: Record<string, { fonte: { servico?: string; operacao?: string }; carregar: 'auto' | 'manual' }> } }
 export const fonteDe = (programa: ProgramaDados, nome: string) => { const d = Object.hasOwn(programa.pagina.dados, nome) ? programa.pagina.dados[nome] : undefined; return d && Object.hasOwn(programa.pagina.fontes, d.id) ? programa.pagina.fontes[d.id] : undefined }
-export const criaCarregador = (programa: ProgramaDados, o: Parameters<typeof chama>[2] = {}): Carregador =>
-  async ({ dados, args }) => {
+/** operações que o editor dispara a cada tecla: esperam um instante (só a ÚLTIMA chamada de uma rajada sai) e a requisição anterior ainda em voo é cancelada. A chamada superada devolve `undefined` e é ignorada pelo runtime (a ação `executar` só aplica a resposta da última). */
+export const ATRASO_MS: Record<string, number> = { previsualizar: 150 }
+export const criaCarregador = (programa: ProgramaDados, o: Parameters<typeof chama>[2] = {}): Carregador => {
+  const pendente = new Map<string, { timer: ReturnType<typeof setTimeout>; fim: (v: unknown) => void; abre: AbortController }>()
+  return async ({ dados, args }) => {
     const f = fonteDe(programa, dados)?.fonte
     if (!f || f.servico !== 'studio' || !f.operacao) throw new ErroStudio(0, 'dado_desconhecido', `o dado ${dados} não é do serviço studio`)
-    return chama(f.operacao, args, o)
+    const atraso = Object.hasOwn(ATRASO_MS, f.operacao) ? ATRASO_MS[f.operacao]! : 0
+    if (!atraso) return chama(f.operacao, args, o)
+    const anterior = pendente.get(f.operacao); if (anterior) { clearTimeout(anterior.timer); anterior.abre.abort(); anterior.fim(undefined) }
+    const abre = new AbortController(), base = o.fetch ?? fetch, op = f.operacao
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { chama(op, args, { ...o, fetch: (u, init) => base(u, { ...init, signal: abre.signal }) }).then(resolve, (e) => (abre.signal.aborted ? resolve(undefined) : reject(e))).finally(() => { if (pendente.get(op)?.abre === abre) pendente.delete(op) }) }, atraso)
+      pendente.set(op, { timer, fim: resolve, abre })
+    })
   }
+}
