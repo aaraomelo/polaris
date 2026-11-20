@@ -39,7 +39,8 @@ async function entra(usuario: string, tenant: 'a' | 'b' = 'a'): Promise<{ ctx: B
 }
 const previa = (p: Page) => p.frameLocator('iframe[title="Pré-visualização da página"]')
 /** a paleta horizontal: abre a categoria (botão "Texto (n)") e escolhe o bloco pelo título */
-const adiciona = async (p: Page, categoria: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${categoria}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
+const abrePaleta = async (p: Page) => { if (!(await p.getByRole('toolbar', { name: 'Paleta de blocos' }).isVisible())) await p.getByRole('button', { name: 'Adicionar bloco' }).click() }
+const adiciona = async (p: Page, categoria: string, titulo: string) => { await abrePaleta(p); await p.getByRole('button', { name: new RegExp(`^${categoria}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
 /** a paleta de campos do formulário: abre a categoria e escolhe o campo pelo título */
 const campo = async (p: Page, categoria: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${categoria}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
 const linhaDe = (p: Page, id: string) => p.getByRole('button', { name: new RegExp(`#${id}$`) })
@@ -162,8 +163,9 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   it('paleta de blocos: categorias na horizontal com contagem, lista com título e resumo, busca em todas, entra DENTRO do que aceita filhos e DEPOIS do que não aceita', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('paleta-teste'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/paleta'); await p.getByRole('button', { name: 'Criar', exact: true }).click() // página nova e vazia: o teste não depende do que os outros deixaram nas páginas de exemplo
     await expect(p.getByText('Página paleta-teste')).toBeVisible(); await linhaDe(p, 'raiz').click()
+    expect(await p.getByRole('toolbar', { name: 'Paleta de blocos' }).count()).toBe(0); await p.getByRole('button', { name: 'Adicionar bloco' }).click(); await expect(p.getByRole('button', { name: 'Adicionar bloco' })).toHaveAttribute('aria-expanded', 'true') // a paleta começa fechada e abre sob demanda
     const cats = await p.getByRole('button', { name: /^(Layout|Texto|Navegação|Formulário|Entrada|Mídia|Dados|Feedback|Site|Outros)\s\(\d+\)$/ }).allInnerTexts(); expect(cats.map((c) => c.replace(/\s\(\d+\)$/, ''))).toEqual(['Layout', 'Texto', 'Navegação', 'Formulário', 'Entrada', 'Mídia', 'Dados', 'Feedback', 'Site', 'Outros'])
-    await expect(p.getByText('Adicionar dentro de layout/pilha')).toBeVisible()
+    await expect(p.getByText('dentro de Pilha', { exact: true })).toBeVisible()
     const boxes = await Promise.all(cats.map(async (_, i) => (await p.getByRole('button', { name: /^(Layout|Texto|Navegação|Formulário|Entrada|Mídia|Dados|Feedback|Site|Outros)\s\(\d+\)$/ }).nth(i).boundingBox())!)); expect(new Set(boxes.map((b) => Math.round(b!.y))).size).toBeLessThanOrEqual(2) // lado a lado (uma linha, no máximo quebra uma vez)
     await p.setViewportSize({ width: 1000, height: 800 }); expect(await p.evaluate(() => { const m = document.querySelector('main')!; return m.scrollWidth <= m.clientWidth })).toBe(true); await p.setViewportSize({ width: 1280, height: 720 }) // a paleta quebra em outra linha em vez de rolar o conteúdo para o lado
     await expect(p.getByRole('button', { name: 'Pilha', exact: true })).toHaveCount(0) // nada aberto: a lista longa de antes sumiu
@@ -173,7 +175,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('zzzqqq'); await expect(p.getByText('Nenhum bloco para "zzzqqq".')).toBeVisible(); await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('')
     const ids = async () => (await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => /#(\w+)$/.exec(t)?.[1]).filter(Boolean)
     await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Texto', 'Título') // dois filhos dentro do raiz (o raiz continua selecionado)
-    const [primeiro, segundo] = (await ids()).filter((x) => x !== 'raiz'); expect(await ids()).toEqual(['raiz', primeiro, segundo]); await linhaDe(p, primeiro!).click();  await expect(p.getByText('Adicionar depois de texto/paragrafo')).toBeVisible(); const antes = await ids(); await adiciona(p, 'Texto', 'Texto pequeno'); const depois = await ids()
+    const [primeiro, segundo] = (await ids()).filter((x) => x !== 'raiz'); expect(await ids()).toEqual(['raiz', primeiro, segundo]); await linhaDe(p, primeiro!).click();  await abrePaleta(p); await expect(p.getByText('depois de Parágrafo', { exact: true })).toBeVisible(); const antes = await ids(); await adiciona(p, 'Texto', 'Texto pequeno'); const depois = await ids()
     const novo = depois.filter((x) => !antes.includes(x)); expect(novo).toHaveLength(1); expect(depois).toEqual(['raiz', primeiro, novo[0], segundo]) // DEPOIS do selecionado, no mesmo pai (entre os dois)
     await linhaDe(p, 'raiz').click(); await adiciona(p, 'Feedback', 'Alerta'); const fim = await ids(); expect(fim.length).toBe(depois.length + 1); expect(fim[fim.length - 1]).toBe(fim.filter((x) => !depois.includes(x))[0]) // no raiz: entra dentro, no fim
     await expect(p.getByRole('button', { name: 'Alerta', exact: true })).toHaveCount(0) // a lista fecha depois de adicionar
@@ -182,7 +184,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   it('paleta de blocos pelo teclado: setas entre categorias, Baixo abre e entra na lista, setas entre itens, Enter adiciona, Esc fecha e volta à categoria; papéis ARIA', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('paleta-teclado'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/pt'); await p.getByRole('button', { name: 'Criar', exact: true }).click()
     await expect(p.getByText('Página paleta-teclado')).toBeVisible(); await linhaDe(p, 'raiz').click()
-    expect(await p.getByRole('toolbar', { name: 'Paleta de blocos' }).count()).toBe(1)
+    await abrePaleta(p); expect(await p.getByRole('toolbar', { name: 'Paleta de blocos' }).count()).toBe(1)
     const foco = () => p.evaluate(() => (document.activeElement as HTMLElement | null)?.textContent?.trim() ?? ''); const cat = (n: string) => p.getByRole('button', { name: new RegExp(`^${n}\\s\\(\\d+\\)$`) })
     await cat('Layout').focus(); await p.keyboard.press('ArrowRight'); expect(await foco()).toMatch(/^Texto\s\(/); await p.keyboard.press('ArrowLeft'); await p.keyboard.press('ArrowLeft'); expect(await foco()).toMatch(/^Outros\s\(/) // anda e dá a volta
     await cat('Texto').focus(); await p.keyboard.press('ArrowDown'); await expect(p.getByRole('group', { name: 'Blocos da categoria' })).toBeVisible(); const nomes = await p.locator('[role=group][aria-label="Blocos da categoria"] button').allInnerTexts(); expect(nomes.length).toBe(6)
@@ -190,7 +192,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.keyboard.press('ArrowRight'); await expect.poll(foco).toBe(nomes[1]); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe(nomes[2]); await p.keyboard.press('ArrowUp'); await p.keyboard.press('ArrowLeft'); await expect.poll(foco).toBe(nomes[0]); await p.keyboard.press('End'); await expect.poll(foco).toBe(nomes[5]); await p.keyboard.press('Home'); await expect.poll(foco).toBe(nomes[0])
     await p.keyboard.press('Escape'); await expect(p.getByRole('group', { name: 'Blocos da categoria' })).toHaveCount(0); expect(await foco()).toMatch(/^Texto\s\(/) // Esc fecha e volta à categoria
     await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe(nomes[1]); await p.keyboard.press('Enter'); await expect(p.getByRole('button', { name: /#b1$/ })).toBeVisible(); await expect(p.getByRole('group', { name: 'Blocos da categoria' })).toHaveCount(0) // Enter adiciona e fecha
-    await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('selo'); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe('Selo'); await p.keyboard.press('ArrowUp'); expect(await p.evaluate(() => (document.activeElement as HTMLElement).tagName)).toBe('INPUT') // da busca para a lista e de volta
+    await abrePaleta(p); await p.getByRole('textbox', { name: 'Buscar bloco' }).fill('selo'); await p.keyboard.press('ArrowDown'); await expect.poll(foco).toBe('Selo'); await p.keyboard.press('ArrowUp'); expect(await p.evaluate(() => (document.activeElement as HTMLElement).tagName)).toBe('INPUT') // da busca para a lista e de volta
     await p.getByRole('textbox', { name: 'Buscar bloco' }).focus(); await p.keyboard.press('Escape'); await expect(p.getByRole('textbox', { name: 'Buscar bloco' })).toHaveValue('') // Esc limpa a busca
     await ctx.close()
   })
@@ -224,7 +226,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await ctx.close()
   })
   it('MONTAR UMA LANDING PAGE só pelo Studio: cabeçalho com links (JSON de lista), hero, rodapé; listas de valores disponíveis; JSON inválido não entra; salvar', async () => {
-    const { ctx, p } = await entra('ana'); const secao = async (nome: string, titulo: string) => { await p.getByRole('button', { name: new RegExp(`^${nome}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
+    const { ctx, p } = await entra('ana'); const secao = async (nome: string, titulo: string) => { await abrePaleta(p); await p.getByRole('button', { name: new RegExp(`^${nome}\\s\\(\\d+\\)$`) }).click(); await p.getByRole('button', { name: titulo, exact: true }).click() }
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('lp'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/lp'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página lp')).toBeVisible(); await linhaDe(p, 'raiz').click()
     const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]'); await p.getByRole('button', { name: 'Prévia ampla' }).click(); await expect(p.getByRole('button', { name: 'Prévia ampla' })).toHaveAttribute('aria-current', 'true') // a prévia da coluna é estreita (o menu do cabeçalho recolhe): a ampla mostra o site como no computador
     // 1) cabeçalho: texto, lista de rotas (datalist) e a lista de links como JSON
@@ -255,7 +257,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   it('lista editada ITEM A ITEM (sem escrever JSON): adicionar, editar, subir, descer e remover; itens de texto e de objeto; o JSON da lista segue disponível', async () => {
     const { ctx, p } = await entra('ana'); const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('itens'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/itens'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página itens')).toBeVisible()
-    await p.getByRole('button', { name: 'Prévia ampla' }).click(); await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Cabeçalho do site', exact: true }).click(); await p.getByRole('button', { name: /Cabeçalho do site #b1$/ }).click()
+    await p.getByRole('button', { name: 'Prévia ampla' }).click(); await linhaDe(p, 'raiz').click(); await abrePaleta(p); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Cabeçalho do site', exact: true }).click(); await p.getByRole('button', { name: /Cabeçalho do site #b1$/ }).click()
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await expect(p.getByText('Item 1', { exact: true })).toBeVisible()
     await p.getByRole('textbox', { name: 'Texto (item 1)', exact: true }).fill('Início'); await p.getByRole('combobox', { name: 'Destino (link) (item 1)', exact: true }).fill('/'); await expect(frame().getByRole('link', { name: 'Início' })).toBeVisible()
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 2)', exact: true }).fill('Produtos'); await p.getByRole('combobox', { name: 'Destino (link) (item 2)', exact: true }).fill('/produtos')
@@ -265,7 +267,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('button', { name: 'Remover item' }).first().click(); await expect.poll(ordem).toEqual(['Produtos']); await expect(p.getByText('Item 2', { exact: true })).toHaveCount(0)
     await p.getByRole('button', { name: 'Editar JSON' }).first().click(); expect(JSON.parse(await p.getByRole('textbox', { name: /^JSON de / }).inputValue())).toEqual([{ texto: 'Produtos', href: '/produtos' }]); await p.getByRole('button', { name: 'Cancelar' }).click() // o JSON é o mesmo
     // lista de TEXTOS: as sugestões fixas da busca
-    await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Barra de busca', exact: true }).click(); await p.getByRole('button', { name: /Barra de busca #b2$/ }).click()
+    await linhaDe(p, 'raiz').click(); await abrePaleta(p); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Barra de busca', exact: true }).click(); await p.getByRole('button', { name: /Barra de busca #b2$/ }).click()
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto do item 1', exact: true }).fill('Café'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto do item 2', exact: true }).fill('Pão')
     await expect.poll(() => frame().locator('datalist option').evaluateAll((l) => l.map((o) => (o as HTMLOptionElement).value))).toEqual(['Café', 'Pão']); await ctx.close()
   })
@@ -296,7 +298,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   it('SUBCOMPONENTES na árvore: cabeçalho, hero e rodapé mostram seus elementos (campos, listas, itens, botões, colunas e links) e cada um se edita', async () => {
     const { ctx, p } = await entra('ana'); const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('sub'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/sub'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página sub')).toBeVisible()
-    await p.getByRole('button', { name: 'Prévia ampla' }).click(); const add = async (t: string) => { await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: t, exact: true }).click() }
+    await p.getByRole('button', { name: 'Prévia ampla' }).click(); const add = async (t: string) => { await linhaDe(p, 'raiz').click(); await abrePaleta(p); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: t, exact: true }).click() }
     const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover|Duplicar|Copiar|Recortar|Colar)/.test(t) && !/^[▾▸·\s]+$/.test(t))
     await add('Cabeçalho do site'); await p.getByRole('button', { name: /Cabeçalho do site #b1$/ }).click(); await p.getByRole('textbox', { name: 'Título', exact: true }).fill('Minha loja')
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 1)', exact: true }).fill('Início'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 2)', exact: true }).fill('Contato')

@@ -637,6 +637,10 @@
      "tipo": "json",
      "inicial": []
     },
+    "paletaAberta": {
+     "tipo": "booleano",
+     "inicial": false
+    },
     "copiado": {
      "tipo": "json"
     },
@@ -4816,18 +4820,59 @@
                    "props": {
                     "gap": 6,
                     "alinha": "centro",
+                    "quebra": true
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Adicionar bloco",
+                       "variante": "primario",
+                       "icone": "mais",
+                       "expandido": "{estado.paletaAberta}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "paletaAberta",
+                         "valor": "!estado.paletaAberta"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "catBloco",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "buscaBloco",
+                         "valor": "\"\""
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "texto/pequeno",
+                      "props": {
+                       "texto": "{(tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0 ? \"dentro de \" : \"depois de \") + (acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).titulo}"
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "se": "estado.paletaAberta",
+                   "props": {
+                    "gap": 6,
+                    "alinha": "centro",
                     "quebra": true,
                     "papel": "toolbar",
                     "rotulo": "Paleta de blocos"
                    },
                    "slots": {
                     "filhos": [
-                     {
-                      "bloco": "texto/pequeno",
-                      "props": {
-                       "texto": "{\"Adicionar \" + (tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0 ? \"dentro de \" : \"depois de \") + (obter(estado.no.spec.raiz, estado.sel)).bloco}"
-                      }
-                     },
                      {
                       "bloco": "nav/botao",
                       "props": {
@@ -5085,7 +5130,7 @@
                   },
                   {
                    "bloco": "layout/pilha",
-                   "se": "estado.catBloco != \"\" || estado.buscaBloco != \"\"",
+                   "se": "estado.paletaAberta && (estado.catBloco != \"\" || estado.buscaBloco != \"\")",
                    "props": {
                     "gap": 6
                    },
@@ -5188,6 +5233,11 @@
                                   "acao": "definir",
                                   "estado": "sel",
                                   "valor": "concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "paletaAberta",
+                                  "valor": "false"
                                  },
                                  {
                                   "acao": "definir",
@@ -5818,6 +5868,11 @@
                                   "acao": "definir",
                                   "estado": "sel",
                                   "valor": "concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "paletaAberta",
+                                  "valor": "false"
                                  },
                                  {
                                   "acao": "definir",
@@ -10118,6 +10173,11 @@
                                      "acao": "definir",
                                      "estado": "sel",
                                      "valor": "concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "paletaAberta",
+                                     "valor": "false"
                                     },
                                     {
                                      "acao": "definir",

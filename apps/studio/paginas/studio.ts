@@ -152,19 +152,23 @@ const insere = (bloco: string): Acao[] => [
   def('tmpBloco', bloco), def('tmpDentro', `${ACEITA} || tamanho(estado.sel) == 0`),
   def('tmpCaminho', `estado.tmpDentro ? ${CAMINHO_SLOT} : ${PAI_LISTA}`), def('tmpPos', 'estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1'),
   def('no', 'com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))'),
-  def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), "/") && !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('sel', 'concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])'), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
+  def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), "/") && !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('sel', 'concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])'), def('paletaAberta', 'false'), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
 ]
 const ADICIONA: Acao[] = insere(NOVO_BLOCO)
 /** colar o bloco copiado (ou recortado): entra como bloco novo, com ids novos, dentro do selecionado (se aceita filhos) ou depois dele */
 const COLA: Acao[] = insere(`com(estado.copiado, ["id"], ${PROX_ID})`)
 const botaoCategoria = (id: string, nome: string, icone: string, cobre: string): Inst => botao(`{${q(nome + ' (')} + tamanho(filtra(blocos.blocos, bd => ${cobre})) + ")"}`, [def('buscaBloco', '""'), def('catBloco', `estado.catBloco == ${q(id)} ? "" : ${q(id)}`)], { props: { icone, atual: `{estado.catBloco == ${q(id)} && estado.buscaBloco == ""}` } })
 const paletaDeBlocos = (): Inst => pilha([
+  // a paleta é um painel que abre sob demanda ("Adicionar bloco") e fecha sozinho depois de inserir, para a árvore e a prévia ficarem no alto
   linha([
-    P('texto/pequeno', { props: { texto: `{"Adicionar " + (${ACEITA} || tamanho(estado.sel) == 0 ? "dentro de " : "depois de ") + (${SELNO}).bloco}` } }),
+    botao('Adicionar bloco', [def('paletaAberta', '!estado.paletaAberta'), def('catBloco', '""'), def('buscaBloco', '""')], { props: { icone: 'mais', variante: 'primario', expandido: '{estado.paletaAberta}' } }),
+    P('texto/pequeno', { props: { texto: `{(${ACEITA} || tamanho(estado.sel) == 0 ? "dentro de " : "depois de ") + (${DEFBLOCO}).titulo}` } }),
+  ], { props: { gap: 6, alinha: 'centro', quebra: true } }),
+  linha([
     ...CATEGORIAS.map((c) => botaoCategoria(c.id, c.nome, c.icone, emPrefixos(c.prefixos))),
     botaoCategoria('outros', 'Outros', 'mais', `!(${emPrefixos(TODOS_PREFIXOS)})`),
     P('entrada/texto', { props: { valor: '{estado.buscaBloco}', rotulo: 'Buscar bloco', placeholder: 'Buscar bloco' }, eventos: { aoMudar: [def('buscaBloco', 'evento'), def('catBloco', '""')] } }),
-  ], { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de blocos' } }),
+  ], { se: 'estado.paletaAberta', props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de blocos' } }),
   pilha([
     pilha([P('layout/grade', { props: { colunas: 3, gap: 8 }, filhos: [
       pilha([
@@ -173,7 +177,7 @@ const paletaDeBlocos = (): Inst => pilha([
       ], { repetir: { cada: `filtra(blocos.blocos, bd => ${DA_LISTA})`, como: 'bd', chave: 'bd.id' }, gap: 2 }),
     ] })], { props: { papel: 'group', rotulo: 'Blocos da categoria' }, gap: 0 }),
     texto('Nenhum bloco para "{estado.buscaBloco}".', { se: `estado.buscaBloco != "" && tamanho(filtra(blocos.blocos, bd => ${DA_LISTA})) == 0` }),
-  ], { se: 'estado.catBloco != "" || estado.buscaBloco != ""', gap: 6 }),
+  ], { se: 'estado.paletaAberta && (estado.catBloco != "" || estado.buscaBloco != "")', gap: 6 }),
 ], { se: `estado.no && ${EH_PAGINA} && ${SELNO}`, gap: 6 })
 
 
@@ -840,7 +844,7 @@ export const PAGINA = no('pagina', 'studio.app', {
   dados: { ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema', pagsite: 'studio.pagsite' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    recolhidos: { tipo: 'json', inicial: [] }, copiado: { tipo: 'json' }, abaCel: { tipo: 'texto', inicial: 'blocos' }, selElemento: { tipo: 'json' }, prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    recolhidos: { tipo: 'json', inicial: [] }, paletaAberta: { tipo: 'booleano', inicial: false }, copiado: { tipo: 'json' }, abaCel: { tipo: 'texto', inicial: 'blocos' }, selElemento: { tipo: 'json' }, prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
