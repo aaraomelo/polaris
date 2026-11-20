@@ -1,5 +1,6 @@
 import { montaVivo, type Programa } from '@polaris/engine'
 import '@polaris/engine/formulario' // registra o validador na função `validaFormulario` (o painel de teste do editor de formulários)
+import { ativaTelas } from '@polaris/engine/tela'
 import { criaCarregador, fonteDe } from './api'
 
 // O hospedeiro: carrega o PROGRAMA da página `studio.app` (compilado em build a partir dos nós JSON), resolve os dados `auto` e monta a página com o runtime vivo da plataforma.
@@ -102,4 +103,6 @@ new MutationObserver(() => { cancelAnimationFrame(agendado); agendado = requestA
 const pular = document.createElement('a'); pular.href = '#principal'; pular.textContent = 'Pular para o conteúdo'; pular.className = 'pular'
 pular.addEventListener('click', (e) => { const m = document.getElementById('principal'); if (m) { e.preventDefault(); m.setAttribute('tabindex', '-1'); m.focus() } })
 document.body.prepend(pular)
+// A tela de edição do cartaz (`midia/tela`): caixas que se arrastam e redimensionam por cima da prévia, e botões com `arrasta` que se soltam sobre ela
+ativaTelas()
 void inicia()

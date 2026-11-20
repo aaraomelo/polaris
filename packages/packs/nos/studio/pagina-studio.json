@@ -18881,6 +18881,12 @@
                             }
                            },
                            {
+                            "bloco": "texto/paragrafo",
+                            "props": {
+                             "texto": "Clique para adicionar, ou arraste para a peça."
+                            }
+                           },
+                           {
                             "bloco": "layout/linha",
                             "props": {
                              "gap": 6,
@@ -18896,7 +18902,8 @@
                                "props": {
                                 "texto": "Texto",
                                 "variante": "secundario",
-                                "icone": "texto-paragrafo"
+                                "icone": "texto-paragrafo",
+                                "arrasta": "texto"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -18949,7 +18956,8 @@
                                "props": {
                                 "texto": "Faixa",
                                 "variante": "secundario",
-                                "icone": "layout-destaque"
+                                "icone": "layout-destaque",
+                                "arrasta": "faixa"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -19002,7 +19010,8 @@
                                "props": {
                                 "texto": "Preço",
                                 "variante": "secundario",
-                                "icone": "feedback-selo"
+                                "icone": "feedback-selo",
+                                "arrasta": "preco"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -19055,7 +19064,8 @@
                                "props": {
                                 "texto": "Código de barras",
                                 "variante": "secundario",
-                                "icone": "cartaz"
+                                "icone": "cartaz",
+                                "arrasta": "codigoBarras"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -19108,7 +19118,8 @@
                                "props": {
                                 "texto": "QR code",
                                 "variante": "secundario",
-                                "icone": "layout-grade"
+                                "icone": "layout-grade",
+                                "arrasta": "qrcode"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -19161,7 +19172,8 @@
                                "props": {
                                 "texto": "Validade",
                                 "variante": "secundario",
-                                "icone": "historico"
+                                "icone": "historico",
+                                "arrasta": "validade"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -19675,13 +19687,130 @@
                             }
                            },
                            {
-                            "bloco": "midia/quadro",
+                            "bloco": "midia/tela",
+                            "se": "previa && previa.ok && previa.html",
                             "props": {
-                             "titulo": "Pré-visualização do cartaz",
-                             "html": "{previa.html}",
-                             "altura": 560
+                             "proporcao": "{(obter(estado.no.spec, [\"orientacao\"]) == \"paisagem\" ? (obter(objeto([[\"A4\", 1.4142857142857144], [\"A5\", 1.4189189189189189], [\"A6\", 1.4095238095238096], [\"A7\", 1.4189189189189189]]), [estado.no.spec.tamanho ?? \"A4\"]) ?? 1.4142857142857144) : 1 / (obter(objeto([[\"A4\", 1.4142857142857144], [\"A5\", 1.4189189189189189], [\"A6\", 1.4095238095238096], [\"A7\", 1.4189189189189189]]), [estado.no.spec.tamanho ?? \"A4\"]) ?? 1.4142857142857144))}",
+                             "caixas": "{mapeia(estado.no.spec.elementos ?? [], (e, i) => objeto([[\"id\", texto(i)], [\"rotulo\", \"Caixa \" + (i + 1) + \": \" + e.tipo + (e.id ? \" \" + e.id : \"\")], [\"topo\", (obter(e, [\"caixa\", \"topo\"]) ?? 0)], [\"esquerda\", obter(e, [\"caixa\", \"esquerda\"]) ?? (1 - (obter(e, [\"caixa\", \"direita\"]) ?? 0) - (obter(e, [\"caixa\", \"largura\"]) ?? 0))], [\"largura\", (obter(e, [\"caixa\", \"largura\"]) ?? 0)], [\"altura\", (obter(e, [\"caixa\", \"altura\"]) ?? 0)], [\"rotacao\", e.rotacao ?? 0], [\"atual\", i == estado.selEl]]))}",
+                             "passo": 0.005
                             },
-                            "se": "previa && previa.ok && previa.html"
+                            "eventos": {
+                             "aoSelecionar": [
+                              {
+                               "acao": "definir",
+                               "estado": "selEl",
+                               "valor": "(paraNumero(evento.id) ?? -1)"
+                              }
+                             ],
+                             "aoMover": [
+                              {
+                               "acao": "definir",
+                               "estado": "passado",
+                               "valor": "\"mv:\" + evento.id != \"\" && estado.chaveEdicao == \"mv:\" + evento.id ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "futuro",
+                               "valor": "[]"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "chaveEdicao",
+                               "valor": "\"mv:\" + evento.id"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "no",
+                               "valor": "com(estado.no, [\"spec\", \"elementos\", (paraNumero(evento.id) ?? -1), \"caixa\"], mescla(sem(obter(estado.no.spec, [\"elementos\", (paraNumero(evento.id) ?? -1), \"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"topo\", evento.topo], [\"esquerda\", evento.esquerda], [\"largura\", evento.largura], [\"altura\", evento.altura]])))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "selEl",
+                               "valor": "(paraNumero(evento.id) ?? -1)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "sel",
+                               "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "selElemento",
+                               "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ],
+                             "aoSoltar": [
+                              {
+                               "acao": "definir",
+                               "estado": "passado",
+                               "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "futuro",
+                               "valor": "[]"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "chaveEdicao",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "tmpBloco",
+                               "valor": "mescla(objeto([[\"tipo\", evento.valor], [\"id\", \"el\" + estado.contador], [\"caixa\", objeto([[\"topo\", maximo(0, minimo(1 - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1]), evento.topo - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1]) / 2))], [\"esquerda\", maximo(0, minimo(1 - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0]), evento.esquerda - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0]) / 2))], [\"largura\", obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0])], [\"altura\", obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1])]])]]), obter(objeto([[\"texto\", objeto([[\"texto\", \"Texto\"]])], [\"faixa\", objeto([[\"cor\", [200, 16, 46]]])], [\"preco\", objeto([[\"valor\", \"9.99\"]])], [\"codigoBarras\", objeto([[\"valor\", \"7891000100103\"], [\"formato\", \"ean13\"]])], [\"qrcode\", objeto([[\"valor\", \"https://exemplo.com.br\"]])], [\"validade\", objeto([])]]), [evento.valor]) ?? objeto([]))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "no",
+                               "valor": "obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor]) == null ? estado.no : com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "selEl",
+                               "valor": "tamanho(estado.no.spec.elementos ?? []) - 1"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "contador",
+                               "valor": "estado.contador + 1"
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ]
+                            },
+                            "slots": {
+                             "filhos": [
+                              {
+                               "bloco": "midia/quadro",
+                               "props": {
+                                "titulo": "Pré-visualização do cartaz",
+                                "html": "{previa.html}",
+                                "altura": 560
+                               }
+                              }
+                             ]
+                            }
                            },
                            {
                             "bloco": "layout/pilha",

@@ -3,7 +3,7 @@ import { registraCommerce } from '@polaris/engine/commerce'
 import { registraSite } from '@polaris/engine/site'
 import { cssDoTema, registraTemas, TEMA_PADRAO } from '@polaris/engine/tema'
 import { Registry, criaValidador, validaFormulario } from '@polaris/schema'
-import { htmlDe, layoutCartaz, validaNoCartaz } from '@polaris/signmaker'
+import { cssDoCartaz, htmlDe, layoutCartaz, validaNoCartaz } from '@polaris/signmaker'
 import { CSS_FORMULARIO, confereExpressoes, renderizaFormularioHtml } from '@polaris/engine'
 
 // Pré-visualização: o mesmo compilador e renderizador da produção sobre o RASCUNHO. Serve ao cliente (SPA) e ao servidor (`/studio/previa`).
@@ -14,6 +14,12 @@ const VALIDA_NO = criaValidador()
 const ID_SEGURO = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/
 
 /** prévia de um `cartaz`: o MESMO layout e o MESMO desenhador de HTML que a geração real (e que o PDF), sobre o rascunho e os dados de exemplo. Dado faltando ou texto que não cabe vira PROBLEMA, não erro. */
+/** a peça INTEIRA ajustada ao quadro da prévia (o SVG com `viewBox` escala o HTML da peça, que é em pt, para caber sem rolagem): a tela de edição põe as caixas por cima na mesma proporção. É só a prévia do editor; o HTML e o PDF reais seguem sendo os de `htmlDe` e `pdfDe`. */
+function ajustadoAoQuadro(l: Parameters<typeof htmlDe>[0]): string {
+  const p = l.paginas[0]; if (!p) return htmlDe(l)
+  const W = Number(p.largura.toFixed(3)), H = Number(p.altura.toFixed(3))
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:"><style>${cssDoCartaz(l)}\nhtml,body{height:100%;overflow:hidden;background:#fff}.pagina{margin:0!important;box-shadow:none!important}svg.ajuste{display:block;width:100%;height:100%}</style></head><body><svg class="ajuste" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"><foreignObject x="0" y="0" width="${W}" height="${H}"><div xmlns="http://www.w3.org/1999/xhtml">${htmlDe({ ...l, paginas: [p] }, { fragmento: true })}</div></foreignObject></svg></body></html>`
+}
 function geraPreviewCartaz(no: any, dados: unknown): ResultadoPreview {
   const fmt = (e: { caminho: string; mensagem: string }) => `${e.caminho} ${e.mensagem}`
   const problemas: string[] = []
@@ -21,7 +27,7 @@ function geraPreviewCartaz(no: any, dados: unknown): ResultadoPreview {
   const incoerente = validaNoCartaz(no); problemas.push(...incoerente)
   if (incoerente.length) return { ok: true, titulo: String(no.spec?.titulo ?? ''), html: '', problemas } // incoerente: a geração recusaria; a lista de problemas é o que o editor mostra
   let html = '', titulo = String(no.spec?.titulo ?? '')
-  try { const l = layoutCartaz(no.spec, dados ?? no.spec?.exemplo ?? {}); html = htmlDe(l); titulo = l.titulo; problemas.push(...l.avisos) } catch (e) { problemas.push((e as Error).message.slice(0, 200)) }
+  try { const l = layoutCartaz(no.spec, dados ?? no.spec?.exemplo ?? {}); html = ajustadoAoQuadro(l); titulo = l.titulo; problemas.push(...l.avisos) } catch (e) { problemas.push((e as Error).message.slice(0, 200)) }
   return { ok: true, titulo, html, problemas: problemas.slice(0, 50) }
 }
 

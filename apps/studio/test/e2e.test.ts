@@ -359,6 +359,33 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const ids2 = (await arv.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim().split('#')[1]); expect(ids2.length).toBe(5); expect(new Set(ids2).size).toBe(ids2.length)
     await ctx.close()
   })
+  it('CARTAZ: tela de edição — arrastar a caixa, redimensionar, setas, e soltar da paleta sobre a peça criam e movem elementos (um passo de desfazer por gesto)', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('dnd'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Cartaz dnd')).toBeVisible()
+    const barra = p.getByRole('toolbar', { name: 'Paleta de elementos' }), tela = p.locator('[data-polaris-tela]'), valor = async (nome: string) => Number(await p.getByRole('textbox', { name: nome, exact: true }).inputValue())
+    await barra.getByRole('button', { name: 'Texto', exact: true }).click(); await expect(tela.locator('[data-caixa="1"]')).toBeVisible(); expect(await tela.getAttribute('style')).toMatch(/aspect-ratio:1\.41/) // moldura na proporção da peça (um cartaz novo é A5 em paisagem: 210 ÷ 148)
+    expect([await valor('Topo'), await valor('Esquerda'), await valor('Largura'), await valor('Altura')]).toEqual([0.1, 0.1, 0.8, 0.2])
+    // arrastar o corpo da caixa: 20% da largura para a direita e 10% da altura para baixo
+    const r = (await tela.boundingBox())!, c0 = (await tela.locator('[data-caixa="1"]').boundingBox())!
+    await p.mouse.move(c0.x + c0.width / 2, c0.y + c0.height / 2); await p.mouse.down(); await p.mouse.move(c0.x + c0.width / 2 + r.width * 0.05, c0.y + c0.height / 2 + r.height * 0.02, { steps: 3 }); await p.mouse.move(c0.x + c0.width / 2 + r.width * 0.10, c0.y + c0.height / 2 + r.height * 0.10, { steps: 4 }); await p.mouse.up()
+    await expect.poll(async () => [await valor('Topo'), await valor('Esquerda')]).toEqual([0.2, 0.2]) // topo +0,1; a esquerda sobe 0,1 e para na moldura (a caixa tem 80% de largura: no máximo 0,2)
+    expect(await valor('Largura')).toBe(0.8)
+    await p.getByRole('button', { name: 'Desfazer' }).click(); await expect.poll(() => valor('Topo')).toBe(0.1) // o gesto inteiro é UM passo de desfazer
+    // redimensionar pela alça do canto inferior direito: a caixa encolhe de 0,8 para ~0,5 de largura
+    const alca = tela.locator('[data-caixa="1"] [data-alca="se"]'), a0 = (await alca.boundingBox())!
+    await p.mouse.move(a0.x + a0.width / 2, a0.y + a0.height / 2); await p.mouse.down(); await p.mouse.move(a0.x + a0.width / 2 - r.width * 0.15, a0.y + a0.height / 2 + r.height * 0.05, { steps: 5 }); await p.mouse.move(a0.x + a0.width / 2 - r.width * 0.30, a0.y + a0.height / 2 + r.height * 0.10, { steps: 5 }); await p.mouse.up()
+    await expect.poll(() => valor('Largura')).toBeCloseTo(0.5, 1); expect(await valor('Altura')).toBeGreaterThan(0.25); expect(await valor('Esquerda')).toBe(0.1)
+    // teclado: a seta direita move 1% (2 passos de 0,5%), Alt + seta redimensiona
+    const antes = await valor('Esquerda'); await tela.locator('[data-caixa="1"]').focus(); await p.keyboard.press('ArrowRight'); await expect.poll(() => valor('Esquerda')).toBeCloseTo(antes + 0.01, 3)
+    const larg = await valor('Largura'); await p.keyboard.press('Alt+ArrowRight'); await expect.poll(() => valor('Largura')).toBeCloseTo(larg + 0.01, 3)
+    // soltar da paleta sobre a peça: cria uma faixa no ponto, centrada
+    const bf = (await barra.getByRole('button', { name: 'Faixa', exact: true }).boundingBox())! // (o `dragTo` do Playwright trava com o arrastar nativo do Chrome; a sequência manual do mouse é a de um usuário)
+    await p.mouse.move(bf.x + bf.width / 2, bf.y + bf.height / 2); await p.mouse.down(); await p.mouse.move(bf.x + bf.width / 2 + 10, bf.y + bf.height / 2 + 10, { steps: 3 }); await p.mouse.move(r.x + r.width * 0.5, r.y + r.height * 0.8, { steps: 12 }); await p.waitForTimeout(200); await p.mouse.up()
+    await expect(tela.locator('[data-caixa="2"]')).toBeVisible(); await expect.poll(async () => [await valor('Largura'), await valor('Altura')]).toEqual([0.8, 0.2]); expect(await valor('Topo')).toBeCloseTo(0.7, 1) // centro em 80% da altura: topo 0,8 − 0,1
+    expect(await p.locator('button', { hasText: /^(▶ )?\d+\. / }).count()).toBe(3) // o título do cartaz novo, o texto e a faixa solta
+    expect(erros.filter((e) => /ana:/.test(e) && !/previa|status of/.test(e))).toEqual([])
+    await ctx.close()
+  })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {
     const { ctx, p } = await entra('ana')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('cola'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/cola'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página cola')).toBeVisible()

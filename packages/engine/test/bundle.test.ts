@@ -25,10 +25,10 @@ describe('orçamento do bundle do cliente', () => {
     expect(b.gz).toBeLessThan(10.5 * 1024) // (10 KB → 10,5 KB com `elementosDoBloco` e `semIds`, as funções da árvore do Studio) a biblioteca completa cresceu (listas, aritmética exata, caminhos); a página real carrega só o que usa (aot.test.ts)
   })
 
-  it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 160 KB gz', async () => {
+  it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 161 KB gz', async () => {
     const b = await empacota(`import { hidrata } from './src/render/cliente'; import { COMPONENTES_BASE } from './src/render/base'; hidrata(COMPONENTES_BASE)`)
     for (const re of PROIBIDOS) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
-    expect(b.gz).toBeLessThan(160 * 1024)
+    expect(b.gz).toBeLessThan(161 * 1024) // 160 → 161 KB: os blocos novos do Studio (midia/tela, as props alvo e arrasta, o papel status) entram no cliente de hidratação
     const proprio = b.entradas.filter((e) => /packages\/engine\/src/.test(e) || /^src\//.test(e))
     expect(proprio.length).toBeGreaterThan(5) // a medição enxerga o nosso código (não é um bundle vazio)
   })

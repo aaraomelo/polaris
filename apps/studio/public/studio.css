@@ -49,3 +49,7 @@ a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-ra
 }
 /* a linha da árvore não estoura: o grupo de ações encolhe e quebra por dentro */
 #polaris [aria-label="Árvore de blocos"] > div > div > div{min-width:0}
+/* tela de edição (cartaz): a prévia preenche a moldura e as caixas ficam por cima */
+#polaris [data-polaris-tela]{max-width:100%;border:1px solid var(--cor-borda,#ccc);background:#fff;margin-inline:auto}
+#polaris [data-polaris-tela]>iframe{position:absolute;inset:0;width:100%!important;height:100%!important;border:0}
+#polaris [data-polaris-tela] [data-caixa]:focus-visible{outline:3px solid var(--cor-primaria,#2563eb)!important;outline-offset:2px}

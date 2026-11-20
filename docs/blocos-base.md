@@ -127,3 +127,5 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 
 **`lista` em `entrada/texto`** liga o campo a um `form/sugestoes` da página (lista de valores do navegador), como `entrada/busca`. **`largura` e `cresce` em `layout/linha` e `layout/pilha`**: `largura` (40 a 2000 px) fixa a largura de uma caixa dentro de uma linha; `cresce` a faz ocupar o espaço que sobra sem estourar (`flex: 1 1 0%` e `min-width: 0`).
 **`expandido` em `nav/botao`**: verdadeiro ou falso viram `aria-expanded` (botão que abre e fecha algo, como a seta de uma árvore); sem o prop, o atributo não existe.
+
+**`midia/tela` (tela de edição)**: moldura de proporção fixa (`proporcao`) que mostra os filhos e, por cima, as `caixas` (`{ id, rotulo, topo, esquerda, largura, altura, rotacao?, atual? }`, em frações) que a ilha `@polaris/engine/tela` arrasta e redimensiona; eventos `aoMover`, `aoSelecionar` e `aoSoltar`. **`nav/botao` com `arrasta`**: o botão vira arrastável e leva o valor ao soltar na tela (`aoSoltar`). Os atributos saem de `src/tela/atributos.ts`, os mesmos nos dois renderizadores, validados e limitados (200 caixas, ids seguros).

@@ -618,13 +618,39 @@ const escolhaEl = (rotulo: string, caminho: string[], opcoes: string[], padrao: 
 ], { ...(opc.se ? { se: opc.se } : {}), props: { gap: 4 } })
 const eh = (...tipos: string[]) => `(${tipos.map((t) => `${TIPO_EL} == ${q(t)}`).join(' || ')})`
 
+/** os tamanhos das peças (altura ÷ largura, em pé) para a moldura da tela de edição ter a mesma proporção da peça */
+const RAZAO_PECA = `(obter(objeto([["A4", ${297 / 210}], ["A5", ${210 / 148}], ["A6", ${148 / 105}], ["A7", ${105 / 74}]]), [estado.no.spec.tamanho ?? "A4"]) ?? ${297 / 210})`
+const PROPORCAO_PECA = `(obter(estado.no.spec, ["orientacao"]) == "paisagem" ? ${RAZAO_PECA} : 1 / ${RAZAO_PECA})`
+const EL_CAIXA = (c: string) => `(obter(e, ["caixa", ${q(c)}]) ?? 0)`
+const CAIXAS_DA_PECA = `mapeia(estado.no.spec.elementos ?? [], (e, i) => objeto([["id", texto(i)], ["rotulo", "Caixa " + (i + 1) + ": " + e.tipo + (e.id ? " " + e.id : "")], ["topo", ${EL_CAIXA('topo')}], ["esquerda", obter(e, ["caixa", "esquerda"]) ?? (1 - ${EL_CAIXA('direita')} - ${EL_CAIXA('largura')})], ["largura", ${EL_CAIXA('largura')}], ["altura", ${EL_CAIXA('altura')}], ["rotacao", e.rotacao ?? 0], ["atual", i == estado.selEl]]))`
+const ID_EVENTO = '(paraNumero(evento.id) ?? -1)'
+/** os tamanhos e os campos obrigatórios de cada tipo ao SOLTAR da paleta sobre a peça (o mesmo que os botões criam, com a caixa centrada no ponto) */
+const TAM_SOLTO = 'objeto([["texto", [0.8, 0.2]], ["faixa", [0.8, 0.2]], ["preco", [0.8, 0.4]], ["codigoBarras", [0.4, 0.3]], ["qrcode", [0.25, 0.35]], ["validade", [0.8, 0.1]]])'
+const EXTRAS_SOLTO = 'objeto([["texto", objeto([["texto", "Texto"]])], ["faixa", objeto([["cor", [200, 16, 46]]])], ["preco", objeto([["valor", "9.99"]])], ["codigoBarras", objeto([["valor", "7891000100103"], ["formato", "ean13"]])], ["qrcode", objeto([["valor", "https://exemplo.com.br"]])], ["validade", objeto([])]])'
+const telaDaPeca = (): Inst => P('midia/tela', {
+  se: 'previa && previa.ok && previa.html',
+  props: { proporcao: `{${PROPORCAO_PECA}}`, caixas: `{${CAIXAS_DA_PECA}}`, passo: 0.005 },
+  eventos: {
+    aoSelecionar: [def('selEl', ID_EVENTO)],
+    aoMover: edita(`com(estado.no, ["spec", "elementos", ${ID_EVENTO}, "caixa"], mescla(sem(obter(estado.no.spec, ["elementos", ${ID_EVENTO}, "caixa"]) ?? objeto([]), ["direita"]), objeto([["topo", evento.topo], ["esquerda", evento.esquerda], ["largura", evento.largura], ["altura", evento.altura]])))`.replace(/evento\.(topo|esquerda|largura|altura)/g, 'evento.$1'), '"mv:" + evento.id', [def('selEl', ID_EVENTO)]),
+    aoSoltar: [
+      ...guarda,
+      def('tmpBloco', `mescla(objeto([["tipo", evento.valor], ["id", "el" + estado.contador], ["caixa", objeto([["topo", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 1]), evento.topo - obter(${TAM_SOLTO}, [evento.valor, 1]) / 2))], ["esquerda", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 0]), evento.esquerda - obter(${TAM_SOLTO}, [evento.valor, 0]) / 2))], ["largura", obter(${TAM_SOLTO}, [evento.valor, 0])], ["altura", obter(${TAM_SOLTO}, [evento.valor, 1])]])]]), obter(${EXTRAS_SOLTO}, [evento.valor]) ?? objeto([]))`),
+      def('no', 'obter(' + TAM_SOLTO + ', [evento.valor]) == null ? estado.no : com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))'),
+      def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia,
+    ],
+  },
+  filhos: [P('midia/quadro', { props: { titulo: 'Pré-visualização do cartaz', html: '{previa.html}', altura: 560 } })],
+})
+
 const listaDeElementos = (): Inst => pilha([
   titulo('Elementos', 4),
   pilha([botao('{(x.i == estado.selEl ? "▶ " : "") + (x.i + 1) + ". " + x.e.tipo + " " + (x.e.id ?? "")}', [def('selEl', 'x.i')])],
     { repetir: { cada: 'mapeia(estado.no.spec.elementos ?? [], (e, i) => objeto([["i", i], ["e", e]]))', como: 'x', chave: 'texto(x.i)' }, gap: 2 }),
   titulo('Adicionar', 5),
+  texto('Clique para adicionar, ou arraste para a peça.'),
   linha(Object.keys(NOVO_EL).map((t) => botao(ROTULO_EL[t]![0], [...guarda,
-    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [${NOVO_EL[t]}]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { props: { icone: ROTULO_EL[t]![1] } })), { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de elementos' } }),
+    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [${NOVO_EL[t]}]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { props: { icone: ROTULO_EL[t]![1], arrasta: t } })), { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de elementos' } }),
   titulo('Peça', 5),
   linha(['A4', 'A5', 'A6', 'A7'].map((t) => botao(`{estado.no.spec.tamanho == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "tamanho"], ${q(t)})`))), { props: { gap: 4 } }),
   linha(['retrato', 'paisagem'].map((t) => botao(`{(estado.no.spec.orientacao ?? "retrato") == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "orientacao"], ${q(t)})`))), { props: { gap: 4 } }),
@@ -673,7 +699,7 @@ const abaElementos = (): Inst => pilha([
     listaDeElementos(),
     pilha([
       titulo('Pré-visualização (o mesmo desenho do HTML e do PDF)', 4),
-      P('midia/quadro', { props: { titulo: 'Pré-visualização do cartaz', html: '{previa.html}', altura: 560 }, se: 'previa && previa.ok && previa.html' }),
+      telaDaPeca(),
       pilha([
         texto('{tamanho(previa.problemas ?? []) == 0 ? "Sem problemas." : tamanho(previa.problemas) + " problema(s):"}'),
         texto('• {p}', { repetir: { cada: 'previa.problemas ?? []', como: 'p', chave: 'p' } }),

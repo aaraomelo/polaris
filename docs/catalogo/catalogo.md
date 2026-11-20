@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-63 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+64 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -951,7 +951,7 @@ Caixa com borda, fundo de superfície e espaçamento interno, para agrupar um it
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
-| `papel` | "toolbar" \| "group" \| "list" | não |  |  |
+| `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  |  |
 | `rotulo` | texto ≤ 200 caracteres | não |  |  |
 
 **Slots**
@@ -1274,7 +1274,7 @@ Coloca os filhos lado a lado (flex row).
 | `cresce` | booleano | não |  | ocupa o espaço que sobra na linha (flex 1, sem estourar) |
 | `gap` | número ≥ 0 | não |  |  |
 | `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
-| `papel` | "toolbar" \| "group" \| "list" | não |  | papel ARIA do grupo (barra de ferramentas, grupo ou lista) |
+| `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
 
@@ -1411,7 +1411,7 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
 | `cresce` | booleano | não |  | ocupa o espaço que sobra na linha (flex 1, sem estourar) |
 | `gap` | número ≥ 0 | não |  |  |
 | `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
-| `papel` | "toolbar" \| "group" \| "list" | não |  | papel ARIA do grupo (barra de ferramentas, grupo ou lista) |
+| `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
 
@@ -1960,6 +1960,72 @@ Exibe um documento HTML num iframe **sempre** isolado (`sandbox` vazio: sem scri
 }
 ```
 
+### Tela de edição (`midia/tela`)
+
+Moldura de proporção fixa (`proporcao`, largura ÷ altura) que mostra os filhos (uma prévia) e, por cima, as `caixas` que o usuário **arrasta e redimensiona** com o mouse, o toque ou o teclado (setas movem, Alt e setas redimensionam). Cada caixa é `{ id, rotulo, topo, esquerda, largura, altura, rotacao?, atual? }` em frações da moldura; `passo` é a grade de encaixe. Eventos: `aoMover` (`{ id, topo, esquerda, largura, altura }`, ao soltar), `aoSelecionar` (`{ id }`, ao apertar) e `aoSoltar` (`{ valor, topo, esquerda }`, ao soltar sobre a tela um botão com `arrasta`). O comportamento vem da ilha `@polaris/engine/tela`, que o hospedeiro ativa; sem ela é só a moldura.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `caixas` | lista | não |  | as caixas desenhadas por cima dos filhos, que o usuário arrasta e redimensiona (frações da moldura) |
+| `passo` | número ≥ 0.001 ≤ 0.1 | não | 0.005 | a grade de encaixe do arrastar (fração da moldura) |
+| `proporcao` | número ≤ 20 | não |  | largura ÷ altura da moldura (a prévia de uma peça A4 em pé é 0,7071) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoMover` | json |
+| `aoSelecionar` | json |
+| `aoSoltar` | json |
+
+**Exemplo: Peça com duas caixas**
+
+```json
+{
+  "bloco": "midia/tela",
+  "props": {
+    "proporcao": 0.7071,
+    "caixas": [
+      {
+        "id": "titulo",
+        "rotulo": "Título",
+        "topo": 0.08,
+        "esquerda": 0.1,
+        "largura": 0.8,
+        "altura": 0.2,
+        "atual": true
+      },
+      {
+        "id": "preco",
+        "rotulo": "Preço",
+        "topo": 0.4,
+        "esquerda": 0.1,
+        "largura": 0.8,
+        "altura": 0.3
+      }
+    ]
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/pequeno",
+        "props": {
+          "texto": "a prévia da peça entra aqui"
+        }
+      }
+    ]
+  }
+}
+```
+
 ## nav
 
 ### Alternador (abre e fecha sem JavaScript) (`nav/alternador`)
@@ -2006,6 +2072,8 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `alvo` | texto ≤ 120 caracteres | não |  | identifica o que o botão representa (data-alvo; letras, números, _ e -): o hospedeiro usa para realçar o item correspondente |
+| `arrasta` | texto ≤ 120 caracteres | não |  | torna o botão arrastável (`draggable`) e leva este valor ao soltar numa `midia/tela` (evento `aoSoltar`); letras, números, _ e - |
 | `atual` | booleano | não |  | o item escolhido (aria-current), ex.: no menu lateral |
 | `desabilitado` | booleano | não |  |  |
 | `expandido` | booleano | não |  | botão que abre/fecha algo: leva aria-expanded (verdadeiro/falso) |

@@ -45,6 +45,7 @@
     "./tema": "./src/tema/index.ts",
     "./expr": "./src/expr/index.ts",
     "./formulario": "./src/formulario/index.ts",
+    "./tela": "./src/tela/index.ts",
     "./site": "./src/site/index.ts"
   }
 }
