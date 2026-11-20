@@ -57,3 +57,5 @@ Montserrat (OFL) e Roboto (Apache 2.0) estão no repositório. As fontes `Primar
 - Os fundos do legado (`filename`) vêm do backend e não estão no repositório: o fundo aqui é cor ou data URL.
 - A semântica de caixa/rotação/ajuste é a **deste** motor, mais limpa que a do legado (que usava fatores empíricos como 0,93 e 1,045); o conversor das configurações (S2) traduz as geometrias e o resultado será conferido visualmente.
 - O editor do Studio não baixa o PDF (a prévia é o HTML, que o teste prova igual ao PDF); o PDF vem da API/biblioteca (`geraCartaz`, `geraLote`). Não há arrastar-e-soltar na prévia.
+
+**A prévia do editor**: é a peça INTEIRA ajustada ao quadro (SVG com `viewBox` em px, 1 pt = 96/72 px, escalando o mesmo HTML de `htmlDe`); o HTML e o PDF reais não passam por esse ajuste.

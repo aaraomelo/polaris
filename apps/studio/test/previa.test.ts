@@ -58,4 +58,11 @@ describe('/studio/previa', () => {
     const r = await previa({ no: f, selecionado: 'dois' }); expect(r.html).toContain('data-campo="b"'); expect(r.html).not.toContain('data-campo="a"'); expect(r.html).toContain('aria-current="step">Dois'); expect(r.html).not.toMatch(/<img/i)
     const ruim = await previa({ no: { kind: 'formulario', id: 'q', versao: '1.0.0', spec: { campos: [{ nome: 'Ruim Nome', tipo: 'texto' }] } } }); expect(ruim).toMatchObject({ ok: true, html: '' }); expect(ruim.problemas.length).toBeGreaterThan(0)
   })
+  it('a prévia do cartaz ajusta a peça ao quadro com a moldura em PX (pt × 96/72): sem isso a peça fica 33% maior e cortada', async () => {
+    const { geraPreview } = await import('../src/preview'), no = (tamanho: string, orientacao: string) => ({ kind: 'cartaz', id: 'c', versao: '1.0.0', estatuto: 'rascunho', spec: { tamanho, orientacao, fundo: { cor: [255, 255, 255] }, elementos: [{ tipo: 'texto', id: 't', texto: 'Oi', caixa: { topo: 0.1, esquerda: 0.1, largura: 0.5, altura: 0.2 } }] } })
+    const r = geraPreview(no('A5', 'paisagem'), [], undefined) as { ok: true; html: string }; expect(r.ok).toBe(true)
+    const m = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(r.html); expect(m).not.toBeNull(); expect(Number(m![1])).toBeCloseTo(210 * 96 / 25.4, 0); expect(Number(m![2])).toBeCloseTo(148 * 96 / 25.4, 0) // A5 paisagem: 210 × 148 mm em px
+    expect(r.html).toMatch(/<foreignObject x="0" y="0" width="793\.\d+" height="559\.\d+">/)
+    const ret = geraPreview(no('A4', 'retrato'), [], undefined) as { ok: true; html: string }; const n = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(ret.html)!; expect(Number(n[2]) / Number(n[1])).toBeCloseTo(297 / 210, 3) // a proporção da peça se mantém
+  })
 })
