@@ -46,7 +46,7 @@ document.addEventListener('keydown', (e) => {
   }
 })
 // Teclado da ÁRVORE DE BLOCOS: ↑/↓ andam entre os blocos (os botões de seleção são os "secundario" do grupo), → expande (ou desce ao próximo) e ← recolhe; Home/End vão ao primeiro e ao último. Enter e Espaço selecionam (botão nativo).
-const ARVORE = '[role=group][aria-label="Árvore de blocos"]'
+const ARVORE = '[aria-label="Árvore de blocos"]'
 document.addEventListener('keydown', (e) => {
   const alvo = e.target as HTMLElement | null; if (!alvo || e.altKey || e.ctrlKey || e.metaKey || alvo.tagName !== 'BUTTON' || alvo.getAttribute('data-variante') !== 'secundario') return
   const arv = alvo.closest(ARVORE); if (!arv) return
@@ -75,4 +75,22 @@ document.addEventListener('keydown', (e) => {
     const linha = alvo.parentElement, rem = linha && [...linha.querySelectorAll<HTMLButtonElement>('button')].find((x) => x.textContent?.trim() === 'Remover'); if (rem) { e.preventDefault(); rem.click() }
   }
 })
+// Semântica de ÁRVORE para leitores de tela: o contêiner vira `tree`; cada linha, `treeitem` com nível, estado expandido e selecionado; setas e marcadores (só visuais) saem da leitura; só um item fica na ordem do Tab (o ativo) e as setas do teclado movem o foco. Reaplica a cada mudança da árvore (o runtime redesenha as linhas).
+function aplicaArvore(): void {
+  const arv = document.querySelector<HTMLElement>(ARVORE); if (!arv) return
+  arv.setAttribute('role', 'tree'); arv.setAttribute('aria-orientation', 'vertical')
+  const linhas = [...arv.querySelectorAll<HTMLElement>(':scope > div > div')], itens: HTMLButtonElement[] = []
+  for (const l of linhas) {
+    const bs = [...l.querySelectorAll<HTMLButtonElement>(':scope > button')], sel = bs.find((b) => b.getAttribute('data-variante') === 'secundario'); if (!sel) continue
+    const seta = sel.previousElementSibling as HTMLElement | null, nivel = ((seta?.textContent ?? '').match(/^\u2003*/)?.[0].length ?? 0) + 1
+    l.setAttribute('role', 'treeitem'); l.setAttribute('aria-level', String(nivel)); l.setAttribute('aria-label', (sel.textContent ?? '').trim())
+    l.setAttribute('aria-selected', sel.hasAttribute('aria-current') ? 'true' : 'false')
+    const ex = seta?.getAttribute('aria-expanded'); if (ex) l.setAttribute('aria-expanded', ex); else l.removeAttribute('aria-expanded')
+    if (seta) { seta.setAttribute('aria-hidden', 'true'); seta.tabIndex = -1 }
+    itens.push(sel)
+  }
+  const ativo = itens.find((b) => b.hasAttribute('aria-current')) ?? itens[0]; for (const b of itens) b.tabIndex = b === ativo ? 0 : -1
+}
+let agendado = 0
+new MutationObserver(() => { cancelAnimationFrame(agendado); agendado = requestAnimationFrame(aplicaArvore) }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-current', 'aria-expanded'] })
 void inicia()

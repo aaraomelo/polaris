@@ -271,7 +271,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
   })
   it('ÁRVORE DE BLOCOS como árvore de diretórios: recuo, setas que expandem e recolhem, expandir/recolher tudo, ações na linha do selecionado, teclado', async () => {
     const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('arvore'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/arvore'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página arvore')).toBeVisible()
-    const nos = async () => (await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim()), arv = p.getByRole('group', { name: 'Árvore de blocos' })
+    const nos = async () => (await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim()), arv = p.getByRole('tree', { name: 'Árvore de blocos' })
     await linhaDe(p, 'raiz').click(); await adiciona(p, 'Layout', 'Pilha'); await linhaDe(p, 'b1').click(); await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Texto', 'Título') // raiz > pilha(b1) > paragrafo(b2), titulo(b3)
     await linhaDe(p, 'raiz').click(); await adiciona(p, 'Feedback', 'Selo') // raiz > ..., selo(b4)
     expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'texto/paragrafo #b2', 'texto/titulo #b3', 'feedback/selo #b4'])
@@ -297,7 +297,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const { ctx, p } = await entra('ana'); const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('sub'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/sub'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página sub')).toBeVisible()
     await p.getByRole('button', { name: 'Prévia ampla' }).click(); const add = async (t: string) => { await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: t, exact: true }).click() }
-    const arv = p.getByRole('group', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover)/.test(t) && !/^[▾▸·\s]+$/.test(t))
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover)/.test(t) && !/^[▾▸·\s]+$/.test(t))
     await add('Cabeçalho do site'); await p.getByRole('button', { name: /site\/cabecalho #b1$/ }).click(); await p.getByRole('textbox', { name: 'Título', exact: true }).fill('Minha loja')
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 1)', exact: true }).fill('Início'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 2)', exact: true }).fill('Contato')
     expect(await linhas()).toEqual(expect.arrayContaining(['site/cabecalho #b1', 'Título: Minha loja', 'Links do menu: 2 item(ns)', 'Início', 'Contato', 'Submenus: 0 item(ns)'])) // os elementos do cabeçalho, abaixo dele
@@ -319,6 +319,9 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     // o bloco ativo aparece em destaque na prévia (contorno no id dele, mesmo sem id próprio) e as linhas da árvore trazem o alvo
     await arv.getByRole('button', { name: 'Ajuda', exact: true }).click(); await expect(arv.locator('button[data-alvo="raiz"]')).toHaveCount(1)
     await expect.poll(async () => (await p.locator('iframe[title="Pré-visualização da página"]').getAttribute('srcdoc')) ?? '').toContain('#b3{outline:2px solid #f59e0b')
+    // semântica de árvore: tree > treeitem com nível, expandido e selecionado; só o ativo está no Tab
+    const itensA = arv.getByRole('treeitem'); await expect(itensA.first()).toHaveAttribute('aria-level', '1'); await expect(arv.getByRole('treeitem', { name: 'Loja', exact: true })).toHaveAttribute('aria-level', '4'); await expect(arv.getByRole('treeitem', { name: /^site\/rodape/ })).toHaveAttribute('aria-expanded', 'true')
+    await arv.getByRole('button', { name: 'Loja', exact: true }).click(); await expect(arv.getByRole('treeitem', { name: 'Loja', exact: true })).toHaveAttribute('aria-selected', 'true'); expect(await arv.locator('button[tabindex="0"][data-variante=secundario]').count()).toBe(1)
     // atalhos: Ctrl+Z desfaz, Ctrl+Shift+Z refaz; Delete na linha do bloco selecionado remove; ← sobe ao pai
     await arv.getByRole('button', { name: /^site\/rodape #b3$/ }).click(); await p.keyboard.press('Delete'); await expect(arv.getByRole('button', { name: /site\/rodape #b3$/ })).toHaveCount(0)
     await p.locator('body').click({ position: { x: 5, y: 5 } }); await p.keyboard.press('Control+z'); await expect(arv.getByRole('button', { name: /site\/rodape #b3$/ })).toHaveCount(1); await p.keyboard.press('Control+Shift+z'); await expect(arv.getByRole('button', { name: /site\/rodape #b3$/ })).toHaveCount(0); await p.keyboard.press('Control+z')
