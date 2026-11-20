@@ -29,7 +29,7 @@ const ALINHA: Record<string, string> = { inicio: 'flex-start', centro: 'center',
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
 const larguraCaixa = (v: unknown): string | undefined => (typeof v === 'number' && Number.isFinite(v) ? `${Math.min(2000, Math.max(40, Math.round(v)))}px` : undefined)
-const papelDe = (p: Record<string, unknown>): Record<string, string> => (['toolbar', 'group', 'list'].includes(p.papel as string) ? { role: p.papel as string } : {})
+const papelDe = (p: Record<string, unknown>): Record<string, string> => (['toolbar', 'group', 'list', 'status'].includes(p.papel as string) ? { role: p.papel as string } : {})
 const caixa = (direcao: 'column' | 'row'): Descritor => ({
   chave: () => 'div', tag: () => 'div', filhos: true,
   attrs: (p, id) => {

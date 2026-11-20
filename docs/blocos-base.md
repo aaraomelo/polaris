@@ -119,7 +119,7 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 - **Limites**: traço fixo (1,75 px na grade de 24: em tamanhos pequenos fica mais fino); só uma cor mais o acento; sem animação; o CSS do tema cresce ~16 KB (cacheado por hash); um nome bem formado que não existe não pinta nada (no `nome` literal, a compilação recusa).
 
 **`quebra` em `layout/linha` e `layout/pilha`**: `true` acrescenta `flex-wrap: wrap` (a linha passa para outra linha quando falta espaço, em vez de estourar a largura). O padrão continua sem quebra.
-**`papel` e `rotulo` em `layout/linha` e `layout/pilha`**: `papel` (`toolbar`, `group` ou `list`) e `rotulo` (nome acessível) viram `role` e `aria-label` do grupo; sem eles nada muda.
+**`papel` e `rotulo` em `layout/linha` e `layout/pilha`**: `papel` (`toolbar`, `group`, `list` ou `status`, a região viva que o leitor de tela anuncia ao mudar) e `rotulo` (nome acessível) viram `role` e `aria-label` do grupo; sem eles nada muda.
 
 **Seção recolhível (`layout/secao`)**: um `<details>` nativo (sem JavaScript) com borda, o título (`layout/secao-titulo`: texto e `icone`, mais uma seta que gira ao abrir) e o conteúdo; `aberta` faz a seção começar aberta e o leitor pode recolher. Serve a painéis de propriedades e formulários longos. **Limites**: o estado aberto/fechado é do navegador (volta ao inicial se a página for refeita do zero); o título deve ser o primeiro filho; uma seção não lembra o estado entre uma seleção e outra no Studio.
 

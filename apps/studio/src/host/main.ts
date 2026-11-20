@@ -93,4 +93,8 @@ function aplicaArvore(): void {
 }
 let agendado = 0
 new MutationObserver(() => { cancelAnimationFrame(agendado); agendado = requestAnimationFrame(aplicaArvore) }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-current', 'aria-expanded'] })
+// "Pular para o conteúdo": o primeiro Tab leva a este link (só aparece com o foco) e ele leva ao <main id="principal">
+const pular = document.createElement('a'); pular.href = '#principal'; pular.textContent = 'Pular para o conteúdo'; pular.className = 'pular'
+pular.addEventListener('click', (e) => { const m = document.getElementById('principal'); if (m) { e.preventDefault(); m.setAttribute('tabindex', '-1'); m.focus() } })
+document.body.prepend(pular)
 void inicia()

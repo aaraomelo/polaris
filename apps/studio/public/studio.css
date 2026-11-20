@@ -37,3 +37,5 @@ section[aria-label]{background:var(--card);border:1px solid var(--bd);border-rad
 @media (max-width:1000px){#polaris main div[style*="grid-template-columns:repeat(3,"]{grid-template-columns:minmax(0,1fr)!important}}
 /* alvos de toque maiores em telas de toque */
 @media (pointer:coarse){#polaris button,#polaris summary,#polaris [role=toolbar] button{min-height:44px}#polaris input[type=checkbox]{width:24px;height:24px}}
+/* link "Pular para o conteúdo": fora da tela até receber o foco */
+a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-radius:6px;background:var(--cor-primaria);color:var(--cor-sobre-primaria,#fff);font-weight:600;text-decoration:none}a.pular:focus{top:8px}

@@ -831,7 +831,7 @@ export const PAGINA = no('pagina', 'studio.app', {
         def('aberto', 'com(com(estado.aberto, ["seq"], resultado.versao.seq), ["origem"], "tenant")'), def('noSalvo', 'estado.no'), ...aviso('sucesso', '"Salvo como versão " + resultado.versao.seq'), exe('nos'), ...carregaLateral('{estado.aberto.kind}', 'estado.aberto.id'),
       ], aviso('erro', 'erro'))], { se: 'estado.no', props: { variante: 'primario', icone: 'salvar' } }),
       botao('Publicar', [exe('publicar', {}, [...aviso('sucesso', '"Publicado: release " + resultado.release + ". O site já usa as versões salvas."')], aviso('erro', 'erro'))], { props: { variante: 'primario', icone: 'publicar' } }),
-      texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}'),
+      linha([texto('{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == "base" ? "padrão da plataforma" : "salvo (v" + estado.aberto.seq + ")") : "● alterações não salvas") : ""}')], { props: { papel: 'status', rotulo: 'Situação do rascunho' } }),
     ] } }),
     // menu lateral: os nós de cada tipo (o aberto fica marcado) e as ferramentas
     P('site/menu-lateral', { props: { rotulo: 'Navegação do Studio', textoAlternador: 'Nós e ferramentas', rotuloAlternador: 'Abrir os nós e as ferramentas' }, slots: { filhos: [
@@ -845,7 +845,7 @@ export const PAGINA = no('pagina', 'studio.app', {
         ...(['pagina', 'tema', 'formulario', 'cartaz'] as const).map(secaoDeNos),
       ] }),
     ] } }),
-    P('layout/principal', { filhos: [pilha([
+    P('layout/principal', { id: 'principal', filhos: [pilha([
       ...(['sucesso', 'erro', 'neutro'] as const).map((tom) => P('feedback/alerta', { se: `estado.aviso && estado.tipoAviso == ${q(tom)}`, props: { tom }, filhos: [texto('{estado.aviso}')] })),
       pilha([titulo('Bem-vindo ao Studio', 2), texto('Escolha uma página, um tema, um formulário ou um cartaz no menu à esquerda para editar, ou abra uma ferramenta (releases, imagens, diagramas).')], { se: '!estado.no && !estado.painel && estado.criando == ""', props: { gap: 8 } }),
       linha([texto('Prévia:'), botao('Claro', [def('modoPrevia', '"claro"'), atualizaPrevia], { props: { atual: '{estado.modoPrevia == "claro"}', icone: 'tema-escuro' } }), botao('Escuro', [def('modoPrevia', '"escuro"'), atualizaPrevia], { props: { atual: '{estado.modoPrevia == "escuro"}', icone: 'tema-escuro' } })], { se: 'estado.no', props: { gap: 6, papel: 'toolbar', rotulo: 'Modo da prévia' } }),

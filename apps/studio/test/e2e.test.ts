@@ -332,6 +332,13 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect(arv.getByRole('button', { name: 'Ajuda', exact: true })).toHaveCount(0); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toHaveCount(0); await expect(p.getByRole('heading', { name: /^site\/rodape$/ })).toBeVisible()
     await ctx.close()
   })
+  it('ACESSIBILIDADE: link de pular, <main id> e região viva da situação do rascunho', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.keyboard.press('Tab'); expect(await p.evaluate(() => document.activeElement?.textContent)).toBe('Pular para o conteúdo')
+    await p.keyboard.press('Enter'); expect(await p.evaluate(() => document.activeElement?.id)).toBe('principal')
+    expect(await p.locator('[role=status][aria-label="Situação do rascunho"]').count()).toBe(1); expect(await p.locator('main#principal').count()).toBe(1)
+    await ctx.close()
+  })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
     const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });
     const box = async (sel: string) => (await p.locator(sel).first().boundingBox())!, cab = await box('[data-painel] > header'), lat = await box('[data-painel] > aside'), prin = await box('[data-painel] > main')

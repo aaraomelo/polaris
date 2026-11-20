@@ -1121,9 +1121,22 @@
           }
          },
          {
-          "bloco": "texto/paragrafo",
+          "bloco": "layout/linha",
           "props": {
-           "texto": "{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == \"base\" ? \"padrão da plataforma\" : \"salvo (v\" + estado.aberto.seq + \")\") : \"● alterações não salvas\") : \"\"}"
+           "gap": 8,
+           "alinha": "centro",
+           "papel": "status",
+           "rotulo": "Situação do rascunho"
+          },
+          "slots": {
+           "filhos": [
+            {
+             "bloco": "texto/paragrafo",
+             "props": {
+              "texto": "{estado.no ? (igual(estado.no, estado.noSalvo) ? (estado.aberto.origem == \"base\" ? \"padrão da plataforma\" : \"salvo (v\" + estado.aberto.seq + \")\") : \"● alterações não salvas\") : \"\"}"
+             }
+            }
+           ]
           }
          }
         ]
@@ -3022,6 +3035,7 @@
       },
       {
        "bloco": "layout/principal",
+       "id": "principal",
        "slots": {
         "filhos": [
          {
