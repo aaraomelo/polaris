@@ -527,7 +527,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
     for (let n = e.target as Node | null; n && n !== o.container; n = n.parentNode) {
       const ent = handlers.get(n)
       const fn = ent?.h[e.type]
-      if (fn) { fn(e); modelo.flush(); ent!.sync?.() }
+      if (fn) { fn(e); modelo.flush(); ent!.sync?.(); if (e.type[0] === 'p') break } // os eventos `polaris-*` (as ilhas) valem só para o bloco mais próximo, não sobem para os ancestrais
     }
   }
   // os eventos do DOM que os blocos declaram: `click`, `input`, `change` e os personalizados da tela de edição e da zona de soltar (o formulário avisa por outro caminho)

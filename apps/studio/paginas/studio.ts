@@ -221,7 +221,7 @@ const MOVE_ARVORE: Acao[] = [
   def('tmpBloco', g(`obter(${RAIZ}, estado.tmpOrig)`, 'null')),
   def('tmpOrig2', g('(igual(fatia(estado.tmpOrig, 0, tamanho(estado.tmpCaminho)), estado.tmpCaminho) && tamanho(estado.tmpOrig) > tamanho(estado.tmpCaminho) && obter(estado.tmpOrig, [tamanho(estado.tmpCaminho)]) >= estado.tmpPos) ? com(estado.tmpOrig, [tamanho(estado.tmpCaminho)], obter(estado.tmpOrig, [tamanho(estado.tmpCaminho)]) + 1) : estado.tmpOrig', '[]')),
   def('passado', `${OK_MOVE} || estado.tmpOkE ? fatia(concat(estado.passado, [estado.no]), -60) : estado.passado`), def('futuro', `${OK_MOVE} || estado.tmpOkE ? [] : estado.futuro`), def('chaveEdicao', '""'),
-  def('no', g(`sem(com(estado.no, concat(["spec", "raiz"], estado.tmpCaminho), concat(fatia(obter(${RAIZ}, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(${RAIZ}, estado.tmpCaminho) ?? [], estado.tmpPos))), concat(["spec", "raiz"], estado.tmpOrig2))`, gE(`com(estado.no, ${LISTA_E}, move(obter(estado.no, ${LISTA_E}), ultimo(${ORIGEM_E}.e), estado.tmpPos))`, 'estado.no'))),
+  def('no', g(`sem(com(estado.no, concat(["spec", "raiz"], estado.tmpCaminho), concat(fatia(obter(${RAIZ}, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(${RAIZ}, estado.tmpCaminho) ?? [], estado.tmpPos))), concat(["spec", "raiz"], estado.tmpOrig2))`, gE(`obter(estado.no, ${LISTA_E}) == null ? estado.no : com(estado.no, ${LISTA_E}, move(obter(estado.no, ${LISTA_E}), ultimo(${ORIGEM_E}.e), estado.tmpPos))`, 'estado.no'))),
   def('sel', g('(igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])', gE(`${ORIGEM_E}.b`, 'estado.sel'))),
   def('selElemento', g('null', gE(`objeto([["caminho", concat(fatia(${ORIGEM_E}.e, 0, tamanho(${ORIGEM_E}.e) - 1), [estado.tmpPos])], ["tipo", "item"], ["rotulo", ${ORIGEM_E}.v.rotulo], ["valor", ""], ["tem", ${ORIGEM_E}.v.tem], ["itens", ${ORIGEM_E}.v.itens]])`, 'estado.selElemento'))),
   def('recolhidos', g(`filtra(estado.recolhidos, r => r != ${CHAVE_CAMINHO('estado.tmpAlvo')} && !comeca(r, ${CHAVE_CAMINHO('fatia(estado.tmpOrig, 0, tamanho(estado.tmpOrig) - 1)')} + "/") && !comeca(r, ${CHAVE_CAMINHO('estado.tmpCaminho')} + "/"))`, 'estado.recolhidos')),
@@ -393,7 +393,7 @@ const propriedades = (): Inst => pilha([
 const COPIA_DO_SELECIONADO = def('copiado', `semIds(${SELNO}, "slots")`)
 const REMOVE_SELECIONADO: Acao[] = [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
-    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
+    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('selElemento', 'null'), def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
   ]
 const botoesDaSelecao = (): Inst[] => [
   botao('Duplicar', [
@@ -619,13 +619,15 @@ const editorDeFormularios = (): Inst => pilha([
 // ---- editor de cartazes (Sign Maker) --------------------------------------------------------------------------------------------------------
 const ELSEL = 'obter(estado.no.spec, ["elementos", estado.selEl])', DOCEL = '["spec", "elementos", estado.selEl]', TIPO_EL = `(${ELSEL}).tipo`
 const COM_SEL = 'estado.selEl >= 0 && tamanho(estado.no.spec.elementos ?? []) > estado.selEl'
+/** o próximo id livre `el<n>` do cartaz: maior que o contador e que qualquer `el<n>` que a peça já tenha (o contador recomeça a cada abertura) */
+const PROX_EL = '"el" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? ""), 0, (a, i) => comeca(i, "el") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))'
 const NOVO_EL: Record<string, string> = {
-  texto: 'objeto([["tipo", "texto"], ["id", "el" + estado.contador], ["texto", "Texto"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
-  faixa: 'objeto([["tipo", "faixa"], ["id", "el" + estado.contador], ["cor", [200, 16, 46]], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
-  preco: 'objeto([["tipo", "preco"], ["id", "el" + estado.contador], ["valor", "9.99"], ["caixa", objeto([["topo", 0.3], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.4]])]])',
-  codigoBarras: 'objeto([["tipo", "codigoBarras"], ["id", "el" + estado.contador], ["valor", "7891000100103"], ["formato", "ean13"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.1], ["largura", 0.4], ["altura", 0.3]])]])',
-  qrcode: 'objeto([["tipo", "qrcode"], ["id", "el" + estado.contador], ["valor", "https://exemplo.com.br"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.6], ["largura", 0.25], ["altura", 0.35]])]])',
-  validade: 'objeto([["tipo", "validade"], ["id", "el" + estado.contador], ["caixa", objeto([["topo", 0.85], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.1]])]])',
+  texto: 'objeto([["tipo", "texto"], ["id", ' + PROX_EL + '], ["texto", "Texto"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
+  faixa: 'objeto([["tipo", "faixa"], ["id", ' + PROX_EL + '], ["cor", [200, 16, 46]], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
+  preco: 'objeto([["tipo", "preco"], ["id", ' + PROX_EL + '], ["valor", "9.99"], ["caixa", objeto([["topo", 0.3], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.4]])]])',
+  codigoBarras: 'objeto([["tipo", "codigoBarras"], ["id", ' + PROX_EL + '], ["valor", "7891000100103"], ["formato", "ean13"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.1], ["largura", 0.4], ["altura", 0.3]])]])',
+  qrcode: 'objeto([["tipo", "qrcode"], ["id", ' + PROX_EL + '], ["valor", "https://exemplo.com.br"], ["caixa", objeto([["topo", 0.6], ["esquerda", 0.6], ["largura", 0.25], ["altura", 0.35]])]])',
+  validade: 'objeto([["tipo", "validade"], ["id", ' + PROX_EL + '], ["caixa", objeto([["topo", 0.85], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.1]])]])',
 }
 /** o título e o ícone de cada tipo de elemento do cartaz na paleta */
 const ROTULO_EL: Record<string, [string, string]> = { texto: ['Texto', 'texto-paragrafo'], faixa: ['Faixa', 'layout-destaque'], preco: ['Preço', 'feedback-selo'], codigoBarras: ['Código de barras', 'cartaz'], qrcode: ['QR code', 'layout-grade'], validade: ['Validade', 'historico'] }
@@ -661,12 +663,12 @@ const telaDaPeca = (): Inst => P('midia/tela', {
   props: { proporcao: `{${PROPORCAO_PECA}}`, caixas: `{${CAIXAS_DA_PECA}}`, passo: 0.005 },
   eventos: {
     aoSelecionar: [def('selEl', ID_EVENTO)],
-    aoMover: edita(`com(estado.no, ["spec", "elementos", ${ID_EVENTO}, "caixa"], mescla(sem(obter(estado.no.spec, ["elementos", ${ID_EVENTO}, "caixa"]) ?? objeto([]), ["direita"]), objeto([["topo", evento.topo], ["esquerda", evento.esquerda], ["largura", evento.largura], ["altura", evento.altura]])))`.replace(/evento\.(topo|esquerda|largura|altura)/g, 'evento.$1'), '"mv:" + evento.id', [def('selEl', ID_EVENTO)]),
+    aoMover: edita(`(obter(estado.no.spec, ["elementos", ${ID_EVENTO}, "caixa"]) == null ? estado.no : com(estado.no, ["spec", "elementos", ${ID_EVENTO}, "caixa"], mescla(sem(obter(estado.no.spec, ["elementos", ${ID_EVENTO}, "caixa"]) ?? objeto([]), ["direita"]), objeto([["topo", evento.topo], ["esquerda", evento.esquerda], ["largura", evento.largura], ["altura", evento.altura]]))))`, '"mv:" + evento.id', [def('selEl', ID_EVENTO)]),
     aoSoltar: [
-      ...guarda,
-      def('tmpBloco', `mescla(objeto([["tipo", evento.valor], ["id", "el" + estado.contador], ["caixa", objeto([["topo", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 1]), evento.topo - obter(${TAM_SOLTO}, [evento.valor, 1]) / 2))], ["esquerda", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 0]), evento.esquerda - obter(${TAM_SOLTO}, [evento.valor, 0]) / 2))], ["largura", obter(${TAM_SOLTO}, [evento.valor, 0])], ["altura", obter(${TAM_SOLTO}, [evento.valor, 1])]])]]), obter(${EXTRAS_SOLTO}, [evento.valor]) ?? objeto([]))`),
+      def('passado', `obter(${TAM_SOLTO}, [evento.valor]) == null ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)`), def('futuro', `obter(${TAM_SOLTO}, [evento.valor]) == null ? estado.futuro : []`), def('chaveEdicao', '""'),
+      def('tmpBloco', `mescla(objeto([["tipo", evento.valor], ["id", ${PROX_EL}], ["caixa", objeto([["topo", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 1]), evento.topo - obter(${TAM_SOLTO}, [evento.valor, 1]) / 2))], ["esquerda", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 0]), evento.esquerda - obter(${TAM_SOLTO}, [evento.valor, 0]) / 2))], ["largura", obter(${TAM_SOLTO}, [evento.valor, 0])], ["altura", obter(${TAM_SOLTO}, [evento.valor, 1])]])]]), obter(${EXTRAS_SOLTO}, [evento.valor]) ?? objeto([]))`),
       def('no', 'obter(' + TAM_SOLTO + ', [evento.valor]) == null ? estado.no : com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))'),
-      def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia,
+      def('selEl', `obter(${TAM_SOLTO}, [evento.valor]) == null ? estado.selEl : tamanho(estado.no.spec.elementos ?? []) - 1`), def('contador', 'estado.contador + 1'), atualizaPrevia,
     ],
   },
   filhos: [P('midia/quadro', { props: { titulo: 'Pré-visualização do cartaz', html: '{previa.html}', altura: 560 } })],
@@ -692,7 +694,7 @@ const barraDeElemento = (): Inst => linha([
   botao('Remover', [...guarda, def('no', `sem(estado.no, ${DOCEL})`), def('selEl', '-1'), atualizaPrevia], { se: COM_SEL }),
   botao('Subir', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], move(estado.no.spec.elementos, estado.selEl, estado.selEl - 1))'), def('selEl', 'estado.selEl - 1'), atualizaPrevia], { se: `${COM_SEL} && estado.selEl > 0` }),
   botao('Descer', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], move(estado.no.spec.elementos, estado.selEl, estado.selEl + 1))'), def('selEl', 'estado.selEl + 1'), atualizaPrevia], { se: `${COM_SEL} && estado.selEl < tamanho(estado.no.spec.elementos) - 1` }),
-  botao('Duplicar', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos, [com(com(' + ELSEL + ', ["id"], "el" + estado.contador), ["se"], null)]))'), def('selEl', 'tamanho(estado.no.spec.elementos) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { se: COM_SEL }),
+  botao('Duplicar', [...guarda, def('no', 'com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos, [com(com(' + ELSEL + ', ["id"], ' + PROX_EL + '), ["se"], null)]))'), def('selEl', 'tamanho(estado.no.spec.elementos) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { se: COM_SEL }),
 ], { se: 'estado.no', props: { gap: 4 } })
 
 const propriedadesDoElemento = (): Inst => pilha([

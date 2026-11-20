@@ -45,7 +45,7 @@ export function redimensiona(c: Caixa, alca: Alca, dx: number, dy: number, passo
   if (d - e < TAMANHO_MIN) { if (alca.includes('w')) e = d - TAMANHO_MIN; else d = e + TAMANHO_MIN }
   if (b - t < TAMANHO_MIN) { if (alca.includes('n')) t = b - TAMANHO_MIN; else b = t + TAMANHO_MIN }
   e = limita(e, 0, 1 - TAMANHO_MIN); t = limita(t, 0, 1 - TAMANHO_MIN); d = limita(d, e + TAMANHO_MIN, 1); b = limita(b, t + TAMANHO_MIN, 1)
-  return { caixa: { esquerda: r4(e), topo: r4(t), largura: r4(d - e), altura: r4(b - t) }, guias }
+  return { caixa: { esquerda: r4(e), topo: r4(t), largura: r4(r4(d) - r4(e)), altura: r4(r4(b) - r4(t)) }, guias }
 }
 
 /** onde fica uma caixa de tamanho (l, a) solta com o centro no ponto (x, y): dentro da moldura e na grade */
