@@ -670,6 +670,19 @@
     "tmpBloco": {
      "tipo": "json"
     },
+    "tmpOrig": {
+     "tipo": "json"
+    },
+    "tmpAlvo": {
+     "tipo": "json"
+    },
+    "tmpOk": {
+     "tipo": "booleano",
+     "inicial": false
+    },
+    "tmpOrig2": {
+     "tipo": "json"
+    },
     "tmpDentro": {
      "tipo": "booleano",
      "inicial": false
@@ -5481,7 +5494,98 @@
                    "props": {
                     "gap": 4,
                     "papel": "group",
-                    "rotulo": "Árvore de blocos"
+                    "rotulo": "Árvore de blocos",
+                    "solta": true
+                   },
+                   "eventos": {
+                    "aoSoltar": [
+                     {
+                      "acao": "definir",
+                      "estado": "tmpOrig",
+                      "valor": "obter(acha(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => objeto([[\"k\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")], [\"c\", x.caminho]])), l => l.k == evento.valor) ?? objeto([]), [\"c\"])"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpAlvo",
+                      "valor": "obter(acha(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => objeto([[\"k\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")], [\"c\", x.caminho]])), l => l.k == evento.alvo) ?? objeto([]), [\"c\"])"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpOk",
+                      "valor": "estado.tmpOrig != null && estado.tmpAlvo != null && tamanho(estado.tmpOrig) > 0 && !igual(fatia(estado.tmpAlvo, 0, tamanho(estado.tmpOrig)), estado.tmpOrig)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpDentro",
+                      "valor": "estado.tmpOk ? (tamanho(estado.tmpAlvo) == 0 || (evento.zona == \"dentro\" && tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots ?? objeto([]))) > 0)) : (false)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpCaminho",
+                      "valor": "estado.tmpOk ? (estado.tmpDentro ? concat(estado.tmpAlvo, [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots ?? objeto([])).filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots))]) : fatia(estado.tmpAlvo, 0, tamanho(estado.tmpAlvo) - 1)) : ([])"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpPos",
+                      "valor": "estado.tmpOk ? (estado.tmpDentro ? tamanho(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? []) : ultimo(estado.tmpAlvo) + (evento.zona == \"antes\" ? 0 : 1)) : (0)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpBloco",
+                      "valor": "estado.tmpOk ? (obter(estado.no.spec.raiz, estado.tmpOrig)) : (null)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpOrig2",
+                      "valor": "estado.tmpOk ? ((igual(fatia(estado.tmpOrig, 0, tamanho(estado.tmpCaminho)), estado.tmpCaminho) && tamanho(estado.tmpOrig) > tamanho(estado.tmpCaminho) && obter(estado.tmpOrig, [tamanho(estado.tmpCaminho)]) >= estado.tmpPos) ? com(estado.tmpOrig, [tamanho(estado.tmpCaminho)], obter(estado.tmpOrig, [tamanho(estado.tmpCaminho)]) + 1) : estado.tmpOrig) : ([])"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "passado",
+                      "valor": "estado.tmpOk ? (fatia(concat(estado.passado, [estado.no]), -60)) : (estado.passado)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "futuro",
+                      "valor": "estado.tmpOk ? ([]) : (estado.futuro)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "chaveEdicao",
+                      "valor": "\"\""
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "no",
+                      "valor": "estado.tmpOk ? (sem(com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpCaminho), concat(fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], estado.tmpPos))), concat([\"spec\", \"raiz\"], estado.tmpOrig2))) : (estado.no)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "sel",
+                      "valor": "estado.tmpOk ? ((igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])) : (estado.sel)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "selElemento",
+                      "valor": "null"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "recolhidos",
+                      "valor": "estado.tmpOk ? (filtra(estado.recolhidos, r => r != junta(mapeia(estado.tmpAlvo, p => texto(p)), \"/\") && !comeca(r, junta(mapeia(fatia(estado.tmpOrig, 0, tamanho(estado.tmpOrig) - 1), p => texto(p)), \"/\") + \"/\") && !comeca(r, junta(mapeia(estado.tmpCaminho, p => texto(p)), \"/\") + \"/\"))) : (estado.recolhidos)"
+                     },
+                     {
+                      "acao": "executar",
+                      "dados": "previa",
+                      "args": {
+                       "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                       "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                       "modo": "{estado.modoPrevia}"
+                      }
+                     }
+                    ]
                    },
                    "slots": {
                     "filhos": [
@@ -5602,7 +5706,8 @@
                              "variante": "secundario",
                              "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
                              "atual": "{estado.selElemento == null && igual(x.caminho, estado.sel)}",
-                             "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}"
+                             "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}",
+                             "arrasta": "{\"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")}"
                             },
                             "eventos": {
                              "aoClicar": [
@@ -9786,7 +9891,98 @@
                       "props": {
                        "gap": 4,
                        "papel": "group",
-                       "rotulo": "Árvore de blocos"
+                       "rotulo": "Árvore de blocos",
+                       "solta": true
+                      },
+                      "eventos": {
+                       "aoSoltar": [
+                        {
+                         "acao": "definir",
+                         "estado": "tmpOrig",
+                         "valor": "obter(acha(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => objeto([[\"k\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")], [\"c\", x.caminho]])), l => l.k == evento.valor) ?? objeto([]), [\"c\"])"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpAlvo",
+                         "valor": "obter(acha(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => objeto([[\"k\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")], [\"c\", x.caminho]])), l => l.k == evento.alvo) ?? objeto([]), [\"c\"])"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpOk",
+                         "valor": "estado.tmpOrig != null && estado.tmpAlvo != null && tamanho(estado.tmpOrig) > 0 && !igual(fatia(estado.tmpAlvo, 0, tamanho(estado.tmpOrig)), estado.tmpOrig)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpDentro",
+                         "valor": "estado.tmpOk ? (tamanho(estado.tmpAlvo) == 0 || (evento.zona == \"dentro\" && tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots ?? objeto([]))) > 0)) : (false)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpCaminho",
+                         "valor": "estado.tmpOk ? (estado.tmpDentro ? concat(estado.tmpAlvo, [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots ?? objeto([])).filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots))]) : fatia(estado.tmpAlvo, 0, tamanho(estado.tmpAlvo) - 1)) : ([])"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpPos",
+                         "valor": "estado.tmpOk ? (estado.tmpDentro ? tamanho(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? []) : ultimo(estado.tmpAlvo) + (evento.zona == \"antes\" ? 0 : 1)) : (0)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpBloco",
+                         "valor": "estado.tmpOk ? (obter(estado.no.spec.raiz, estado.tmpOrig)) : (null)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpOrig2",
+                         "valor": "estado.tmpOk ? ((igual(fatia(estado.tmpOrig, 0, tamanho(estado.tmpCaminho)), estado.tmpCaminho) && tamanho(estado.tmpOrig) > tamanho(estado.tmpCaminho) && obter(estado.tmpOrig, [tamanho(estado.tmpCaminho)]) >= estado.tmpPos) ? com(estado.tmpOrig, [tamanho(estado.tmpCaminho)], obter(estado.tmpOrig, [tamanho(estado.tmpCaminho)]) + 1) : estado.tmpOrig) : ([])"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "passado",
+                         "valor": "estado.tmpOk ? (fatia(concat(estado.passado, [estado.no]), -60)) : (estado.passado)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "futuro",
+                         "valor": "estado.tmpOk ? ([]) : (estado.futuro)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "chaveEdicao",
+                         "valor": "\"\""
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "no",
+                         "valor": "estado.tmpOk ? (sem(com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpCaminho), concat(fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], estado.tmpPos))), concat([\"spec\", \"raiz\"], estado.tmpOrig2))) : (estado.no)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "sel",
+                         "valor": "estado.tmpOk ? ((igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])) : (estado.sel)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "selElemento",
+                         "valor": "null"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "recolhidos",
+                         "valor": "estado.tmpOk ? (filtra(estado.recolhidos, r => r != junta(mapeia(estado.tmpAlvo, p => texto(p)), \"/\") && !comeca(r, junta(mapeia(fatia(estado.tmpOrig, 0, tamanho(estado.tmpOrig) - 1), p => texto(p)), \"/\") + \"/\") && !comeca(r, junta(mapeia(estado.tmpCaminho, p => texto(p)), \"/\") + \"/\"))) : (estado.recolhidos)"
+                        },
+                        {
+                         "acao": "executar",
+                         "dados": "previa",
+                         "args": {
+                          "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                          "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                          "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                          "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                          "modo": "{estado.modoPrevia}"
+                         }
+                        }
+                       ]
                       },
                       "slots": {
                        "filhos": [
@@ -9907,7 +10103,8 @@
                                 "variante": "secundario",
                                 "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
                                 "atual": "{estado.selElemento == null && igual(x.caminho, estado.sel)}",
-                                "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}"
+                                "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}",
+                                "arrasta": "{\"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")}"
                                },
                                "eventos": {
                                 "aoClicar": [

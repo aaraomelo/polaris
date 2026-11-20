@@ -1277,12 +1277,19 @@ Coloca os filhos lado a lado (flex row).
 | `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
+| `solta` | booleano | não |  | zona de soltar: itens com `arrasta` (botões) arrastados para dentro dela chegam em `aoSoltar` como `{ valor, alvo, zona }` (zona: antes, dentro ou depois do item sob o ponteiro); a ilha `@polaris/engine/tela` faz o arrastar |
 
 **Slots**
 
 | Slot | Aceita | Mín. | Máx. |
 |---|---|---|---|
 | `filhos` | qualquer bloco |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoSoltar` | json |
 
 **Exemplo: Lado a lado**
 
@@ -1414,12 +1421,19 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
 | `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
+| `solta` | booleano | não |  | zona de soltar: itens com `arrasta` (botões) arrastados para dentro dela chegam em `aoSoltar` como `{ valor, alvo, zona }` (zona: antes, dentro ou depois do item sob o ponteiro); a ilha `@polaris/engine/tela` faz o arrastar |
 
 **Slots**
 
 | Slot | Aceita | Mín. | Máx. |
 |---|---|---|---|
 | `filhos` | qualquer bloco |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoSoltar` | json |
 
 **Exemplo: Com espaçamento**
 

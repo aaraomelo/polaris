@@ -386,6 +386,26 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     expect(erros.filter((e) => /ana:/.test(e) && !/previa|status of/.test(e))).toEqual([])
     await ctx.close()
   })
+  it('ÁRVORE: arrastar e soltar um bloco antes, dentro ou depois de outro (recusa soltar dentro de si; um passo de desfazer; a seleção acompanha)', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('arrasta'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/arrasta'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página arrasta')).toBeVisible()
+    await adiciona(p, 'Layout', 'Pilha'); await adiciona(p, 'Texto', 'Título') // b1 Pilha com b2 dentro
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }); await arv.getByRole('button', { name: /^Pilha #raiz$/ }).click(); await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Feedback', 'Selo') // b3 e b4 na raiz
+    const ordem = async () => (await arv.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim().replace(/\s+/g, ' ')).filter((t) => !/^(Subir|Descer|Remover|Duplicar|Copiar|Recortar|Colar)/.test(t))
+    const linha = (id: string) => arv.getByRole('button', { name: new RegExp(`#${id}$`) })
+    const arrasta = async (de: string, para: string, f: number) => { const a = (await linha(de).boundingBox())!, b = (await linha(para).boundingBox())!; await p.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await p.mouse.down(); await p.mouse.move(a.x + a.width / 2 + 8, a.y + a.height / 2 + 8, { steps: 3 }); await p.mouse.move(b.x + b.width / 2, b.y + b.height * f, { steps: 10 }); await p.waitForTimeout(150); await p.mouse.up(); await p.waitForTimeout(400) }
+    expect(await ordem()).toEqual(['Pilha #raiz', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3', 'Selo #b4'])
+    await arrasta('b4', 'b1', 0.1); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // ANTES da pilha
+    await expect(linha('b4')).toHaveAttribute('aria-current', 'true') // a seleção acompanha o bloco movido
+    await arrasta('b3', 'b1', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // DENTRO da pilha (entra depois do título; a ordem plana não muda, o recuo sim)
+    const recuo = async (id: string) => (await linha(id).evaluate((el) => (el.parentElement!.querySelector('button')!.textContent ?? '').match(/^\u2003*/)![0].length)); expect(await recuo('b3')).toBe(await recuo('b2')) // agora irmão do título
+    await arrasta('b1', 'b2', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // dentro de si mesmo: recusado
+    await arrasta('b2', 'b4', 0.9); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Título #b2', 'Pilha #b1', 'Parágrafo #b3']) // DEPOIS do selo, fora da pilha
+    await arrasta('raiz', 'b1', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Título #b2', 'Pilha #b1', 'Parágrafo #b3']) // a raiz não se move
+    await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // cada soltar é um passo
+    const ids = (await ordem()).map((t) => t.split('#')[1]); expect(new Set(ids).size).toBe(ids.length)
+    await ctx.close()
+  })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {
     const { ctx, p } = await entra('ana')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('cola'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/cola'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página cola')).toBeVisible()

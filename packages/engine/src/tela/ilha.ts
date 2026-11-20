@@ -116,12 +116,29 @@ export function ativaTelas(raiz: Document = document): () => void {
   const varre = (): void => { for (const el of raiz.querySelectorAll<HTMLElement>('[data-polaris-tela]')) { const l = ligadas.get(el); if (l) l.sincroniza(); else monta(el) } }
   // as mudanças que a própria ilha faz dentro da camada (caixas, alças, guias) NÃO religam nada: sem isso o observador se dispararia em laço
   const obs = new MutationObserver((rs) => { if (rs.every((r) => (r.target as Element).closest?.('[data-tela-camada]'))) return; varre() }); obs.observe(raiz.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-polaris-caixas', 'data-passo'] })
-  const dragstart = (e: DragEvent): void => { const b = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); const v = b?.getAttribute('data-arrasta') ?? ''; if (b && ID_ARRASTA.test(v) && e.dataTransfer) { e.dataTransfer.setData('text/plain', v); e.dataTransfer.effectAllowed = 'copy' } }
+  const dragstart = (e: DragEvent): void => { const b = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); const v = b?.getAttribute('data-arrasta') ?? ''; if (b && ID_ARRASTA.test(v) && e.dataTransfer) { e.dataTransfer.setData('text/plain', v); e.dataTransfer.effectAllowed = 'copyMove' } }
   // enquanto um botão `arrasta` está em movimento, a camada das caixas captura o arrasto (o quadro da prévia é um iframe isolado e engoliria os eventos); ao terminar, volta a deixar o ponteiro passar
   const camadas = (v: string): void => { for (const c of raiz.querySelectorAll<HTMLElement>('[data-tela-camada]')) c.style.setProperty('pointer-events', v) }
   const arrastando = (e: DragEvent): void => { dragstart(e); if ((e.target as HTMLElement | null)?.closest?.('[data-arrasta]')) camadas('auto') }
-  const solto = (): void => camadas('none')
+  const solto = (): void => { camadas('none'); limpaZonas() }
+  // ZONA DE SOLTAR (`data-solta`, a prop `solta` das caixas de layout): um item `arrasta` solto sobre outro item da mesma zona avisa `polaris-soltar { valor, alvo, zona }`, com a zona pela altura do ponteiro no item (alto = antes, meio = dentro, baixo = depois); o item sob o ponteiro leva `data-solta-zona` para o CSS desenhar a indicação
+  const limpaZonas = (): void => { for (const el of raiz.querySelectorAll('[data-solta-zona]')) el.removeAttribute('data-solta-zona') }
+  const zonaDe = (e: DragEvent, item: HTMLElement): 'antes' | 'dentro' | 'depois' => { const r = item.getBoundingClientRect(), f = r.height > 0 ? (e.clientY - r.top) / r.height : 0.5; return f < 0.3 ? 'antes' : f > 0.7 ? 'depois' : 'dentro' }
+  const itemDaZona = (e: Event): HTMLElement | null => { const it = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); return it && it.closest('[data-solta]') ? it : null }
+  const sobre = (e: DragEvent): void => {
+    const it = itemDaZona(e); if (!it || !e.dataTransfer || ![...e.dataTransfer.types].includes('text/plain')) return
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const z = zonaDe(e, it)
+    if (it.getAttribute('data-solta-zona') !== z) { limpaZonas(); it.setAttribute('data-solta-zona', z) }
+  }
+  const soltou = (e: DragEvent): void => {
+    const it = itemDaZona(e); if (!it) return
+    const valor = e.dataTransfer?.getData('text/plain') ?? '', alvo = it.getAttribute('data-arrasta') ?? ''; limpaZonas()
+    if (!ID_ARRASTA.test(valor) || !ID_ARRASTA.test(alvo)) return
+    e.preventDefault(); it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor, alvo, zona: zonaDe(e, it) } }))
+  }
+  const saiu = (e: DragEvent): void => { if (!(e.relatedTarget as HTMLElement | null)?.closest?.('[data-solta]')) limpaZonas() }
+  raiz.addEventListener('dragover', sobre); raiz.addEventListener('drop', soltou); raiz.addEventListener('dragleave', saiu)
   raiz.addEventListener('dragstart', arrastando); raiz.addEventListener('dragend', solto, true); raiz.addEventListener('drop', solto, true); varre()
-  global = { parar: () => { obs.disconnect(); raiz.removeEventListener('dragstart', arrastando); raiz.removeEventListener('dragend', solto, true); raiz.removeEventListener('drop', solto, true); global = null } }
+  global = { parar: () => { obs.disconnect(); raiz.removeEventListener('dragstart', arrastando); raiz.removeEventListener('dragend', solto, true); raiz.removeEventListener('drop', solto, true); raiz.removeEventListener('dragover', sobre); raiz.removeEventListener('drop', soltou); raiz.removeEventListener('dragleave', saiu); global = null } }
   return global.parar
 }

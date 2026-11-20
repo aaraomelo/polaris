@@ -530,8 +530,8 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
       if (fn) { fn(e); modelo.flush(); ent!.sync?.() }
     }
   }
-  // os eventos do DOM que os blocos declaram (`click`, `input`, `change` e os personalizados, como `polaris-mover` da tela de edição)
-  const tipos = [...new Set(['click', 'input', 'change', ...Object.values(o.descritores ?? descritoresPadrao()).flatMap((d) => Object.values(d.eventos ?? {}).map((ev) => ev.dom))])]
+  // os eventos do DOM que os blocos declaram: `click`, `input`, `change` e os personalizados da tela de edição e da zona de soltar (o formulário avisa por outro caminho)
+  const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar']
   for (const t of tipos) o.container.addEventListener(t, ouve)
 
   return {

@@ -31,12 +31,14 @@ const comId = (id: string | undefined): Record<string, string> => (id ? { id } :
 
 const larguraCaixa = (v: unknown): string | undefined => (typeof v === 'number' && Number.isFinite(v) ? `${Math.min(2000, Math.max(40, Math.round(v)))}px` : undefined)
 const papelDe = (p: Record<string, unknown>): Record<string, string> => (['toolbar', 'group', 'list', 'status'].includes(p.papel as string) ? { role: p.papel as string } : {})
+/** o `detail` de um CustomEvent (as ilhas avisam por eventos personalizados) */
+const detalhe = (e: Event): unknown => (e as CustomEvent).detail
 const caixa = (direcao: 'column' | 'row'): Descritor => ({
-  chave: () => 'div', tag: () => 'div', filhos: true,
+  chave: () => 'div', tag: () => 'div', filhos: true, eventos: { aoSoltar: { dom: 'polaris-soltar', payload: detalhe } },
   attrs: (p, id) => {
     const gap = num(p.gap)
     const alinha = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined
-    return { ...comId(id), ...papelDe(p), ...rotulo(p), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
+    return { ...comId(id), ...papelDe(p), ...rotulo(p), ...(p.solta === true ? { 'data-solta': '' } : {}), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
   },
 })
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))
@@ -96,7 +98,7 @@ export const d_layout_principal: Descritor = { chave: () => 'main', tag: () => '
 export const d_layout_cartao: Descritor = { chave: () => 'div:cartao', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-cartao': '', ...papelDe(p), ...rotulo(p) }) }
 export const d_midia_tela: Descritor = {
   chave: () => 'div:tela', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), ...atributosDaTela(p) }),
-  eventos: { aoMover: { dom: 'polaris-mover', payload: (e) => (e as CustomEvent).detail }, aoSelecionar: { dom: 'polaris-selecionar', payload: (e) => (e as CustomEvent).detail }, aoSoltar: { dom: 'polaris-soltar', payload: (e) => (e as CustomEvent).detail } },
+  eventos: { aoMover: { dom: 'polaris-mover', payload: detalhe }, aoSelecionar: { dom: 'polaris-selecionar', payload: detalhe }, aoSoltar: { dom: 'polaris-soltar', payload: detalhe } },
 }
 export const d_layout_secao: Descritor = { chave: () => 'details:secao', tag: () => 'details', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-secao': '', ...(p.aberta === true ? { open: '' } : {}) }) }
 export const d_layout_secao_titulo: Descritor = { chave: () => 'summary:secao', tag: () => 'summary', texto: (p) => txt(p.texto), attrs: (p, id) => ({ ...comId(id), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }) }
@@ -206,7 +208,7 @@ export const d_form_formulario: Descritor = {
     const valores = valoresIniciaisJson(p.valores), idioma = typeof p.idioma === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/.test(p.idioma) ? p.idioma : ''
     return { ...comId(id), 'data-polaris-formulario': idFormulario(p.formulario), ...(valores ? { 'data-polaris-valores': valores } : {}), ...(idioma ? { 'data-polaris-idioma': idioma } : {}), role: 'group', 'aria-busy': 'true' }
   },
-  eventos: { aoEnviado: { dom: 'polaris-enviado', payload: (e) => (e as CustomEvent).detail }, aoErro: { dom: 'polaris-erro', payload: (e) => (e as CustomEvent).detail } },
+  eventos: { aoEnviado: { dom: 'polaris-enviado', payload: detalhe }, aoErro: { dom: 'polaris-erro', payload: detalhe } },
 }
 /** Quadro: um documento HTML dentro de um iframe SEMPRE com `sandbox=""` (sem scripts, sem formulários, sem navegação, origem opaca). Nada nas props altera o sandbox. */
 export const QUADRO_MAX = 262_144
