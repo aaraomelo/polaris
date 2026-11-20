@@ -143,7 +143,9 @@ const DA_LISTA = `estado.buscaBloco != "" ? contem(semAcentos(minusculas(bd.id +
 /** o selecionado aceita filhos (declara algum slot)? Então o bloco novo entra dentro; senão, logo depois dele, no pai */
 const ACEITA = `tamanho(chaves((${DEFBLOCO}).slots ?? objeto([]))) > 0`
 const PAI_LISTA = 'concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.sel) - 1))'
-const NOVO_BLOCO = `mescla(objeto([["bloco", bd.id], ["id", "b" + estado.contador]]), tamanho(chaves(${PROPS_NOVAS})) > 0 ? objeto([["props", ${PROPS_NOVAS}]]) : objeto([]))`
+/** o próximo id livre `b<n>`: maior que o contador e que qualquer `b<n>` que a página já tenha (o contador recomeça a cada página aberta, então um id novo podia repetir um existente) */
+const PROX_ID = `"b" + maximo(estado.contador, 1 + dobra(mapeia(percorre(${RAIZ}, "slots"), x => x.no.id ?? ""), 0, (a, i) => comeca(i, "b") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a))`
+const NOVO_BLOCO = `mescla(objeto([["bloco", bd.id], ["id", ${PROX_ID}]]), tamanho(chaves(${PROPS_NOVAS})) > 0 ? objeto([["props", ${PROPS_NOVAS}]]) : objeto([]))`
 /** passos curtos (cada expressão tem limite de tamanho): o bloco novo, DENTRO ou DEPOIS, a lista de destino e a posição; depois uma única inserção */
 const ADICIONA: Acao[] = [
   def('chaveEdicao', '""'), def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'),
@@ -355,7 +357,7 @@ const propriedades = (): Inst => pilha([
 const botoesDaSelecao = (): Inst[] => [
   botao('Duplicar', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
-    def('tmpBloco', `com(semIds(${SELNO}, "slots"), ["id"], "b" + estado.contador)`), def('tmpCaminho', PAI_LISTA), def('tmpPos', 'ultimo(estado.sel) + 1'),
+    def('tmpBloco', `com(semIds(${SELNO}, "slots"), ["id"], ${PROX_ID})`), def('tmpCaminho', PAI_LISTA), def('tmpPos', 'ultimo(estado.sel) + 1'),
     def('no', 'com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))'),
     def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`),
     def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [estado.tmpPos])'), atualizaPrevia,

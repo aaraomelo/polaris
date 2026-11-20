@@ -350,6 +350,11 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect.poll(() => previa(p).locator('h1').allInnerTexts()).toEqual(['Olá', 'Olá'])
     const ids = await arv.getByRole('button', { name: /#/ }).allTextContents(); expect(new Set(ids.map((t) => t.trim())).size).toBe(ids.length) // ids todos diferentes
     await p.getByRole('button', { name: 'Desfazer' }).click(); await expect.poll(() => previa(p).locator('h1').allInnerTexts()).toEqual(['Olá'])
+    // ids novos nunca repetem os que a página já tem, nem depois de salvar e reabrir (o contador recomeça)
+    await p.getByRole('button', { name: 'Salvar' }).click(); await expect(p.getByText(/salvo \(v\d+\)/)).toBeVisible(); await p.reload(); await p.getByRole('link', { name: 'Polaris Studio' }).waitFor()
+    await p.getByRole('button', { name: /dup \(personalizado\)/ }).click(); await expect(p.getByText('Página dup')).toBeVisible()
+    await arv.getByRole('button', { name: /Pilha #b1$/ }).click(); await p.getByRole('button', { name: 'Duplicar' }).click(); await adiciona(p, 'Texto', 'Parágrafo')
+    const ids2 = (await arv.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim().split('#')[1]); expect(ids2.length).toBe(5); expect(new Set(ids2).size).toBe(ids2.length)
     await ctx.close()
   })
   it('CELULAR: as três colunas do editor viram abas (Blocos, Prévia, Propriedades); no computador aparecem juntas', async () => {

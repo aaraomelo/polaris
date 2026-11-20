@@ -5144,7 +5144,7 @@
                                  {
                                   "acao": "definir",
                                   "estado": "tmpBloco",
-                                  "valor": "mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + estado.contador]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))"
+                                  "valor": "mescla(objeto([[\"bloco\", bd.id], [\"id\", \"b\" + maximo(estado.contador, 1 + dobra(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => x.no.id ?? \"\"), 0, (a, i) => comeca(i, \"b\") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a))]]), tamanho(chaves(objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)])))) > 0 ? objeto([[\"props\", objeto(mapeia(filtra(camposDoSchema(bd.props), c => c.obrigatorio && tamanho(c.caminho) == 1), c => [c.nome, c.padrao ?? (c.tipo == \"texto\" ? c.rotulo : (c.tipo == \"inteiro\" || c.tipo == \"numero\") ? (c.min ?? 0) : c.tipo == \"booleano\" ? false : c.tipo == \"escolha\" ? c.opcoes[0] : null)]))]]) : objeto([]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -5621,7 +5621,7 @@
                                  {
                                   "acao": "definir",
                                   "estado": "tmpBloco",
-                                  "valor": "com(semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\"), [\"id\"], \"b\" + estado.contador)"
+                                  "valor": "com(semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\"), [\"id\"], \"b\" + maximo(estado.contador, 1 + dobra(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => x.no.id ?? \"\"), 0, (a, i) => comeca(i, \"b\") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a)))"
                                  },
                                  {
                                   "acao": "definir",
@@ -9753,7 +9753,7 @@
                                     {
                                      "acao": "definir",
                                      "estado": "tmpBloco",
-                                     "valor": "com(semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\"), [\"id\"], \"b\" + estado.contador)"
+                                     "valor": "com(semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\"), [\"id\"], \"b\" + maximo(estado.contador, 1 + dobra(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => x.no.id ?? \"\"), 0, (a, i) => comeca(i, \"b\") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a)))"
                                     },
                                     {
                                      "acao": "definir",
