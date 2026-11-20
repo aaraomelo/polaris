@@ -32,8 +32,8 @@ beforeAll(async () => {
   nav = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox'] })
 })
 afterAll(async () => { await nav?.close(); await app?.close(); await pg?.close() })
-async function entra(usuario: string, tenant: 'a' | 'b' = 'a'): Promise<{ ctx: BrowserContext; p: Page }> {
-  const ctx = await nav.newContext({ viewport: { width: 1400, height: 900 } }); await ctx.addCookies([{ name: 'u', value: `${usuario}|${tenant}`, url }])
+async function entra(usuario: string, tenant: 'a' | 'b' = 'a', toque = false): Promise<{ ctx: BrowserContext; p: Page }> {
+  const ctx = await nav.newContext({ viewport: { width: 1400, height: 900 }, ...(toque ? { hasTouch: true } : {}) }); await ctx.addCookies([{ name: 'u', value: `${usuario}|${tenant}`, url }])
   const p = await ctx.newPage(); p.on('console', (m) => { if (m.type() === 'error' && !/status of (400|409|422)/.test(m.text())) erros.push(`${usuario}: ${m.text()} (${m.location().url})`) }); p.on('pageerror', (e) => erros.push(`${usuario}: ${e.message}`))
   await p.goto(`${url}/studio`); await p.getByRole('link', { name: 'Polaris Studio' }).waitFor(); return { ctx, p }
 }
@@ -484,6 +484,35 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     // a largura cresce 0,1 da altura da peça = 0,1 × altura ÷ largura da peça em fração (A5 paisagem: ÷ 1,4189), o pivô (topo, esquerda) não muda
     await expect.poll(() => valor('Largura')).toBeCloseTo(0.3 + 0.1 / 1.4189, 1); expect(await valor('Esquerda')).toBe(0.4); expect(await valor('Topo')).toBe(0.6); expect(await valor('Altura')).toBe(0.15)
     expect(await p.locator('[data-caixa="1"] [data-alca="e"]').count()).toBe(1)
+    await ctx.close()
+  })
+  it('TOQUE: pressão longa arrasta (fantasma, dica de inválido, soltar na árvore e sobre a peça); mexer antes é rolar e não arrasta', async () => {
+    const { ctx, p } = await entra('ana', 'a', true), cdp = await ctx.newCDPSession(p)
+    const toca = async (tipo: 'touchStart' | 'touchMove' | 'touchEnd', x?: number, y?: number) => { await cdp.send('Input.dispatchTouchEvent', { type: tipo, touchPoints: tipo === 'touchEnd' ? [] : [{ x: x!, y: y!, id: 1 }] }) }
+    const arrastaToque = async (de: Locator, alvo: (() => Promise<{ x: number; y: number }>), pressao = 520, antesDeSoltar?: () => Promise<void>) => {
+      await de.scrollIntoViewIfNeeded(); const a = (await de.boundingBox())!, x0 = a.x + a.width / 2, y0 = a.y + a.height / 2
+      await toca('touchStart', x0, y0); await p.waitForTimeout(pressao); const b = await alvo()
+      for (let i = 1; i <= 8; i++) { await toca('touchMove', x0 + ((b.x - x0) * i) / 8, y0 + ((b.y - y0) * i) / 8); await p.waitForTimeout(25) }
+      await p.waitForTimeout(120); if (antesDeSoltar) await antesDeSoltar(); await toca('touchEnd'); await p.waitForTimeout(500)
+    }
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('toque'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/toque'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página toque')).toBeVisible()
+    await adiciona(p, 'Layout', 'Pilha'); await adiciona(p, 'Texto', 'Título'); const arv = p.getByRole('tree', { name: 'Árvore de blocos' }); await arv.getByRole('button', { name: /^Pilha #raiz$/ }).click(); await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Feedback', 'Selo')
+    const ordem = async () => (await arv.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim().replace(/\s+/g, ' ')).filter((t) => !/^(Subir|Descer|Remover|Duplicar|Copiar|Recortar|Colar)/.test(t)), linha = (id: string) => arv.getByRole('button', { name: new RegExp(`#${id}$`) })
+    const ponto = (id: string, f: number) => async () => { await linha(id).scrollIntoViewIfNeeded(); const b = (await linha(id).boundingBox())!; return { x: b.x + b.width / 2, y: b.y + b.height * f } }
+    const inicial = ['Pilha #raiz', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3', 'Selo #b4']; expect(await ordem()).toEqual(inicial)
+    // rolar não arrasta: o dedo mexe logo, antes da pressão longa
+    await linha('b4').scrollIntoViewIfNeeded(); const s4 = (await linha('b4').boundingBox())!; await toca('touchStart', s4.x + 5, s4.y + 5); await toca('touchMove', s4.x + 5, s4.y - 40); await p.waitForTimeout(500); expect(await p.locator('[data-arrasto-toque]').count()).toBe(0); await toca('touchEnd'); expect(await ordem()).toEqual(inicial)
+    // pressão longa: o fantasma aparece, o alvo mostra a zona e o soltar move (Selo ANTES da pilha)
+    await arrastaToque(linha('b4'), ponto('b1', 0.1), 520, async () => { expect(await p.locator('[data-arrasto-toque]').count()).toBe(1); expect(await linha('b1').getAttribute('data-solta-zona')).toBe('antes') })
+    expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']); expect(await p.locator('[data-arrasto-toque]').count()).toBe(0)
+    // a dica de inválido também vale no toque: a pilha sobre o próprio filho; soltar ali não muda nada
+    const antes = await ordem(); await arrastaToque(linha('b1'), ponto('b2', 0.5), 520, async () => { expect(await linha('b2').getAttribute('data-solta-zona')).toBe('invalida') }); expect(await ordem()).toEqual(antes)
+    await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(inicial) // um soltar por toque é um passo de desfazer
+    // cartaz: soltar um botão da paleta sobre a peça cria o elemento no ponto
+    await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('toque-cartaz'); await p.getByRole('button', { name: 'Criar', exact: true }).click().catch(() => {}); await p.getByRole('button', { name: 'Descartar e criar' }).click().catch(() => {}); await expect(p.getByText('Cartaz toque-cartaz')).toBeVisible()
+    const tela = p.locator('[data-polaris-tela]'), faixa = p.getByRole('toolbar', { name: 'Paleta de elementos' }).getByRole('button', { name: 'Faixa', exact: true }), nElem = () => p.locator('button', { hasText: /^(▶ )?\d+\. / }).count()
+    const antesN = await nElem(); await arrastaToque(faixa, async () => { const r = (await tela.boundingBox())!; return { x: r.x + r.width * 0.5, y: r.y + r.height * 0.8 } }); await expect.poll(nElem).toBe(antesN + 1)
+    await expect.poll(async () => Number(await p.getByRole('textbox', { name: 'Topo', exact: true }).inputValue())).toBeCloseTo(0.7, 1) // o centro da faixa vai ao ponto (80% da altura)
     await ctx.close()
   })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {

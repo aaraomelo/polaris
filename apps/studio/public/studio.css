@@ -63,3 +63,5 @@ a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-ra
 #polaris [data-polaris-tela]{width:min(100%,calc(75vh * var(--proporcao,1)))!important}
 /* soltar INVÁLIDO (a ilha marca o item sob o ponteiro quando o hospedeiro recusa): vermelho tracejado, e o navegador mostra o cursor de proibido */
 #polaris [data-solta] [data-arrasta][data-solta-zona="invalida"]{outline:3px dashed #dc2626;outline-offset:-3px;background:rgba(220,38,38,.12);cursor:no-drop}
+/* arrastar por toque: a pressão longa não seleciona texto nem abre a lupa/menu do iOS */
+#polaris [data-arrasta]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}

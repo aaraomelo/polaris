@@ -134,37 +134,90 @@ export function ativaTelas(raiz: Document = document): () => void {
   const dragstart = (e: DragEvent): void => { const b = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); const v = b?.getAttribute('data-arrasta') ?? ''; if (b && ID_ARRASTA.test(v) && e.dataTransfer) { emArrasto = v; e.dataTransfer.setData(MIME, v); e.dataTransfer.effectAllowed = 'copyMove' } }
   // enquanto um botão `arrasta` está em movimento, a camada das caixas captura o arrasto (o quadro da prévia é um iframe isolado e engoliria os eventos); ao terminar, volta a deixar o ponteiro passar
   const camadas = (v: string): void => { for (const c of raiz.querySelectorAll<HTMLElement>('[data-tela-camada]')) c.style.setProperty('pointer-events', v) }
-  const arrastando = (e: DragEvent): void => { dragstart(e); if ((e.target as HTMLElement | null)?.closest?.('[data-arrasta]')) camadas('auto') }
+  const arrastando = (e: DragEvent): void => { if (toque) { e.preventDefault(); return } dragstart(e); if ((e.target as HTMLElement | null)?.closest?.('[data-arrasta]')) camadas('auto') }
   const solto = (): void => { camadas('none'); limpaZonas(); emArrasto = '' }
   // ZONA DE SOLTAR (`data-solta`, a prop `solta` das caixas de layout): um item `arrasta` solto sobre outro item da mesma zona avisa `polaris-soltar { valor, alvo, zona }`, com a zona pela altura do ponteiro no item (alto = antes, meio = dentro, baixo = depois); o item sob o ponteiro leva `data-solta-zona` para o CSS desenhar a indicação
   const limpaZonas = (): void => { for (const el of raiz.querySelectorAll('[data-solta-zona]')) el.removeAttribute('data-solta-zona') }
-  const zonaDe = (e: DragEvent, item: HTMLElement): 'antes' | 'dentro' | 'depois' => { const r = item.getBoundingClientRect(), f = r.height > 0 ? (e.clientY - r.top) / r.height : 0.5; return f < 0.3 ? 'antes' : f > 0.7 ? 'depois' : 'dentro' }
-  /** o item sob o ponteiro; fora de qualquer item (entre linhas, numa linha sem `arrasta`, depois do último), o item MAIS PRÓXIMO na vertical: o soltar ambíguo vai para a posição certa em vez de ser perdido (acima do item = antes, abaixo = depois) */
-  const itemDaZona = (e: Event): HTMLElement | null => {
-    const alvo = e.target as HTMLElement | null, it = alvo?.closest?.<HTMLElement>('[data-arrasta]'); if (it && it.closest('[data-solta]')) return it
+  const zonaPorY = (y: number, item: HTMLElement): 'antes' | 'dentro' | 'depois' => { const r = item.getBoundingClientRect(), f = r.height > 0 ? (y - r.top) / r.height : 0.5; return f < 0.3 ? 'antes' : f > 0.7 ? 'depois' : 'dentro' }
+  /** o item sob o ponto; fora de qualquer item (entre linhas, numa linha sem `arrasta`, depois do último), o item MAIS PRÓXIMO na vertical: o soltar ambíguo vai para a posição certa em vez de ser perdido (acima do item = antes, abaixo = depois) */
+  const itemEm = (alvo: Element | null, y: number): HTMLElement | null => {
+    const it = alvo?.closest?.<HTMLElement>('[data-arrasta]'); if (it && it.closest('[data-solta]')) return it
     const zona = alvo?.closest?.<HTMLElement>('[data-solta]'); if (!zona) return null
-    const y = (e as DragEvent).clientY; let melhor: HTMLElement | null = null, dist = Infinity
+    let melhor: HTMLElement | null = null, dist = Infinity
     for (const c of zona.querySelectorAll<HTMLElement>('[data-arrasta]')) { const r = c.getBoundingClientRect(); if (r.height <= 0) continue; const d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; if (d < dist) { dist = d; melhor = c } }
     return melhor
   }
+  /** o hospedeiro decide se o soltar vale: `polaris-sobre` (cancelável) com { valor, alvo, zona }; cancelado = inválido (marca vermelha; no arrasto nativo, cursor de proibido e sem soltar). Marca o item sob o ponteiro. */
+  const avalia = (it: HTMLElement, y: number, valor: string): { vale: boolean; zona: 'antes' | 'dentro' | 'depois' } => {
+    const zona = zonaPorY(y, it), vale = it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-sobre', { bubbles: true, cancelable: true, detail: { valor, alvo: it.getAttribute('data-arrasta') ?? '', zona } })) !== false
+    const marca = vale ? zona : 'invalida'; if (it.getAttribute('data-solta-zona') !== marca) { limpaZonas(); it.setAttribute('data-solta-zona', marca) }
+    return { vale, zona }
+  }
+  const avisaSoltar = (it: HTMLElement, valor: string, zona: string): void => { const alvo = it.getAttribute('data-arrasta') ?? ''; if (ID_ARRASTA.test(valor) && ID_ARRASTA.test(alvo)) it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor, alvo, zona } })) }
   const sobre = (e: DragEvent): void => {
-    const it = itemDaZona(e); if (!it || !e.dataTransfer || ![...e.dataTransfer.types].includes(MIME)) return
-    const z = zonaDe(e, it), alvo = it.getAttribute('data-arrasta') ?? ''
-    // o hospedeiro decide se o soltar vale: `polaris-sobre` (cancelável) com { valor, alvo, zona }; cancelado = inválido (marca vermelha, o navegador mostra o cursor de proibido e não solta)
-    const vale = it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-sobre', { bubbles: true, cancelable: true, detail: { valor: emArrasto, alvo, zona: z } })) !== false
+    if (!e.dataTransfer || ![...e.dataTransfer.types].includes(MIME)) return
+    const it = itemEm(e.target as Element | null, e.clientY); if (!it) return
+    const { vale } = avalia(it, e.clientY, emArrasto)
     if (vale) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } else e.dataTransfer.dropEffect = 'none'
-    const marca = vale ? z : 'invalida'
-    if (it.getAttribute('data-solta-zona') !== marca) { limpaZonas(); it.setAttribute('data-solta-zona', marca) }
   }
   const soltou = (e: DragEvent): void => {
-    const it = itemDaZona(e); if (!it) return
-    const marcado = it.getAttribute('data-solta-zona') === 'invalida', valor = e.dataTransfer?.getData(MIME) ?? '', alvo = it.getAttribute('data-arrasta') ?? ''; limpaZonas(); if (marcado) return
-    if (!ID_ARRASTA.test(valor) || !ID_ARRASTA.test(alvo)) return
-    e.preventDefault(); it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor, alvo, zona: zonaDe(e, it) } }))
+    const it = itemEm(e.target as Element | null, e.clientY); if (!it) return
+    const marcado = it.getAttribute('data-solta-zona') === 'invalida', valor = e.dataTransfer?.getData(MIME) ?? ''; limpaZonas(); if (marcado) return
+    e.preventDefault(); avisaSoltar(it, valor, zonaPorY(e.clientY, it))
   }
   const saiu = (e: DragEvent): void => { if (!(e.relatedTarget as HTMLElement | null)?.closest?.('[data-solta]')) limpaZonas() }
+  // ARRASTAR POR TOQUE: o arrastar nativo do HTML não é confiável em telas de toque; aqui, uma pressão longa num botão `arrasta` começa o arrasto (um fantasma segue o dedo, a lista rola perto das bordas) e o soltar chama a mesma lógica do mouse. Mexer antes da pressão longa é rolar a página, como sempre.
+  const LONGA = 350, TOLERANCIA = 10, BORDA = 56
+  let toque: { it: HTMLElement; valor: string; x0: number; y0: number; x: number; y: number; id: number; timer: number; ativo: boolean; fantasma?: HTMLElement; raf?: number } | null = null
+  const rolavel = (el: Element | null): HTMLElement | null => { for (let n = el?.parentElement ?? null; n; n = n.parentElement) { const o = getComputedStyle(n).overflowY; if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight) return n } return null }
+  const alvoDoToque = (): void => {
+    if (!toque) return
+    const el = raiz.elementFromPoint(toque.x, toque.y), it = itemEm(el, toque.y); if (it) avalia(it, toque.y, toque.valor); else limpaZonas()
+  }
+  const fimDoToque = (solta: boolean): void => {
+    const t = toque; if (!t) return; toque = null; clearTimeout(t.timer); if (t.raf) cancelAnimationFrame(t.raf); t.fantasma?.remove()
+    if (!t.ativo) return
+    const el = raiz.elementFromPoint(t.x, t.y), it = itemEm(el, t.y), marcado = it?.getAttribute('data-solta-zona') === 'invalida'; limpaZonas(); emArrasto = ''
+    // o toque que fecha o arrasto não vira clique no botão
+    const engole = (c: Event): void => { c.preventDefault(); c.stopPropagation() }; raiz.addEventListener('click', engole, { capture: true, once: true }); setTimeout(() => raiz.removeEventListener('click', engole, true), 500)
+    if (!solta) return
+    if (it) { if (!marcado) avisaSoltar(it, t.valor, zonaPorY(t.y, it)); return }
+    const tela = el?.closest?.<HTMLElement>('[data-polaris-tela]'); if (!tela) return // sobre a tela de edição: cria no ponto (o mesmo `polaris-soltar` do mouse)
+    const r = tela.getBoundingClientRect(); if (r.width <= 0 || r.height <= 0) return
+    const c = colocaCentrada(Math.min(1, Math.max(0, (t.x - r.left) / r.width)), Math.min(1, Math.max(0, (t.y - r.top) / r.height)), 0, 0, passoDe({ passo: Number(tela.getAttribute('data-passo')) }))
+    if (ID_ARRASTA.test(t.valor)) tela.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor: t.valor, topo: c.topo, esquerda: c.esquerda } }))
+  }
+  const comecaToque = (): void => {
+    const t = toque; if (!t) return; t.ativo = true; emArrasto = t.valor
+    const f = document.createElement('div'); f.setAttribute('data-arrasto-toque', ''); f.textContent = (t.it.textContent ?? '').trim().slice(0, 40)
+    f.style.cssText = 'position:fixed;z-index:2147483647;pointer-events:none;padding:6px 10px;border-radius:8px;background:#f59e0b;color:#111;font:600 14px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.92;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;left:0;top:0;transform:translate(' + (t.x + 14) + 'px,' + (t.y - 18) + 'px)'
+    document.body.appendChild(f); t.fantasma = f; navigator.vibrate?.(15)
+    const ciclo = (): void => { // autorrolagem nas bordas, e o alvo é recalculado (a lista anda sob o dedo)
+      if (!toque) return; const box = rolavel(t.it), topo = box ? box.getBoundingClientRect().top : 0, base = box ? box.getBoundingClientRect().bottom : innerHeight
+      const d = toque.y < topo + BORDA ? -10 : toque.y > base - BORDA ? 10 : 0
+      if (d) { if (box) box.scrollTop += d; else scrollBy(0, d); alvoDoToque() }
+      toque.raf = requestAnimationFrame(ciclo)
+    }
+    t.raf = requestAnimationFrame(ciclo); alvoDoToque()
+  }
+  const toqueBaixo = (e: PointerEvent): void => {
+    if (e.pointerType !== 'touch' || toque) return
+    const it = (e.target as Element | null)?.closest?.<HTMLElement>('[data-arrasta]'); const valor = it?.getAttribute('data-arrasta') ?? ''; if (!it || !ID_ARRASTA.test(valor)) return
+    toque = { it, valor, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, id: e.pointerId, ativo: false, timer: window.setTimeout(comecaToque, LONGA) }
+  }
+  const toqueMove = (e: PointerEvent): void => {
+    if (!toque || e.pointerId !== toque.id) return; toque.x = e.clientX; toque.y = e.clientY
+    if (!toque.ativo) { if (Math.hypot(e.clientX - toque.x0, e.clientY - toque.y0) > TOLERANCIA) fimDoToque(false); return } // mexeu antes da pressão longa: é rolagem
+    if (toque.fantasma) toque.fantasma.style.transform = `translate(${toque.x + 14}px,${toque.y - 18}px)`; alvoDoToque()
+  }
+  const toqueCima = (cancelado: boolean) => (e: PointerEvent): void => { if (toque && e.pointerId === toque.id) fimDoToque(!cancelado) }
+  const naoRola = (e: TouchEvent): void => { if (toque?.ativo && e.cancelable) e.preventDefault() } // durante o arrasto o dedo não rola a página
+  const semMenu = (e: Event): void => { if (toque) e.preventDefault() } // a pressão longa não abre o menu de contexto
+  const cimaSolta = toqueCima(false) as EventListener, cimaCancela = toqueCima(true) as EventListener
+  raiz.addEventListener('pointerdown', toqueBaixo as EventListener); raiz.addEventListener('pointermove', toqueMove as EventListener); raiz.addEventListener('pointerup', cimaSolta); raiz.addEventListener('pointercancel', cimaCancela)
+  raiz.addEventListener('touchmove', naoRola as EventListener, { passive: false }); raiz.addEventListener('contextmenu', semMenu)
   raiz.addEventListener('dragover', sobre); raiz.addEventListener('drop', soltou); raiz.addEventListener('dragleave', saiu)
   raiz.addEventListener('dragstart', arrastando); raiz.addEventListener('pointerdown', solto, true); raiz.addEventListener('dragend', solto, true); raiz.addEventListener('drop', solto, true); varre()
-  global = { parar: () => { obs.disconnect(); raiz.removeEventListener('dragstart', arrastando); raiz.removeEventListener('pointerdown', solto, true); raiz.removeEventListener('dragend', solto, true); raiz.removeEventListener('drop', solto, true); raiz.removeEventListener('dragover', sobre); raiz.removeEventListener('drop', soltou); raiz.removeEventListener('dragleave', saiu); global = null } }
+  global = { parar: () => { obs.disconnect(); raiz.removeEventListener('dragstart', arrastando); raiz.removeEventListener('pointerdown', solto, true); raiz.removeEventListener('dragend', solto, true); raiz.removeEventListener('drop', solto, true); raiz.removeEventListener('dragover', sobre); raiz.removeEventListener('drop', soltou); raiz.removeEventListener('dragleave', saiu); raiz.removeEventListener('pointerdown', toqueBaixo as EventListener); raiz.removeEventListener('pointermove', toqueMove as EventListener); raiz.removeEventListener('pointerup', cimaSolta); raiz.removeEventListener('pointercancel', cimaCancela); raiz.removeEventListener('touchmove', naoRola as EventListener); raiz.removeEventListener('contextmenu', semMenu); fimDoToque(false); global = null } }
   return global.parar
 }
