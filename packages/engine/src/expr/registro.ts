@@ -317,6 +317,12 @@ export const REGISTRO: Def[] = [
     { expr: 'tamanho(elementosDoBloco(p, s))', esc: { p: { papel: 'group', subtitulo: 'x' }, s: { type: 'object', properties: { papel: { type: 'string' }, subtitulo: { type: 'string' } } } }, saida: 1 },
     { expr: 'elementosDoBloco(p, 5)', esc: { p: {} }, indefinido: U },
   ] },
+  { nome: 'semIds', tipo: 'funcao', assinatura: 'semIds(raiz, chave) → árvore', descricao: 'Uma CÓPIA da árvore sem o campo `id` em cada nó (o nó e os filhos de `chave`, como em `percorre`): serve para duplicar um bloco sem repetir identificadores. O resto fica igual; raiz que não é objeto ou chave inválida é ausente.', exemplos: [
+    { expr: 'semIds(n, "slots")', esc: { n: { id: 'a', bloco: 'x', slots: { filhos: [{ id: 'b', bloco: 'y' }, { bloco: 'z', props: { id: 7 } }] } } }, saida: { bloco: 'x', slots: { filhos: [{ bloco: 'y' }, { bloco: 'z', props: { id: 7 } }] } } },
+    { expr: 'semIds(n, "filhos")', esc: { n: { id: 1, filhos: [{ id: 2, filhos: [{ id: 3 }] }] } }, saida: { filhos: [{ filhos: [{}] }] } },
+    { expr: 'semIds(n, "slots").id', esc: { n: { id: 'a' } }, indefinido: U },
+    { expr: 'semIds(5, "slots")', indefinido: U },
+  ] },
   { nome: 'inverso', tipo: 'funcao', assinatura: 'inverso(patches) → patches', descricao: 'Os patches que DESFAZEM: ordem inversa, `add` ↔ `remove`, `replace` troca `valor` e `antes`. Exige o valor antigo nos patches (os de `difere` já o trazem).', exemplos: [
     { expr: 'inverso(difere(a, b))', esc: { a: { x: 1 }, b: { x: 2 } }, saida: [{ op: 'replace', caminho: ['x'], valor: 1, antes: 2 }] },
   ], leis: [{ expr: 'igual(aplica(b, inverso(difere(a, b))), a)', gera: { a: 'json', b: 'json' } }] },

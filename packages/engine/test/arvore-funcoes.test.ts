@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FUNCOES_PADRAO, avalia, parseExpr } from '../src/index'
-import { camposDoSchema, elementosDoBloco, percorre } from '../src/expr/arvore'
+import { camposDoSchema, elementosDoBloco, percorre, semIds } from '../src/expr/arvore'
 
 const ev = (src: string, esc: Record<string, unknown> = {}) => avalia(parseExpr(src), esc, FUNCOES_PADRAO)
 
@@ -85,5 +85,16 @@ describe('elementosDoBloco', () => {
     const s = { type: 'object', properties: { ['__proto__']: { type: 'string' }, itens: { type: 'array', items: { type: 'string' } } } }
     expect(elementosDoBloco({ itens: ['a', 7, null, { x: 1 }, 'b'] }, s)!.map((e) => e.rotulo)).toEqual(['Itens', 'a', 'Item 2', 'Item 3', 'Item 4', 'b'])
     const muitos = elementosDoBloco({ itens: Array.from({ length: 5000 }, (_, i) => `i${i}`) }, s)!; expect(muitos.length).toBeLessThanOrEqual(10_000); expect(muitos.length).toBeGreaterThan(10)
+  })
+})
+
+describe('semIds', () => {
+  it('tira o id do nó e dos filhos de slots, sem mexer no original nem nas props', () => {
+    const n = { id: 'a', bloco: 'x', props: { id: 'p' }, slots: { filhos: [{ id: 'b', bloco: 'y', slots: { filhos: [{ id: 'c' }] } }], outro: [{ id: 'd' }] } }, c = JSON.stringify(n)
+    expect(semIds(n, 'slots')).toEqual({ bloco: 'x', props: { id: 'p' }, slots: { filhos: [{ bloco: 'y', slots: { filhos: [{}] } }], outro: [{}] } }); expect(JSON.stringify(n)).toBe(c)
+  })
+  it('total: entradas estranhas e chaves perigosas', () => {
+    for (const r of [5, null, 'x', []]) expect(semIds(r, 'slots')).toBeUndefined(); expect(semIds({}, '__proto__')).toBeUndefined(); expect(semIds({}, 7)).toBeUndefined()
+    expect(semIds({ id: 1, slots: { filhos: [3, null, { id: 2 }] } }, 'slots')).toEqual({ slots: { filhos: [3, null, {}] } })
   })
 })

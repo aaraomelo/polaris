@@ -195,7 +195,8 @@ const arvore = (): Inst => pilha([
     linha([
       setaDaLinha(`x.v == null && (${TEM_FILHOS} || ${DEFX}.composto == true)`), marcadorDaLinha(`x.v == null && !(${TEM_FILHOS} || ${DEFX}.composto == true)`),
       botao('{x.no.bloco + (x.no.id ? " #" + x.no.id : "")}', [def('sel', 'x.caminho'), def('selElemento', 'null'), def('abaCel', '"props"'), atualizaPrevia], { se: 'x.v == null', props: { icone: `{${DEFX}.icone}`, atual: '{estado.selElemento == null && igual(x.caminho, estado.sel)}', variante: 'secundario', alvo: `{${ALVO_DO_BLOCO}}` } }),
-      ...botoesDaSelecao().map((b) => ({ ...b, se: `x.v == null && igual(x.caminho, estado.sel) && estado.selElemento == null${b.se ? ` && (${b.se})` : ''}` })),
+      // as ações do bloco selecionado ficam num grupo que quebra de linha por dentro (a linha do bloco não estoura sobre a prévia)
+      linha(botoesDaSelecao().map((b) => ({ ...b, se: b.se })), { se: 'x.v == null && igual(x.caminho, estado.sel) && estado.selElemento == null', props: { gap: 2, quebra: true, cresce: true } }),
       setaDaLinha('x.v != null && x.v.tem'), marcadorDaLinha('x.v != null && !x.v.tem'),
       botao('{x.v.rotulo + (x.v.valor != "" ? ": " + x.v.valor : "")}', [def('sel', 'x.caminho'), def('selElemento', 'x.v'), def('abaCel', '"props"'), atualizaPrevia], { se: 'x.v != null', props: { icone: `{${ICONE_ELEMENTO}}`, atual: '{estado.selElemento != null && igual(x.caminho, estado.sel) && igual(estado.selElemento.caminho, x.v.caminho)}', variante: 'secundario', alvo: `{${ALVO_DO_BLOCO}}` } }),
     ], { props: { gap: 2, alinha: 'centro' } }),
@@ -351,6 +352,13 @@ const propriedades = (): Inst => pilha([
 
 /** as ações do bloco selecionado (remover, subir, descer): ficam na linha dele na árvore */
 const botoesDaSelecao = (): Inst[] => [
+  botao('Duplicar', [
+    def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
+    def('tmpBloco', `com(semIds(${SELNO}, "slots"), ["id"], "b" + estado.contador)`), def('tmpCaminho', PAI_LISTA), def('tmpPos', 'ultimo(estado.sel) + 1'),
+    def('no', 'com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))'),
+    def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`),
+    def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [estado.tmpPos])'), atualizaPrevia,
+  ], { se: 'tamanho(estado.sel) > 0', props: { icone: 'mais', variante: 'fantasma' } }),
   botao('Remover', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,

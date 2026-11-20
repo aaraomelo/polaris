@@ -1593,6 +1593,19 @@ Os elementos que as props de um bloco composto desenham (cabeçalho, hero, rodap
 | `tamanho(elementosDoBloco(p, s))` | `{"p":{"papel":"group","subtitulo":"x"},"s":{"type":"object","properties":{"papel":{"type":"string"},"subtitulo":{"type":"string"}}}}` | `1` |
 | `elementosDoBloco(p, 5)` | `{"p":{}}` | _(ausente)_ |
 
+### `semIds`
+
+`semIds(raiz, chave) → árvore`
+
+Uma CÓPIA da árvore sem o campo `id` em cada nó (o nó e os filhos de `chave`, como em `percorre`): serve para duplicar um bloco sem repetir identificadores. O resto fica igual; raiz que não é objeto ou chave inválida é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `semIds(n, "slots")` | `{"n":{"id":"a","bloco":"x","slots":{"filhos":[{"id":"b","bloco":"y"},{"bloco":"z","props":{"id":7}}]}}}` | `{"bloco":"x","slots":{"filhos":[{"bloco":"y"},{"bloco":"z","props":{"id":7}}]}}` |
+| `semIds(n, "filhos")` | `{"n":{"id":1,"filhos":[{"id":2,"filhos":[{"id":3}]}]}}` | `{"filhos":[{"filhos":[{}]}]}` |
+| `semIds(n, "slots").id` | `{"n":{"id":"a"}}` | _(ausente)_ |
+| `semIds(5, "slots")` |  | _(ausente)_ |
+
 ### `inverso`
 
 `inverso(patches) → patches`

@@ -1,7 +1,7 @@
 import type { Funcoes } from './tipos'
 import { fq_racional, fq_qsoma, fq_qmul, fq_qsub, fq_qdiv, fq_qresto, fq_qneg, fq_qabs, fq_qcmp, fq_qpot, fq_qpiso, fq_qnumerador, fq_qdenominador, fq_qmdc, fq_qmmc, fq_qmin, fq_qmax, fq_qdec, fq_qformata, fq_qbrl, fq_qnum } from './exato'
 import { f_validaFormulario } from './formulario-gancho'
-import { f_urlcodifica, f_semAcentos, f_analisaJson, f_paraJson, f_divide, f_paraNumero, f_percorre, f_camposDoSchema, f_elementosDoBloco, f_igual, f_obter, f_com, f_sem, f_insere, f_move, f_mescla, f_difere, f_aplica, f_inverso, f_concat, f_achata, f_fatia, f_inverte, f_primeiro, f_ultimo, f_unicos, f_intervalo, f_soma, f_chaves, f_valores, f_entradas, f_objeto, f_tamanho, f_maiusculas, f_minusculas, f_aparar, f_contem, f_comeca, f_termina, f_junta, f_texto, f_numero, f_arredonda, f_piso, f_teto, f_absoluto, f_minimo, f_maximo, f_padrao, f_brl, f_pct, f_data, f_dataHora } from './funcoes'
+import { f_urlcodifica, f_semAcentos, f_analisaJson, f_paraJson, f_divide, f_paraNumero, f_percorre, f_camposDoSchema, f_elementosDoBloco, f_semIds, f_igual, f_obter, f_com, f_sem, f_insere, f_move, f_mescla, f_difere, f_aplica, f_inverso, f_concat, f_achata, f_fatia, f_inverte, f_primeiro, f_ultimo, f_unicos, f_intervalo, f_soma, f_chaves, f_valores, f_entradas, f_objeto, f_tamanho, f_maiusculas, f_minusculas, f_aparar, f_contem, f_comeca, f_termina, f_junta, f_texto, f_numero, f_arredonda, f_piso, f_teto, f_absoluto, f_minimo, f_maximo, f_padrao, f_brl, f_pct, f_data, f_dataHora } from './funcoes'
 import { f_atualiza, f_mapeia, f_filtra, f_dobra, f_todos, f_algum, f_acha, f_ordena, f_agrupa } from './ordem-superior'
 
 // Tabelas AGREGADAS (servidor, testes, docs, compilador). Ficam FORA de funcoes.ts/exato.ts de propósito: um objeto que reúne todas as funções
@@ -43,6 +43,7 @@ export const FUNCOES_PADRAO: Funcoes = {
   validaFormulario: f_validaFormulario,
   camposDoSchema: f_camposDoSchema,
   elementosDoBloco: f_elementosDoBloco,
+  semIds: f_semIds,
   obter: f_obter,
   com: f_com,
   sem: f_sem,

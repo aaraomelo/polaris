@@ -96,3 +96,17 @@ export function elementosDoBloco(props: unknown, schema: unknown): ElementoDoBlo
   anda(P, schema, [], 1, false)
   return out
 }
+
+/** Uma CÓPIA da árvore sem o campo `id` em cada nó (o nó e os filhos de `chave`, como em `percorre`): para duplicar um bloco sem repetir identificadores. O resto fica como está; chave inválida ou raiz que não é objeto é ausente. */
+export function semIds(raiz: unknown, chave: unknown): Record<string, unknown> | undefined {
+  if (!ehObj(raiz) || typeof chave !== 'string' || PROIBIDOS.has(chave)) return undefined
+  let n = 0
+  const copia = (no: Record<string, unknown>, nivel: number): Record<string, unknown> => {
+    if (++n > LIMITES_EXPR.lista || nivel > LIMITES_EXPR.profundidade * 4) throw new RangeError('limite')
+    const lista = (l: unknown) => (Array.isArray(l) ? l.map((x) => (ehObj(x) ? copia(x, nivel + 1) : x)) : l)
+    const f = no[chave], out: Record<string, unknown> = {}
+    for (const k of Object.keys(no)) if (k !== 'id' && !PROIBIDOS.has(k)) out[k] = k !== chave ? no[k] : ehObj(f) ? Object.fromEntries(Object.keys(f).filter((kk) => !PROIBIDOS.has(kk)).map((kk) => [kk, lista(f[kk])])) : lista(f)
+    return out
+  }
+  try { return copia(raiz, 0) } catch { return undefined }
+}

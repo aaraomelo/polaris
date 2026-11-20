@@ -47,3 +47,5 @@ a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-ra
   #polaris main:has([data-alvo=aba-previa][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(2)),
   #polaris main:has([data-alvo=aba-props][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(3)){display:none!important}
 }
+/* a linha da árvore não estoura: o grupo de ações encolhe e quebra por dentro */
+#polaris [aria-label="Árvore de blocos"] > div > div > div{min-width:0}

@@ -283,7 +283,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await seta('raiz').click(); expect(await nos()).toEqual(['layout/pilha #raiz']); await seta('raiz').click(); expect((await nos()).length).toBe(5)
     await p.getByRole('button', { name: 'Recolher tudo' }).click(); expect(await nos()).toEqual(['layout/pilha #raiz']); await p.getByRole('button', { name: 'Expandir tudo' }).click(); expect((await nos()).length).toBe(5)
     // ações só na linha do selecionado, e o selecionado é o marcado
-    await linhaDe(p, 'b3').click(); await expect(linhaDe(p, 'b3')).toHaveAttribute('aria-current', 'true'); expect(await arv.getByRole('button', { name: 'Remover' }).count()).toBe(1); expect(await linhaDe(p, 'b3').locator('xpath=following-sibling::button').allTextContents()).toEqual(expect.arrayContaining(['Subir', 'Remover']))
+    await linhaDe(p, 'b3').click(); await expect(linhaDe(p, 'b3')).toHaveAttribute('aria-current', 'true'); expect(await arv.getByRole('button', { name: 'Remover' }).count()).toBe(1); expect(await linhaDe(p, 'b3').locator('xpath=following-sibling::div//button').allTextContents()).toEqual(expect.arrayContaining(['Subir', 'Remover']))
     await arv.getByRole('button', { name: 'Subir' }).click(); expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'texto/titulo #b3', 'texto/paragrafo #b2', 'feedback/selo #b4']) // subir troca com o irmão
     await arv.getByRole('button', { name: 'Remover' }).click(); expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'texto/paragrafo #b2', 'feedback/selo #b4']) // remover tira o bloco e a seleção vai para o pai
     // adicionar dentro de um recolhido o expande
@@ -297,7 +297,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const { ctx, p } = await entra('ana'); const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('sub'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/sub'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página sub')).toBeVisible()
     await p.getByRole('button', { name: 'Prévia ampla' }).click(); const add = async (t: string) => { await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: t, exact: true }).click() }
-    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover)/.test(t) && !/^[▾▸·\s]+$/.test(t))
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover|Duplicar)/.test(t) && !/^[▾▸·\s]+$/.test(t))
     await add('Cabeçalho do site'); await p.getByRole('button', { name: /site\/cabecalho #b1$/ }).click(); await p.getByRole('textbox', { name: 'Título', exact: true }).fill('Minha loja')
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 1)', exact: true }).fill('Início'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 2)', exact: true }).fill('Contato')
     expect(await linhas()).toEqual(expect.arrayContaining(['site/cabecalho #b1', 'Título: Minha loja', 'Links do menu: 2 item(ns)', 'Início', 'Contato', 'Submenus: 0 item(ns)'])) // os elementos do cabeçalho, abaixo dele
@@ -330,6 +330,18 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await arv.getByRole('button', { name: 'Ajuda', exact: true }).click(); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toBeVisible()
     for (let i = 0; i < 12 && (await arv.getByRole('button', { name: 'Ajuda', exact: true }).count()) > 0; i++) await p.getByRole('button', { name: 'Desfazer' }).click()
     await expect(arv.getByRole('button', { name: 'Ajuda', exact: true })).toHaveCount(0); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toHaveCount(0); await expect(p.getByRole('heading', { name: /^site\/rodape$/ })).toBeVisible()
+    await ctx.close()
+  })
+  it('DUPLICAR um bloco (com os filhos, ids novos) e desfazer', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('dup'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/dup'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página dup')).toBeVisible()
+    await adiciona(p, 'Layout', 'Pilha'); await adiciona(p, 'Texto', 'Título'); await p.getByRole('textbox', { name: 'Texto', exact: true }).first().fill('Olá') // pilha b1 com um título dentro
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }); await arv.getByRole('button', { name: /layout\/pilha #b1$/ }).click(); await p.getByRole('button', { name: 'Duplicar' }).click()
+    expect(await arv.getByRole('button', { name: /^layout\/pilha/ }).count()).toBe(3) // a raiz, a original e a cópia
+    expect(await arv.getByRole('button', { name: /^texto\/titulo/ }).count()).toBe(2) // o filho veio junto
+    await expect.poll(() => previa(p).locator('h1').allInnerTexts()).toEqual(['Olá', 'Olá'])
+    const ids = await arv.getByRole('button', { name: /#/ }).allTextContents(); expect(new Set(ids.map((t) => t.trim())).size).toBe(ids.length) // ids todos diferentes
+    await p.getByRole('button', { name: 'Desfazer' }).click(); await expect.poll(() => previa(p).locator('h1').allInnerTexts()).toEqual(['Olá'])
     await ctx.close()
   })
   it('CELULAR: as três colunas do editor viram abas (Blocos, Prévia, Propriedades); no computador aparecem juntas', async () => {
