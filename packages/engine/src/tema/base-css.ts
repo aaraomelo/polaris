@@ -4,7 +4,7 @@ import { ICONES_CSS } from '../icones/css'
 // Os blocos emitem tags semânticas (e `data-tom`, `role`), então o estilo se prende a elas dentro do contêiner `#polaris`.
 export const BASE_CSS = `/* polaris: estilos base dos blocos (usa só variáveis do tema) */
 body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var(--tipografia-familia);font-size:var(--tipografia-tamanho-base);line-height:1.5}
-#polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:1.25}
+#polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:1.25;font-family:var(--tipografia-familia-titulo, var(--tipografia-familia));font-weight:var(--tipografia-peso-titulo, bold)}
 #polaris p{margin:0 0 var(--espacamento-base)}
 #polaris a{color:var(--cor-primaria)}
 #polaris a:hover{color:var(--cor-primaria-hover)}

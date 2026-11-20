@@ -7,6 +7,7 @@ import { SENHA_LOCAL, TENANTS_LOCAIS, emailLocal, sobeLocal } from '../src/local
 // pnpm local --limpa    apaga os dados antes de subir
 // pnpm local --memoria  não grava nada em disco
 // pnpm local --porta 3100
+// pnpm local --site exemplos/maison   outro site de demonstração (nós *.json + fotos em <pasta>/img/)
 process.env.NODE_ENV = 'development'
 process.env.POLARIS_LOG_NIVEL ??= 'warn' // sem uma linha de log por requisição no terminal; `POLARIS_LOG_NIVEL=info pnpm local` volta a mostrar
 const args = process.argv.slice(2), tem = (f: string) => args.includes(f), valor = (f: string) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined }
@@ -17,7 +18,7 @@ if (!existsSync(studio)) { console.log('empacotando o Studio…'); execFileSync(
 const porta = valor('--porta') ? Number(valor('--porta')) : Number(process.env.PORT ?? 3000)
 if (!Number.isInteger(porta) || porta < 0 || porta > 65535) { console.error('porta inválida'); process.exit(2) }
 try {
-  const l = await sobeLocal({ dados, porta, ...(process.env.POLARIS_NOS ? { nos: resolve(process.env.POLARIS_NOS) } : {}), ...(process.env.POLARIS_LOCAL_PG_PORTA ? { pgPorta: Number(process.env.POLARIS_LOCAL_PG_PORTA) } : {}), silencioso: true })
+  const l = await sobeLocal({ dados, porta, ...(process.env.POLARIS_NOS ? { nos: resolve(process.env.POLARIS_NOS) } : {}), ...(valor('--site') ? { site: resolve(raiz, valor('--site')!) } : {}), ...(process.env.POLARIS_LOCAL_PG_PORTA ? { pgPorta: Number(process.env.POLARIS_LOCAL_PG_PORTA) } : {}), silencioso: true })
   console.log(`
 Polaris local no ar${dados ? ` (dados em ${dados})` : ' (em memória)'}
 

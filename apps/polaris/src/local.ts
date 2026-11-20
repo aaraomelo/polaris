@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
@@ -7,6 +7,7 @@ import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
 import { registraBase, voltaSegura } from '@polaris/engine'
 import { registraSite } from '@polaris/engine/site'
 import { cookieDeSessao } from '@polaris/gateway'
+import { registraCommerce } from '@polaris/engine/commerce'
 import { registraTemas } from '@polaris/engine/tema'
 import { SignJWT, exportJWK, generateKeyPair, importJWK } from 'jose'
 import { configGateway, configServico } from './config'
@@ -92,10 +93,17 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     for (const t of TENANTS_LOCAIS) await ident.criaUsuario({ tenantId: t.id, email: emailLocal(t.alias), nome: 'Ana (demonstração)', papeis: ['studio.editor', 'gerente'], senha: SENHA_LOCAL })
     // a imagem do banner do site de exemplo (a home aponta para ela pelo SHA-256): idempotente, uma por tenant
     const ativos = criaAtivos({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } } })
+    const fotos: Record<string, string> = {} // nome do arquivo (sem extensão) → endereço do ativo salvo, para as páginas apontarem por `@img/<nome>`
     const pastaImgs = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site || ''
     for (const [arq, nome] of [['banner.png', 'banner-de-exemplo'], ['logo.png', 'logo-de-exemplo']] as const) {
       const f = pastaImgs ? join(pastaImgs, arq) : ''; if (!f || !existsSync(f)) continue
       const dados = readFileSync(f).toString('base64'); for (const t of TENANTS_LOCAIS) await ativos.salva(t.id, 'sistema', { nome, dados })
+    }
+    // e as fotos da pasta `<site>/img/` (png, jpg, webp), cada uma pelo nome do arquivo sem a extensão (o gerador do site as aponta pelo SHA-256)
+    const imgDir = pastaImgs ? join(pastaImgs, 'img') : ''
+    if (imgDir && existsSync(imgDir)) for (const arq of readdirSync(imgDir).sort()) {
+      if (!/\.(png|jpe?g|webp)$/i.test(arq)) continue
+      const dados = readFileSync(join(imgDir, arq)).toString('base64'), nome = arq.replace(/\.[^.]+$/, ''); for (const t of TENANTS_LOCAIS) { const r = await ativos.salva(t.id, 'sistema', { nome, dados }); if (r.ok) fotos[nome] = r.ativo.caminho; else console.warn(`foto ${arq} recusada: ${r.erro}`) }
     }
     // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
     const reg = carregaNos(nosDir)
@@ -117,8 +125,8 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
         for (const t of TENANTS_LOCAIS) await db.query(`INSERT INTO loja.destaque (tenant_id, titulo, descricao) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM loja.destaque WHERE tenant_id = $1 AND titulo = $2)`, [t.id, titulo, descricao])
     }
     if ((await db.query(`SELECT 1 FROM information_schema.columns WHERE table_schema = 'loja' AND table_name = 'destaque' AND column_name = 'imagem'`)).rows.length) await db.exec(`UPDATE loja.destaque SET imagem = CASE WHEN titulo ILIKE '%caf%' THEN '/_polaris/img/96898dfdb1b73039f83a5f27f9e13bd533e63b543a343bcc5771ed7c6f47aa5a.webp?w=160' ELSE '/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png' END WHERE imagem IS NULL`) // miniaturas de exemplo (as imagens que o seed já hospeda)
-    const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw); registraSite(regGw)
-    const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw)
+    const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw); registraSite(regGw); registraCommerce(regGw) // os blocos de comércio (cartão de produto etc.) também valem nas páginas dos tenants de demonstração
+    const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw, (t) => t.replace(/@img\/([A-Za-z0-9_-]+)/g, (m, n: string) => (fotos[n] ?? m)))
     const { gw, verifica } = montaGatewayComChave(configGateway({ ...jwt, POLARIS_PLATAFORMA_POOL_MAX: '1', POLARIS_IDENTIDADE_CHAVE_PRIVADA_JWK: JSON.stringify(privada), POLARIS_NOS: nosDir, POLARIS_SERVICOS: JSON.stringify({ loja: urlServico }), DATABASE_URL_PLATAFORMA: pg('polaris_app'), POLARIS_BASES_DOMINIO: 'polaris.localhost', POLARIS_STUDIO_DIR: resolve(studioDir), POLARIS_PREVIEW_SEGREDO: 'polaris-local-preview-segredo-de-desenvolvimento-0123', POLARIS_GRAPHQL_INTROSPECCAO: '1', POLARIS_LIMITE_TAXA: 'desligado', POLARIS_PORT: undefined } as never), regGw); fecham.push(async () => { gw.server.closeAllConnections(); await gw.close() })
     await verifica() // a privada tem de combinar com a pública que serviço e gateway usam
     const chavePrivada = await importJWK(privada as never, 'ES256')
