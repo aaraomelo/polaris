@@ -5845,6 +5845,388 @@
                               },
                               {
                                "bloco": "layout/pilha",
+                               "se": "c.tipo == \"json\" && ((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\" || (tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\")",
+                               "props": {
+                                "gap": 6
+                               },
+                               "slots": {
+                                "filhos": [
+                                 {
+                                  "bloco": "layout/cartao",
+                                  "repetir": {
+                                   "cada": "mapeia((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), (e, i) => objeto([[\"i\", i], [\"x\", e]]))",
+                                   "como": "x",
+                                   "chave": "texto(x.i)"
+                                  },
+                                  "slots": {
+                                   "filhos": [
+                                    {
+                                     "bloco": "layout/linha",
+                                     "props": {
+                                      "gap": 4,
+                                      "alinha": "centro",
+                                      "quebra": true
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "texto/destaque",
+                                        "props": {
+                                         "texto": "Item {x.i + 1}"
+                                        }
+                                       },
+                                       {
+                                        "bloco": "nav/botao",
+                                        "se": "x.i > 0",
+                                        "props": {
+                                         "texto": "Subir",
+                                         "variante": "fantasma"
+                                        },
+                                        "eventos": {
+                                         "aoClicar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"\""
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i - 1))"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "nav/botao",
+                                        "se": "x.i < tamanho((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? [])) - 1",
+                                        "props": {
+                                         "texto": "Descer",
+                                         "variante": "fantasma"
+                                        },
+                                        "eventos": {
+                                         "aoClicar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"\""
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i + 1))"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "nav/botao",
+                                        "props": {
+                                         "texto": "Remover item",
+                                         "variante": "fantasma",
+                                         "icone": "apagar"
+                                        },
+                                        "eventos": {
+                                         "aoClicar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"\""
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "sem(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]))"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "entrada/texto",
+                                     "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\"",
+                                     "props": {
+                                      "valor": "{texto(x.x)}",
+                                      "rotulo": "Texto do item {x.i + 1}"
+                                     },
+                                     "eventos": {
+                                      "aoMudar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), evento)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "layout/pilha",
+                                     "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\"",
+                                     "props": {
+                                      "gap": 6
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "repetir": {
+                                         "cada": "filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => tamanho(f.caminho) <= 2)",
+                                         "como": "f",
+                                         "chave": "junta(f.caminho, \".\")"
+                                        },
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "{f.rotulo}"
+                                           }
+                                          },
+                                          {
+                                           "bloco": "entrada/texto",
+                                           "se": "f.tipo == \"texto\" || f.tipo == \"inteiro\" || f.tipo == \"numero\"",
+                                           "props": {
+                                            "valor": "{texto(obter(x.x, f.caminho) ?? \"\")}",
+                                            "rotulo": "{f.rotulo} (item {x.i + 1})",
+                                            "lista": "{f.nome == \"href\" ? \"dl-rotas\" : (f.nome == \"icone\" ? \"dl-icones\" : \"\")}"
+                                           },
+                                           "eventos": {
+                                            "aoMudar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\")"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "evento == \"\" ? sem(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho)) : com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (paraNumero(evento) ?? evento) : evento)"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "entrada/caixa",
+                                           "se": "f.tipo == \"booleano\"",
+                                           "props": {
+                                            "marcado": "{obter(x.x, f.caminho) == true}",
+                                            "rotulo": "{f.rotulo} (item {x.i + 1})"
+                                           },
+                                           "eventos": {
+                                            "aoMudar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), evento)"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/paragrafo",
+                                           "se": "f.tipo == \"json\"",
+                                           "props": {
+                                            "texto": "({f.rotulo} é uma lista: edite pelo JSON da lista, logo abaixo)"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "nav/botao",
+                                  "props": {
+                                   "texto": "Adicionar item",
+                                   "variante": "secundario",
+                                   "icone": "mais"
+                                  },
+                                  "eventos": {
+                                   "aoClicar": [
+                                    {
+                                     "acao": "definir",
+                                     "estado": "passado",
+                                     "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "futuro",
+                                     "valor": "[]"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "chaveEdicao",
+                                     "valor": "\"\""
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "no",
+                                     "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), concat((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), [((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\" ? \"Novo item\" : objeto(mapeia(filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => f.obrigatorio && tamanho(f.caminho) == 1), f => [f.nome, f.tipo == \"booleano\" ? false : (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (f.min ?? 0) : f.tipo == \"json\" ? [] : f.nome == \"href\" ? \"/\" : \"Novo\"])))]))"
+                                    },
+                                    {
+                                     "acao": "executar",
+                                     "dados": "previa",
+                                     "args": {
+                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                      "modo": "{estado.modoPrevia}"
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "layout/pilha",
                                "se": "c.tipo == \"json\"",
                                "props": {
                                 "gap": 4
@@ -6238,6 +6620,388 @@
                                         }
                                        }
                                       ]
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "layout/pilha",
+                               "se": "c.tipo == \"json\" && ((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\" || (tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\")",
+                               "props": {
+                                "gap": 6
+                               },
+                               "slots": {
+                                "filhos": [
+                                 {
+                                  "bloco": "layout/cartao",
+                                  "repetir": {
+                                   "cada": "mapeia((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), (e, i) => objeto([[\"i\", i], [\"x\", e]]))",
+                                   "como": "x",
+                                   "chave": "texto(x.i)"
+                                  },
+                                  "slots": {
+                                   "filhos": [
+                                    {
+                                     "bloco": "layout/linha",
+                                     "props": {
+                                      "gap": 4,
+                                      "alinha": "centro",
+                                      "quebra": true
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "texto/destaque",
+                                        "props": {
+                                         "texto": "Item {x.i + 1}"
+                                        }
+                                       },
+                                       {
+                                        "bloco": "nav/botao",
+                                        "se": "x.i > 0",
+                                        "props": {
+                                         "texto": "Subir",
+                                         "variante": "fantasma"
+                                        },
+                                        "eventos": {
+                                         "aoClicar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"\""
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i - 1))"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "nav/botao",
+                                        "se": "x.i < tamanho((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? [])) - 1",
+                                        "props": {
+                                         "texto": "Descer",
+                                         "variante": "fantasma"
+                                        },
+                                        "eventos": {
+                                         "aoClicar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"\""
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i + 1))"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "nav/botao",
+                                        "props": {
+                                         "texto": "Remover item",
+                                         "variante": "fantasma",
+                                         "icone": "apagar"
+                                        },
+                                        "eventos": {
+                                         "aoClicar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"\""
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "sem(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]))"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "entrada/texto",
+                                     "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\"",
+                                     "props": {
+                                      "valor": "{texto(x.x)}",
+                                      "rotulo": "Texto do item {x.i + 1}"
+                                     },
+                                     "eventos": {
+                                      "aoMudar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), evento)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "layout/pilha",
+                                     "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\"",
+                                     "props": {
+                                      "gap": 6
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "repetir": {
+                                         "cada": "filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => tamanho(f.caminho) <= 2)",
+                                         "como": "f",
+                                         "chave": "junta(f.caminho, \".\")"
+                                        },
+                                        "props": {
+                                         "gap": 2
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "texto/pequeno",
+                                           "props": {
+                                            "texto": "{f.rotulo}"
+                                           }
+                                          },
+                                          {
+                                           "bloco": "entrada/texto",
+                                           "se": "f.tipo == \"texto\" || f.tipo == \"inteiro\" || f.tipo == \"numero\"",
+                                           "props": {
+                                            "valor": "{texto(obter(x.x, f.caminho) ?? \"\")}",
+                                            "rotulo": "{f.rotulo} (item {x.i + 1})",
+                                            "lista": "{f.nome == \"href\" ? \"dl-rotas\" : (f.nome == \"icone\" ? \"dl-icones\" : \"\")}"
+                                           },
+                                           "eventos": {
+                                            "aoMudar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\")"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "evento == \"\" ? sem(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho)) : com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (paraNumero(evento) ?? evento) : evento)"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "entrada/caixa",
+                                           "se": "f.tipo == \"booleano\"",
+                                           "props": {
+                                            "marcado": "{obter(x.x, f.caminho) == true}",
+                                            "rotulo": "{f.rotulo} (item {x.i + 1})"
+                                           },
+                                           "eventos": {
+                                            "aoMudar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), evento)"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "texto/paragrafo",
+                                           "se": "f.tipo == \"json\"",
+                                           "props": {
+                                            "texto": "({f.rotulo} é uma lista: edite pelo JSON da lista, logo abaixo)"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "nav/botao",
+                                  "props": {
+                                   "texto": "Adicionar item",
+                                   "variante": "secundario",
+                                   "icone": "mais"
+                                  },
+                                  "eventos": {
+                                   "aoClicar": [
+                                    {
+                                     "acao": "definir",
+                                     "estado": "passado",
+                                     "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "futuro",
+                                     "valor": "[]"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "chaveEdicao",
+                                     "valor": "\"\""
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "no",
+                                     "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), concat((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), [((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\" ? \"Novo item\" : objeto(mapeia(filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => f.obrigatorio && tamanho(f.caminho) == 1), f => [f.nome, f.tipo == \"booleano\" ? false : (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (f.min ?? 0) : f.tipo == \"json\" ? [] : f.nome == \"href\" ? \"/\" : \"Novo\"])))]))"
+                                    },
+                                    {
+                                     "acao": "executar",
+                                     "dados": "previa",
+                                     "args": {
+                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                      "modo": "{estado.modoPrevia}"
                                      }
                                     }
                                    ]
@@ -6892,6 +7656,388 @@
                                  },
                                  {
                                   "bloco": "layout/pilha",
+                                  "se": "c.tipo == \"json\" && ((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\" || (tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\")",
+                                  "props": {
+                                   "gap": 6
+                                  },
+                                  "slots": {
+                                   "filhos": [
+                                    {
+                                     "bloco": "layout/cartao",
+                                     "repetir": {
+                                      "cada": "mapeia((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), (e, i) => objeto([[\"i\", i], [\"x\", e]]))",
+                                      "como": "x",
+                                      "chave": "texto(x.i)"
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "layout/linha",
+                                        "props": {
+                                         "gap": 4,
+                                         "alinha": "centro",
+                                         "quebra": true
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "texto/destaque",
+                                           "props": {
+                                            "texto": "Item {x.i + 1}"
+                                           }
+                                          },
+                                          {
+                                           "bloco": "nav/botao",
+                                           "se": "x.i > 0",
+                                           "props": {
+                                            "texto": "Subir",
+                                            "variante": "fantasma"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i - 1))"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "nav/botao",
+                                           "se": "x.i < tamanho((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? [])) - 1",
+                                           "props": {
+                                            "texto": "Descer",
+                                            "variante": "fantasma"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i + 1))"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Remover item",
+                                            "variante": "fantasma",
+                                            "icone": "apagar"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "sem(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]))"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "entrada/texto",
+                                        "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\"",
+                                        "props": {
+                                         "valor": "{texto(x.x)}",
+                                         "rotulo": "Texto do item {x.i + 1}"
+                                        },
+                                        "eventos": {
+                                         "aoMudar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "com(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), evento)"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\"",
+                                        "props": {
+                                         "gap": 6
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "layout/pilha",
+                                           "repetir": {
+                                            "cada": "filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => tamanho(f.caminho) <= 2)",
+                                            "como": "f",
+                                            "chave": "junta(f.caminho, \".\")"
+                                           },
+                                           "props": {
+                                            "gap": 2
+                                           },
+                                           "slots": {
+                                            "filhos": [
+                                             {
+                                              "bloco": "texto/pequeno",
+                                              "props": {
+                                               "texto": "{f.rotulo}"
+                                              }
+                                             },
+                                             {
+                                              "bloco": "entrada/texto",
+                                              "se": "f.tipo == \"texto\" || f.tipo == \"inteiro\" || f.tipo == \"numero\"",
+                                              "props": {
+                                               "valor": "{texto(obter(x.x, f.caminho) ?? \"\")}",
+                                               "rotulo": "{f.rotulo} (item {x.i + 1})",
+                                               "lista": "{f.nome == \"href\" ? \"dl-rotas\" : (f.nome == \"icone\" ? \"dl-icones\" : \"\")}"
+                                              },
+                                              "eventos": {
+                                               "aoMudar": [
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "passado",
+                                                 "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "futuro",
+                                                 "valor": "[]"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "chaveEdicao",
+                                                 "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\")"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "no",
+                                                 "valor": "evento == \"\" ? sem(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho)) : com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (paraNumero(evento) ?? evento) : evento)"
+                                                },
+                                                {
+                                                 "acao": "executar",
+                                                 "dados": "previa",
+                                                 "args": {
+                                                  "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                                  "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                                  "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                                  "modo": "{estado.modoPrevia}"
+                                                 }
+                                                }
+                                               ]
+                                              }
+                                             },
+                                             {
+                                              "bloco": "entrada/caixa",
+                                              "se": "f.tipo == \"booleano\"",
+                                              "props": {
+                                               "marcado": "{obter(x.x, f.caminho) == true}",
+                                               "rotulo": "{f.rotulo} (item {x.i + 1})"
+                                              },
+                                              "eventos": {
+                                               "aoMudar": [
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "passado",
+                                                 "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "futuro",
+                                                 "valor": "[]"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "chaveEdicao",
+                                                 "valor": "\"\""
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "no",
+                                                 "valor": "com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), evento)"
+                                                },
+                                                {
+                                                 "acao": "executar",
+                                                 "dados": "previa",
+                                                 "args": {
+                                                  "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                                  "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                                  "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                                  "modo": "{estado.modoPrevia}"
+                                                 }
+                                                }
+                                               ]
+                                              }
+                                             },
+                                             {
+                                              "bloco": "texto/paragrafo",
+                                              "se": "f.tipo == \"json\"",
+                                              "props": {
+                                               "texto": "({f.rotulo} é uma lista: edite pelo JSON da lista, logo abaixo)"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Adicionar item",
+                                      "variante": "secundario",
+                                      "icone": "mais"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), concat((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), [((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\" ? \"Novo item\" : objeto(mapeia(filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => f.obrigatorio && tamanho(f.caminho) == 1), f => [f.nome, f.tipo == \"booleano\" ? false : (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (f.min ?? 0) : f.tipo == \"json\" ? [] : f.nome == \"href\" ? \"/\" : \"Novo\"])))]))"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "layout/pilha",
                                   "se": "c.tipo == \"json\"",
                                   "props": {
                                    "gap": 4
@@ -7285,6 +8431,388 @@
                                            }
                                           }
                                          ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "layout/pilha",
+                                  "se": "c.tipo == \"json\" && ((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\" || (tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\")",
+                                  "props": {
+                                   "gap": 6
+                                  },
+                                  "slots": {
+                                   "filhos": [
+                                    {
+                                     "bloco": "layout/cartao",
+                                     "repetir": {
+                                      "cada": "mapeia((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), (e, i) => objeto([[\"i\", i], [\"x\", e]]))",
+                                      "como": "x",
+                                      "chave": "texto(x.i)"
+                                     },
+                                     "slots": {
+                                      "filhos": [
+                                       {
+                                        "bloco": "layout/linha",
+                                        "props": {
+                                         "gap": 4,
+                                         "alinha": "centro",
+                                         "quebra": true
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "texto/destaque",
+                                           "props": {
+                                            "texto": "Item {x.i + 1}"
+                                           }
+                                          },
+                                          {
+                                           "bloco": "nav/botao",
+                                           "se": "x.i > 0",
+                                           "props": {
+                                            "texto": "Subir",
+                                            "variante": "fantasma"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i - 1))"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "nav/botao",
+                                           "se": "x.i < tamanho((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? [])) - 1",
+                                           "props": {
+                                            "texto": "Descer",
+                                            "variante": "fantasma"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), move((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), x.i, x.i + 1))"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          },
+                                          {
+                                           "bloco": "nav/botao",
+                                           "props": {
+                                            "texto": "Remover item",
+                                            "variante": "fantasma",
+                                            "icone": "apagar"
+                                           },
+                                           "eventos": {
+                                            "aoClicar": [
+                                             {
+                                              "acao": "definir",
+                                              "estado": "passado",
+                                              "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "futuro",
+                                              "valor": "[]"
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "chaveEdicao",
+                                              "valor": "\"\""
+                                             },
+                                             {
+                                              "acao": "definir",
+                                              "estado": "no",
+                                              "valor": "sem(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]))"
+                                             },
+                                             {
+                                              "acao": "executar",
+                                              "dados": "previa",
+                                              "args": {
+                                               "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                               "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                               "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                               "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                               "modo": "{estado.modoPrevia}"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "entrada/texto",
+                                        "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\"",
+                                        "props": {
+                                         "valor": "{texto(x.x)}",
+                                         "rotulo": "Texto do item {x.i + 1}"
+                                        },
+                                        "eventos": {
+                                         "aoMudar": [
+                                          {
+                                           "acao": "definir",
+                                           "estado": "passado",
+                                           "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "futuro",
+                                           "valor": "[]"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "chaveEdicao",
+                                           "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i"
+                                          },
+                                          {
+                                           "acao": "definir",
+                                           "estado": "no",
+                                           "valor": "com(estado.no, concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), evento)"
+                                          },
+                                          {
+                                           "acao": "executar",
+                                           "dados": "previa",
+                                           "args": {
+                                            "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                            "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                            "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                            "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                            "modo": "{estado.modoPrevia}"
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       },
+                                       {
+                                        "bloco": "layout/pilha",
+                                        "se": "(tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"object\"",
+                                        "props": {
+                                         "gap": 6
+                                        },
+                                        "slots": {
+                                         "filhos": [
+                                          {
+                                           "bloco": "layout/pilha",
+                                           "repetir": {
+                                            "cada": "filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => tamanho(f.caminho) <= 2)",
+                                            "como": "f",
+                                            "chave": "junta(f.caminho, \".\")"
+                                           },
+                                           "props": {
+                                            "gap": 2
+                                           },
+                                           "slots": {
+                                            "filhos": [
+                                             {
+                                              "bloco": "texto/pequeno",
+                                              "props": {
+                                               "texto": "{f.rotulo}"
+                                              }
+                                             },
+                                             {
+                                              "bloco": "entrada/texto",
+                                              "se": "f.tipo == \"texto\" || f.tipo == \"inteiro\" || f.tipo == \"numero\"",
+                                              "props": {
+                                               "valor": "{texto(obter(x.x, f.caminho) ?? \"\")}",
+                                               "rotulo": "{f.rotulo} (item {x.i + 1})",
+                                               "lista": "{f.nome == \"href\" ? \"dl-rotas\" : (f.nome == \"icone\" ? \"dl-icones\" : \"\")}"
+                                              },
+                                              "eventos": {
+                                               "aoMudar": [
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "passado",
+                                                 "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") != \"\" && estado.chaveEdicao == \"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\") ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "futuro",
+                                                 "valor": "[]"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "chaveEdicao",
+                                                 "valor": "\"it:\" + junta(estado.sel, \".\") + \":\" + junta(c.caminho, \".\") + \":\" + x.i + \":\" + junta(f.caminho, \".\")"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "no",
+                                                 "valor": "evento == \"\" ? sem(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho)) : com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (paraNumero(evento) ?? evento) : evento)"
+                                                },
+                                                {
+                                                 "acao": "executar",
+                                                 "dados": "previa",
+                                                 "args": {
+                                                  "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                                  "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                                  "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                                  "modo": "{estado.modoPrevia}"
+                                                 }
+                                                }
+                                               ]
+                                              }
+                                             },
+                                             {
+                                              "bloco": "entrada/caixa",
+                                              "se": "f.tipo == \"booleano\"",
+                                              "props": {
+                                               "marcado": "{obter(x.x, f.caminho) == true}",
+                                               "rotulo": "{f.rotulo} (item {x.i + 1})"
+                                              },
+                                              "eventos": {
+                                               "aoMudar": [
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "passado",
+                                                 "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "futuro",
+                                                 "valor": "[]"
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "chaveEdicao",
+                                                 "valor": "\"\""
+                                                },
+                                                {
+                                                 "acao": "definir",
+                                                 "estado": "no",
+                                                 "valor": "com(estado.no, concat(concat(concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), [x.i]), f.caminho), evento)"
+                                                },
+                                                {
+                                                 "acao": "executar",
+                                                 "dados": "previa",
+                                                 "args": {
+                                                  "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                                  "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                                  "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                                  "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                                  "modo": "{estado.modoPrevia}"
+                                                 }
+                                                }
+                                               ]
+                                              }
+                                             },
+                                             {
+                                              "bloco": "texto/paragrafo",
+                                              "se": "f.tipo == \"json\"",
+                                              "props": {
+                                               "texto": "({f.rotulo} é uma lista: edite pelo JSON da lista, logo abaixo)"
+                                              }
+                                             }
+                                            ]
+                                           }
+                                          }
+                                         ]
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Adicionar item",
+                                      "variante": "secundario",
+                                      "icone": "mais"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat(concat([\"spec\", \"raiz\"], estado.sel), [\"props\"], c.caminho), concat((obter(obter(estado.no.spec.raiz, estado.sel).props ?? objeto([]), c.caminho) ?? []), [((tamanho(c.caminho) == 1 ? obter(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"]) ?? objeto([]), [\"type\"]) : \"\") == \"string\" ? \"Novo item\" : objeto(mapeia(filtra(camposDoSchema(obter((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props, [\"properties\", c.nome, \"items\"])), f => f.obrigatorio && tamanho(f.caminho) == 1), f => [f.nome, f.tipo == \"booleano\" ? false : (f.tipo == \"inteiro\" || f.tipo == \"numero\") ? (f.min ?? 0) : f.tipo == \"json\" ? [] : f.nome == \"href\" ? \"/\" : \"Novo\"])))]))"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
                                         }
                                        }
                                       ]

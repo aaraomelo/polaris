@@ -186,6 +186,36 @@ const listasDeOpcoes = (): Inst => pilha([
   P('form/sugestoes', { id: 'dl-temas', filhos: [P('form/opcao', { repetir: { cada: 'unicos(concat(mapeia(filtra(nos.nos, n => n.kind == "tema"), n => n.id), nos.base.tema ?? []))', como: 't', chave: 't' }, props: { valor: '{t}' } })] }),
 ], { gap: 0 })
 
+/** EDITOR POR ITEM de uma lista (links, colunas, sugestões…): um cartão por item com os campos do item, subir, descer e remover, e "Adicionar item". O JSON da lista segue disponível logo abaixo. Vale para listas de nível 1 cujos itens são objetos ou textos. */
+const ITENS = `obter((${DEFBLOCO}).props, ["properties", c.nome, "items"])`
+const ITEM_TIPO = `(tamanho(c.caminho) == 1 ? obter(${ITENS} ?? objeto([]), ["type"]) : "")`
+const CAMINHO_LISTA = `concat(${DOCSEL}, ["props"], c.caminho)`
+const VALOR_LISTA = `(obter(${SELNO}.props ?? objeto([]), c.caminho) ?? [])`
+const NOVO_ITEM = `(${ITEM_TIPO} == "string" ? "Novo item" : objeto(mapeia(filtra(camposDoSchema(${ITENS}), f => f.obrigatorio && tamanho(f.caminho) == 1), f => [f.nome, f.tipo == "booleano" ? false : (f.tipo == "inteiro" || f.tipo == "numero") ? (f.min ?? 0) : f.tipo == "json" ? [] : f.nome == "href" ? "/" : "Novo"])))`
+const CHAVE_ITEM = '"it:" + junta(estado.sel, ".") + ":" + junta(c.caminho, ".") + ":" + x.i'
+const DO_ITEM = `concat(${CAMINHO_LISTA}, [x.i])`
+const campoDoItem = (): Inst => pilha([
+  P('texto/pequeno', { props: { texto: '{f.rotulo}' } }),
+  P('entrada/texto', { se: 'f.tipo == "texto" || f.tipo == "inteiro" || f.tipo == "numero"', props: { valor: '{texto(obter(x.x, f.caminho) ?? "")}', rotulo: '{f.rotulo} (item {x.i + 1})', lista: `{f.nome == "href" ? "dl-rotas" : (f.nome == "icone" ? "dl-icones" : "")}` },
+    eventos: { aoMudar: edita(`evento == "" ? sem(estado.no, concat(${DO_ITEM}, f.caminho)) : com(estado.no, concat(${DO_ITEM}, f.caminho), (f.tipo == "inteiro" || f.tipo == "numero") ? (paraNumero(evento) ?? evento) : evento)`, `${CHAVE_ITEM} + ":" + junta(f.caminho, ".")`) } }),
+  P('entrada/caixa', { se: 'f.tipo == "booleano"', props: { marcado: '{obter(x.x, f.caminho) == true}', rotulo: '{f.rotulo} (item {x.i + 1})' }, eventos: { aoMudar: edita(`com(estado.no, concat(${DO_ITEM}, f.caminho), evento)`) } }),
+  texto('({f.rotulo} é uma lista: edite pelo JSON da lista, logo abaixo)', { se: 'f.tipo == "json"' }),
+], { repetir: { cada: `filtra(camposDoSchema(${ITENS}), f => tamanho(f.caminho) <= 2)`, como: 'f', chave: 'junta(f.caminho, ".")' }, gap: 2 })
+const itemDaLista = (): Inst => cartao([
+  linha([
+    P('texto/destaque', { props: { texto: 'Item {x.i + 1}' } }),
+    botao('Subir', edita(`com(estado.no, ${CAMINHO_LISTA}, move(${VALOR_LISTA}, x.i, x.i - 1))`), { se: 'x.i > 0', props: { variante: 'fantasma' } }),
+    botao('Descer', edita(`com(estado.no, ${CAMINHO_LISTA}, move(${VALOR_LISTA}, x.i, x.i + 1))`), { se: `x.i < tamanho(${VALOR_LISTA}) - 1`, props: { variante: 'fantasma' } }),
+    botao('Remover item', edita(`sem(estado.no, ${DO_ITEM})`), { props: { variante: 'fantasma', icone: 'apagar' } }),
+  ], { props: { gap: 4, quebra: true } }),
+  P('entrada/texto', { se: `${ITEM_TIPO} == "string"`, props: { valor: '{texto(x.x)}', rotulo: 'Texto do item {x.i + 1}' }, eventos: { aoMudar: edita(`com(estado.no, ${DO_ITEM}, evento)`, CHAVE_ITEM) } }),
+  P('layout/pilha', { se: `${ITEM_TIPO} == "object"`, props: { gap: 6 }, filhos: [campoDoItem()] }),
+], { repetir: { cada: `mapeia(${VALOR_LISTA}, (e, i) => objeto([["i", i], ["x", e]]))`, como: 'x', chave: 'texto(x.i)' } })
+const editorDeItens = (): Inst => pilha([
+  itemDaLista(),
+  botao('Adicionar item', edita(`com(estado.no, ${CAMINHO_LISTA}, concat(${VALOR_LISTA}, [${NOVO_ITEM}]))`), { props: { icone: 'mais' } }),
+], { se: `c.tipo == "json" && (${ITEM_TIPO} == "object" || ${ITEM_TIPO} == "string")`, gap: 6 })
+
 /** o JSON de uma prop estruturada (lista ou objeto: links, grupos, colunas…): resumo, "Editar JSON" e a caixa com Aplicar e Cancelar (só entra no rascunho se for JSON válido) */
 const CHAVE_PROP = 'junta(estado.sel, ".") + ":" + junta(c.caminho, ".")'
 const jsonDeProp = (): Inst => pilha([
@@ -217,6 +247,7 @@ const campoDeProp = (avancado: boolean): Inst => pilha([
   P('midia/imagem', { se: EH_IMAGEM, props: { src: `{obter(${SELNO}.props, c.caminho)}`, alt: 'Prévia da imagem escolhida', largura: 56, altura: 56 } }),
   P('entrada/caixa', { se: 'c.tipo == "booleano"', props: { marcado: `{obter(${SELNO}.props, c.caminho) == true}`, rotulo: '{c.rotulo}' }, eventos: { aoMudar: edita(`com(estado.no, concat(${DOCSEL}, ["props"], c.caminho), evento)`) } }),
   linha([P('layout/linha', { repetir: { cada: 'c.opcoes', como: 'o', chave: 'texto(o)' }, filhos: [botao('{o}{obter(' + SELNO + '.props, c.caminho) == o ? " ✓" : ""}', edita(`com(estado.no, concat(${DOCSEL}, ["props"], c.caminho), o)`), { props: { atual: `{obter(${SELNO}.props, c.caminho) == o}` } })] })], { se: 'c.tipo == "escolha"', props: { gap: 4, quebra: true } }),
+  editorDeItens(),
   jsonDeProp(),
 ], { repetir: { cada: `filtra(camposDoSchema((${DEFBLOCO}).props), c => ${avancado ? '' : '!'}algum([${AVANCADOS.map((n) => q(n)).join(', ')}], n => n == c.nome))`, como: 'c', chave: 'junta(c.caminho, ".")' }, gap: 2 })
 

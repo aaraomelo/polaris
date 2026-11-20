@@ -252,6 +252,23 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('lp-novo'); await expect(p.getByRole('button', { name: 'Criar', exact: true }).or(p.getByRole('button', { name: 'Descartar e criar' }))).toBeVisible()
     await ctx.close()
   })
+  it('lista editada ITEM A ITEM (sem escrever JSON): adicionar, editar, subir, descer e remover; itens de texto e de objeto; o JSON da lista segue disponível', async () => {
+    const { ctx, p } = await entra('ana'); const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('itens'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/itens'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página itens')).toBeVisible()
+    await p.getByRole('button', { name: 'Prévia ampla' }).click(); await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Cabeçalho do site', exact: true }).click(); await p.getByRole('button', { name: /site\/cabecalho #b1$/ }).click()
+    await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await expect(p.getByText('Item 1', { exact: true })).toBeVisible()
+    await p.getByRole('textbox', { name: 'Texto (item 1)', exact: true }).fill('Início'); await p.getByRole('combobox', { name: 'Destino (link) (item 1)', exact: true }).fill('/'); await expect(frame().getByRole('link', { name: 'Início' })).toBeVisible()
+    await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 2)', exact: true }).fill('Produtos'); await p.getByRole('combobox', { name: 'Destino (link) (item 2)', exact: true }).fill('/produtos')
+    const ordem = async () => (await frame().locator('header nav > a').allInnerTexts()); await expect.poll(ordem).toEqual(['Início', 'Produtos'])
+    await p.getByRole('button', { name: 'Subir' }).last().click(); await expect.poll(ordem).toEqual(['Produtos', 'Início']) // subir o item 2
+    await p.getByRole('button', { name: 'Descer' }).first().click(); await expect.poll(ordem).toEqual(['Início', 'Produtos']) // e descer de volta
+    await p.getByRole('button', { name: 'Remover item' }).first().click(); await expect.poll(ordem).toEqual(['Produtos']); await expect(p.getByText('Item 2', { exact: true })).toHaveCount(0)
+    await p.getByRole('button', { name: 'Editar JSON' }).first().click(); expect(JSON.parse(await p.getByRole('textbox', { name: /^JSON de / }).inputValue())).toEqual([{ texto: 'Produtos', href: '/produtos' }]); await p.getByRole('button', { name: 'Cancelar' }).click() // o JSON é o mesmo
+    // lista de TEXTOS: as sugestões fixas da busca
+    await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Barra de busca', exact: true }).click(); await p.getByRole('button', { name: /site\/busca #b2$/ }).click()
+    await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto do item 1', exact: true }).fill('Café'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto do item 2', exact: true }).fill('Pão')
+    await expect.poll(() => frame().locator('datalist option').evaluateAll((l) => l.map((o) => (o as HTMLOptionElement).value))).toEqual(['Café', 'Pão']); await ctx.close()
+  })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
     const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });
     const box = async (sel: string) => (await p.locator(sel).first().boundingBox())!, cab = await box('[data-painel] > header'), lat = await box('[data-painel] > aside'), prin = await box('[data-painel] > main')

@@ -20,7 +20,7 @@ const comTitulos = (schema: unknown, prof = 0): unknown => {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema) || prof > 4) return schema
   const s = schema as Record<string, unknown>, props = s.properties
   if (!props || typeof props !== 'object') return schema
-  return { ...s, properties: Object.fromEntries(Object.entries(props as Record<string, unknown>).map(([k, v]) => { const f = v && typeof v === 'object' ? (v as Record<string, unknown>) : {}; const t = f.title === undefined && TITULOS_PROP[k] ? { ...f, title: TITULOS_PROP[k] } : f; return [k, prof < 3 ? comTitulos(t, prof + 1) : t] })) }
+  return { ...s, properties: Object.fromEntries(Object.entries(props as Record<string, unknown>).map(([k, v]) => { const f = v && typeof v === 'object' ? (v as Record<string, unknown>) : {}; const t = f.title === undefined && TITULOS_PROP[k] ? { ...f, title: TITULOS_PROP[k] } : f; const t2 = prof < 3 ? comTitulos(t, prof + 1) : t; const it = (t2 as Record<string, unknown>).items; return [k, it && typeof it === 'object' && prof < 3 ? { ...(t2 as object), items: comTitulos(it, prof + 1) } : t2] })) }
 }
 /** o ícone (família Grafite) de cada bloco: por padrão `a/b` → `a-b`; os compostos do site reaproveitam o do bloco que mais se parece */
 const ICONE_DE_BLOCO: Record<string, string> = { 'site/cabecalho': 'layout-cabecalho', 'site/rodape': 'layout-rodape', 'site/hero': 'layout-destaque', 'site/busca': 'form-busca', 'site/menu-lateral': 'layout-lateral' }
