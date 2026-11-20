@@ -75,7 +75,7 @@ export const COMPONENTES_BASE: Componentes = {
   'layout/painel': ({ slots, id }) => createElement('div', { ...(id ? { id } : {}), 'data-painel': '' }, slots.filhos),
   'layout/lateral': ({ props, slots, id }) => createElement('aside', { ...(id ? { id } : {}), 'data-lateral': '', ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Navegação lateral' } : props) }, slots.filhos),
   'layout/principal': ({ slots, id }) => createElement('main', { ...(id ? { id } : {}), 'data-principal': '' }, slots.filhos),
-  'midia/tela': ({ props, slots, id }) => { const { style: _s, ...attrs } = atributosDaTela(props); return createElement('div', { ...(id ? { id } : {}), ...attrs, style: { aspectRatio: proporcaoDe(props), position: 'relative', width: '100%' } }, slots.filhos) },
+  'midia/tela': ({ props, slots, id }) => { const { style: _s, ...attrs } = atributosDaTela(props); return createElement('div', { ...(id ? { id } : {}), ...attrs, style: { aspectRatio: proporcaoDe(props), position: 'relative', width: '100%', ['--proporcao' as string]: proporcaoDe(props) } as CSSProperties }, slots.filhos) },
   'layout/cartao': ({ props, slots, id }) => createElement('div', { ...(id ? { id } : {}), 'data-cartao': '', ...papelDe(props) }, slots.filhos),
   'layout/secao': ({ props, slots, id }) => createElement('details', { ...(id ? { id } : {}), 'data-secao': '', ...(props.aberta === true ? { open: true } : {}) }, slots.filhos),
   'layout/secao-titulo': ({ props, id }) => createElement('summary', { ...(id ? { id } : {}), ...(nomeDeIcone(props.icone) ? { 'data-icone': nomeDeIcone(props.icone) } : {}) }, txt(props.texto)),

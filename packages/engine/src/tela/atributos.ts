@@ -23,5 +23,5 @@ export function caixasDe(p: Record<string, unknown>): CaixaTela[] {
 /** os atributos da moldura: marca da ilha, caixas em JSON, passo e a proporção (CSS `aspect-ratio`) */
 export function atributosDaTela(p: Record<string, unknown>): Record<string, string> {
   const caixas = caixasDe(p), json = JSON.stringify(caixas)
-  return { 'data-polaris-tela': '', 'data-passo': String(passoDe(p)), ...(caixas.length ? { 'data-polaris-caixas': json } : {}), style: `aspect-ratio:${proporcaoDe(p)};position:relative;width:100%` }
+  return { 'data-polaris-tela': '', 'data-passo': String(passoDe(p)), ...(caixas.length ? { 'data-polaris-caixas': json } : {}), style: `aspect-ratio:${proporcaoDe(p)};position:relative;width:100%;--proporcao:${proporcaoDe(p)}` }
 }

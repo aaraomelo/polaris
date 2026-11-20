@@ -24,7 +24,7 @@ function monta(el: HTMLElement): void {
   const passo = (): number => passoDe({ passo: Number(el.getAttribute('data-passo')) })
   const retang = (): DOMRect => el.getBoundingClientRect()
   const emite = (nome: string, detail: unknown): void => { el.dispatchEvent(new CustomEvent(nome, { bubbles: true, detail })) }
-  const aplica = (n: HTMLElement, c: Caixa, rot: number): void => css(n, { top: pct(c.topo), left: pct(c.esquerda), width: pct(c.largura), height: pct(c.altura), transform: rot ? `rotate(${-rot}deg)` : '' })
+  const aplica = (n: HTMLElement, c: Caixa, rot: number): void => css(n, { top: pct(c.topo), left: pct(c.esquerda), width: pct(c.largura), height: pct(c.altura), transform: rot ? `rotate(${-rot}deg)` : '', 'transform-origin': '0% 50%' })
   const limpaGuias = (): void => { for (const g of guias.splice(0)) g.remove() }
   const mostraGuias = (gs: Guia[]): void => {
     limpaGuias()

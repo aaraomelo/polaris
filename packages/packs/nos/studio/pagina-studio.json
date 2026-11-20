@@ -683,6 +683,16 @@
     "tmpOrig2": {
      "tipo": "json"
     },
+    "tmpOrigE": {
+     "tipo": "json"
+    },
+    "tmpAlvoE": {
+     "tipo": "json"
+    },
+    "tmpOkE": {
+     "tipo": "booleano",
+     "inicial": false
+    },
     "tmpDentro": {
      "tipo": "booleano",
      "inicial": false
@@ -5516,6 +5526,21 @@
                      },
                      {
                       "acao": "definir",
+                      "estado": "tmpOrigE",
+                      "valor": "acha(mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => x.v != null && x.v.tipo == \"item\"), x => objeto([[\"k\", x.ka], [\"b\", x.caminho], [\"e\", x.v.caminho], [\"v\", x.v]])), l => l.k == evento.valor)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpAlvoE",
+                      "valor": "acha(mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => x.v != null && x.v.tipo == \"item\"), x => objeto([[\"k\", x.ka], [\"b\", x.caminho], [\"e\", x.v.caminho], [\"v\", x.v]])), l => l.k == evento.alvo)"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "tmpOkE",
+                      "valor": "estado.tmpOrigE != null && estado.tmpAlvoE != null && igual(estado.tmpOrigE.b, estado.tmpAlvoE.b) && igual(fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1), fatia(estado.tmpAlvoE.e, 0, tamanho(estado.tmpAlvoE.e) - 1)) && !igual(estado.tmpOrigE.e, estado.tmpAlvoE.e)"
+                     },
+                     {
+                      "acao": "definir",
                       "estado": "tmpDentro",
                       "valor": "estado.tmpOk ? (tamanho(estado.tmpAlvo) == 0 || (evento.zona == \"dentro\" && tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots ?? objeto([]))) > 0)) : (false)"
                      },
@@ -5527,7 +5552,7 @@
                      {
                       "acao": "definir",
                       "estado": "tmpPos",
-                      "valor": "estado.tmpOk ? (estado.tmpDentro ? tamanho(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? []) : ultimo(estado.tmpAlvo) + (evento.zona == \"antes\" ? 0 : 1)) : (0)"
+                      "valor": "estado.tmpOk ? (estado.tmpDentro ? tamanho(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? []) : ultimo(estado.tmpAlvo) + (evento.zona == \"antes\" ? 0 : 1)) : (estado.tmpOkE ? ((ultimo(estado.tmpAlvoE.e) + (evento.zona == \"antes\" ? 0 : 1)) > ultimo(estado.tmpOrigE.e) ? ultimo(estado.tmpAlvoE.e) + (evento.zona == \"antes\" ? 0 : 1) - 1 : ultimo(estado.tmpAlvoE.e) + (evento.zona == \"antes\" ? 0 : 1)) : (0))"
                      },
                      {
                       "acao": "definir",
@@ -5542,12 +5567,12 @@
                      {
                       "acao": "definir",
                       "estado": "passado",
-                      "valor": "estado.tmpOk ? (fatia(concat(estado.passado, [estado.no]), -60)) : (estado.passado)"
+                      "valor": "estado.tmpOk || estado.tmpOkE ? fatia(concat(estado.passado, [estado.no]), -60) : estado.passado"
                      },
                      {
                       "acao": "definir",
                       "estado": "futuro",
-                      "valor": "estado.tmpOk ? ([]) : (estado.futuro)"
+                      "valor": "estado.tmpOk || estado.tmpOkE ? [] : estado.futuro"
                      },
                      {
                       "acao": "definir",
@@ -5557,17 +5582,17 @@
                      {
                       "acao": "definir",
                       "estado": "no",
-                      "valor": "estado.tmpOk ? (sem(com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpCaminho), concat(fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], estado.tmpPos))), concat([\"spec\", \"raiz\"], estado.tmpOrig2))) : (estado.no)"
+                      "valor": "estado.tmpOk ? (sem(com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpCaminho), concat(fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], estado.tmpPos))), concat([\"spec\", \"raiz\"], estado.tmpOrig2))) : (estado.tmpOkE ? (com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpOrigE.b, [\"props\"], fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1)), move(obter(estado.no, concat([\"spec\", \"raiz\"], estado.tmpOrigE.b, [\"props\"], fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1))), ultimo(estado.tmpOrigE.e), estado.tmpPos))) : (estado.no))"
                      },
                      {
                       "acao": "definir",
                       "estado": "sel",
-                      "valor": "estado.tmpOk ? ((igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])) : (estado.sel)"
+                      "valor": "estado.tmpOk ? ((igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])) : (estado.tmpOkE ? (estado.tmpOrigE.b) : (estado.sel))"
                      },
                      {
                       "acao": "definir",
                       "estado": "selElemento",
-                      "valor": "null"
+                      "valor": "estado.tmpOk ? (null) : (estado.tmpOkE ? (objeto([[\"caminho\", concat(fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1), [estado.tmpPos])], [\"tipo\", \"item\"], [\"rotulo\", estado.tmpOrigE.v.rotulo], [\"valor\", \"\"], [\"tem\", estado.tmpOrigE.v.tem], [\"itens\", estado.tmpOrigE.v.itens]])) : (estado.selElemento))"
                      },
                      {
                       "acao": "definir",
@@ -5634,7 +5659,7 @@
                            {
                             "acao": "definir",
                             "estado": "recolhidos",
-                            "valor": "mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v]]))) : []))), x => x.v == null ? (tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0 || (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true) : x.v.tem), x => (x.v == null ? junta(mapeia(x.caminho, p => texto(p)), \"/\") : junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\")))"
+                            "valor": "mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => x.v == null ? (tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0 || (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true) : x.v.tem), x => (x.v == null ? junta(mapeia(x.caminho, p => texto(p)), \"/\") : junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\")))"
                            }
                           ]
                          }
@@ -5645,7 +5670,7 @@
                      {
                       "bloco": "layout/pilha",
                       "repetir": {
-                       "cada": "filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v]]))) : []))), x => !((algum(estado.recolhidos, r => r == \"\" ? x.nivel > 0 : comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\"), r + \"/\")) || (x.v != null && algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\") || comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\"), r + \"/\"))))))",
+                       "cada": "filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => !((algum(estado.recolhidos, r => r == \"\" ? x.nivel > 0 : comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\"), r + \"/\")) || (x.v != null && algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\") || comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\"), r + \"/\"))))))",
                        "como": "x",
                        "chave": "(x.v == null ? junta(mapeia(x.caminho, p => texto(p)), \"/\") : junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\"))"
                       },
@@ -5707,7 +5732,7 @@
                              "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
                              "atual": "{estado.selElemento == null && igual(x.caminho, estado.sel)}",
                              "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}",
-                             "arrasta": "{\"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")}"
+                             "arrasta": "{x.ka}"
                             },
                             "eventos": {
                              "aoClicar": [
@@ -6210,7 +6235,8 @@
                              "variante": "secundario",
                              "icone": "{obter(objeto([[\"campo\", \"entrada-texto\"], [\"lista\", \"lista-lista\"], [\"item\", \"texto-rotulo\"], [\"objeto\", \"nav-botao\"]]), [x.v.tipo])}",
                              "atual": "{estado.selElemento != null && igual(x.caminho, estado.sel) && igual(estado.selElemento.caminho, x.v.caminho)}",
-                             "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}"
+                             "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}",
+                             "arrasta": "{x.ka}"
                             },
                             "eventos": {
                              "aoClicar": [
@@ -9913,6 +9939,21 @@
                         },
                         {
                          "acao": "definir",
+                         "estado": "tmpOrigE",
+                         "valor": "acha(mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => x.v != null && x.v.tipo == \"item\"), x => objeto([[\"k\", x.ka], [\"b\", x.caminho], [\"e\", x.v.caminho], [\"v\", x.v]])), l => l.k == evento.valor)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpAlvoE",
+                         "valor": "acha(mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => x.v != null && x.v.tipo == \"item\"), x => objeto([[\"k\", x.ka], [\"b\", x.caminho], [\"e\", x.v.caminho], [\"v\", x.v]])), l => l.k == evento.alvo)"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "tmpOkE",
+                         "valor": "estado.tmpOrigE != null && estado.tmpAlvoE != null && igual(estado.tmpOrigE.b, estado.tmpAlvoE.b) && igual(fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1), fatia(estado.tmpAlvoE.e, 0, tamanho(estado.tmpAlvoE.e) - 1)) && !igual(estado.tmpOrigE.e, estado.tmpAlvoE.e)"
+                        },
+                        {
+                         "acao": "definir",
                          "estado": "tmpDentro",
                          "valor": "estado.tmpOk ? (tamanho(estado.tmpAlvo) == 0 || (evento.zona == \"dentro\" && tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.tmpAlvo).bloco) ?? objeto([])).slots ?? objeto([]))) > 0)) : (false)"
                         },
@@ -9924,7 +9965,7 @@
                         {
                          "acao": "definir",
                          "estado": "tmpPos",
-                         "valor": "estado.tmpOk ? (estado.tmpDentro ? tamanho(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? []) : ultimo(estado.tmpAlvo) + (evento.zona == \"antes\" ? 0 : 1)) : (0)"
+                         "valor": "estado.tmpOk ? (estado.tmpDentro ? tamanho(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? []) : ultimo(estado.tmpAlvo) + (evento.zona == \"antes\" ? 0 : 1)) : (estado.tmpOkE ? ((ultimo(estado.tmpAlvoE.e) + (evento.zona == \"antes\" ? 0 : 1)) > ultimo(estado.tmpOrigE.e) ? ultimo(estado.tmpAlvoE.e) + (evento.zona == \"antes\" ? 0 : 1) - 1 : ultimo(estado.tmpAlvoE.e) + (evento.zona == \"antes\" ? 0 : 1)) : (0))"
                         },
                         {
                          "acao": "definir",
@@ -9939,12 +9980,12 @@
                         {
                          "acao": "definir",
                          "estado": "passado",
-                         "valor": "estado.tmpOk ? (fatia(concat(estado.passado, [estado.no]), -60)) : (estado.passado)"
+                         "valor": "estado.tmpOk || estado.tmpOkE ? fatia(concat(estado.passado, [estado.no]), -60) : estado.passado"
                         },
                         {
                          "acao": "definir",
                          "estado": "futuro",
-                         "valor": "estado.tmpOk ? ([]) : (estado.futuro)"
+                         "valor": "estado.tmpOk || estado.tmpOkE ? [] : estado.futuro"
                         },
                         {
                          "acao": "definir",
@@ -9954,17 +9995,17 @@
                         {
                          "acao": "definir",
                          "estado": "no",
-                         "valor": "estado.tmpOk ? (sem(com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpCaminho), concat(fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], estado.tmpPos))), concat([\"spec\", \"raiz\"], estado.tmpOrig2))) : (estado.no)"
+                         "valor": "estado.tmpOk ? (sem(com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpCaminho), concat(fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no.spec.raiz, estado.tmpCaminho) ?? [], estado.tmpPos))), concat([\"spec\", \"raiz\"], estado.tmpOrig2))) : (estado.tmpOkE ? (com(estado.no, concat([\"spec\", \"raiz\"], estado.tmpOrigE.b, [\"props\"], fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1)), move(obter(estado.no, concat([\"spec\", \"raiz\"], estado.tmpOrigE.b, [\"props\"], fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1))), ultimo(estado.tmpOrigE.e), estado.tmpPos))) : (estado.no))"
                         },
                         {
                          "acao": "definir",
                          "estado": "sel",
-                         "valor": "estado.tmpOk ? ((igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])) : (estado.sel)"
+                         "valor": "estado.tmpOk ? ((igual(fatia(concat(estado.tmpCaminho, [estado.tmpPos]), 0, tamanho(estado.tmpOrig2) - 1), fatia(estado.tmpOrig2, 0, tamanho(estado.tmpOrig2) - 1)) && tamanho(estado.tmpCaminho) >= tamanho(estado.tmpOrig2) - 1 && obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) > ultimo(estado.tmpOrig2)) ? com(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1], obter(concat(estado.tmpCaminho, [estado.tmpPos]), [tamanho(estado.tmpOrig2) - 1]) - 1) : concat(estado.tmpCaminho, [estado.tmpPos])) : (estado.tmpOkE ? (estado.tmpOrigE.b) : (estado.sel))"
                         },
                         {
                          "acao": "definir",
                          "estado": "selElemento",
-                         "valor": "null"
+                         "valor": "estado.tmpOk ? (null) : (estado.tmpOkE ? (objeto([[\"caminho\", concat(fatia(estado.tmpOrigE.e, 0, tamanho(estado.tmpOrigE.e) - 1), [estado.tmpPos])], [\"tipo\", \"item\"], [\"rotulo\", estado.tmpOrigE.v.rotulo], [\"valor\", \"\"], [\"tem\", estado.tmpOrigE.v.tem], [\"itens\", estado.tmpOrigE.v.itens]])) : (estado.selElemento))"
                         },
                         {
                          "acao": "definir",
@@ -10031,7 +10072,7 @@
                               {
                                "acao": "definir",
                                "estado": "recolhidos",
-                               "valor": "mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v]]))) : []))), x => x.v == null ? (tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0 || (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true) : x.v.tem), x => (x.v == null ? junta(mapeia(x.caminho, p => texto(p)), \"/\") : junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\")))"
+                               "valor": "mapeia(filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => x.v == null ? (tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0 || (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true) : x.v.tem), x => (x.v == null ? junta(mapeia(x.caminho, p => texto(p)), \"/\") : junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\")))"
                               }
                              ]
                             }
@@ -10042,7 +10083,7 @@
                         {
                          "bloco": "layout/pilha",
                          "repetir": {
-                          "cada": "filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v]]))) : []))), x => !((algum(estado.recolhidos, r => r == \"\" ? x.nivel > 0 : comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\"), r + \"/\")) || (x.v != null && algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\") || comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\"), r + \"/\"))))))",
+                          "cada": "filtra(achata(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => concat([mescla(x, objeto([[\"v\", null], [\"ka\", \"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")]]))], (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).composto == true ? mapeia(elementosDoBloco(x.no.props ?? objeto([]), (acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).props ?? objeto([])), v => mescla(x, objeto([[\"v\", v], [\"ka\", v.tipo == \"item\" ? \"e\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\") + \"_\" + junta(mapeia(v.caminho, s => \"-\" + texto(s)), \"\") : \"\"]]))) : []))), x => !((algum(estado.recolhidos, r => r == \"\" ? x.nivel > 0 : comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\"), r + \"/\")) || (x.v != null && algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\") || comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\"), r + \"/\"))))))",
                           "como": "x",
                           "chave": "(x.v == null ? junta(mapeia(x.caminho, p => texto(p)), \"/\") : junta(mapeia(x.caminho, p => texto(p)), \"/\") + \"#\" + junta(mapeia(x.v.caminho, p => texto(p)), \"/\"))"
                          },
@@ -10104,7 +10145,7 @@
                                 "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
                                 "atual": "{estado.selElemento == null && igual(x.caminho, estado.sel)}",
                                 "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}",
-                                "arrasta": "{\"n\" + junta(mapeia(x.caminho, s => \"-\" + texto(s)), \"\")}"
+                                "arrasta": "{x.ka}"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -10607,7 +10648,8 @@
                                 "variante": "secundario",
                                 "icone": "{obter(objeto([[\"campo\", \"entrada-texto\"], [\"lista\", \"lista-lista\"], [\"item\", \"texto-rotulo\"], [\"objeto\", \"nav-botao\"]]), [x.v.tipo])}",
                                 "atual": "{estado.selElemento != null && igual(x.caminho, estado.sel) && igual(estado.selElemento.caminho, x.v.caminho)}",
-                                "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}"
+                                "alvo": "{(x.no.id ?? (\"pl-\" + junta(mapeia(x.caminho, p => texto(p)), \"-\")))}",
+                                "arrasta": "{x.ka}"
                                },
                                "eventos": {
                                 "aoClicar": [
@@ -20251,6 +20293,338 @@
                                },
                                "slots": {
                                 "filhos": [
+                                 {
+                                  "bloco": "texto/paragrafo",
+                                  "props": {
+                                   "texto": "Alinhar à peça:"
+                                  }
+                                 },
+                                 {
+                                  "bloco": "layout/linha",
+                                  "props": {
+                                   "gap": 4,
+                                   "alinha": "centro",
+                                   "quebra": true,
+                                   "papel": "group",
+                                   "rotulo": "Alinhar à peça"
+                                  },
+                                  "slots": {
+                                   "filhos": [
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Esquerda",
+                                      "variante": "fantasma"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat([\"spec\", \"elementos\", estado.selEl], [\"caixa\"]), mescla(sem(obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"esquerda\", arredonda(0, 4)]])))"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "sel",
+                                        "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "selElemento",
+                                        "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Centro",
+                                      "variante": "fantasma"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat([\"spec\", \"elementos\", estado.selEl], [\"caixa\"]), mescla(sem(obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"esquerda\", arredonda((1 - (obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\", \"largura\"]) ?? 0)) / 2, 4)]])))"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "sel",
+                                        "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "selElemento",
+                                        "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Direita",
+                                      "variante": "fantasma"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat([\"spec\", \"elementos\", estado.selEl], [\"caixa\"]), mescla(sem(obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"esquerda\", arredonda(1 - (obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\", \"largura\"]) ?? 0), 4)]])))"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "sel",
+                                        "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "selElemento",
+                                        "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Topo",
+                                      "variante": "fantasma"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat([\"spec\", \"elementos\", estado.selEl], [\"caixa\"]), mescla(sem(obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"topo\", arredonda(0, 4)]])))"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "sel",
+                                        "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "selElemento",
+                                        "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Meio",
+                                      "variante": "fantasma"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat([\"spec\", \"elementos\", estado.selEl], [\"caixa\"]), mescla(sem(obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"topo\", arredonda((1 - (obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\", \"altura\"]) ?? 0)) / 2, 4)]])))"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "sel",
+                                        "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "selElemento",
+                                        "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    },
+                                    {
+                                     "bloco": "nav/botao",
+                                     "props": {
+                                      "texto": "Base",
+                                      "variante": "fantasma"
+                                     },
+                                     "eventos": {
+                                      "aoClicar": [
+                                       {
+                                        "acao": "definir",
+                                        "estado": "passado",
+                                        "valor": "\"\" != \"\" && estado.chaveEdicao == \"\" ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "futuro",
+                                        "valor": "[]"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "chaveEdicao",
+                                        "valor": "\"\""
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "no",
+                                        "valor": "com(estado.no, concat([\"spec\", \"elementos\", estado.selEl], [\"caixa\"]), mescla(sem(obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\"]) ?? objeto([]), [\"direita\"]), objeto([[\"topo\", arredonda(1 - (obter(obter(estado.no.spec, [\"elementos\", estado.selEl]), [\"caixa\", \"altura\"]) ?? 0), 4)]])))"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "sel",
+                                        "valor": "obter(estado.no.spec.raiz, estado.sel) != null ? estado.sel : []"
+                                       },
+                                       {
+                                        "acao": "definir",
+                                        "estado": "selElemento",
+                                        "valor": "estado.selElemento == null ? null : (acha(elementosDoBloco((obter(estado.no.spec.raiz, estado.sel) ?? objeto([])).props ?? objeto([]), ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)"
+                                       },
+                                       {
+                                        "acao": "executar",
+                                        "dados": "previa",
+                                        "args": {
+                                         "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                         "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                         "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                         "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                         "modo": "{estado.modoPrevia}"
+                                        }
+                                       }
+                                      ]
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
                                  {
                                   "bloco": "layout/pilha",
                                   "props": {

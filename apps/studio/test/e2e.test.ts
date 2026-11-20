@@ -5,7 +5,7 @@ import { registraSite } from '@polaris/engine/site'
 import { registraTemas } from '@polaris/engine/tema'
 import { DDL_DIRETORIO, criaArmazemDeNos, criaAtivos, diretorioSql, registroDaPlataforma, type Sessao } from '@polaris/packs'
 import type { FastifyInstance } from 'fastify'
-import { chromium, type Browser, type BrowserContext, type Page } from 'playwright-core'
+import { chromium, type Browser, type BrowserContext, type Locator, type Page } from 'playwright-core'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { criaServidorStudio } from '../src/servidor'
 import './matchers'
@@ -378,6 +378,9 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     // teclado: a seta direita move 1% (2 passos de 0,5%), Alt + seta redimensiona
     const antes = await valor('Esquerda'); await tela.locator('[data-caixa="1"]').focus(); await p.keyboard.press('ArrowRight'); await expect.poll(() => valor('Esquerda')).toBeCloseTo(antes + 0.01, 3)
     const larg = await valor('Largura'); await p.keyboard.press('Alt+ArrowRight'); await expect.poll(() => valor('Largura')).toBeCloseTo(larg + 0.01, 3)
+    // alinhar à peça: centro, base e direita calculam pela largura e pela altura do elemento (sem sobra de ponto flutuante)
+    const grupo = p.getByRole('group', { name: 'Alinhar à peça' }); await grupo.getByRole('button', { name: 'Centro' }).click(); await expect.poll(() => valor('Esquerda')).toBeCloseTo((1 - (await valor('Largura'))) / 2, 4); expect(String(await valor('Esquerda')).length).toBeLessThanOrEqual(7)
+    await grupo.getByRole('button', { name: 'Base' }).click(); await expect.poll(async () => (await valor('Topo')) + (await valor('Altura'))).toBeCloseTo(1, 3); await grupo.getByRole('button', { name: 'Topo' }).click(); await expect.poll(() => valor('Topo')).toBe(0)
     // soltar da paleta sobre a peça: cria uma faixa no ponto, centrada
     const bf = (await barra.getByRole('button', { name: 'Faixa', exact: true }).boundingBox())! // (o `dragTo` do Playwright trava com o arrastar nativo do Chrome; a sequência manual do mouse é a de um usuário)
     await p.mouse.move(bf.x + bf.width / 2, bf.y + bf.height / 2); await p.mouse.down(); await p.mouse.move(bf.x + bf.width / 2 + 10, bf.y + bf.height / 2 + 10, { steps: 3 }); await p.mouse.move(r.x + r.width * 0.5, r.y + r.height * 0.8, { steps: 12 }); await p.waitForTimeout(200); await p.mouse.up()
@@ -404,6 +407,27 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await arrasta('raiz', 'b1', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Título #b2', 'Pilha #b1', 'Parágrafo #b3']) // a raiz não se move
     await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // cada soltar é um passo
     const ids = (await ordem()).map((t) => t.split('#')[1]); expect(new Set(ids).size).toBe(ids.length)
+    await ctx.close()
+  })
+  it('ÁRVORE: reordenar itens de lista de um composto arrastando (só na mesma lista) e soltar dentro de um bloco cujo slot não é `filhos`', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('itens-arrasta'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/ia'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página itens-arrasta')).toBeVisible()
+    await adiciona(p, 'Site', 'Cabeçalho do site'); await p.getByRole('button', { name: 'Editar JSON' }).first().click(); await p.getByRole('textbox', { name: /^JSON de / }).fill('[{"texto":"A","href":"/a"},{"texto":"B","href":"/b"},{"texto":"C","href":"/c"}]'); await p.getByRole('button', { name: 'Aplicar JSON' }).click()
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
+    const itens = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => ['A', 'B', 'C'].includes(t)), nav = () => frame().locator('header nav > a').allInnerTexts()
+    const item = (t: string) => arv.getByRole('button', { name: t, exact: true })
+    const arrasta = async (de: Locator, para: Locator, f: number) => { await para.scrollIntoViewIfNeeded(); await de.scrollIntoViewIfNeeded(); const a = (await de.boundingBox())!, b = (await para.boundingBox())!; await p.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await p.mouse.down(); await p.mouse.move(a.x + a.width / 2 + 8, a.y + a.height / 2 + 8, { steps: 3 }); await p.mouse.move(b.x + b.width / 2, b.y + b.height * f, { steps: 10 }); await p.waitForTimeout(150); await p.mouse.up(); await p.waitForTimeout(400) }
+    expect(await itens()).toEqual(['A', 'B', 'C']); await expect.poll(nav).toEqual(['A', 'B', 'C'])
+    await arrasta(item('C'), item('A'), 0.1); expect(await itens()).toEqual(['C', 'A', 'B']); await expect.poll(nav).toEqual(['C', 'A', 'B']) // C ANTES de A: a árvore e a prévia
+    await expect(p.getByRole('heading', { name: 'Item 1' })).toBeVisible() // o painel do item acompanha: é o primeiro agora
+    await arrasta(item('C'), item('B'), 0.9); expect(await itens()).toEqual(['A', 'B', 'C']); await expect.poll(nav).toEqual(['A', 'B', 'C']) // C DEPOIS de B
+    await arrasta(item('A'), item('B'), 0.5); expect(await itens()).toEqual(['B', 'A', 'C']) // "dentro" de um item vale depois
+    await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await itens()).toEqual(['A', 'B', 'C']) // um passo por soltar
+    await arrasta(item('A'), arv.getByRole('button', { name: /^Pilha #raiz$/ }), 0.5); expect(await itens()).toEqual(['A', 'B', 'C']) // item sobre bloco: recusado
+    // soltar um bloco DENTRO do cabeçalho: o primeiro slot dele é `acoes`, não `filhos`
+    await adiciona(p, 'Feedback', 'Selo'); const selo = arv.getByRole('button', { name: /^Selo #/ }), cab = arv.getByRole('button', { name: /^Cabeçalho do site #/ })
+    await arrasta(selo, cab, 0.5); await expect.poll(async () => frame().locator('header').getByText(/Selo|Texto/).count()).toBeGreaterThan(0)
+    const dentro = await arv.getByRole('button', { name: /#/ }).allTextContents(); expect(dentro.map((t) => t.trim()).filter((t) => /^(Pilha|Cabeçalho|Selo)/.test(t)).map((t) => t.replace(/ #.*/, ''))).toEqual(['Pilha', 'Cabeçalho do site', 'Selo']) // continua depois do cabeçalho na ordem plana, agora filho dele
     await ctx.close()
   })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {

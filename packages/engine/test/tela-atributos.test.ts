@@ -12,7 +12,7 @@ describe('midia/tela: atributos', () => {
     expect(caixasDe({ caixas: Array.from({ length: 500 }, (_, i) => ({ id: `c${i}` })) })).toHaveLength(200); for (const v of [undefined, null, 'x', {}, 5]) expect(caixasDe({ caixas: v })).toEqual([])
   })
   it('atributos: marca da ilha, passo, estilo de proporção; as caixas só aparecem se houver', () => {
-    const a = atributosDaTela({ proporcao: 2, caixas: [{ id: 'a' }] }); expect(a['data-polaris-tela']).toBe(''); expect(a['data-passo']).toBe('0.005'); expect(a.style).toBe('aspect-ratio:2;position:relative;width:100%'); expect(JSON.parse(a['data-polaris-caixas']!)).toHaveLength(1)
+    const a = atributosDaTela({ proporcao: 2, caixas: [{ id: 'a' }] }); expect(a['data-polaris-tela']).toBe(''); expect(a['data-passo']).toBe('0.005'); expect(a.style).toBe('aspect-ratio:2;position:relative;width:100%;--proporcao:2'); expect(JSON.parse(a['data-polaris-caixas']!)).toHaveLength(1)
     expect(atributosDaTela({})).not.toHaveProperty('data-polaris-caixas')
   })
 })
