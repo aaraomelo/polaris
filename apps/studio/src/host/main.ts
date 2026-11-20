@@ -54,6 +54,25 @@ document.addEventListener('keydown', (e) => {
   const vai = (k: number) => { e.preventDefault(); itens[Math.max(0, Math.min(itens.length - 1, k))]!.focus() }
   if (e.key === 'ArrowDown') vai(i + 1); else if (e.key === 'ArrowUp') vai(i - 1); else if (e.key === 'Home') vai(0); else if (e.key === 'End') vai(itens.length - 1)
   else if (e.key === 'ArrowRight') { if (seta?.getAttribute('aria-expanded') === 'false') { e.preventDefault(); seta.click() } else vai(i + 1) }
-  else if (e.key === 'ArrowLeft') { if (seta?.getAttribute('aria-expanded') === 'true') { e.preventDefault(); seta.click() } }
+  else if (e.key === 'ArrowLeft') {
+    if (seta?.getAttribute('aria-expanded') === 'true') { e.preventDefault(); seta.click() }
+    else { // recolhido ou folha: sobe ao pai (a linha anterior com menos recuo; o recuo são os espaços largos do começo do rótulo da seta)
+      const recuo = (b: Element) => ((b.previousElementSibling?.textContent ?? '').match(/^\u2003*/)?.[0].length ?? 0)
+      for (let k = i - 1; k >= 0; k--) if (recuo(itens[k]!) < recuo(alvo)) { e.preventDefault(); itens[k]!.focus(); break }
+    }
+  }
+})
+// Atalhos do editor (fora de campos de texto, onde o desfazer é do próprio campo): Ctrl+Z desfaz, Ctrl+Shift+Z ou Ctrl+Y refaz, Ctrl+S salva, Delete remove o bloco da linha da árvore em foco. Clicam nos mesmos botões da barra, então valem as mesmas regras (botão ausente = nada acontece).
+const clicaBotao = (nome: string): boolean => { const b = [...document.querySelectorAll<HTMLButtonElement>('button')].find((x) => x.textContent?.trim() === nome && !x.disabled); b?.click(); return !!b }
+document.addEventListener('keydown', (e) => {
+  const alvo = e.target as HTMLElement | null, emCampo = !!alvo?.closest('input, textarea, select, [contenteditable=""], [contenteditable=true]')
+  const k = e.key.toLowerCase()
+  if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+    if (k === 's') { e.preventDefault(); clicaBotao('Salvar'); return }
+    if (emCampo) return
+    if (k === 'z' && !e.shiftKey) { if (clicaBotao('Desfazer')) e.preventDefault() } else if ((k === 'z' && e.shiftKey) || k === 'y') { if (clicaBotao('Refazer')) e.preventDefault() }
+  } else if (e.key === 'Delete' && !e.ctrlKey && !e.altKey && !e.metaKey && !emCampo && alvo?.closest(ARVORE) && alvo.getAttribute('data-variante') === 'secundario' && alvo.hasAttribute('aria-current')) {
+    const linha = alvo.parentElement, rem = linha && [...linha.querySelectorAll<HTMLButtonElement>('button')].find((x) => x.textContent?.trim() === 'Remover'); if (rem) { e.preventDefault(); rem.click() }
+  }
 })
 void inicia()

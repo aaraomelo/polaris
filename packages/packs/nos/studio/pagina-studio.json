@@ -5133,6 +5133,11 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "catBloco",
                                   "valor": "\"\""
                                  },

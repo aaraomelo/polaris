@@ -33,3 +33,7 @@ section[aria-label]{background:var(--card);border:1px solid var(--bd);border-rad
 #polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo]{transition:background-color .12s,border-color .12s,box-shadow .12s}
 #polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo]:hover,#polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo]:focus-visible{background:color-mix(in srgb,var(--cor-primaria) 12%,transparent);border-color:var(--cor-primaria);box-shadow:0 0 0 2px color-mix(in srgb,var(--cor-primaria) 30%,transparent)}
 #polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo][aria-current]{background:color-mix(in srgb,var(--cor-primaria) 20%,transparent);border-color:var(--cor-primaria);font-weight:600}
+/* Celular e zoom: as três colunas do editor (árvore, prévia, propriedades) empilham em vez de ficarem de 100 px */
+@media (max-width:1000px){#polaris main div[style*="grid-template-columns:repeat(3,"]{grid-template-columns:minmax(0,1fr)!important}}
+/* alvos de toque maiores em telas de toque */
+@media (pointer:coarse){#polaris button,#polaris summary,#polaris [role=toolbar] button{min-height:44px}#polaris input[type=checkbox]{width:24px;height:24px}}

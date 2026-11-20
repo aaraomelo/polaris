@@ -319,6 +319,10 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     // o bloco ativo aparece em destaque na prévia (contorno no id dele, mesmo sem id próprio) e as linhas da árvore trazem o alvo
     await arv.getByRole('button', { name: 'Ajuda', exact: true }).click(); await expect(arv.locator('button[data-alvo="raiz"]')).toHaveCount(1)
     await expect.poll(async () => (await p.locator('iframe[title="Pré-visualização da página"]').getAttribute('srcdoc')) ?? '').toContain('#b3{outline:2px solid #f59e0b')
+    // atalhos: Ctrl+Z desfaz, Ctrl+Shift+Z refaz; Delete na linha do bloco selecionado remove; ← sobe ao pai
+    await arv.getByRole('button', { name: /^site\/rodape #b3$/ }).click(); await p.keyboard.press('Delete'); await expect(arv.getByRole('button', { name: /site\/rodape #b3$/ })).toHaveCount(0)
+    await p.locator('body').click({ position: { x: 5, y: 5 } }); await p.keyboard.press('Control+z'); await expect(arv.getByRole('button', { name: /site\/rodape #b3$/ })).toHaveCount(1); await p.keyboard.press('Control+Shift+z'); await expect(arv.getByRole('button', { name: /site\/rodape #b3$/ })).toHaveCount(0); await p.keyboard.press('Control+z')
+    await arv.getByRole('button', { name: 'Todos os produtos', exact: true }).focus(); await p.keyboard.press('ArrowLeft'); await expect.poll(() => p.evaluate(() => document.activeElement?.textContent?.trim())).toMatch(/^Links: /); await p.keyboard.press('ArrowLeft'); await p.keyboard.press('ArrowLeft'); await expect.poll(() => p.evaluate(() => document.activeElement?.textContent?.trim())).toBe('Loja') // ← sobe ao pai (item → lista → coluna)
     // seleção segura: desfazer até o elemento selecionado deixar de existir não deixa painel vazio nem seleção solta
     await arv.getByRole('button', { name: 'Ajuda', exact: true }).click(); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toBeVisible()
     for (let i = 0; i < 12 && (await arv.getByRole('button', { name: 'Ajuda', exact: true }).count()) > 0; i++) await p.getByRole('button', { name: 'Desfazer' }).click()
