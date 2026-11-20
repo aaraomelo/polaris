@@ -52,3 +52,40 @@ export function redimensiona(c: Caixa, alca: Alca, dx: number, dy: number, passo
 export function colocaCentrada(x: number, y: number, l: number, a: number, passo: number): Caixa {
   return { esquerda: r4(limita(grade(x - l / 2, passo), 0, Math.max(0, 1 - l))), topo: r4(limita(grade(y - a / 2, passo), 0, Math.max(0, 1 - a))), largura: l, altura: a }
 }
+
+/**
+ * Redimensiona uma caixa GIRADA pela alça: o deslocamento do ponteiro (em frações da moldura, nos eixos da TELA) é levado para os eixos da própria caixa, só as bordas da alça mudam, e o ponto oposto à alça fica PARADO na tela.
+ * Como o giro é em torno do meio da borda esquerda (o pivô do Sign Maker no HTML e no PDF), mexer na borda esquerda, de cima ou de baixo desloca o pivô: a posição é refeita para o ponto oposto não sair do lugar.
+ * A conta é no espaço da peça em pt (altura = 1, largura = `prop`), onde o giro não deforma; `prop` é largura ÷ altura da moldura. Sem encaixe nas guias (a caixa girada não tem alinhamento óbvio); a grade vale para o tamanho.
+ */
+export function redimensionaGirada(c: Caixa, alca: Alca, dx: number, dy: number, graus: number, prop: number, passo: number): { caixa: Caixa; guias: Guia[] } {
+  const a = (graus * Math.PI) / 180, co = Math.cos(a), si = Math.sin(a)
+  const dxs = dx * prop, dys = dy // deslocamento da tela, no espaço da peça
+  return redimensionaLocal(c, alca, co * dxs - si * dys, si * dxs + co * dys, graus, prop, passo)
+}
+
+/** o mesmo, com o deslocamento JÁ nos eixos da caixa (o teclado: "mais largo" é sempre ao longo da própria caixa) */
+export function redimensionaLocal(c: Caixa, alca: Alca, dlx: number, dly: number, graus: number, prop: number, passo: number): { caixa: Caixa; guias: Guia[] } {
+  const a = (graus * Math.PI) / 180, co = Math.cos(a), si = Math.sin(a)
+  const x = c.esquerda * prop, y = c.topo, w = c.largura * prop, h = c.altura
+  const ox = x, oy = y + h / 2 // o pivô, antes
+  // bordas nos eixos da caixa, com a origem no pivô: esquerda 0, direita w, topo −h/2, base h/2
+  let l = 0, r = w, t = -h / 2, b = h / 2
+  if (alca.includes('w')) l += dlx
+  if (alca.includes('e')) r += dlx
+  if (alca.includes('n')) t += dly
+  if (alca.includes('s')) b += dly
+  const minW = TAMANHO_MIN * prop, minH = TAMANHO_MIN
+  if (r - l < minW) { if (alca.includes('w')) l = r - minW; else r = l + minW }
+  if (b - t < minH) { if (alca.includes('n')) t = b - minH; else b = t + minH }
+  const gp = (v: number): number => grade(v, passo) // a grade vale para o tamanho
+  const w2 = Math.max(minW, gp((r - l) / prop) * prop), h2 = Math.max(minH, gp(b - t))
+  // o lado fixo é o oposto ao da alça: se a alça mexe na direita, a esquerda fica (l); se mexe na esquerda, a direita (r); idem em cima e embaixo
+  if (alca.includes('w')) l = r - w2; else r = l + w2
+  if (alca.includes('n')) t = b - h2; else b = t + h2
+  // o novo pivô (meio da nova borda esquerda), nos eixos antigos da caixa, vira posição na peça pelo giro
+  const px = l, py = (t + b) / 2
+  const nx = ox + co * px + si * py, ny = oy - si * px + co * py
+  const nh = b - t, nw = r - l
+  return { caixa: { esquerda: r4(nx / prop), topo: r4(ny - nh / 2), largura: r4(nw / prop), altura: r4(nh) }, guias: [] }
+}

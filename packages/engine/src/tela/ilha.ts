@@ -1,4 +1,4 @@
-import { ALCAS, colocaCentrada, move, redimensiona, type Alca, type Caixa, type Guia } from './geometria'
+import { ALCAS, colocaCentrada, move, redimensiona, redimensionaGirada, redimensionaLocal, type Alca, type Caixa, type Guia } from './geometria'
 import { caixasDe, passoDe, type CaixaTela } from './atributos'
 
 // A ILHA da tela de edição (`midia/tela`): no navegador desenha por cima da moldura as caixas (do atributo `data-polaris-caixas`), e traduz mouse, toque e teclado em três eventos que o runtime entrega às ações do bloco:
@@ -57,7 +57,7 @@ function monta(el: HTMLElement): void {
       css(n, { border: c.atual ? '2px solid #f59e0b' : '1px dashed rgba(245,158,11,.7)', background: c.atual ? 'rgba(245,158,11,.10)' : 'transparent', 'z-index': c.atual ? '2' : '1' })
       aplica(n, c, c.rotacao)
       for (const a of [...n.querySelectorAll('[data-alca]')]) a.remove()
-      if (c.atual && !c.rotacao) for (const a of ALCAS) { // girada: sem alças (os eixos da alça e do modelo não coincidem); mover continua valendo
+      if (c.atual) for (const a of ALCAS) { // as alças giram junto com a caixa (o transform é do pai)
         const h = document.createElement('div'); h.setAttribute('data-alca', a); h.setAttribute('aria-hidden', 'true')
         const cx = a.includes('w') ? '0%' : a.includes('e') ? '100%' : '50%', cy = a.includes('n') ? '0%' : a.includes('s') ? '100%' : '50%'
         css(h, { position: 'absolute', left: cx, top: cy, width: '12px', height: '12px', margin: '-6px 0 0 -6px', background: '#fff', border: '2px solid #f59e0b', 'border-radius': '3px', cursor: `${a}-resize`, 'touch-action': 'none', 'box-sizing': 'border-box' })
@@ -84,7 +84,8 @@ function monta(el: HTMLElement): void {
     const dx = (e.clientX - gesto.x0) / r.width, dy = (e.clientY - gesto.y0) / r.height
     if (!gesto.moveu && Math.hypot(e.clientX - gesto.x0, e.clientY - gesto.y0) < 3) return // um clique não é um arrastar
     gesto.moveu = true
-    const res = gesto.tipo === 'alca' ? redimensiona(gesto.ini, gesto.alca!, dx, dy, passo(), outras(gesto.id)) : move(gesto.ini, dx, dy, passo(), outras(gesto.id))
+    const rot = caixas.find((x) => x.id === gesto!.id)?.rotacao ?? 0
+    const res = gesto.tipo === 'alca' ? (rot ? redimensionaGirada(gesto.ini, gesto.alca!, dx, dy, rot, r.width / r.height, passo()) : redimensiona(gesto.ini, gesto.alca!, dx, dy, passo(), outras(gesto.id))) : move(gesto.ini, dx, dy, passo(), outras(gesto.id))
     gesto.atual = res.caixa; const n = nos.get(gesto.id); if (n) aplica(n, res.caixa, caixas.find((x) => x.id === gesto!.id)?.rotacao ?? 0); mostraGuias(res.guias)
   })
   const fim = (cancelado: boolean) => (e: PointerEvent): void => {
@@ -103,7 +104,8 @@ function monta(el: HTMLElement): void {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); emite('polaris-selecionar', { id }); return }
     const d: number[] | undefined = ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] } as Record<string, number[]>)[e.key]; if (!d) return
     e.preventDefault(); const p = passo() * (e.shiftKey ? 10 : 2), box: Caixa = { topo: c.topo, esquerda: c.esquerda, largura: c.largura, altura: c.altura }
-    const res = e.altKey ? redimensiona(box, d[0] !== 0 ? 'e' : 's', d[0]! * p, d[1]! * p, passo(), [], 0) : move(box, d[0]! * p, d[1]! * p, passo(), [], 0)
+    const rr = retang(), prop = rr.height > 0 ? rr.width / rr.height : 1
+    const res = e.altKey ? (c.rotacao ? redimensionaLocal(box, d[0] !== 0 ? 'e' : 's', d[0]! * p * prop, d[1]! * p, c.rotacao, prop, passo()) : redimensiona(box, d[0] !== 0 ? 'e' : 's', d[0]! * p, d[1]! * p, passo(), [], 0)) : move(box, d[0]! * p, d[1]! * p, passo(), [], 0)
     if (!c.atual) emite('polaris-selecionar', { id })
     emite('polaris-mover', { id, topo: res.caixa.topo, esquerda: res.caixa.esquerda, largura: res.caixa.largura, altura: res.caixa.altura })
   })

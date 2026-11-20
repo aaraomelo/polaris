@@ -456,6 +456,20 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(['Pilha', 'Título', 'Cabeçalho do site', 'A', 'B', 'Parágrafo']) // o único passo real foi o 2)
     await ctx.close()
   })
+  it('CARTAZ: elemento GIRADO tem alças que seguem a caixa (a alça "e" de uma caixa a 90° estica a largura na vertical e o pivô não anda)', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('girada'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Cartaz girada')).toBeVisible()
+    const tela = p.locator('[data-polaris-tela]'), valor = async (n: string) => Number(await p.getByRole('textbox', { name: n, exact: true }).inputValue()), pomos = async (n: string, v: string) => { await p.getByRole('textbox', { name: n, exact: true }).fill(v); await p.waitForTimeout(120) }
+    await p.getByRole('toolbar', { name: 'Paleta de elementos' }).getByRole('button', { name: 'Faixa', exact: true }).click()
+    await pomos('Topo', '0.6'); await pomos('Esquerda', '0.4'); await pomos('Largura', '0.3'); await pomos('Altura', '0.15'); await pomos('Rotação (graus, anti-horário)', '90'); await p.waitForTimeout(900)
+    const r = (await tela.boundingBox())!, alca = tela.locator('[data-caixa="1"] [data-alca="e"]'); await expect(alca).toBeVisible() // com giro, as alças continuam lá
+    const a0 = (await alca.boundingBox())!; expect(a0.y).toBeLessThan(r.y + r.height * 0.4) // a 90°, a ponta da largura aponta para CIMA: a alça "e" fica no alto
+    await p.mouse.move(a0.x + a0.width / 2, a0.y + a0.height / 2); await p.mouse.down(); await p.mouse.move(a0.x + a0.width / 2, a0.y + a0.height / 2 - r.height * 0.05, { steps: 3 }); await p.mouse.move(a0.x + a0.width / 2, a0.y + a0.height / 2 - r.height * 0.1, { steps: 4 }); await p.mouse.up()
+    // a largura cresce 0,1 da altura da peça = 0,1 × altura ÷ largura da peça em fração (A5 paisagem: ÷ 1,4189), o pivô (topo, esquerda) não muda
+    await expect.poll(() => valor('Largura')).toBeCloseTo(0.3 + 0.1 / 1.4189, 1); expect(await valor('Esquerda')).toBe(0.4); expect(await valor('Topo')).toBe(0.6); expect(await valor('Altura')).toBe(0.15)
+    expect(await p.locator('[data-caixa="1"] [data-alca="e"]').count()).toBe(1)
+    await ctx.close()
+  })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {
     const { ctx, p } = await entra('ana')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('cola'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/cola'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página cola')).toBeVisible()
