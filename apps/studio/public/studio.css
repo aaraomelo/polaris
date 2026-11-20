@@ -61,3 +61,5 @@ a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-ra
 /* cartaz: a coluna da prévia ganha o dobro das outras, e a moldura nunca passa de ~75% da altura da tela (largura = altura × proporção), para uma peça em pé não sair da tela */
 @media (min-width:1001px){#polaris main div[style*="grid-template-columns:repeat(3,"]:has([data-polaris-tela]){grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)!important}}
 #polaris [data-polaris-tela]{width:min(100%,calc(75vh * var(--proporcao,1)))!important}
+/* soltar INVÁLIDO (a ilha marca o item sob o ponteiro quando o hospedeiro recusa): vermelho tracejado, e o navegador mostra o cursor de proibido */
+#polaris [data-solta] [data-arrasta][data-solta-zona="invalida"]{outline:3px dashed #dc2626;outline-offset:-3px;background:rgba(220,38,38,.12);cursor:no-drop}

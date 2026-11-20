@@ -63,6 +63,17 @@ document.addEventListener('keydown', (e) => {
     }
   }
 })
+// Regras do soltar na árvore de blocos (o hospedeiro responde ao `polaris-sobre` da ilha; cancelado = inválido: marca vermelha e cursor de proibido). As chaves das linhas: `n-slots-filhos-0` é um bloco (a raiz é `n`), `e-<bloco>_<item>` é um item de lista de um composto. Espelham a ação `MOVE_ARVORE` de `studio.ts`: o que ela recusa aparece aqui como inválido.
+const familia = (k: string, pai: string): boolean => k === pai || k.startsWith(pai + '-') // `k` é o próprio `pai` ou está dentro dele
+const donoDoItem = (k: string): string => 'n' + k.slice(1, k.indexOf('_')) // `e-slots-filhos-0_-links-1` → `n-slots-filhos-0`
+const listaDoItem = (item: string): string => item.slice(0, item.lastIndexOf('-'))
+export function soltarValido(valor: string, alvo: string): boolean {
+  if (valor === 'n') return false // a raiz não se move
+  if (valor[0] === 'n') return alvo[0] === 'n' ? !familia(alvo, valor) : alvo[0] === 'e' ? !familia(donoDoItem(alvo), valor) : true // um bloco não vai para dentro de si; sobre um item de lista, vai depois do dono dele
+  if (valor[0] === 'e') { if (alvo[0] !== 'e') return false; const [va, vb] = valor.split('_'), [aa, ab] = alvo.split('_'); return va === aa && listaDoItem(vb ?? '') === listaDoItem(ab ?? '') && vb !== ab } // um item só se move dentro da própria lista
+  return true
+}
+document.addEventListener('polaris-sobre', (e) => { const d = (e as CustomEvent<{ valor?: string; alvo?: string }>).detail; if (typeof d?.valor === 'string' && typeof d?.alvo === 'string' && !soltarValido(d.valor, d.alvo)) e.preventDefault() })
 // Depois de uma ação da linha (Subir, Descer, Duplicar, Colar…) o runtime redesenha as linhas e o foco se perderia no começo da página: devolve o foco à linha do bloco selecionado
 document.addEventListener('click', (e) => {
   const b = (e.target as HTMLElement | null)?.closest?.('button'); const t = b?.textContent?.trim() ?? ''

@@ -9,6 +9,8 @@ import { caixasDe, passoDe, type CaixaTela } from './atributos'
 
 /** o tipo do arrasto: próprio da plataforma, para que texto arrastado de FORA (outra aba, outro app) nunca vire um soltar */
 const MIME = 'application/x-polaris-arrasta'
+/** o valor do botão que está sendo arrastado (durante o `dragover` o navegador não deixa ler o `dataTransfer`) */
+let emArrasto = ''
 const ID_ARRASTA = /^[A-Za-z][\w-]{0,119}$/
 const r4 = (v: number): number => Math.round(v * 10000) / 10000
 const ligadas = new WeakMap<HTMLElement, { sincroniza: () => void }>()
@@ -129,11 +131,11 @@ export function ativaTelas(raiz: Document = document): () => void {
   const varre = (): void => { for (const el of raiz.querySelectorAll<HTMLElement>('[data-polaris-tela]')) { const l = ligadas.get(el); if (l) l.sincroniza(); else monta(el) } }
   // as mudanças que a própria ilha faz dentro da camada (caixas, alças, guias) NÃO religam nada: sem isso o observador se dispararia em laço
   const obs = new MutationObserver((rs) => { if (rs.every((r) => (r.target as Element).closest?.('[data-tela-camada]'))) return; varre() }); obs.observe(raiz.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-polaris-caixas', 'data-passo'] })
-  const dragstart = (e: DragEvent): void => { const b = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); const v = b?.getAttribute('data-arrasta') ?? ''; if (b && ID_ARRASTA.test(v) && e.dataTransfer) { e.dataTransfer.setData(MIME, v); e.dataTransfer.effectAllowed = 'copyMove' } }
+  const dragstart = (e: DragEvent): void => { const b = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); const v = b?.getAttribute('data-arrasta') ?? ''; if (b && ID_ARRASTA.test(v) && e.dataTransfer) { emArrasto = v; e.dataTransfer.setData(MIME, v); e.dataTransfer.effectAllowed = 'copyMove' } }
   // enquanto um botão `arrasta` está em movimento, a camada das caixas captura o arrasto (o quadro da prévia é um iframe isolado e engoliria os eventos); ao terminar, volta a deixar o ponteiro passar
   const camadas = (v: string): void => { for (const c of raiz.querySelectorAll<HTMLElement>('[data-tela-camada]')) c.style.setProperty('pointer-events', v) }
   const arrastando = (e: DragEvent): void => { dragstart(e); if ((e.target as HTMLElement | null)?.closest?.('[data-arrasta]')) camadas('auto') }
-  const solto = (): void => { camadas('none'); limpaZonas() }
+  const solto = (): void => { camadas('none'); limpaZonas(); emArrasto = '' }
   // ZONA DE SOLTAR (`data-solta`, a prop `solta` das caixas de layout): um item `arrasta` solto sobre outro item da mesma zona avisa `polaris-soltar { valor, alvo, zona }`, com a zona pela altura do ponteiro no item (alto = antes, meio = dentro, baixo = depois); o item sob o ponteiro leva `data-solta-zona` para o CSS desenhar a indicação
   const limpaZonas = (): void => { for (const el of raiz.querySelectorAll('[data-solta-zona]')) el.removeAttribute('data-solta-zona') }
   const zonaDe = (e: DragEvent, item: HTMLElement): 'antes' | 'dentro' | 'depois' => { const r = item.getBoundingClientRect(), f = r.height > 0 ? (e.clientY - r.top) / r.height : 0.5; return f < 0.3 ? 'antes' : f > 0.7 ? 'depois' : 'dentro' }
@@ -147,12 +149,16 @@ export function ativaTelas(raiz: Document = document): () => void {
   }
   const sobre = (e: DragEvent): void => {
     const it = itemDaZona(e); if (!it || !e.dataTransfer || ![...e.dataTransfer.types].includes(MIME)) return
-    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const z = zonaDe(e, it)
-    if (it.getAttribute('data-solta-zona') !== z) { limpaZonas(); it.setAttribute('data-solta-zona', z) }
+    const z = zonaDe(e, it), alvo = it.getAttribute('data-arrasta') ?? ''
+    // o hospedeiro decide se o soltar vale: `polaris-sobre` (cancelável) com { valor, alvo, zona }; cancelado = inválido (marca vermelha, o navegador mostra o cursor de proibido e não solta)
+    const vale = it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-sobre', { bubbles: true, cancelable: true, detail: { valor: emArrasto, alvo, zona: z } })) !== false
+    if (vale) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } else e.dataTransfer.dropEffect = 'none'
+    const marca = vale ? z : 'invalida'
+    if (it.getAttribute('data-solta-zona') !== marca) { limpaZonas(); it.setAttribute('data-solta-zona', marca) }
   }
   const soltou = (e: DragEvent): void => {
     const it = itemDaZona(e); if (!it) return
-    const valor = e.dataTransfer?.getData(MIME) ?? '', alvo = it.getAttribute('data-arrasta') ?? ''; limpaZonas()
+    const marcado = it.getAttribute('data-solta-zona') === 'invalida', valor = e.dataTransfer?.getData(MIME) ?? '', alvo = it.getAttribute('data-arrasta') ?? ''; limpaZonas(); if (marcado) return
     if (!ID_ARRASTA.test(valor) || !ID_ARRASTA.test(alvo)) return
     e.preventDefault(); it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor, alvo, zona: zonaDe(e, it) } }))
   }

@@ -407,6 +407,13 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await arrasta('b3', 'b1', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // DENTRO da pilha (entra depois do título; a ordem plana não muda, o recuo sim)
     const recuo = async (id: string) => (await linha(id).evaluate((el) => (el.parentElement!.querySelector('button')!.textContent ?? '').match(/^\u2003*/)![0].length)); expect(await recuo('b3')).toBe(await recuo('b2')) // agora irmão do título
     await arrasta('b1', 'b2', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // dentro de si mesmo: recusado
+    { // a dica: arrastar a pilha sobre o próprio filho marca o filho como inválido (vermelho); sobre um irmão, mostra a zona
+      await linha('b1').scrollIntoViewIfNeeded(); const o = (await linha('b1').boundingBox())!, f = (await linha('b2').boundingBox())!
+      await p.mouse.move(o.x + o.width / 2, o.y + o.height / 2); await p.mouse.down(); await p.mouse.move(o.x + o.width / 2 + 8, o.y + o.height / 2 + 8, { steps: 3 }); await p.mouse.move(f.x + f.width / 2, f.y + f.height / 2, { steps: 8 }); await p.mouse.move(f.x + f.width / 2 + 1, f.y + f.height / 2 + 1)
+      await expect.poll(() => linha('b2').getAttribute('data-solta-zona')).toBe('invalida')
+      const s4 = (await linha('b4').boundingBox())!; await p.mouse.move(s4.x + s4.width / 2, s4.y + s4.height * 0.9, { steps: 8 }); await p.mouse.move(s4.x + s4.width / 2 + 1, s4.y + s4.height * 0.9); await expect.poll(() => linha('b4').getAttribute('data-solta-zona')).toBe('depois'); expect(await linha('b2').getAttribute('data-solta-zona')).toBeNull()
+      await p.keyboard.press('Escape'); await p.mouse.up(); await p.waitForTimeout(300)
+    }
     await arrasta('b2', 'b4', 0.9); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Título #b2', 'Pilha #b1', 'Parágrafo #b3']) // DEPOIS do selo, fora da pilha
     await arrasta('raiz', 'b1', 0.5); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Título #b2', 'Pilha #b1', 'Parágrafo #b3']) // a raiz não se move
     await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(['Pilha #raiz', 'Selo #b4', 'Pilha #b1', 'Título #b2', 'Parágrafo #b3']) // cada soltar é um passo
@@ -429,6 +436,15 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await arrasta(item('A'), item('B'), 0.5); expect(await itens()).toEqual(['B', 'A', 'C']) // "dentro" de um item vale depois
     await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await itens()).toEqual(['A', 'B', 'C']) // um passo por soltar
     await arrasta(item('A'), arv.getByRole('button', { name: /^Pilha #raiz$/ }), 0.5); expect(await itens()).toEqual(['A', 'B', 'C']) // item sobre bloco: recusado
+    // a dica de soltar inválido: durante o arrasto, o alvo que seria recusado fica marcado `invalida` (vermelho, cursor de proibido) e o válido mostra a zona
+    const zona = (l: Locator) => l.getAttribute('data-solta-zona'), raizL = arv.getByRole('button', { name: /^Pilha #raiz$/ })
+    await item('A').scrollIntoViewIfNeeded(); await raizL.scrollIntoViewIfNeeded(); const ia = (await item('A').boundingBox())!, rr = (await raizL.boundingBox())!
+    await p.mouse.move(ia.x + ia.width / 2, ia.y + ia.height / 2); await p.mouse.down(); await p.mouse.move(ia.x + ia.width / 2 + 8, ia.y + ia.height / 2 + 8, { steps: 3 })
+    await p.mouse.move(rr.x + rr.width / 2, rr.y + rr.height / 2, { steps: 8 }); await p.mouse.move(rr.x + rr.width / 2 + 1, rr.y + rr.height / 2 + 1); await expect.poll(() => zona(raizL)).toBe('invalida') // item sobre um bloco: inválido
+    const ib2 = (await item('B').boundingBox())! // o arrasto nativo rola a página: mede B de novo
+    await p.mouse.move(ib2.x + ib2.width / 2, ib2.y + ib2.height * 0.1, { steps: 8 }); await p.mouse.move(ib2.x + ib2.width / 2 + 1, ib2.y + ib2.height * 0.1 + 1); await expect.poll(() => zona(item('B'))).toBe('antes'); expect(await zona(raizL)).toBeNull() // item sobre outro item da lista: válido, e a marca vermelha sai
+    await p.mouse.up(); await p.waitForTimeout(300); expect(await p.locator('[data-solta-zona]').count()).toBe(0) // soltou: nenhuma marca sobra
+
     // soltar um bloco DENTRO do cabeçalho: o primeiro slot dele é `acoes`, não `filhos`
     await adiciona(p, 'Feedback', 'Selo'); const selo = arv.getByRole('button', { name: /^Selo #/ }), cab = arv.getByRole('button', { name: /^Cabeçalho do site #/ })
     await arrasta(selo, cab, 0.5); await expect.poll(async () => frame().locator('header').getByText(/Selo|Texto/).count()).toBeGreaterThan(0)
