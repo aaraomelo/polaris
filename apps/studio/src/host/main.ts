@@ -71,6 +71,8 @@ document.addEventListener('keydown', (e) => {
     if (k === 's') { e.preventDefault(); clicaBotao('Salvar'); return }
     if (emCampo) return
     if (k === 'z' && !e.shiftKey) { if (clicaBotao('Desfazer')) e.preventDefault() } else if ((k === 'z' && e.shiftKey) || k === 'y') { if (clicaBotao('Refazer')) e.preventDefault() }
+  } else if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey && /^(Identificador do novo nó|Rota da nova página)$/.test(alvo?.getAttribute('aria-label') ?? '')) {
+    e.preventDefault(); clicaBotao('Criar') || clicaBotao('Descartar e criar') // Enter no formulário de criar envia (o botão só existe quando o identificador é válido)
   } else if (e.key === 'Delete' && !e.ctrlKey && !e.altKey && !e.metaKey && !emCampo && alvo?.closest(ARVORE) && alvo.getAttribute('data-variante') === 'secundario' && alvo.hasAttribute('aria-current')) {
     const linha = alvo.parentElement, rem = linha && [...linha.querySelectorAll<HTMLButtonElement>('button')].find((x) => x.textContent?.trim() === 'Remover'); if (rem) { e.preventDefault(); rem.click() }
   }

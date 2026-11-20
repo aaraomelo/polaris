@@ -332,6 +332,14 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect(arv.getByRole('button', { name: 'Ajuda', exact: true })).toHaveCount(0); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toHaveCount(0); await expect(p.getByRole('heading', { name: /^site\/rodape$/ })).toBeVisible()
     await ctx.close()
   })
+  it('CRIAR com Enter e aviso de campo obrigatório vazio', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('enter'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/enter'); await p.getByRole('textbox', { name: 'Rota da nova página' }).press('Enter')
+    await expect(p.getByText('Página enter')).toBeVisible() // Enter enviou; sem clicar em Criar
+    await adiciona(p, 'Texto', 'Título'); const campoTexto = p.getByRole('textbox', { name: 'Texto', exact: true }).first()
+    expect(await p.getByText('Campo obrigatório', { exact: false }).count()).toBe(0); await campoTexto.fill(''); await expect(p.getByText('Campo obrigatório', { exact: false })).toBeVisible(); await campoTexto.fill('Oi'); await expect.poll(() => p.getByText('Campo obrigatório', { exact: false }).count()).toBe(0)
+    await ctx.close()
+  })
   it('DUPLICAR um bloco (com os filhos, ids novos) e desfazer', async () => {
     const { ctx, p } = await entra('ana')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('dup'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/dup'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página dup')).toBeVisible()

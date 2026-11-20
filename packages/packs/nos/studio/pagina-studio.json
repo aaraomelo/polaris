@@ -3782,36 +3782,68 @@
                 "slots": {
                  "filhos": [
                   {
-                   "bloco": "entrada/texto",
+                   "bloco": "layout/pilha",
                    "props": {
-                    "valor": "{estado.novoId}",
-                    "rotulo": "Identificador do novo nó",
-                    "placeholder": "ex.: minha-pagina"
+                    "gap": 1
                    },
-                   "eventos": {
-                    "aoMudar": [
+                   "slots": {
+                    "filhos": [
                      {
-                      "acao": "definir",
-                      "estado": "novoId",
-                      "valor": "evento"
+                      "bloco": "texto/pequeno",
+                      "props": {
+                       "texto": "Identificador"
+                      }
+                     },
+                     {
+                      "bloco": "entrada/texto",
+                      "props": {
+                       "valor": "{estado.novoId}",
+                       "rotulo": "Identificador do novo nó",
+                       "placeholder": "ex.: minha-pagina"
+                      },
+                      "eventos": {
+                       "aoMudar": [
+                        {
+                         "acao": "definir",
+                         "estado": "novoId",
+                         "valor": "evento"
+                        }
+                       ]
+                      }
                      }
                     ]
                    }
                   },
                   {
-                   "bloco": "entrada/texto",
+                   "bloco": "layout/pilha",
                    "se": "estado.criando == \"pagina\"",
                    "props": {
-                    "valor": "{estado.novaRota}",
-                    "rotulo": "Rota da nova página",
-                    "placeholder": "/rota"
+                    "gap": 1
                    },
-                   "eventos": {
-                    "aoMudar": [
+                   "slots": {
+                    "filhos": [
                      {
-                      "acao": "definir",
-                      "estado": "novaRota",
-                      "valor": "evento"
+                      "bloco": "texto/pequeno",
+                      "props": {
+                       "texto": "Rota"
+                      }
+                     },
+                     {
+                      "bloco": "entrada/texto",
+                      "props": {
+                       "valor": "{estado.novaRota}",
+                       "rotulo": "Rota da nova página",
+                       "placeholder": "/rota"
+                      },
+                      "eventos": {
+                       "aoMudar": [
+                        {
+                         "acao": "definir",
+                         "estado": "novaRota",
+                         "valor": "evento"
+                        }
+                       ]
+                      }
                      }
                     ]
                    }
@@ -7764,6 +7796,13 @@
                                }
                               },
                               {
+                               "bloco": "texto/pequeno",
+                               "se": "c.obrigatorio && c.tipo == \"texto\" && texto(obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho) ?? \"\") == \"\"",
+                               "props": {
+                                "texto": "⚠ Campo obrigatório: preencha para o bloco ficar completo."
+                               }
+                              },
+                              {
                                "bloco": "entrada/texto",
                                "se": "c.tipo == \"texto\" || c.tipo == \"inteiro\" || c.tipo == \"numero\"",
                                "props": {
@@ -8646,6 +8685,13 @@
                                "se": "c.descricao",
                                "props": {
                                 "texto": "{c.descricao}"
+                               }
+                              },
+                              {
+                               "bloco": "texto/pequeno",
+                               "se": "c.obrigatorio && c.tipo == \"texto\" && texto(obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho) ?? \"\") == \"\"",
+                               "props": {
+                                "texto": "⚠ Campo obrigatório: preencha para o bloco ficar completo."
                                }
                               },
                               {
@@ -11767,6 +11813,13 @@
                                   }
                                  },
                                  {
+                                  "bloco": "texto/pequeno",
+                                  "se": "c.obrigatorio && c.tipo == \"texto\" && texto(obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho) ?? \"\") == \"\"",
+                                  "props": {
+                                   "texto": "⚠ Campo obrigatório: preencha para o bloco ficar completo."
+                                  }
+                                 },
+                                 {
                                   "bloco": "entrada/texto",
                                   "se": "c.tipo == \"texto\" || c.tipo == \"inteiro\" || c.tipo == \"numero\"",
                                   "props": {
@@ -12649,6 +12702,13 @@
                                   "se": "c.descricao",
                                   "props": {
                                    "texto": "{c.descricao}"
+                                  }
+                                 },
+                                 {
+                                  "bloco": "texto/pequeno",
+                                  "se": "c.obrigatorio && c.tipo == \"texto\" && texto(obter(obter(estado.no.spec.raiz, estado.sel).props, c.caminho) ?? \"\") == \"\"",
+                                  "props": {
+                                   "texto": "⚠ Campo obrigatório: preencha para o bloco ficar completo."
                                   }
                                  },
                                  {

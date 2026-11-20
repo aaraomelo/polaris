@@ -273,6 +273,7 @@ const EH_AVANCADO = `algum([${AVANCADOS.map((n) => q(n)).join(', ')}], n => n ==
 const campoDeProp = (avancado: boolean): Inst => pilha([
   P('texto/rotulo', { props: { texto: '{c.rotulo}{c.obrigatorio ? " *" : ""}' } }),
   P('texto/pequeno', { se: 'c.descricao', props: { texto: '{c.descricao}' } }),
+  P('texto/pequeno', { se: `c.obrigatorio && c.tipo == "texto" && texto(obter(${SELNO}.props, c.caminho) ?? "") == ""`, props: { texto: '⚠ Campo obrigatório: preencha para o bloco ficar completo.' } }),
   P('entrada/texto', { se: 'c.tipo == "texto" || c.tipo == "inteiro" || c.tipo == "numero"', props: { valor: `{obter(${SELNO}.props, c.caminho)}`, rotulo: '{c.rotulo}', lista: `{${LISTA_DO_CAMPO}}`, placeholder: `{${COM_LISTA} ? "escolha da lista ou digite" : ""}` },
     eventos: { aoMudar: edita(`evento == "" ? sem(estado.no, concat(${DOCSEL}, ["props"], c.caminho)) : com(estado.no, concat(${DOCSEL}, ["props"], c.caminho), (c.tipo == "inteiro" || c.tipo == "numero") ? (paraNumero(evento) ?? evento) : evento)`, `"pr:" + junta(estado.sel, ".") + "." + junta(c.caminho, ".")`) } }),
   P('midia/imagem', { se: EH_IMAGEM, props: { src: `{obter(${SELNO}.props, c.caminho)}`, alt: 'Prévia da imagem escolhida', largura: 56, altura: 56 } }),
@@ -813,8 +814,8 @@ const ACOES_CRIAR: Acao[] = [
 /** já existe um nó do tipo escolhido com o identificador digitado (do tenant ou do padrão)? */
 const JA_EXISTE = 'algum(concat(mapeia(filtra(nos.nos, n => n.kind == estado.criando), n => n.id), obter(nos.base, [estado.criando]) ?? []), x => x == estado.novoId)'
 const formCriar = (): Inst => pilha([linha([
-  P('entrada/texto', { props: { valor: '{estado.novoId}', rotulo: 'Identificador do novo nó', placeholder: 'ex.: minha-pagina' }, eventos: { aoMudar: [def('novoId', 'evento')] } }),
-  P('entrada/texto', { se: 'estado.criando == "pagina"', props: { valor: '{estado.novaRota}', rotulo: 'Rota da nova página', placeholder: '/rota' }, eventos: { aoMudar: [def('novaRota', 'evento')] } }),
+  pilha([P('texto/pequeno', { props: { texto: 'Identificador' } }), P('entrada/texto', { props: { valor: '{estado.novoId}', rotulo: 'Identificador do novo nó', placeholder: 'ex.: minha-pagina' }, eventos: { aoMudar: [def('novoId', 'evento')] } })], { gap: 1 }),
+  pilha([P('texto/pequeno', { props: { texto: 'Rota' } }), P('entrada/texto', { props: { valor: '{estado.novaRota}', rotulo: 'Rota da nova página', placeholder: '/rota' }, eventos: { aoMudar: [def('novaRota', 'evento')] } })], { se: 'estado.criando == "pagina"', gap: 1 }),
   botao('Criar', ACOES_CRIAR, { se: `estado.novoId != "" && !(${JA_EXISTE}) && !(${SUJO})`, props: { variante: 'primario' } }),
   botao('Criar', [def('confirmaCriar', 'true')], { se: `estado.novoId != "" && !(${JA_EXISTE}) && (${SUJO}) && !estado.confirmaCriar` }), // com alterações não salvas no editor, criar as descartaria: pede confirmação
   texto('Há alterações não salvas em {estado.aberto.id}; criar um novo nó as descarta.', { se: 'estado.confirmaCriar' }),
