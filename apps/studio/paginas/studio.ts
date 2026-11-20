@@ -319,7 +319,7 @@ const campoDeProp = (avancado: boolean): Inst => pilha([
   linha([P('layout/linha', { repetir: { cada: 'c.opcoes', como: 'o', chave: 'texto(o)' }, filhos: [botao('{o}{obter(' + SELNO + '.props, c.caminho) == o ? " ✓" : ""}', edita(`com(estado.no, concat(${DOCSEL}, ["props"], c.caminho), o)`), { props: { atual: `{obter(${SELNO}.props, c.caminho) == o}` } })] })], { se: 'c.tipo == "escolha"', props: { gap: 4, quebra: true } }),
   editorDeItens(),
   jsonDeProp(),
-], { repetir: { cada: `filtra(camposDoSchema((${DEFBLOCO}).props), c => ${avancado ? '' : '!'}algum([${AVANCADOS.map((n) => q(n)).join(', ')}], n => n == c.nome))`, como: 'c', chave: 'junta(c.caminho, ".")' }, gap: 2 })
+], { repetir: { cada: `filtra(camposDoSchema((${DEFBLOCO}).props), c => !algum(["solta", "arrasta", "alvo"], n => n == c.nome) && ${avancado ? '' : '!'}algum([${AVANCADOS.map((n) => q(n)).join(', ')}], n => n == c.nome))`, como: 'c', chave: 'junta(c.caminho, ".")' }, gap: 2 })
 
 /** uma seção recolhível de um painel de propriedades: título com ícone e o conteúdo (começa aberta ou fechada) */
 const secao = (nome: string, icone: string, filhos: Inst[], o: { aberta?: boolean; se?: string } = {}): Inst =>
@@ -621,6 +621,8 @@ const ELSEL = 'obter(estado.no.spec, ["elementos", estado.selEl])', DOCEL = '["s
 const COM_SEL = 'estado.selEl >= 0 && tamanho(estado.no.spec.elementos ?? []) > estado.selEl'
 /** o próximo id livre `el<n>` do cartaz: maior que o contador e que qualquer `el<n>` que a peça já tenha (o contador recomeça a cada abertura) */
 const PROX_EL = '"el" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? ""), 0, (a, i) => comeca(i, "el") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))'
+/** cada elemento novo nasce deslocado (4% por elemento já na peça, até 6 degraus) para não cair em cima do anterior, e sempre dentro da peça */
+const CASCATA = '(com(com(estado.tmpBloco, ["caixa", "topo"], arredonda(minimo((obter(estado.tmpBloco, ["caixa", "topo"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, ["caixa", "altura"]) ?? 0)), 4)), ["caixa", "esquerda"], arredonda(minimo((obter(estado.tmpBloco, ["caixa", "esquerda"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, ["caixa", "largura"]) ?? 0)), 4)))'
 const NOVO_EL: Record<string, string> = {
   texto: 'objeto([["tipo", "texto"], ["id", ' + PROX_EL + '], ["texto", "Texto"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
   faixa: 'objeto([["tipo", "faixa"], ["id", ' + PROX_EL + '], ["cor", [200, 16, 46]], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.2]])]])',
@@ -666,7 +668,7 @@ const telaDaPeca = (): Inst => P('midia/tela', {
     aoMover: edita(`(obter(estado.no.spec, ["elementos", ${ID_EVENTO}, "caixa"]) == null ? estado.no : com(estado.no, ["spec", "elementos", ${ID_EVENTO}, "caixa"], mescla(sem(obter(estado.no.spec, ["elementos", ${ID_EVENTO}, "caixa"]) ?? objeto([]), ["direita"]), objeto([["topo", evento.topo], ["esquerda", evento.esquerda], ["largura", evento.largura], ["altura", evento.altura]]))))`, '"mv:" + evento.id', [def('selEl', ID_EVENTO)]),
     aoSoltar: [
       def('passado', `obter(${TAM_SOLTO}, [evento.valor]) == null ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)`), def('futuro', `obter(${TAM_SOLTO}, [evento.valor]) == null ? estado.futuro : []`), def('chaveEdicao', '""'),
-      def('tmpBloco', `mescla(objeto([["tipo", evento.valor], ["id", ${PROX_EL}], ["caixa", objeto([["topo", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 1]), evento.topo - obter(${TAM_SOLTO}, [evento.valor, 1]) / 2))], ["esquerda", maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 0]), evento.esquerda - obter(${TAM_SOLTO}, [evento.valor, 0]) / 2))], ["largura", obter(${TAM_SOLTO}, [evento.valor, 0])], ["altura", obter(${TAM_SOLTO}, [evento.valor, 1])]])]]), obter(${EXTRAS_SOLTO}, [evento.valor]) ?? objeto([]))`),
+      def('tmpBloco', `mescla(objeto([["tipo", evento.valor], ["id", ${PROX_EL}], ["caixa", objeto([["topo", arredonda(maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 1]), evento.topo - obter(${TAM_SOLTO}, [evento.valor, 1]) / 2)), 4)], ["esquerda", arredonda(maximo(0, minimo(1 - obter(${TAM_SOLTO}, [evento.valor, 0]), evento.esquerda - obter(${TAM_SOLTO}, [evento.valor, 0]) / 2)), 4)], ["largura", obter(${TAM_SOLTO}, [evento.valor, 0])], ["altura", obter(${TAM_SOLTO}, [evento.valor, 1])]])]]), obter(${EXTRAS_SOLTO}, [evento.valor]) ?? objeto([]))`),
       def('no', 'obter(' + TAM_SOLTO + ', [evento.valor]) == null ? estado.no : com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))'),
       def('selEl', `obter(${TAM_SOLTO}, [evento.valor]) == null ? estado.selEl : tamanho(estado.no.spec.elementos ?? []) - 1`), def('contador', 'estado.contador + 1'), atualizaPrevia,
     ],
@@ -681,7 +683,8 @@ const listaDeElementos = (): Inst => pilha([
   titulo('Adicionar', 5),
   texto('Clique para adicionar, ou arraste para a peça.'),
   linha(Object.keys(NOVO_EL).map((t) => botao(ROTULO_EL[t]![0], [...guarda,
-    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [${NOVO_EL[t]}]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { props: { icone: ROTULO_EL[t]![1], arrasta: t } })), { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de elementos' } }),
+    def('tmpBloco', NOVO_EL[t]!), def('tmpBloco', CASCATA),
+    def('no', `com(estado.no, ["spec", "elementos"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))`), def('selEl', 'tamanho(estado.no.spec.elementos ?? []) - 1'), def('contador', 'estado.contador + 1'), atualizaPrevia], { props: { icone: ROTULO_EL[t]![1], arrasta: t } })), { props: { gap: 6, quebra: true, papel: 'toolbar', rotulo: 'Paleta de elementos' } }),
   titulo('Peça', 5),
   linha(['A4', 'A5', 'A6', 'A7'].map((t) => botao(`{estado.no.spec.tamanho == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "tamanho"], ${q(t)})`))), { props: { gap: 4 } }),
   linha(['retrato', 'paisagem'].map((t) => botao(`{(estado.no.spec.orientacao ?? "retrato") == ${q(t)} ? "● " : ""}${t}`, edita(`com(estado.no, ["spec", "orientacao"], ${q(t)})`))), { props: { gap: 4 } }),

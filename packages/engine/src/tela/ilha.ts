@@ -35,8 +35,11 @@ function monta(el: HTMLElement): void {
   const outras = (id: string): Caixa[] => caixas.filter((c) => c.id !== id)
 
   let ultimo = ''
+  // a prévia (um iframe isolado) é só uma imagem aqui: sem eventos de ponteiro nela, o mouse nunca é roteado para dentro do quadro (o que travava o arrasto com captura de ponteiro)
+  const semPonteiro = (): void => { for (const f of el.querySelectorAll<HTMLElement>(':scope > iframe')) f.style.setProperty('pointer-events', 'none') }
   const sincroniza = (): void => {
     if (gesto) return // não redesenha no meio do gesto
+    semPonteiro()
     const texto = `${el.getAttribute('data-polaris-caixas') ?? ''}|${el.getAttribute('data-passo') ?? ''}`; if (texto === ultimo && nos.size > 0) return; ultimo = texto // só redesenha quando as caixas mudaram
     let lidas: CaixaTela[] = []
     try { lidas = caixasDe({ caixas: JSON.parse(el.getAttribute('data-polaris-caixas') ?? '[]') }) } catch { lidas = [] }
@@ -72,6 +75,8 @@ function monta(el: HTMLElement): void {
     const ini: Caixa = { topo: c.topo, esquerda: c.esquerda, largura: c.largura, altura: c.altura }
     gesto = { id, tipo: alca ? 'alca' : 'mover', ...(alca ? { alca } : {}), x0: e.clientX, y0: e.clientY, ini, atual: ini, moveu: false, pid: e.pointerId }
     if (!c.atual) emite('polaris-selecionar', { id })
+    const esc = (k: KeyboardEvent): void => { if (k.key !== 'Escape' || !gesto) return; gesto = null; limpaGuias(); sincroniza(); document.removeEventListener('keydown', esc, true) } // Esc cancela o gesto: a caixa volta ao que o documento diz
+    document.addEventListener('keydown', esc, true); camada.addEventListener('pointerup', () => document.removeEventListener('keydown', esc, true), { once: true })
   })
   camada.addEventListener('pointermove', (e) => {
     if (!gesto || e.pointerId !== gesto.pid) return

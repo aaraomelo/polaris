@@ -63,6 +63,13 @@ document.addEventListener('keydown', (e) => {
     }
   }
 })
+// Depois de uma ação da linha (Subir, Descer, Duplicar, Colar…) o runtime redesenha as linhas e o foco se perderia no começo da página: devolve o foco à linha do bloco selecionado
+document.addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement | null)?.closest?.('button'); const t = b?.textContent?.trim() ?? ''
+  if (!b || !b.closest(ARVORE) || !['Subir', 'Descer', 'Duplicar', 'Copiar', 'Recortar', 'Colar', 'Remover'].includes(t)) return
+  const volta = (n: number): void => { const alvo = document.querySelector<HTMLElement>(`${ARVORE} button[data-variante=secundario][aria-current]`); if (alvo) alvo.focus({ preventScroll: true }); else if (n > 0) requestAnimationFrame(() => volta(n - 1)) }
+  requestAnimationFrame(() => volta(6))
+}, true) // na captura: o runtime redesenha as linhas no próprio clique e o botão clicado já sairia da árvore
 // Atalhos do editor (fora de campos de texto, onde o desfazer é do próprio campo): Ctrl+Z desfaz, Ctrl+Shift+Z ou Ctrl+Y refaz, Ctrl+S salva, Delete remove o bloco da linha da árvore em foco. Clicam nos mesmos botões da barra, então valem as mesmas regras (botão ausente = nada acontece).
 const clicaBotao = (nome: string): boolean => { const b = [...document.querySelectorAll<HTMLButtonElement>('button')].find((x) => x.textContent?.trim() === nome && !x.disabled); b?.click(); return !!b }
 document.addEventListener('keydown', (e) => {

@@ -53,10 +53,10 @@ a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-ra
 #polaris [data-polaris-tela]{max-width:100%;border:1px solid var(--cor-borda,#ccc);background:#fff;margin-inline:auto}
 #polaris [data-polaris-tela]>iframe{position:absolute;inset:0;width:100%!important;height:100%!important;border:0}
 #polaris [data-polaris-tela] [data-caixa]:focus-visible{outline:3px solid var(--cor-primaria,#2563eb)!important;outline-offset:2px}
-/* árvore: a indicação do soltar (antes: linha em cima; depois: linha embaixo; dentro: contorno) e o item que se arrasta */
-#polaris [data-solta] [data-arrasta][data-solta-zona="antes"]{box-shadow:0 -3px 0 0 var(--cor-primaria,#2563eb)}
-#polaris [data-solta] [data-arrasta][data-solta-zona="depois"]{box-shadow:0 3px 0 0 var(--cor-primaria,#2563eb)}
-#polaris [data-solta] [data-arrasta][data-solta-zona="dentro"]{outline:2px solid var(--cor-primaria,#2563eb);outline-offset:-2px;background:color-mix(in srgb,var(--cor-primaria,#2563eb) 14%,transparent)}
+/* árvore: a indicação do soltar (âmbar, como a das caixas do cartaz): linha grossa em cima (antes) ou embaixo (depois), contorno e fundo (dentro) */
+#polaris [data-solta] [data-arrasta][data-solta-zona="antes"]{box-shadow:0 -4px 0 0 #f59e0b}
+#polaris [data-solta] [data-arrasta][data-solta-zona="depois"]{box-shadow:0 4px 0 0 #f59e0b}
+#polaris [data-solta] [data-arrasta][data-solta-zona="dentro"]{outline:3px solid #f59e0b;outline-offset:-3px;background:rgba(245,158,11,.18)}
 #polaris [data-solta] [data-arrasta]{cursor:grab}
 /* cartaz: a coluna da prévia ganha o dobro das outras, e a moldura nunca passa de ~75% da altura da tela (largura = altura × proporção), para uma peça em pé não sair da tela */
 @media (min-width:1001px){#polaris main div[style*="grid-template-columns:repeat(3,"]:has([data-polaris-tela]){grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)!important}}

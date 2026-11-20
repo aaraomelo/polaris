@@ -8140,7 +8140,7 @@
                            {
                             "bloco": "layout/pilha",
                             "repetir": {
-                             "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => !algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
+                             "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => !algum([\"solta\", \"arrasta\", \"alvo\"], n => n == c.nome) && !algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
                              "como": "c",
                              "chave": "junta(c.caminho, \".\")"
                             },
@@ -9032,7 +9032,7 @@
                            {
                             "bloco": "layout/pilha",
                             "repetir": {
-                             "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
+                             "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => !algum([\"solta\", \"arrasta\", \"alvo\"], n => n == c.nome) && algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
                              "como": "c",
                              "chave": "junta(c.caminho, \".\")"
                             },
@@ -12448,7 +12448,7 @@
                               {
                                "bloco": "layout/pilha",
                                "repetir": {
-                                "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => !algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
+                                "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => !algum([\"solta\", \"arrasta\", \"alvo\"], n => n == c.nome) && !algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
                                 "como": "c",
                                 "chave": "junta(c.caminho, \".\")"
                                },
@@ -13340,7 +13340,7 @@
                               {
                                "bloco": "layout/pilha",
                                "repetir": {
-                                "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
+                                "cada": "filtra(camposDoSchema((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).props), c => !algum([\"solta\", \"arrasta\", \"alvo\"], n => n == c.nome) && algum([\"papel\", \"rotulo\", \"largura\", \"cresce\", \"quebra\", \"tamanhos\", \"atual\"], n => n == c.nome))",
                                 "como": "c",
                                 "chave": "junta(c.caminho, \".\")"
                                },
@@ -19183,8 +19183,18 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "objeto([[\"tipo\", \"texto\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"texto\", \"Texto\"], [\"caixa\", objeto([[\"topo\", 0.1], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.2]])]])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "(com(com(estado.tmpBloco, [\"caixa\", \"topo\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"topo\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"altura\"]) ?? 0)), 4)), [\"caixa\", \"esquerda\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"esquerda\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"largura\"]) ?? 0)), 4)))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "no",
-                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [objeto([[\"tipo\", \"texto\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"texto\", \"Texto\"], [\"caixa\", objeto([[\"topo\", 0.1], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.2]])]])]))"
+                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -19237,8 +19247,18 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "objeto([[\"tipo\", \"faixa\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"cor\", [200, 16, 46]], [\"caixa\", objeto([[\"topo\", 0.1], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.2]])]])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "(com(com(estado.tmpBloco, [\"caixa\", \"topo\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"topo\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"altura\"]) ?? 0)), 4)), [\"caixa\", \"esquerda\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"esquerda\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"largura\"]) ?? 0)), 4)))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "no",
-                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [objeto([[\"tipo\", \"faixa\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"cor\", [200, 16, 46]], [\"caixa\", objeto([[\"topo\", 0.1], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.2]])]])]))"
+                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -19291,8 +19311,18 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "objeto([[\"tipo\", \"preco\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"valor\", \"9.99\"], [\"caixa\", objeto([[\"topo\", 0.3], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.4]])]])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "(com(com(estado.tmpBloco, [\"caixa\", \"topo\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"topo\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"altura\"]) ?? 0)), 4)), [\"caixa\", \"esquerda\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"esquerda\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"largura\"]) ?? 0)), 4)))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "no",
-                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [objeto([[\"tipo\", \"preco\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"valor\", \"9.99\"], [\"caixa\", objeto([[\"topo\", 0.3], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.4]])]])]))"
+                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -19345,8 +19375,18 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "objeto([[\"tipo\", \"codigoBarras\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"valor\", \"7891000100103\"], [\"formato\", \"ean13\"], [\"caixa\", objeto([[\"topo\", 0.6], [\"esquerda\", 0.1], [\"largura\", 0.4], [\"altura\", 0.3]])]])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "(com(com(estado.tmpBloco, [\"caixa\", \"topo\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"topo\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"altura\"]) ?? 0)), 4)), [\"caixa\", \"esquerda\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"esquerda\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"largura\"]) ?? 0)), 4)))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "no",
-                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [objeto([[\"tipo\", \"codigoBarras\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"valor\", \"7891000100103\"], [\"formato\", \"ean13\"], [\"caixa\", objeto([[\"topo\", 0.6], [\"esquerda\", 0.1], [\"largura\", 0.4], [\"altura\", 0.3]])]])]))"
+                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -19399,8 +19439,18 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "objeto([[\"tipo\", \"qrcode\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"valor\", \"https://exemplo.com.br\"], [\"caixa\", objeto([[\"topo\", 0.6], [\"esquerda\", 0.6], [\"largura\", 0.25], [\"altura\", 0.35]])]])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "(com(com(estado.tmpBloco, [\"caixa\", \"topo\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"topo\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"altura\"]) ?? 0)), 4)), [\"caixa\", \"esquerda\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"esquerda\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"largura\"]) ?? 0)), 4)))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "no",
-                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [objeto([[\"tipo\", \"qrcode\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"valor\", \"https://exemplo.com.br\"], [\"caixa\", objeto([[\"topo\", 0.6], [\"esquerda\", 0.6], [\"largura\", 0.25], [\"altura\", 0.35]])]])]))"
+                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -19453,8 +19503,18 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "objeto([[\"tipo\", \"validade\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"caixa\", objeto([[\"topo\", 0.85], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.1]])]])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "(com(com(estado.tmpBloco, [\"caixa\", \"topo\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"topo\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"altura\"]) ?? 0)), 4)), [\"caixa\", \"esquerda\"], arredonda(minimo((obter(estado.tmpBloco, [\"caixa\", \"esquerda\"]) ?? 0) + 0.04 * (tamanho(estado.no.spec.elementos ?? []) % 6), 1 - (obter(estado.tmpBloco, [\"caixa\", \"largura\"]) ?? 0)), 4)))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "no",
-                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [objeto([[\"tipo\", \"validade\"], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"caixa\", objeto([[\"topo\", 0.85], [\"esquerda\", 0.1], [\"largura\", 0.8], [\"altura\", 0.1]])]])]))"
+                                  "valor": "com(estado.no, [\"spec\", \"elementos\"], concat(estado.no.spec.elementos ?? [], [estado.tmpBloco]))"
                                  },
                                  {
                                   "acao": "definir",
@@ -20028,7 +20088,7 @@
                               {
                                "acao": "definir",
                                "estado": "tmpBloco",
-                               "valor": "mescla(objeto([[\"tipo\", evento.valor], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"caixa\", objeto([[\"topo\", maximo(0, minimo(1 - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1]), evento.topo - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1]) / 2))], [\"esquerda\", maximo(0, minimo(1 - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0]), evento.esquerda - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0]) / 2))], [\"largura\", obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0])], [\"altura\", obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1])]])]]), obter(objeto([[\"texto\", objeto([[\"texto\", \"Texto\"]])], [\"faixa\", objeto([[\"cor\", [200, 16, 46]]])], [\"preco\", objeto([[\"valor\", \"9.99\"]])], [\"codigoBarras\", objeto([[\"valor\", \"7891000100103\"], [\"formato\", \"ean13\"]])], [\"qrcode\", objeto([[\"valor\", \"https://exemplo.com.br\"]])], [\"validade\", objeto([])]]), [evento.valor]) ?? objeto([]))"
+                               "valor": "mescla(objeto([[\"tipo\", evento.valor], [\"id\", \"el\" + maximo(estado.contador, 1 + dobra(mapeia(estado.no.spec.elementos ?? [], e => e.id ?? \"\"), 0, (a, i) => comeca(i, \"el\") ? maximo(a, paraNumero(fatia(i, 2)) ?? 0) : a))], [\"caixa\", objeto([[\"topo\", arredonda(maximo(0, minimo(1 - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1]), evento.topo - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1]) / 2)), 4)], [\"esquerda\", arredonda(maximo(0, minimo(1 - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0]), evento.esquerda - obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0]) / 2)), 4)], [\"largura\", obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 0])], [\"altura\", obter(objeto([[\"texto\", [0.8, 0.2]], [\"faixa\", [0.8, 0.2]], [\"preco\", [0.8, 0.4]], [\"codigoBarras\", [0.4, 0.3]], [\"qrcode\", [0.25, 0.35]], [\"validade\", [0.8, 0.1]]]), [evento.valor, 1])]])]]), obter(objeto([[\"texto\", objeto([[\"texto\", \"Texto\"]])], [\"faixa\", objeto([[\"cor\", [200, 16, 46]]])], [\"preco\", objeto([[\"valor\", \"9.99\"]])], [\"codigoBarras\", objeto([[\"valor\", \"7891000100103\"], [\"formato\", \"ean13\"]])], [\"qrcode\", objeto([[\"valor\", \"https://exemplo.com.br\"]])], [\"validade\", objeto([])]]), [evento.valor]) ?? objeto([]))"
                               },
                               {
                                "acao": "definir",
