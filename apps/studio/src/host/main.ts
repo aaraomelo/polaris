@@ -68,6 +68,9 @@ document.addEventListener('keydown', (e) => {
   const alvo = e.target as HTMLElement | null, emCampo = !!alvo?.closest('input, textarea, select, [contenteditable=""], [contenteditable=true]')
   const k = e.key.toLowerCase()
   if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+    const noFoco = !emCampo && alvo?.closest(ARVORE) && alvo.getAttribute('data-variante') === 'secundario' ? alvo.parentElement : null // copiar, recortar e colar valem com o foco numa linha da árvore
+    const acao = k === 'c' ? 'Copiar' : k === 'x' ? 'Recortar' : k === 'v' ? 'Colar' : ''
+    if (acao && noFoco && !e.shiftKey) { const b = [...noFoco.querySelectorAll<HTMLButtonElement>('button')].find((x) => x.textContent?.trim() === acao); if (b) { e.preventDefault(); b.click() } return }
     if (k === 's') { e.preventDefault(); clicaBotao('Salvar'); return }
     if (emCampo) return
     if (k === 'z' && !e.shiftKey) { if (clicaBotao('Desfazer')) e.preventDefault() } else if ((k === 'z' && e.shiftKey) || k === 'y') { if (clicaBotao('Refazer')) e.preventDefault() }

@@ -637,6 +637,9 @@
      "tipo": "json",
      "inicial": []
     },
+    "copiado": {
+     "tipo": "json"
+    },
     "abaCel": {
      "tipo": "texto",
      "inicial": "blocos"
@@ -5676,6 +5679,174 @@
                                "bloco": "nav/botao",
                                "se": "tamanho(estado.sel) > 0",
                                "props": {
+                                "texto": "Copiar",
+                                "variante": "fantasma"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "copiado",
+                                  "valor": "semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\")"
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "se": "tamanho(estado.sel) > 0",
+                               "props": {
+                                "texto": "Recortar",
+                                "variante": "fantasma"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "copiado",
+                                  "valor": "semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\")"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "passado",
+                                  "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "futuro",
+                                  "valor": "[]"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "chaveEdicao",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "recolhidos",
+                                  "valor": "filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), \"/\") + \"/\"))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "no",
+                                  "valor": "sem(estado.no, concat([\"spec\", \"raiz\"], estado.sel))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "fatia(estado.sel, 0, tamanho(estado.sel) - 3)"
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "se": "estado.copiado != null",
+                               "props": {
+                                "texto": "Colar",
+                                "variante": "fantasma"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "chaveEdicao",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "passado",
+                                  "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "futuro",
+                                  "valor": "[]"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpBloco",
+                                  "valor": "com(estado.copiado, [\"id\"], \"b\" + maximo(estado.contador, 1 + dobra(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => x.no.id ?? \"\"), 0, (a, i) => comeca(i, \"b\") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a)))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpDentro",
+                                  "valor": "tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpCaminho",
+                                  "valor": "estado.tmpDentro ? concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]) : concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "tmpPos",
+                                  "valor": "estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "no",
+                                  "valor": "com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "contador",
+                                  "valor": "estado.contador + 1"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "selElemento",
+                                  "valor": "null"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "recolhidos",
+                                  "valor": "filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), \"/\") && !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), \"/\") + \"/\"))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "catBloco",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "buscaBloco",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "se": "tamanho(estado.sel) > 0",
+                               "props": {
                                 "texto": "Remover",
                                 "variante": "fantasma",
                                 "icone": "apagar"
@@ -9789,6 +9960,174 @@
                                      "acao": "definir",
                                      "estado": "sel",
                                      "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [estado.tmpPos])"
+                                    },
+                                    {
+                                     "acao": "executar",
+                                     "dados": "previa",
+                                     "args": {
+                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                      "modo": "{estado.modoPrevia}"
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "nav/botao",
+                                  "se": "tamanho(estado.sel) > 0",
+                                  "props": {
+                                   "texto": "Copiar",
+                                   "variante": "fantasma"
+                                  },
+                                  "eventos": {
+                                   "aoClicar": [
+                                    {
+                                     "acao": "definir",
+                                     "estado": "copiado",
+                                     "valor": "semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\")"
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "nav/botao",
+                                  "se": "tamanho(estado.sel) > 0",
+                                  "props": {
+                                   "texto": "Recortar",
+                                   "variante": "fantasma"
+                                  },
+                                  "eventos": {
+                                   "aoClicar": [
+                                    {
+                                     "acao": "definir",
+                                     "estado": "copiado",
+                                     "valor": "semIds(obter(estado.no.spec.raiz, estado.sel), \"slots\")"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "passado",
+                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "futuro",
+                                     "valor": "[]"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "chaveEdicao",
+                                     "valor": "\"\""
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "recolhidos",
+                                     "valor": "filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), \"/\") + \"/\"))"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "no",
+                                     "valor": "sem(estado.no, concat([\"spec\", \"raiz\"], estado.sel))"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "sel",
+                                     "valor": "fatia(estado.sel, 0, tamanho(estado.sel) - 3)"
+                                    },
+                                    {
+                                     "acao": "executar",
+                                     "dados": "previa",
+                                     "args": {
+                                      "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                      "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                      "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                      "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? (\"pl\" + (tamanho(estado.sel) > 0 ? \"-\" + junta(mapeia(estado.sel, p => texto(p)), \"-\") : \"\"))) : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                      "modo": "{estado.modoPrevia}"
+                                     }
+                                    }
+                                   ]
+                                  }
+                                 },
+                                 {
+                                  "bloco": "nav/botao",
+                                  "se": "estado.copiado != null",
+                                  "props": {
+                                   "texto": "Colar",
+                                   "variante": "fantasma"
+                                  },
+                                  "eventos": {
+                                   "aoClicar": [
+                                    {
+                                     "acao": "definir",
+                                     "estado": "chaveEdicao",
+                                     "valor": "\"\""
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "passado",
+                                     "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "futuro",
+                                     "valor": "[]"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "tmpBloco",
+                                     "valor": "com(estado.copiado, [\"id\"], \"b\" + maximo(estado.contador, 1 + dobra(mapeia(percorre(estado.no.spec.raiz, \"slots\"), x => x.no.id ?? \"\"), 0, (a, i) => comeca(i, \"b\") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a)))"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "tmpDentro",
+                                     "valor": "tamanho(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots ?? objeto([]))) > 0 || tamanho(estado.sel) == 0"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "tmpCaminho",
+                                     "valor": "estado.tmpDentro ? concat(concat([\"spec\", \"raiz\"], estado.sel), [\"slots\", ((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots.filhos ? \"filhos\" : primeiro(chaves((acha(blocos.blocos, b => b.id == obter(estado.no.spec.raiz, estado.sel).bloco)).slots)))]) : concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1))"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "tmpPos",
+                                     "valor": "estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "no",
+                                     "valor": "com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "contador",
+                                     "valor": "estado.contador + 1"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "selElemento",
+                                     "valor": "null"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "recolhidos",
+                                     "valor": "filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), \"/\") && !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), \"/\") + \"/\"))"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "sel",
+                                     "valor": "concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])"
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "catBloco",
+                                     "valor": "\"\""
+                                    },
+                                    {
+                                     "acao": "definir",
+                                     "estado": "buscaBloco",
+                                     "valor": "\"\""
                                     },
                                     {
                                      "acao": "executar",

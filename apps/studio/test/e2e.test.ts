@@ -297,7 +297,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const { ctx, p } = await entra('ana'); const frame = () => p.frameLocator('iframe[title="Pré-visualização da página"]')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('sub'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/sub'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página sub')).toBeVisible()
     await p.getByRole('button', { name: 'Prévia ampla' }).click(); const add = async (t: string) => { await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: t, exact: true }).click() }
-    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover|Duplicar)/.test(t) && !/^[▾▸·\s]+$/.test(t))
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), linhas = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => t.length > 1 && !/^(Expandir|Recolher|Subir|Descer|Remover|Duplicar|Copiar|Recortar|Colar)/.test(t) && !/^[▾▸·\s]+$/.test(t))
     await add('Cabeçalho do site'); await p.getByRole('button', { name: /Cabeçalho do site #b1$/ }).click(); await p.getByRole('textbox', { name: 'Título', exact: true }).fill('Minha loja')
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 1)', exact: true }).fill('Início'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto (item 2)', exact: true }).fill('Contato')
     expect(await linhas()).toEqual(expect.arrayContaining(['Cabeçalho do site #b1', 'Título: Minha loja', 'Links do menu: 2 item(ns)', 'Início', 'Contato', 'Submenus: 0 item(ns)'])) // os elementos do cabeçalho, abaixo dele
@@ -355,6 +355,23 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await p.getByRole('button', { name: /dup \(personalizado\)/ }).click(); await expect(p.getByText('Página dup')).toBeVisible()
     await arv.getByRole('button', { name: /Pilha #b1$/ }).click(); await p.getByRole('button', { name: 'Duplicar' }).click(); await adiciona(p, 'Texto', 'Parágrafo')
     const ids2 = (await arv.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim().split('#')[1]); expect(ids2.length).toBe(5); expect(new Set(ids2).size).toBe(ids2.length)
+    await ctx.close()
+  })
+  it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('cola'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/cola'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página cola')).toBeVisible()
+    await adiciona(p, 'Layout', 'Pilha'); await adiciona(p, 'Texto', 'Título'); await p.getByRole('textbox', { name: 'Texto', exact: true }).first().fill('Olá')
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }), h1 = () => previa(p).locator('h1').allInnerTexts(), pilha = arv.getByRole('button', { name: /^Pilha #b1$/ }), raiz = arv.getByRole('button', { name: /^Pilha #raiz$/ })
+    expect(await p.getByRole('button', { name: 'Colar' }).count()).toBe(0) // nada copiado ainda
+    await pilha.click(); await p.getByRole('button', { name: 'Copiar' }).click(); await raiz.click(); await p.getByRole('button', { name: 'Colar' }).click()
+    await expect.poll(h1).toEqual(['Olá', 'Olá']) // a cópia entrou na raiz, com o filho
+    const ids = async () => (await arv.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim().split('#')[1]); const i1 = await ids(); expect(new Set(i1).size).toBe(i1.length)
+    await pilha.click(); await p.getByRole('button', { name: 'Recortar' }).click(); await expect.poll(h1).toEqual(['Olá']) // saiu da árvore
+    await raiz.click(); await p.getByRole('button', { name: 'Colar' }).click(); await expect.poll(h1).toEqual(['Olá', 'Olá']) // e volta onde se colar
+    await p.getByRole('button', { name: 'Desfazer' }).click(); await expect.poll(h1).toEqual(['Olá']) // colar entra no desfazer
+    // teclado: Ctrl+C na linha de um bloco e Ctrl+V na linha da raiz
+    await arv.getByRole('button', { name: /^Pilha #/ }).nth(1).focus(); await p.keyboard.press('Control+c'); await raiz.focus(); await p.keyboard.press('Control+v'); await expect.poll(h1).toEqual(['Olá', 'Olá'])
+    const i2 = await ids(); expect(new Set(i2).size).toBe(i2.length)
     await ctx.close()
   })
   it('CELULAR: as três colunas do editor viram abas (Blocos, Prévia, Propriedades); no computador aparecem juntas', async () => {

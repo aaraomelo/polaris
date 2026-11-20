@@ -147,13 +147,16 @@ const PAI_LISTA = 'concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.
 const PROX_ID = `"b" + maximo(estado.contador, 1 + dobra(mapeia(percorre(${RAIZ}, "slots"), x => x.no.id ?? ""), 0, (a, i) => comeca(i, "b") ? maximo(a, paraNumero(fatia(i, 1)) ?? 0) : a))`
 const NOVO_BLOCO = `mescla(objeto([["bloco", bd.id], ["id", ${PROX_ID}]]), tamanho(chaves(${PROPS_NOVAS})) > 0 ? objeto([["props", ${PROPS_NOVAS}]]) : objeto([]))`
 /** passos curtos (cada expressão tem limite de tamanho): o bloco novo, DENTRO ou DEPOIS, a lista de destino e a posição; depois uma única inserção */
-const ADICIONA: Acao[] = [
+const insere = (bloco: string): Acao[] => [
   def('chaveEdicao', '""'), def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'),
-  def('tmpBloco', NOVO_BLOCO), def('tmpDentro', `${ACEITA} || tamanho(estado.sel) == 0`),
+  def('tmpBloco', bloco), def('tmpDentro', `${ACEITA} || tamanho(estado.sel) == 0`),
   def('tmpCaminho', `estado.tmpDentro ? ${CAMINHO_SLOT} : ${PAI_LISTA}`), def('tmpPos', 'estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1'),
   def('no', 'com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))'),
   def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), "/") && !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('sel', 'concat(fatia(estado.tmpCaminho, 2, tamanho(estado.tmpCaminho)), [estado.tmpPos])'), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
 ]
+const ADICIONA: Acao[] = insere(NOVO_BLOCO)
+/** colar o bloco copiado (ou recortado): entra como bloco novo, com ids novos, dentro do selecionado (se aceita filhos) ou depois dele */
+const COLA: Acao[] = insere(`com(estado.copiado, ["id"], ${PROX_ID})`)
 const botaoCategoria = (id: string, nome: string, icone: string, cobre: string): Inst => botao(`{${q(nome + ' (')} + tamanho(filtra(blocos.blocos, bd => ${cobre})) + ")"}`, [def('buscaBloco', '""'), def('catBloco', `estado.catBloco == ${q(id)} ? "" : ${q(id)}`)], { props: { icone, atual: `{estado.catBloco == ${q(id)} && estado.buscaBloco == ""}` } })
 const paletaDeBlocos = (): Inst => pilha([
   linha([
@@ -354,6 +357,11 @@ const propriedades = (): Inst => pilha([
 ], { se: `estado.no && ${EH_PAGINA} && ${SELNO}`, gap: 6 })
 
 /** as ações do bloco selecionado (remover, subir, descer): ficam na linha dele na árvore */
+const COPIA_DO_SELECIONADO = def('copiado', `semIds(${SELNO}, "slots")`)
+const REMOVE_SELECIONADO: Acao[] = [
+    def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
+    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
+  ]
 const botoesDaSelecao = (): Inst[] => [
   botao('Duplicar', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
@@ -362,10 +370,10 @@ const botoesDaSelecao = (): Inst[] => [
     def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`),
     def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [estado.tmpPos])'), atualizaPrevia,
   ], { se: 'tamanho(estado.sel) > 0', props: { icone: 'mais', variante: 'fantasma' } }),
-  botao('Remover', [
-    def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
-    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
-  ], { se: 'tamanho(estado.sel) > 0', props: { icone: 'apagar', variante: 'fantasma' } }),
+  botao('Copiar', [COPIA_DO_SELECIONADO], { se: 'tamanho(estado.sel) > 0', props: { variante: 'fantasma' } }),
+  botao('Recortar', [COPIA_DO_SELECIONADO, ...REMOVE_SELECIONADO], { se: 'tamanho(estado.sel) > 0', props: { variante: 'fantasma' } }),
+  botao('Colar', COLA, { se: 'estado.copiado != null', props: { variante: 'fantasma' } }),
+  botao('Remover', REMOVE_SELECIONADO, { se: 'tamanho(estado.sel) > 0', props: { icone: 'apagar', variante: 'fantasma' } }),
   botao('Subir', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('no', `com(estado.no, concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))`),
@@ -832,7 +840,7 @@ export const PAGINA = no('pagina', 'studio.app', {
   dados: { ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema', pagsite: 'studio.pagsite' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    recolhidos: { tipo: 'json', inicial: [] }, abaCel: { tipo: 'texto', inicial: 'blocos' }, selElemento: { tipo: 'json' }, prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    recolhidos: { tipo: 'json', inicial: [] }, copiado: { tipo: 'json' }, abaCel: { tipo: 'texto', inicial: 'blocos' }, selElemento: { tipo: 'json' }, prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },
