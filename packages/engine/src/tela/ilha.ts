@@ -13,6 +13,14 @@ const MIME = 'application/x-polaris-arrasta'
 let emArrasto = ''
 const ID_ARRASTA = /^[A-Za-z][\w-]{0,119}$/
 const r4 = (v: number): number => Math.round(v * 10000) / 10000
+/** MIRA: durante o arrasto sobre a peça de edição, uma cruz mostra onde o centro do elemento vai cair */
+function miraEm(tela: HTMLElement, x: number, y: number): void {
+  const camada = tela.querySelector<HTMLElement>('[data-tela-camada]'); if (!camada) return; const r = tela.getBoundingClientRect(); if (r.width <= 0 || r.height <= 0) return
+  let m = camada.querySelector<HTMLElement>('[data-mira]')
+  if (!m) { m = document.createElement('div'); m.setAttribute('data-mira', ''); m.setAttribute('aria-hidden', 'true'); m.style.cssText = 'position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:none;border:2px solid #f59e0b;border-radius:50%;background:radial-gradient(#f59e0b 0 2px,transparent 3px)'; camada.appendChild(m) }
+  m.style.left = `${((x - r.left) / r.width) * 100}%`; m.style.top = `${((y - r.top) / r.height) * 100}%`
+}
+const limpaMiras = (raiz: ParentNode = document): void => { for (const m of raiz.querySelectorAll('[data-mira]')) m.remove() }
 const ligadas = new WeakMap<HTMLElement, { sincroniza: () => void }>()
 
 const css = (el: HTMLElement, s: Record<string, string>): void => { for (const [k, v] of Object.entries(s)) el.style.setProperty(k, v) }
@@ -56,13 +64,14 @@ function monta(el: HTMLElement): void {
         camada.appendChild(n); nos.set(c.id, n)
       }
       n.setAttribute('aria-label', c.rotulo); n.setAttribute('aria-pressed', c.atual ? 'true' : 'false'); n.title = `${c.rotulo}: arraste, ou use as setas (Shift: passo grande; Alt: redimensiona)`
-      css(n, { border: c.atual ? '2px solid #f59e0b' : '1px dashed rgba(245,158,11,.7)', background: c.atual ? 'rgba(245,158,11,.10)' : 'transparent', 'z-index': c.atual ? '2' : '1' })
+      css(n, { 'touch-action': c.atual ? 'none' : 'pan-y pinch-zoom', border: c.atual ? '2px solid #f59e0b' : '1px dashed rgba(245,158,11,.7)', background: c.atual ? 'rgba(245,158,11,.10)' : 'transparent', 'z-index': c.atual ? '2' : '1' })
       aplica(n, c, c.rotacao)
       for (const a of [...n.querySelectorAll('[data-alca]')]) a.remove()
       if (c.atual) for (const a of ALCAS) { // as alças giram junto com a caixa (o transform é do pai)
         const h = document.createElement('div'); h.setAttribute('data-alca', a); h.setAttribute('aria-hidden', 'true')
         const cx = a.includes('w') ? '0%' : a.includes('e') ? '100%' : '50%', cy = a.includes('n') ? '0%' : a.includes('s') ? '100%' : '50%'
-        css(h, { position: 'absolute', left: cx, top: cy, width: '12px', height: '12px', margin: '-6px 0 0 -6px', background: '#fff', border: '2px solid #f59e0b', 'border-radius': '3px', cursor: `${a}-resize`, 'touch-action': 'none', 'box-sizing': 'border-box' })
+        const g = matchMedia('(pointer: coarse)').matches ? 26 : 12 // dedo: alvo de acerto maior
+        css(h, { position: 'absolute', left: cx, top: cy, width: g + 'px', height: g + 'px', margin: `${-g / 2}px 0 0 ${-g / 2}px`, background: '#fff', border: '2px solid #f59e0b', 'border-radius': '3px', cursor: `${a}-resize`, 'touch-action': 'none', 'box-sizing': 'border-box' })
         n.appendChild(h)
       }
     }
@@ -72,6 +81,10 @@ function monta(el: HTMLElement): void {
     const alvo = e.target as HTMLElement, caixa = alvo.closest<HTMLElement>('[data-caixa]'); if (!caixa || e.button > 0) return
     if (gesto) return // um ponteiro de cada vez
     const id = caixa.getAttribute('data-caixa')!, c = caixas.find((x) => x.id === id); if (!c) return
+    if (e.pointerType === 'touch' && !c.atual) { // no toque, a caixa ainda não escolhida só seleciona (um toque simples); arrastar começa depois, na selecionada. Assim o dedo sobre a peça ainda rola a página.
+      const x0 = e.clientX, y0 = e.clientY, t0 = performance.now(), fim = (u: PointerEvent): void => { camada.removeEventListener('pointerup', fim); if (Math.hypot(u.clientX - x0, u.clientY - y0) < 10 && performance.now() - t0 < 600) emite('polaris-selecionar', { id }) }
+      camada.addEventListener('pointerup', fim); camada.addEventListener('pointercancel', () => camada.removeEventListener('pointerup', fim), { once: true }); return
+    }
     const alca = alvo.closest<HTMLElement>('[data-alca]')?.getAttribute('data-alca') as Alca | null
     e.preventDefault(); caixa.focus({ preventScroll: true }); try { caixa.setPointerCapture?.(e.pointerId) } catch { /* ponteiro já inativo */ }
     const ini: Caixa = { topo: c.topo, esquerda: c.esquerda, largura: c.largura, altura: c.altura }
@@ -113,10 +126,11 @@ function monta(el: HTMLElement): void {
   })
 
   // soltar um botão com `arrasta` sobre a tela: o centro da peça nova vai ao ponto
-  el.addEventListener('dragover', (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes(MIME)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' } })
+  el.addEventListener('dragover', (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes(MIME)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; miraEm(el, e.clientX, e.clientY) } })
+  el.addEventListener('dragleave', (e) => { if (!el.contains(e.relatedTarget as Node | null)) limpaMiras(el) })
   el.addEventListener('drop', (e) => {
     const valor = e.dataTransfer?.getData(MIME) ?? ''; if (!ID_ARRASTA.test(valor)) return
-    e.preventDefault(); const r = retang(); if (r.width <= 0 || r.height <= 0) return
+    limpaMiras(el); e.preventDefault(); const r = retang(); if (r.width <= 0 || r.height <= 0) return
     const c = colocaCentrada(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)), 0, 0, passo())
     emite('polaris-soltar', { valor, topo: c.topo, esquerda: c.esquerda })
   })
@@ -135,7 +149,7 @@ export function ativaTelas(raiz: Document = document): () => void {
   // enquanto um botão `arrasta` está em movimento, a camada das caixas captura o arrasto (o quadro da prévia é um iframe isolado e engoliria os eventos); ao terminar, volta a deixar o ponteiro passar
   const camadas = (v: string): void => { for (const c of raiz.querySelectorAll<HTMLElement>('[data-tela-camada]')) c.style.setProperty('pointer-events', v) }
   const arrastando = (e: DragEvent): void => { if (toque) { e.preventDefault(); return } dragstart(e); if ((e.target as HTMLElement | null)?.closest?.('[data-arrasta]')) camadas('auto') }
-  const solto = (): void => { camadas('none'); limpaZonas(); emArrasto = '' }
+  const solto = (): void => { if (toque?.ativo) return; camadas('none'); limpaZonas(); limpaMiras(raiz); emArrasto = '' }
   // ZONA DE SOLTAR (`data-solta`, a prop `solta` das caixas de layout): um item `arrasta` solto sobre outro item da mesma zona avisa `polaris-soltar { valor, alvo, zona }`, com a zona pela altura do ponteiro no item (alto = antes, meio = dentro, baixo = depois); o item sob o ponteiro leva `data-solta-zona` para o CSS desenhar a indicação
   const limpaZonas = (): void => { for (const el of raiz.querySelectorAll('[data-solta-zona]')) el.removeAttribute('data-solta-zona') }
   const zonaPorY = (y: number, item: HTMLElement): 'antes' | 'dentro' | 'depois' => { const r = item.getBoundingClientRect(), f = r.height > 0 ? (y - r.top) / r.height : 0.5; return f < 0.3 ? 'antes' : f > 0.7 ? 'depois' : 'dentro' }
@@ -155,12 +169,13 @@ export function ativaTelas(raiz: Document = document): () => void {
   }
   const avisaSoltar = (it: HTMLElement, valor: string, zona: string): void => { const alvo = it.getAttribute('data-arrasta') ?? ''; if (ID_ARRASTA.test(valor) && ID_ARRASTA.test(alvo)) it.closest('[data-solta]')!.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor, alvo, zona } })) }
   const sobre = (e: DragEvent): void => {
-    if (!e.dataTransfer || ![...e.dataTransfer.types].includes(MIME)) return
+    if (!e.dataTransfer || ![...e.dataTransfer.types].includes(MIME) || (e.target as Element | null)?.closest?.('[data-polaris-tela]')) return // sobre a peça de edição vale a peça
     const it = itemEm(e.target as Element | null, e.clientY); if (!it) return
     const { vale } = avalia(it, e.clientY, emArrasto)
     if (vale) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } else e.dataTransfer.dropEffect = 'none'
   }
   const soltou = (e: DragEvent): void => {
+    if ((e.target as Element | null)?.closest?.('[data-polaris-tela]')) return
     const it = itemEm(e.target as Element | null, e.clientY); if (!it) return
     const marcado = it.getAttribute('data-solta-zona') === 'invalida', valor = e.dataTransfer?.getData(MIME) ?? ''; limpaZonas(); if (marcado) return
     e.preventDefault(); avisaSoltar(it, valor, zonaPorY(e.clientY, it))
@@ -168,18 +183,25 @@ export function ativaTelas(raiz: Document = document): () => void {
   const saiu = (e: DragEvent): void => { if (!(e.relatedTarget as HTMLElement | null)?.closest?.('[data-solta]')) limpaZonas() }
   // ARRASTAR POR TOQUE: o arrastar nativo do HTML não é confiável em telas de toque; aqui, uma pressão longa num botão `arrasta` começa o arrasto (um fantasma segue o dedo, a lista rola perto das bordas) e o soltar chama a mesma lógica do mouse. Mexer antes da pressão longa é rolar a página, como sempre.
   const LONGA = 350, TOLERANCIA = 10, BORDA = 56
-  let toque: { it: HTMLElement; valor: string; x0: number; y0: number; x: number; y: number; id: number; timer: number; ativo: boolean; fantasma?: HTMLElement; raf?: number } | null = null
+  let toque: { it: HTMLElement; valor: string; x0: number; y0: number; x: number; y: number; id: number; timer: number; ativo: boolean; moveu?: boolean; fantasma?: HTMLElement; raf?: number; caixa?: HTMLElement | null; teto?: number } | null = null
   const rolavel = (el: Element | null): HTMLElement | null => { for (let n = el?.parentElement ?? null; n; n = n.parentElement) { const o = getComputedStyle(n).overflowY; if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight) return n } return null }
   const alvoDoToque = (): void => {
     if (!toque) return
+    if (!toque.moveu) return // pressão longa sem mexer o dedo ainda não é um arrasto: nada de marca
     const el = raiz.elementFromPoint(toque.x, toque.y), it = itemEm(el, toque.y); if (it) avalia(it, toque.y, toque.valor); else limpaZonas()
+    const tela = el?.closest?.<HTMLElement>('[data-polaris-tela]'); if (tela && !toque.it.closest('[data-solta]')) miraEm(tela, toque.x, toque.y); else limpaMiras(raiz)
   }
   const fimDoToque = (solta: boolean): void => {
-    const t = toque; if (!t) return; toque = null; clearTimeout(t.timer); if (t.raf) cancelAnimationFrame(t.raf); t.fantasma?.remove()
+    const t = toque; if (!t) return; toque = null; clearTimeout(t.timer); clearTimeout(t.teto); if (t.raf) cancelAnimationFrame(t.raf); t.fantasma?.remove(); raiz.removeEventListener('touchmove', naoRola as EventListener)
     if (!t.ativo) return
-    const el = raiz.elementFromPoint(t.x, t.y), it = itemEm(el, t.y), marcado = it?.getAttribute('data-solta-zona') === 'invalida'; limpaZonas(); emArrasto = ''
+    if (!t.moveu) { limpaZonas(); emArrasto = ''; limpaMiras(raiz); if (solta) t.it.click(); return } // pressão longa sem mexer: vale como toque (seleciona)
+    limpaMiras(raiz)
+    const el = raiz.elementFromPoint(t.x, t.y), sobreTela = !!el?.closest?.('[data-polaris-tela]') && !t.it.closest('[data-solta]'), it = sobreTela ? null : itemEm(el, t.y), marcado = it?.getAttribute('data-solta-zona') === 'invalida'; limpaZonas(); emArrasto = ''
     // o toque que fecha o arrasto não vira clique no botão
-    const engole = (c: Event): void => { c.preventDefault(); c.stopPropagation() }; raiz.addEventListener('click', engole, { capture: true, once: true }); setTimeout(() => raiz.removeEventListener('click', engole, true), 500)
+    // (só o clique que cai no próprio item e logo depois; qualquer outro toque, ou o próximo apertar, desarma)
+    const desarma = (): void => { raiz.removeEventListener('click', engole, true); raiz.removeEventListener('pointerdown', desarma, true); clearTimeout(tmr) }
+    const engole = (c: Event): void => { if (t.it.contains(c.target as Node)) { c.preventDefault(); c.stopPropagation() } desarma() }
+    const tmr = window.setTimeout(desarma, 400); raiz.addEventListener('click', engole, true); raiz.addEventListener('pointerdown', desarma, true)
     if (!solta) return
     if (it) { if (!marcado) avisaSoltar(it, t.valor, zonaPorY(t.y, it)); return }
     const tela = el?.closest?.<HTMLElement>('[data-polaris-tela]'); if (!tela) return // sobre a tela de edição: cria no ponto (o mesmo `polaris-soltar` do mouse)
@@ -187,37 +209,45 @@ export function ativaTelas(raiz: Document = document): () => void {
     const c = colocaCentrada(Math.min(1, Math.max(0, (t.x - r.left) / r.width)), Math.min(1, Math.max(0, (t.y - r.top) / r.height)), 0, 0, passoDe({ passo: Number(tela.getAttribute('data-passo')) }))
     if (ID_ARRASTA.test(t.valor)) tela.dispatchEvent(new CustomEvent('polaris-soltar', { bubbles: true, detail: { valor: t.valor, topo: c.topo, esquerda: c.esquerda } }))
   }
+  const posicionaFantasma = (): void => { const t = toque; if (!t?.fantasma) return; const w = t.fantasma.offsetWidth || 120; t.fantasma.style.transform = `translate(${Math.max(8, Math.min(t.x + 14, innerWidth - w - 8))}px,${Math.max(8, t.y - 18)}px)` }
   const comecaToque = (): void => {
     const t = toque; if (!t) return; t.ativo = true; emArrasto = t.valor
     const f = document.createElement('div'); f.setAttribute('data-arrasto-toque', ''); f.textContent = (t.it.textContent ?? '').trim().slice(0, 40)
     f.style.cssText = 'position:fixed;z-index:2147483647;pointer-events:none;padding:6px 10px;border-radius:8px;background:#f59e0b;color:#111;font:600 14px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.92;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;left:0;top:0;transform:translate(' + (t.x + 14) + 'px,' + (t.y - 18) + 'px)'
-    document.body.appendChild(f); t.fantasma = f; navigator.vibrate?.(15)
+    f.setAttribute('aria-hidden', 'true'); document.body.appendChild(f); t.fantasma = f; navigator.vibrate?.(15)
+    t.caixa = rolavel(t.it); t.teto = window.setTimeout(() => fimDoToque(false), 90_000) // o arrasto não passa de 90 s (rede de segurança)
+    raiz.addEventListener('touchmove', naoRola as EventListener, { passive: false }) // só durante o arrasto: a rolagem do resto da página segue no compositor
     const ciclo = (): void => { // autorrolagem nas bordas, e o alvo é recalculado (a lista anda sob o dedo)
-      if (!toque) return; const box = rolavel(t.it), topo = box ? box.getBoundingClientRect().top : 0, base = box ? box.getBoundingClientRect().bottom : innerHeight
+      if (!toque) return; const box = t.caixa ?? null, rb = box?.getBoundingClientRect(), topo = Math.max(0, rb?.top ?? 0), base = Math.min(innerHeight, rb?.bottom ?? innerHeight) // a janela limita a borda
       const d = toque.y < topo + BORDA ? -10 : toque.y > base - BORDA ? 10 : 0
-      if (d) { if (box) box.scrollTop += d; else scrollBy(0, d); alvoDoToque() }
+      if (d) { const caixaAntes = box?.scrollTop ?? 0, janelaAntes = scrollY; if (box) box.scrollTop += d; if (!box || box.scrollTop === caixaAntes) scrollBy(0, d) /* o contêiner chegou ao limite: rola a janela */; if ((box?.scrollTop ?? 0) !== caixaAntes || scrollY !== janelaAntes) alvoDoToque() } // só recalcula o alvo se algo rolou de fato
       toque.raf = requestAnimationFrame(ciclo)
     }
     t.raf = requestAnimationFrame(ciclo); alvoDoToque()
   }
   const toqueBaixo = (e: PointerEvent): void => {
-    if (e.pointerType !== 'touch' || toque) return
+    if (e.pointerType !== 'touch') return
+    if (toque) { if (e.pointerId !== toque.id) fimDoToque(false); return } // um segundo dedo (pinça, dois dedos) cancela o arrasto
     const it = (e.target as Element | null)?.closest?.<HTMLElement>('[data-arrasta]'); const valor = it?.getAttribute('data-arrasta') ?? ''; if (!it || !ID_ARRASTA.test(valor)) return
     toque = { it, valor, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, id: e.pointerId, ativo: false, timer: window.setTimeout(comecaToque, LONGA) }
   }
   const toqueMove = (e: PointerEvent): void => {
     if (!toque || e.pointerId !== toque.id) return; toque.x = e.clientX; toque.y = e.clientY
     if (!toque.ativo) { if (Math.hypot(e.clientX - toque.x0, e.clientY - toque.y0) > TOLERANCIA) fimDoToque(false); return } // mexeu antes da pressão longa: é rolagem
-    if (toque.fantasma) toque.fantasma.style.transform = `translate(${toque.x + 14}px,${toque.y - 18}px)`; alvoDoToque()
+    if (!toque.moveu && Math.hypot(e.clientX - toque.x0, e.clientY - toque.y0) > TOLERANCIA) toque.moveu = true
+    posicionaFantasma(); alvoDoToque()
   }
   const toqueCima = (cancelado: boolean) => (e: PointerEvent): void => { if (toque && e.pointerId === toque.id) fimDoToque(!cancelado) }
   const naoRola = (e: TouchEvent): void => { if (toque?.ativo && e.cancelable) e.preventDefault() } // durante o arrasto o dedo não rola a página
   const semMenu = (e: Event): void => { if (toque) e.preventDefault() } // a pressão longa não abre o menu de contexto
   const cimaSolta = toqueCima(false) as EventListener, cimaCancela = toqueCima(true) as EventListener
   raiz.addEventListener('pointerdown', toqueBaixo as EventListener); raiz.addEventListener('pointermove', toqueMove as EventListener); raiz.addEventListener('pointerup', cimaSolta); raiz.addEventListener('pointercancel', cimaCancela)
-  raiz.addEventListener('touchmove', naoRola as EventListener, { passive: false }); raiz.addEventListener('contextmenu', semMenu)
+  raiz.addEventListener('contextmenu', semMenu)
+  // rede de segurança: se o `pointerup` nunca chegar (app em segundo plano, chamada, alerta), o arrasto não fica preso
+  const perdeu = (): void => fimDoToque(false), visib = (): void => { if (document.visibilityState === 'hidden') fimDoToque(false) }
+  window.addEventListener('blur', perdeu); document.addEventListener('visibilitychange', visib); raiz.addEventListener('touchcancel', perdeu)
   raiz.addEventListener('dragover', sobre); raiz.addEventListener('drop', soltou); raiz.addEventListener('dragleave', saiu)
   raiz.addEventListener('dragstart', arrastando); raiz.addEventListener('pointerdown', solto, true); raiz.addEventListener('dragend', solto, true); raiz.addEventListener('drop', solto, true); varre()
-  global = { parar: () => { obs.disconnect(); raiz.removeEventListener('dragstart', arrastando); raiz.removeEventListener('pointerdown', solto, true); raiz.removeEventListener('dragend', solto, true); raiz.removeEventListener('drop', solto, true); raiz.removeEventListener('dragover', sobre); raiz.removeEventListener('drop', soltou); raiz.removeEventListener('dragleave', saiu); raiz.removeEventListener('pointerdown', toqueBaixo as EventListener); raiz.removeEventListener('pointermove', toqueMove as EventListener); raiz.removeEventListener('pointerup', cimaSolta); raiz.removeEventListener('pointercancel', cimaCancela); raiz.removeEventListener('touchmove', naoRola as EventListener); raiz.removeEventListener('contextmenu', semMenu); fimDoToque(false); global = null } }
+  global = { parar: () => { obs.disconnect(); raiz.removeEventListener('dragstart', arrastando); raiz.removeEventListener('pointerdown', solto, true); raiz.removeEventListener('dragend', solto, true); raiz.removeEventListener('drop', solto, true); raiz.removeEventListener('dragover', sobre); raiz.removeEventListener('drop', soltou); raiz.removeEventListener('dragleave', saiu); raiz.removeEventListener('pointerdown', toqueBaixo as EventListener); raiz.removeEventListener('pointermove', toqueMove as EventListener); raiz.removeEventListener('pointerup', cimaSolta); raiz.removeEventListener('pointercancel', cimaCancela); raiz.removeEventListener('contextmenu', semMenu); window.removeEventListener('blur', perdeu); document.removeEventListener('visibilitychange', visib); raiz.removeEventListener('touchcancel', perdeu); fimDoToque(false); global = null } }
   return global.parar
 }

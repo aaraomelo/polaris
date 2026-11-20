@@ -34,14 +34,14 @@ section[aria-label]{background:var(--card);border:1px solid var(--bd);border-rad
 #polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo]:hover,#polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo]:focus-visible{background:color-mix(in srgb,var(--cor-primaria) 12%,transparent);border-color:var(--cor-primaria);box-shadow:0 0 0 2px color-mix(in srgb,var(--cor-primaria) 30%,transparent)}
 #polaris [role=group][aria-label="Árvore de blocos"] button[data-alvo][aria-current]{background:color-mix(in srgb,var(--cor-primaria) 20%,transparent);border-color:var(--cor-primaria);font-weight:600}
 /* Celular e zoom: as três colunas do editor (árvore, prévia, propriedades) empilham em vez de ficarem de 100 px */
-@media (max-width:1000px){#polaris main div[style*="grid-template-columns:repeat(3,"]{grid-template-columns:minmax(0,1fr)!important}}
+@media (max-width:1180px){#polaris main div[style*="grid-template-columns:repeat(3,"]{grid-template-columns:minmax(0,1fr)!important}}
 /* alvos de toque maiores em telas de toque */
 @media (pointer:coarse){#polaris button,#polaris summary,#polaris [role=toolbar] button{min-height:44px}#polaris input[type=checkbox]{width:24px;height:24px}}
 /* link "Pular para o conteúdo": fora da tela até receber o foco */
 a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-radius:6px;background:var(--cor-primaria);color:var(--cor-sobre-primaria,#fff);font-weight:600;text-decoration:none}a.pular:focus{top:8px}
 /* Abas do editor (Blocos | Prévia | Propriedades): só no celular; a barra some no computador e as três colunas aparecem juntas */
 #polaris main [role=toolbar][aria-label="Abas do editor"]{display:none!important}
-@media (max-width:1000px){
+@media (max-width:1180px){
   #polaris main [role=toolbar][aria-label="Abas do editor"]{display:flex!important;position:sticky;top:0;z-index:5;background:var(--bg,Canvas);padding:4px 0}
   #polaris main:has([data-alvo=aba-blocos][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(1)),
   #polaris main:has([data-alvo=aba-previa][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(2)),
@@ -59,9 +59,12 @@ a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-ra
 #polaris [data-solta] [data-arrasta][data-solta-zona="dentro"]{outline:3px solid #f59e0b;outline-offset:-3px;background:rgba(245,158,11,.18)}
 #polaris [data-solta] [data-arrasta]{cursor:grab}
 /* cartaz: a coluna da prévia ganha o dobro das outras, e a moldura nunca passa de ~75% da altura da tela (largura = altura × proporção), para uma peça em pé não sair da tela */
-@media (min-width:1001px){#polaris main div[style*="grid-template-columns:repeat(3,"]:has([data-polaris-tela]){grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)!important}}
+@media (min-width:1181px){#polaris main div[style*="grid-template-columns:repeat(3,"]:has([data-polaris-tela]){grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)!important}}
 #polaris [data-polaris-tela]{width:min(100%,calc(75vh * var(--proporcao,1)))!important}
 /* soltar INVÁLIDO (a ilha marca o item sob o ponteiro quando o hospedeiro recusa): vermelho tracejado, e o navegador mostra o cursor de proibido */
 #polaris [data-solta] [data-arrasta][data-solta-zona="invalida"]{outline:3px dashed #dc2626;outline-offset:-3px;background:rgba(220,38,38,.12);cursor:no-drop}
 /* arrastar por toque: a pressão longa não seleciona texto nem abre a lupa/menu do iOS */
 #polaris [data-arrasta]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+/* a árvore nunca passa por baixo da prévia: o contêiner encolhe e rola, e rótulos longos quebram dentro da coluna */
+#polaris [role=tree]{min-width:0;overflow-x:auto}
+#polaris [role=tree] button{max-width:100%;white-space:normal;text-align:left}

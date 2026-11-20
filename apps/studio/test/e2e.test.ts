@@ -508,11 +508,25 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     // a dica de inválido também vale no toque: a pilha sobre o próprio filho; soltar ali não muda nada
     const antes = await ordem(); await arrastaToque(linha('b1'), ponto('b2', 0.5), 520, async () => { expect(await linha('b2').getAttribute('data-solta-zona')).toBe('invalida') }); expect(await ordem()).toEqual(antes)
     await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(inicial) // um soltar por toque é um passo de desfazer
+    // pressão longa SEM mexer vale como um toque: seleciona, sem marca vermelha
+    await arv.getByRole('button', { name: /^Pilha #raiz$/ }).click(); await arrastaToque(linha('b3'), ponto('b3', 0.5), 520, async () => { expect(await p.locator('[data-solta-zona]').count()).toBe(0) }); await expect(linha('b3')).toHaveAttribute('aria-current', 'true')
+    // um segundo dedo cancela o arrasto
+    { await linha('b4').scrollIntoViewIfNeeded(); const a = (await linha('b4').boundingBox())!, x = a.x + a.width / 2, y = a.y + a.height / 2
+      await toca('touchStart', x, y); await p.waitForTimeout(520); expect(await p.locator('[data-arrasto-toque]').count()).toBe(1)
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }, { x: x + 60, y: y + 60, id: 2 }] }); await p.waitForTimeout(150); expect(await p.locator('[data-arrasto-toque]').count()).toBe(0)
+      await toca('touchEnd'); await p.waitForTimeout(300); expect(await ordem()).toEqual(inicial) }
     // cartaz: soltar um botão da paleta sobre a peça cria o elemento no ponto
     await p.getByRole('button', { name: 'Novo cartaz' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('toque-cartaz'); await p.getByRole('button', { name: 'Criar', exact: true }).click().catch(() => {}); await p.getByRole('button', { name: 'Descartar e criar' }).click().catch(() => {}); await expect(p.getByText('Cartaz toque-cartaz')).toBeVisible()
     const tela = p.locator('[data-polaris-tela]'), faixa = p.getByRole('toolbar', { name: 'Paleta de elementos' }).getByRole('button', { name: 'Faixa', exact: true }), nElem = () => p.locator('button', { hasText: /^(▶ )?\d+\. / }).count()
+    // a caixa ainda não escolhida só SELECIONA por toque (o dedo sobre a peça rola a página); arrastar vale depois, na selecionada
+    await expect(tela.locator('[data-caixa="0"]')).toBeVisible(); const c0 = (await tela.locator('[data-caixa="0"]').boundingBox())!
+    expect(await tela.locator('[data-caixa="0"]').getAttribute('aria-pressed')).toBe('false'); expect(await tela.locator('[data-caixa="0"]').evaluate((e) => getComputedStyle(e).touchAction)).toMatch(/pan-y/)
+    await toca('touchStart', c0.x + 20, c0.y + c0.height / 2); for (let i = 1; i <= 5; i++) await toca('touchMove', c0.x + 20, c0.y + c0.height / 2 + i * 8); await toca('touchEnd'); await p.waitForTimeout(300)
+    expect(await tela.locator('[data-caixa="0"]').getAttribute('aria-pressed')).toBe('false') // arrastar a não escolhida não a move nem a seleciona
+    await toca('touchStart', c0.x + 20, c0.y + c0.height / 2); await toca('touchEnd'); await expect.poll(() => tela.locator('[data-caixa="0"]').getAttribute('aria-pressed')).toBe('true') // um toque simples seleciona
     const antesN = await nElem(); await arrastaToque(faixa, async () => { const r = (await tela.boundingBox())!; return { x: r.x + r.width * 0.5, y: r.y + r.height * 0.8 } }); await expect.poll(nElem).toBe(antesN + 1)
     await expect.poll(async () => Number(await p.getByRole('textbox', { name: 'Topo', exact: true }).inputValue())).toBeCloseTo(0.7, 1) // o centro da faixa vai ao ponto (80% da altura)
+    expect(await p.locator('[data-mira]').count()).toBe(0) // a mira some ao soltar
     await ctx.close()
   })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {
