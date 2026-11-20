@@ -53,11 +53,16 @@ const atualizaPrevia: Acao = exe('previa', {
   no: `{(${EH_PAGINA} || ${EH_FORM} || ${EH_CARTAZ}) ? estado.no : estado.amostra}`, dados: `{${EH_CARTAZ} ? (estado.no.spec.exemplo ?? objeto([])) : null}`, tema: `{${EH_TEMA} ? estado.no : null}`, selecionado: `{${EH_PAGINA} ? (${SELNO}.id ?? ("pl" + (tamanho(estado.sel) > 0 ? "-" + junta(mapeia(estado.sel, p => texto(p)), "-") : ""))) : ${EH_FORM} ? estado.passoPrevia : ""}`, modo: '{estado.modoPrevia}',
 })
 /** toda edição do rascunho passa por aqui: guarda o anterior para desfazer (edições seguidas do MESMO campo, `chave`, viram um passo só), limpa o refazer e atualiza a prévia */
-const edita = (novo: string, chave = '""'): Acao[] => [
-  def('passado', `${chave} != "" && estado.chaveEdicao == ${chave} ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)`), def('futuro', '[]'), def('chaveEdicao', chave), def('no', novo), atualizaPrevia,
+/** depois de QUALQUER troca do rascunho (editar, desfazer, refazer): a seleção volta a apontar para algo que existe. O bloco que sumiu manda a seleção para a raiz; o elemento que sumiu (item removido, campo limpo) fecha o painel de elemento; o que continua é relido do rascunho vivo (rótulo, valor, schema), nunca de uma cópia velha. Roda ANTES da prévia, que usa a seleção para o destaque. */
+const RECONCILIA: Acao[] = [
+  def('sel', `${SELNO} != null ? estado.sel : []`),
+  def('selElemento', `estado.selElemento == null ? null : (acha(elementosDoBloco((${SELNO} ?? objeto([])).props ?? objeto([]), ((${DEFBLOCO}) ?? objeto([])).props ?? objeto([])) ?? [], e => igual(e.caminho, estado.selElemento.caminho)) ?? null)`),
 ]
-const desfaz: Acao[] = [def('futuro', 'concat(estado.futuro, [estado.no])'), def('no', 'ultimo(estado.passado)'), def('passado', 'fatia(estado.passado, 0, -1)'), def('chaveEdicao', '""'), atualizaPrevia]
-const refaz: Acao[] = [def('passado', 'concat(estado.passado, [estado.no])'), def('no', 'ultimo(estado.futuro)'), def('futuro', 'fatia(estado.futuro, 0, -1)'), def('chaveEdicao', '""'), atualizaPrevia]
+const edita = (novo: string, chave = '""', extras: Acao[] = []): Acao[] => [
+  def('passado', `${chave} != "" && estado.chaveEdicao == ${chave} ? estado.passado : fatia(concat(estado.passado, [estado.no]), -60)`), def('futuro', '[]'), def('chaveEdicao', chave), def('no', novo), ...extras, ...RECONCILIA, atualizaPrevia,
+]
+const desfaz: Acao[] = [def('futuro', 'concat(estado.futuro, [estado.no])'), def('recolhidos', `igual(mapeia(percorre(estado.no.spec.raiz, "slots"), x => x.bloco + ":" + junta(mapeia(x.caminho, p => texto(p)), "/")), mapeia(percorre(ultimo(estado.passado).spec.raiz, "slots"), x => x.bloco + ":" + junta(mapeia(x.caminho, p => texto(p)), "/"))) ? estado.recolhidos : []`), def('no', 'ultimo(estado.passado)'), def('passado', 'fatia(estado.passado, 0, -1)'), def('chaveEdicao', '""'), ...RECONCILIA, atualizaPrevia]
+const refaz: Acao[] = [def('passado', 'concat(estado.passado, [estado.no])'), def('recolhidos', `igual(mapeia(percorre(estado.no.spec.raiz, "slots"), x => x.bloco + ":" + junta(mapeia(x.caminho, p => texto(p)), "/")), mapeia(percorre(ultimo(estado.futuro).spec.raiz, "slots"), x => x.bloco + ":" + junta(mapeia(x.caminho, p => texto(p)), "/"))) ? estado.recolhidos : []`), def('no', 'ultimo(estado.futuro)'), def('futuro', 'fatia(estado.futuro, 0, -1)'), def('chaveEdicao', '""'), ...RECONCILIA, atualizaPrevia]
 
 /** histórico e comentários do nó aberto (só existem para nó já salvo no servidor) */
 const carregaLateral = (kind: string, id: string): Acao[] => [exe('versoes', { kind, id: `{${id}}` }), exe('comentarios', { kind, id: `{${id}}` })]
@@ -145,7 +150,7 @@ const ADICIONA: Acao[] = [
   def('tmpBloco', NOVO_BLOCO), def('tmpDentro', `${ACEITA} || tamanho(estado.sel) == 0`),
   def('tmpCaminho', `estado.tmpDentro ? ${CAMINHO_SLOT} : ${PAI_LISTA}`), def('tmpPos', 'estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1'),
   def('no', 'com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))'),
-  def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', 'filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), "/"))'), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
+  def('contador', 'estado.contador + 1'), def('selElemento', 'null'), def('recolhidos', `filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), "/") && !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
 ]
 const botaoCategoria = (id: string, nome: string, icone: string, cobre: string): Inst => botao(`{${q(nome + ' (')} + tamanho(filtra(blocos.blocos, bd => ${cobre})) + ")"}`, [def('buscaBloco', '""'), def('catBloco', `estado.catBloco == ${q(id)} ? "" : ${q(id)}`)], { props: { icone, atual: `{estado.catBloco == ${q(id)} && estado.buscaBloco == ""}` } })
 const paletaDeBlocos = (): Inst => pilha([
@@ -297,9 +302,9 @@ const NOVO_EL_ITEM = `(obter(${EL}.itens, ["type"]) == "string" ? "Novo item" : 
 const IDX = `ultimo(${EL}.caminho)`, PAI_EL = `fatia(${EL}.caminho, 0, tamanho(${EL}.caminho) - 1)`
 const PATH_PAI = `concat(${DOCSEL}, ["props"], ${PAI_EL})`, LISTA_PAI = `(obter(${SELNO}.props ?? objeto([]), ${PAI_EL}) ?? [])`
 const acoesDoItem = (): Inst => linha([
-  botao('Subir', edita(`com(estado.no, ${PATH_PAI}, move(${LISTA_PAI}, ${IDX}, ${IDX} - 1))`).concat([def('selElemento', `com(${EL}, ["caminho"], concat(${PAI_EL}, [${IDX} - 1]))`)]), { se: `${IDX} > 0`, props: { variante: 'fantasma' } }),
-  botao('Descer', edita(`com(estado.no, ${PATH_PAI}, move(${LISTA_PAI}, ${IDX}, ${IDX} + 1))`).concat([def('selElemento', `com(${EL}, ["caminho"], concat(${PAI_EL}, [${IDX} + 1]))`)]), { se: `${IDX} < tamanho(${LISTA_PAI}) - 1`, props: { variante: 'fantasma' } }),
-  botao('Remover item', edita(`sem(estado.no, ${BASE_EL})`).concat([def('selElemento', 'null')]), { props: { variante: 'fantasma', icone: 'apagar' } }),
+  botao('Subir', edita(`com(estado.no, ${PATH_PAI}, move(${LISTA_PAI}, ${IDX}, ${IDX} - 1))`, '""', [def('selElemento', `com(${EL}, ["caminho"], concat(${PAI_EL}, [${IDX} - 1]))`)]), { se: `${IDX} > 0`, props: { variante: 'fantasma' } }),
+  botao('Descer', edita(`com(estado.no, ${PATH_PAI}, move(${LISTA_PAI}, ${IDX}, ${IDX} + 1))`, '""', [def('selElemento', `com(${EL}, ["caminho"], concat(${PAI_EL}, [${IDX} + 1]))`)]), { se: `${IDX} < tamanho(${LISTA_PAI}) - 1`, props: { variante: 'fantasma' } }),
+  botao('Remover item', edita(`sem(estado.no, ${BASE_EL})`, '""', [def('selElemento', 'null')]), { props: { variante: 'fantasma', icone: 'apagar' } }),
 ], { props: { gap: 4, quebra: true } })
 const painelDoElemento = (): Inst => pilha([
   linha([titulo(`{${EL}.tipo == "item" ? "Item " + (${IDX} + 1) : ${EL}.rotulo}`, 5), botao('Voltar ao bloco', [def('selElemento', 'null')], { props: { variante: 'fantasma', icone: 'chevron' } })], { props: { gap: 8, quebra: true } }),
@@ -310,13 +315,13 @@ const painelDoElemento = (): Inst => pilha([
     P('entrada/caixa', { se: `${EL}.tipoCampo == "booleano"`, props: { marcado: `{${PROPS_DO_BLOCO} == true}`, rotulo: `{${EL}.rotulo}` }, eventos: { aoMudar: edita(`com(estado.no, ${BASE_EL}, evento)`) } }),
     linha([P('layout/linha', { repetir: { cada: `${EL}.opcoes ?? []`, como: 'o', chave: 'texto(o)' }, filhos: [botao('{o}', edita(`com(estado.no, ${BASE_EL}, o)`), { props: { atual: `{${PROPS_DO_BLOCO} == o}` } })] })], { se: `${EL}.tipoCampo == "escolha"`, props: { gap: 4, quebra: true } }),
     P('midia/imagem', { se: `${EL}.tipoCampo == "texto" && algum(["logo", "imagem", "src"], n => n == ultimo(${EL}.caminho)) && comeca(texto(${PROPS_DO_BLOCO} ?? ""), "/")`, props: { src: `{${PROPS_DO_BLOCO}}`, alt: 'Prévia da imagem escolhida', largura: 56, altura: 56 } }),
-    botao('Limpar este campo', edita(`sem(estado.no, ${BASE_EL})`).concat([def('selElemento', 'null')]), { props: { variante: 'fantasma', icone: 'apagar' } }),
+    botao('Limpar este campo', edita(`sem(estado.no, ${BASE_EL})`, '""', [def('selElemento', 'null')]), { props: { variante: 'fantasma', icone: 'apagar' } }),
   ], { se: `${EL}.tipo == "campo"`, gap: 6 }),
   // um objeto (o botão do hero) ou um item de lista
   pilha([camposEm(BASE_EL, PROPS_DO_BLOCO, `${EL}.itens`, '"eo:" + junta(estado.sel, ".") + ":" + junta(' + EL + '.caminho, ".")'),
     acoesDoItem()], { se: `${EL}.tipo == "item"`, gap: 8 }),
   pilha([camposEm(BASE_EL, PROPS_DO_BLOCO, `${EL}.itens`, '"eo:" + junta(estado.sel, ".") + ":" + junta(' + EL + '.caminho, ".")'),
-    botao('Remover este elemento', edita(`sem(estado.no, ${BASE_EL})`).concat([def('selElemento', 'null')]), { props: { variante: 'fantasma', icone: 'apagar' } })], { se: `${EL}.tipo == "objeto"`, gap: 8 }),
+    botao('Remover este elemento', edita(`sem(estado.no, ${BASE_EL})`, '""', [def('selElemento', 'null')]), { props: { variante: 'fantasma', icone: 'apagar' } })], { se: `${EL}.tipo == "objeto"`, gap: 8 }),
   // uma lista: um cartão por item e "Adicionar item"
   pilha([
     cartao([
@@ -348,17 +353,17 @@ const propriedades = (): Inst => pilha([
 const botoesDaSelecao = (): Inst[] => [
   botao('Remover', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
-    def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
+    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
   ], { se: 'tamanho(estado.sel) > 0', props: { icone: 'apagar', variante: 'fantasma' } }),
   botao('Subir', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('no', `com(estado.no, concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))`),
-    def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])'), atualizaPrevia,
+    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])'), atualizaPrevia,
   ], { se: 'tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0', props: { variante: 'fantasma' } }),
   botao('Descer', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('no', `com(estado.no, concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) + 1))`),
-    def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])'), atualizaPrevia,
+    def('recolhidos', `filtra(estado.recolhidos, r => !comeca(r, junta(mapeia(fatia(estado.sel, 0, tamanho(estado.sel) - 1), p => texto(p)), "/") + "/"))`), def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])'), atualizaPrevia,
   ], { se: `tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1`, props: { variante: 'fantasma' } }),
 ]
 

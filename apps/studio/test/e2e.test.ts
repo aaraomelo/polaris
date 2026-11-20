@@ -319,6 +319,10 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     // o bloco ativo aparece em destaque na prévia (contorno no id dele, mesmo sem id próprio) e as linhas da árvore trazem o alvo
     await arv.getByRole('button', { name: 'Ajuda', exact: true }).click(); await expect(arv.locator('button[data-alvo="raiz"]')).toHaveCount(1)
     await expect.poll(async () => (await p.locator('iframe[title="Pré-visualização da página"]').getAttribute('srcdoc')) ?? '').toContain('#b3{outline:2px solid #f59e0b')
+    // seleção segura: desfazer até o elemento selecionado deixar de existir não deixa painel vazio nem seleção solta
+    await arv.getByRole('button', { name: 'Ajuda', exact: true }).click(); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toBeVisible()
+    for (let i = 0; i < 12 && (await arv.getByRole('button', { name: 'Ajuda', exact: true }).count()) > 0; i++) await p.getByRole('button', { name: 'Desfazer' }).click()
+    await expect(arv.getByRole('button', { name: 'Ajuda', exact: true })).toHaveCount(0); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toHaveCount(0); await expect(p.getByRole('heading', { name: /^site\/rodape$/ })).toBeVisible()
     await ctx.close()
   })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
