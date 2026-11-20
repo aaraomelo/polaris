@@ -332,6 +332,20 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await expect(arv.getByRole('button', { name: 'Ajuda', exact: true })).toHaveCount(0); await expect(p.getByRole('button', { name: 'Voltar ao bloco' })).toHaveCount(0); await expect(p.getByRole('heading', { name: /^site\/rodape$/ })).toBeVisible()
     await ctx.close()
   })
+  it('CELULAR: as três colunas do editor viram abas (Blocos, Prévia, Propriedades); no computador aparecem juntas', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('cel'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/cel'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página cel')).toBeVisible()
+    const abas = p.getByRole('toolbar', { name: 'Abas do editor' }), arv = p.getByRole('tree', { name: 'Árvore de blocos' }), iframe = p.locator('iframe[title="Pré-visualização da página"]')
+    expect(await abas.isVisible()).toBe(false); expect(await arv.isVisible()).toBe(true); expect(await iframe.isVisible()).toBe(true) // computador: tudo junto, sem abas
+    await p.setViewportSize({ width: 390, height: 800 })
+    expect(await abas.isVisible()).toBe(true); expect(await arv.isVisible()).toBe(true); expect(await iframe.isVisible()).toBe(false) // começa em Blocos
+    await abas.getByRole('button', { name: 'Prévia' }).click(); expect(await iframe.isVisible()).toBe(true); expect(await arv.isVisible()).toBe(false)
+    await abas.getByRole('button', { name: 'Blocos' }).click(); await arv.getByRole('button', { name: /layout\/pilha #raiz$/ }).click() // escolher um bloco leva às propriedades
+    expect(await abas.getByRole('button', { name: 'Propriedades' }).getAttribute('aria-current')).toBe('true'); expect(await arv.isVisible()).toBe(false); expect(await p.getByRole('button', { name: 'Identificação' }).count() + await p.locator('summary', { hasText: 'Identificação' }).count()).toBeGreaterThan(0)
+    expect(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true) // sem rolagem horizontal
+    await p.setViewportSize({ width: 1400, height: 900 }); expect(await abas.isVisible()).toBe(false); expect(await arv.isVisible()).toBe(true)
+    await ctx.close()
+  })
   it('ACESSIBILIDADE: link de pular, <main id> e região viva da situação do rascunho', async () => {
     const { ctx, p } = await entra('ana')
     await p.keyboard.press('Tab'); expect(await p.evaluate(() => document.activeElement?.textContent)).toBe('Pular para o conteúdo')

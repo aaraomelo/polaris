@@ -39,3 +39,11 @@ section[aria-label]{background:var(--card);border:1px solid var(--bd);border-rad
 @media (pointer:coarse){#polaris button,#polaris summary,#polaris [role=toolbar] button{min-height:44px}#polaris input[type=checkbox]{width:24px;height:24px}}
 /* link "Pular para o conteúdo": fora da tela até receber o foco */
 a.pular{position:fixed;left:8px;top:-60px;z-index:100;padding:8px 14px;border-radius:6px;background:var(--cor-primaria);color:var(--cor-sobre-primaria,#fff);font-weight:600;text-decoration:none}a.pular:focus{top:8px}
+/* Abas do editor (Blocos | Prévia | Propriedades): só no celular; a barra some no computador e as três colunas aparecem juntas */
+#polaris main [role=toolbar][aria-label="Abas do editor"]{display:none!important}
+@media (max-width:1000px){
+  #polaris main [role=toolbar][aria-label="Abas do editor"]{display:flex!important;position:sticky;top:0;z-index:5;background:var(--bg,Canvas);padding:4px 0}
+  #polaris main:has([data-alvo=aba-blocos][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(1)),
+  #polaris main:has([data-alvo=aba-previa][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(2)),
+  #polaris main:has([data-alvo=aba-props][aria-current]) div[style*="grid-template-columns:repeat(3,"]>:not(:nth-child(3)){display:none!important}
+}

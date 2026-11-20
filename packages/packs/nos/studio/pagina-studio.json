@@ -637,6 +637,10 @@
      "tipo": "json",
      "inicial": []
     },
+    "abaCel": {
+     "tipo": "texto",
+     "inicial": "blocos"
+    },
     "selElemento": {
      "tipo": "json"
     },
@@ -5308,6 +5312,77 @@
                 }
                },
                {
+                "bloco": "layout/linha",
+                "se": "!estado.prevAmpla",
+                "props": {
+                 "gap": 4,
+                 "alinha": "centro",
+                 "papel": "toolbar",
+                 "rotulo": "Abas do editor"
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "nav/botao",
+                   "props": {
+                    "texto": "Blocos",
+                    "variante": "secundario",
+                    "icone": "layout-pilha",
+                    "atual": "{estado.abaCel == \"blocos\"}",
+                    "alvo": "aba-blocos"
+                   },
+                   "eventos": {
+                    "aoClicar": [
+                     {
+                      "acao": "definir",
+                      "estado": "abaCel",
+                      "valor": "\"blocos\""
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "nav/botao",
+                   "props": {
+                    "texto": "Prévia",
+                    "variante": "secundario",
+                    "icone": "midia-imagem",
+                    "atual": "{estado.abaCel == \"previa\"}",
+                    "alvo": "aba-previa"
+                   },
+                   "eventos": {
+                    "aoClicar": [
+                     {
+                      "acao": "definir",
+                      "estado": "abaCel",
+                      "valor": "\"previa\""
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "nav/botao",
+                   "props": {
+                    "texto": "Propriedades",
+                    "variante": "secundario",
+                    "icone": "editar",
+                    "atual": "{estado.abaCel == \"props\"}",
+                    "alvo": "aba-props"
+                   },
+                   "eventos": {
+                    "aoClicar": [
+                     {
+                      "acao": "definir",
+                      "estado": "abaCel",
+                      "valor": "\"props\""
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               },
+               {
                 "bloco": "layout/grade",
                 "se": "!estado.prevAmpla",
                 "props": {
@@ -5455,6 +5530,11 @@
                                "acao": "definir",
                                "estado": "selElemento",
                                "valor": "null"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "abaCel",
+                               "valor": "\"props\""
                               },
                               {
                                "acao": "executar",
@@ -5687,6 +5767,11 @@
                                "acao": "definir",
                                "estado": "selElemento",
                                "valor": "x.v"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "abaCel",
+                               "valor": "\"props\""
                               },
                               {
                                "acao": "executar",
@@ -9472,6 +9557,11 @@
                                   "valor": "null"
                                  },
                                  {
+                                  "acao": "definir",
+                                  "estado": "abaCel",
+                                  "valor": "\"props\""
+                                 },
+                                 {
                                   "acao": "executar",
                                   "dados": "previa",
                                   "args": {
@@ -9702,6 +9792,11 @@
                                   "acao": "definir",
                                   "estado": "selElemento",
                                   "valor": "x.v"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "abaCel",
+                                  "valor": "\"props\""
                                  },
                                  {
                                   "acao": "executar",
