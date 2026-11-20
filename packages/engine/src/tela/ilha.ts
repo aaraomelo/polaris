@@ -135,7 +135,14 @@ export function ativaTelas(raiz: Document = document): () => void {
   // ZONA DE SOLTAR (`data-solta`, a prop `solta` das caixas de layout): um item `arrasta` solto sobre outro item da mesma zona avisa `polaris-soltar { valor, alvo, zona }`, com a zona pela altura do ponteiro no item (alto = antes, meio = dentro, baixo = depois); o item sob o ponteiro leva `data-solta-zona` para o CSS desenhar a indicação
   const limpaZonas = (): void => { for (const el of raiz.querySelectorAll('[data-solta-zona]')) el.removeAttribute('data-solta-zona') }
   const zonaDe = (e: DragEvent, item: HTMLElement): 'antes' | 'dentro' | 'depois' => { const r = item.getBoundingClientRect(), f = r.height > 0 ? (e.clientY - r.top) / r.height : 0.5; return f < 0.3 ? 'antes' : f > 0.7 ? 'depois' : 'dentro' }
-  const itemDaZona = (e: Event): HTMLElement | null => { const it = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('[data-arrasta]'); return it && it.closest('[data-solta]') ? it : null }
+  /** o item sob o ponteiro; fora de qualquer item (entre linhas, numa linha sem `arrasta`, depois do último), o item MAIS PRÓXIMO na vertical: o soltar ambíguo vai para a posição certa em vez de ser perdido (acima do item = antes, abaixo = depois) */
+  const itemDaZona = (e: Event): HTMLElement | null => {
+    const alvo = e.target as HTMLElement | null, it = alvo?.closest?.<HTMLElement>('[data-arrasta]'); if (it && it.closest('[data-solta]')) return it
+    const zona = alvo?.closest?.<HTMLElement>('[data-solta]'); if (!zona) return null
+    const y = (e as DragEvent).clientY; let melhor: HTMLElement | null = null, dist = Infinity
+    for (const c of zona.querySelectorAll<HTMLElement>('[data-arrasta]')) { const r = c.getBoundingClientRect(); if (r.height <= 0) continue; const d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; if (d < dist) { dist = d; melhor = c } }
+    return melhor
+  }
   const sobre = (e: DragEvent): void => {
     const it = itemDaZona(e); if (!it || !e.dataTransfer || ![...e.dataTransfer.types].includes(MIME)) return
     e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const z = zonaDe(e, it)

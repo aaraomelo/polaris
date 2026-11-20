@@ -435,6 +435,27 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     const dentro = await arv.getByRole('button', { name: /#/ }).allTextContents(); expect(dentro.map((t) => t.trim()).filter((t) => /^(Pilha|Cabeçalho|Selo)/.test(t)).map((t) => t.replace(/ #.*/, ''))).toEqual(['Pilha', 'Cabeçalho do site', 'Selo']) // continua depois do cabeçalho na ordem plana, agora filho dele
     await ctx.close()
   })
+  it('ÁRVORE: soltar em lugar ambíguo se ajusta (entre linhas, sobre um item de lista, sobre si mesmo) e um soltar sem efeito não vira passo de desfazer', async () => {
+    const { ctx, p } = await entra('ana')
+    await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('ambiguo'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/amb'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página ambiguo')).toBeVisible()
+    await adiciona(p, 'Site', 'Cabeçalho do site'); await p.getByRole('button', { name: 'Editar JSON' }).first().click(); await p.getByRole('textbox', { name: /^JSON de / }).fill('[{"texto":"A","href":"/a"},{"texto":"B","href":"/b"}]'); await p.getByRole('button', { name: 'Aplicar JSON' }).click()
+    const arv = p.getByRole('tree', { name: 'Árvore de blocos' }); await arv.getByRole('button', { name: /^Pilha #raiz$/ }).click(); await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Texto', 'Título')
+    const ordem = async () => (await arv.getByRole('button').allTextContents()).map((t) => t.trim()).filter((t) => /^(Pilha|Cabeçalho|Parágrafo|Título|A$|B$)/.test(t)).map((t) => t.replace(/ #.*/, ''))
+    const bloco = (nome: RegExp) => arv.getByRole('button', { name: nome }), arrasta = async (de: Locator, x: number, y: number) => { const a = (await de.boundingBox())!; await p.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await p.mouse.down(); await p.mouse.move(a.x + a.width / 2 + 8, a.y + a.height / 2 + 8, { steps: 3 }); await p.mouse.move(x, y, { steps: 10 }); await p.waitForTimeout(150); await p.mouse.up(); await p.waitForTimeout(400) }
+    const vista = async (l: Locator) => { await l.scrollIntoViewIfNeeded(); return (await l.boundingBox())! }
+    expect(await ordem()).toEqual(['Pilha', 'Cabeçalho do site', 'A', 'B', 'Parágrafo', 'Título'])
+    // 1) entre linhas / à direita do rótulo (fora do botão): vale a linha mais próxima, pela altura do ponteiro
+    const cab = await vista(bloco(/^Cabeçalho do site #/)); await arrasta(bloco(/^Título #/), cab.x + cab.width + 80, cab.y + cab.height * 0.1)
+    expect(await ordem()).toEqual(['Pilha', 'Título', 'Cabeçalho do site', 'A', 'B', 'Parágrafo']) // ANTES do cabeçalho, mesmo sem soltar em cima do botão
+    // 2) um bloco solto sobre um item de lista do cabeçalho vai para DEPOIS do cabeçalho (o dono do item), em vez de ser recusado
+    const itemB = await vista(arv.getByRole('button', { name: 'B', exact: true })); await arrasta(bloco(/^Título #/), itemB.x + itemB.width / 2, itemB.y + itemB.height / 2)
+    expect(await ordem()).toEqual(['Pilha', 'Cabeçalho do site', 'A', 'B', 'Título', 'Parágrafo'])
+    // 3) soltar um bloco sobre si mesmo não faz nada (e não vira passo de desfazer): um Desfazer volta o passo anterior
+    const t = await vista(bloco(/^Título #/)); await arrasta(bloco(/^Título #/), t.x + t.width / 2, t.y + t.height * 0.1)
+    expect(await ordem()).toEqual(['Pilha', 'Cabeçalho do site', 'A', 'B', 'Título', 'Parágrafo'])
+    await p.getByRole('button', { name: 'Desfazer' }).click(); expect(await ordem()).toEqual(['Pilha', 'Título', 'Cabeçalho do site', 'A', 'B', 'Parágrafo']) // o único passo real foi o 2)
+    await ctx.close()
+  })
   it('COPIAR, RECORTAR e COLAR blocos (com os filhos e ids novos), pelos botões e pelo teclado', async () => {
     const { ctx, p } = await entra('ana')
     await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('cola'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/cola'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página cola')).toBeVisible()
