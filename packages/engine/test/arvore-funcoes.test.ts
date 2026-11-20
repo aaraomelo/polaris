@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FUNCOES_PADRAO, avalia, parseExpr } from '../src/index'
-import { camposDoSchema, percorre } from '../src/expr/arvore'
+import { camposDoSchema, elementosDoBloco, percorre } from '../src/expr/arvore'
 
 const ev = (src: string, esc: Record<string, unknown> = {}) => avalia(parseExpr(src), esc, FUNCOES_PADRAO)
 
@@ -63,4 +63,27 @@ describe('paraNumero', () => {
     for (const x of ['', ' ', 'abc', '0x10', 'Infinity', '-Infinity', 'NaN', '1 2', '1_000', '1,234.5', '1.234,5', '1e', 'e5', '--1', '1e999', '٣', '１２', NaN, Infinity, null, undefined, true, [], {}, '1'.repeat(65)]) expect(pn(x), String(x)).toBeUndefined()
   })
   it('é o inverso de texto()/numero em ida e volta (inteiros e decimais simples)', () => { for (const n of [0, 1, -7, 3.25, 1e21]) expect(pn(ev('texto(n)', { n }))).toBe(n) })
+})
+
+describe('elementosDoBloco', () => {
+  const link = { type: 'object', properties: { texto: { type: 'string' }, href: { type: 'string' } } }
+  const rodape = { type: 'object', properties: { colunas: { type: 'array', items: { type: 'object', properties: { titulo: { type: 'string' }, links: { type: 'array', items: link } } } }, copyright: { type: 'string', title: 'Aviso legal' }, papel: { type: 'string' } } }
+  it('cabeçalho/rodapé: campo, lista, itens com nome, lista dentro do item e os itens dela, com níveis e caminhos certos', () => {
+    const r = elementosDoBloco({ copyright: '© 2026', papel: 'group', colunas: [{ titulo: 'Loja', links: [{ texto: 'Produtos', href: '/p' }, { href: '/x' }] }, { titulo: 'Ajuda' }] }, rodape)!
+    expect(r.map((e) => [e.nivel, e.tipo, e.rotulo])).toEqual([[1, 'lista', 'Colunas'], [2, 'item', 'Loja'], [3, 'lista', 'Links'], [4, 'item', 'Produtos'], [4, 'item', 'Item 2'], [2, 'item', 'Ajuda'], [3, 'lista', 'Links'], [1, 'campo', 'Aviso legal']])
+    expect(r.map((e) => e.caminho)).toEqual([['colunas'], ['colunas', 0], ['colunas', 0, 'links'], ['colunas', 0, 'links', 0], ['colunas', 0, 'links', 1], ['colunas', 1], ['colunas', 1, 'links'], ['copyright']])
+    expect(r.find((e) => e.rotulo === 'Aviso legal')).toMatchObject({ valor: '© 2026', tipoCampo: 'texto' }); expect(r[0]).toMatchObject({ tem: true, valor: '2 item(ns)' }); expect(r[6]).toMatchObject({ tem: false, valor: '0 item(ns)' }); expect(r[1]!.tem).toBe(true); expect(r[5]!.tem).toBe(true)
+    expect(r.some((e) => e.rotulo.toLowerCase().includes('papel'))).toBe(false) // campo técnico fica de fora
+  })
+  it('objeto (botão do hero) aparece só se preenchido; listas aparecem sempre (para o primeiro item); campo sem valor não aparece; sem schema de objeto é ausente', () => {
+    const hero = { type: 'object', properties: { titulo: { type: 'string' }, cta: { type: 'object', properties: { texto: { type: 'string' } } }, botoes: { type: 'array', items: link }, nivel: { enum: [1, 2] } } }
+    expect(elementosDoBloco({ titulo: 'T' }, hero)!.map((e) => [e.tipo, e.rotulo])).toEqual([['campo', 'Título'], ['lista', 'Botoes']]); expect(elementosDoBloco({ cta: { texto: 'Ver' }, nivel: 2 }, hero)!.map((e) => [e.tipo, e.rotulo, e.tipoCampo])).toEqual([['objeto', 'Cta', undefined], ['lista', 'Botoes', undefined], ['campo', 'Nível', 'escolha']])
+    expect(elementosDoBloco(null, hero)!.map((e) => e.tipo)).toEqual(['lista']); for (const s of [5, null, 'x', []]) expect(elementosDoBloco({}, s)).toBeUndefined()
+  })
+  it('valor longo é cortado em 30 caracteres com reticências (cabe numa linha da árvore)', () => { const r = elementosDoBloco({ t: 'x'.repeat(100) }, { type: 'object', properties: { t: { type: 'string' } } })!; expect(r[0]!.valor).toBe(`${'x'.repeat(29)}…`) })
+  it('total e seguro: chaves perigosas e itens estranhos não quebram nem seguem; muita coisa é limitada', () => {
+    const s = { type: 'object', properties: { ['__proto__']: { type: 'string' }, itens: { type: 'array', items: { type: 'string' } } } }
+    expect(elementosDoBloco({ itens: ['a', 7, null, { x: 1 }, 'b'] }, s)!.map((e) => e.rotulo)).toEqual(['Itens', 'a', 'Item 2', 'Item 3', 'Item 4', 'b'])
+    const muitos = elementosDoBloco({ itens: Array.from({ length: 5000 }, (_, i) => `i${i}`) }, s)!; expect(muitos.length).toBeLessThanOrEqual(10_000); expect(muitos.length).toBeGreaterThan(10)
+  })
 })

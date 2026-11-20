@@ -42,6 +42,17 @@ function geraPreviewFormulario(no: any, extras: any[], selecionadoId: string | u
   return { ok: true, titulo: String((spec as { titulo?: unknown }).titulo ?? ''), problemas: problemas.slice(0, 50), html: `<!doctype html><html lang="pt-BR" data-modo="${modo === 'escuro' ? 'escuro' : 'claro'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}${CSS_FORMULARIO}</style></head><body><div id="polaris">${corpo}</div></body></html>` }
 }
 
+/** Dá um `id` (`pl-slots-filhos-0`…, o caminho do bloco) a cada bloco que não tem um, SÓ na prévia: o Studio usa para realçar na prévia o bloco que está selecionado ou sob o mouse na árvore. Não mexe no nó salvo nem muda ids que já existem. */
+export function anotaIds(no: any): any {
+  if (!no?.spec?.raiz || typeof no.spec.raiz !== 'object') return no
+  const anda = (n: any, caminho: Array<string | number>, prof: number): any => {
+    if (!n || typeof n !== 'object' || Array.isArray(n) || prof > 40) return n
+    const slots = n.slots && typeof n.slots === 'object' && !Array.isArray(n.slots) ? Object.fromEntries(Object.entries(n.slots as Record<string, unknown>).map(([k, v]) => [k, Array.isArray(v) ? v.map((f, i) => anda(f, [...caminho, 'slots', k, i], prof + 1)) : v])) : n.slots
+    return { ...n, ...(typeof n.id === 'string' && n.id ? {} : { id: ['pl', ...caminho].join('-') }), ...(slots !== undefined ? { slots } : {}) }
+  }
+  return { ...no, spec: { ...no.spec, raiz: anda(no.spec.raiz, [], 0) } }
+}
+
 export function geraPreview(no: any, blocosDoTenant: any[], selecionadoId: string | undefined, temaNo?: any, modo: 'claro' | 'escuro' = 'claro', dados?: unknown): ResultadoPreview {
   if (no?.kind === 'cartaz') return geraPreviewCartaz(no, dados)
   if (no?.kind === 'formulario') { try { return geraPreviewFormulario(no, blocosDoTenant, selecionadoId, temaNo, modo) } catch (e) { return { ok: false, erros: [(e as Error).message.slice(0, 300)] } } }
@@ -50,7 +61,7 @@ export function geraPreview(no: any, blocosDoTenant: any[], selecionadoId: strin
     for (const b of blocosDoTenant) { try { reg.registra(b) } catch { /* bloco inválido do tenant: o preview segue sem ele */ } }
     let tema: any = TEMA_PADRAO
     if (temaNo) { try { tema = reg.registra({ ...temaNo, id: 'studio.preview-tema' }) } catch { /* tema ainda inválido */ } }
-    const pagina = reg.registra({ ...no, id: 'studio.preview', estatuto: 'publicado', tenantId: null })
+    const pagina = reg.registra({ ...anotaIds(no), id: 'studio.preview', estatuto: 'publicado', tenantId: null })
     const c = compilaPrograma(reg, pagina)
     if (!c.ok) return { ok: false, erros: c.erros.slice(0, 20).map((e: any) => `${e.caminho ?? ''} ${e.mensagem}`.trim()) }
     const r = renderPaginaHtml({ programa: c.programa, componentes: COMPONENTES_BASE, dados: {} })

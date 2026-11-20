@@ -1579,6 +1579,20 @@ Os campos de um JSON Schema de objeto, na ordem de declaração, com objetos ani
 | `camposDoSchema(s)[0].obrigatorio` | `{"s":{"type":"object","required":["t"],"properties":{"t":{"type":"string","title":"Texto"}}}}` | `true` |
 | `camposDoSchema(5)` |  | _(ausente)_ |
 
+### `elementosDoBloco`
+
+`elementosDoBloco(props, schema) → lista de elementos`
+
+Os elementos que as props de um bloco composto desenham (cabeçalho, hero, rodapé), como uma árvore para o editor: cada campo preenchido, cada LISTA com um item por linha (e as listas dentro dos itens, como os links de uma coluna) e cada objeto (como o botão do hero). `{ caminho, nivel, rotulo, valor, tipo, tem, tipoCampo?, opcoes?, itens? }`: `caminho` é o do elemento dentro das props (pronto para `obter`, `com` e `sem`), `nivel` a profundidade (1 a 4), `tipo` é campo, lista, item ou objeto, `tem` diz se há filhos e `itens` é o schema dos itens (ou do objeto). Os campos técnicos (papel, rotulo, largura…) ficam de fora. Schema que não é objeto é ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mapeia(elementosDoBloco(p, s), e => e.rotulo)` | `{"p":{"titulo":"Loja","links":[{"texto":"Início"},{"texto":"Contato"}]},"s":{"type":"object","properties":{"titulo":{"type":"string"},"links":{"type":"array","items":{"type":"object","properties":{"texto":{"type":"string"}}}}}}}` | `["Título","Links","Início","Contato"]` |
+| `mapeia(elementosDoBloco(p, s), e => e.nivel)` | `{"p":{"colunas":[{"titulo":"A","links":[{"texto":"x"}]}]},"s":{"type":"object","properties":{"colunas":{"type":"array","items":{"type":"object","properties":{"titulo":{"type":"string"},"links":{"type":"array","items":{"type":"object","properties":{"texto":{"type":"string"}}}}}}}}}}` | `[1,2,3,4]` |
+| `elementosDoBloco(p, s)[0].caminho` | `{"p":{"cta":{"texto":"Ver"}},"s":{"type":"object","properties":{"cta":{"type":"object","properties":{"texto":{"type":"string"}}}}}}` | `["cta"]` |
+| `tamanho(elementosDoBloco(p, s))` | `{"p":{"papel":"group","subtitulo":"x"},"s":{"type":"object","properties":{"papel":{"type":"string"},"subtitulo":{"type":"string"}}}}` | `1` |
+| `elementosDoBloco(p, 5)` | `{"p":{}}` | _(ausente)_ |
+
 ### `inverso`
 
 `inverso(patches) → patches`

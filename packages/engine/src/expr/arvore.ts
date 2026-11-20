@@ -57,3 +57,42 @@ export function camposDoSchema(schema: unknown): CampoDoSchema[] | undefined {
   anda(schema, [], [], 0)
   return out
 }
+
+export type ElementoDoBloco = { caminho: Array<string | number>; nivel: number; rotulo: string; valor: string; tipo: 'campo' | 'lista' | 'item' | 'objeto'; tem: boolean; tipoCampo?: 'texto' | 'numero' | 'booleano' | 'escolha'; opcoes?: unknown[]; itens?: Record<string, unknown> }
+const OCULTOS = new Set(['papel', 'rotulo', 'largura', 'cresce', 'quebra', 'tamanhos', 'atual'])
+const texto = (v: unknown): string | undefined => (typeof v === 'string' && v.trim() ? v.trim() : undefined)
+/**
+ * Os ELEMENTOS de um bloco composto (cabeçalho, hero, rodapé…): o que as props dele desenham, como uma árvore para o editor mostrar abaixo do bloco: cada campo preenchido, cada LISTA (com um item por linha) e cada objeto (como o botão do hero).
+ * Itens com listas dentro (a coluna do rodapé com seus links) mostram a lista e os itens dela. `caminho` é o do elemento DENTRO das props (pronto para `obter`, `com`, `sem`); `nivel` é a profundidade (1, 2, 3, 4); `itens` é o schema dos itens (de uma lista, de um item, de um objeto).
+ */
+export function elementosDoBloco(props: unknown, schema: unknown): ElementoDoBloco[] | undefined {
+  if (!ehObj(schema)) return undefined
+  const out: ElementoDoBloco[] = [], P = ehObj(props) ? props : {}
+  const anda = (obj: Record<string, unknown>, esq: Record<string, unknown>, base: Array<string | number>, nivel: number, soListas: boolean): void => {
+    const ps = esq.properties; if (!ehObj(ps)) return
+    for (const k of Object.keys(ps)) {
+      if (out.length >= LIMITES_EXPR.lista) return
+      if (PROIBIDOS.has(k) || (nivel === 1 && OCULTOS.has(k))) continue
+      const f = ps[k]; if (!ehObj(f)) continue
+      const v = proprio(obj, k) ? obj[k] : undefined, cam = [...base, k], rotulo = texto(f.title) ?? rotuloDe(k)
+      if (f.type === 'array' && ehObj(f.items) && nivel <= 3) {
+        const itens = Array.isArray(v) ? v : []
+        out.push({ caminho: cam, nivel, rotulo, valor: `${itens.length} item(ns)`, tipo: 'lista', tem: itens.length > 0, itens: f.items as Record<string, unknown> })
+        itens.forEach((it, i) => {
+          if (out.length >= LIMITES_EXPR.lista) return
+          const sub = ehObj(f.items) && ehObj((f.items as Record<string, unknown>).properties) ? Object.keys((f.items as { properties: Record<string, unknown> }).properties).filter((kk) => !PROIBIDOS.has(kk) && ehObj((f.items as { properties: Record<string, Record<string, unknown>> }).properties[kk]) && (f.items as { properties: Record<string, Record<string, unknown>> }).properties[kk]!.type === 'array') : []
+          const nome = typeof it === 'string' ? texto(it) : ehObj(it) ? (texto(it.texto) ?? texto(it.titulo) ?? texto(it.nome)) : undefined
+          out.push({ caminho: [...cam, i], nivel: nivel + 1, rotulo: nome ?? `Item ${i + 1}`, valor: '', tipo: 'item', tem: sub.length > 0 && ehObj(it), itens: f.items as Record<string, unknown> })
+          if (ehObj(it) && sub.length) anda(it, { properties: Object.fromEntries(sub.map((kk) => [kk, (f.items as { properties: Record<string, unknown> }).properties[kk]])) }, [...cam, i], nivel + 2, true)
+        })
+      } else if (soListas) continue
+      else if (f.type === 'object' && ehObj(f.properties)) { if (v !== undefined) out.push({ caminho: cam, nivel, rotulo, valor: '', tipo: 'objeto', tem: false, itens: f }) }
+      else if (v !== undefined && v !== null) {
+        const tipoCampo = Array.isArray(f.enum) ? 'escolha' : f.type === 'string' ? 'texto' : f.type === 'number' || f.type === 'integer' ? 'numero' : f.type === 'boolean' ? 'booleano' : undefined
+        if (tipoCampo) out.push({ caminho: cam, nivel, rotulo, valor: String(v).length > 30 ? `${String(v).slice(0, 29)}…` : String(v), tipo: 'campo', tem: false, tipoCampo, ...(tipoCampo === 'escolha' ? { opcoes: (f.enum as unknown[]).slice(0, 50) } : {}) })
+      }
+    }
+  }
+  anda(P, schema, [], 1, false)
+  return out
+}

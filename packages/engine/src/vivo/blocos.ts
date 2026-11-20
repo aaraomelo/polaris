@@ -61,7 +61,7 @@ export const d_nav_link: Descritor = {
   }
 export const d_nav_botao: Descritor = {
     chave: () => 'button', tag: () => 'button', texto: (p) => txt(p.texto),
-    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}), ...(p.expandido != null ? { 'aria-expanded': '' + p.expandido } : {}) }),
+    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}), ...(p.expandido != null ? { 'aria-expanded': '' + p.expandido } : {}), ...(typeof p.alvo === 'string' && /^[A-Za-z][\w-]{0,119}$/.test(p.alvo) ? { 'data-alvo': p.alvo } : {}) }),
     eventos: { aoClicar: { dom: 'click' } },
   }
 /** nome acessível do campo: `rotulo` vira `aria-label` (sem ele, o único jeito era um `texto/rotulo` ligado por `para`/`id`) */
