@@ -633,6 +633,10 @@
      "tipo": "texto",
      "inicial": ""
     },
+    "recolhidos": {
+     "tipo": "json",
+     "inicial": []
+    },
     "prevAmpla": {
      "tipo": "booleano",
      "inicial": false
@@ -1314,6 +1318,11 @@
                     },
                     {
                      "acao": "definir",
+                     "estado": "recolhidos",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
                      "estado": "aviso",
                      "valor": "\"\""
                     },
@@ -1500,6 +1509,11 @@
                     {
                      "acao": "definir",
                      "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "recolhidos",
                      "valor": "[]"
                     },
                     {
@@ -1728,6 +1742,11 @@
                     },
                     {
                      "acao": "definir",
+                     "estado": "recolhidos",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
                      "estado": "aviso",
                      "valor": "\"\""
                     },
@@ -1914,6 +1933,11 @@
                     {
                      "acao": "definir",
                      "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "recolhidos",
                      "valor": "[]"
                     },
                     {
@@ -2142,6 +2166,11 @@
                     },
                     {
                      "acao": "definir",
+                     "estado": "recolhidos",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
                      "estado": "aviso",
                      "valor": "\"\""
                     },
@@ -2328,6 +2357,11 @@
                     {
                      "acao": "definir",
                      "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "recolhidos",
                      "valor": "[]"
                     },
                     {
@@ -2556,6 +2590,11 @@
                     },
                     {
                      "acao": "definir",
+                     "estado": "recolhidos",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
                      "estado": "aviso",
                      "valor": "\"\""
                     },
@@ -2742,6 +2781,11 @@
                     {
                      "acao": "definir",
                      "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "recolhidos",
                      "valor": "[]"
                     },
                     {
@@ -3727,6 +3771,11 @@
                      },
                      {
                       "acao": "definir",
+                      "estado": "recolhidos",
+                      "valor": "[]"
+                     },
+                     {
+                      "acao": "definir",
                       "estado": "aviso",
                       "valor": "\"\""
                      },
@@ -3850,6 +3899,11 @@
                      {
                       "acao": "definir",
                       "estado": "sel",
+                      "valor": "[]"
+                     },
+                     {
+                      "acao": "definir",
+                      "estado": "recolhidos",
                       "valor": "[]"
                      },
                      {
@@ -4019,6 +4073,11 @@
                     {
                      "acao": "definir",
                      "estado": "sel",
+                     "valor": "[]"
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "recolhidos",
                      "valor": "[]"
                     },
                     {
@@ -4604,163 +4663,6 @@
                 }
                },
                {
-                "bloco": "layout/linha",
-                "se": "estado.no && estado.aberto.kind == \"pagina\"",
-                "props": {
-                 "gap": 4,
-                 "alinha": "centro"
-                },
-                "slots": {
-                 "filhos": [
-                  {
-                   "bloco": "nav/botao",
-                   "se": "tamanho(estado.sel) > 0",
-                   "props": {
-                    "texto": "Remover",
-                    "variante": "secundario",
-                    "icone": "apagar"
-                   },
-                   "eventos": {
-                    "aoClicar": [
-                     {
-                      "acao": "definir",
-                      "estado": "passado",
-                      "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "futuro",
-                      "valor": "[]"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "chaveEdicao",
-                      "valor": "\"\""
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "no",
-                      "valor": "sem(estado.no, concat([\"spec\", \"raiz\"], estado.sel))"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "sel",
-                      "valor": "fatia(estado.sel, 0, tamanho(estado.sel) - 3)"
-                     },
-                     {
-                      "acao": "executar",
-                      "dados": "previa",
-                      "args": {
-                       "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                       "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                       "modo": "{estado.modoPrevia}"
-                      }
-                     }
-                    ]
-                   }
-                  },
-                  {
-                   "bloco": "nav/botao",
-                   "se": "tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0",
-                   "props": {
-                    "texto": "Subir",
-                    "variante": "secundario"
-                   },
-                   "eventos": {
-                    "aoClicar": [
-                     {
-                      "acao": "definir",
-                      "estado": "passado",
-                      "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "futuro",
-                      "valor": "[]"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "chaveEdicao",
-                      "valor": "\"\""
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "no",
-                      "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "sel",
-                      "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])"
-                     },
-                     {
-                      "acao": "executar",
-                      "dados": "previa",
-                      "args": {
-                       "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                       "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                       "modo": "{estado.modoPrevia}"
-                      }
-                     }
-                    ]
-                   }
-                  },
-                  {
-                   "bloco": "nav/botao",
-                   "se": "tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1",
-                   "props": {
-                    "texto": "Descer",
-                    "variante": "secundario"
-                   },
-                   "eventos": {
-                    "aoClicar": [
-                     {
-                      "acao": "definir",
-                      "estado": "passado",
-                      "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "futuro",
-                      "valor": "[]"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "chaveEdicao",
-                      "valor": "\"\""
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "no",
-                      "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) + 1))"
-                     },
-                     {
-                      "acao": "definir",
-                      "estado": "sel",
-                      "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])"
-                     },
-                     {
-                      "acao": "executar",
-                      "dados": "previa",
-                      "args": {
-                       "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                       "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                       "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                       "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                       "modo": "{estado.modoPrevia}"
-                      }
-                     }
-                    ]
-                   }
-                  }
-                 ]
-                }
-               },
-               {
                 "bloco": "layout/pilha",
                 "se": "estado.no && estado.aberto.kind == \"pagina\" && obter(estado.no.spec.raiz, estado.sel)",
                 "props": {
@@ -5133,6 +5035,11 @@
                                  },
                                  {
                                   "acao": "definir",
+                                  "estado": "recolhidos",
+                                  "valor": "filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), \"/\"))"
+                                 },
+                                 {
+                                  "acao": "definir",
                                   "estado": "catBloco",
                                   "valor": "\"\""
                                  },
@@ -5300,21 +5207,69 @@
                   {
                    "bloco": "layout/pilha",
                    "props": {
-                    "gap": 8
+                    "gap": 4,
+                    "papel": "group",
+                    "rotulo": "Árvore de blocos"
                    },
                    "slots": {
                     "filhos": [
                      {
-                      "bloco": "texto/titulo",
+                      "bloco": "layout/linha",
                       "props": {
-                       "texto": "Blocos",
-                       "nivel": 4
+                       "gap": 4,
+                       "alinha": "centro",
+                       "quebra": true
+                      },
+                      "slots": {
+                       "filhos": [
+                        {
+                         "bloco": "texto/titulo",
+                         "props": {
+                          "texto": "Blocos",
+                          "nivel": 4
+                         }
+                        },
+                        {
+                         "bloco": "nav/botao",
+                         "props": {
+                          "texto": "Expandir tudo",
+                          "variante": "fantasma",
+                          "icone": "chevron"
+                         },
+                         "eventos": {
+                          "aoClicar": [
+                           {
+                            "acao": "definir",
+                            "estado": "recolhidos",
+                            "valor": "[]"
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "bloco": "nav/botao",
+                         "props": {
+                          "texto": "Recolher tudo",
+                          "variante": "fantasma",
+                          "icone": "layout-pilha"
+                         },
+                         "eventos": {
+                          "aoClicar": [
+                           {
+                            "acao": "definir",
+                            "estado": "recolhidos",
+                            "valor": "mapeia(filtra(percorre(estado.no.spec.raiz, \"slots\"), x => tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0), x => junta(mapeia(x.caminho, p => texto(p)), \"/\"))"
+                           }
+                          ]
+                         }
+                        }
+                       ]
                       }
                      },
                      {
                       "bloco": "layout/pilha",
                       "repetir": {
-                       "cada": "percorre(estado.no.spec.raiz, \"slots\")",
+                       "cada": "filtra(percorre(estado.no.spec.raiz, \"slots\"), x => !(algum(estado.recolhidos, r => r == \"\" ? x.nivel > 0 : comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\"), r + \"/\"))))",
                        "como": "x",
                        "chave": "junta(mapeia(x.caminho, p => texto(p)), \"/\")"
                       },
@@ -5324,29 +5279,222 @@
                       "slots": {
                        "filhos": [
                         {
-                         "bloco": "nav/botao",
+                         "bloco": "layout/linha",
                          "props": {
-                          "texto": "{(x.nivel > 0 ? junta(mapeia(intervalo(0, x.nivel), i => \" \"), \"\") : \"\") + x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}",
-                          "variante": "secundario",
-                          "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
-                          "atual": "{igual(x.caminho, estado.sel)}"
+                          "gap": 2,
+                          "alinha": "centro",
+                          "quebra": true
                          },
-                         "eventos": {
-                          "aoClicar": [
+                         "slots": {
+                          "filhos": [
                            {
-                            "acao": "definir",
-                            "estado": "sel",
-                            "valor": "x.caminho"
+                            "bloco": "nav/botao",
+                            "se": "tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0",
+                            "props": {
+                             "texto": "{junta(mapeia(intervalo(0, x.nivel), i => \" \"), \"\") + (algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\")) ? \"▸\" : \"▾\")}",
+                             "variante": "fantasma",
+                             "expandido": "{!(algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\")))}"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "recolhidos",
+                               "valor": "algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\")) ? filtra(estado.recolhidos, r => r != junta(mapeia(x.caminho, p => texto(p)), \"/\")) : concat(estado.recolhidos, [junta(mapeia(x.caminho, p => texto(p)), \"/\")])"
+                              }
+                             ]
+                            }
                            },
                            {
-                            "acao": "executar",
-                            "dados": "previa",
-                            "args": {
-                             "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                             "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                             "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                             "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                             "modo": "{estado.modoPrevia}"
+                            "bloco": "nav/botao",
+                            "se": "!(tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0)",
+                            "props": {
+                             "texto": "{junta(mapeia(intervalo(0, x.nivel), i => \" \"), \"\") + \"·\"}",
+                             "variante": "fantasma",
+                             "desabilitado": true
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "recolhidos",
+                               "valor": "estado.recolhidos"
+                              }
+                             ]
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "props": {
+                             "texto": "{x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}",
+                             "variante": "secundario",
+                             "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
+                             "atual": "{igual(x.caminho, estado.sel)}"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "sel",
+                               "valor": "x.caminho"
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ]
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "se": "igual(x.caminho, estado.sel) && (tamanho(estado.sel) > 0)",
+                            "props": {
+                             "texto": "Remover",
+                             "variante": "fantasma",
+                             "icone": "apagar"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "passado",
+                               "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "futuro",
+                               "valor": "[]"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "chaveEdicao",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "no",
+                               "valor": "sem(estado.no, concat([\"spec\", \"raiz\"], estado.sel))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "sel",
+                               "valor": "fatia(estado.sel, 0, tamanho(estado.sel) - 3)"
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ]
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "se": "igual(x.caminho, estado.sel) && (tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0)",
+                            "props": {
+                             "texto": "Subir",
+                             "variante": "fantasma"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "passado",
+                               "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "futuro",
+                               "valor": "[]"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "chaveEdicao",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "no",
+                               "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "sel",
+                               "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])"
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ]
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "se": "igual(x.caminho, estado.sel) && (tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1)",
+                            "props": {
+                             "texto": "Descer",
+                             "variante": "fantasma"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "passado",
+                               "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "futuro",
+                               "valor": "[]"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "chaveEdicao",
+                               "valor": "\"\""
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "no",
+                               "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) + 1))"
+                              },
+                              {
+                               "acao": "definir",
+                               "estado": "sel",
+                               "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])"
+                              },
+                              {
+                               "acao": "executar",
+                               "dados": "previa",
+                               "args": {
+                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                "modo": "{estado.modoPrevia}"
+                               }
+                              }
+                             ]
                             }
                            }
                           ]
@@ -7226,21 +7374,69 @@
                      {
                       "bloco": "layout/pilha",
                       "props": {
-                       "gap": 8
+                       "gap": 4,
+                       "papel": "group",
+                       "rotulo": "Árvore de blocos"
                       },
                       "slots": {
                        "filhos": [
                         {
-                         "bloco": "texto/titulo",
+                         "bloco": "layout/linha",
                          "props": {
-                          "texto": "Blocos",
-                          "nivel": 4
+                          "gap": 4,
+                          "alinha": "centro",
+                          "quebra": true
+                         },
+                         "slots": {
+                          "filhos": [
+                           {
+                            "bloco": "texto/titulo",
+                            "props": {
+                             "texto": "Blocos",
+                             "nivel": 4
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "props": {
+                             "texto": "Expandir tudo",
+                             "variante": "fantasma",
+                             "icone": "chevron"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "recolhidos",
+                               "valor": "[]"
+                              }
+                             ]
+                            }
+                           },
+                           {
+                            "bloco": "nav/botao",
+                            "props": {
+                             "texto": "Recolher tudo",
+                             "variante": "fantasma",
+                             "icone": "layout-pilha"
+                            },
+                            "eventos": {
+                             "aoClicar": [
+                              {
+                               "acao": "definir",
+                               "estado": "recolhidos",
+                               "valor": "mapeia(filtra(percorre(estado.no.spec.raiz, \"slots\"), x => tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0), x => junta(mapeia(x.caminho, p => texto(p)), \"/\"))"
+                              }
+                             ]
+                            }
+                           }
+                          ]
                          }
                         },
                         {
                          "bloco": "layout/pilha",
                          "repetir": {
-                          "cada": "percorre(estado.no.spec.raiz, \"slots\")",
+                          "cada": "filtra(percorre(estado.no.spec.raiz, \"slots\"), x => !(algum(estado.recolhidos, r => r == \"\" ? x.nivel > 0 : comeca(junta(mapeia(x.caminho, p => texto(p)), \"/\"), r + \"/\"))))",
                           "como": "x",
                           "chave": "junta(mapeia(x.caminho, p => texto(p)), \"/\")"
                          },
@@ -7250,29 +7446,222 @@
                          "slots": {
                           "filhos": [
                            {
-                            "bloco": "nav/botao",
+                            "bloco": "layout/linha",
                             "props": {
-                             "texto": "{(x.nivel > 0 ? junta(mapeia(intervalo(0, x.nivel), i => \" \"), \"\") : \"\") + x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}",
-                             "variante": "secundario",
-                             "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
-                             "atual": "{igual(x.caminho, estado.sel)}"
+                             "gap": 2,
+                             "alinha": "centro",
+                             "quebra": true
                             },
-                            "eventos": {
-                             "aoClicar": [
+                            "slots": {
+                             "filhos": [
                               {
-                               "acao": "definir",
-                               "estado": "sel",
-                               "valor": "x.caminho"
+                               "bloco": "nav/botao",
+                               "se": "tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0",
+                               "props": {
+                                "texto": "{junta(mapeia(intervalo(0, x.nivel), i => \" \"), \"\") + (algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\")) ? \"▸\" : \"▾\")}",
+                                "variante": "fantasma",
+                                "expandido": "{!(algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\")))}"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "recolhidos",
+                                  "valor": "algum(estado.recolhidos, r => r == junta(mapeia(x.caminho, p => texto(p)), \"/\")) ? filtra(estado.recolhidos, r => r != junta(mapeia(x.caminho, p => texto(p)), \"/\")) : concat(estado.recolhidos, [junta(mapeia(x.caminho, p => texto(p)), \"/\")])"
+                                 }
+                                ]
+                               }
                               },
                               {
-                               "acao": "executar",
-                               "dados": "previa",
-                               "args": {
-                                "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
-                                "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
-                                "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
-                                "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
-                                "modo": "{estado.modoPrevia}"
+                               "bloco": "nav/botao",
+                               "se": "!(tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0)",
+                               "props": {
+                                "texto": "{junta(mapeia(intervalo(0, x.nivel), i => \" \"), \"\") + \"·\"}",
+                                "variante": "fantasma",
+                                "desabilitado": true
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "recolhidos",
+                                  "valor": "estado.recolhidos"
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "props": {
+                                "texto": "{x.no.bloco + (x.no.id ? \" #\" + x.no.id : \"\")}",
+                                "variante": "secundario",
+                                "icone": "{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}",
+                                "atual": "{igual(x.caminho, estado.sel)}"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "x.caminho"
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "se": "igual(x.caminho, estado.sel) && (tamanho(estado.sel) > 0)",
+                               "props": {
+                                "texto": "Remover",
+                                "variante": "fantasma",
+                                "icone": "apagar"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "passado",
+                                  "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "futuro",
+                                  "valor": "[]"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "chaveEdicao",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "no",
+                                  "valor": "sem(estado.no, concat([\"spec\", \"raiz\"], estado.sel))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "fatia(estado.sel, 0, tamanho(estado.sel) - 3)"
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "se": "igual(x.caminho, estado.sel) && (tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0)",
+                               "props": {
+                                "texto": "Subir",
+                                "variante": "fantasma"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "passado",
+                                  "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "futuro",
+                                  "valor": "[]"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "chaveEdicao",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "no",
+                                  "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])"
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
+                               }
+                              },
+                              {
+                               "bloco": "nav/botao",
+                               "se": "igual(x.caminho, estado.sel) && (tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1)",
+                               "props": {
+                                "texto": "Descer",
+                                "variante": "fantasma"
+                               },
+                               "eventos": {
+                                "aoClicar": [
+                                 {
+                                  "acao": "definir",
+                                  "estado": "passado",
+                                  "valor": "fatia(concat(estado.passado, [estado.no]), -60)"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "futuro",
+                                  "valor": "[]"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "chaveEdicao",
+                                  "valor": "\"\""
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "no",
+                                  "valor": "com(estado.no, concat([\"spec\", \"raiz\"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(estado.no.spec.raiz, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) + 1))"
+                                 },
+                                 {
+                                  "acao": "definir",
+                                  "estado": "sel",
+                                  "valor": "concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])"
+                                 },
+                                 {
+                                  "acao": "executar",
+                                  "dados": "previa",
+                                  "args": {
+                                   "no": "{(estado.aberto.kind == \"pagina\" || estado.aberto.kind == \"formulario\" || estado.aberto.kind == \"cartaz\") ? estado.no : estado.amostra}",
+                                   "dados": "{estado.aberto.kind == \"cartaz\" ? (estado.no.spec.exemplo ?? objeto([])) : null}",
+                                   "tema": "{estado.aberto.kind == \"tema\" ? estado.no : null}",
+                                   "selecionado": "{estado.aberto.kind == \"pagina\" ? (obter(estado.no.spec.raiz, estado.sel).id ?? \"\") : estado.aberto.kind == \"formulario\" ? estado.passoPrevia : \"\"}",
+                                   "modo": "{estado.modoPrevia}"
+                                  }
+                                 }
+                                ]
                                }
                               }
                              ]

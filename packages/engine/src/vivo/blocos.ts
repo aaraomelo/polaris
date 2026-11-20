@@ -29,12 +29,13 @@ const ALINHA: Record<string, string> = { inicio: 'flex-start', centro: 'center',
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
 const larguraCaixa = (v: unknown): string | undefined => (typeof v === 'number' && Number.isFinite(v) ? `${Math.min(2000, Math.max(40, Math.round(v)))}px` : undefined)
+const papelDe = (p: Record<string, unknown>): Record<string, string> => (['toolbar', 'group', 'list'].includes(p.papel as string) ? { role: p.papel as string } : {})
 const caixa = (direcao: 'column' | 'row'): Descritor => ({
   chave: () => 'div', tag: () => 'div', filhos: true,
   attrs: (p, id) => {
     const gap = num(p.gap)
     const alinha = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined
-    return { ...comId(id), ...(p.papel === 'toolbar' || p.papel === 'group' || p.papel === 'list' ? { role: p.papel } : {}), ...rotulo(p), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
+    return { ...comId(id), ...papelDe(p), ...rotulo(p), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
   },
 })
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))
@@ -60,7 +61,7 @@ export const d_nav_link: Descritor = {
   }
 export const d_nav_botao: Descritor = {
     chave: () => 'button', tag: () => 'button', texto: (p) => txt(p.texto),
-    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }),
+    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}), ...(p.expandido != null ? { 'aria-expanded': '' + p.expandido } : {}) }),
     eventos: { aoClicar: { dom: 'click' } },
   }
 /** nome acessível do campo: `rotulo` vira `aria-label` (sem ele, o único jeito era um `texto/rotulo` ligado por `para`/`id`) */
@@ -91,7 +92,7 @@ export const d_midia_icone: Descritor = {
 export const d_layout_painel: Descritor = { chave: () => 'div:painel', tag: () => 'div', filhos: true, attrs: (_p, id) => ({ ...comId(id), 'data-painel': '' }) }
 export const d_layout_lateral: Descritor = { chave: () => 'aside', tag: () => 'aside', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-lateral': '', ...rotulo(p.rotulo === undefined ? { rotulo: 'Navegação lateral' } : p) }) }
 export const d_layout_principal: Descritor = { chave: () => 'main', tag: () => 'main', filhos: true, attrs: (_p, id) => ({ ...comId(id), 'data-principal': '' }) }
-export const d_layout_cartao: Descritor = { chave: () => 'div:cartao', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-cartao': '', ...(p.papel === 'toolbar' || p.papel === 'group' || p.papel === 'list' ? { role: p.papel } : {}), ...rotulo(p) }) }
+export const d_layout_cartao: Descritor = { chave: () => 'div:cartao', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-cartao': '', ...papelDe(p), ...rotulo(p) }) }
 export const d_layout_secao: Descritor = { chave: () => 'details:secao', tag: () => 'details', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-secao': '', ...(p.aberta === true ? { open: '' } : {}) }) }
 export const d_layout_secao_titulo: Descritor = { chave: () => 'summary:secao', tag: () => 'summary', texto: (p) => txt(p.texto), attrs: (p, id) => ({ ...comId(id), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }) }
 export const d_nav_submenu: Descritor = { chave: () => 'details', tag: () => 'details', filhos: true, attrs: (_p, id) => ({ ...comId(id), 'data-submenu': '' }) }

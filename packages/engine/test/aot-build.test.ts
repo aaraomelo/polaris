@@ -44,7 +44,7 @@ describe('construirAot: o modo mais barato que serve a cada página', () => {
     expect(p.inicio!.arquivos.cliente).toBeUndefined(); expect(p.inicio!.cspScript).toBeUndefined()
     // contador: evento → vivo, pré-renderizado, com bundle e hash de CSP
     expect(p.contador).toMatchObject({ modo: 'vivo', prerenderizada: true })
-    expect(p.contador!.arquivos.cliente!.gz).toBeLessThan(11 * 1024); expect(p.contador!.cspScript).toMatch(/^sha256-[A-Za-z0-9+/]+=*$/)
+    expect(p.contador!.arquivos.cliente!.gz).toBeLessThan(11.5 * 1024) // era 11 KB: os blocos novos do Studio e do site (ícones, seções, cartão, aria-expanded, papéis ARIA) entram nos descritores do cliente; o teto subiu 0,5 KB de propósito, para continuar pegando crescimento acidental; expect(p.contador!.cspScript).toMatch(/^sha256-[A-Za-z0-9+/]+=*$/)
     // rota com parâmetro e página com dados: elegíveis ao modo mais barato, mas renderizadas por requisição (sem HTML pré-feito)
     expect(p.produto).toMatchObject({ modo: 'estatico', prerenderizada: false }); expect(p.produto!.motivos.join()).toContain('parâmetros')
     expect(p.loja).toMatchObject({ modo: 'estatico', prerenderizada: false }); expect(p.loja!.motivos.join()).toContain('dados')

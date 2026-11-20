@@ -64,7 +64,7 @@ const carregaLateral = (kind: string, id: string): Acao[] => [exe('versoes', { k
 /** abrir um nó: carrega, guarda o rascunho e a cópia salva (para saber se há alteração) e gera a prévia */
 const abrirX = (kindExpr: string, id: string): Acao => exe('abrir', { kind: `{${kindExpr}}`, id: `{${id}}` }, [
   def('aberto', `objeto([["kind", ${kindExpr}], ["id", ${id}], ["origem", resultado.origem], ["seq", resultado.seq]])`), def('no', 'resultado.no'), def('noSalvo', 'resultado.no'),
-  def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('de', '""'), def('para', '""'), def('pendente', 'null'), def('confirmaRestaurar', 'false'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('abaCartaz', '"elementos"'), def('selEl', '-1'), def('passoPrevia', '""'), def('jsonTexto', '""'), def('jsonErro', '""'), atualizaPrevia, ...carregaLateral(`{${kindExpr}}`, id),
+  def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('recolhidos', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('de', '""'), def('para', '""'), def('pendente', 'null'), def('confirmaRestaurar', 'false'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('abaCartaz', '"elementos"'), def('selEl', '-1'), def('passoPrevia', '""'), def('jsonTexto', '""'), def('jsonErro', '""'), atualizaPrevia, ...carregaLateral(`{${kindExpr}}`, id),
 ], aviso('erro', 'erro'))
 const abrir = (kind: string, id: string): Acao => abrirX(q(kind), id)
 const SUJO = 'estado.no && !igual(estado.no, estado.noSalvo)'
@@ -145,7 +145,7 @@ const ADICIONA: Acao[] = [
   def('tmpBloco', NOVO_BLOCO), def('tmpDentro', `${ACEITA} || tamanho(estado.sel) == 0`),
   def('tmpCaminho', `estado.tmpDentro ? ${CAMINHO_SLOT} : ${PAI_LISTA}`), def('tmpPos', 'estado.tmpDentro ? tamanho(obter(estado.no, estado.tmpCaminho) ?? []) : ultimo(estado.sel) + 1'),
   def('no', 'com(estado.no, estado.tmpCaminho, concat(fatia(obter(estado.no, estado.tmpCaminho) ?? [], 0, estado.tmpPos), [estado.tmpBloco], fatia(obter(estado.no, estado.tmpCaminho) ?? [], estado.tmpPos)))'),
-  def('contador', 'estado.contador + 1'), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
+  def('contador', 'estado.contador + 1'), def('recolhidos', 'filtra(estado.recolhidos, r => r != junta(mapeia(estado.sel, p => texto(p)), "/"))'), def('catBloco', '""'), def('buscaBloco', '""'), atualizaPrevia,
 ]
 const botaoCategoria = (id: string, nome: string, icone: string, cobre: string): Inst => botao(`{${q(nome + ' (')} + tamanho(filtra(blocos.blocos, bd => ${cobre})) + ")"}`, [def('buscaBloco', '""'), def('catBloco', `estado.catBloco == ${q(id)} ? "" : ${q(id)}`)], { props: { icone, atual: `{estado.catBloco == ${q(id)} && estado.buscaBloco == ""}` } })
 const paletaDeBlocos = (): Inst => pilha([
@@ -167,10 +167,24 @@ const paletaDeBlocos = (): Inst => pilha([
 ], { se: `estado.no && ${EH_PAGINA} && ${SELNO}`, gap: 6 })
 
 
+/** A ÁRVORE DE BLOCOS, como uma árvore de diretórios: cada bloco com filhos tem uma seta que expande e recolhe (`estado.recolhidos` guarda as chaves recolhidas), o selecionado mostra as ações (subir, descer, remover) na própria linha, e a paleta acima adiciona dentro ou depois dele */
+const CHAVE_NO = 'junta(mapeia(x.caminho, p => texto(p)), "/")'
+const TEM_FILHOS = 'tamanho(achata(valores(x.no.slots ?? objeto([])))) > 0'
+const RECOLHIDO = `algum(estado.recolhidos, r => r == ${CHAVE_NO})`
+const ESCONDIDO = `algum(estado.recolhidos, r => r == "" ? x.nivel > 0 : comeca(${CHAVE_NO}, r + "/"))`
+const RECUO = 'junta(mapeia(intervalo(0, x.nivel), i => " "), "")'
+const TODOS_COM_FILHOS = `mapeia(filtra(percorre(${RAIZ}, "slots"), x => ${TEM_FILHOS}), x => ${CHAVE_NO})`
 const arvore = (): Inst => pilha([
-  titulo('Blocos', 4),
-  pilha([botao('{(x.nivel > 0 ? junta(mapeia(intervalo(0, x.nivel), i => " "), "") : "") + x.no.bloco + (x.no.id ? " #" + x.no.id : "")}', [def('sel', 'x.caminho'), atualizaPrevia], { props: { icone: '{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}', atual: '{igual(x.caminho, estado.sel)}' } })], { repetir: { cada: `percorre(${RAIZ}, "slots")`, como: 'x', chave: 'junta(mapeia(x.caminho, p => texto(p)), "/")' }, gap: 0 }),
-])
+  linha([titulo('Blocos', 4), botao('Expandir tudo', [def('recolhidos', '[]')], { props: { variante: 'fantasma', icone: 'chevron' } }), botao('Recolher tudo', [def('recolhidos', TODOS_COM_FILHOS)], { props: { variante: 'fantasma', icone: 'layout-pilha' } })], { props: { gap: 4, quebra: true } }),
+  pilha([
+    linha([
+      botao(`{${RECUO} + (${RECOLHIDO} ? "▸" : "▾")}`, [def('recolhidos', `${RECOLHIDO} ? filtra(estado.recolhidos, r => r != ${CHAVE_NO}) : concat(estado.recolhidos, [${CHAVE_NO}])`)], { se: TEM_FILHOS, props: { variante: 'fantasma', expandido: `{!(${RECOLHIDO})}` } }),
+      botao(`{${RECUO} + "·"}`, [def('recolhidos', 'estado.recolhidos')], { se: `!(${TEM_FILHOS})`, props: { variante: 'fantasma', desabilitado: true } }),
+      botao('{x.no.bloco + (x.no.id ? " #" + x.no.id : "")}', [def('sel', 'x.caminho'), atualizaPrevia], { props: { icone: '{(acha(blocos.blocos, b => b.id == x.no.bloco) ?? objeto([])).icone}', atual: '{igual(x.caminho, estado.sel)}', variante: 'secundario' } }),
+      ...botoesDaSelecao().map((b) => ({ ...b, se: `igual(x.caminho, estado.sel)${b.se ? ` && (${b.se})` : ''}` })),
+    ], { props: { gap: 2, alinha: 'centro', quebra: true } }),
+  ], { repetir: { cada: `filtra(percorre(${RAIZ}, "slots"), x => !(${ESCONDIDO}))`, como: 'x', chave: CHAVE_NO }, gap: 0 }),
+], { props: { papel: 'group', rotulo: 'Árvore de blocos' }, gap: 4 })
 
 /** quais campos de bloco têm uma LISTA de valores disponíveis (id do <datalist> que o navegador oferece ao digitar) */
 const LISTAS_DE_PROP = `objeto([["icone", "dl-icones"], ["logo", "dl-imagens"], ["imagem", "dl-imagens"], ["src", "dl-imagens"], ["href", "dl-rotas"], ["acao", "dl-rotas"], ["destino", "dl-rotas"], ["sugestoesDestino", "dl-rotas"], ["formulario", "dl-formularios"], ["tema", "dl-temas"]])`
@@ -265,22 +279,23 @@ const propriedades = (): Inst => pilha([
   secao('Avançado (acessibilidade e layout)', 'releases', [campoDeProp(true)], { aberta: false, se: `tamanho(filtra(camposDoSchema((${DEFBLOCO}).props), c => ${EH_AVANCADO})) > 0` }),
 ], { se: `estado.no && ${EH_PAGINA} && ${SELNO}`, gap: 6 })
 
-const barraDeBloco = (): Inst => linha([
+/** as ações do bloco selecionado (remover, subir, descer): ficam na linha dele na árvore */
+const botoesDaSelecao = (): Inst[] => [
   botao('Remover', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('no', `sem(estado.no, ${DOCSEL})`), def('sel', 'fatia(estado.sel, 0, tamanho(estado.sel) - 3)'), atualizaPrevia,
-  ], { se: 'tamanho(estado.sel) > 0', props: { icone: 'apagar' } }),
+  ], { se: 'tamanho(estado.sel) > 0', props: { icone: 'apagar', variante: 'fantasma' } }),
   botao('Subir', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('no', `com(estado.no, concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) - 1))`),
     def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) - 1])'), atualizaPrevia,
-  ], { se: 'tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0' }),
+  ], { se: 'tamanho(estado.sel) > 0 && ultimo(estado.sel) > 0', props: { variante: 'fantasma' } }),
   botao('Descer', [
     def('passado', 'fatia(concat(estado.passado, [estado.no]), -60)'), def('futuro', '[]'), def('chaveEdicao', '""'),
     def('no', `com(estado.no, concat(["spec", "raiz"], fatia(estado.sel, 0, tamanho(estado.sel) - 1)), move(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1)), ultimo(estado.sel), ultimo(estado.sel) + 1))`),
     def('sel', 'concat(fatia(estado.sel, 0, tamanho(estado.sel) - 1), [ultimo(estado.sel) + 1])'), atualizaPrevia,
-  ], { se: `tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1` }),
-], { se: `estado.no && ${EH_PAGINA}`, props: { gap: 4 } })
+  ], { se: `tamanho(estado.sel) > 0 && ultimo(estado.sel) < tamanho(obter(${RAIZ}, fatia(estado.sel, 0, tamanho(estado.sel) - 1))) - 1`, props: { variante: 'fantasma' } }),
+]
 
 /** a prévia da página: com "Prévia ampla" ela sai da coluna e ocupa a largura toda (o cabeçalho mostra o menu completo, o hero aparece inteiro) */
 const previaDaPagina = (se: string): Inst => pilha([
@@ -305,7 +320,6 @@ const editorDePaginas = (): Inst => pilha([
   titulo('Página {estado.aberto.id}', 3),
   publicacaoDaPagina(),
   texto('Salve a página (Salvar, no topo) para poder mostrá-la no site.', { se: 'site && site.configuravel && estado.aberto.origem == "novo"' }),
-  barraDeBloco(),
   paletaDeBlocos(),
   listasDeOpcoes(),
   // normal: árvore | prévia | propriedades. Ampla: a prévia ganha metade da largura (o site aparece como no computador) e a árvore e as propriedades empilham ao lado
@@ -715,7 +729,7 @@ const historicoVista = (): Inst => pilha([
 const ACOES_CRIAR: Acao[] = [
     def('aberto', 'objeto([["kind", estado.criando], ["id", estado.novoId], ["origem", "novo"], ["seq", null]])'),
     def('no', 'estado.criando == "cartaz" ? objeto([["kind", "cartaz"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tamanho", "A5"], ["orientacao", "paisagem"], ["titulo", estado.novoId], ["fundo", objeto([["cor", [255, 255, 255]]])], ["fonte", objeto([["familia", "Montserrat"], ["peso", "negrito"]])], ["exemplo", objeto([])], ["elementos", [objeto([["tipo", "texto"], ["id", "titulo"], ["texto", "Novo cartaz"], ["caixa", objeto([["topo", 0.1], ["esquerda", 0.1], ["largura", 0.8], ["altura", 0.3]])], ["alinhaV", "meio"]])]]])]]) : estado.criando == "formulario" ? objeto([["kind", "formulario"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["titulo", estado.novoId], ["campos", [objeto([["nome", "nome"], ["tipo", "texto"], ["rotulo", "Nome"], ["obrigatorio", true]])]]])]]) : estado.criando == "pagina" ? objeto([["kind", "pagina"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["rota", estado.novaRota], ["raiz", objeto([["bloco", "layout/pilha"], ["id", "raiz"]])]])]]) : objeto([["kind", "tema"], ["id", estado.novoId], ["versao", "1.0.0"], ["estatuto", "rascunho"], ["spec", objeto([["tokens", objeto([["cor", objeto([["fundo", "#ffffff"], ["texto", "#111111"], ["primaria", "#1d4ed8"]])]])]])]])'),
-    def('noSalvo', 'null'), def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('abaCartaz', '"elementos"'), def('selEl', '-1'), def('passoPrevia', '""'), def('criando', '""'), atualizaPrevia, def('confirmaCriar', 'false')]
+    def('noSalvo', 'null'), def('passado', '[]'), def('futuro', '[]'), def('chaveEdicao', '""'), def('sel', '[]'), def('recolhidos', '[]'), def('aviso', '""'), def('aba', '"editor"'), def('selCampo', '[]'), def('abaForm', '"campos"'), def('abaCartaz', '"elementos"'), def('selEl', '-1'), def('passoPrevia', '""'), def('criando', '""'), atualizaPrevia, def('confirmaCriar', 'false')]
 /** já existe um nó do tipo escolhido com o identificador digitado (do tenant ou do padrão)? */
 const JA_EXISTE = 'algum(concat(mapeia(filtra(nos.nos, n => n.kind == estado.criando), n => n.id), obter(nos.base, [estado.criando]) ?? []), x => x == estado.novoId)'
 const formCriar = (): Inst => pilha([linha([
@@ -735,7 +749,7 @@ export const PAGINA = no('pagina', 'studio.app', {
   dados: { ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema', pagsite: 'studio.pagsite' },
   estado: {
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
-    prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
+    recolhidos: { tipo: 'json', inicial: [] }, prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
     sel: { tipo: 'json', inicial: [] }, contador: { tipo: 'inteiro', inicial: 1 }, aviso: { tipo: 'texto', inicial: '' }, tipoAviso: { tipo: 'texto', inicial: 'neutro' }, amostra: { tipo: 'json', inicial: AMOSTRA },
   },

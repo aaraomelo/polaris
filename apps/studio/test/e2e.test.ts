@@ -75,7 +75,7 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await ctx.close()
   })
   it('páginas: lista, abre, mostra a árvore com ids e a prévia compilada pelo servidor', async () => {
-    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'home (personalizado)' }).click()
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'home (personalizado)' }).click(); 
     await expect(p.getByText('Página home')).toBeVisible(); await expect(linhaDe(p, 'raiz')).toBeVisible(); await expect(linhaDe(p, 'titulo')).toBeVisible(); await expect(previa(p).locator('h1')).toHaveText('Bem-vindo')
     await ctx.close()
   })
@@ -268,6 +268,30 @@ describe.skipIf(!CHROME)('Studio: uma página da plataforma', () => {
     await linhaDe(p, 'raiz').click(); await p.getByRole('button', { name: /^Site\s\(/ }).click(); await p.getByRole('button', { name: 'Barra de busca', exact: true }).click(); await p.getByRole('button', { name: /site\/busca #b2$/ }).click()
     await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto do item 1', exact: true }).fill('Café'); await p.getByRole('button', { name: 'Adicionar item' }).first().click(); await p.getByRole('textbox', { name: 'Texto do item 2', exact: true }).fill('Pão')
     await expect.poll(() => frame().locator('datalist option').evaluateAll((l) => l.map((o) => (o as HTMLOptionElement).value))).toEqual(['Café', 'Pão']); await ctx.close()
+  })
+  it('ÁRVORE DE BLOCOS como árvore de diretórios: recuo, setas que expandem e recolhem, expandir/recolher tudo, ações na linha do selecionado, teclado', async () => {
+    const { ctx, p } = await entra('ana'); await p.getByRole('button', { name: 'Nova página' }).click(); await p.getByRole('textbox', { name: 'Identificador do novo nó' }).fill('arvore'); await p.getByRole('textbox', { name: 'Rota da nova página' }).fill('/arvore'); await p.getByRole('button', { name: 'Criar', exact: true }).click(); await expect(p.getByText('Página arvore')).toBeVisible()
+    const nos = async () => (await p.getByRole('button', { name: /#/ }).allTextContents()).map((t) => t.trim()), arv = p.getByRole('group', { name: 'Árvore de blocos' })
+    await linhaDe(p, 'raiz').click(); await adiciona(p, 'Layout', 'Pilha'); await linhaDe(p, 'b1').click(); await adiciona(p, 'Texto', 'Parágrafo'); await adiciona(p, 'Texto', 'Título') // raiz > pilha(b1) > paragrafo(b2), titulo(b3)
+    await linhaDe(p, 'raiz').click(); await adiciona(p, 'Feedback', 'Selo') // raiz > ..., selo(b4)
+    expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'texto/paragrafo #b2', 'texto/titulo #b3', 'feedback/selo #b4'])
+    const recuo = async (id: string) => (await linhaDe(p, id).evaluate((e) => (e.parentElement!.firstElementChild as HTMLElement).getBoundingClientRect().width)); expect(await recuo('b2')).toBeGreaterThan(await recuo('b1')); expect(await recuo('b1')).toBeGreaterThan(await recuo('raiz')) // cada nível anda para a direita
+    const seta = (id: string) => linhaDe(p, id).locator('xpath=preceding-sibling::button[1]')
+    await expect(seta('raiz')).toHaveAttribute('aria-expanded', 'true'); await expect(seta('b1')).toHaveAttribute('aria-expanded', 'true'); expect(await seta('b2').isDisabled()).toBe(true); expect(await seta('b2').getAttribute('aria-expanded')).toBeNull() // folha: marcador, sem seta
+    await seta('b1').click(); expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'feedback/selo #b4']); await expect(seta('b1')).toHaveAttribute('aria-expanded', 'false') // recolher esconde os filhos
+    await seta('b1').click(); expect((await nos()).length).toBe(5) // e expandir traz de volta
+    await seta('raiz').click(); expect(await nos()).toEqual(['layout/pilha #raiz']); await seta('raiz').click(); expect((await nos()).length).toBe(5)
+    await p.getByRole('button', { name: 'Recolher tudo' }).click(); expect(await nos()).toEqual(['layout/pilha #raiz']); await p.getByRole('button', { name: 'Expandir tudo' }).click(); expect((await nos()).length).toBe(5)
+    // ações só na linha do selecionado, e o selecionado é o marcado
+    await linhaDe(p, 'b3').click(); await expect(linhaDe(p, 'b3')).toHaveAttribute('aria-current', 'true'); expect(await arv.getByRole('button', { name: 'Remover' }).count()).toBe(1); expect(await linhaDe(p, 'b3').locator('xpath=following-sibling::button').allTextContents()).toEqual(expect.arrayContaining(['Subir', 'Remover']))
+    await arv.getByRole('button', { name: 'Subir' }).click(); expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'texto/titulo #b3', 'texto/paragrafo #b2', 'feedback/selo #b4']) // subir troca com o irmão
+    await arv.getByRole('button', { name: 'Remover' }).click(); expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'texto/paragrafo #b2', 'feedback/selo #b4']) // remover tira o bloco e a seleção vai para o pai
+    // adicionar dentro de um recolhido o expande
+    await seta('b1').click(); expect((await nos()).includes('texto/paragrafo #b2')).toBe(false); await linhaDe(p, 'b1').click(); await adiciona(p, 'Texto', 'Texto pequeno'); expect((await nos()).some((t) => t.startsWith('texto/pequeno'))).toBe(true); await expect(seta('b1')).toHaveAttribute('aria-expanded', 'true')
+    // teclado: ↓ anda, ← recolhe, → expande
+    await linhaDe(p, 'raiz').focus(); await p.keyboard.press('ArrowDown'); expect(await p.evaluate(() => document.activeElement?.textContent)).toContain('layout/pilha #b1'); await p.keyboard.press('ArrowLeft'); expect(await nos()).toEqual(['layout/pilha #raiz', 'layout/pilha #b1', 'feedback/selo #b4'])
+    await p.keyboard.press('ArrowRight'); expect((await nos()).length).toBe(5); await p.keyboard.press('ArrowRight'); expect(await p.evaluate(() => document.activeElement?.textContent)).toContain('texto/paragrafo #b2'); await p.keyboard.press('End'); expect(await p.evaluate(() => document.activeElement?.textContent)).toContain('feedback/selo #b4'); await p.keyboard.press('Home'); expect(await p.evaluate(() => document.activeElement?.textContent)).toContain('#raiz')
+    await ctx.close()
   })
   it('redesenho: painel com cabeçalho, menu lateral (o nó aberto fica marcado) e conteúdo; no celular a lateral recolhe atrás do botão', async () => {
     const { ctx, p } = await entra('ana'); await p.setViewportSize({ width: 1280, height: 800 });

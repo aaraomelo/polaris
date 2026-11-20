@@ -45,4 +45,15 @@ document.addEventListener('keydown', (e) => {
     else if (e.key === 'Escape') { const aberta = categoriaAberta(); if (aberta) { e.preventDefault(); aberta.click(); aberta.focus() } else { const b = document.querySelector<HTMLInputElement>(`${BARRA} input`); if (b) { e.preventDefault(); b.value = ''; b.dispatchEvent(new Event('input', { bubbles: true })); b.focus() } } }
   }
 })
+// Teclado da ÁRVORE DE BLOCOS: ↑/↓ andam entre os blocos (os botões de seleção são os "secundario" do grupo), → expande (ou desce ao próximo) e ← recolhe; Home/End vão ao primeiro e ao último. Enter e Espaço selecionam (botão nativo).
+const ARVORE = '[role=group][aria-label="Árvore de blocos"]'
+document.addEventListener('keydown', (e) => {
+  const alvo = e.target as HTMLElement | null; if (!alvo || e.altKey || e.ctrlKey || e.metaKey || alvo.tagName !== 'BUTTON' || alvo.getAttribute('data-variante') !== 'secundario') return
+  const arv = alvo.closest(ARVORE); if (!arv) return
+  const itens = [...arv.querySelectorAll<HTMLButtonElement>('button[data-variante=secundario]')], i = itens.indexOf(alvo as HTMLButtonElement), seta = alvo.previousElementSibling as HTMLElement | null
+  const vai = (k: number) => { e.preventDefault(); itens[Math.max(0, Math.min(itens.length - 1, k))]!.focus() }
+  if (e.key === 'ArrowDown') vai(i + 1); else if (e.key === 'ArrowUp') vai(i - 1); else if (e.key === 'Home') vai(0); else if (e.key === 'End') vai(itens.length - 1)
+  else if (e.key === 'ArrowRight') { if (seta?.getAttribute('aria-expanded') === 'false') { e.preventDefault(); seta.click() } else vai(i + 1) }
+  else if (e.key === 'ArrowLeft') { if (seta?.getAttribute('aria-expanded') === 'true') { e.preventDefault(); seta.click() } }
+})
 void inicia()

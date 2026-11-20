@@ -2008,6 +2008,7 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 |---|---|---|---|---|
 | `atual` | booleano | não |  | o item escolhido (aria-current), ex.: no menu lateral |
 | `desabilitado` | booleano | não |  |  |
+| `expandido` | booleano | não |  | botão que abre/fecha algo: leva aria-expanded (verdadeiro/falso) |
 | `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
 | `texto` | texto | sim |  |  |
 | `variante` | "primario" \| "secundario" \| "fantasma" | não |  | primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto |

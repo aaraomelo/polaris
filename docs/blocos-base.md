@@ -126,3 +126,4 @@ A URL da imagem passa por `urlSegura` e vai para o CSS escapada (`cssUrl`: aspas
 **Cartão (`layout/cartao`)**: caixa com borda, fundo de superfície e espaçamento interno, que empilha os filhos; em `layout/grade` vários cartões ficam alinhados. `papel` e `rotulo` (como em `layout/linha`) dão nome e papel ARIA quando o cartão é um grupo.
 
 **`lista` em `entrada/texto`** liga o campo a um `form/sugestoes` da página (lista de valores do navegador), como `entrada/busca`. **`largura` e `cresce` em `layout/linha` e `layout/pilha`**: `largura` (40 a 2000 px) fixa a largura de uma caixa dentro de uma linha; `cresce` a faz ocupar o espaço que sobra sem estourar (`flex: 1 1 0%` e `min-width: 0`).
+**`expandido` em `nav/botao`**: verdadeiro ou falso viram `aria-expanded` (botão que abre e fecha algo, como a seta de uma árvore); sem o prop, o atributo não existe.
