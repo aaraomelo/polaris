@@ -71,6 +71,20 @@ CREATE TABLE IF NOT EXISTS plataforma.comentario (
 CREATE INDEX IF NOT EXISTS comentario_no ON plataforma.comentario (tenant_id, kind, no_id, criado_em);
 DROP TRIGGER IF EXISTS no_versao_imutavel ON plataforma.no_versao;
 CREATE TRIGGER no_versao_imutavel BEFORE UPDATE OR DELETE ON plataforma.no_versao FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
+-- os MODELOS (templates) de site: um pacote de nós (tema, páginas, dados, traduções, tenant) com nome e versão, guardado por tenant. Cada gravação é uma versão IMUTÁVEL (seq); remover grava uma lápide (conteudo nulo).
+CREATE TABLE IF NOT EXISTS plataforma.template_versao (
+  tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),
+  slug text NOT NULL CHECK (slug ~ '^[a-z][a-z0-9-]{0,62}$'),
+  seq integer NOT NULL,
+  conteudo jsonb,
+  hash text NOT NULL,
+  autor text NOT NULL,
+  nota text,
+  criado_em timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, slug, seq)
+);
+DROP TRIGGER IF EXISTS template_versao_imutavel ON plataforma.template_versao;
+CREATE TRIGGER template_versao_imutavel BEFORE UPDATE OR DELETE ON plataforma.template_versao FOR EACH ROW EXECUTE FUNCTION plataforma.imutavel();
 -- release = SNAPSHOT imutável: o conjunto exato de versões de nós que vai a produção. release_ponteiro aponta a de produção; release_evento é o diário (promoções e rollbacks).
 CREATE TABLE IF NOT EXISTS plataforma.release (
   tenant_id uuid NOT NULL REFERENCES plataforma.tenant (id),

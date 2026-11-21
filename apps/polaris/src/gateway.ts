@@ -1,5 +1,5 @@
 import { clienteHttp, criaGateway } from '@polaris/gateway'
-import { criaArmazemDeNos, criaAtivos, criaPreview, criaReleases, criaResolvedorTenant, nosDoPack, rotasStudio, sessaoDeToken } from '@polaris/packs'
+import { criaArmazemDeNos, criaAtivos, criaPreview, criaReleases, criaResolvedorTenant, criaTemplates, nosDoPack, rotasStudio, sessaoDeToken } from '@polaris/packs'
 import { previsualiza, rotasEstaticasStudio } from '@polaris/studio-app'
 import { criaPool } from '@polaris/pg'
 import type { Registry } from '@polaris/schema'
@@ -42,6 +42,13 @@ function montaGatewayInterno(c: ConfigGateway, reg: Registry) {
   if (c.studioDir) for (const n of nosDoPack('studio')) { try { reg.registra(n) } catch { /* já registrado (nós carregados do diretório) */ } }
   const studio = c.studioDir && qp ? (() => {
     const armazem = criaArmazemDeNos({ q: qp, base: reg }), dir = c.studioDir
+    const publicarRelease = releases ? async (a: { tenantId: string; autor: string; nota?: string }) => {
+      const c = await releases.cria(a.tenantId, a.autor, a.nota); if (!c.ok) return c
+      const p = await releases.promove(a.tenantId, c.release.numero, a.autor, a.nota); if (!p.ok) return p
+      tenants?.invalida() // o diretório guarda a release de produção em cache
+      return { ok: true as const, release: c.release.numero }
+    } : undefined
+    const templates = criaTemplates({ q: qp, base: reg, armazem, ...(ativos ? { ativos } : {}), ...(paginas ? { tenantNo: (t: string) => paginas.tenantNo({ tenantId: t }) } : {}), ...(publicarRelease ? { publicar: publicarRelease } : {}) })
     return (app: import('fastify').FastifyInstance, api: { sessao(req: import('fastify').FastifyRequest): Promise<{ tenantId: string; usuario?: string; papeis?: string[] } | null> }) => {
       void app.register(async (inst) => {
         rotasEstaticasStudio(inst, dir)
@@ -53,7 +60,7 @@ function montaGatewayInterno(c: ConfigGateway, reg: Registry) {
           const p = await releases.promove(a.tenantId, c.release.numero, a.autor, a.nota); if (!p.ok) return p
           tenants?.invalida() // o diretório guarda a release de produção em cache: sem isto o site só mudaria quando o cache vencesse
           return { ok: true as const, release: c.release.numero }
-        } } : {}), armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
+        } } : {}), templates, armazem, baseDe: async () => reg, q: qp, autentica: async (req) => { const s = await api.sessao(req); return s?.usuario ? sessaoDeToken(reg, { tenantId: s.tenantId, usuario: s.usuario, papeis: s.papeis ?? [] }) : null } })
       })
     }
   })() : null

@@ -130,43 +130,6 @@
             ],
             "permissao": "publica"
           }
-        },
-        "template": {
-          "campos": {
-            "slug": {
-              "tipo": "texto",
-              "obrigatorio": true,
-              "descricao": "identificador do modelo (ex.: maison)"
-            },
-            "nome": {
-              "tipo": "texto",
-              "obrigatorio": true
-            },
-            "descricao": {
-              "tipo": "texto"
-            },
-            "segmento": {
-              "tipo": "texto"
-            },
-            "versao": {
-              "tipo": "texto",
-              "descricao": "versão do modelo (semver)"
-            },
-            "idiomas": {
-              "tipo": "json",
-              "descricao": "idiomas do modelo, o primeiro é o padrão"
-            },
-            "nos": {
-              "tipo": "json",
-              "descricao": "os nós do modelo (tema, páginas, dados, traducao, tenant…), como nos arquivos .json; fotos como @img/<nome>"
-            },
-            "miniatura": {
-              "tipo": "texto"
-            }
-          },
-          "crud": {
-            "caminho": "/templates"
-          }
         }
       },
       "operacoes": {}
@@ -189,8 +152,7 @@
             "remover"
           ],
           "sujeitos": [
-            "loja.produto",
-            "loja.template"
+            "loja.produto"
           ]
         }
       ]

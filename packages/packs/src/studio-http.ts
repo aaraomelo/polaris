@@ -4,6 +4,7 @@ import type { Registry } from '@polaris/schema'
 import { desenhaFluxo, diagramaDeBlocos, diffNo, fluxoDaAplicacao, paginaDoDiagrama, GRUPOS, validaTexto, validaToken, type Grupo } from '@polaris/studio'
 import type { criaArmazemDeNos, KindDoTenant } from './overrides'
 import { KINDS_DO_TENANT } from './overrides'
+import type { criaTemplates } from './templates'
 
 // API de AUTORIA do Studio. O tenant e o autor vêm SEMPRE da sessão (`autentica`), nunca do corpo: não há como gravar, ler ou comentar em nome de outro tenant ou outra pessoa.
 // Tudo é gravado como versão imutável (E7); aqui só há leitura, gravação com controle de concorrência (409 se alguém salvou antes), histórico, diff e comentários.
@@ -56,6 +57,8 @@ export type OpcoesStudio = {
   /** põe os rascunhos do tenant em PRODUÇÃO: cria uma release com as cabeças de hoje e a promove. Sem ele, `/studio/publicar` é 501. */
   publicar?: (a: { tenantId: string; autor: string; nota?: string }) => Promise<{ ok: true; release: number } | { ok: false; erros: string[] }>
   previsualiza?: (a: { no: unknown; tema?: unknown; selecionado?: string; modo?: 'claro' | 'escuro'; dados?: unknown; blocosDoTenant: unknown[] }) => { ok: true; html: string; titulo: string; avisos?: unknown[]; problemas?: string[] } | { ok: false; erros: string[] }
+  /** os modelos (templates) de site do tenant (`criaTemplates`); sem isto, `/studio/templates*` é 501 */
+  templates?: ReturnType<typeof criaTemplates>
   /** imagens do tenant (`criaAtivos`); sem isto, `/studio/ativos*` é 501 */
   ativos?: import('./ativos').Ativos
   limite?: { tenta(chave: string, custo?: number): { ok: true } | { ok: false; esperaSeg: number } }
@@ -254,6 +257,50 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const { tenantId: _t, segmento: _g, ...resto } = site.no
     const r = await o.armazem.salva(s.tenantId, s.usuario, { ...resto, versao: proxima(String(site.no.versao ?? '1.0.0')), spec: { ...(site.no.spec as object), paginas: novas } }, `${mostrar ? 'mostra' : 'tira'} a página ${pagina} ${mostrar ? 'no' : 'do'} site`, { configDoSite: true })
     return r.ok ? { ok: true, paginas: novas, versao: r.versao.seq } : erro(reply, 422, 'no_invalido', 'a configuração do site não passou na validação', { erros: r.erros })
+  })
+
+  // modelos (templates) de site: guardar (versão imutável), listar (leve), ler, histórico, remover e APLICAR ao tenant
+  const SLUG_M = /^[a-z][a-z0-9-]{0,62}$/
+  app.get('/studio/templates', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    return o.templates.lista(s.tenantId)
+  })
+  app.get<{ Params: { slug: string }; Querystring: { seq?: string } }>('/studio/templates/:slug', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    if (!SLUG_M.test(req.params.slug) || (req.query.seq !== undefined && !/^\d{1,9}$/.test(req.query.seq))) return erro(reply, 400, 'requisicao_invalida', 'slug ou seq inválido')
+    const m = await o.templates.le(s.tenantId, req.params.slug, req.query.seq === undefined ? undefined : Number(req.query.seq))
+    return m ?? erro(reply, 404, 'nao_encontrado', 'modelo inexistente')
+  })
+  app.get<{ Params: { slug: string }; Querystring: { limite?: string } }>('/studio/templates/:slug/historico', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    if (!SLUG_M.test(req.params.slug)) return erro(reply, 400, 'requisicao_invalida', 'slug inválido')
+    return o.templates.historico(s.tenantId, req.params.slug, req.query.limite && /^\d{1,3}$/.test(req.query.limite) ? Number(req.query.limite) : 50)
+  })
+  app.put<{ Params: { slug: string } }>('/studio/templates/:slug', { bodyLimit: 4 * 1024 * 1024 + 4096 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    const b = req.body as Record<string, unknown> | null; const { nota, ...dado } = (b && typeof b === 'object' && !Array.isArray(b) ? b : {}) as Record<string, unknown>
+    const r = await o.templates.salva(s.tenantId, s.usuario, req.params.slug, dado, typeof nota === 'string' ? nota : undefined)
+    return r.ok ? reply.status(r.novo ? 201 : 200).send({ ok: true, seq: r.seq, novo: r.novo }) : erro(reply, 422, 'modelo_invalido', 'o modelo não passou na validação', { erros: r.erros })
+  })
+  app.delete<{ Params: { slug: string } }>('/studio/templates/:slug', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    if (!SLUG_M.test(req.params.slug)) return erro(reply, 400, 'requisicao_invalida', 'slug inválido')
+    return (await o.templates.remove(s.tenantId, s.usuario, req.params.slug)) ? reply.status(204).send() : erro(reply, 404, 'nao_encontrado', 'modelo inexistente')
+  })
+  app.post<{ Params: { slug: string } }>('/studio/templates/:slug/aplicar', { bodyLimit: 4 * 1024 }, async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.editar', 10); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    const b = req.body ?? {}; if (!so(b, ['seq', 'publicar', 'nota'])) return erro(reply, 400, 'requisicao_invalida', 'corpo: { seq?, publicar?, nota? }')
+    const { seq, publicar, nota } = b as { seq?: unknown; publicar?: unknown; nota?: unknown }
+    if ((seq !== undefined && (!Number.isInteger(seq) || (seq as number) < 1)) || (publicar !== undefined && typeof publicar !== 'boolean') || (nota !== undefined && (typeof nota !== 'string' || nota.length > 200))) return erro(reply, 400, 'requisicao_invalida', 'seq: inteiro; publicar: verdadeiro ou falso; nota: até 200 caracteres')
+    if (!SLUG_M.test(req.params.slug)) return erro(reply, 400, 'requisicao_invalida', 'slug inválido')
+    const r = await o.templates.aplica(s.tenantId, s.usuario, req.params.slug, { ...(seq !== undefined ? { seq: seq as number } : {}), ...(publicar !== undefined ? { publicar: publicar as boolean } : {}), ...(nota !== undefined ? { nota: nota as string } : {}) })
+    return r.ok ? r : erro(reply, r.erros[0] === 'modelo inexistente' ? 404 : 422, r.erros[0] === 'modelo inexistente' ? 'nao_encontrado' : 'modelo_invalido', r.erros[0] === 'modelo inexistente' ? 'modelo inexistente' : 'não foi possível aplicar o modelo', { erros: r.erros })
   })
 
   // releases: o que está em produção, as anteriores, a diferença entre elas e o rollback (voltar é trocar o ponteiro: nada se apaga)

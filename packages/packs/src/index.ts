@@ -9,6 +9,7 @@ export { criaSemeador, provisiona, type Diretorio, type Portas as PortasCadastro
 export { rotasCadastro, type Limite, type OpcoesCadastro } from './cadastro-http'
 export { criaPreview, criaReleases, type Producao, type Release } from './releases'
 export { KINDS_DO_TENANT, criaArmazemDeNos, type KindDoTenant, type Limites as LimitesOverrides, type ResultadoSalvar, type VersaoNo } from './overrides'
+export { criaTemplates, type Modelo, type ResumoModelo, type ResultadoAplica, type ResultadoModelo } from './templates'
 export { rotasStudio, sessaoDeToken, type OpcoesStudio, type Sessao } from './studio-http'
 export { criaGestorDominios, criaResolvedorTenant, mudaStatusTenant, normalizaHost, validaDominio, type Dns, type InfoTenant, type OpcoesResolvedor, type Reivindicacao } from './dominios'
 export { DDL_DIRETORIO, diretorioSql } from './diretorio'

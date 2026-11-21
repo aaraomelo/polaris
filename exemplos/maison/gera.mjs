@@ -388,8 +388,10 @@ const formulario = { kind: 'formulario', id: 'maison.checkout', versao: '1.0.0',
     { nome: 'cidade', tipo: 'texto', rotulo: doDicionario('checkout.form.cidade'), obrigatorio: true },
   ],
   acoes: [{ id: 'enviar', rotulo: doDicionario('checkout.form.enviar'), tipo: 'enviar', estilo: 'primario' }],
+  // o pedido de demonstração vira um contato da loja (entidade pública `contato`): o endereço de entrega segue na mensagem; o pedido em si fica na página (estado `pedidos`)
+  envio: { servico: 'loja', operacao: 'criarContato', args: { nome: 'valores.nome', email: 'valores.email', telefone: 'valores.telefone', mensagem: 'junta(["Entrega:", valores.endereco, valores.cidade, valores.cep], " ")' } },
 } }
-const PEDIDO = `objeto([["numero", 1001 + tamanho(estado.pedidos)], ["cliente", evento.valores], ["itens", mapeia(${LINHAS}, l => objeto([["nome", l.p.nome], ["qtd", l.qtd], ["total", qmul(l.p.preco, l.qtd)]]))], ["total", ${SUBTOTAL}]])`
+const PEDIDO = `objeto([["numero", 1001 + tamanho(estado.pedidos)], ["cliente", objeto([["nome", evento.resultado.nome], ["email", evento.resultado.email]])], ["itens", mapeia(${LINHAS}, l => objeto([["nome", l.p.nome], ["qtd", l.qtd], ["total", qmul(l.p.preco, l.qtd)]]))], ["total", ${SUBTOTAL}]])`
 const resumoLinha = b('layout/linha', { gap: 12, alinha: 'centro', quebra: true }, [
   b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 56 }),
   b('layout/pilha', { gap: 2, cresce: true, alinha: 'inicio' }, [b('texto/rotulo', { texto: '{l.p.nome}' }), b('texto/pequeno', { texto: '{l.qtd + " × " + qmoeda(l.p.preco, idioma)}' })]),

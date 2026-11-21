@@ -152,7 +152,7 @@ describe('Studio atrás do gateway', () => {
 describe('migração do esquema `plataforma`', () => {
   it('aplica, é idempotente (rodar de novo não muda nada) e concede só o necessário ao papel da plataforma', async () => {
     await db.exec('RESET ROLE; DROP SCHEMA IF EXISTS plataforma CASCADE'); const porta = /:(\d+)/.exec(srv.getServerConn())![1]; const url = `postgres://postgres@127.0.0.1:${porta}/postgres`
-    expect(await migraPlataforma({ urlMigrador: url, papelPlataforma: 'polaris_app' })).toEqual({ tabelas: 15 }); expect(await migraPlataforma({ urlMigrador: url, papelPlataforma: 'polaris_app' })).toEqual({ tabelas: 15 })
+    expect(await migraPlataforma({ urlMigrador: url, papelPlataforma: 'polaris_app' })).toEqual({ tabelas: 16 }); expect(await migraPlataforma({ urlMigrador: url, papelPlataforma: 'polaris_app' })).toEqual({ tabelas: 16 })
     const priv = (await db.query(`SELECT table_name, string_agg(privilege_type, ',' ORDER BY privilege_type) AS p FROM information_schema.role_table_grants WHERE grantee = 'polaris_app' AND table_schema = 'plataforma' GROUP BY 1 ORDER BY 1`)).rows as Array<{ table_name: string; p: string }>
     expect(Object.fromEntries(priv.map((r) => [r.table_name, r.p]))).toMatchObject({ no_versao: 'INSERT,SELECT', release: 'INSERT,SELECT', release_evento: 'INSERT,SELECT', tenant: 'DELETE,INSERT,SELECT,UPDATE', comentario: 'INSERT,SELECT,UPDATE', usuario: 'DELETE,INSERT,SELECT,UPDATE', login_tentativa: 'DELETE,INSERT,SELECT,UPDATE', token_senha: 'DELETE,INSERT,SELECT,UPDATE', email_saida: 'DELETE,INSERT,SELECT,UPDATE', ativo: 'DELETE,INSERT,SELECT,UPDATE', ativo_variante: 'DELETE,INSERT,SELECT,UPDATE' }) // as imutáveis só leem e inserem
   })

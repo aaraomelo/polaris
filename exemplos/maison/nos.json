@@ -849,7 +849,17 @@
           "tipo": "enviar",
           "estilo": "primario"
         }
-      ]
+      ],
+      "envio": {
+        "servico": "loja",
+        "operacao": "criarContato",
+        "args": {
+          "nome": "valores.nome",
+          "email": "valores.email",
+          "telefone": "valores.telefone",
+          "mensagem": "junta([\"Entrega:\", valores.endereco, valores.cidade, valores.cep], \" \")"
+        }
+      }
     }
   },
   {
@@ -5062,7 +5072,7 @@
                                     {
                                       "acao": "definir",
                                       "estado": "pedidos",
-                                      "valor": "concat(estado.pedidos, [objeto([[\"numero\", 1001 + tamanho(estado.pedidos)], [\"cliente\", evento.valores], [\"itens\", mapeia(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), l => objeto([[\"nome\", l.p.nome], [\"qtd\", l.qtd], [\"total\", qmul(l.p.preco, l.qtd)]]))], [\"total\", dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))]])])"
+                                      "valor": "concat(estado.pedidos, [objeto([[\"numero\", 1001 + tamanho(estado.pedidos)], [\"cliente\", objeto([[\"nome\", evento.resultado.nome], [\"email\", evento.resultado.email]])], [\"itens\", mapeia(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), l => objeto([[\"nome\", l.p.nome], [\"qtd\", l.qtd], [\"total\", qmul(l.p.preco, l.qtd)]]))], [\"total\", dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))]])])"
                                     },
                                     {
                                       "acao": "definir",
