@@ -115,6 +115,17 @@ describe('blocos de exibição: dinheiro exato, vazios, links, disponibilidade',
     const solto = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto } }))
     expect(solto.querySelector('a')).toBeNull(); expect(solto.querySelector('[data-recorta] img')).not.toBeNull()
   })
+  it('cartão com anatomia completa: categoria, selo e rótulo sobre a foto, 2ª foto, descrição; sem os dados nada disso aparece', () => {
+    const produto = P('x', 'Vaso', '10.00', { fotoUrl: '/img/v.jpg', fotoHover: '/img/v2.jpg', categoria: 'Cerâmica', selo: 'Novo', descricao: 'Grés torneado' })
+    const d = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto, href: '/p/x', rotuloFoto: 'Ver detalhes', mostraDescricao: true } }))
+    const foto = d.querySelector('[data-marca=foto-produto]')!
+    expect([...foto.querySelectorAll('img')].map((i) => i.getAttribute('src'))).toEqual(['/img/v.jpg', '/img/v2.jpg'])
+    expect(foto.querySelector('[data-marca=selo-produto]')!.textContent).toBe('Novo'); expect(foto.querySelector('[data-marca=rotulo-produto]')!.textContent).toBe('Ver detalhes')
+    expect(d.querySelector('[data-sobretitulo]')!.textContent).toBe('Cerâmica'); expect(d.querySelector('[data-marca=cartao-produto] > small')!.textContent).toBe('Grés torneado')
+    const nu = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto: P('x', 'Vaso', '10.00', { fotoUrl: '/img/v.jpg', descricao: 'Grés' }), href: '/p/x' } }))
+    expect(nu.querySelectorAll('img').length).toBe(1); expect(nu.querySelector('[data-marca=selo-produto]')).toBeNull(); expect(nu.querySelector('[data-marca=rotulo-produto]')).toBeNull()
+    expect(nu.querySelector('[data-sobretitulo]')).toBeNull(); expect(nu.querySelector('[data-marca=cartao-produto] > small')).toBeNull() // descrição só com `mostraDescricao`
+  })
   it('conteúdo hostil do catálogo é texto, e foto com javascript: não vira imagem', () => {
     const d = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto: P('x', '<img src=x onerror=alert(1)>', '1', { fotoUrl: 'javascript:alert(1)' }) } }))
     expect(d.querySelector('img')).toBeNull(); expect(d.querySelector('h3')!.textContent).toBe('<img src=x onerror=alert(1)>')

@@ -30,7 +30,7 @@ export const SERVICOS = [
         nome: { tipo: 'texto', obrigatorio: true }, descricao: { tipo: 'texto' },
         preco: { tipo: 'dinheiro', obrigatorio: true, descricao: 'preço de venda atual (texto decimal exato)' },
         precoDe: { tipo: 'dinheiro', descricao: 'preço anterior; quando maior que `preco`, a vitrine mostra "de … por …"' },
-        fotoUrl: { tipo: 'texto' }, disponivel: { tipo: 'booleano', obrigatorio: true, descricao: 'vendável e com estoque' },
+        fotoUrl: { tipo: 'texto' }, fotoHover: { tipo: 'texto', descricao: 'segunda foto (aparece no hover do cartão)' }, categoria: { tipo: 'texto' }, selo: { tipo: 'texto', descricao: 'etiqueta sobre a foto (Novo, Destaque…)' }, disponivel: { tipo: 'booleano', obrigatorio: true, descricao: 'vendável e com estoque' },
         possuiVariantes: { tipo: 'booleano', padrao: false },
       }, indices: [['sku']] },
       variante: { campos: {
@@ -93,7 +93,13 @@ export const EVENTOS = [
 
 // ---- blocos de exibição ---------------------------------------------------------------------------------------------------------------------
 
-const produtoProp = { type: 'object', properties: { id: { type: 'string' }, nome: { type: 'string' }, descricao: { type: 'string' }, preco: { type: ['string', 'number'] }, precoDe: { type: ['string', 'number'] }, fotoUrl: { type: 'string' }, disponivel: { type: 'boolean' } }, required: ['nome', 'preco'] }
+const produtoProp = { type: 'object', properties: { id: { type: 'string' }, nome: { type: 'string' }, descricao: { type: 'string' }, preco: { type: ['string', 'number'] }, precoDe: { type: ['string', 'number'] }, fotoUrl: { type: 'string' }, fotoHover: { type: 'string', description: 'segunda foto, que aparece no hover da foto do cartão' }, categoria: { type: 'string' }, selo: { type: 'string', description: 'etiqueta sobre a foto (ex.: Novo, Destaque)' }, disponivel: { type: 'boolean' } }, required: ['nome', 'preco'] }
+const FOTO_PRODUTO = { bloco: 'layout/pilha', props: { recorta: true, marca: 'foto-produto' }, slots: { filhos: [
+  { bloco: 'midia/imagem', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } },
+  { bloco: 'midia/imagem', se: 'props.produto.fotoHover', props: { src: '{props.produto.fotoHover}', alt: '', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } },
+  { bloco: 'layout/pilha', se: 'props.produto.selo', props: { marca: 'selo-produto' }, slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: '{props.produto.selo}' } }] } },
+  { bloco: 'layout/pilha', se: 'props.rotuloFoto', props: { marca: 'rotulo-produto' }, slots: { filhos: [{ bloco: 'texto/pequeno', props: { texto: '{props.rotuloFoto}' } }] } },
+] } }
 const dinheiro = { type: ['string', 'number'], description: 'valor em reais: texto decimal exato ("49.90") ou número' }
 const PRODUTO_EX = { id: 'p1', nome: 'Pão de queijo 500 g', descricao: 'Receita tradicional mineira, congelado.', preco: '24.90', precoDe: '29.90', fotoUrl: 'exemplos/produto.svg', disponivel: true }
 const ESGOTADO_EX = { ...PRODUTO_EX, id: 'p2', nome: 'Bolo de fubá', preco: '18.00', precoDe: undefined, disponivel: false }
@@ -113,20 +119,18 @@ export const BLOCOS_COMMERCE = [
   }),
   no('bloco', 'commerce.cartao-produto', {
     interface: 'commerce/cartao-produto', titulo: 'Cartão de produto', descricao: 'Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `acoes` recebe botões da página (ex.: "Adicionar").',
-    props: { type: 'object', properties: { produto: produtoProp, href: { type: 'string' }, rotuloLink: { type: 'string', maxLength: 40, description: 'texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe' }, fluida: { type: 'boolean', description: 'a foto ocupa toda a largura do cartão (em vez dos 240 px fixos)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura da foto (0,8 = retrato 4:5), com corte' } }, required: ['produto'] }, slots: { acoes: {} },
+    props: { type: 'object', properties: { produto: produtoProp, href: { type: 'string' }, mostraDescricao: { type: 'boolean', description: 'mostra a descrição do produto sob o nome' }, rotuloFoto: { type: 'string', maxLength: 40, description: 'rótulo que sobe sobre a foto no hover (ex.: Ver detalhes)' }, rotuloLink: { type: 'string', maxLength: 40, description: 'texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe' }, fluida: { type: 'boolean', description: 'a foto ocupa toda a largura do cartão (em vez dos 240 px fixos)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura da foto (0,8 = retrato 4:5), com corte' } }, required: ['produto'] }, slots: { acoes: {} },
     exemplos: [
       { titulo: 'Com ação', instancia: instancia('commerce/cartao-produto', { produto: PRODUTO_EX, href: '/produto/p1' }, { acoes: [{ bloco: 'nav/botao', props: { texto: 'Adicionar' } }] }) },
       { titulo: 'Esgotado', instancia: instancia('commerce/cartao-produto', { produto: ESGOTADO_EX }) },
     ],
-    modelo: { bloco: 'layout/pilha', props: { gap: 8 }, slots: { filhos: [
-      // a foto leva ao detalhe quando há `href`; o recorte deixa o zoom do hover (token movimento.zoomCartao) dentro da caixa
-      { bloco: 'nav/link', se: 'props.produto.fotoUrl && props.href', props: { href: '{props.href}' }, slots: { filhos: [
-        { bloco: 'layout/pilha', props: { recorta: true }, slots: { filhos: [{ bloco: 'midia/imagem', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } }] } },
-      ] } },
-      { bloco: 'layout/pilha', se: 'props.produto.fotoUrl && !props.href', props: { recorta: true }, slots: { filhos: [
-        { bloco: 'midia/imagem', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } },
-      ] } },
+    modelo: { bloco: 'layout/pilha', props: { gap: 8, marca: 'cartao-produto' }, slots: { filhos: [
+      // a foto leva ao detalhe quando há `href`; fica numa caixa que recorta (zoom no hover) e leva, por cima: o selo, o rótulo que sobe no hover e a 2ª foto (fade no hover)
+      { bloco: 'nav/link', se: 'props.produto.fotoUrl && props.href', props: { href: '{props.href}' }, slots: { filhos: [FOTO_PRODUTO] } },
+      { ...FOTO_PRODUTO, se: 'props.produto.fotoUrl && !props.href' },
+      { bloco: 'texto/sobretitulo', se: 'props.produto.categoria', props: { texto: '{props.produto.categoria}' } },
       { bloco: 'texto/titulo', props: { texto: '{props.produto.nome}', nivel: 3 } },
+      { bloco: 'texto/pequeno', se: 'props.mostraDescricao && props.produto.descricao', props: { texto: '{props.produto.descricao}' } },
       { bloco: 'commerce/preco', props: { valor: '{props.produto.preco}', de: '{props.produto.precoDe}' } },
       { bloco: 'feedback/selo', se: 'props.produto.disponivel == false', props: { texto: 'Indisponível', tom: 'erro' } },
       { bloco: 'nav/link', se: 'props.href && props.rotuloLink != ""', props: { href: '{props.href}', texto: '{props.rotuloLink ?? "Ver detalhes"}' } },

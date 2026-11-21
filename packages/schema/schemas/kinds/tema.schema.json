@@ -86,7 +86,7 @@
         },
         "movimento": {
           "type": "object",
-          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto no hover), `entrada` (duração da entrada da capa), `zoomCapa` (escala final do zoom lento). Sem estes tokens não há transição",
+          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto do cartão no hover), `fotoAlt` (fade da 2ª foto), `rotulo` (rótulo sobre a foto), `zoomFaixa`, `zoomFaixaDuracao`, `faixaVeu`, `faixaVeuDuracao`, `faixaTexto` e `faixaElevacao` (faixa `zoom`), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da capa). Sem estes tokens não há transição",
           "additionalProperties": {
             "type": [
               "number",
@@ -100,6 +100,19 @@
         "botao": {
           "type": "object",
           "description": "botões e links de botão: `caixa` (uppercase), `espacamento` (letter-spacing), `tamanho` e `peso`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "cartao": {
+          "type": "object",
+          "description": "cartão de produto: `tituloTamanho`, `tituloAltura`, `tituloEspacamento`, `tituloHover`, `categoriaCor`, `categoriaTamanho`, `categoriaEspacamento`, `descricaoTamanho`, `precoTamanho`, `precoPeso`, `precoEspacamento`, `seloFundo`, `seloTexto`, `seloMargem`",
           "additionalProperties": {
             "type": [
               "number",
@@ -123,6 +136,15 @@
     "seguirSistema": {
       "type": "boolean",
       "description": "false: o modo escuro só vale com data-modo=\"escuro\" no <html>, sem seguir a preferência do sistema (padrão: true)"
+    },
+    "fontes": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*$"
+      },
+      "description": "fontes embutidas na plataforma que o tema usa (ex.: cormorant-garamond, inter): o servidor emite o @font-face e serve o arquivo da própria origem. Nome desconhecido é ignorado"
     }
   },
   "type": "object",

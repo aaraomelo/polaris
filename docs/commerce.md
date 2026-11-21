@@ -27,6 +27,8 @@ São **composições declarativas** sobre os blocos base (`modelo`): nenhum cód
 
 `commerce/cartao-produto`: com `href`, a **foto** também leva ao detalhe (dentro de uma caixa que recorta, para o zoom do hover do tema); `rotuloLink` troca o texto do link sob o preço (padrão "Ver detalhes") e, vazio (`""`), o esconde.
 
+`commerce/cartao-produto` na versão completa: `produto.categoria` (linha pequena acima do nome), `produto.selo` (etiqueta sobre a foto), `produto.fotoHover` (2ª foto que entra no hover), e as props `rotuloFoto` (rótulo que sobe sobre a foto no hover) e `mostraDescricao`. Tudo opcional; sem os dados o cartão é o de antes. O estilo vem dos tokens `cartao.*` e `movimento.*` do tema.
+
 ## Por que o slot `acoes`
 O modelo de um bloco não tem estado nem eventos (por desenho: ele é uma função das props). Então os blocos **exibem** e deixam um slot `acoes`; a página põe ali os botões e campos com os eventos dela. O conteúdo do slot é montado no escopo da página: enxerga `estado`, `dados` e a variável do `repetir` (cada "Adicionar" sabe de qual cartão veio: testado).
 

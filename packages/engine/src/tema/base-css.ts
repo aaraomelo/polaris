@@ -4,12 +4,12 @@ import { ICONES_CSS } from '../icones/css'
 // Os blocos emitem tags semânticas (e `data-tom`, `role`), então o estilo se prende a elas dentro do contêiner `#polaris`.
 export const BASE_CSS = `/* polaris: estilos base dos blocos (usa só variáveis do tema) */
 body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var(--tipografia-familia);font-size:var(--tipografia-tamanho-base);line-height:1.5}
-#polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:1.25;font-family:var(--tipografia-familia-titulo, var(--tipografia-familia));font-weight:var(--tipografia-peso-titulo, bold)}
+#polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:var(--tipografia-altura-titulo, 1.25);letter-spacing:var(--tipografia-espacamento-titulo, normal);font-family:var(--tipografia-familia-titulo, var(--tipografia-familia));font-weight:var(--tipografia-peso-titulo, bold)}
 #polaris h1{font-size:var(--tipografia-tamanho-h1, 2em)}
 #polaris h2{font-size:var(--tipografia-tamanho-h2, 1.5em)}
 #polaris h3{font-size:var(--tipografia-tamanho-h3, 1.17em)}
-#polaris p{margin:0 0 var(--espacamento-base)}
-#polaris [data-sobretitulo]{margin:0 0 var(--espacamento-base);font-size:.75em;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--cor-primaria)}
+#polaris p{margin:0 0 var(--espacamento-base);line-height:var(--tipografia-altura-corpo, inherit)}
+#polaris [data-sobretitulo]{line-height:1.5;margin:0 0 var(--tipografia-margem-sobretitulo, var(--espacamento-base));font-size:var(--tipografia-tamanho-sobretitulo, .75em);font-weight:600;letter-spacing:var(--tipografia-espacamento-sobretitulo, .25em);text-transform:uppercase;color:var(--cor-primaria)}
 #polaris section[data-imagem] [data-sobretitulo]{color:inherit;opacity:.85}
 #polaris [data-contido]{box-sizing:border-box;width:100%;max-width:var(--layout-largura, 72rem);margin-inline:auto;padding-inline:calc(var(--espacamento-base) * 3)}
 #polaris [data-contido=estreita]{max-width:var(--layout-largura-estreita, 48rem)}
@@ -163,6 +163,30 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris footer :is(h1,h2,h3,h4,h5,h6){color:var(--rodape-texto, inherit);font-size:var(--rodape-marca-tamanho, inherit)}
 #polaris a:has(>[data-recorta]){display:block}
 #polaris [data-recorta]{overflow:hidden}
+#polaris [data-marca=foto-produto]{position:relative}
+#polaris [data-marca=foto-produto]>img:first-of-type{transition:transform var(--movimento-zoom-duracao, 0s) ease-out,opacity var(--movimento-foto-alt, 0s) ease-out}
+#polaris [data-marca=foto-produto]>img:nth-of-type(2){position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(var(--movimento-zoom-cartao, 1));transition:opacity var(--movimento-foto-alt, 0s) ease-out,transform var(--movimento-foto-alt, 0s) ease-out}
+#polaris [data-marca=foto-produto]:hover>img:nth-of-type(2){opacity:1;transform:none}
+#polaris [data-marca=foto-produto]:has(>img:nth-of-type(2)):hover>img:first-of-type{opacity:0}
+#polaris [data-marca=selo-produto]{position:absolute;top:var(--cartao-selo-margem, 1rem);left:var(--cartao-selo-margem, 1rem);z-index:1;padding:.375rem .75rem;background:var(--cartao-selo-fundo, var(--cor-primaria));color:var(--cartao-selo-texto, var(--cor-texto-sobre-primaria));pointer-events:none}
+#polaris [data-marca=selo-produto]>small{color:var(--cartao-selo-texto, var(--cor-texto-sobre-primaria));font-size:.625rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
+#polaris [data-marca=rotulo-produto]{position:absolute;left:50%;bottom:1rem;z-index:1;padding:.625rem 1.5rem;background:color-mix(in srgb, var(--cor-fundo) 95%, transparent);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,.5rem);transition:opacity var(--movimento-rotulo, 0s) ease,transform var(--movimento-rotulo, 0s) ease}
+#polaris [data-marca=foto-produto]:hover>[data-marca=rotulo-produto]{opacity:1;transform:translate(-50%,0)}
+#polaris [data-marca=rotulo-produto]>small{font-size:.75rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--cor-texto)}
+#polaris [data-marca=cartao-produto] [data-sobretitulo]{margin:0;color:var(--cartao-categoria-cor, var(--cor-texto-suave));font-size:var(--cartao-categoria-tamanho, .6875rem);letter-spacing:var(--cartao-categoria-espacamento, .2em);font-weight:500}
+#polaris [data-marca=cartao-produto] h3{margin:0;line-height:var(--cartao-titulo-altura, var(--tipografia-altura-titulo, 1.25));font-size:var(--cartao-titulo-tamanho, var(--tipografia-tamanho-h3, 1.17em));letter-spacing:var(--cartao-titulo-espacamento, normal);transition:color var(--movimento-rapido, 0s) ease}
+#polaris [data-marca=cartao-produto]:hover h3{color:var(--cartao-titulo-hover, inherit)}
+#polaris [data-marca=cartao-produto]>small{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;font-size:var(--cartao-descricao-tamanho, .875em);line-height:var(--tipografia-altura-corpo, inherit);color:var(--cor-texto-suave)}
+#polaris [data-marca=cartao-produto] strong{font-size:var(--cartao-preco-tamanho, inherit);font-weight:var(--cartao-preco-peso, bolder);letter-spacing:var(--cartao-preco-espacamento, normal)}
+#polaris section[data-zoom][data-imagem]{position:relative;overflow:hidden}
+#polaris section[data-zoom][data-imagem]::before{content:'';position:absolute;inset:0;z-index:0;background:inherit;background-size:cover;background-position:center;transition:transform var(--movimento-zoom-faixa-duracao, 0s) ease-out}
+#polaris section[data-zoom][data-imagem]:hover::before{transform:scale(var(--movimento-zoom-faixa, 1))}
+#polaris section[data-zoom][data-imagem]::after{content:'';position:absolute;inset:0;z-index:0;background:var(--movimento-faixa-veu, transparent);opacity:0;transition:opacity var(--movimento-faixa-veu-duracao, 0s) ease}
+#polaris section[data-zoom][data-imagem]:hover::after{opacity:1}
+#polaris section[data-zoom]>*{position:relative;z-index:1}
+#polaris section[data-zoom]{justify-content:flex-end;padding:calc(var(--espacamento-base) * 4)}
+#polaris section[data-zoom] :is(h2,h3){transition:transform var(--movimento-faixa-texto, 0s) ease}
+#polaris section[data-zoom]:hover :is(h2,h3){transform:translateY(var(--movimento-faixa-elevacao, 0px))}
 #polaris [data-recorta]>img{transition:transform var(--movimento-zoom-duracao, 0s) ease-out}
 #polaris [data-recorta]:hover>img{transform:scale(var(--movimento-zoom-cartao, 1))}
 #polaris footer nav{flex-direction:column;align-items:flex-start;gap:var(--espacamento-base)}

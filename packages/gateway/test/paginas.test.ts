@@ -50,6 +50,26 @@ describe('servidor de páginas', () => {
     e.reg.registra({ kind: 'tenant', id: 'comform', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'comform', segmento: 'varejo', modulos: ['loja'], paginas: ['p.home', 'p.contato'] } } as never); modo.id = 'comform'
     try { await verifica() } finally { modo.id = undefined }
   })
+  it('tema com `fontes`: o CSS leva o @font-face (mesma origem), o arquivo é servido como font/woff2 com cache eterno; sem `fontes` não há @font-face', async () => {
+    e.reg.registra({ kind: 'tema', id: 'comfonte', versao: '1.0.0', estatuto: 'publicado', spec: { fontes: ['cormorant-garamond', 'inter', 'nao-existe'], tokens: { cor: { primaria: '#123456' } } } } as never)
+    e.reg.registra({ kind: 'tenant', id: 'comfonte', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'comfonte', segmento: 'varejo', modulos: ['loja'], tema: 'comfonte', paginas: ['p.home'] } } as never); modo.id = 'comfonte'
+    try {
+      const r = await e.req('GET', '/', { host: 'a.loja.test' }); if (!/rel="stylesheet"/.test(r.body)) throw new Error(`${r.statusCode} ${r.body.slice(0, 600)}`); const href = /<link rel="stylesheet" href="(\/_polaris\/a\/[\w.-]+\.css)">/.exec(r.body)![1]!
+      expect(String(r.headers['content-security-policy'])).toContain("font-src 'self'")
+      const css = (await e.req('GET', href, { host: 'a.loja.test' })).body
+      const urls = [...css.matchAll(/@font-face\{font-family:'([^']+)';font-style:(\w+);[^}]*src:url\((\/_polaris\/a\/[0-9a-f]+\.woff2)\)/g)]
+      expect(urls.map((m) => `${m[1]}/${m[2]}`)).toEqual(['Cormorant Garamond/normal', 'Cormorant Garamond/italic', 'Inter/normal']) // o nome desconhecido é ignorado
+      const f = await e.req('GET', urls[0]![3]!, { host: 'a.loja.test' })
+      expect(f.statusCode).toBe(200); expect(String(f.headers['content-type'])).toContain('font/woff2'); expect(String(f.headers['cache-control'])).toContain('immutable')
+      expect(f.rawPayload.subarray(0, 4).toString('latin1')).toBe('wOF2'); expect(f.rawPayload.length).toBeGreaterThan(20000)
+    } finally { modo.id = undefined }
+    e.reg.registra({ kind: 'tema', id: 'semfonte', versao: '1.0.0', estatuto: 'publicado', spec: { tokens: { cor: { primaria: '#123456' } } } } as never)
+    e.reg.registra({ kind: 'tenant', id: 'semfonte', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'semfonte', segmento: 'varejo', modulos: ['loja'], tema: 'semfonte', paginas: ['p.home'] } } as never); modo.id = 'semfonte'
+    try {
+      const r = await e.req('GET', '/', { host: 'a.loja.test' }), href = /<link rel="stylesheet" href="(\/_polaris\/a\/[\w.-]+\.css)">/.exec(r.body)![1]!
+      expect((await e.req('GET', href, { host: 'a.loja.test' })).body).not.toContain('@font-face')
+    } finally { modo.id = undefined }
+  })
   const verifica = async () => {
     const r = await e.req('GET', '/contato', { host: 'a.loja.test' }); expect(r.statusCode, r.body.slice(0, 200)).toBe(200)
     expect(r.body).toContain('data-polaris-formulario="so-valida"'); expect(r.body).toContain('Carregando formulário…')

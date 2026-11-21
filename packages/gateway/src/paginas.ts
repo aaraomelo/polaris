@@ -3,6 +3,7 @@ import { Readable } from 'node:stream'
 import { compilaTabela, resolveRota, type Programa, type TabelaRotas } from '@polaris/engine'
 import { empacotaCliente, empacotaIlhaFormulario, usoDoPrograma } from '@polaris/engine/aot'
 import { streamVivo } from '@polaris/engine/servidor-vivo'
+import { cssFontFace, bytesDaFonte } from '@polaris/engine/fontes'
 import { cssDoTema } from '@polaris/engine/tema'
 import type { Registry } from '@polaris/schema'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
@@ -56,15 +57,15 @@ const lerPreview = (h: string | undefined): string | null => {
 }
 const faixaPreview = (n: number) => `<div id="pl-preview" style="position:sticky;top:0;z-index:2147483647;background:#f59e0b;color:#111;padding:6px 12px;font:14px system-ui,sans-serif">Pré-visualização da release ${n} (não é o site publicado) · <a href="/_polaris/preview/sair" style="color:#111">sair</a></div>`
 const RESERVADO = /^\/(api|bff|studio|graphql|_polaris|_dev|metricas|saude|\.well-known)(\/|$)/
-const sha = (s: string) => createHash('sha256').update(s).digest('hex').slice(0, 16)
+const sha = (s: string | Buffer) => createHash('sha256').update(s).digest('hex').slice(0, 16)
 const CSP = (nonce: string) => `default-src 'none'; script-src 'nonce-${nonce}' 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`
 const NEGADO_TXT = (c: number) => (c === 404 ? 'Página não encontrada' : c === 403 ? 'Acesso negado' : c === 401 ? 'Autenticação necessária' : 'Erro')
 
 export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPaginas): void {
   const tabelas = new Map<string, TabelaRotas | null>()
-  const ativos = new Map<string, { tipo: string; corpo: string }>() // JS do cliente e CSS do tema, endereçados pelo conteúdo
+  const ativos = new Map<string, { tipo: string; corpo: string | Buffer }>() // JS do cliente e CSS do tema, endereçados pelo conteúdo
   const bundles = new WeakMap<Programa, Promise<string | null>>()
-  const guarda = (nome: string, tipo: string, corpo: string) => { if (!ativos.has(nome)) { ativos.set(nome, { tipo, corpo }); while (ativos.size > 400) ativos.delete(ativos.keys().next().value as string) } return `/_polaris/a/${nome}` }
+  const guarda = (nome: string, tipo: string, corpo: string | Buffer) => { if (!ativos.has(nome)) { ativos.set(nome, { tipo, corpo }); while (ativos.size > 400) ativos.delete(ativos.keys().next().value as string) } return `/_polaris/a/${nome}` }
 
   app.get('/_polaris/a/:nome', async (req, reply) => {
     const a = ativos.get((req.params as { nome: string }).nome)
@@ -99,7 +100,9 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     const id = (reg.resolve('tenant', tenantNo, { tenantId: ctx.tenantId })?.no.spec as { tema?: string } | undefined)?.tema ?? 'padrao'
     const t = reg.resolve('tema', id, { tenantId: ctx.tenantId })
     if (!t) return []
-    const css = cssDoTema(t.no)
+    // fontes embutidas que o tema pede: o arquivo é servido como ativo (endereçado pelo conteúdo, cache eterno) e o @font-face aponta para ele
+    const pedidas = (t.no.spec as { fontes?: string[] }).fontes ?? []
+    const css = cssDoTema(t.no, pedidas.length ? cssFontFace(pedidas, (arq) => { const b = bytesDaFonte(arq); return guarda(`${sha(b)}.woff2`, 'font/woff2', b) }) : '')
     return [guarda(`${sha(css)}.css`, 'text/css; charset=utf-8', css)]
   }
   const tabelaDe = (reg: Registry, ctx: CtxGw, tenantNo: string, chaveRelease: string): TabelaRotas | null => {

@@ -28,6 +28,8 @@ const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'n
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
 const ALINHA: Record<string, string> = { inicio: 'flex-start', centro: 'center', fim: 'flex-end', esticar: 'stretch' }
 /** a proporção válida da imagem (largura ÷ altura entre 0,2 e 5), ou 0 */
+/** gancho de estilo: `marca` (letras minúsculas, dígitos e hífen) vira `data-marca`, que o CSS do tema usa (ex.: o cartão de produto) */
+export const marcaDe = (p: Record<string, unknown>): string | undefined => (typeof p.marca === 'string' && /^[a-z][a-z0-9-]{0,31}$/.test(p.marca) ? p.marca : undefined)
 export const proporcaoDaImagem = (p: Record<string, unknown>): number => { const v = typeof p.proporcao === 'number' && Number.isFinite(p.proporcao) ? p.proporcao : 0; return v >= 0.2 && v <= 5 ? Math.round(v * 1000) / 1000 : 0 }
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
@@ -40,7 +42,7 @@ const caixa = (direcao: 'column' | 'row'): Descritor => ({
   attrs: (p, id) => {
     const gap = num(p.gap)
     const alinha = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined
-    return { ...comId(id), ...papelDe(p), ...rotulo(p), ...(p.solta === true ? { 'data-solta': '' } : {}), ...(p.recorta === true ? { 'data-recorta': '' } : {}), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
+    return { ...comId(id), ...papelDe(p), ...rotulo(p), ...(p.solta === true ? { 'data-solta': '' } : {}), ...(p.recorta === true ? { 'data-recorta': '' } : {}), ...(marcaDe(p) ? { 'data-marca': marcaDe(p)! } : {}), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
   },
 })
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))
@@ -111,7 +113,7 @@ export const d_layout_destaque: Descritor = {
   chave: () => 'section', tag: () => 'section', filhos: true,
   attrs: (p, id) => {
     const img = urlSegura(p.imagem), a = inteiro(p.altura, 120, 800, 320), e = Math.min(0.8, Math.max(0, num(p.escurece) ?? 0.45))
-    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), ...(p.capa === true ? { 'data-capa': '' } : {}), style: `min-height:${p.capa === true ? (a >= 800 ? '100svh' : `min(${a}px,100svh)`) : `${a}px`}${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
+    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), ...(p.capa === true ? { 'data-capa': '' } : {}), ...(p.zoom === true ? { 'data-zoom': '' } : {}), style: `min-height:${p.capa === true ? (a >= 800 ? '100svh' : `min(${a}px,100svh)`) : `${a}px`}${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
   },
 }
 export const d_layout_contido: Descritor = { chave: () => 'div:contido', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-contido': p.largura === 'estreita' || p.largura === 'larga' ? p.largura : 'normal' }) }

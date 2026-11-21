@@ -82,7 +82,8 @@ export function registraTemas(reg: Registry): void {
 }
 
 /** CSS completo de uma página: variáveis do tema (+ modos) e a folha dos blocos. Determinístico (ordem estável). */
-export const cssDoTema = (no: No): string => `${emite(no, 'css')}\n${BASE_CSS}`
+/** `fontFace`: os `@font-face` das fontes embutidas que o tema pede (`spec.fontes`), montados por quem serve os arquivos (o gateway); sem ele a pilha de fontes do sistema vale. */
+export const cssDoTema = (no: No, fontFace = ''): string => `${fontFace ? `${fontFace}\n` : ''}${emite(no, 'css')}\n${BASE_CSS}`
 
 // ---- auditoria de acessibilidade ------------------------------------------------------------------------------------------------------
 

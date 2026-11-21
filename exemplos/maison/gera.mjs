@@ -13,6 +13,7 @@ const foto = (nome) => { readFileSync(join(aqui, 'img', `${nome}.jpg`)); return 
 const tema = {
   kind: 'tema', id: 'maison', versao: '1.0.0', estatuto: 'publicado',
   spec: {
+    fontes: ['cormorant-garamond', 'inter'], // embutidas na plataforma e servidas da própria origem (docs/temas.md)
     seguirSistema: false, // sempre claro, como o template; o escuro só com data-modo="escuro"
     tokens: {
       cor: {
@@ -22,7 +23,7 @@ const tema = {
       },
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
-      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: '1.625rem' },
+      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
       layout: { largura: '80rem', larguraEstreita: '48rem', larguraLarga: '90rem' },
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
       cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1 },
@@ -30,7 +31,8 @@ const tema = {
       rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', link: 'color-mix(in srgb, var(--cor-fundo) 70%, transparent)', borda: 'transparent' },
       // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
       botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500 },
-      movimento: { rapido: '300ms', sublinha: '500ms', zoomDuracao: '700ms', zoomCartao: 1.05, entrada: '1.2s', zoomCapa: 1.08 },
+      cartao: { tituloTamanho: '1.25rem', tituloAltura: 1.375, tituloEspacamento: '-0.025em', tituloHover: 'var(--cor-primaria)', descricaoTamanho: '0.875rem', precoTamanho: '1rem', precoPeso: 500, precoEspacamento: '0.025em' },
+      movimento: { rapido: '300ms', sublinha: '500ms', zoomDuracao: '1s', zoomCartao: 1.05, fotoAlt: '1s', rotulo: '500ms', zoomFaixa: 1.1, zoomFaixaDuracao: '1.2s', faixaVeu: 'color-mix(in srgb, var(--cor-texto) 20%, transparent)', faixaVeuDuracao: '700ms', faixaTexto: '500ms', faixaElevacao: '-0.25rem', entrada: '1.2s', zoomCapa: 1.08 },
     },
     modos: {
       escuro: {
@@ -79,7 +81,9 @@ const PRODUTOS = [
   { id: 'caixa', colecao: 'presentes', nome: 'Caixa de Presente Selecionada', descricao: 'Uma seleção cuidadosa das nossas peças favoritas', preco: '225.00', material: 'Grés', foto: 'produto-caixa-presente' },
 ]
 const NOME_COLECAO = Object.fromEntries(CATEGORIAS.map((c) => [c.slug, c.nome]))
-const paraProduto = (p) => ({ id: p.id, colecao: p.colecao, colecaoNome: NOME_COLECAO[p.colecao], nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true, material: p.material, ...(p.selo ? { selo: p.selo } : {}) })
+const FOTOS_HOVER = ['sobre-1', 'foto-1', 'foto-2', 'loja-capa', 'hero', 'sobre-2', 'colecao-iluminacao', 'sobre-capa'] // a segunda foto de cada peça (aparece no hover): cenas da casa, em ciclo
+const fotoHoverDe = (p) => foto(FOTOS_HOVER[PRODUTOS.indexOf(p) % FOTOS_HOVER.length])
+const paraProduto = (p) => ({ id: p.id, colecao: p.colecao, colecaoNome: NOME_COLECAO[p.colecao], categoria: NOME_COLECAO[p.colecao], fotoHover: fotoHoverDe(p), nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true, material: p.material, ...(p.selo ? { selo: p.selo } : {}) })
 const NOVIDADES = ['arco', 'orbe', 'vaso', 'tigela'].map((id) => PRODUTOS.find((p) => p.id === id))
 const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'colecao-5']
 
@@ -126,10 +130,10 @@ const home = b('layout/pilha', { gap: 0 }, [
   contido([
     b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
       b('midia/imagem', { src: foto(COLECOES[0].foto), alt: COLECOES[0].nome, fluida: true, proporcao: 0.8 }),
-      b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+      b('layout/pilha', { gap: 0, alinha: 'inicio' }, [
         sobre('Coleção em destaque'),
-        titulo(COLECOES[0].nome, 2),
-        par(`${COLECOES[0].frase}. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz.`),
+        titulo(COLECOES[0].nome, 2), folga(16),
+        par(`${COLECOES[0].frase}. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz.`), folga(24),
         link(`/produtos?colecao=${COLECOES[0].slug}`, 'Ver iluminação', 'primario'),
       ]),
     ]),
@@ -143,7 +147,7 @@ const home = b('layout/pilha', { gap: 0 }, [
         link('/produtos', 'Ver tudo'),
       ]),
       folga(24),
-      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p), href: `/produtos/${p.id}`, rotuloLink: '' }))),
+      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p), href: `/produtos/${p.id}`, rotuloLink: '', rotuloFoto: 'Ver detalhes', mostraDescricao: true }))),
     ]),
   ]),
   folga(112),
@@ -151,14 +155,14 @@ const home = b('layout/pilha', { gap: 0 }, [
   contido([
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Explore por'), titulo('Coleções', 2)]),
     folga(32),
-    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda' }, [titulo(c.nome, 3), par(c.frase), link(`/produtos?colecao=${c.slug}`, 'Ver peças')]))),
+    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda', zoom: true }, [titulo(c.nome, 3), par(c.frase), link(`/produtos?colecao=${c.slug}`, 'Ver peças')]))),
   ], 'larga', { id: 'colecoes' }),
   folga(112),
   // a faixa de fotos
   contido([
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Siga a casa'), titulo('@maison', 2)]),
     folga(24),
-    b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('midia/imagem', { src: foto(f), alt: `Foto ${i + 1} da casa`, fluida: true, proporcao: 1 }))),
+    b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: `Foto ${i + 1} da casa`, fluida: true, proporcao: 1 })]))),
   ], 'larga'),
   folga(112),
   rodape(),
@@ -167,8 +171,8 @@ const home = b('layout/pilha', { gap: 0 }, [
 // ---- produtos: filtro por categoria (?colecao=…), contagem e grade com selos --------------------------------------------------------------
 const FILTRADOS = 'filtra(estado.produtos, p => (consulta.colecao ?? "") == "" || p.colecao == consulta.colecao)'
 const filtro = (slug, nome) => b('nav/link', { href: slug ? `/produtos?colecao=${slug}` : '/produtos', texto: nome, botao: 'secundario', atual: `{(consulta.colecao ?? "") == ${JSON.stringify(slug)}}` }) // o filtro escolhido leva aria-current e fica preenchido
-const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}', href: '{"/produtos/" + p.id}', rotuloLink: '' }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
-  { bloco: 'texto/pequeno', props: { texto: '{(p.selo ? p.selo + " · " : "") + p.material}' } }, // o selo (Destaque, Novo) e o material, na linha pequena sob o preço
+const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}', href: '{"/produtos/" + p.id}', rotuloLink: '', rotuloFoto: 'Ver detalhes', mostraDescricao: true }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
+  { bloco: 'texto/pequeno', props: { texto: '{p.material}' } }, // o selo (Destaque, Novo) vai sobre a foto; aqui só o material
   { bloco: 'nav/botao', props: { texto: 'Adicionar à sacola', variante: 'secundario' }, eventos: aoClicar(adiciona('p.id')) },
 ] } }
 const produtos = b('layout/pilha', { gap: 0 }, [
@@ -228,7 +232,7 @@ const sobre_ = b('layout/pilha', { gap: 0 }, [
     b('layout/grade', { colunas: 3, gap: 48 }, VALORES.map(([n, t, d]) => b('layout/pilha', { gap: 8, alinha: 'inicio' }, [sobre(n), titulo(t, 3), par(d)]))),
   ])]),
   folga(112),
-  contido([b('layout/grade', { colunas: 3, gap: 24 }, ['colecao-ceramica', 'colecao-4', 'produto-almofada'].map((f, i) => b('midia/imagem', { src: foto(f), alt: `Detalhe ${i + 1} das peças`, fluida: true, proporcao: 0.8 })))], 'larga'),
+  contido([b('layout/grade', { colunas: 3, gap: 24 }, ['colecao-ceramica', 'colecao-4', 'produto-almofada'].map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: `Detalhe ${i + 1} das peças`, fluida: true, proporcao: 0.8 })])))], 'larga'),
   folga(112),
   b('layout/destaque', { imagem: foto('foto-2'), altura: 420, escurece: 0.45, alinha: 'centro' }, [
     sobre('Vamos conversar'), titulo('Tem alguma dúvida?', 2),
@@ -269,7 +273,7 @@ const detalhe = b('layout/pilha', { gap: 0 }, [
     contido([
       b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Da mesma coleção'), titulo('Você também pode gostar', 2)]),
       folga(32),
-      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{o}', href: '{"/produtos/" + o.id}', rotuloLink: '' }, repetir: { cada: MESMA.replace(/\bp\./g, 'p.'), como: 'o', chave: 'o.id' } }]),
+      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{o}', href: '{"/produtos/" + o.id}', rotuloLink: '', rotuloFoto: 'Ver detalhes', mostraDescricao: true }, repetir: { cada: MESMA.replace(/\bp\./g, 'p.'), como: 'o', chave: 'o.id' } }]),
     ], 'larga', { se: `tamanho(${MESMA}) > 0` }),
   ]), repetir: { cada: ACHADO, como: 'p', chave: 'p.id' } },
   contido([

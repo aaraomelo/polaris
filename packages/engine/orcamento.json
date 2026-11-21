@@ -1,9 +1,9 @@
 {
-  "_": "Orçamento de performance do runtime (2026-11-20: contador 11400 → 11450 B pela zona de soltar das caixas de layout, `solta` e `aoSoltar`; 11450 → 11650 B pelo estado que `persiste` no navegador, ~175 B em todo cliente; 11650 → 11700 B e lista-formatos 11800 → 11850 B pelos eventos `polaris-enviado`/`polaris-erro` das ilhas de formulário na lista do vivo). Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
+  "_": "Orçamento de performance do runtime (2026-11-20: contador 11400 → 11450 B pela zona de soltar das caixas de layout, `solta` e `aoSoltar`; 11450 → 11650 B pelo estado que `persiste` no navegador, ~175 B em todo cliente; 11650 → 11700 B e lista-formatos 11800 → 11850 B pelos eventos `polaris-enviado`/`polaris-erro` das ilhas de formulário na lista do vivo; lista-formatos 11850 → 11900 B por `data-marca` e `data-zoom` nos blocos de layout). Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
   "bundle_gz_bytes": {
     "estatica-simples": 11100,
     "contador": 11700,
-    "lista-formatos": 11850,
+    "lista-formatos": 11900,
     "dinheiro-exato": 12000,
     "com-bloco-de-codigo": 17300
   },

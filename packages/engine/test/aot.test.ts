@@ -92,9 +92,9 @@ describe('bundle por página: tree-shaking real', () => {
     expect(exata.pacote.gz).toBeGreaterThan(base.pacote.gz)
     expect(exata.pacote.gz).toBeLessThan(base.pacote.gz + 2.5 * 1024) // a aritmética exata inteira custa pouco
   })
-  it('a loja completa (listas, combinadores, aritmética exata, eventos) fica abaixo de 13,25 KB gz — o react-dom sozinho tem ~135 KB', async () => {
+  it('a loja completa (listas, combinadores, aritmética exata, eventos) fica abaixo de 13,3 KB gz — o react-dom sozinho tem ~135 KB', async () => {
     const r = await empacotaCliente(loja())
-    expect(r.ok && r.pacote.gz).toBeLessThan(13.25 * 1024) // 13 → 13,25 KB: eventos `polaris-*` e `data-solta` das ilhas
+    expect(r.ok && r.pacote.gz).toBeLessThan(13.3 * 1024) // 13 → 13,25 → 13,3 KB: eventos `polaris-*` e `data-solta` das ilhas; `data-marca` e `data-zoom` dos blocos de layout
   })
   it('páginas que o runtime vivo não suporta são recusadas com os motivos (nenhum bundle)', async () => {
     const r = new Registry(); registraBase(r)

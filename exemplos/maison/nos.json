@@ -5,6 +5,10 @@
     "versao": "1.0.0",
     "estatuto": "publicado",
     "spec": {
+      "fontes": [
+        "cormorant-garamond",
+        "inter"
+      ],
       "seguirSistema": false,
       "tokens": {
         "cor": {
@@ -42,7 +46,13 @@
           "alturaExibicao": 0.9,
           "espacamentoExibicao": "-0.025em",
           "tamanhoH2": "clamp(2rem, 4vw, 3rem)",
-          "tamanhoH3": "1.625rem"
+          "tamanhoH3": "clamp(1.5rem, 2.4vw, 1.875rem)",
+          "alturaTitulo": 1,
+          "espacamentoTitulo": "-0.025em",
+          "alturaCorpo": 1.625,
+          "tamanhoSobretitulo": "0.6875rem",
+          "espacamentoSobretitulo": "0.3em",
+          "margemSobretitulo": "1rem"
         },
         "layout": {
           "largura": "80rem",
@@ -78,11 +88,29 @@
           "tamanho": "0.8125rem",
           "peso": 500
         },
+        "cartao": {
+          "tituloTamanho": "1.25rem",
+          "tituloAltura": 1.375,
+          "tituloEspacamento": "-0.025em",
+          "tituloHover": "var(--cor-primaria)",
+          "descricaoTamanho": "0.875rem",
+          "precoTamanho": "1rem",
+          "precoPeso": 500,
+          "precoEspacamento": "0.025em"
+        },
         "movimento": {
           "rapido": "300ms",
           "sublinha": "500ms",
-          "zoomDuracao": "700ms",
+          "zoomDuracao": "1s",
           "zoomCartao": 1.05,
+          "fotoAlt": "1s",
+          "rotulo": "500ms",
+          "zoomFaixa": 1.1,
+          "zoomFaixaDuracao": "1.2s",
+          "faixaVeu": "color-mix(in srgb, var(--cor-texto) 20%, transparent)",
+          "faixaVeuDuracao": "700ms",
+          "faixaTexto": "500ms",
+          "faixaElevacao": "-0.25rem",
           "entrada": "1.2s",
           "zoomCapa": 1.08
         }
@@ -314,7 +342,7 @@
                         {
                           "bloco": "layout/pilha",
                           "props": {
-                            "gap": 16,
+                            "gap": 0,
                             "alinha": "inicio"
                           },
                           "slots": {
@@ -333,9 +361,21 @@
                                 }
                               },
                               {
+                                "bloco": "layout/espacador",
+                                "props": {
+                                  "tamanho": 16
+                                }
+                              },
+                              {
                                 "bloco": "texto/paragrafo",
                                 "props": {
                                   "texto": "Formas escultóricas que lançam calor e sombra. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz."
+                                }
+                              },
+                              {
+                                "bloco": "layout/espacador",
+                                "props": {
+                                  "tamanho": 24
                                 }
                               },
                               {
@@ -440,6 +480,8 @@
                                     "id": "arco",
                                     "colecao": "iluminacao",
                                     "colecaoNome": "Iluminação",
+                                    "categoria": "Iluminação",
+                                    "fotoHover": "@img/sobre-1",
                                     "nome": "Luminária Pendente Arco",
                                     "descricao": "Um arco gracioso de latão curvado à mão e linho",
                                     "preco": "485.00",
@@ -449,7 +491,9 @@
                                     "selo": "Destaque"
                                   },
                                   "href": "/produtos/arco",
-                                  "rotuloLink": ""
+                                  "rotuloLink": "",
+                                  "rotuloFoto": "Ver detalhes",
+                                  "mostraDescricao": true
                                 }
                               },
                               {
@@ -461,6 +505,8 @@
                                     "id": "orbe",
                                     "colecao": "iluminacao",
                                     "colecaoNome": "Iluminação",
+                                    "categoria": "Iluminação",
+                                    "fotoHover": "@img/hero",
                                     "nome": "Luminária de Mesa Orbe",
                                     "descricao": "Vidro soprado encontra bronze escultural",
                                     "preco": "295.00",
@@ -470,7 +516,9 @@
                                     "selo": "Novo"
                                   },
                                   "href": "/produtos/orbe",
-                                  "rotuloLink": ""
+                                  "rotuloLink": "",
+                                  "rotuloFoto": "Ver detalhes",
+                                  "mostraDescricao": true
                                 }
                               },
                               {
@@ -482,6 +530,8 @@
                                     "id": "vaso",
                                     "colecao": "ceramica",
                                     "colecaoNome": "Cerâmica",
+                                    "categoria": "Cerâmica",
+                                    "fotoHover": "@img/foto-1",
                                     "nome": "Vaso Escultural Grande",
                                     "descricao": "Grés torneado à mão com esmalte natural de cinzas",
                                     "preco": "320.00",
@@ -491,7 +541,9 @@
                                     "selo": "Destaque"
                                   },
                                   "href": "/produtos/vaso",
-                                  "rotuloLink": ""
+                                  "rotuloLink": "",
+                                  "rotuloFoto": "Ver detalhes",
+                                  "mostraDescricao": true
                                 }
                               },
                               {
@@ -503,6 +555,8 @@
                                     "id": "tigela",
                                     "colecao": "ceramica",
                                     "colecaoNome": "Cerâmica",
+                                    "categoria": "Cerâmica",
+                                    "fotoHover": "@img/sobre-2",
                                     "nome": "Tigela de Servir do Dia a Dia",
                                     "descricao": "Formas simples para os rituais diários",
                                     "preco": "145.00",
@@ -511,7 +565,9 @@
                                     "material": "Grés"
                                   },
                                   "href": "/produtos/tigela",
-                                  "rotuloLink": ""
+                                  "rotuloLink": "",
+                                  "rotuloFoto": "Ver detalhes",
+                                  "mostraDescricao": true
                                 }
                               }
                             ]
@@ -580,7 +636,8 @@
                             "imagem": "@img/colecao-iluminacao",
                             "altura": 360,
                             "escurece": 0.4,
-                            "alinha": "esquerda"
+                            "alinha": "esquerda",
+                            "zoom": true
                           },
                           "slots": {
                             "filhos": [
@@ -613,7 +670,8 @@
                             "imagem": "@img/colecao-ceramica",
                             "altura": 360,
                             "escurece": 0.4,
-                            "alinha": "esquerda"
+                            "alinha": "esquerda",
+                            "zoom": true
                           },
                           "slots": {
                             "filhos": [
@@ -646,7 +704,8 @@
                             "imagem": "@img/colecao-3",
                             "altura": 360,
                             "escurece": 0.4,
-                            "alinha": "esquerda"
+                            "alinha": "esquerda",
+                            "zoom": true
                           },
                           "slots": {
                             "filhos": [
@@ -679,7 +738,8 @@
                             "imagem": "@img/colecao-4",
                             "altura": 360,
                             "escurece": 0.4,
-                            "alinha": "esquerda"
+                            "alinha": "esquerda",
+                            "zoom": true
                           },
                           "slots": {
                             "filhos": [
@@ -712,7 +772,8 @@
                             "imagem": "@img/colecao-5",
                             "altura": 360,
                             "escurece": 0.4,
-                            "alinha": "esquerda"
+                            "alinha": "esquerda",
+                            "zoom": true
                           },
                           "slots": {
                             "filhos": [
@@ -745,7 +806,8 @@
                             "imagem": "@img/colecao-6",
                             "altura": 360,
                             "escurece": 0.4,
-                            "alinha": "esquerda"
+                            "alinha": "esquerda",
+                            "zoom": true
                           },
                           "slots": {
                             "filhos": [
@@ -831,57 +893,117 @@
                     "slots": {
                       "filhos": [
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/hero",
-                            "alt": "Foto 1 da casa",
-                            "fluida": true,
-                            "proporcao": 1
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/hero",
+                                  "alt": "Foto 1 da casa",
+                                  "fluida": true,
+                                  "proporcao": 1
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/foto-1",
-                            "alt": "Foto 2 da casa",
-                            "fluida": true,
-                            "proporcao": 1
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/foto-1",
+                                  "alt": "Foto 2 da casa",
+                                  "fluida": true,
+                                  "proporcao": 1
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/foto-2",
-                            "alt": "Foto 3 da casa",
-                            "fluida": true,
-                            "proporcao": 1
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/foto-2",
+                                  "alt": "Foto 3 da casa",
+                                  "fluida": true,
+                                  "proporcao": 1
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/foto-3",
-                            "alt": "Foto 4 da casa",
-                            "fluida": true,
-                            "proporcao": 1
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/foto-3",
+                                  "alt": "Foto 4 da casa",
+                                  "fluida": true,
+                                  "proporcao": 1
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/colecao-ceramica",
-                            "alt": "Foto 5 da casa",
-                            "fluida": true,
-                            "proporcao": 1
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/colecao-ceramica",
+                                  "alt": "Foto 5 da casa",
+                                  "fluida": true,
+                                  "proporcao": 1
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/colecao-5",
-                            "alt": "Foto 6 da casa",
-                            "fluida": true,
-                            "proporcao": 1
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/colecao-5",
+                                  "alt": "Foto 6 da casa",
+                                  "fluida": true,
+                                  "proporcao": 1
+                                }
+                              }
+                            ]
                           }
                         }
                       ]
@@ -1189,7 +1311,9 @@
                             "proporcao": 0.8,
                             "produto": "{p}",
                             "href": "{\"/produtos/\" + p.id}",
-                            "rotuloLink": ""
+                            "rotuloLink": "",
+                            "rotuloFoto": "Ver detalhes",
+                            "mostraDescricao": true
                           },
                           "repetir": {
                             "cada": "filtra(estado.produtos, p => (consulta.colecao ?? \"\") == \"\" || p.colecao == consulta.colecao)",
@@ -1201,7 +1325,7 @@
                               {
                                 "bloco": "texto/pequeno",
                                 "props": {
-                                  "texto": "{(p.selo ? p.selo + \" · \" : \"\") + p.material}"
+                                  "texto": "{p.material}"
                                 }
                               },
                               {
@@ -1297,6 +1421,8 @@
               "id": "arco",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/sobre-1",
               "nome": "Luminária Pendente Arco",
               "descricao": "Um arco gracioso de latão curvado à mão e linho",
               "preco": "485.00",
@@ -1309,6 +1435,8 @@
               "id": "vaso",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural Grande",
               "descricao": "Grés torneado à mão com esmalte natural de cinzas",
               "preco": "320.00",
@@ -1321,6 +1449,8 @@
               "id": "mesa",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/foto-2",
               "nome": "Mesa de Jantar Colheita",
               "descricao": "Carvalho maciço feito para gerações à mesa",
               "preco": "2850.00",
@@ -1333,6 +1463,8 @@
               "id": "castical",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/loja-capa",
               "nome": "Conjunto de Castiçais Forja",
               "descricao": "Latão forjado à mão em três alturas graduadas",
               "preco": "245.00",
@@ -1345,6 +1477,8 @@
               "id": "orbe",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/hero",
               "nome": "Luminária de Mesa Orbe",
               "descricao": "Vidro soprado encontra bronze escultural",
               "preco": "295.00",
@@ -1357,6 +1491,8 @@
               "id": "tigela",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/sobre-2",
               "nome": "Tigela de Servir do Dia a Dia",
               "descricao": "Formas simples para os rituais diários",
               "preco": "145.00",
@@ -1368,6 +1504,8 @@
               "id": "poltrona",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/colecao-iluminacao",
               "nome": "Poltrona Trançada",
               "descricao": "Corda de papel dinamarquesa e nogueira escultural",
               "preco": "1450.00",
@@ -1380,6 +1518,8 @@
               "id": "manta",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-capa",
               "nome": "Manta de Linho Herança",
               "descricao": "Linho belga lavado em tons naturais",
               "preco": "195.00",
@@ -1391,6 +1531,8 @@
               "id": "almofada",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-1",
               "nome": "Almofada de Lã Feltrada à Mão",
               "descricao": "Feita por artesãos com técnicas tradicionais de feltragem",
               "preco": "165.00",
@@ -1402,6 +1544,8 @@
               "id": "vasinho",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural para Uma Flor",
               "descricao": "Forma minimalista para uma única haste",
               "preco": "85.00",
@@ -1413,6 +1557,8 @@
               "id": "vela",
               "colecao": "sazonal",
               "colecaoNome": "Coleção sazonal",
+              "categoria": "Coleção sazonal",
+              "fotoHover": "@img/foto-2",
               "nome": "Vela Lareira de Inverno",
               "descricao": "Notas de cedro, fumaça e ervas secas",
               "preco": "65.00",
@@ -1424,6 +1570,8 @@
               "id": "bandeja",
               "colecao": "novidades",
               "colecaoNome": "Novidades",
+              "categoria": "Novidades",
+              "fotoHover": "@img/loja-capa",
               "nome": "Bandeja de Mármore Polido",
               "descricao": "Pedra natural para a beleza de todo dia",
               "preco": "175.00",
@@ -1436,6 +1584,8 @@
               "id": "caixa",
               "colecao": "presentes",
               "colecaoNome": "Presentes selecionados",
+              "categoria": "Presentes selecionados",
+              "fotoHover": "@img/hero",
               "nome": "Caixa de Presente Selecionada",
               "descricao": "Uma seleção cuidadosa das nossas peças favoritas",
               "preco": "225.00",
@@ -1720,7 +1870,9 @@
                                   "proporcao": 0.8,
                                   "produto": "{o}",
                                   "href": "{\"/produtos/\" + o.id}",
-                                  "rotuloLink": ""
+                                  "rotuloLink": "",
+                                  "rotuloFoto": "Ver detalhes",
+                                  "mostraDescricao": true
                                 },
                                 "repetir": {
                                   "cada": "fatia(filtra(estado.produtos, o => o.colecao == p.colecao && o.id != p.id), 0, 4)",
@@ -1848,6 +2000,8 @@
               "id": "arco",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/sobre-1",
               "nome": "Luminária Pendente Arco",
               "descricao": "Um arco gracioso de latão curvado à mão e linho",
               "preco": "485.00",
@@ -1860,6 +2014,8 @@
               "id": "vaso",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural Grande",
               "descricao": "Grés torneado à mão com esmalte natural de cinzas",
               "preco": "320.00",
@@ -1872,6 +2028,8 @@
               "id": "mesa",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/foto-2",
               "nome": "Mesa de Jantar Colheita",
               "descricao": "Carvalho maciço feito para gerações à mesa",
               "preco": "2850.00",
@@ -1884,6 +2042,8 @@
               "id": "castical",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/loja-capa",
               "nome": "Conjunto de Castiçais Forja",
               "descricao": "Latão forjado à mão em três alturas graduadas",
               "preco": "245.00",
@@ -1896,6 +2056,8 @@
               "id": "orbe",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/hero",
               "nome": "Luminária de Mesa Orbe",
               "descricao": "Vidro soprado encontra bronze escultural",
               "preco": "295.00",
@@ -1908,6 +2070,8 @@
               "id": "tigela",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/sobre-2",
               "nome": "Tigela de Servir do Dia a Dia",
               "descricao": "Formas simples para os rituais diários",
               "preco": "145.00",
@@ -1919,6 +2083,8 @@
               "id": "poltrona",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/colecao-iluminacao",
               "nome": "Poltrona Trançada",
               "descricao": "Corda de papel dinamarquesa e nogueira escultural",
               "preco": "1450.00",
@@ -1931,6 +2097,8 @@
               "id": "manta",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-capa",
               "nome": "Manta de Linho Herança",
               "descricao": "Linho belga lavado em tons naturais",
               "preco": "195.00",
@@ -1942,6 +2110,8 @@
               "id": "almofada",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-1",
               "nome": "Almofada de Lã Feltrada à Mão",
               "descricao": "Feita por artesãos com técnicas tradicionais de feltragem",
               "preco": "165.00",
@@ -1953,6 +2123,8 @@
               "id": "vasinho",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural para Uma Flor",
               "descricao": "Forma minimalista para uma única haste",
               "preco": "85.00",
@@ -1964,6 +2136,8 @@
               "id": "vela",
               "colecao": "sazonal",
               "colecaoNome": "Coleção sazonal",
+              "categoria": "Coleção sazonal",
+              "fotoHover": "@img/foto-2",
               "nome": "Vela Lareira de Inverno",
               "descricao": "Notas de cedro, fumaça e ervas secas",
               "preco": "65.00",
@@ -1975,6 +2149,8 @@
               "id": "bandeja",
               "colecao": "novidades",
               "colecaoNome": "Novidades",
+              "categoria": "Novidades",
+              "fotoHover": "@img/loja-capa",
               "nome": "Bandeja de Mármore Polido",
               "descricao": "Pedra natural para a beleza de todo dia",
               "preco": "175.00",
@@ -1987,6 +2163,8 @@
               "id": "caixa",
               "colecao": "presentes",
               "colecaoNome": "Presentes selecionados",
+              "categoria": "Presentes selecionados",
+              "fotoHover": "@img/hero",
               "nome": "Caixa de Presente Selecionada",
               "descricao": "Uma seleção cuidadosa das nossas peças favoritas",
               "preco": "225.00",
@@ -2478,30 +2656,60 @@
                     "slots": {
                       "filhos": [
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/colecao-ceramica",
-                            "alt": "Detalhe 1 das peças",
-                            "fluida": true,
-                            "proporcao": 0.8
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/colecao-ceramica",
+                                  "alt": "Detalhe 1 das peças",
+                                  "fluida": true,
+                                  "proporcao": 0.8
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/colecao-4",
-                            "alt": "Detalhe 2 das peças",
-                            "fluida": true,
-                            "proporcao": 0.8
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/colecao-4",
+                                  "alt": "Detalhe 2 das peças",
+                                  "fluida": true,
+                                  "proporcao": 0.8
+                                }
+                              }
+                            ]
                           }
                         },
                         {
-                          "bloco": "midia/imagem",
+                          "bloco": "layout/pilha",
                           "props": {
-                            "src": "@img/produto-almofada",
-                            "alt": "Detalhe 3 das peças",
-                            "fluida": true,
-                            "proporcao": 0.8
+                            "recorta": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "@img/produto-almofada",
+                                  "alt": "Detalhe 3 das peças",
+                                  "fluida": true,
+                                  "proporcao": 0.8
+                                }
+                              }
+                            ]
                           }
                         }
                       ]
@@ -2992,6 +3200,8 @@
               "id": "arco",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/sobre-1",
               "nome": "Luminária Pendente Arco",
               "descricao": "Um arco gracioso de latão curvado à mão e linho",
               "preco": "485.00",
@@ -3004,6 +3214,8 @@
               "id": "vaso",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural Grande",
               "descricao": "Grés torneado à mão com esmalte natural de cinzas",
               "preco": "320.00",
@@ -3016,6 +3228,8 @@
               "id": "mesa",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/foto-2",
               "nome": "Mesa de Jantar Colheita",
               "descricao": "Carvalho maciço feito para gerações à mesa",
               "preco": "2850.00",
@@ -3028,6 +3242,8 @@
               "id": "castical",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/loja-capa",
               "nome": "Conjunto de Castiçais Forja",
               "descricao": "Latão forjado à mão em três alturas graduadas",
               "preco": "245.00",
@@ -3040,6 +3256,8 @@
               "id": "orbe",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/hero",
               "nome": "Luminária de Mesa Orbe",
               "descricao": "Vidro soprado encontra bronze escultural",
               "preco": "295.00",
@@ -3052,6 +3270,8 @@
               "id": "tigela",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/sobre-2",
               "nome": "Tigela de Servir do Dia a Dia",
               "descricao": "Formas simples para os rituais diários",
               "preco": "145.00",
@@ -3063,6 +3283,8 @@
               "id": "poltrona",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/colecao-iluminacao",
               "nome": "Poltrona Trançada",
               "descricao": "Corda de papel dinamarquesa e nogueira escultural",
               "preco": "1450.00",
@@ -3075,6 +3297,8 @@
               "id": "manta",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-capa",
               "nome": "Manta de Linho Herança",
               "descricao": "Linho belga lavado em tons naturais",
               "preco": "195.00",
@@ -3086,6 +3310,8 @@
               "id": "almofada",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-1",
               "nome": "Almofada de Lã Feltrada à Mão",
               "descricao": "Feita por artesãos com técnicas tradicionais de feltragem",
               "preco": "165.00",
@@ -3097,6 +3323,8 @@
               "id": "vasinho",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural para Uma Flor",
               "descricao": "Forma minimalista para uma única haste",
               "preco": "85.00",
@@ -3108,6 +3336,8 @@
               "id": "vela",
               "colecao": "sazonal",
               "colecaoNome": "Coleção sazonal",
+              "categoria": "Coleção sazonal",
+              "fotoHover": "@img/foto-2",
               "nome": "Vela Lareira de Inverno",
               "descricao": "Notas de cedro, fumaça e ervas secas",
               "preco": "65.00",
@@ -3119,6 +3349,8 @@
               "id": "bandeja",
               "colecao": "novidades",
               "colecaoNome": "Novidades",
+              "categoria": "Novidades",
+              "fotoHover": "@img/loja-capa",
               "nome": "Bandeja de Mármore Polido",
               "descricao": "Pedra natural para a beleza de todo dia",
               "preco": "175.00",
@@ -3131,6 +3363,8 @@
               "id": "caixa",
               "colecao": "presentes",
               "colecaoNome": "Presentes selecionados",
+              "categoria": "Presentes selecionados",
+              "fotoHover": "@img/hero",
               "nome": "Caixa de Presente Selecionada",
               "descricao": "Uma seleção cuidadosa das nossas peças favoritas",
               "preco": "225.00",
@@ -3499,6 +3733,8 @@
               "id": "arco",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/sobre-1",
               "nome": "Luminária Pendente Arco",
               "descricao": "Um arco gracioso de latão curvado à mão e linho",
               "preco": "485.00",
@@ -3511,6 +3747,8 @@
               "id": "vaso",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural Grande",
               "descricao": "Grés torneado à mão com esmalte natural de cinzas",
               "preco": "320.00",
@@ -3523,6 +3761,8 @@
               "id": "mesa",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/foto-2",
               "nome": "Mesa de Jantar Colheita",
               "descricao": "Carvalho maciço feito para gerações à mesa",
               "preco": "2850.00",
@@ -3535,6 +3775,8 @@
               "id": "castical",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/loja-capa",
               "nome": "Conjunto de Castiçais Forja",
               "descricao": "Latão forjado à mão em três alturas graduadas",
               "preco": "245.00",
@@ -3547,6 +3789,8 @@
               "id": "orbe",
               "colecao": "iluminacao",
               "colecaoNome": "Iluminação",
+              "categoria": "Iluminação",
+              "fotoHover": "@img/hero",
               "nome": "Luminária de Mesa Orbe",
               "descricao": "Vidro soprado encontra bronze escultural",
               "preco": "295.00",
@@ -3559,6 +3803,8 @@
               "id": "tigela",
               "colecao": "ceramica",
               "colecaoNome": "Cerâmica",
+              "categoria": "Cerâmica",
+              "fotoHover": "@img/sobre-2",
               "nome": "Tigela de Servir do Dia a Dia",
               "descricao": "Formas simples para os rituais diários",
               "preco": "145.00",
@@ -3570,6 +3816,8 @@
               "id": "poltrona",
               "colecao": "mobiliario",
               "colecaoNome": "Mobiliário",
+              "categoria": "Mobiliário",
+              "fotoHover": "@img/colecao-iluminacao",
               "nome": "Poltrona Trançada",
               "descricao": "Corda de papel dinamarquesa e nogueira escultural",
               "preco": "1450.00",
@@ -3582,6 +3830,8 @@
               "id": "manta",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-capa",
               "nome": "Manta de Linho Herança",
               "descricao": "Linho belga lavado em tons naturais",
               "preco": "195.00",
@@ -3593,6 +3843,8 @@
               "id": "almofada",
               "colecao": "texteis",
               "colecaoNome": "Têxteis",
+              "categoria": "Têxteis",
+              "fotoHover": "@img/sobre-1",
               "nome": "Almofada de Lã Feltrada à Mão",
               "descricao": "Feita por artesãos com técnicas tradicionais de feltragem",
               "preco": "165.00",
@@ -3604,6 +3856,8 @@
               "id": "vasinho",
               "colecao": "objetos",
               "colecaoNome": "Objetos e vasos",
+              "categoria": "Objetos e vasos",
+              "fotoHover": "@img/foto-1",
               "nome": "Vaso Escultural para Uma Flor",
               "descricao": "Forma minimalista para uma única haste",
               "preco": "85.00",
@@ -3615,6 +3869,8 @@
               "id": "vela",
               "colecao": "sazonal",
               "colecaoNome": "Coleção sazonal",
+              "categoria": "Coleção sazonal",
+              "fotoHover": "@img/foto-2",
               "nome": "Vela Lareira de Inverno",
               "descricao": "Notas de cedro, fumaça e ervas secas",
               "preco": "65.00",
@@ -3626,6 +3882,8 @@
               "id": "bandeja",
               "colecao": "novidades",
               "colecaoNome": "Novidades",
+              "categoria": "Novidades",
+              "fotoHover": "@img/loja-capa",
               "nome": "Bandeja de Mármore Polido",
               "descricao": "Pedra natural para a beleza de todo dia",
               "preco": "175.00",
@@ -3638,6 +3896,8 @@
               "id": "caixa",
               "colecao": "presentes",
               "colecaoNome": "Presentes selecionados",
+              "categoria": "Presentes selecionados",
+              "fotoHover": "@img/hero",
               "nome": "Caixa de Presente Selecionada",
               "descricao": "Uma seleção cuidadosa das nossas peças favoritas",
               "preco": "225.00",
