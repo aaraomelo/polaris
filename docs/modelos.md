@@ -11,6 +11,7 @@ Um **modelo** é um pacote de nós (tema, páginas, blocos de composição, dado
 ## Ler
 - `GET /studio/templates`: a lista **leve** (cabeças, sem os nós; traz `nNos`).
 - `GET /studio/templates/:slug[?seq=N]`: o modelo inteiro (a cabeça ou a versão N).
+- **Leitura fragmentada** (para o Studio abrir um modelo grande sem baixar tudo): `GET /studio/templates/:slug/manifesto[?seq=N]` devolve os metadados e, de cada nó, `{kind, id, hash, bytes}` (o hash é o SHA-256 do JSON do nó), tudo calculado no banco; `GET /studio/templates/:slug/nos/:kind/<id>[?seq=N]` devolve **um** nó, com `ETag` igual ao hash do manifesto e `Cache-Control: private, no-cache`: quem já tem o nó manda `If-None-Match` e recebe 304 sem corpo. O manifesto de 14 nós tem poucos KB, e o cliente traz a página ou o tema só quando precisa.
 - `GET /studio/templates/:slug/historico` e `DELETE /studio/templates/:slug`.
 - `studio.ver` basta para ler; o tenant vem só da sessão (um tenant nunca vê o modelo de outro).
 
@@ -21,4 +22,4 @@ Um **modelo** é um pacote de nós (tema, páginas, blocos de composição, dado
 3. O nó `tenant` do modelo **não** substitui o do tenant: o tenant continua dono do alias, do nome e dos módulos; o modelo só dá `tema`, `paginas`, `paginaNaoEncontrada`, `idiomas` e `idiomaPadrao` (usa o nó de mesmo alias, senão o primeiro).
 4. Com `publicar: true`, cria e promove uma release; sem ele, o site só muda quando alguém publicar.
 
-Limites: aplicar não é atômico (se um nó falhar no meio, os anteriores ficam como rascunho, que não vai ao ar sem release; a validação do pacote antes de gravar torna isso raro); aplicar não remove nós que o tenant já tinha e o modelo não traz; o modelo não carrega as fotos, só os nomes (os ativos precisam existir no tenant).
+Limites: os nós ainda são guardados juntos num único JSON por versão (a leitura fragmentada extrai no banco, mas não deduplica entre versões; guardar cada nó por conteúdo é o passo seguinte, só vale com muitas versões de modelos grandes); aplicar não é atômico (se um nó falhar no meio, os anteriores ficam como rascunho, que não vai ao ar sem release; a validação do pacote antes de gravar torna isso raro); aplicar não remove nós que o tenant já tinha e o modelo não traz; o modelo não carrega as fotos, só os nomes (os ativos precisam existir no tenant).

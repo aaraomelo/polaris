@@ -92,6 +92,13 @@ describe('ambiente local', () => {
     const cheio = await json(await get(l, 'loja-demo', '/studio/templates/maison', ed)); const reg = new Registry(); registraBase(reg); registraTemas(reg); registraSite(reg); registraCommerce(reg)
     for (const n of cheio.modelo.nos) reg.registra(n)
     expect(reg.ids('pagina' as never)).toEqual(expect.arrayContaining(['maison.home', 'maison.produtos'])); expect(reg.ids('traducao' as never)).toContain('maison.textos')
+    // leitura FRAGMENTADA: o manifesto traz kind/id/hash/bytes de cada nó (sem os nós) e cada nó vem por si, com ETag e 304
+    const man = await json(await get(l, 'loja-demo', '/studio/templates/maison/manifesto', ed)); expect(man).toMatchObject({ seq: 1, modelo: { nome: 'Maison', versao: '1.0.0' } }); expect(man.modelo.nos).toBeUndefined(); expect(man.nos).toHaveLength(cheio.modelo.nos.length)
+    const alvoM = man.nos.find((n: any) => n.kind === 'pagina' && n.id === 'maison.home'); expect(alvoM.bytes).toBeGreaterThan(500); expect(alvoM.hash).toMatch(/^[0-9a-f]{64}$/)
+    const um = await get(l, 'loja-demo', '/studio/templates/maison/nos/pagina/maison.home', ed); expect(um.status).toBe(200); expect(um.headers.get('etag')).toBe(`"${alvoM.hash}"`); expect(um.headers.get('cache-control')).toBe('private, no-cache')
+    expect(await json(um)).toEqual(cheio.modelo.nos.find((n: any) => n.kind === 'pagina' && n.id === 'maison.home'))
+    expect((await req(l, 'loja-demo', 'GET', '/studio/templates/maison/nos/pagina/maison.home', ed, undefined, { 'if-none-match': `"${alvoM.hash}"` })).status).toBe(304)
+    expect((await get(l, 'loja-demo', '/studio/templates/maison/nos/pagina/nao.existe', ed)).status).toBe(404); expect((await get(l, 'loja-demo', '/studio/templates/maison/manifesto?seq=9', ed)).status).toBe(404); expect((await get(l, 'loja-outra', '/studio/templates/maison/nos/pagina/maison.home', await l.token('loja-outra', ['studio.leitor']))).status).toBe(200) // cada tenant lê o seu
     // gravar: leitor não; editor sim; versão imutável (conteúdo igual não cria outra; mudou, seq 2); histórico e leitura de uma versão antiga
     const pagina = (t: string) => ({ kind: 'pagina', id: 'mini.home', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/mini', titulo: t, raiz: { bloco: 'texto/titulo', props: { texto: t, nivel: 1 } } } })
     const corpo = (t: string, extra: object = {}) => ({ nome: 'Mínimo', versao: '1.0.0', idiomas: ['pt-BR'], nos: [pagina(t)], ...extra })

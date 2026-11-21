@@ -84,7 +84,7 @@ export function errosDeTema(no: Record<string, unknown>): string[] {
 const proxima = (v: string) => { const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(v); return m ? `${m[1]}.${m[2]}.${Number(m[3]) + 1}` : '1.0.1' }
 const ANCORA_NO = /^[A-Za-z0-9._-]{1,100}$/
 export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
-  app.addHook('onSend', async (_req, reply) => { reply.header('cache-control', 'no-store'); reply.header('x-content-type-options', 'nosniff') })
+  app.addHook('onSend', async (_req, reply) => { if (!reply.getHeader('cache-control')) reply.header('cache-control', 'no-store'); reply.header('x-content-type-options', 'nosniff') })
   async function sessao(req: FastifyRequest, reply: FastifyReply, p: Parameters<Sessao['pode']>[0], custo = 1): Promise<Sessao | null> {
     const s = await o.autentica(req).catch(() => null)
     if (!s) { erro(reply, 401, 'nao_autenticado', 'entre para usar o Studio'); return null }
@@ -272,6 +272,23 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     if (!SLUG_M.test(req.params.slug) || (req.query.seq !== undefined && !/^\d{1,9}$/.test(req.query.seq))) return erro(reply, 400, 'requisicao_invalida', 'slug ou seq inválido')
     const m = await o.templates.le(s.tenantId, req.params.slug, req.query.seq === undefined ? undefined : Number(req.query.seq))
     return m ?? erro(reply, 404, 'nao_encontrado', 'modelo inexistente')
+  })
+  const seqQ = (v: string | undefined) => (v === undefined ? undefined : /^\d{1,9}$/.test(v) ? Number(v) : NaN)
+  // leitura FRAGMENTADA: o manifesto (metadados + kind/id/hash/bytes de cada nó) e cada nó por si, com ETag = hash do nó (304 se o cliente já tem)
+  app.get<{ Params: { slug: string }; Querystring: { seq?: string } }>('/studio/templates/:slug/manifesto', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    const seq = seqQ(req.query.seq); if (!SLUG_M.test(req.params.slug) || Number.isNaN(seq)) return erro(reply, 400, 'requisicao_invalida', 'slug ou seq inválido')
+    return (await o.templates.manifesto(s.tenantId, req.params.slug, seq)) ?? erro(reply, 404, 'nao_encontrado', 'modelo inexistente')
+  })
+  app.get<{ Params: { slug: string; kind: string; '*': string }; Querystring: { seq?: string } }>('/studio/templates/:slug/nos/:kind/*', async (req, reply) => {
+    const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
+    if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
+    const seq = seqQ(req.query.seq), id = req.params['*']; if (!SLUG_M.test(req.params.slug) || Number.isNaN(seq) || !ANCORA_NO.test(req.params.kind) || !ID.test(id)) return erro(reply, 400, 'requisicao_invalida', 'slug, kind, id ou seq inválido')
+    const r = await o.templates.no(s.tenantId, req.params.slug, req.params.kind, id, seq); if (!r) return erro(reply, 404, 'nao_encontrado', 'nó inexistente neste modelo')
+    const etag = `"${r.hash}"`; reply.header('etag', etag); reply.header('cache-control', 'private, no-cache') // revalida sempre, mas só baixa o que mudou (o hook de onSend só põe no-store quando a rota não definiu)
+    if (req.headers['if-none-match'] === etag) return reply.status(304).send()
+    return r.no
   })
   app.get<{ Params: { slug: string }; Querystring: { limite?: string } }>('/studio/templates/:slug/historico', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply

@@ -96,6 +96,22 @@ export function criaTemplates(o: {
       if (!r || r.conteudo === null) return null
       return { seq: Number(r.seq), autor: r.autor as string, nota: (r.nota as string | null) ?? null, criadoEm: new Date(r.criado_em as string).toISOString(), modelo: r.conteudo as Modelo }
     },
+    /** o MANIFESTO: os metadados do modelo e, de cada nó, `{kind, id, hash, bytes}` (o hash é o SHA-256 do JSON do nó e serve de ETag). Calculado no banco: os nós não trafegam. */
+    async manifesto(tenantId: string, slug: string, seq?: number): Promise<{ seq: number; autor: string; nota: string | null; criadoEm: string; modelo: Omit<Modelo, 'nos'>; nos: Array<{ kind: string; id: string; hash: string; bytes: number }> } | null> {
+      if (!SLUG.test(slug)) return null
+      const filtro = seq === undefined ? `seq = (SELECT max(seq) FROM plataforma.template_versao WHERE tenant_id = $1 AND slug = $2)` : `seq = $3`, ps = seq === undefined ? [tenantId, slug] : [tenantId, slug, seq]
+      const cab = (await q(`SELECT seq, conteudo - 'nos' AS meta, autor, nota, criado_em FROM plataforma.template_versao WHERE tenant_id = $1 AND slug = $2 AND ${filtro}`, ps)).rows[0]
+      if (!cab || cab.meta === null) return null
+      const nos = (await q(`SELECT e->>'kind' AS kind, e->>'id' AS id, encode(sha256(convert_to(e::text, 'UTF8')), 'hex') AS hash, octet_length(e::text) AS bytes FROM plataforma.template_versao, jsonb_array_elements(conteudo->'nos') WITH ORDINALITY AS t(e, n) WHERE tenant_id = $1 AND slug = $2 AND ${filtro} ORDER BY n`, ps)).rows
+      return { seq: Number(cab.seq), autor: cab.autor as string, nota: (cab.nota as string | null) ?? null, criadoEm: new Date(cab.criado_em as string).toISOString(), modelo: cab.meta as Omit<Modelo, 'nos'>, nos: nos.map((r) => ({ kind: r.kind as string, id: r.id as string, hash: r.hash as string, bytes: Number(r.bytes) })) }
+    },
+    /** UM nó do modelo (a cabeça ou a versão `seq`), extraído no banco; devolve também o hash do manifesto */
+    async no(tenantId: string, slug: string, kind: string, id: string, seq?: number): Promise<{ hash: string; no: Record<string, unknown> } | null> {
+      if (!SLUG.test(slug)) return null
+      const filtro = seq === undefined ? `seq = (SELECT max(seq) FROM plataforma.template_versao WHERE tenant_id = $1 AND slug = $2)` : `seq = $5`, ps = seq === undefined ? [tenantId, slug, kind, id] : [tenantId, slug, kind, id, seq]
+      const r = (await q(`SELECT e AS no, encode(sha256(convert_to(e::text, 'UTF8')), 'hex') AS hash FROM plataforma.template_versao, jsonb_array_elements(conteudo->'nos') AS t(e) WHERE tenant_id = $1 AND slug = $2 AND ${filtro} AND e->>'kind' = $3 AND e->>'id' = $4 LIMIT 1`, ps)).rows[0]
+      return r ? { hash: r.hash as string, no: r.no as Record<string, unknown> } : null
+    },
     /** as versões do modelo, da mais nova à mais antiga (a lápide aparece como `removido`) */
     async historico(tenantId: string, slug: string, limite = 50): Promise<Array<{ seq: number; versao: string | null; autor: string; nota: string | null; criadoEm: string; removido: boolean; nNos: number }>> {
       return (await q(`SELECT seq, conteudo, autor, nota, criado_em FROM plataforma.template_versao WHERE tenant_id = $1 AND slug = $2 ORDER BY seq DESC LIMIT $3`, [tenantId, slug, Math.min(Math.max(limite, 1), 200)])).rows
