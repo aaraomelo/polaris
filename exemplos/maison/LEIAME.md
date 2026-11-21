@@ -17,6 +17,9 @@ O tema declara `seguirSistema: false` (sempre claro, como o template), `cabecalh
 ## Idiomas (pt-BR e en)
 As páginas **só levam chaves** (`{t("home.titulo")}`); os textos ficam em `idiomas.mjs` e saem como o catálogo `maison.textos` (kind `traducao`, `docs/i18n.md`). O padrão é pt-BR (`/produtos`) e o inglês é o **texto original do template** (`/en/produtos`), o que valida a cópia. Os produtos são dados em vários idiomas (`loc(idioma, …)`), os preços usam `qmoeda(…, idioma)`, o formulário do checkout tem rótulos por idioma e o cabeçalho tem o seletor (`tenant.idiomas`). Para acrescentar um idioma: um bloco novo em `idiomas.mjs` e o código em `IDIOMAS`.
 
+## Tipografia (pesos e tamanhos)
+Conferida elemento a elemento contra o template: família, tamanho, peso, espaçamento e caixa de 17 pontos da capa, das coleções e do rodapé batem (por exemplo: marca e h1 da capa em 400, não 500; títulos de coluna do rodapé em Cormorant 600 11 px caixa alta; "Explore" 12/500; botão da assinatura 56×48 só com a seta). Cada diferença virou token (docs/temas.md), não regra da Maison.
+
 ## Rodapé
 Três faixas (`site/rodape` com `faixas`): marca e frase com a assinatura de e-mail no slot `topo` (o e-mail e o "já assinou" são estado da página, o segundo persistente: não há servidor), as quatro colunas (a última com e-mail e horário como linhas de texto) e o aviso final. O que o rodapé tem de reutilizável está no `docs/blocos-base.md`.
 

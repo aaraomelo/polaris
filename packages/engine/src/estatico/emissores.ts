@@ -28,7 +28,7 @@ const MAO: Emissores = {
   'layout/linha': caixa('row'),
   'texto/titulo': ({ props, filhos, id }) => {
     const n = Math.min(6, Math.max(1, Math.trunc(num(props.nivel) ?? 1)))
-    return `<h${n}${idAttr(id)}${props.tamanho === 'grande' ? ' data-tamanho="grande"' : ''}>${props.texto === undefined || props.texto === '' ? (filhos.filhos ?? "") : escHtml(txt(props.texto))}</h${n}>`
+    return `<h${n}${idAttr(id)}${props.tamanho === 'grande' || props.tamanho === 'medio' ? ` data-tamanho="${props.tamanho}"` : ''}>${props.texto === undefined || props.texto === '' ? (filhos.filhos ?? "") : escHtml(txt(props.texto))}</h${n}>`
   },
   'texto/paragrafo': ({ props, id }) => `<p${idAttr(id)}>${escHtml(txt(props.texto))}</p>`,
   'midia/imagem': ({ props, id }) => {

@@ -25,10 +25,10 @@ describe('orçamento do bundle do cliente', () => {
     expect(b.gz).toBeLessThan(11.5 * 1024) // (10,5 → 11,5 KB: `traduz`, `loc`, `qmoeda` e o formatador ICU do i18n) (10 KB → 10,5 KB com `elementosDoBloco` e `semIds`, as funções da árvore do Studio) a biblioteca completa cresceu (listas, aritmética exata, caminhos); a página real carrega só o que usa (aot.test.ts)
   })
 
-  it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 164 KB gz', async () => {
+  it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 165 KB gz', async () => {
     const b = await empacota(`import { hidrata } from './src/render/cliente'; import { COMPONENTES_BASE } from './src/render/base'; hidrata(COMPONENTES_BASE)`)
     for (const re of PROIBIDOS) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
-    expect(b.gz).toBeLessThan(164 * 1024) // 160 → 161 → 162 → 164 KB (as funções do i18n entram na biblioteca completa): os blocos novos do Studio (midia/tela, as props alvo e arrasta, o papel status) e as primitivas de layout do tema Maison (layout/contido, texto/sobretitulo, imagem fluida, alinha da grade) entram no cliente de hidratação
+    expect(b.gz).toBeLessThan(165 * 1024) // 160 → 161 → 162 → 164 → 165 KB (as funções do i18n entram na biblioteca completa; `iconeApos`, `rotulo` do botão e `data-botao` texto nos descritores): os blocos novos do Studio (midia/tela, as props alvo e arrasta, o papel status) e as primitivas de layout do tema Maison (layout/contido, texto/sobretitulo, imagem fluida, alinha da grade) entram no cliente de hidratação
     const proprio = b.entradas.filter((e) => /packages\/engine\/src/.test(e) || /^src\//.test(e))
     expect(proprio.length).toBeGreaterThan(5) // a medição enxerga o nosso código (não é um bundle vazio)
   })

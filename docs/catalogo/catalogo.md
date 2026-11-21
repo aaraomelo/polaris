@@ -1997,7 +1997,7 @@ Lista de itens; `ordenada` numera. Só aceita `lista/item`.
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `acento` | booleano | não |  | o detalhe de acento na cor de destaque do tema |
-| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" \| "sacola" \| "coracao" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
+| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" \| "sacola" \| "coracao" \| "seta" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível; sem ele o ícone é decorativo (aria-hidden) |
 | `tamanho` | número ≥ 8 ≤ 96 | não |  | lado em px (padrão 1,25 em, acompanha o texto) |
 
@@ -2256,6 +2256,8 @@ Botão de ação. `aoClicar` executa a lista de ações declarada na instância.
 | `desabilitado` | booleano | não |  |  |
 | `expandido` | booleano | não |  | botão que abre/fecha algo: leva aria-expanded (verdadeiro/falso) |
 | `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
+| `iconeApos` | booleano | não |  | o ícone vem DEPOIS do texto (uma seta de "ver mais"); com texto vazio, é um botão só de ícone (dê um `rotulo`) |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 | `texto` | texto | sim |  |  |
 | `variante` | "primario" \| "secundario" \| "fantasma" | não |  | primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto |
 
@@ -2341,9 +2343,10 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `atual` | booleano | não |  | a página atual: o link leva aria-current="page" |
-| `botao` | texto ≤ 12 caracteres | não |  | primario ou secundario: o link com aparência de botão |
+| `botao` | texto ≤ 12 caracteres | não |  | primario, secundario ou texto: o link com aparência de botão (texto: caixa alta pequena, com seta se houver `icone`) |
 | `href` | texto | sim |  |  |
 | `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
+| `iconeApos` | booleano | não |  | o ícone vem DEPOIS do texto (uma seta de "ver mais"); com texto vazio, é um botão só de ícone (dê um `rotulo`) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 | `soConsulta` | booleano | não |  | o link só muda a consulta da URL (?nome=valor) da MESMA página: o estado ligado a ela (`daConsulta`) muda e a URL acompanha, sem recarregar nem voltar ao topo |
 | `texto` | texto | não |  |  |
@@ -3463,7 +3466,7 @@ Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o taman
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `nivel` | inteiro ≥ 1 ≤ 6 | não | 1 |  |
-| `tamanho` | "grande" | não |  | título de seção maior (token tipografia.tamanhoGrande) |
+| `tamanho` | "grande" \| "medio" | não |  | título de seção maior (tokens tipografia.tamanhoGrande e tamanhoMedio) |
 | `texto` | texto | sim |  | o texto do título; vazio ("") faz o título ser montado com os filhos (`texto/trecho`, `texto/enfase`) |
 
 **Slots**

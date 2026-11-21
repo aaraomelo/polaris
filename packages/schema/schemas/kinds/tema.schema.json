@@ -73,7 +73,7 @@
         },
         "rodape": {
           "type": "object",
-          "description": "rodapé (site/rodape): `fundo`, `texto`, `suave` (texto secundário), `link`, `borda`, `marcaTamanho`, `marcaPeso`, `marcaEspacamento`, `descricaoTamanho`, `tituloTamanho`, `tituloPeso`, `tituloEspacamento`, `tituloCaixa`. Faixas (`faixas: true`): `recuo`, `gap`, `recuoX`, `divisor`, `faixaRecuoY`, `baseRecuoY`, `linkGap`, `legalGap`, `topoLargura`. Campos do rodapé (assinatura): `campoAltura`, `campoFundo`, `campoBorda`, `campoTexto`, `campoPlaceholder`, `botaoFundo`, `botaoTexto`",
+          "description": "rodapé (site/rodape): `fundo`, `texto`, `suave` (texto secundário), `link`, `borda`, `marcaTamanho`, `marcaPeso`, `marcaEspacamento`, `descricaoTamanho`, `tituloTamanho`, `tituloPeso`, `tituloEspacamento`, `tituloCaixa`. Faixas (`faixas: true`): `recuo`, `gap`, `recuoX`, `divisor`, `faixaRecuoY`, `baseRecuoY`, `linkGap`, `legalGap`, `topoLargura`. Campos do rodapé (assinatura): `campoAltura`, `campoFundo`, `campoBorda`, `campoTexto`, `campoPlaceholder`, `botaoFundo`, `botaoTexto`. Tipografia do rodapé: `tituloFamilia`, `tituloCor`, `descricaoCor`, `linkTamanho`, `linhasTamanho`, `linhasCor`, `baseTamanho`, `baseCor`, `topoTamanho`, `topoEspacamento`, `topoCor`, `campoTamanho`, `campoRecuo`, `botaoRecuoX`, `botaoPeso`, `botaoTamanho`, `botaoIcone`, `botaoBorda`",
           "additionalProperties": {
             "type": [
               "number",
@@ -86,7 +86,7 @@
         },
         "movimento": {
           "type": "object",
-          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto do cartão no hover), `fotoAlt` (fade da 2ª foto), `rotulo` (rótulo sobre a foto), `zoomFaixa`, `zoomFaixaDuracao`, `faixaVeu`, `faixaVeuDuracao`, `faixaTexto` e `faixaElevacao` (faixa `zoom`), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da capa). Sem estes tokens não há transição",
+          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto do cartão no hover), `fotoAlt` (fade da 2ª foto), `rotulo` (rótulo sobre a foto), `zoomFaixa`, `zoomFaixaDuracao`, `faixaVeu`, `faixaVeuDuracao`, `faixaTexto` e `faixaElevacao` (faixa `zoom`), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da capa). Sem estes tokens não há transição. Revelação do sobretítulo das faixas `zoom` no hover: `faixaRevela` (opacidade inicial, ex.: 0) e `faixaRevelaY`",
           "additionalProperties": {
             "type": [
               "number",
@@ -99,7 +99,7 @@
         },
         "botao": {
           "type": "object",
-          "description": "botões e links de botão: `caixa` (uppercase), `espacamento` (letter-spacing), `tamanho` e `peso`",
+          "description": "botões e links de botão: `caixa` (uppercase), `espacamento` (letter-spacing), `tamanho` e `peso`; o link `botao: \"texto\"` (texto em caixa alta com seta): `textoTamanho`, `textoPeso`, `textoEspacamento`, `textoCaixa`, `textoCor`, `textoCorHover`, `textoGap`, `textoIcone`, `textoDesloca`",
           "additionalProperties": {
             "type": [
               "number",
@@ -125,7 +125,7 @@
         },
         "capa": {
           "type": "object",
-          "description": "capa (layout/destaque com `capa`): `indicador` é o texto do indicador de rolagem entre aspas (ex.: \"Rolar\"); sem ele não há indicador",
+          "description": "capa (layout/destaque com `capa`): `indicador` (texto do indicador de rolagem entre aspas), `indicadorPeso`, `textoTamanho`, `textoLargura`, `textoCor`",
           "additionalProperties": {
             "type": [
               "number",
@@ -165,6 +165,19 @@
         "selecao": {
           "type": "object",
           "description": "seletor (entrada/selecao): `largura`, `altura`, `tamanho`, `espacamento`, `fundo`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "faixa": {
+          "type": "object",
+          "description": "texto das faixas `zoom` (as coleções): `sobretituloTamanho`, `sobretituloEspacamento`, `textoTamanho`, `linkTamanho`",
           "additionalProperties": {
             "type": [
               "number",

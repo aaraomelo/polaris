@@ -53,7 +53,7 @@ export const d_layout_pilha: Descritor = /* @__PURE__ */ caixa('column')
 export const d_layout_linha: Descritor = /* @__PURE__ */ caixa('row')
 /** `tamanho: 'grande'` é o título de seção maior (token `tipografia.tamanhoGrande`); com `texto` vazio ("") o conteúdo vem do slot `filhos` (use `texto/trecho` e `texto/enfase`) */
 const tituloComFilhos = (p: Record<string, unknown>): boolean => p.texto === undefined || p.texto === ''
-export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${tituloComFilhos(p) ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' ? { 'data-tamanho': 'grande' } : {}) }), texto: (p) => (tituloComFilhos(p) ? undefined : txt(p.texto)) }
+export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${tituloComFilhos(p) ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' || p.tamanho === 'medio' ? { 'data-tamanho': p.tamanho as string } : {}) }), texto: (p) => (tituloComFilhos(p) ? undefined : txt(p.texto)) }
 export const d_texto_enfase: Descritor = { chave: () => 'em', tag: () => 'em', attrs: (p, id) => ({ ...comId(id), ...(p.bloco === true ? { style: 'display:block' } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
 export const d_midia_imagem: Descritor = {
@@ -67,13 +67,13 @@ export const d_nav_link: Descritor = {
     chave: (p) => (p.texto !== undefined ? 'a:t' : 'a:f'), tag: () => 'a', filhos: true,
     attrs: (p, id) => {
       const href = urlSegura(p.href)
-      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.soConsulta === true ? { 'data-consulta': '' } : {}), ...rotulo(p), ...(p.botao === 'primario' || p.botao === 'secundario' ? { 'data-botao': p.botao } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }
+      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.soConsulta === true ? { 'data-consulta': '' } : {}), ...rotulo(p), ...(p.botao === 'primario' || p.botao === 'secundario' || p.botao === 'texto' ? { 'data-botao': p.botao } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}), ...(p.iconeApos === true ? { 'data-icone-apos': '' } : {}) }
     },
     texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
   }
 export const d_nav_botao: Descritor = {
     chave: () => 'button', tag: () => 'button', texto: (p) => txt(p.texto),
-    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}), ...(p.expandido != null ? { 'aria-expanded': '' + p.expandido } : {}), ...(typeof p.alvo === 'string' && /^[A-Za-z][\w-]{0,119}$/.test(p.alvo) ? { 'data-alvo': p.alvo } : {}), ...(typeof p.arrasta === 'string' && /^[A-Za-z][\w-]{0,119}$/.test(p.arrasta) ? { draggable: 'true', 'data-arrasta': p.arrasta } : {}) }),
+    attrs: (p, id) => ({ ...comId(id), type: 'button', ...(p.desabilitado === true ? { disabled: '' } : {}), ...(p.atual === true ? { 'aria-current': 'true' } : {}), ...(p.variante === 'secundario' || p.variante === 'fantasma' ? { 'data-variante': p.variante } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}), ...(p.iconeApos === true ? { 'data-icone-apos': '' } : {}), ...rotulo(p), ...(p.expandido != null ? { 'aria-expanded': '' + p.expandido } : {}), ...(typeof p.alvo === 'string' && /^[A-Za-z][\w-]{0,119}$/.test(p.alvo) ? { 'data-alvo': p.alvo } : {}), ...(typeof p.arrasta === 'string' && /^[A-Za-z][\w-]{0,119}$/.test(p.arrasta) ? { draggable: 'true', 'data-arrasta': p.arrasta } : {}) }),
     eventos: { aoClicar: { dom: 'click' } },
   }
 /** nome acessível do campo: `rotulo` vira `aria-label` (sem ele, o único jeito era um `texto/rotulo` ligado por `para`/`id`) */

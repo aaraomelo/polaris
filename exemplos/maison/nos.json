@@ -43,6 +43,8 @@
           "tamanhoBase": "16px",
           "tamanhoH1": "clamp(2.75rem, 6.5vw, 5rem)",
           "tamanhoExibicao": "clamp(3rem, 8.5vw, 8rem)",
+          "pesoExibicao": 400,
+          "tamanhoMedio": "clamp(1.875rem, 3vw, 2.25rem)",
           "tamanhoGrande": "clamp(2.5rem, 5vw, 3.75rem)",
           "alturaExibicao": 0.9,
           "espacamentoExibicao": "-0.025em",
@@ -70,7 +72,7 @@
           "borda": "transparent",
           "marcaTamanho": "clamp(1.5rem, 2.4vw, 1.875rem)",
           "marcaFamilia": "var(--tipografia-familia-titulo)",
-          "marcaPeso": 500,
+          "marcaPeso": 400,
           "marcaEspacamento": "-0.025em",
           "marcaHover": "var(--cor-primaria)",
           "linkTamanho": "0.75rem",
@@ -107,12 +109,30 @@
           "recuoX": "max(3rem, calc((100% - 100rem) / 2 + 3rem))",
           "divisor": "color-mix(in srgb, var(--cor-fundo) 10%, transparent)",
           "campoAltura": "3rem",
-          "campoFundo": "transparent",
-          "campoBorda": "color-mix(in srgb, var(--cor-fundo) 20%, transparent)",
+          "campoFundo": "color-mix(in srgb, var(--cor-fundo) 5%, transparent)",
+          "campoBorda": "color-mix(in srgb, var(--cor-fundo) 15%, transparent)",
           "campoTexto": "var(--cor-fundo)",
           "campoPlaceholder": "color-mix(in srgb, var(--cor-fundo) 40%, transparent)",
+          "campoTamanho": "0.875rem",
+          "campoRecuo": "0 1rem",
           "botaoFundo": "var(--cor-fundo)",
           "botaoTexto": "var(--cor-texto)",
+          "botaoRecuoX": "1.25rem",
+          "botaoBorda": 0,
+          "botaoPeso": 500,
+          "botaoTamanho": "0.875rem",
+          "botaoIcone": "1rem",
+          "tituloFamilia": "var(--tipografia-familia-titulo)",
+          "tituloCor": "color-mix(in srgb, var(--cor-fundo) 40%, transparent)",
+          "descricaoCor": "color-mix(in srgb, var(--cor-fundo) 50%, transparent)",
+          "linkTamanho": "0.875rem",
+          "linhasTamanho": "0.875rem",
+          "linhasCor": "color-mix(in srgb, var(--cor-fundo) 40%, transparent)",
+          "baseTamanho": "0.75rem",
+          "baseCor": "color-mix(in srgb, var(--cor-fundo) 30%, transparent)",
+          "topoTamanho": "0.625rem",
+          "topoEspacamento": "0.3em",
+          "topoCor": "color-mix(in srgb, var(--cor-fundo) 40%, transparent)",
           "faixaRecuoY": "4rem",
           "baseRecuoY": "1.5rem",
           "linkGap": "0.75rem",
@@ -134,7 +154,13 @@
           "caixa": "uppercase",
           "espacamento": "0.1em",
           "tamanho": "0.8125rem",
-          "peso": 500
+          "peso": 500,
+          "textoTamanho": "0.875rem",
+          "textoPeso": 500,
+          "textoEspacamento": "0.15em",
+          "textoCaixa": "uppercase",
+          "textoCor": "var(--cor-texto-suave)",
+          "textoCorHover": "var(--cor-texto)"
         },
         "abas": {
           "gap": "0.5rem",
@@ -169,6 +195,17 @@
           "espacamento": "0.05em",
           "fundo": "var(--cor-fundo)"
         },
+        "capa": {
+          "textoTamanho": "1.125rem",
+          "textoLargura": "32rem",
+          "indicadorPeso": 400
+        },
+        "faixa": {
+          "linkTamanho": "0.75rem",
+          "sobretituloTamanho": "0.625rem",
+          "sobretituloEspacamento": "0.3em",
+          "textoTamanho": "0.875rem"
+        },
         "cartao": {
           "tituloTamanho": "1.25rem",
           "tituloAltura": 1.375,
@@ -186,6 +223,8 @@
           "zoomCartao": 1.05,
           "fotoAlt": "1s",
           "rotulo": "500ms",
+          "faixaRevela": 0,
+          "faixaRevelaY": "0.5rem",
           "zoomFaixa": 1.1,
           "zoomFaixaDuracao": "1.2s",
           "faixaVeu": "color-mix(in srgb, var(--cor-texto) 20%, transparent)",
@@ -884,7 +923,9 @@
                           "props": {
                             "href": "{(tenant.prefixo ?? \"\") + \"/produtos\"}",
                             "texto": "{t(\"home.cta\")}",
-                            "botao": "primario"
+                            "botao": "primario",
+                            "icone": "seta",
+                            "iconeApos": true
                           }
                         }
                       ]
@@ -1056,7 +1097,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos\"}",
-                                  "texto": "{t(\"home.verTudo\")}"
+                                  "texto": "{t(\"home.verTudo\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1196,7 +1240,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}",
-                                  "texto": "{t(\"home.colecoes.cta\")}"
+                                  "texto": "{t(\"home.colecoes.cta\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1237,7 +1284,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}",
-                                  "texto": "{t(\"home.colecoes.cta\")}"
+                                  "texto": "{t(\"home.colecoes.cta\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1278,7 +1328,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}",
-                                  "texto": "{t(\"home.colecoes.cta\")}"
+                                  "texto": "{t(\"home.colecoes.cta\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1319,7 +1372,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}",
-                                  "texto": "{t(\"home.colecoes.cta\")}"
+                                  "texto": "{t(\"home.colecoes.cta\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1360,7 +1416,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}",
-                                  "texto": "{t(\"home.colecoes.cta\")}"
+                                  "texto": "{t(\"home.colecoes.cta\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1401,7 +1460,10 @@
                                 "bloco": "nav/link",
                                 "props": {
                                   "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}",
-                                  "texto": "{t(\"home.colecoes.cta\")}"
+                                  "texto": "{t(\"home.colecoes.cta\")}",
+                                  "botao": "texto",
+                                  "icone": "seta",
+                                  "iconeApos": true
                                 }
                               }
                             ]
@@ -1487,7 +1549,10 @@
                           "bloco": "nav/link",
                           "props": {
                             "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}",
-                            "texto": "{t(\"home.citacao.cta\")}"
+                            "texto": "{t(\"home.citacao.cta\")}",
+                            "botao": "texto",
+                            "icone": "seta",
+                            "iconeApos": true
                           }
                         },
                         {
@@ -1533,7 +1598,8 @@
                           "bloco": "texto/titulo",
                           "props": {
                             "texto": "@maisonhome",
-                            "nivel": 2
+                            "nivel": 2,
+                            "tamanho": "medio"
                           }
                         },
                         {
@@ -1812,7 +1878,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [
@@ -2818,7 +2886,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [
@@ -3881,7 +3951,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [
@@ -5100,7 +5172,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [
@@ -5658,7 +5732,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [
@@ -6567,7 +6643,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [
@@ -7366,7 +7444,9 @@
                         {
                           "bloco": "nav/botao",
                           "props": {
-                            "texto": "{t(\"rodape.assinar\")}"
+                            "texto": "",
+                            "icone": "seta",
+                            "rotulo": "{t(\"rodape.assinar\")}"
                           },
                           "eventos": {
                             "aoClicar": [

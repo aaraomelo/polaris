@@ -14,6 +14,9 @@ export const ICONES_CSS = [
   '#polaris span[data-icone]::after{background:var(--icone-acento,currentColor);-webkit-mask-image:var(--ic-acento);mask-image:var(--ic-acento)}',
   '#polaris span[data-icone][data-acento]{--icone-acento:var(--cor-destaque)}',
   '#polaris :is(button,a,summary)[data-icone]{display:inline-flex;align-items:center;gap:calc(var(--espacamento-base) * 1)}',
-  '#polaris :is(button,a,summary)[data-icone]::before{content:"";flex:none;width:1.25em;height:1.25em;background:currentColor;-webkit-mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat;mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat}',
+  '#polaris :is(button,a,summary)[data-icone]::before{content:"";flex:none;width:var(--icone-tamanho,1.25em);height:var(--icone-tamanho,1.25em);background:currentColor;-webkit-mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat;mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat}',
+  '#polaris :is(button,a,summary)[data-icone][data-icone-apos]::before{content:none}',
+  '#polaris :is(button,a,summary)[data-icone][data-icone-apos]::after{content:"";flex:none;width:var(--icone-tamanho,1.25em);height:var(--icone-tamanho,1.25em);background:currentColor;-webkit-mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat;mask:var(--ic-base) center/contain no-repeat,var(--ic-acento) center/contain no-repeat;transition:transform var(--movimento-rapido,0s) ease}',
+  '#polaris :is(button,a)[data-icone][data-icone-apos]:hover::after{transform:translateX(var(--icone-desloca,0))}',
   ...Object.entries(ICONES).map(([nome, i]) => `#polaris [data-icone=${nome}]{--ic-base:${svg(i.base)};--ic-acento:${i.acento ? svg(i.acento) : vazio}}`),
 ].join('\n')

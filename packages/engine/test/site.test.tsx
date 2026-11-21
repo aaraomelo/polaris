@@ -275,7 +275,7 @@ describe('ícones (midia/icone e `icone` de botões e links)', () => {
     expect(um('nav/link', { href: '/x', texto: 'x', icone: 'entrar' }).querySelector('a')!.getAttribute('data-icone')).toBe('entrar')
   })
   it('o tema traz uma regra por ícone (duas imagens, só máscara: sem cor literal) e a estrutura dos três usos', () => {
-    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(62); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a,summary)[data-icone]::before')
+    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(63); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a,summary)[data-icone]::before')
     for (const n of ['salvar', 'layout-pilha', 'cartaz', 'tema-escuro']) expect(css, n).toContain(`[data-icone=${n}]{--ic-base:url("data:image/svg+xml,`)
   })
 })
@@ -283,7 +283,7 @@ describe('ícones (midia/icone e `icone` de botões e links)', () => {
 describe('lista de nomes dos ícones', () => {
   it('nomes.ts (o que o navegador carrega) coincide com dados.ts (as imagens que só o CSS usa)', async () => {
     const { ICONES, FAMILIAS_ICONES } = await import('../src/icones/dados'), { NOMES_ICONES } = await import('../src/icones/nomes')
-    expect([...NOMES_ICONES].sort()).toEqual(Object.keys(ICONES).sort()); expect(FAMILIAS_ICONES.flatMap((f) => f[1]).sort()).toEqual([...NOMES_ICONES].sort()); expect(NOMES_ICONES.length).toBe(62)
+    expect([...NOMES_ICONES].sort()).toEqual(Object.keys(ICONES).sort()); expect(FAMILIAS_ICONES.flatMap((f) => f[1]).sort()).toEqual([...NOMES_ICONES].sort()); expect(NOMES_ICONES.length).toBe(63)
     for (const [n, i] of Object.entries(ICONES)) { expect(i.base.length + i.acento.length, n).toBeGreaterThan(10); expect(i.base + i.acento, n).not.toMatch(/<script|on[a-z]+=|href=|javascript:/i) }
   })
 })

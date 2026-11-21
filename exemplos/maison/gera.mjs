@@ -24,20 +24,22 @@ const tema = {
       },
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
-      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
+      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', pesoExibicao: 400, tamanhoMedio: 'clamp(1.875rem, 3vw, 2.25rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
       layout: { largura: '100rem', larguraEstreita: '64rem', larguraLarga: '100rem', recuo: '3rem', recuoEstreito: '1.5rem' }, // o contêiner do template (container-full 1600 px, recuo de 48; container-narrow 1024 px, recuo de 24)
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
-      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1, linkPeso: 500, linkAtualCor: 'var(--cor-texto-suave)', linkAtualPeso: 500, linkAtualDecoracao: 'none', iconeCor: 'var(--cor-texto)', iconeHover: 'var(--cor-superficie-alt)', gatilhoAltura: '2.5rem', gatilhoRecuoX: '1rem', gatilhoFundo: 'color-mix(in srgb, var(--cor-superficie-alt) 50%, transparent)', submenuHover: 'grid', submenuDisplay: 'grid', submenuColunas: 2, submenuGap: '0.25rem', submenuLargura: '37.5rem', submenuRecuo: '1rem', submenuFundo: 'var(--cor-fundo)', submenuBorda: 'var(--cor-borda)', submenuSombra: '0 10px 30px color-mix(in srgb, var(--cor-texto) 8%, transparent)', submenuRaio: 0, submenuItem: '0.75rem', submenuItemHover: 'var(--cor-superficie-alt)' }, // o painel das coleções abre no hover: 2 colunas, cada item com título e descrição
+      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 400, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1, linkPeso: 500, linkAtualCor: 'var(--cor-texto-suave)', linkAtualPeso: 500, linkAtualDecoracao: 'none', iconeCor: 'var(--cor-texto)', iconeHover: 'var(--cor-superficie-alt)', gatilhoAltura: '2.5rem', gatilhoRecuoX: '1rem', gatilhoFundo: 'color-mix(in srgb, var(--cor-superficie-alt) 50%, transparent)', submenuHover: 'grid', submenuDisplay: 'grid', submenuColunas: 2, submenuGap: '0.25rem', submenuLargura: '37.5rem', submenuRecuo: '1rem', submenuFundo: 'var(--cor-fundo)', submenuBorda: 'var(--cor-borda)', submenuSombra: '0 10px 30px color-mix(in srgb, var(--cor-texto) 8%, transparent)', submenuRaio: 0, submenuItem: '0.75rem', submenuItemHover: 'var(--cor-superficie-alt)' }, // o painel das coleções abre no hover: 2 colunas, cada item com título e descrição
       // rodapé invertido: fundo escuro no claro e claro no escuro
-      rodape: { recuo: 0, gap: 0, recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', divisor: 'color-mix(in srgb, var(--cor-fundo) 10%, transparent)', campoAltura: '3rem', campoFundo: 'transparent', campoBorda: 'color-mix(in srgb, var(--cor-fundo) 20%, transparent)', campoTexto: 'var(--cor-fundo)', campoPlaceholder: 'color-mix(in srgb, var(--cor-fundo) 40%, transparent)', botaoFundo: 'var(--cor-fundo)', botaoTexto: 'var(--cor-texto)', faixaRecuoY: '4rem', baseRecuoY: '1.5rem', linkGap: '0.75rem', fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
+      rodape: { recuo: 0, gap: 0, recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', divisor: 'color-mix(in srgb, var(--cor-fundo) 10%, transparent)', campoAltura: '3rem', campoFundo: 'color-mix(in srgb, var(--cor-fundo) 5%, transparent)', campoBorda: 'color-mix(in srgb, var(--cor-fundo) 15%, transparent)', campoTexto: 'var(--cor-fundo)', campoPlaceholder: 'color-mix(in srgb, var(--cor-fundo) 40%, transparent)', campoTamanho: '0.875rem', campoRecuo: '0 1rem', botaoFundo: 'var(--cor-fundo)', botaoTexto: 'var(--cor-texto)', botaoRecuoX: '1.25rem', botaoBorda: 0, botaoPeso: 500, botaoTamanho: '0.875rem', botaoIcone: '1rem', tituloFamilia: 'var(--tipografia-familia-titulo)', tituloCor: 'color-mix(in srgb, var(--cor-fundo) 40%, transparent)', descricaoCor: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', linkTamanho: '0.875rem', linhasTamanho: '0.875rem', linhasCor: 'color-mix(in srgb, var(--cor-fundo) 40%, transparent)', baseTamanho: '0.75rem', baseCor: 'color-mix(in srgb, var(--cor-fundo) 30%, transparent)', topoTamanho: '0.625rem', topoEspacamento: '0.3em', topoCor: 'color-mix(in srgb, var(--cor-fundo) 40%, transparent)', faixaRecuoY: '4rem', baseRecuoY: '1.5rem', linkGap: '0.75rem', fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
       // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
-      botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500 },
+      botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500, textoTamanho: '0.875rem', textoPeso: 500, textoEspacamento: '0.15em', textoCaixa: 'uppercase', textoCor: 'var(--cor-texto-suave)', textoCorHover: 'var(--cor-texto)' },
       // a barra de categorias da loja: fixa sob o cabeçalho, translúcida com desfoque, abas em caixa alta (a escolhida invertida) e o seletor de ordem à direita
       abas: { gap: '0.5rem', altura: '2.25rem', recuoX: '1.25rem', recuoY: 0, tamanho: '0.75rem', peso: 500, espacamento: '0.1em', caixa: 'uppercase', cor: 'var(--cor-texto)', corHover: 'var(--cor-texto)', fundoHover: 'var(--cor-superficie-alt)', corAtiva: 'var(--cor-fundo)', fundoAtiva: 'var(--cor-texto)' },
       barra: { fundo: 'color-mix(in srgb, var(--cor-fundo) 95%, transparent)', desfoque: 'blur(12px)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', recuoY: '1.25rem', gap: '1rem', rotuloTamanho: '0.75rem', rotuloEspacamento: '0.1em', rotuloCaixa: 'uppercase', rotuloCor: 'var(--cor-texto-suave)' },
       selecao: { largura: '11.25rem', altura: '2.25rem', tamanho: '0.75rem', espacamento: '0.05em', fundo: 'var(--cor-fundo)' },
+      capa: { textoTamanho: '1.125rem', textoLargura: '32rem', indicadorPeso: 400 },
+      faixa: { linkTamanho: '0.75rem', sobretituloTamanho: '0.625rem', sobretituloEspacamento: '0.3em', textoTamanho: '0.875rem' },
       cartao: { tituloTamanho: '1.25rem', tituloAltura: 1.375, tituloEspacamento: '-0.025em', tituloHover: 'var(--cor-primaria)', descricaoTamanho: '0.875rem', precoTamanho: '1rem', precoPeso: 500, precoEspacamento: '0.025em' },
-      movimento: { rapido: '300ms', sublinha: '500ms', zoomDuracao: '1s', zoomCartao: 1.05, fotoAlt: '1s', rotulo: '500ms', zoomFaixa: 1.1, zoomFaixaDuracao: '1.2s', faixaVeu: 'color-mix(in srgb, var(--cor-texto) 20%, transparent)', faixaVeuDuracao: '700ms', faixaTexto: '500ms', faixaElevacao: '-0.25rem', entrada: '1.2s', zoomCapa: 1.08 },
+      movimento: { rapido: '300ms', sublinha: '500ms', zoomDuracao: '1s', zoomCartao: 1.05, fotoAlt: '1s', rotulo: '500ms', faixaRevela: 0, faixaRevelaY: '0.5rem', zoomFaixa: 1.1, zoomFaixaDuracao: '1.2s', faixaVeu: 'color-mix(in srgb, var(--cor-texto) 20%, transparent)', faixaVeuDuracao: '700ms', faixaTexto: '500ms', faixaElevacao: '-0.25rem', entrada: '1.2s', zoomCapa: 1.08 },
     },
     modos: {
       escuro: {
@@ -146,11 +148,11 @@ const rodape = () => b('site/rodape', {
   b('texto/sobretitulo', { texto: T('rodape.newsletter') }),
   b('layout/linha', { gap: 0 }, [
     b('entrada/texto', { valor: '{estado.email}', rotulo: T('rodape.newsletter'), placeholder: T('rodape.email') }, undefined, { eventos: { aoMudar: [{ acao: 'definir', estado: 'email', valor: 'evento' }] } }),
-    b('nav/botao', { texto: T('rodape.assinar') }, undefined, { eventos: { aoClicar: [{ acao: 'definir', estado: 'inscrito', valor: 'contem(estado.email, "@")' }] } }),
+    b('nav/botao', { texto: '', icone: 'seta', rotulo: T('rodape.assinar') }, undefined, { eventos: { aoClicar: [{ acao: 'definir', estado: 'inscrito', valor: 'contem(estado.email, "@")' }] } }),
   ], { se: '!estado.inscrito' }),
   b('texto/pequeno', { texto: T('rodape.obrigado') }, undefined, { se: 'estado.inscrito' }),
 ] } })
-const link = (href, texto, botao) => b('nav/link', { href: H(href), texto, ...(botao ? { botao } : {}) })
+const link = (href, texto, botao, extra = {}) => b('nav/link', { href: H(href), texto, ...(botao ? { botao } : {}), ...extra })
 // as props de um cartão de produto: o template passa os rótulos e o idioma (o bloco não tem texto fixo que o template não possa trocar)
 const propsCartao = (produto, href) => ({ fluida: true, proporcao: 0.8, produto, href, rotuloLink: '', rotuloFoto: T('produto.verDetalhes'), mostraDescricao: true, idioma: '{idioma}' })
 
@@ -164,7 +166,7 @@ const home = b('layout/pilha', { gap: 0 }, [
       sobre(T('home.eyebrow')),
       tituloEnfase(T('home.titulo1'), T('home.titulo2'), 1),
       par(T('home.texto')),
-      link('/produtos', T('home.cta'), 'primario'),
+      link('/produtos', T('home.cta'), 'primario', { icone: 'seta', iconeApos: true }),
     ]),
     b('layout/pilha', { marca: 'indicador-capa' }, [b('texto/pequeno', { texto: T('home.rolar') })]),
   ]),
@@ -188,7 +190,7 @@ const home = b('layout/pilha', { gap: 0 }, [
       folga(64),
       b('layout/linha', { gap: 16, alinha: 'fim', quebra: true }, [
         b('layout/pilha', { gap: 4, cresce: true }, [sobre(T('home.novidades.eyebrow')), titulo(T('home.novidades.titulo'), 2)]),
-        link('/produtos', T('home.verTudo')),
+        link('/produtos', T('home.verTudo'), 'texto', { icone: 'seta', iconeApos: true }),
       ]),
       folga(24),
       b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: propsCartao('{p}', H('{"/produtos/" + p.id}')), repetir: { cada: NOVIDADES, como: 'p', chave: 'p.id' } }]),
@@ -202,7 +204,7 @@ const home = b('layout/pilha', { gap: 0 }, [
     folga(32),
     b('layout/grade', { colunas: 12, gap: 24, alinha: 'inicio' }, GRADE_COLECOES.map(([slug, ocupa, proporcao]) => {
       const c = COLECOES.find((x) => x.slug === slug)
-      return b('layout/destaque', { imagem: foto(c.foto), ocupa, proporcao, escurece: 0.4, alinha: 'esquerda', zoom: true }, [sobre(T('loja.colecao')), titulo(T(`colecao.${slug}.nome`), 3), par(T(`colecao.${slug}.frase`)), link(`/produtos?colecao=${slug}`, T('home.colecoes.cta'))])
+      return b('layout/destaque', { imagem: foto(c.foto), ocupa, proporcao, escurece: 0.4, alinha: 'esquerda', zoom: true }, [sobre(T('loja.colecao')), titulo(T(`colecao.${slug}.nome`), 3), par(T(`colecao.${slug}.frase`)), link(`/produtos?colecao=${slug}`, T('home.colecoes.cta'), 'texto', { icone: 'seta', iconeApos: true })])
     })),
   ], 'larga', { id: 'colecoes' }),
   folga(128),
@@ -213,14 +215,14 @@ const home = b('layout/pilha', { gap: 0 }, [
       sobre(T('home.citacao.eyebrow')),
       b('texto/titulo', { texto: '', nivel: 2 }, [b('texto/trecho', { texto: T('home.citacao.a') }), b('texto/enfase', { texto: T('home.citacao.enfase') }), b('texto/trecho', { texto: T('home.citacao.b') })]),
       par(T('home.citacao.texto')),
-      link('/sobre', T('home.citacao.cta')),
+      link('/sobre', T('home.citacao.cta'), 'texto', { icone: 'seta', iconeApos: true }),
       folga(112),
     ], 'estreita'),
   ]),
   folga(112),
   // a faixa de fotos
   contido([
-    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('home.instagram.eyebrow')), titulo('@maisonhome', 2), par(T('home.instagram.texto'))]),
+    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('home.instagram.eyebrow')), titulo('@maisonhome', 2, 'medio'), par(T('home.instagram.texto'))]),
     folga(24),
     b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: T('home.foto.alt', { n: i + 1 }), fluida: true, proporcao: 1 })]))),
   ], 'larga'),
