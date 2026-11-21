@@ -184,7 +184,7 @@ export function colunaSql(nome: string, c: Campo): string {
   return partes.join(' ')
 }
 
-type EntidadeSql = { campos: Record<string, Campo>; indices?: string[][]; unicos?: string[][]; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' } }
+type EntidadeSql = { escopo?: 'usuario'; campos: Record<string, Campo>; indices?: string[][]; unicos?: string[][]; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' } }
 const RESERVADOS = ['id', 'tenant_id', 'criado_em', 'atualizado_em']
 
 /** Nome da FK composta de um campo. */
@@ -264,11 +264,12 @@ export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, ent
   for (const [campo, c] of Object.entries(ent.campos)) {
     validaReferencia(servico, nome, campo, c, entidades)
     if (c.referencia !== undefined) fks.push(...sqlFk(servico, nome, campo, c.referencia))
-    if (RESERVADOS.includes(snake(campo))) throw new EmissaoErro(`servico ${servico}: campo '${campo}' em '${nome}' colide com coluna reservada (${RESERVADOS.join(', ')})`)
+    if (RESERVADOS.includes(snake(campo)) || (ent.escopo === 'usuario' && snake(campo) === 'dono')) throw new EmissaoErro(`servico ${servico}: campo '${campo}' em '${nome}' colide com coluna reservada (${RESERVADOS.join(', ')})`)
   }
   const colunas = [
     '  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid()',
     '  "tenant_id" uuid NOT NULL',
+    ...(ent.escopo === 'usuario' ? ['  "dono" text NOT NULL'] : []),
     ...Object.keys(ent.campos).map((c) => colunaSql(c, ent.campos[c]!)),
     '  "criado_em" timestamptz NOT NULL DEFAULT now()',
     '  "atualizado_em" timestamptz NOT NULL DEFAULT now()',
@@ -276,6 +277,7 @@ export function ddlEntidade(servico: string, nome: string, ent: EntidadeSql, ent
   tabela.push('', `CREATE TABLE IF NOT EXISTS ${tab} (\n${colunas.join(',\n')}\n);`)
   tabela.push(`CREATE UNIQUE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_tenant_id_uidx`)} ON ${tab} ("tenant_id", "id");`) // alvo das FKs compostas
   tabela.push(`CREATE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_tenant_idx`)} ON ${tab} ("tenant_id");`)
+  if (ent.escopo === 'usuario') tabela.push(`CREATE INDEX IF NOT EXISTS ${identSql(`${snake(nome)}_dono_idx`)} ON ${tab} ("tenant_id", "dono");`)
   for (const cols of ent.indices ?? []) {
     for (const c of cols) if (!(c in ent.campos)) throw new EmissaoErro(`servico ${servico}: índice de '${nome}' usa campo inexistente '${c}'`)
     tabela.push(sqlIndice(servico, nome, cols))

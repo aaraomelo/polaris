@@ -7,7 +7,7 @@ import type { No } from './index'
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
 export type CrudOp = 'listar' | 'obter' | 'criar' | 'atualizar' | 'remover'
-type Ent = { campos: Record<string, Campo & { descricao?: string }>; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' }; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
+type Ent = { escopo?: 'usuario'; campos: Record<string, Campo & { descricao?: string }>; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' }; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
 type Op = { metodo: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; caminho: string; entrada?: Record<string, Campo>; saida?: string; lista?: boolean; permissao?: string; publica?: string[] }
 type Spec = { entidades: Record<string, Ent>; operacoes: Record<string, Op>; consome?: string[] }
 
@@ -100,6 +100,7 @@ export function rotasDe(no: No): Rota[] {
     if (!ent.crud) continue
     const { caminho } = ent.crud
     const permissao = modoDeAcesso(ent.crud.permissao)
+    if (ent.escopo === 'usuario' && permissao === 'publica') throw new EmissaoErro(`servico ${no.id}: a entidade '${nome}' tem escopo por usuário e não pode ter crud público (não há usuário para dono dos registros)`)
     const ops = ent.crud.operacoes ?? ['listar', 'obter', 'criar', 'atualizar', 'remover']
     const idParam = { id: { tipo: 'uuid', obrigatorio: true } } as Record<string, Campo>
     if (ent.busca) {

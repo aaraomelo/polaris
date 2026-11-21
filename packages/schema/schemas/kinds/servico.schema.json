@@ -98,6 +98,12 @@
                 "description": "exata: trechos de palavras, sem acento nem maiúsculas. aproximada: também erros de digitação e ordena por RELEVÂNCIA, com índice trigrama (exige a extensão pg_trgm no Postgres)"
               }
             }
+          },
+          "escopo": {
+            "enum": [
+              "usuario"
+            ],
+            "description": "`usuario`: cada registro pertence a quem o criou (coluna `dono`, preenchida pelo servidor com o usuário do token); listar, obter, atualizar e remover só alcançam os registros do próprio usuário, além do tenant. Exige crud protegido (nada de `publica`)."
           }
         },
         "additionalProperties": false

@@ -152,6 +152,8 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
     const valor = (campo: string, v: unknown) => (ent.campos[campo]!.tipo === 'json' ? JSON.stringify(v) : v)
     const coluna = (campo: string) => ident(snake(campo))
     const cond = e.acesso?.resolvido.tipo === 'onde' ? e.acesso.resolvido.cond : null
+    // escopo por usuário: cada registro é de quem o criou (coluna `dono`, preenchida aqui, nunca vinda do corpo); tudo o mais só alcança os do próprio usuário
+    const dono = ent.escopo === 'usuario' ? (e.ctx.usuario ?? (() => { throw new ErroApi(401, 'nao_autenticado', 'autenticação necessária') })()) : null
     const proibido = () => new ErroApi(403, 'proibido', 'a operação levaria o registro para fora do que o seu papel permite')
     // o que o papel pode LER desta entidade (resposta) e ESCREVER nesta ação
     const leitura = e.acesso ? camposDe(e.acesso, op === 'listar' ? 'listar' : 'obter', sujeito) : null
@@ -169,6 +171,7 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
         let relevancia: string | undefined
         if (typeof busca === 'string' && ent.busca) { const c = condicaoDeBusca(ent.busca, busca, coluna, ps); if (c) { onde.push(`(${c.onde})`); relevancia = c.relevancia } } // busca por texto (sem acento nem maiúsculas); termo sem palavra nenhuma não filtra; no modo aproximado, por relevância
         for (const [k, v] of Object.entries(filtros)) { ps.push(v); onde.push(`${coluna(k)} = $${ps.length}`) }
+        if (dono !== null) { ps.push(dono); onde.push(`"dono" = $${ps.length}`) }
         if (cond) onde.push(`(${aSql(cond, coluna, ps, tipos as Tipos)})`) // o alcance do papel entra no WHERE: o que está fora nem é lido
         ps.push(limite, (pagina - 1) * limite)
         const r = await e.q(`SELECT ${colunas(ent, leitura)} FROM ${t}${onde.length ? ` WHERE ${onde.join(' AND ')}` : ''} ORDER BY ${relevancia ? `(${relevancia}) DESC, ` : ''}criado_em, id LIMIT $${ps.length - 1} OFFSET $${ps.length}`, ps)
@@ -176,12 +179,13 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
       }
       case 'obter': {
         const ps: unknown[] = [e.params.id]
-        const r = await e.q(`SELECT ${colunas(ent, leitura)} FROM ${t} WHERE id = $1${cond ? ` AND (${aSql(cond, coluna, ps, tipos as Tipos)})` : ''}`, ps)
+        if (dono !== null) ps.push(dono)
+        const r = await e.q(`SELECT ${colunas(ent, leitura)} FROM ${t} WHERE id = $1${dono !== null ? ' AND "dono" = $2' : ''}${cond ? ` AND (${aSql(cond, coluna, ps, tipos as Tipos)})` : ''}`, ps)
         if (!r.rows[0]) throw naoAchou(); return projeta(r.rows[0])
       }
       case 'criar': {
         const campos = Object.keys(e.entrada)
-        const r = await e.q(`INSERT INTO ${t} ("tenant_id"${campos.map((c) => `, ${coluna(c)}`).join('')}) VALUES ($1${campos.map((_, i) => `, $${i + 2}`).join('')}) RETURNING ${colunas(ent)}`, [e.ctx.tenantId, ...campos.map((c) => valor(c, e.entrada[c]))])
+        const r = await e.q(`INSERT INTO ${t} ("tenant_id"${dono !== null ? ', "dono"' : ''}${campos.map((c) => `, ${coluna(c)}`).join('')}) VALUES ($1${dono !== null ? ', $2' : ''}${campos.map((_, i) => `, $${i + (dono !== null ? 3 : 2)}`).join('')}) RETURNING ${colunas(ent)}`, [e.ctx.tenantId, ...(dono !== null ? [dono] : []), ...campos.map((c) => valor(c, e.entrada[c]))])
         if (!noEscopo(r.rows[0]!)) throw proibido() // o registro criado cairia fora do alcance do papel: a transação desfaz
         return projeta(r.rows[0]!)
       }
@@ -189,14 +193,16 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
         const campos = Object.keys(e.entrada)
         if (!campos.length) throw new ErroApi(400, 'requisicao_invalida', 'informe ao menos um campo para atualizar')
         const ps: unknown[] = [e.params.id, ...campos.map((c) => valor(c, e.entrada[c]))]
-        const r = await e.q(`UPDATE ${t} SET ${campos.map((c, i) => `${coluna(c)} = $${i + 2}`).join(', ')}, "atualizado_em" = now() WHERE id = $1${cond ? ` AND (${aSql(cond, coluna, ps, tipos as Tipos)})` : ''} RETURNING ${colunas(ent)}`, ps)
+        if (dono !== null) ps.push(dono)
+        const r = await e.q(`UPDATE ${t} SET ${campos.map((c, i) => `${coluna(c)} = $${i + 2}`).join(', ')}, "atualizado_em" = now() WHERE id = $1${dono !== null ? ` AND "dono" = $${ps.length}` : ''}${cond ? ` AND (${aSql(cond, coluna, ps, tipos as Tipos)})` : ''} RETURNING ${colunas(ent)}`, ps)
         if (!r.rows[0]) throw naoAchou()
         if (!noEscopo(r.rows[0])) throw proibido() // não se "empurra" um registro para fora do próprio alcance
         return projeta(r.rows[0])
       }
       case 'remover': {
         const ps: unknown[] = [e.params.id]
-        const r = await e.q(`DELETE FROM ${t} WHERE id = $1${cond ? ` AND (${aSql(cond, coluna, ps, tipos as Tipos)})` : ''} RETURNING id`, ps)
+        if (dono !== null) ps.push(dono)
+        const r = await e.q(`DELETE FROM ${t} WHERE id = $1${dono !== null ? ' AND "dono" = $2' : ''}${cond ? ` AND (${aSql(cond, coluna, ps, tipos as Tipos)})` : ''} RETURNING id`, ps)
         if (!r.rowCount) throw naoAchou(); return undefined
       }
       default: throw new Error(`operação CRUD desconhecida: ${op}`)
