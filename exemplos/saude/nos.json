@@ -30,6 +30,7 @@
           "textoSobrePrimaria": "#110c08"
         },
         "grafico": {
+          "meio": "#bbb7af",
           "risco": "#f46343",
           "neutro": "#c5bdb0",
           "destaque": "#f46343",
@@ -45,7 +46,7 @@
           "superficie": "#18130e",
           "espessura": "1px",
           "recuo": "1.25rem",
-          "recuoTabela": "2rem"
+          "recuoTabela": "2rem 2rem 1.5rem"
         },
         "raio": {
           "pequeno": 999,
@@ -145,6 +146,19 @@
               "altura": 1.5,
               "espacamento": "0"
             },
+            "dica": {
+              "tamanho": "0.8125rem",
+              "peso": 400,
+              "altura": 1.4,
+              "espacamento": "0"
+            },
+            "dica-meta": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "0.6875rem",
+              "peso": 400,
+              "altura": 1.5,
+              "espacamento": "0"
+            },
             "guia": {
               "tamanho": "0.8125rem",
               "peso": 400,
@@ -198,6 +212,7 @@
             "textoSobrePrimaria": "#f6f3ed"
           },
           "grafico": {
+            "meio": "#403933",
             "risco": "#c0401f",
             "neutro": "#5d534c",
             "destaque": "#c0401f",
@@ -460,6 +475,9 @@
           "tipo": "texto",
           "inicial": "fenwick-legal"
         },
+        "dica": {
+          "tipo": "json"
+        },
         "detalhe": {
           "tipo": "booleano",
           "inicial": false
@@ -493,14 +511,14 @@
                   {
                     "bloco": "layout/pilha",
                     "props": {
-                      "gap": 28
+                      "gap": 0
                     },
                     "slots": {
                       "filhos": [
                         {
                           "bloco": "layout/espacador",
                           "props": {
-                            "tamanho": 8
+                            "tamanho": 40
                           }
                         },
                         {
@@ -581,6 +599,12 @@
                                 }
                               }
                             ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 13
                           }
                         },
                         {
@@ -718,6 +742,12 @@
                                 }
                               }
                             ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 49
                           }
                         },
                         {
@@ -869,6 +899,12 @@
                           }
                         },
                         {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 14
+                          }
+                        },
+                        {
                           "bloco": "layout/pilha",
                           "props": {
                             "marca": "grafico-painel"
@@ -918,7 +954,7 @@
                                         "selecionado": "{estado.detalhe && estado.sel == p.slug}"
                                       },
                                       "repetir": {
-                                        "cada": "achata(mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mapeia(enxame(mapeia(g.itens, c => objeto([[\"slug\", c.slug], [\"nome\", c.nome], [\"saude\", c.saude], [\"arr\", qnum(c.arr)], [\"x\", escala(c.saude, 0, 100, -51, 1030)], [\"r\", escala(raiz(qnum(c.arr)), 100, 950, 2.5, 15)], [\"cor\", junta([\"color-mix(in oklab, var(--grafico-risco) \", texto(arredonda(maximo(0, minimo(100, escala(c.saude, 40, 80, 100, 0))))), \"%, var(--grafico-neutro))\"], \"\")]])), 1.5), p => mescla(p, objeto([[\"y\", (estado.visao == \"combinado\" ? 110 : 70 + k * 130) + p.y]])))))",
+                                        "cada": "achata(mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mapeia(enxame(mapeia(g.itens, c => objeto([[\"slug\", c.slug], [\"nome\", c.nome], [\"saude\", c.saude], [\"arr\", qnum(c.arr)], [\"x\", escala(c.saude, 0, 100, -51, 1030)], [\"r\", escala(raiz(qnum(c.arr)), 100, 950, 2.5, 15)], [\"seg\", c.segmento], [\"cor\", junta([\"color-mix(in oklab, var(--grafico-risco) \", texto(arredonda(maximo(0, minimo(100, escala(c.saude, 40, 80, 100, 0))))), \"%, var(--grafico-neutro))\"], \"\")]])), 1.5), p => mescla(p, objeto([[\"y\", (estado.visao == \"combinado\" ? 110 : 70 + k * 130) + p.y]])))))",
                                         "como": "p",
                                         "chave": "p.slug"
                                       },
@@ -933,6 +969,34 @@
                                             "acao": "definir",
                                             "estado": "detalhe",
                                             "valor": "true"
+                                          }
+                                        ],
+                                        "aoEntrar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "dica",
+                                            "valor": "p"
+                                          }
+                                        ],
+                                        "aoFoco": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "dica",
+                                            "valor": "p"
+                                          }
+                                        ],
+                                        "aoSair": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "dica",
+                                            "valor": "null"
+                                          }
+                                        ],
+                                        "aoDesfoco": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "dica",
+                                            "valor": "null"
                                           }
                                         ]
                                       }
@@ -1045,15 +1109,85 @@
                                     }
                                   ]
                                 }
+                              },
+                              {
+                                "bloco": "feedback/dica",
+                                "props": {
+                                  "esquerda": "{minimo(maximo(estado.dica.x / 1088 * 100, 8), 92)}",
+                                  "topo": "{(estado.dica.y - estado.dica.r) / (estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) * 100}"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "layout/pilha",
+                                      "props": {
+                                        "gap": 2
+                                      },
+                                      "slots": {
+                                        "filhos": [
+                                          {
+                                            "bloco": "texto/paragrafo",
+                                            "props": {
+                                              "texto": "{estado.dica.nome}",
+                                              "escala": "dica"
+                                            }
+                                          },
+                                          {
+                                            "bloco": "layout/linha",
+                                            "props": {
+                                              "gap": 12,
+                                              "alinha": "centro"
+                                            },
+                                            "slots": {
+                                              "filhos": [
+                                                {
+                                                  "bloco": "texto/paragrafo",
+                                                  "props": {
+                                                    "texto": "{junta([\"$\", compacto(estado.dica.arr, idioma)], \"\")}",
+                                                    "escala": "dica-meta",
+                                                    "tom": "meio"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "texto/paragrafo",
+                                                  "props": {
+                                                    "texto": "{estado.dica.saude}",
+                                                    "escala": "dica-meta",
+                                                    "tom": "meio"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "texto/paragrafo",
+                                                  "props": {
+                                                    "texto": "{objeto([[\"enterprise\", t(\"seg.enterprise\")], [\"mid-market\", t(\"seg.mid-market\")], [\"smb\", t(\"seg.smb\")]])[estado.dica.seg]}",
+                                                    "escala": "nota",
+                                                    "tom": "suave"
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "se": "estado.dica"
                               }
                             ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 68
                           }
                         },
                         {
                           "bloco": "layout/pilha",
                           "props": {
                             "marca": "tabela-painel",
-                            "gap": 12
+                            "gap": 0
                           },
                           "slots": {
                             "filhos": [
@@ -1081,70 +1215,80 @@
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.conta\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 274
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.arr\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 70
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.saude\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 61
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.semanas\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 135
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.queda\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 94
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.autonomia\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 80
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.assentos\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 50
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.semana\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 40
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.contato\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 99
                                                   }
                                                 },
                                                 {
                                                   "bloco": "tabela/celula",
                                                   "props": {
                                                     "texto": "{t(\"col.renovacao\")}",
-                                                    "cabecalho": true
+                                                    "cabecalho": true,
+                                                    "largura": 120
                                                   }
                                                 }
                                               ]
@@ -1326,6 +1470,12 @@
                                       }
                                     }
                                   ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/espacador",
+                                "props": {
+                                  "tamanho": 12
                                 }
                               },
                               {
@@ -1727,7 +1877,7 @@
               "repetir": {
                 "cada": "filtra(concat(c1, c2), c => c.slug == estado.sel)",
                 "como": "s",
-                "chave": "s.slug"
+                "chave": "\"detalhe\""
               }
             },
             {

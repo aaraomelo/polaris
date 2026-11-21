@@ -78,9 +78,10 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris [data-marca=indicadores]>*{padding:var(--painel-recuo,1.25rem) 1rem;text-align:center;align-items:center}
 #polaris [data-marca=indicadores]>*+*{border-left:1px solid var(--painel-divisoria,var(--cor-borda))}
 #polaris [data-marca=tabela-painel]{background:var(--painel-superficie,var(--cor-superficie));padding:var(--painel-recuo-tabela,1.5rem);overflow-x:auto}
-#polaris [data-marca=tabela-painel] table{width:100%;border-collapse:collapse;min-width:44rem}
-#polaris [data-marca=tabela-painel] th{font-size:.625rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--cor-texto-suave);text-align:right;padding:.5rem .5rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda))}
-#polaris [data-marca=tabela-painel] td{font-family:var(--tipografia-familia-mono,inherit);font-size:.8125rem;text-align:right;padding:.6rem .35rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda));white-space:nowrap}
+#polaris [data-marca=tabela-painel] table{width:100%;border-collapse:collapse;min-width:44rem;table-layout:fixed}
+#polaris [data-marca=tabela-painel] :is(th,td){box-sizing:border-box}
+#polaris [data-marca=tabela-painel] th{font-size:.625rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--cor-texto-suave);text-align:right;padding:.25rem .35rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda))}
+#polaris [data-marca=tabela-painel] td{font-family:var(--tipografia-familia-mono,inherit);font-size:.8125rem;text-align:right;padding:.625rem .35rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda));white-space:nowrap}
 #polaris [data-marca=tabela-painel] :is(th,td):first-child{text-align:left;font-family:inherit}
 #polaris [data-marca=tabela-painel] svg{width:4.5rem;height:1.5rem;display:block;margin-left:auto;overflow:visible}
 #polaris [data-marca=tabela-painel] button{letter-spacing:0;font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
@@ -90,25 +91,22 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris svg [role=button]:hover{opacity:.8}
 #polaris svg [role=button]:focus-visible{outline:2px solid var(--cor-texto);outline-offset:2px}
 #polaris svg [data-selecionado]{stroke:var(--cor-texto);stroke-width:2}
+#polaris [data-dica]{position:absolute;transform:translate(-50%,calc(-100% - var(--dica-distancia,.25rem)));z-index:20;pointer-events:none;white-space:nowrap;box-sizing:border-box;padding:var(--dica-recuo,.5rem .75rem);background:var(--dica-fundo,var(--cor-superficie));color:var(--cor-texto);border-radius:var(--dica-raio,0);box-shadow:var(--dica-sombra,none)}
+#polaris [data-marca=grafico-painel]{position:relative}
 #polaris div[data-modal]{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(var(--modal-largura,36rem),calc(100vw - 2rem));max-height:calc(100vh - 2rem);overflow:auto;z-index:60;box-sizing:border-box;padding:var(--modal-recuo,1.5rem);background:var(--modal-fundo,var(--cor-superficie,var(--cor-fundo)));color:var(--cor-texto);border:var(--espacamento-borda,1px) solid var(--cor-borda);border-radius:var(--raio-grande);box-shadow:0 0 0 100vmax var(--modal-veu,color-mix(in srgb,var(--cor-fundo) 70%,transparent))}
 #polaris tr[data-clicavel]{cursor:pointer}
 #polaris tr[data-clicavel]:hover td{background:var(--tabela-linha-hover,var(--cor-superficie-alt))}
 #polaris aside[data-gaveta]{position:fixed;top:0;bottom:0;width:min(var(--gaveta-largura,30rem),100vw);overflow:auto;z-index:50;box-sizing:border-box;padding:var(--gaveta-recuo,1.5rem);background:var(--gaveta-fundo,var(--cor-superficie,var(--cor-fundo)));color:var(--cor-texto);box-shadow:0 0 0 100vmax var(--gaveta-veu,color-mix(in srgb,var(--cor-fundo) 70%,transparent))}
 #polaris aside[data-gaveta=direita]{right:0;border-left:var(--espacamento-borda,1px) solid var(--cor-borda)}
 #polaris aside[data-gaveta=esquerda]{left:0;border-right:var(--espacamento-borda,1px) solid var(--cor-borda)}
-/* transição de gaveta e modal (tokens movimento.painel e movimento.painelCurva): com a prop aberta o painel fica montado e anima entrada e saída; sem ela, só a entrada (a página o monta com se) */
-#polaris :is(aside[data-gaveta],div[data-modal])[data-estado]{transition:transform var(--movimento-painel,0s) var(--movimento-painel-curva,ease),opacity var(--movimento-painel,0s) var(--movimento-painel-curva,ease),visibility var(--movimento-painel,0s) var(--movimento-painel-curva,ease),box-shadow var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
+/* transição de gaveta e modal (tokens movimento.painel e movimento.painelCurva; sem painel não há transição). Tudo é TRANSIÇÃO, com um só mecanismo: abrir e fechar (prop aberta, o painel fica montado) e também aparecer já aberto (o painel montado por se, ou recriado): @starting-style dá o ponto de partida da entrada em cada criação */
+#polaris :is(aside[data-gaveta],div[data-modal]){transition:transform var(--movimento-painel,0s) var(--movimento-painel-curva,ease),opacity var(--movimento-painel,0s) var(--movimento-painel-curva,ease),visibility var(--movimento-painel,0s) var(--movimento-painel-curva,ease),box-shadow var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
 #polaris aside[data-gaveta][data-estado=fechada]{visibility:hidden;box-shadow:0 0 0 100vmax transparent}
 #polaris aside[data-gaveta=direita][data-estado=fechada]{transform:translateX(100%)}
 #polaris aside[data-gaveta=esquerda][data-estado=fechada]{transform:translateX(-100%)}
 #polaris div[data-modal][data-estado=fechada]{visibility:hidden;opacity:0;transform:translate(-50%,-48%) scale(.97);box-shadow:0 0 0 100vmax transparent}
-@keyframes polaris-gaveta-direita{from{transform:translateX(100%);box-shadow:0 0 0 100vmax transparent}}
-@keyframes polaris-gaveta-esquerda{from{transform:translateX(-100%);box-shadow:0 0 0 100vmax transparent}}
-@keyframes polaris-modal{from{opacity:0;transform:translate(-50%,-48%) scale(.97);box-shadow:0 0 0 100vmax transparent}}
-#polaris aside[data-gaveta=direita]:not([data-estado]){animation:polaris-gaveta-direita var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
-#polaris aside[data-gaveta=esquerda]:not([data-estado]){animation:polaris-gaveta-esquerda var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
-#polaris div[data-modal]:not([data-estado]){animation:polaris-modal var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
-@media (prefers-reduced-motion:reduce){#polaris :is(aside[data-gaveta],div[data-modal]){transition:none!important;animation:none!important}}
+@starting-style{#polaris aside[data-gaveta=direita]{transform:translateX(100%);box-shadow:0 0 0 100vmax transparent}#polaris aside[data-gaveta=esquerda]{transform:translateX(-100%);box-shadow:0 0 0 100vmax transparent}#polaris div[data-modal]{opacity:0;transform:translate(-50%,-48%) scale(.97);box-shadow:0 0 0 100vmax transparent}}
+@media (prefers-reduced-motion:reduce){#polaris :is(aside[data-gaveta],div[data-modal]){transition:none!important}}
 #polaris [data-painel]>aside[data-lateral]{grid-column:1;grid-row:2;overflow:auto;border-right:var(--espacamento-borda) solid var(--cor-borda);background:var(--cor-superficie);padding:calc(var(--espacamento-base) * 1.5);display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 1.5)}
 #polaris [data-painel]>main[data-principal]{grid-column:2;grid-row:2;overflow:auto;padding:calc(var(--espacamento-base) * 2);min-width:0}
 #polaris [data-lateral] nav{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:2px}

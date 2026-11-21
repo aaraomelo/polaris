@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-79 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+80 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -709,6 +709,45 @@ Mensagem em destaque (`role="alert"`: leitores de tela anunciam). `tom` define a
 }
 ```
 
+### Dica (tooltip) (`feedback/dica`)
+
+Balão que aparece sobre um ponto de um contêiner posicionado (ex.: a bolha de um gráfico sob o mouse): `esquerda` e `topo` em % do contêiner, a dica fica acima do ponto e centrada. Não captura o mouse. Mostre-a com `se`, ligada ao estado que `aoEntrar`/`aoSair` (e `aoFoco`/`aoDesfoco`) das formas `grafico/*` alteram.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `esquerda` | número | não |  | posição horizontal em % da largura do contêiner posicionado (o centro da dica) |
+| `topo` | número | não |  | posição vertical em % da altura do contêiner posicionado (a dica fica ACIMA deste ponto) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Sobre um ponto**
+
+```json
+{
+  "bloco": "feedback/dica",
+  "props": {
+    "esquerda": 50,
+    "topo": 40
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Conta A · saúde 22"
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Selo (`feedback/selo`)
 
 Etiqueta curta de estado. `tom`: neutro, sucesso, alerta ou erro (a cor vem do tema, e o contraste é auditado).
@@ -1062,6 +1101,10 @@ Um círculo dentro de `grafico/svg`. `cor` (CSS seguro) ou `tom` (token `grafico
 | Evento | Payload |
 |---|---|
 | `aoClicar` | — |
+| `aoDesfoco` | — |
+| `aoEntrar` | — |
+| `aoFoco` | — |
+| `aoSair` | — |
 
 **Exemplo: Bolhas**
 
@@ -1166,6 +1209,10 @@ Barra ou fundo dentro de `grafico/svg` (`x`, `y`, `largura`, `altura`, `raio`). 
 | Evento | Payload |
 |---|---|
 | `aoClicar` | — |
+| `aoDesfoco` | — |
+| `aoEntrar` | — |
+| `aoFoco` | — |
+| `aoSair` | — |
 
 **Exemplo: Barras**
 
@@ -3414,6 +3461,7 @@ Grupo `thead`: aceita só `tabela/linha`.
 |---|---|---|---|---|
 | `cabecalho` | booleano | não | false |  |
 | `colunas` | inteiro ≥ 1 ≤ 1000 | não |  |  |
+| `largura` | número ≥ 1 ≤ 2000 | não |  | largura da coluna em px (na primeira linha da tabela) |
 | `linhas` | inteiro ≥ 1 ≤ 65534 | não |  |  |
 | `texto` | texto | não |  |  |
 | `tom` | texto | não |  | cor do texto pelo nome do tom do tema (token `grafico.<tom>`) |

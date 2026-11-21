@@ -532,7 +532,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
     }
   }
   // os eventos do DOM que os blocos declaram: `click`, `input`, `change` e os personalizados da tela de edição e da zona de soltar (o formulário avisa por outro caminho)
-  const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar', 'polaris-enviado', 'polaris-erro', 'polaris-fechar']
+  const tipos = ['click', 'mouseover', 'mouseout', 'focusin', 'focusout', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar', 'polaris-enviado', 'polaris-erro', 'polaris-fechar']
   for (const t of tipos) o.container.addEventListener(t, ouve)
   // gaveta e modal: Esc e o clique FORA do diálogo avisam `aoFechar` (o clique é visto na captura, antes de abrir outro: quem abriu o diálogo atual já o fechou)
   const doc = o.container.ownerDocument, fecha = (d: Element) => d.dispatchEvent(new CustomEvent('polaris-fechar', { bubbles: true }))

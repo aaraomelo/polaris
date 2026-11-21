@@ -37,7 +37,7 @@ describe('orçamento do bundle do cliente', () => {
     const b = await empacota(`import { montaVivo } from './src/vivo/index'; montaVivo({} as never)`)
     for (const re of [...PROIBIDOS, /node_modules\/\.pnpm\/react/]) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
     // 7,5 KB no protótipo → 10,2 KB com modelo, hidratação e a biblioteca de listas/combinadores → 11,7 KB com a aritmética exata (BigInt) → 13,6 KB com caminhos/patches/histórico. A biblioteca padrão é o que mais pesa: o corte é incluí-la POR PROGRAMA (só as funções usadas). Próximo corte: incluir só as funções que o programa usa.
-    expect(b.gz).toBeLessThan(25.3 * 1024) // 24 → 24,6 KB: primitivas SVG, gaveta e funções de gráfico
+    expect(b.gz).toBeLessThan(25.6 * 1024) // 24 → 25,6 KB: primitivas SVG, gaveta, modal, dica e funções de gráfico
     // (limite anterior: 24 KB)
     expect(b.entradas.some((e) => /vivo\/monta/.test(e))).toBe(true)
   })

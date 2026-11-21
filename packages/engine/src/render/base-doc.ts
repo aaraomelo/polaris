@@ -43,6 +43,9 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'grafico/rotulo': { titulo: 'Rótulo (SVG)', descricao: 'Texto dentro de `grafico/svg` na posição (`x`, `y`), com `ancora` (inicio, centro, fim), `base` e `tamanho`.', exemplos: [
     { titulo: 'Valor do eixo', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/rotulo', props: { x: 30, y: 10, texto: '40', ancora: 'centro', base: 'central', tamanho: 8 } }] } } },
   ] },
+  'feedback/dica': { titulo: 'Dica (tooltip)', descricao: 'Balão que aparece sobre um ponto de um contêiner posicionado (ex.: a bolha de um gráfico sob o mouse): `esquerda` e `topo` em % do contêiner, a dica fica acima do ponto e centrada. Não captura o mouse. Mostre-a com `se`, ligada ao estado que `aoEntrar`/`aoSair` (e `aoFoco`/`aoDesfoco`) das formas `grafico/*` alteram.', exemplos: [
+    { titulo: 'Sobre um ponto', instancia: { bloco: 'feedback/dica', props: { esquerda: 50, topo: 40 }, slots: { filhos: [par('Conta A · saúde 22')] } } },
+  ] },
   'layout/modal': { titulo: 'Modal', descricao: 'Diálogo centralizado sobre a página, com véu: confirmações e formulários curtos. A página decide quando mostrá-lo (`se`); Esc e o clique fora disparam `aoFechar`, que deve desligar o `se`. `rotulo` é o nome do diálogo e `largura`, em rem.', exemplos: [
     { titulo: 'Confirmação', instancia: { bloco: 'layout/modal', props: { rotulo: 'Confirmar exclusão', largura: 24 }, slots: { filhos: [par('Excluir esta conta?')] } } },
   ] },

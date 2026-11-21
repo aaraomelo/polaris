@@ -69,7 +69,7 @@ export const descritorSvg = (bloco: string, filhos = false): Descritor => ({
   attrs: (p, id) => { const f = formaSvg(bloco, p); return { ...(id ? { id } : {}), ...f.attrs, ...(Object.keys(f.estilo).length ? { style: cssTexto(f.estilo) } : {}) } },
   ...(bloco === 'grafico/rotulo' ? { texto: (p: Record<string, unknown>) => formaSvg(bloco, p).texto } : {}),
   ...(filhos ? { filhos: true } : {}),
-  ...(bloco === 'grafico/circulo' || bloco === 'grafico/retangulo' ? { eventos: { aoClicar: { dom: 'click' } } } : {}),
+  ...(bloco === 'grafico/circulo' || bloco === 'grafico/retangulo' ? { eventos: { aoClicar: { dom: 'click' }, aoEntrar: { dom: 'mouseover' }, aoSair: { dom: 'mouseout' }, aoFoco: { dom: 'focusin' }, aoDesfoco: { dom: 'focusout' } } } : {}),
 })
 export const d_grafico_svg: Descritor = /* @__PURE__ */ descritorSvg('grafico/svg', true)
 export const d_grafico_circulo: Descritor = /* @__PURE__ */ descritorSvg('grafico/circulo')

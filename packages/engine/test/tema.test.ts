@@ -51,6 +51,10 @@ describe('tema: do tiffany-erp para o nó `tema` do Polaris', () => {
 })
 
 describe('folha base dos blocos', () => {
+  it('gaveta e modal: uma só transição para abrir, fechar e aparecer já aberto (@starting-style), em toda abertura', () => {
+    expect(BASE_CSS).toContain('#polaris :is(aside[data-gaveta],div[data-modal]){transition:transform var(--movimento-painel,0s)')
+    expect(BASE_CSS).toMatch(/@starting-style\{#polaris aside\[data-gaveta=direita\]\{transform:translateX\(100%\)/); expect(BASE_CSS).toContain('[data-estado=fechada]{visibility:hidden'); expect(BASE_CSS).not.toContain('polaris-gaveta-direita')
+  })
   it('só usa variáveis do tema: nenhuma cor literal; e o tema declara TODAS as variáveis que ela lê (em todos os presets)', () => {
     expect(BASE_CSS).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/)
     const usadas = variaveisDaBase()

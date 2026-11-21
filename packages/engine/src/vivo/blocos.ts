@@ -160,7 +160,7 @@ export const d_tabela_cabecalho: Descritor = /* @__PURE__ */ contem('thead')
 export const d_tabela_corpo: Descritor = /* @__PURE__ */ contem('tbody')
 export const d_tabela_celula: Descritor = {
   chave: (p) => `${p.cabecalho === true ? 'th' : 'td'}:${p.texto !== undefined ? 't' : 'f'}`, tag: (p) => (p.cabecalho === true ? 'th' : 'td'), filhos: true,
-  attrs: (p, id) => ({ ...comId(id), ...(corDoTom(p) ? { style: `color:${corDoTom(p)}` } : {}), ...opcional('colspan', p.colunas !== undefined ? inteiro(p.colunas, 1, 1000, 1) : undefined), ...opcional('rowspan', p.linhas !== undefined ? inteiro(p.linhas, 1, 65534, 1) : undefined) }),
+  attrs: (p, id) => ({ ...comId(id), ...((corDoTom(p) || (num(p.largura) ?? 0) > 0) ? { style: `${corDoTom(p) ? `color:${corDoTom(p)}` : ''}${corDoTom(p) && (num(p.largura) ?? 0) > 0 ? ';' : ''}${(num(p.largura) ?? 0) > 0 ? `width:${Math.min(2000, num(p.largura)!)}px` : ''}` } : {}), ...opcional('colspan', p.colunas !== undefined ? inteiro(p.colunas, 1, 1000, 1) : undefined), ...opcional('rowspan', p.linhas !== undefined ? inteiro(p.linhas, 1, 65534, 1) : undefined) }),
   texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
 }
 export const d_entrada_numero: Descritor = {
@@ -255,12 +255,16 @@ export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'di
 /** gaveta: painel lateral fixo sobre a página (detalhe de um item). Quem a mostra é a página (`se`); `rotulo` é o nome acessível do diálogo */
 /** `aberta` (booleano) deixa o painel SEMPRE montado e só alterna `data-estado` (aberta/fechada): o CSS anima a entrada e a saída. Sem `aberta`, vale o `se` da página (entra com animação, sai sem) */
 export const estadoPainel = (p: Record<string, unknown>): Record<string, string> => (typeof p.aberta === 'boolean' ? { 'data-estado': p.aberta ? 'aberta' : 'fechada', ...(p.aberta ? {} : { 'aria-hidden': 'true' }) } : {})
+/** a posição de uma dica (tooltip): `esquerda` e `topo` em % do contêiner posicionado mais próximo (a dica fica acima do ponto e centrada nele) */
+const pct = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? `${Math.round(Math.min(100, Math.max(0, v)) * 100) / 100}%` : '0%')
+export const dicaDe = (p: Record<string, unknown>): Record<string, string> => ({ left: pct(p.esquerda), top: pct(p.topo) })
+export const d_feedback_dica: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'tooltip', 'data-dica': '', style: `left:${pct(p.esquerda)};top:${pct(p.topo)}` }) }
 export const d_layout_gaveta: Descritor = { chave: () => 'aside', tag: () => 'aside', filhos: true, eventos: { aoFechar: { dom: 'polaris-fechar' } }, attrs: (p, id) => ({ ...comId(id), ...estadoPainel(p), 'data-gaveta': p.lado === 'esquerda' ? 'esquerda' : 'direita', role: 'dialog', 'aria-label': typeof p.rotulo === 'string' && p.rotulo.trim() ? p.rotulo.trim().slice(0, 200) : 'Detalhes', ...(typeof p.largura === 'number' && p.largura >= 12 && p.largura <= 80 ? { style: `--gaveta-largura:${Math.round(p.largura * 100) / 100}rem` } : {}) }) }
 /** modal: diálogo centralizado sobre a página (confirmações, formulários curtos). A página decide quando mostrá-lo (`se`); Esc e o clique fora disparam `aoFechar` */
 export const d_layout_modal: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, eventos: { aoFechar: { dom: 'polaris-fechar' } }, attrs: (p, id) => ({ ...comId(id), ...estadoPainel(p), 'data-modal': '', role: 'dialog', 'aria-modal': 'true', 'aria-label': typeof p.rotulo === 'string' && p.rotulo.trim() ? p.rotulo.trim().slice(0, 200) : 'Diálogo', ...(typeof p.largura === 'number' && p.largura >= 12 && p.largura <= 80 ? { style: `--modal-largura:${Math.round(p.largura * 100) / 100}rem` } : {}) }) }
 export const d_tabela_linha: Descritor = { chave: () => 'tr', tag: () => 'tr', filhos: true, eventos: { aoClicar: { dom: 'click' } }, attrs: (p, id) => ({ ...comId(id), ...(p.clicavel === true ? { 'data-clicavel': '' } : {}) }) }
 export const DESCRITORES_BASE: DescritoresDom = {
-  'layout/gaveta': d_layout_gaveta, 'layout/modal': d_layout_modal,
+  'feedback/dica': d_feedback_dica, 'layout/gaveta': d_layout_gaveta, 'layout/modal': d_layout_modal,
   'grafico/svg': d_grafico_svg, 'grafico/circulo': d_grafico_circulo, 'grafico/retangulo': d_grafico_retangulo, 'grafico/reta': d_grafico_reta, 'grafico/caminho': d_grafico_caminho, 'grafico/rotulo': d_grafico_rotulo,
   'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/contido': d_layout_contido, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'midia/icone': d_midia_icone, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'layout/cartao': d_layout_cartao, 'layout/secao': d_layout_secao, 'layout/secao-titulo': d_layout_secao_titulo, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
   'midia/tela': d_midia_tela, 'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
