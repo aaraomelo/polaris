@@ -26,9 +26,9 @@ const caixa = (direcao: 'column' | 'row'): Emissor => ({ props, filhos, id }) =>
 const MAO: Emissores = {
   'layout/pilha': caixa('column'),
   'layout/linha': caixa('row'),
-  'texto/titulo': ({ props, id }) => {
+  'texto/titulo': ({ props, filhos, id }) => {
     const n = Math.min(6, Math.max(1, Math.trunc(num(props.nivel) ?? 1)))
-    return `<h${n}${idAttr(id)}>${escHtml(txt(props.texto))}</h${n}>`
+    return `<h${n}${idAttr(id)}${props.tamanho === 'grande' ? ' data-tamanho="grande"' : ''}>${props.texto === undefined ? (filhos.filhos ?? "") : escHtml(txt(props.texto))}</h${n}>`
   },
   'texto/paragrafo': ({ props, id }) => `<p${idAttr(id)}>${escHtml(txt(props.texto))}</p>`,
   'midia/imagem': ({ props, id }) => {

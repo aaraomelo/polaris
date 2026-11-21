@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-66 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+68 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -2723,6 +2723,8 @@ Fim da página: colunas de links (cada uma com título e um menu próprio, com n
 | `colunas` | lista | não |  | grupos de links |
 | `contato` | texto ≤ 300 caracteres | não |  | telefone, e-mail ou endereço, numa linha |
 | `copyright` | texto ≤ 300 caracteres | não |  | aviso legal, ex.: © 2026 Minha loja |
+| `descricao` | texto ≤ 300 caracteres | não |  | frase curta sob a marca |
+| `marca` | texto ≤ 80 caracteres | não |  | nome da marca, em destaque à esquerda das colunas |
 
 **Slots**
 
@@ -3171,6 +3173,28 @@ Trecho importante em negrito semântico (`strong`).
 }
 ```
 
+### Ênfase (`texto/enfase`)
+
+Ênfase semântica em itálico (`em`). Com `bloco: true` ocupa a linha inteira.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `bloco` | booleano | não |  | a ênfase ocupa a linha inteira (vira uma segunda linha do título) |
+| `texto` | texto | sim |  |  |
+
+**Exemplo: Ênfase**
+
+```json
+{
+  "bloco": "texto/enfase",
+  "props": {
+    "texto": "beleza serena"
+  }
+}
+```
+
 ### Parágrafo (`texto/paragrafo`)
 
 Texto corrido. O conteúdo é sempre escapado (nunca HTML).
@@ -3301,14 +3325,49 @@ A linha pequena em caixa alta e letras espaçadas que vem antes de um título ("
 
 ### Título (`texto/titulo`)
 
-Cabeçalho h1 a h6 conforme `nivel` (padrão 1).
+Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o tamanho maior de seção do tema. Sem `texto`, o título é montado com os filhos (`texto/trecho` e `texto/enfase`: a segunda linha em itálico, por exemplo).
 
 **Props**
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `nivel` | inteiro ≥ 1 ≤ 6 | não | 1 |  |
-| `texto` | texto | sim |  |  |
+| `tamanho` | "grande" | não |  | título de seção maior (token tipografia.tamanhoGrande) |
+| `texto` | texto | não |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Com ênfase em itálico**
+
+```json
+{
+  "bloco": "texto/titulo",
+  "props": {
+    "nivel": 1
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/trecho",
+        "props": {
+          "texto": "Objetos de"
+        }
+      },
+      {
+        "bloco": "texto/enfase",
+        "props": {
+          "texto": "beleza serena",
+          "bloco": true
+        }
+      }
+    ]
+  }
+}
+```
 
 **Exemplo: Nível 2**
 
@@ -3318,6 +3377,27 @@ Cabeçalho h1 a h6 conforme `nivel` (padrão 1).
   "props": {
     "texto": "Mais vendidos",
     "nivel": 2
+  }
+}
+```
+
+### Trecho (`texto/trecho`)
+
+Pedaço de texto em linha (`span`), para montar um título ou um parágrafo com partes diferentes.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `texto` | texto | sim |  |  |
+
+**Exemplo: Trecho**
+
+```json
+{
+  "bloco": "texto/trecho",
+  "props": {
+    "texto": "Objetos de"
   }
 }
 ```

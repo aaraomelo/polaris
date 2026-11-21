@@ -73,7 +73,7 @@
         },
         "rodape": {
           "type": "object",
-          "description": "rodapé (site/rodape): `fundo`, `texto`, `link`, `borda`, `marcaTamanho`",
+          "description": "rodapé (site/rodape): `fundo`, `texto`, `suave` (texto secundário), `link`, `borda`, `marcaTamanho`, `marcaPeso`, `marcaEspacamento`, `descricaoTamanho`, `tituloTamanho`, `tituloPeso`, `tituloEspacamento`, `tituloCaixa`",
           "additionalProperties": {
             "type": [
               "number",
@@ -113,6 +113,19 @@
         "cartao": {
           "type": "object",
           "description": "cartão de produto: `tituloTamanho`, `tituloAltura`, `tituloEspacamento`, `tituloHover`, `categoriaCor`, `categoriaTamanho`, `categoriaEspacamento`, `descricaoTamanho`, `precoTamanho`, `precoPeso`, `precoEspacamento`, `seloFundo`, `seloTexto`, `seloMargem`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "capa": {
+          "type": "object",
+          "description": "capa (layout/destaque com `capa`): `indicador` é o texto do indicador de rolagem entre aspas (ex.: \"Rolar\"); sem ele não há indicador",
           "additionalProperties": {
             "type": [
               "number",

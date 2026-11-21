@@ -6,6 +6,7 @@ export const BASE_CSS = `/* polaris: estilos base dos blocos (usa só variáveis
 body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var(--tipografia-familia);font-size:var(--tipografia-tamanho-base);line-height:1.5}
 #polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:var(--tipografia-altura-titulo, 1.25);letter-spacing:var(--tipografia-espacamento-titulo, normal);font-family:var(--tipografia-familia-titulo, var(--tipografia-familia));font-weight:var(--tipografia-peso-titulo, bold)}
 #polaris h1{font-size:var(--tipografia-tamanho-h1, 2em)}
+#polaris :is(h1,h2,h3)[data-tamanho=grande]{font-size:var(--tipografia-tamanho-grande, var(--tipografia-tamanho-h2, 1.5em))}
 #polaris h2{font-size:var(--tipografia-tamanho-h2, 1.5em)}
 #polaris h3{font-size:var(--tipografia-tamanho-h3, 1.17em)}
 #polaris p{margin:0 0 var(--espacamento-base);line-height:var(--tipografia-altura-corpo, inherit)}
@@ -135,6 +136,9 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris section[data-capa] [data-contido]>:nth-child(3){animation-delay:.2s}
 #polaris section[data-capa] [data-contido]>:nth-child(4){animation-delay:.3s}
 }
+#polaris section[data-capa]::after{content:var(--capa-indicador, none);position:absolute;left:50%;bottom:calc(var(--espacamento-base) * 3);z-index:1;transform:translateX(-50%);padding-bottom:calc(var(--espacamento-base) * 5);font-size:.625rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;opacity:.7;background:linear-gradient(currentColor,currentColor) bottom center / 1px calc(var(--espacamento-base) * 4) no-repeat}
+@media (prefers-reduced-motion:no-preference){#polaris section[data-capa]::after{animation:pl-rola 2s ease-in-out infinite}}
+@keyframes pl-rola{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,.5rem)}}
 @keyframes pl-zoom-capa{from{transform:scale(1)}to{transform:scale(var(--movimento-zoom-capa, 1))}}
 @keyframes pl-entra{from{opacity:0;transform:translateY(1rem)}to{opacity:1;transform:none}}
 #polaris section[data-capa] h1{font-size:var(--tipografia-tamanho-exibicao, var(--tipografia-tamanho-h1, 2em));line-height:var(--tipografia-altura-exibicao, 1.25);letter-spacing:var(--tipografia-espacamento-exibicao, normal)}
@@ -189,6 +193,9 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris section[data-zoom]:hover :is(h2,h3){transform:translateY(var(--movimento-faixa-elevacao, 0px))}
 #polaris [data-recorta]>img{transition:transform var(--movimento-zoom-duracao, 0s) ease-out}
 #polaris [data-recorta]:hover>img{transform:scale(var(--movimento-zoom-cartao, 1))}
+#polaris [data-marca=rodape-marca]>strong{font-family:var(--tipografia-familia-titulo, inherit);font-size:var(--rodape-marca-tamanho, inherit);font-weight:var(--rodape-marca-peso, bold);letter-spacing:var(--rodape-marca-espacamento, normal);color:var(--rodape-texto, inherit)}
+#polaris [data-marca=rodape-marca]>small{max-width:20rem;font-size:var(--rodape-descricao-tamanho, .875em);line-height:var(--tipografia-altura-corpo, inherit);color:var(--rodape-suave, inherit)}
+#polaris [data-marca=rodape-coluna]>strong{font-size:var(--rodape-titulo-tamanho, inherit);font-weight:var(--rodape-titulo-peso, bold);letter-spacing:var(--rodape-titulo-espacamento, normal);text-transform:var(--rodape-titulo-caixa, none);color:var(--rodape-suave, inherit)}
 #polaris footer nav{flex-direction:column;align-items:flex-start;gap:var(--espacamento-base)}
 #polaris hr{border:0;border-top:var(--espacamento-borda) solid var(--cor-borda);width:100%}
 #polaris table{border-collapse:collapse;width:100%}

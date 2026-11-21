@@ -28,13 +28,16 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/espacador': { titulo: 'Espaçador', descricao: 'Espaço vertical em pixels (padrão 8). Não é lido por leitores de tela.', exemplos: [
     { titulo: '32 px', instancia: { bloco: 'layout/pilha', slots: { filhos: [par('Antes'), { bloco: 'layout/espacador', props: { tamanho: 32 } }, par('Depois')] } } },
   ] },
-  'texto/titulo': { titulo: 'Título', descricao: 'Cabeçalho h1 a h6 conforme `nivel` (padrão 1).', exemplos: [
+  'texto/titulo': { titulo: 'Título', descricao: 'Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o tamanho maior de seção do tema. Sem `texto`, o título é montado com os filhos (`texto/trecho` e `texto/enfase`: a segunda linha em itálico, por exemplo).', exemplos: [
+    { titulo: 'Com ênfase em itálico', instancia: { bloco: 'texto/titulo', props: { nivel: 1 }, slots: { filhos: [{ bloco: 'texto/trecho', props: { texto: 'Objetos de' } }, { bloco: 'texto/enfase', props: { texto: 'beleza serena', bloco: true } }] } } },
     { titulo: 'Nível 2', instancia: { bloco: 'texto/titulo', props: { texto: 'Mais vendidos', nivel: 2 } } },
   ] },
   'texto/paragrafo': { titulo: 'Parágrafo', descricao: 'Texto corrido. O conteúdo é sempre escapado (nunca HTML).', exemplos: [
     { titulo: 'Texto simples', instancia: par('Frete grátis acima de R$ 99.') },
     { titulo: 'Com marcação (aparece como texto)', instancia: par('<b>não vira negrito</b> & continua seguro') },
   ] },
+  'texto/trecho': { titulo: 'Trecho', descricao: 'Pedaço de texto em linha (`span`), para montar um título ou um parágrafo com partes diferentes.', exemplos: [{ titulo: 'Trecho', instancia: { bloco: 'texto/trecho', props: { texto: 'Objetos de' } } }] },
+  'texto/enfase': { titulo: 'Ênfase', descricao: 'Ênfase semântica em itálico (`em`). Com `bloco: true` ocupa a linha inteira.', exemplos: [{ titulo: 'Ênfase', instancia: { bloco: 'texto/enfase', props: { texto: 'beleza serena' } } }] },
   'texto/destaque': { titulo: 'Destaque', descricao: 'Trecho importante em negrito semântico (`strong`).', exemplos: [{ titulo: 'Preço', instancia: { bloco: 'texto/destaque', props: { texto: 'R$ 49,90' } } }] },
   'texto/pequeno': { titulo: 'Texto pequeno', descricao: 'Observações e notas de rodapé, em cor suave.', exemplos: [{ titulo: 'Nota', instancia: { bloco: 'texto/pequeno', props: { texto: 'Preço válido até domingo.' } } }] },
   'texto/codigo': { titulo: 'Código', descricao: 'Trecho de código ou identificador em fonte monoespaçada.', exemplos: [{ titulo: 'SKU', instancia: { bloco: 'texto/codigo', props: { texto: 'SKU-00123' } } }] },

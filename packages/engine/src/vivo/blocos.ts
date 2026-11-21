@@ -49,7 +49,9 @@ const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc
 
 export const d_layout_pilha: Descritor = /* @__PURE__ */ caixa('column')
 export const d_layout_linha: Descritor = /* @__PURE__ */ caixa('row')
-export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}`, tag: (p) => `h${nivel(p)}`, attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
+/** `tamanho: 'grande'` é o título de seção maior (token `tipografia.tamanhoGrande`); sem `texto` o conteúdo vem do slot `filhos` (use `texto/trecho` e `texto/enfase`) */
+export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${p.texto === undefined ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' ? { 'data-tamanho': 'grande' } : {}) }), texto: (p) => (p.texto === undefined ? undefined : txt(p.texto)) }
+export const d_texto_enfase: Descritor = { chave: () => 'em', tag: () => 'em', attrs: (p, id) => ({ ...comId(id), ...(p.bloco === true ? { style: 'display:block' } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
 export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
@@ -122,6 +124,7 @@ export const d_layout_divisor: Descritor = { chave: () => 'hr', tag: () => 'hr',
 export const d_layout_espacador: Descritor = { chave: () => 'div', tag: () => 'div', attrs: (p, id) => ({ ...comId(id), 'aria-hidden': 'true', style: `height:${px(num(p.tamanho) ?? 8)}` }) }
 export const d_texto_rotulo: Descritor = { chave: () => 'label', tag: () => 'label', attrs: (p, id) => ({ ...comId(id), ...(typeof p.para === 'string' && p.para ? { for: p.para } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_destaque: Descritor = /* @__PURE__ */ folha('strong')
+export const d_texto_trecho: Descritor = /* @__PURE__ */ folha('span')
 export const d_texto_sobretitulo: Descritor = { chave: () => 'p:sobretitulo', tag: () => 'p', attrs: (_, id) => ({ ...comId(id), 'data-sobretitulo': '' }), texto: (p) => txt(p.texto) }
 export const d_texto_pequeno: Descritor = /* @__PURE__ */ folha('small')
 export const d_texto_codigo: Descritor = /* @__PURE__ */ folha('code')
@@ -228,7 +231,7 @@ export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'di
 export const DESCRITORES_BASE: DescritoresDom = {
   'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/contido': d_layout_contido, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'midia/icone': d_midia_icone, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'layout/cartao': d_layout_cartao, 'layout/secao': d_layout_secao, 'layout/secao-titulo': d_layout_secao_titulo, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
   'midia/tela': d_midia_tela, 'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
-  'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/sobretitulo': d_texto_sobretitulo, 'texto/codigo': d_texto_codigo,
+  'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/trecho': d_texto_trecho, 'texto/enfase': d_texto_enfase, 'texto/pequeno': d_texto_pequeno, 'texto/sobretitulo': d_texto_sobretitulo, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,
   'tabela/tabela': d_tabela_tabela, 'tabela/cabecalho': d_tabela_cabecalho, 'tabela/corpo': d_tabela_corpo, 'tabela/linha': d_tabela_linha, 'tabela/celula': d_tabela_celula,
   'entrada/numero': d_entrada_numero, 'entrada/caixa': d_entrada_caixa,

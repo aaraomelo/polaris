@@ -46,6 +46,15 @@ const BLOCOS_CABECALHO = [
 ]
 
 
+// a grade de colunas do rodapé (cada uma com título e menu próprio); `marca` dá às colunas um gancho de estilo
+const COLUNAS_RODAPE = { bloco: 'layout/grade', props: { colunas: '{tamanho(props.colunas ?? [])}', gap: 24 }, slots: { filhos: [
+  { bloco: 'layout/pilha', repetir: { cada: 'props.colunas ?? []', como: 'c', chave: 'c.titulo' }, props: { gap: 8, marca: 'rodape-coluna' }, slots: { filhos: [
+    { bloco: 'texto/destaque', props: { texto: '{c.titulo}' } },
+    { bloco: 'nav/menu', se: 'tamanho(c.links ?? []) > 0', props: { rotulo: '{c.titulo}' }, slots: { filhos: [
+      { bloco: 'nav/link', repetir: { cada: 'c.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+    ] } },
+  ] } },
+] } }
 const BLOCOS_RODAPE = [
   no('bloco', 'site.rodape', {
     interface: 'site/rodape', titulo: 'Rodapé do site',
@@ -53,6 +62,7 @@ const BLOCOS_RODAPE = [
     props: { type: 'object', properties: {
       colunas: { type: 'array', maxItems: 6, items: colunaProp, description: 'grupos de links' }, contato: { type: 'string', maxLength: 300, description: 'telefone, e-mail ou endereço, numa linha' },
       copyright: { type: 'string', maxLength: 300, description: 'aviso legal, ex.: © 2026 Minha loja' },
+      marca: { type: 'string', maxLength: 80, description: 'nome da marca, em destaque à esquerda das colunas' }, descricao: { type: 'string', maxLength: 300, description: 'frase curta sob a marca' },
     } },
     slots: { extra: {} },
     exemplos: [
@@ -60,14 +70,15 @@ const BLOCOS_RODAPE = [
       { titulo: 'Só o aviso, com extra', instancia: instancia('site/rodape', { copyright: '© 2026 Minha loja' }, { extra: [{ bloco: 'nav/link', props: { href: '/termos', texto: 'Termos de uso' } }] }) },
     ],
     modelo: { bloco: 'layout/rodape', slots: { filhos: [
-      { bloco: 'layout/grade', se: 'tamanho(props.colunas ?? []) > 0', props: { colunas: '{tamanho(props.colunas ?? [])}', gap: 24 }, slots: { filhos: [
-        { bloco: 'layout/pilha', repetir: { cada: 'props.colunas ?? []', como: 'c', chave: 'c.titulo' }, props: { gap: 8 }, slots: { filhos: [
-          { bloco: 'texto/destaque', props: { texto: '{c.titulo}' } },
-          { bloco: 'nav/menu', se: 'tamanho(c.links ?? []) > 0', props: { rotulo: '{c.titulo}' }, slots: { filhos: [
-            { bloco: 'nav/link', repetir: { cada: 'c.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
-          ] } },
+      // com `marca`: a marca (e a frase) à esquerda e as colunas à direita; sem ela, só as colunas, como antes
+      { bloco: 'layout/grade', se: 'props.marca', props: { colunas: 2, gap: 48 }, slots: { filhos: [
+        { bloco: 'layout/pilha', props: { gap: 12, marca: 'rodape-marca' }, slots: { filhos: [
+          { bloco: 'texto/destaque', props: { texto: '{props.marca}' } },
+          { bloco: 'texto/pequeno', se: 'props.descricao', props: { texto: '{props.descricao}' } },
         ] } },
+        COLUNAS_RODAPE,
       ] } },
+      { ...COLUNAS_RODAPE, se: '!props.marca && tamanho(props.colunas ?? []) > 0' },
       { bloco: 'core/slot', props: { nome: 'extra' } },
       { bloco: 'texto/paragrafo', se: 'props.contato', props: { texto: '{props.contato}' } },
       { bloco: 'layout/divisor', se: 'props.copyright' },

@@ -43,6 +43,7 @@
           "tamanhoBase": "16px",
           "tamanhoH1": "clamp(2.75rem, 6.5vw, 5rem)",
           "tamanhoExibicao": "clamp(3rem, 8.5vw, 8rem)",
+          "tamanhoGrande": "clamp(2.5rem, 5vw, 3.75rem)",
           "alturaExibicao": 0.9,
           "espacamentoExibicao": "-0.025em",
           "tamanhoH2": "clamp(2rem, 4vw, 3rem)",
@@ -79,8 +80,20 @@
         "rodape": {
           "fundo": "var(--cor-texto)",
           "texto": "var(--cor-fundo)",
-          "link": "color-mix(in srgb, var(--cor-fundo) 70%, transparent)",
-          "borda": "transparent"
+          "suave": "color-mix(in srgb, var(--cor-fundo) 50%, transparent)",
+          "link": "color-mix(in srgb, var(--cor-fundo) 60%, transparent)",
+          "borda": "transparent",
+          "marcaTamanho": "clamp(1.875rem, 3vw, 2.25rem)",
+          "marcaPeso": 400,
+          "marcaEspacamento": "-0.025em",
+          "descricaoTamanho": "0.875rem",
+          "tituloTamanho": "0.6875rem",
+          "tituloPeso": 600,
+          "tituloEspacamento": "0.25em",
+          "tituloCaixa": "uppercase"
+        },
+        "capa": {
+          "indicador": "\"Rolar\""
         },
         "botao": {
           "caixa": "uppercase",
@@ -287,8 +300,24 @@
                         {
                           "bloco": "texto/titulo",
                           "props": {
-                            "texto": "Objetos de beleza serena",
                             "nivel": 1
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/trecho",
+                                "props": {
+                                  "texto": "Objetos de"
+                                }
+                              },
+                              {
+                                "bloco": "texto/enfase",
+                                "props": {
+                                  "texto": "beleza serena",
+                                  "bloco": true
+                                }
+                              }
+                            ]
                           }
                         },
                         {
@@ -357,7 +386,8 @@
                                 "bloco": "texto/titulo",
                                 "props": {
                                   "texto": "Iluminação",
-                                  "nivel": 2
+                                  "nivel": 2,
+                                  "tamanho": "grande"
                                 }
                               },
                               {
@@ -1021,6 +1051,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",
@@ -1369,6 +1401,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",
@@ -1942,6 +1976,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",
@@ -2768,6 +2804,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",
@@ -3147,6 +3185,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",
@@ -3674,6 +3714,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",
@@ -4097,6 +4139,8 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "marca": "Maison",
+                "descricao": "Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.",
                 "colunas": [
                   {
                     "titulo": "Loja",

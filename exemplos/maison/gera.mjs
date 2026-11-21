@@ -23,12 +23,13 @@ const tema = {
       },
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
-      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
+      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
       layout: { largura: '80rem', larguraEstreita: '48rem', larguraLarga: '90rem' },
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
       cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1 },
       // rodapé invertido: fundo escuro no claro e claro no escuro
-      rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', link: 'color-mix(in srgb, var(--cor-fundo) 70%, transparent)', borda: 'transparent' },
+      rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
+      capa: { indicador: '"Rolar"' },
       // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
       botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500 },
       cartao: { tituloTamanho: '1.25rem', tituloAltura: 1.375, tituloEspacamento: '-0.025em', tituloHover: 'var(--cor-primaria)', descricaoTamanho: '0.875rem', precoTamanho: '1rem', precoPeso: 500, precoEspacamento: '0.025em' },
@@ -48,7 +49,9 @@ const tema = {
 
 // ---- blocos ---------------------------------------------------------------------------------------------------------------------------------
 const b = (bloco, props, filhos, extra = {}) => ({ bloco, ...(props ? { props } : {}), ...(filhos ? { slots: { filhos } } : {}), ...extra })
-const titulo = (texto, nivel) => b('texto/titulo', { texto, nivel })
+const titulo = (texto, nivel, tamanho) => b('texto/titulo', { texto, nivel, ...(tamanho ? { tamanho } : {}) })
+// título em duas partes: a segunda em itálico, numa linha própria (a capa do template: "Objects of / Quiet Beauty")
+const tituloEnfase = (inicio, enfase, nivel) => b('texto/titulo', { nivel }, [b('texto/trecho', { texto: inicio }), b('texto/enfase', { texto: enfase, bloco: true })])
 const par = (texto) => b('texto/paragrafo', { texto })
 const sobre = (texto) => b('texto/sobretitulo', { texto })
 const contido = (filhos, largura, extra = {}) => b('layout/contido', largura ? { largura } : undefined, filhos, extra)
@@ -105,6 +108,7 @@ const cabecalho = (atual) => b('site/cabecalho', {
   grupos: [{ titulo: 'Coleções', links: COLECOES.map((c) => ({ texto: c.nome, href: `/produtos?colecao=${c.slug}` })) }],
 })
 const rodape = () => b('site/rodape', {
+  marca: 'Maison', descricao: 'Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.',
   colunas: [
     { titulo: 'Loja', links: [{ texto: 'Todas as peças', href: '/produtos' }, { texto: 'Novidades', href: '/produtos?colecao=novidades' }, { texto: 'Presentes', href: '/produtos?colecao=presentes' }] },
     { titulo: 'Casa', links: [{ texto: 'Sobre a Maison', href: '/sobre' }, { texto: 'Contato', href: '/sobre#contato' }] },
@@ -120,7 +124,7 @@ const home = b('layout/pilha', { gap: 0 }, [
   b('layout/destaque', { imagem: foto('hero'), altura: 800, escurece: 0.3, alinha: 'esquerda', capa: true }, [
     contido([
       sobre('Curadoria para uma vida atenta'),
-      titulo('Objetos de beleza serena', 1),
+      tituloEnfase('Objetos de', 'beleza serena', 1),
       par('Peças de casa e estilo de vida, escolhidas para dar um sentido calmo ao dia a dia.'),
       link('/produtos', 'Ver as peças', 'primario'),
     ]),
@@ -132,7 +136,7 @@ const home = b('layout/pilha', { gap: 0 }, [
       b('midia/imagem', { src: foto(COLECOES[0].foto), alt: COLECOES[0].nome, fluida: true, proporcao: 0.8 }),
       b('layout/pilha', { gap: 0, alinha: 'inicio' }, [
         sobre('Coleção em destaque'),
-        titulo(COLECOES[0].nome, 2), folga(16),
+        titulo(COLECOES[0].nome, 2, 'grande'), folga(16),
         par(`${COLECOES[0].frase}. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz.`), folga(24),
         link(`/produtos?colecao=${COLECOES[0].slug}`, 'Ver iluminação', 'primario'),
       ]),
