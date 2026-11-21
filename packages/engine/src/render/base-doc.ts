@@ -25,6 +25,27 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/divisor': { titulo: 'Divisor', descricao: 'Linha horizontal que separa seções (usa a cor de borda do tema).', exemplos: [
     { titulo: 'Entre parágrafos', instancia: { bloco: 'layout/pilha', slots: { filhos: [par('Acima'), { bloco: 'layout/divisor' }, par('Abaixo')] } } },
   ] },
+  'grafico/svg': { titulo: 'Gráfico (SVG)', descricao: 'Superfície de desenho: um sistema de coordenadas (`largura` × `altura`) que escala para o contêiner. Os filhos são formas (`grafico/circulo`, `reta`, `caminho`, `retangulo`, `rotulo`) com números calculados pela página; gráficos de verdade são composições destas formas.', exemplos: [
+    { titulo: 'Reta e ponto', instancia: { bloco: 'grafico/svg', props: { largura: 100, altura: 40, rotulo: 'Tendência de alta' }, slots: { filhos: [{ bloco: 'grafico/caminho', props: { pontos: [[0, 35], [40, 22], [100, 5]], tom: 'destaque' } }, { bloco: 'grafico/circulo', props: { cx: 100, cy: 5, r: 3, tom: 'destaque' } }] } } },
+  ] },
+  'grafico/circulo': { titulo: 'Círculo (SVG)', descricao: 'Um círculo dentro de `grafico/svg`. `cor` (CSS seguro) ou `tom` (token `grafico.<tom>` do tema). Com `rotulo` vira um botão acessível e dispara `aoClicar`; `selecionado` o destaca.', exemplos: [
+    { titulo: 'Bolhas', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/circulo', props: { cx: 10, cy: 10, r: 6, tom: 'risco' } }, { bloco: 'grafico/circulo', props: { cx: 30, cy: 10, r: 4, cor: 'oklch(0.7 0.1 80)', rotulo: 'Conta A', selecionado: true } }] } } },
+  ] },
+  'grafico/retangulo': { titulo: 'Retângulo (SVG)', descricao: 'Barra ou fundo dentro de `grafico/svg` (`x`, `y`, `largura`, `altura`, `raio`). Com `rotulo` vira botão acessível.', exemplos: [
+    { titulo: 'Barras', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/retangulo', props: { x: 0, y: 4, largura: 40, altura: 5, tom: 'risco' } }, { bloco: 'grafico/retangulo', props: { x: 0, y: 12, largura: 25, altura: 5, tom: 'neutro' } }] } } },
+  ] },
+  'grafico/reta': { titulo: 'Reta (SVG)', descricao: 'Uma linha entre (`x1`, `y1`) e (`x2`, `y2`): eixos, limites e grades. `tracejada` e `espessura`; cor por `cor` ou `tom`.', exemplos: [
+    { titulo: 'Limite tracejado', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/reta', props: { x1: 0, y1: 10, x2: 60, y2: 10, tracejada: true, tom: 'eixo' } }] } } },
+  ] },
+  'grafico/caminho': { titulo: 'Caminho (SVG)', descricao: 'Uma linha ou área: `pontos` (lista de [x, y] ligados por retas) ou o texto `d` do SVG. `preenche` pinta a área.', exemplos: [
+    { titulo: 'Tendência', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/caminho', props: { pontos: [[0, 18], [20, 12], [40, 14], [60, 3]], tom: 'destaque', espessura: 1.5 } }] } } },
+  ] },
+  'grafico/rotulo': { titulo: 'Rótulo (SVG)', descricao: 'Texto dentro de `grafico/svg` na posição (`x`, `y`), com `ancora` (inicio, centro, fim), `base` e `tamanho`.', exemplos: [
+    { titulo: 'Valor do eixo', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/rotulo', props: { x: 30, y: 10, texto: '40', ancora: 'centro', base: 'central', tamanho: 8 } }] } } },
+  ] },
+  'layout/gaveta': { titulo: 'Gaveta', descricao: 'Painel lateral fixo sobre a página (detalhe de um item): `rotulo` é o nome do diálogo, `lado` (direita ou esquerda) e `largura` (rem). A página decide quando mostrá-la (`se`) e põe um botão de fechar dentro.', exemplos: [
+    { titulo: 'Detalhe', instancia: { bloco: 'layout/gaveta', props: { rotulo: 'Detalhe da conta', largura: 28 }, slots: { filhos: [par('Conteúdo da gaveta')] } } },
+  ] },
   'layout/espacador': { titulo: 'Espaçador', descricao: 'Espaço vertical em pixels (padrão 8). Não é lido por leitores de tela.', exemplos: [
     { titulo: '32 px', instancia: { bloco: 'layout/pilha', slots: { filhos: [par('Antes'), { bloco: 'layout/espacador', props: { tamanho: 32 } }, par('Depois')] } } },
   ] },

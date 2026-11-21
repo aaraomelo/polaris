@@ -7,6 +7,9 @@ export type FonteEmbutida = { familia: string; arquivos: Arquivo[] }
 
 export const FONTES_EMBUTIDAS: Record<string, FonteEmbutida> = {
   'cormorant-garamond': { familia: 'Cormorant Garamond', arquivos: [{ estilo: 'normal', peso: '300 700', dados: 'cormorantNormal' }, { estilo: 'italic', peso: '300 700', dados: 'cormorantItalico' }] },
+  newsreader: { familia: 'Newsreader', arquivos: [{ estilo: 'normal', peso: '200 800', dados: 'newsreaderNormal' }] },
+  'work-sans': { familia: 'Work Sans', arquivos: [{ estilo: 'normal', peso: '100 900', dados: 'workSansNormal' }] },
+  'ibm-plex-mono': { familia: 'IBM Plex Mono', arquivos: [{ estilo: 'normal', peso: '400', dados: 'plexMono400' }, { estilo: 'normal', peso: '500', dados: 'plexMono500' }] },
   inter: { familia: 'Inter', arquivos: [{ estilo: 'normal', peso: '300 700', dados: 'interNormal' }] },
 }
 

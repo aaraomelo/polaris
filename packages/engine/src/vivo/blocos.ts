@@ -1,3 +1,4 @@
+import { d_grafico_caminho, d_grafico_circulo, d_grafico_retangulo, d_grafico_reta, d_grafico_rotulo, d_grafico_svg } from './svg'
 import { px } from '../estatico/escape'
 import { atributosDaTela } from '../tela/atributos'
 import { caminhoLocal, cssUrl, idDeElemento, nomeDeIcone, nomeDeParametro, tamanhoDeIcone, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
@@ -55,9 +56,11 @@ const caixa = (direcao: 'column' | 'row'): Descritor => ({
   attrs: (p, id) => {
     const gap = num(p.gap)
     const alinha = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined
-    return { ...comId(id), ...papelDe(p), ...rotulo(p), ...(p.solta === true ? { 'data-solta': '' } : {}), ...(p.recorta === true ? { 'data-recorta': '' } : {}), ...(marcaDe(p) ? { 'data-marca': marcaDe(p)! } : {}), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
+    return { ...comId(id), ...papelDe(p), ...rotulo(p), ...(p.solta === true ? { 'data-solta': '' } : {}), ...(p.recorta === true ? { 'data-recorta': '' } : {}), ...(marcaDe(p) ? { 'data-marca': marcaDe(p)! } : {}), ...(modoDe(p) ? { 'data-modo': modoDe(p)! } : {}), style: `display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${p.quebra === true ? ';flex-wrap:wrap' : ''}${larguraCaixa(p.largura) ? `;width:${larguraCaixa(p.largura)};flex:none` : ''}${p.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}` }
   },
 })
+/** `modo` (nome de um modo do tema, ex.: `claro`) vira `data-modo`: os tokens do modo valem DENTRO desta caixa (o tema escuro/claro da página sem recarregar) */
+export const modoDe = (p: Record<string, unknown>): string | undefined => (typeof p.modo === 'string' && /^[a-z][a-z0-9-]{0,23}$/.test(p.modo) ? p.modo : undefined)
 const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc(num(p.nivel) ?? 1)))
 
 export const d_layout_pilha: Descritor = /* @__PURE__ */ caixa('column')
@@ -249,7 +252,11 @@ export const d_midia_quadro: Descritor = {
 export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'span', attrs: (p, id) => ({ ...comId(id), ...tom(p) }), texto: (p) => txt(p.texto) }
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
+/** gaveta: painel lateral fixo sobre a página (detalhe de um item). Quem a mostra é a página (`se`); `rotulo` é o nome acessível do diálogo */
+export const d_layout_gaveta: Descritor = { chave: () => 'aside', tag: () => 'aside', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-gaveta': p.lado === 'esquerda' ? 'esquerda' : 'direita', role: 'dialog', 'aria-label': typeof p.rotulo === 'string' && p.rotulo.trim() ? p.rotulo.trim().slice(0, 200) : 'Detalhes', ...(typeof p.largura === 'number' && p.largura >= 12 && p.largura <= 80 ? { style: `--gaveta-largura:${Math.round(p.largura * 100) / 100}rem` } : {}) }) }
 export const DESCRITORES_BASE: DescritoresDom = {
+  'layout/gaveta': d_layout_gaveta,
+  'grafico/svg': d_grafico_svg, 'grafico/circulo': d_grafico_circulo, 'grafico/retangulo': d_grafico_retangulo, 'grafico/reta': d_grafico_reta, 'grafico/caminho': d_grafico_caminho, 'grafico/rotulo': d_grafico_rotulo,
   'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/contido': d_layout_contido, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'midia/icone': d_midia_icone, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'layout/cartao': d_layout_cartao, 'layout/secao': d_layout_secao, 'layout/secao-titulo': d_layout_secao_titulo, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
   'midia/tela': d_midia_tela, 'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
   'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/trecho': d_texto_trecho, 'texto/enfase': d_texto_enfase, 'texto/pequeno': d_texto_pequeno, 'texto/sobretitulo': d_texto_sobretitulo, 'texto/codigo': d_texto_codigo,

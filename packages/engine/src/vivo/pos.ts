@@ -14,9 +14,10 @@ export class Pos {
   dentro(el: Element): Pos { return this.adota ? new Pos(el, null, true, el.firstChild) : new Pos(el, null, false) }
 
   el(tag: string): Element {
-    if (!this.adota) return document.createElement(tag)
+    const svg = tag.startsWith('svg:'), nome = svg ? tag.slice(4) : tag // `svg:<forma>`: o elemento nasce no namespace SVG
+    if (!this.adota) return svg ? document.createElementNS('http://www.w3.org/2000/svg', nome) : document.createElement(nome)
     const n = this.prox
-    if (!n || n.nodeType !== 1 || (n as Element).localName !== tag) throw new Divergencia(`esperava <${tag}>, achou ${descreve(n)}`)
+    if (!n || n.nodeType !== 1 || (n as Element).localName !== nome) throw new Divergencia(`esperava <${tag}>, achou ${descreve(n)}`)
     this.prox = n.nextSibling
     return n as Element
   }

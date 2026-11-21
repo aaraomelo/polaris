@@ -1,11 +1,11 @@
 {
-  "_": "Orçamento de performance do runtime (2026-11-20: contador 11400 → 11450 B pela zona de soltar das caixas de layout, `solta` e `aoSoltar`; 11450 → 11650 B pelo estado que `persiste` no navegador, ~175 B em todo cliente; 11650 → 11700 B e lista-formatos 11800 → 11850 B pelos eventos `polaris-enviado`/`polaris-erro` das ilhas de formulário na lista do vivo; lista-formatos 11850 → 11900 B por `data-marca` e `data-zoom` nos blocos de layout; 2026-11-21: +0,3 a 0,5 KB em todo cliente pelo estado ligado à URL (`daConsulta`, ~350 B), o seletor (`entrada/selecao`, `entrada/opcao`) e `soConsulta`: estatica-simples 11100 → 11500, contador 11700 → 12250, lista-formatos 11900 → 12450, dinheiro-exato 12000 → 12300, com-bloco-de-codigo 17300 → 17400 B; +~190 B em todo cliente pela escala tipográfica nomeada `escala` de título/parágrafo/sobretítulo: estatica-simples 11500 → 11750, contador 12250 → 12500, lista-formatos 12450 → 12700, dinheiro-exato 12300 → 12600). Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
+  "_": "Orçamento de performance do runtime (2026-11-20: contador 11400 → 11450 B pela zona de soltar das caixas de layout, `solta` e `aoSoltar`; 11450 → 11650 B pelo estado que `persiste` no navegador, ~175 B em todo cliente; 11650 → 11700 B e lista-formatos 11800 → 11850 B pelos eventos `polaris-enviado`/`polaris-erro` das ilhas de formulário na lista do vivo; lista-formatos 11850 → 11900 B por `data-marca` e `data-zoom` nos blocos de layout; 2026-11-21: +0,3 a 0,5 KB em todo cliente pelo estado ligado à URL (`daConsulta`, ~350 B), o seletor (`entrada/selecao`, `entrada/opcao`) e `soConsulta`: estatica-simples 11100 → 11500, contador 11700 → 12250, lista-formatos 11900 → 12450, dinheiro-exato 12000 → 12300, com-bloco-de-codigo 17300 → 17400 B; +~190 B em todo cliente pela escala tipográfica nomeada `escala` de título/parágrafo/sobretítulo: estatica-simples 11500 → 11750, contador 12250 → 12500, lista-formatos 12450 → 12700, dinheiro-exato 12300 → 12600; +~50 a 100 B em todo cliente pelas primitivas SVG, a gaveta, o `modo` e as funções de gráfico: estatica-simples 11750 → 11800, contador 12500 → 12600, lista-formatos 12700 → 12800, dinheiro-exato 12600 → 12700, com-bloco-de-codigo 17400 → 17500). Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
   "bundle_gz_bytes": {
-    "estatica-simples": 11750,
-    "contador": 12500,
-    "lista-formatos": 12700,
-    "dinheiro-exato": 12600,
-    "com-bloco-de-codigo": 17400
+    "estatica-simples": 11800,
+    "contador": 12600,
+    "lista-formatos": 12800,
+    "dinheiro-exato": 12700,
+    "com-bloco-de-codigo": 17500
   },
   "ssr_vivo_ms": {
     "lista_900_cartoes_mediana": 120

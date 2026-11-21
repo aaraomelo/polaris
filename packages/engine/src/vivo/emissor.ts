@@ -8,7 +8,7 @@ const VAZIOS = new Set(['img', 'input', 'br', 'hr'])
 export function emissorDe(d: Descritor): Emissor {
   return ({ props, filhos, id }) => {
     if (d.chave(props) === null) return ''
-    const tag = d.tag(props)
+    const tag = d.tag(props).replace(/^svg:/, '')
     let attrs = ''
     for (const [k, v] of Object.entries(d.attrs(props, id))) attrs += ` ${k}="${escHtml(v)}"`
     if (d.valor && !d.valorNoTexto && !d.valorSoPropriedade) attrs += ` value="${escHtml(d.valor(props))}"`

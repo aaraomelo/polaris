@@ -15,6 +15,6 @@ describe('bundle por página com bloco de código', () => {
     expect(Object.keys(com.pacote.contribuicao)).toContain('vivo/codigo.ts')
     expect(Object.keys(sem.pacote.contribuicao)).not.toContain('vivo/codigo.ts')
     expect(com.pacote.codigo).not.toMatch(/react|quickjs/i)
-    expect(Object.keys(com.pacote.contribuicao)).not.toContain("expr/funcoes.ts"); expect(com.pacote.gz).toBeLessThan(17 * 1024) // validação, emissores e allowlist de UI custam ~6 KB sobre o núcleo
+    expect(Object.keys(com.pacote.contribuicao)).not.toContain("expr/funcoes.ts"); expect(com.pacote.gz).toBeLessThan(17.2 * 1024) // 17 → 17,2 KB (primitivas SVG, gaveta e `modo`); validação, emissores e allowlist de UI custam ~6 KB sobre o núcleo
   })
 })

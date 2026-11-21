@@ -1,6 +1,6 @@
 import { nomeDeIcone, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 import { emissoresDe } from '../vivo/emissor'
-import { BASE_PARAGRAFO, DESCRITORES_BASE, baseTitulo, estiloEscala, marcaDe, proporcaoDaImagem } from '../vivo/blocos'
+import { modoDe, BASE_PARAGRAFO, DESCRITORES_BASE, baseTitulo, estiloEscala, marcaDe, proporcaoDaImagem } from '../vivo/blocos'
 import { escHtml, px } from './escape'
 
 // Emissores estáticos: o mesmo HTML que os componentes React de render/base.tsx produzem (conferido por teste diferencial),
@@ -19,7 +19,7 @@ const caixa = (direcao: 'column' | 'row'): Emissor => ({ props, filhos, id }) =>
   const gap = num(props.gap)
   const alinha = typeof props.alinha === 'string' ? ALINHA[props.alinha] : undefined
   const papel = props.papel === 'toolbar' || props.papel === 'group' || props.papel === 'list' || props.papel === 'status' ? ` role="${props.papel}"` : '', nome = typeof props.rotulo === 'string' && props.rotulo.trim() ? ` aria-label="${escHtml(props.rotulo.trim().slice(0, 200))}"` : ''
-  const recorta = `${props.recorta === true ? ' data-recorta=""' : ''}${marcaDe(props) ? ` data-marca="${marcaDe(props)}"` : ''}`
+  const recorta = `${props.recorta === true ? ' data-recorta=""' : ''}${marcaDe(props) ? ` data-marca="${marcaDe(props)}"` : ''}${modoDe(props) ? ` data-modo="${modoDe(props)}"` : ''}`
   return `<div${idAttr(id)}${papel}${nome}${recorta} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${props.quebra === true ? ';flex-wrap:wrap' : ''}${typeof props.largura === 'number' && Number.isFinite(props.largura) ? `;width:${Math.min(2000, Math.max(40, Math.round(props.largura)))}px;flex:none` : ''}${props.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}">${filhos.filhos ?? ''}</div>`
 }
 

@@ -187,6 +187,19 @@
           "propertyNames": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
           }
+        },
+        "grafico": {
+          "type": "object",
+          "description": "cores dos gráficos SVG (`grafico/*`): cada nome vira `--grafico-<nome>` e é usado com `tom: \"<nome>\"` (ex.: risco, neutro, destaque, eixo)",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
         }
       },
       "additionalProperties": false
@@ -209,7 +222,7 @@
         "type": "string",
         "pattern": "^[a-z][a-z0-9-]*$"
       },
-      "description": "fontes embutidas na plataforma que o tema usa (ex.: cormorant-garamond, inter): o servidor emite o @font-face e serve o arquivo da própria origem. Nome desconhecido é ignorado"
+      "description": "fontes embutidas na plataforma que o tema usa (cormorant-garamond, inter, newsreader, work-sans, ibm-plex-mono): o servidor emite o @font-face e serve o arquivo da própria origem. Nome desconhecido é ignorado"
     }
   },
   "type": "object",

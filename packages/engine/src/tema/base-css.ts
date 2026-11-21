@@ -68,6 +68,9 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris header nav a[aria-current=page]{color:var(--cabecalho-link-atual-cor, var(--cor-texto));font-weight:var(--cabecalho-link-atual-peso, 600);text-decoration:var(--cabecalho-link-atual-decoracao, underline)}
 #polaris [data-painel]{display:grid;grid-template-columns:var(--largura-lateral, 16rem) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100vh;overflow:hidden}
 #polaris [data-painel]>header{grid-column:1/-1;grid-row:1}
+#polaris aside[data-gaveta]{position:fixed;top:0;bottom:0;width:min(var(--gaveta-largura,30rem),100vw);overflow:auto;z-index:50;box-sizing:border-box;padding:var(--gaveta-recuo,1.5rem);background:var(--gaveta-fundo,var(--cor-superficie,var(--cor-fundo)));color:var(--cor-texto);box-shadow:0 0 0 100vmax var(--gaveta-veu,color-mix(in srgb,var(--cor-fundo) 70%,transparent))}
+#polaris aside[data-gaveta=direita]{right:0;border-left:var(--espacamento-borda,1px) solid var(--cor-borda)}
+#polaris aside[data-gaveta=esquerda]{left:0;border-right:var(--espacamento-borda,1px) solid var(--cor-borda)}
 #polaris [data-painel]>aside[data-lateral]{grid-column:1;grid-row:2;overflow:auto;border-right:var(--espacamento-borda) solid var(--cor-borda);background:var(--cor-superficie);padding:calc(var(--espacamento-base) * 1.5);display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 1.5)}
 #polaris [data-painel]>main[data-principal]{grid-column:2;grid-row:2;overflow:auto;padding:calc(var(--espacamento-base) * 2);min-width:0}
 #polaris [data-lateral] nav{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:2px}

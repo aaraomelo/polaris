@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-71 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+78 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -983,6 +983,323 @@ Lista de sugestões que aparece sob o campo de busca enquanto se digita, buscada
 }
 ```
 
+## grafico
+
+### Caminho (SVG) (`grafico/caminho`)
+
+Uma linha ou área: `pontos` (lista de [x, y] ligados por retas) ou o texto `d` do SVG. `preenche` pinta a área.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `d` | texto ≤ 4000 caracteres | não |  | ou o texto `d` do SVG (M L H V C Z…) |
+| `espessura` | número ≥ 0 | não | 1 |  |
+| `pontos` | lista | não |  | lista de [x, y] ligados por retas |
+| `preenche` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
+
+**Exemplo: Tendência**
+
+```json
+{
+  "bloco": "grafico/svg",
+  "props": {
+    "largura": 60,
+    "altura": 20
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "grafico/caminho",
+        "props": {
+          "pontos": [
+            [
+              0,
+              18
+            ],
+            [
+              20,
+              12
+            ],
+            [
+              40,
+              14
+            ],
+            [
+              60,
+              3
+            ]
+          ],
+          "tom": "destaque",
+          "espessura": 1.5
+        }
+      }
+    ]
+  }
+}
+```
+
+### Círculo (SVG) (`grafico/circulo`)
+
+Um círculo dentro de `grafico/svg`. `cor` (CSS seguro) ou `tom` (token `grafico.<tom>` do tema). Com `rotulo` vira um botão acessível e dispara `aoClicar`; `selecionado` o destaca.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `cx` | número | não |  |  |
+| `cy` | número | não |  |  |
+| `r` | número ≥ 0 | não | 4 |  |
+| `rotulo` | texto | não |  | com rótulo o círculo vira um botão acessível (`aoClicar`) |
+| `selecionado` | booleano | não |  |  |
+| `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
+
+**Exemplo: Bolhas**
+
+```json
+{
+  "bloco": "grafico/svg",
+  "props": {
+    "largura": 60,
+    "altura": 20
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "grafico/circulo",
+        "props": {
+          "cx": 10,
+          "cy": 10,
+          "r": 6,
+          "tom": "risco"
+        }
+      },
+      {
+        "bloco": "grafico/circulo",
+        "props": {
+          "cx": 30,
+          "cy": 10,
+          "r": 4,
+          "cor": "oklch(0.7 0.1 80)",
+          "rotulo": "Conta A",
+          "selecionado": true
+        }
+      }
+    ]
+  }
+}
+```
+
+### Reta (SVG) (`grafico/reta`)
+
+Uma linha entre (`x1`, `y1`) e (`x2`, `y2`): eixos, limites e grades. `tracejada` e `espessura`; cor por `cor` ou `tom`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `espessura` | número ≥ 0 | não | 1 |  |
+| `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
+| `tracejada` | booleano | não |  |  |
+| `x1` | número | não |  |  |
+| `x2` | número | não |  |  |
+| `y1` | número | não |  |  |
+| `y2` | número | não |  |  |
+
+**Exemplo: Limite tracejado**
+
+```json
+{
+  "bloco": "grafico/svg",
+  "props": {
+    "largura": 60,
+    "altura": 20
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "grafico/reta",
+        "props": {
+          "x1": 0,
+          "y1": 10,
+          "x2": 60,
+          "y2": 10,
+          "tracejada": true,
+          "tom": "eixo"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Retângulo (SVG) (`grafico/retangulo`)
+
+Barra ou fundo dentro de `grafico/svg` (`x`, `y`, `largura`, `altura`, `raio`). Com `rotulo` vira botão acessível.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `altura` | número ≥ 0 | não |  |  |
+| `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `largura` | número ≥ 0 | não |  |  |
+| `raio` | número ≥ 0 | não |  |  |
+| `rotulo` | texto | não |  |  |
+| `selecionado` | booleano | não |  |  |
+| `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
+| `x` | número | não |  |  |
+| `y` | número | não |  |  |
+
+**Exemplo: Barras**
+
+```json
+{
+  "bloco": "grafico/svg",
+  "props": {
+    "largura": 60,
+    "altura": 20
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "grafico/retangulo",
+        "props": {
+          "x": 0,
+          "y": 4,
+          "largura": 40,
+          "altura": 5,
+          "tom": "risco"
+        }
+      },
+      {
+        "bloco": "grafico/retangulo",
+        "props": {
+          "x": 0,
+          "y": 12,
+          "largura": 25,
+          "altura": 5,
+          "tom": "neutro"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Rótulo (SVG) (`grafico/rotulo`)
+
+Texto dentro de `grafico/svg` na posição (`x`, `y`), com `ancora` (inicio, centro, fim), `base` e `tamanho`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `ancora` | "inicio" \| "centro" \| "fim" | não |  |  |
+| `base` | "auto" \| "central" | não |  |  |
+| `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `tamanho` | número ≥ 1 | não |  |  |
+| `texto` | texto \| número | não |  |  |
+| `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
+| `x` | número | não |  |  |
+| `y` | número | não |  |  |
+
+**Exemplo: Valor do eixo**
+
+```json
+{
+  "bloco": "grafico/svg",
+  "props": {
+    "largura": 60,
+    "altura": 20
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "grafico/rotulo",
+        "props": {
+          "x": 30,
+          "y": 10,
+          "texto": "40",
+          "ancora": "centro",
+          "base": "central",
+          "tamanho": 8
+        }
+      }
+    ]
+  }
+}
+```
+
+### Gráfico (SVG) (`grafico/svg`)
+
+Superfície de desenho: um sistema de coordenadas (`largura` × `altura`) que escala para o contêiner. Os filhos são formas (`grafico/circulo`, `reta`, `caminho`, `retangulo`, `rotulo`) com números calculados pela página; gráficos de verdade são composições destas formas.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `altura` | número ≥ 1 | não | 100 |  |
+| `largura` | número ≥ 1 | não | 100 | largura do sistema de coordenadas (viewBox); o desenho escala para a largura do contêiner |
+| `marca` | texto | não |  |  |
+| `rotulo` | texto | não |  | descrição para leitor de tela; sem ela o gráfico é decorativo (aria-hidden) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Reta e ponto**
+
+```json
+{
+  "bloco": "grafico/svg",
+  "props": {
+    "largura": 100,
+    "altura": 40,
+    "rotulo": "Tendência de alta"
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "grafico/caminho",
+        "props": {
+          "pontos": [
+            [
+              0,
+              35
+            ],
+            [
+              40,
+              22
+            ],
+            [
+              100,
+              5
+            ]
+          ],
+          "tom": "destaque"
+        }
+      },
+      {
+        "bloco": "grafico/circulo",
+        "props": {
+          "cx": 100,
+          "cy": 5,
+          "r": 3,
+          "tom": "destaque"
+        }
+      }
+    ]
+  }
+}
+```
+
 ## layout
 
 ### Cabeçalho (`layout/cabecalho`)
@@ -1310,6 +1627,46 @@ Espaço vertical em pixels (padrão 8). Não é lido por leitores de tela.
 }
 ```
 
+### Gaveta (`layout/gaveta`)
+
+Painel lateral fixo sobre a página (detalhe de um item): `rotulo` é o nome do diálogo, `lado` (direita ou esquerda) e `largura` (rem). A página decide quando mostrá-la (`se`) e põe um botão de fechar dentro.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `lado` | "direita" \| "esquerda" | não | "direita" |  |
+| `largura` | número ≥ 12 ≤ 80 | não |  | largura em rem (padrão 30) |
+| `rotulo` | texto | não |  | nome acessível do diálogo (padrão: Detalhes) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Detalhe**
+
+```json
+{
+  "bloco": "layout/gaveta",
+  "props": {
+    "rotulo": "Detalhe da conta",
+    "largura": 28
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Conteúdo da gaveta"
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Grade (`layout/grade`)
 
 Distribui os filhos em colunas iguais (1 a 12). Padrão: 2 colunas.
@@ -1433,6 +1790,7 @@ Coloca os filhos lado a lado (flex row).
 | `gap` | número ≥ 0 | não |  |  |
 | `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
 | `marca` | texto | não |  | gancho de estilo: vira data-marca, que o CSS do tema usa (o cartão de produto usa `cartao-produto`) |
+| `modo` | texto | não |  | modo do tema (ex.: claro, escuro): os tokens do modo valem dentro desta caixa; troque com um estado para alternar o tema da página |
 | `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
 | `recorta` | booleano | não |  | corta o que passa da caixa (a foto que cresce no hover, com o token movimento.zoomCartao, fica dentro dela) |
@@ -1579,6 +1937,7 @@ Empilha os filhos na vertical (flex column). Base de quase toda página. `recort
 | `gap` | número ≥ 0 | não |  |  |
 | `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
 | `marca` | texto | não |  | gancho de estilo: vira data-marca, que o CSS do tema usa (o cartão de produto usa `cartao-produto`) |
+| `modo` | texto | não |  | modo do tema (ex.: claro, escuro): os tokens do modo valem dentro desta caixa; troque com um estado para alternar o tema da página |
 | `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
 | `recorta` | booleano | não |  | corta o que passa da caixa (a foto que cresce no hover, com o token movimento.zoomCartao, fica dentro dela) |

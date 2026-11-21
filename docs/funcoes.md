@@ -909,6 +909,77 @@ Valor absoluto.
 - `absoluto(a) >= 0`
 - `absoluto(absoluto(a)) == absoluto(a)`
 
+### `raiz`
+
+`raiz(x) → número`
+
+Raiz quadrada (x ≥ 0); negativo ou não numérico, ausente. Para raios de bolhas proporcionais à ÁREA (valor → raio).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `raiz(9)` |  | `3` |
+| `raiz(-1)` |  | _(ausente)_ |
+
+### `compacto`
+
+`compacto(x, idioma?) → texto`
+
+Número compacto no idioma: `en` → `6.7M`, `621k`; `pt-BR` → `6,7 mi`, `621 mil`. O prefixo da moeda fica no texto da página.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `compacto(6700000, "en")` |  | `"6.7M"` |
+| `compacto(621000, "en")` |  | `"621k"` |
+| `compacto("x")` |  | `""` |
+
+### `dataCurta`
+
+`dataCurta(AAAA-MM-DD, idioma?) → texto`
+
+Data curta no idioma: `en` → `May 24 ’27`; `pt-BR` → `24 mai ’27`.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `dataCurta("2027-05-24", "en")` |  | `"May 24 ’27"` |
+| `dataCurta("2027-05-24", "pt-BR")` |  | `"24 mai ’27"` |
+| `dataCurta("x")` |  | `""` |
+
+### `mediana`
+
+`mediana(lista) → número`
+
+Mediana de uma lista de números (a média dos dois do meio se o tamanho é par); lista vazia ou com valor não numérico, ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `mediana([3, 1, 2])` |  | `2` |
+| `mediana([4, 1, 3, 2])` |  | `2.5` |
+| `mediana([])` |  | _(ausente)_ |
+
+### `escala`
+
+`escala(v, d0, d1, r0, r1) → número`
+
+Interpolação linear: leva `v` do intervalo [d0, d1] para [r0, r1] (sem cortar, 3 casas). Base dos gráficos: valor do dado → posição na tela. Domínio de largura zero, ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `escala(50, 0, 100, 0, 400)` |  | `200` |
+| `escala(5, 10, 0, 0, 100)` |  | `50` |
+| `escala(1, 2, 2, 0, 1)` |  | _(ausente)_ |
+
+### `enxame`
+
+`enxame(xs, rs, folga?) → lista`
+
+Layout de "enxame" (beeswarm): dadas as posições `xs` e os raios `rs` de círculos, devolve o deslocamento vertical de cada um (na mesma ordem) para que nenhum se sobreponha (distância ≥ soma dos raios + folga, padrão 1), o mais perto possível de 0.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `enxame([10, 10], [5, 5], 0)` |  | `[0,10]` |
+| `enxame([0, 100], [5, 5])` |  | `[0,0]` |
+| `enxame([1], [])` |  | _(ausente)_ |
+
 ### `minimo`
 
 `minimo(x, …) → número`
