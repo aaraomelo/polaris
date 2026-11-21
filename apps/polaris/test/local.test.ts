@@ -4,7 +4,8 @@ vi.setConfig({ testTimeout: 120_000, hookTimeout: 120_000 })
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { request as httpRequest } from 'node:http'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { existsSync } from 'node:fs'
 import { chromium } from 'playwright-core'
 import { afterAll, describe, expect, it } from 'vitest'
@@ -62,6 +63,18 @@ describe('ambiente local', () => {
     const outro = await ir.headers.get('location')!; expect(outro).not.toContain('token') // nada de token na URL
     expect((await get(l, 'loja-demo', '/entrar/ir?tenant=loja-demo&papel=gerente&para=site&volta=%2F%2Fmal.com')).headers.get('location')).toMatch(/polaris\.localhost:\d+\/$/) // volta externa vira /
   })
+  it('a Maison lê os produtos da API do catálogo (loja.peca): páginas por idioma, preço e ordem vindos do serviço, e isolado por tenant', async () => {
+    const l = await sobeLocal({ dados: null, porta: 0, silencioso: true, site: join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'exemplos', 'maison') }); abertos.push(l)
+    const api = await get(l, 'loja-demo', '/api/loja/pecas?limite=100') // a listagem é pública (o site a chama sem login)
+    expect(api.status).toBe(200); const itens = (await api.json()) as Array<{ slug: string; preco: string; nome: Record<string, string>; fotoUrl: string }>
+    expect(itens).toHaveLength(13); expect(itens.find((i) => i.slug === 'arco')).toMatchObject({ preco: '485.0000', nome: { 'pt-BR': 'Luminária Pendente Arco', en: 'Arc Pendant Light' } }); expect(itens[0]!.fotoUrl).toMatch(/^\/_polaris\/img\//) // a foto virou o ativo do tenant
+    const pt = await (await get(l, 'loja-demo', '/produtos')).text(), en = await (await get(l, 'loja-demo', '/en/produtos')).text()
+    expect(pt).toContain('Luminária Pendente Arco'); expect(en).toContain('Arc Pendant Light'); expect(pt.match(/data-marca="cartao-produto"/g)).toHaveLength(13)
+    const detalhe = await get(l, 'loja-demo', '/produtos/mesa'); expect(detalhe.status).toBe(200); expect(await detalhe.text()).toContain('2850')
+    // o catálogo é do tenant: a outra loja tem o seu
+    const outra = await (await get(l, 'loja-outra', '/api/loja/pecas?limite=100')).json() as unknown[]; expect(outra).toHaveLength(13)
+  })
+
   it('Studio → Publicar → site: a edição salva só aparece depois de publicada, no tenant certo; página nova ganha rota sozinha', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
     const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no

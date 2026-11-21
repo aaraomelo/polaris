@@ -751,6 +751,28 @@
     }
   },
   {
+    "kind": "dados",
+    "id": "maison.pecas",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "fonte": {
+        "tipo": "servico",
+        "servico": "loja",
+        "operacao": "listarPeca"
+      },
+      "parametros": {
+        "limite": {
+          "tipo": "inteiro"
+        }
+      },
+      "carregar": "auto",
+      "cache": {
+        "ttlSegundos": 30
+      }
+    }
+  },
+  {
     "kind": "formulario",
     "id": "maison.checkout",
     "versao": "1.0.0",
@@ -1214,7 +1236,7 @@
                                   "idioma": "{idioma}"
                                 },
                                 "repetir": {
-                                  "cada": "mapeia([\"arco\", \"orbe\", \"vaso\", \"tigela\"], id => acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), q => q.id == id))",
+                                  "cada": "mapeia([\"arco\", \"orbe\", \"vaso\", \"tigela\"], id => acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), q => q.id == id))",
                                   "como": "p",
                                   "chave": "p.id"
                                 }
@@ -1993,6 +2015,14 @@
       "traducoes": [
         "maison.textos"
       ],
+      "dados": {
+        "pecas": {
+          "dados": "maison.pecas",
+          "args": {
+            "limite": 100
+          }
+        }
+      },
       "estado": {
         "sacola": {
           "tipo": "json",
@@ -2008,389 +2038,6 @@
           "tipo": "booleano",
           "inicial": false,
           "persiste": true
-        },
-        "produtos": {
-          "tipo": "json",
-          "lista": true,
-          "inicial": [
-            {
-              "id": "arco",
-              "colecao": "iluminacao",
-              "preco": "485.00",
-              "fotoUrl": "@img/produto-1",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária Pendente Arco",
-                "en": "Arc Pendant Light"
-              },
-              "descricao": {
-                "pt-BR": "Um arco gracioso de latão curvado à mão e linho",
-                "en": "A graceful arc of hand-bent brass and linen"
-              },
-              "material": {
-                "pt-BR": "Latão maciço",
-                "en": "Solid brass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "vaso",
-              "colecao": "ceramica",
-              "preco": "320.00",
-              "fotoUrl": "@img/colecao-ceramica",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural Grande",
-                "en": "Large Sculptural Vessel"
-              },
-              "descricao": {
-                "pt-BR": "Grés torneado à mão com esmalte natural de cinzas",
-                "en": "Hand-thrown stoneware with natural ash glaze"
-              },
-              "material": {
-                "pt-BR": "Grés de alta temperatura",
-                "en": "High-fire stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "mesa",
-              "colecao": "mobiliario",
-              "preco": "2850.00",
-              "fotoUrl": "@img/colecao-3",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Mesa de Jantar Colheita",
-                "en": "Harvest Dining Table"
-              },
-              "descricao": {
-                "pt-BR": "Carvalho maciço feito para gerações à mesa",
-                "en": "Solid oak crafted for generations of gathering"
-              },
-              "material": {
-                "pt-BR": "Carvalho branco maciço",
-                "en": "Solid white oak"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "castical",
-              "colecao": "objetos",
-              "preco": "245.00",
-              "fotoUrl": "@img/produto-vela-castical",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Conjunto de Castiçais Forja",
-                "en": "Forge Candleholder Set"
-              },
-              "descricao": {
-                "pt-BR": "Latão forjado à mão em três alturas graduadas",
-                "en": "Hand-forged brass in three graduating heights"
-              },
-              "material": {
-                "pt-BR": "Latão forjado maciço",
-                "en": "Solid forged brass"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "orbe",
-              "colecao": "iluminacao",
-              "preco": "295.00",
-              "fotoUrl": "@img/produto-2",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária de Mesa Orbe",
-                "en": "Orb Table Lamp"
-              },
-              "descricao": {
-                "pt-BR": "Vidro soprado encontra bronze escultural",
-                "en": "Mouth-blown glass meets sculptural bronze"
-              },
-              "material": {
-                "pt-BR": "Vidro soprado",
-                "en": "Mouth-blown glass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "tigela",
-              "colecao": "ceramica",
-              "preco": "145.00",
-              "fotoUrl": "@img/produto-3",
-              "fotoHover": "@img/sobre-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Tigela de Servir do Dia a Dia",
-                "en": "Everyday Serving Bowl"
-              },
-              "descricao": {
-                "pt-BR": "Formas simples para os rituais diários",
-                "en": "Simple forms for daily rituals"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "poltrona",
-              "colecao": "mobiliario",
-              "preco": "1450.00",
-              "fotoUrl": "@img/produto-poltrona",
-              "fotoHover": "@img/colecao-iluminacao",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Poltrona Trançada",
-                "en": "Woven Lounge Chair"
-              },
-              "descricao": {
-                "pt-BR": "Corda de papel dinamarquesa e nogueira escultural",
-                "en": "Danish paper cord meets sculptural walnut"
-              },
-              "material": {
-                "pt-BR": "Nogueira maciça",
-                "en": "Solid walnut"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "manta",
-              "colecao": "texteis",
-              "preco": "195.00",
-              "fotoUrl": "@img/colecao-4",
-              "fotoHover": "@img/sobre-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Manta de Linho Herança",
-                "en": "Heritage Linen Throw"
-              },
-              "descricao": {
-                "pt-BR": "Linho belga lavado em tons naturais",
-                "en": "Stonewashed Belgian linen in natural tones"
-              },
-              "material": {
-                "pt-BR": "100% linho belga",
-                "en": "100% Belgian linen"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "almofada",
-              "colecao": "texteis",
-              "preco": "165.00",
-              "fotoUrl": "@img/produto-almofada",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Almofada de Lã Feltrada à Mão",
-                "en": "Hand-Felted Wool Cushion"
-              },
-              "descricao": {
-                "pt-BR": "Feita por artesãos com técnicas tradicionais de feltragem",
-                "en": "Artisan-made using traditional felting techniques"
-              },
-              "material": {
-                "pt-BR": "100% lã neozelandesa",
-                "en": "100% New Zealand wool"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vasinho",
-              "colecao": "objetos",
-              "preco": "85.00",
-              "fotoUrl": "@img/colecao-5",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural para Uma Flor",
-                "en": "Sculptural Bud Vase"
-              },
-              "descricao": {
-                "pt-BR": "Forma minimalista para uma única haste",
-                "en": "Minimalist form for a single stem"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vela",
-              "colecao": "sazonal",
-              "preco": "65.00",
-              "fotoUrl": "@img/colecao-6",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vela Lareira de Inverno",
-                "en": "Winter Hearth Candle"
-              },
-              "descricao": {
-                "pt-BR": "Notas de cedro, fumaça e ervas secas",
-                "en": "Notes of cedar, smoke, and dried herbs"
-              },
-              "material": {
-                "pt-BR": "Cera de soja natural",
-                "en": "Natural soy wax"
-              },
-              "categoria": {
-                "pt-BR": "Coleção sazonal",
-                "en": "Seasonal Collection"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "bandeja",
-              "colecao": "novidades",
-              "preco": "175.00",
-              "fotoUrl": "@img/foto-3",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Bandeja de Mármore Polido",
-                "en": "Honed Marble Tray"
-              },
-              "descricao": {
-                "pt-BR": "Pedra natural para a beleza de todo dia",
-                "en": "Natural stone for everyday beauty"
-              },
-              "material": {
-                "pt-BR": "Mármore de Carrara",
-                "en": "Carrara marble"
-              },
-              "categoria": {
-                "pt-BR": "Novidades",
-                "en": "New Arrivals"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "caixa",
-              "colecao": "presentes",
-              "preco": "225.00",
-              "fotoUrl": "@img/produto-caixa-presente",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Caixa de Presente Selecionada",
-                "en": "Curated Gift Box"
-              },
-              "descricao": {
-                "pt-BR": "Uma seleção cuidadosa das nossas peças favoritas",
-                "en": "A thoughtful selection of our favorite pieces"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Presentes selecionados",
-                "en": "Curated Gifts"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            }
-          ]
         }
       }
     }
@@ -2764,7 +2411,7 @@
                   {
                     "bloco": "texto/pequeno",
                     "props": {
-                      "texto": "{t(\"loja.contagem\", objeto([[\"n\", tamanho(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao))]]))}"
+                      "texto": "{t(\"loja.contagem\", objeto([[\"n\", tamanho(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao))]]))}"
                     }
                   },
                   {
@@ -2794,7 +2441,7 @@
                             "idioma": "{idioma}"
                           },
                           "repetir": {
-                            "cada": "(estado.ordem == \"preco\" ? ordena(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => qnum(x.preco)) : estado.ordem == \"preco-desc\" ? inverte(ordena(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => qnum(x.preco))) : estado.ordem == \"nome\" ? ordena(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => semAcentos(minusculas(x.nome))) : estado.ordem == \"novidades\" ? ordena(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => x.novo ? 0 : 1) : filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao))",
+                            "cada": "(estado.ordem == \"preco\" ? ordena(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => qnum(x.preco)) : estado.ordem == \"preco-desc\" ? inverte(ordena(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => qnum(x.preco))) : estado.ordem == \"nome\" ? ordena(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => semAcentos(minusculas(x.nome))) : estado.ordem == \"novidades\" ? ordena(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao), x => x.novo ? 0 : 1) : filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao))",
                             "como": "p",
                             "chave": "p.id"
                           },
@@ -2833,7 +2480,7 @@
                     "props": {
                       "texto": "{t(\"loja.vazio\")}"
                     },
-                    "se": "tamanho(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao)) == 0"
+                    "se": "tamanho(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => (estado.colecao ?? \"\") == \"\" || p.colecao == estado.colecao)) == 0"
                   }
                 ]
               }
@@ -3005,6 +2652,14 @@
       "traducoes": [
         "maison.textos"
       ],
+      "dados": {
+        "pecas": {
+          "dados": "maison.pecas",
+          "args": {
+            "limite": 100
+          }
+        }
+      },
       "estado": {
         "sacola": {
           "tipo": "json",
@@ -3020,389 +2675,6 @@
           "tipo": "booleano",
           "inicial": false,
           "persiste": true
-        },
-        "produtos": {
-          "tipo": "json",
-          "lista": true,
-          "inicial": [
-            {
-              "id": "arco",
-              "colecao": "iluminacao",
-              "preco": "485.00",
-              "fotoUrl": "@img/produto-1",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária Pendente Arco",
-                "en": "Arc Pendant Light"
-              },
-              "descricao": {
-                "pt-BR": "Um arco gracioso de latão curvado à mão e linho",
-                "en": "A graceful arc of hand-bent brass and linen"
-              },
-              "material": {
-                "pt-BR": "Latão maciço",
-                "en": "Solid brass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "vaso",
-              "colecao": "ceramica",
-              "preco": "320.00",
-              "fotoUrl": "@img/colecao-ceramica",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural Grande",
-                "en": "Large Sculptural Vessel"
-              },
-              "descricao": {
-                "pt-BR": "Grés torneado à mão com esmalte natural de cinzas",
-                "en": "Hand-thrown stoneware with natural ash glaze"
-              },
-              "material": {
-                "pt-BR": "Grés de alta temperatura",
-                "en": "High-fire stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "mesa",
-              "colecao": "mobiliario",
-              "preco": "2850.00",
-              "fotoUrl": "@img/colecao-3",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Mesa de Jantar Colheita",
-                "en": "Harvest Dining Table"
-              },
-              "descricao": {
-                "pt-BR": "Carvalho maciço feito para gerações à mesa",
-                "en": "Solid oak crafted for generations of gathering"
-              },
-              "material": {
-                "pt-BR": "Carvalho branco maciço",
-                "en": "Solid white oak"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "castical",
-              "colecao": "objetos",
-              "preco": "245.00",
-              "fotoUrl": "@img/produto-vela-castical",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Conjunto de Castiçais Forja",
-                "en": "Forge Candleholder Set"
-              },
-              "descricao": {
-                "pt-BR": "Latão forjado à mão em três alturas graduadas",
-                "en": "Hand-forged brass in three graduating heights"
-              },
-              "material": {
-                "pt-BR": "Latão forjado maciço",
-                "en": "Solid forged brass"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "orbe",
-              "colecao": "iluminacao",
-              "preco": "295.00",
-              "fotoUrl": "@img/produto-2",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária de Mesa Orbe",
-                "en": "Orb Table Lamp"
-              },
-              "descricao": {
-                "pt-BR": "Vidro soprado encontra bronze escultural",
-                "en": "Mouth-blown glass meets sculptural bronze"
-              },
-              "material": {
-                "pt-BR": "Vidro soprado",
-                "en": "Mouth-blown glass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "tigela",
-              "colecao": "ceramica",
-              "preco": "145.00",
-              "fotoUrl": "@img/produto-3",
-              "fotoHover": "@img/sobre-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Tigela de Servir do Dia a Dia",
-                "en": "Everyday Serving Bowl"
-              },
-              "descricao": {
-                "pt-BR": "Formas simples para os rituais diários",
-                "en": "Simple forms for daily rituals"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "poltrona",
-              "colecao": "mobiliario",
-              "preco": "1450.00",
-              "fotoUrl": "@img/produto-poltrona",
-              "fotoHover": "@img/colecao-iluminacao",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Poltrona Trançada",
-                "en": "Woven Lounge Chair"
-              },
-              "descricao": {
-                "pt-BR": "Corda de papel dinamarquesa e nogueira escultural",
-                "en": "Danish paper cord meets sculptural walnut"
-              },
-              "material": {
-                "pt-BR": "Nogueira maciça",
-                "en": "Solid walnut"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "manta",
-              "colecao": "texteis",
-              "preco": "195.00",
-              "fotoUrl": "@img/colecao-4",
-              "fotoHover": "@img/sobre-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Manta de Linho Herança",
-                "en": "Heritage Linen Throw"
-              },
-              "descricao": {
-                "pt-BR": "Linho belga lavado em tons naturais",
-                "en": "Stonewashed Belgian linen in natural tones"
-              },
-              "material": {
-                "pt-BR": "100% linho belga",
-                "en": "100% Belgian linen"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "almofada",
-              "colecao": "texteis",
-              "preco": "165.00",
-              "fotoUrl": "@img/produto-almofada",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Almofada de Lã Feltrada à Mão",
-                "en": "Hand-Felted Wool Cushion"
-              },
-              "descricao": {
-                "pt-BR": "Feita por artesãos com técnicas tradicionais de feltragem",
-                "en": "Artisan-made using traditional felting techniques"
-              },
-              "material": {
-                "pt-BR": "100% lã neozelandesa",
-                "en": "100% New Zealand wool"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vasinho",
-              "colecao": "objetos",
-              "preco": "85.00",
-              "fotoUrl": "@img/colecao-5",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural para Uma Flor",
-                "en": "Sculptural Bud Vase"
-              },
-              "descricao": {
-                "pt-BR": "Forma minimalista para uma única haste",
-                "en": "Minimalist form for a single stem"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vela",
-              "colecao": "sazonal",
-              "preco": "65.00",
-              "fotoUrl": "@img/colecao-6",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vela Lareira de Inverno",
-                "en": "Winter Hearth Candle"
-              },
-              "descricao": {
-                "pt-BR": "Notas de cedro, fumaça e ervas secas",
-                "en": "Notes of cedar, smoke, and dried herbs"
-              },
-              "material": {
-                "pt-BR": "Cera de soja natural",
-                "en": "Natural soy wax"
-              },
-              "categoria": {
-                "pt-BR": "Coleção sazonal",
-                "en": "Seasonal Collection"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "bandeja",
-              "colecao": "novidades",
-              "preco": "175.00",
-              "fotoUrl": "@img/foto-3",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Bandeja de Mármore Polido",
-                "en": "Honed Marble Tray"
-              },
-              "descricao": {
-                "pt-BR": "Pedra natural para a beleza de todo dia",
-                "en": "Natural stone for everyday beauty"
-              },
-              "material": {
-                "pt-BR": "Mármore de Carrara",
-                "en": "Carrara marble"
-              },
-              "categoria": {
-                "pt-BR": "Novidades",
-                "en": "New Arrivals"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "caixa",
-              "colecao": "presentes",
-              "preco": "225.00",
-              "fotoUrl": "@img/produto-caixa-presente",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Caixa de Presente Selecionada",
-                "en": "Curated Gift Box"
-              },
-              "descricao": {
-                "pt-BR": "Uma seleção cuidadosa das nossas peças favoritas",
-                "en": "A thoughtful selection of our favorite pieces"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Presentes selecionados",
-                "en": "Curated Gifts"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            }
-          ]
         },
         "colecoes": {
           "tipo": "json",
@@ -3845,7 +3117,7 @@
                                   "idioma": "{idioma}"
                                 },
                                 "repetir": {
-                                  "cada": "fatia(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), o => o.colecao == p.colecao && o.id != p.id), 0, 4)",
+                                  "cada": "fatia(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), o => o.colecao == p.colecao && o.id != p.id), 0, 4)",
                                   "como": "o",
                                   "chave": "o.id"
                                 }
@@ -3855,12 +3127,12 @@
                         }
                       ]
                     },
-                    "se": "tamanho(fatia(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), o => o.colecao == p.colecao && o.id != p.id), 0, 4)) > 0"
+                    "se": "tamanho(fatia(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), o => o.colecao == p.colecao && o.id != p.id), 0, 4)) > 0"
                   }
                 ]
               },
               "repetir": {
-                "cada": "filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == params.id)",
+                "cada": "filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == params.id)",
                 "como": "p",
                 "chave": "p.id"
               }
@@ -3901,7 +3173,7 @@
                   }
                 ]
               },
-              "se": "tamanho(filtra(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == params.id)) == 0"
+              "se": "tamanho(filtra(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == params.id)) == 0"
             },
             {
               "bloco": "layout/espacador",
@@ -4075,6 +3347,14 @@
           "tipo": "texto"
         }
       },
+      "dados": {
+        "pecas": {
+          "dados": "maison.pecas",
+          "args": {
+            "limite": 100
+          }
+        }
+      },
       "estado": {
         "sacola": {
           "tipo": "json",
@@ -4090,389 +3370,6 @@
           "tipo": "booleano",
           "inicial": false,
           "persiste": true
-        },
-        "produtos": {
-          "tipo": "json",
-          "lista": true,
-          "inicial": [
-            {
-              "id": "arco",
-              "colecao": "iluminacao",
-              "preco": "485.00",
-              "fotoUrl": "@img/produto-1",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária Pendente Arco",
-                "en": "Arc Pendant Light"
-              },
-              "descricao": {
-                "pt-BR": "Um arco gracioso de latão curvado à mão e linho",
-                "en": "A graceful arc of hand-bent brass and linen"
-              },
-              "material": {
-                "pt-BR": "Latão maciço",
-                "en": "Solid brass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "vaso",
-              "colecao": "ceramica",
-              "preco": "320.00",
-              "fotoUrl": "@img/colecao-ceramica",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural Grande",
-                "en": "Large Sculptural Vessel"
-              },
-              "descricao": {
-                "pt-BR": "Grés torneado à mão com esmalte natural de cinzas",
-                "en": "Hand-thrown stoneware with natural ash glaze"
-              },
-              "material": {
-                "pt-BR": "Grés de alta temperatura",
-                "en": "High-fire stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "mesa",
-              "colecao": "mobiliario",
-              "preco": "2850.00",
-              "fotoUrl": "@img/colecao-3",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Mesa de Jantar Colheita",
-                "en": "Harvest Dining Table"
-              },
-              "descricao": {
-                "pt-BR": "Carvalho maciço feito para gerações à mesa",
-                "en": "Solid oak crafted for generations of gathering"
-              },
-              "material": {
-                "pt-BR": "Carvalho branco maciço",
-                "en": "Solid white oak"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "castical",
-              "colecao": "objetos",
-              "preco": "245.00",
-              "fotoUrl": "@img/produto-vela-castical",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Conjunto de Castiçais Forja",
-                "en": "Forge Candleholder Set"
-              },
-              "descricao": {
-                "pt-BR": "Latão forjado à mão em três alturas graduadas",
-                "en": "Hand-forged brass in three graduating heights"
-              },
-              "material": {
-                "pt-BR": "Latão forjado maciço",
-                "en": "Solid forged brass"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "orbe",
-              "colecao": "iluminacao",
-              "preco": "295.00",
-              "fotoUrl": "@img/produto-2",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária de Mesa Orbe",
-                "en": "Orb Table Lamp"
-              },
-              "descricao": {
-                "pt-BR": "Vidro soprado encontra bronze escultural",
-                "en": "Mouth-blown glass meets sculptural bronze"
-              },
-              "material": {
-                "pt-BR": "Vidro soprado",
-                "en": "Mouth-blown glass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "tigela",
-              "colecao": "ceramica",
-              "preco": "145.00",
-              "fotoUrl": "@img/produto-3",
-              "fotoHover": "@img/sobre-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Tigela de Servir do Dia a Dia",
-                "en": "Everyday Serving Bowl"
-              },
-              "descricao": {
-                "pt-BR": "Formas simples para os rituais diários",
-                "en": "Simple forms for daily rituals"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "poltrona",
-              "colecao": "mobiliario",
-              "preco": "1450.00",
-              "fotoUrl": "@img/produto-poltrona",
-              "fotoHover": "@img/colecao-iluminacao",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Poltrona Trançada",
-                "en": "Woven Lounge Chair"
-              },
-              "descricao": {
-                "pt-BR": "Corda de papel dinamarquesa e nogueira escultural",
-                "en": "Danish paper cord meets sculptural walnut"
-              },
-              "material": {
-                "pt-BR": "Nogueira maciça",
-                "en": "Solid walnut"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "manta",
-              "colecao": "texteis",
-              "preco": "195.00",
-              "fotoUrl": "@img/colecao-4",
-              "fotoHover": "@img/sobre-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Manta de Linho Herança",
-                "en": "Heritage Linen Throw"
-              },
-              "descricao": {
-                "pt-BR": "Linho belga lavado em tons naturais",
-                "en": "Stonewashed Belgian linen in natural tones"
-              },
-              "material": {
-                "pt-BR": "100% linho belga",
-                "en": "100% Belgian linen"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "almofada",
-              "colecao": "texteis",
-              "preco": "165.00",
-              "fotoUrl": "@img/produto-almofada",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Almofada de Lã Feltrada à Mão",
-                "en": "Hand-Felted Wool Cushion"
-              },
-              "descricao": {
-                "pt-BR": "Feita por artesãos com técnicas tradicionais de feltragem",
-                "en": "Artisan-made using traditional felting techniques"
-              },
-              "material": {
-                "pt-BR": "100% lã neozelandesa",
-                "en": "100% New Zealand wool"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vasinho",
-              "colecao": "objetos",
-              "preco": "85.00",
-              "fotoUrl": "@img/colecao-5",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural para Uma Flor",
-                "en": "Sculptural Bud Vase"
-              },
-              "descricao": {
-                "pt-BR": "Forma minimalista para uma única haste",
-                "en": "Minimalist form for a single stem"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vela",
-              "colecao": "sazonal",
-              "preco": "65.00",
-              "fotoUrl": "@img/colecao-6",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vela Lareira de Inverno",
-                "en": "Winter Hearth Candle"
-              },
-              "descricao": {
-                "pt-BR": "Notas de cedro, fumaça e ervas secas",
-                "en": "Notes of cedar, smoke, and dried herbs"
-              },
-              "material": {
-                "pt-BR": "Cera de soja natural",
-                "en": "Natural soy wax"
-              },
-              "categoria": {
-                "pt-BR": "Coleção sazonal",
-                "en": "Seasonal Collection"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "bandeja",
-              "colecao": "novidades",
-              "preco": "175.00",
-              "fotoUrl": "@img/foto-3",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Bandeja de Mármore Polido",
-                "en": "Honed Marble Tray"
-              },
-              "descricao": {
-                "pt-BR": "Pedra natural para a beleza de todo dia",
-                "en": "Natural stone for everyday beauty"
-              },
-              "material": {
-                "pt-BR": "Mármore de Carrara",
-                "en": "Carrara marble"
-              },
-              "categoria": {
-                "pt-BR": "Novidades",
-                "en": "New Arrivals"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "caixa",
-              "colecao": "presentes",
-              "preco": "225.00",
-              "fotoUrl": "@img/produto-caixa-presente",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Caixa de Presente Selecionada",
-                "en": "Curated Gift Box"
-              },
-              "descricao": {
-                "pt-BR": "Uma seleção cuidadosa das nossas peças favoritas",
-                "en": "A thoughtful selection of our favorite pieces"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Presentes selecionados",
-                "en": "Curated Gifts"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            }
-          ]
         }
       }
     }
@@ -5700,7 +4597,7 @@
                             ]
                           },
                           "repetir": {
-                            "cada": "filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null)",
+                            "cada": "filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null)",
                             "como": "l",
                             "chave": "l.id"
                           }
@@ -5739,7 +4636,7 @@
                         }
                       ]
                     },
-                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null)) == 0"
+                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null)) == 0"
                   },
                   {
                     "bloco": "layout/pilha",
@@ -5758,8 +4655,8 @@
                         {
                           "bloco": "commerce/resumo-pedido",
                           "props": {
-                            "subtotal": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
-                            "total": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
+                            "subtotal": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
+                            "total": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
                             "idioma": "{idioma}",
                             "rotulos": {
                               "subtotal": "{t(\"resumo.subtotal\")}",
@@ -5790,7 +4687,7 @@
                         }
                       ]
                     },
-                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null)) > 0"
+                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null)) > 0"
                   }
                 ]
               }
@@ -5962,6 +4859,14 @@
       "traducoes": [
         "maison.textos"
       ],
+      "dados": {
+        "pecas": {
+          "dados": "maison.pecas",
+          "args": {
+            "limite": 100
+          }
+        }
+      },
       "estado": {
         "sacola": {
           "tipo": "json",
@@ -5977,389 +4882,6 @@
           "tipo": "booleano",
           "inicial": false,
           "persiste": true
-        },
-        "produtos": {
-          "tipo": "json",
-          "lista": true,
-          "inicial": [
-            {
-              "id": "arco",
-              "colecao": "iluminacao",
-              "preco": "485.00",
-              "fotoUrl": "@img/produto-1",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária Pendente Arco",
-                "en": "Arc Pendant Light"
-              },
-              "descricao": {
-                "pt-BR": "Um arco gracioso de latão curvado à mão e linho",
-                "en": "A graceful arc of hand-bent brass and linen"
-              },
-              "material": {
-                "pt-BR": "Latão maciço",
-                "en": "Solid brass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "vaso",
-              "colecao": "ceramica",
-              "preco": "320.00",
-              "fotoUrl": "@img/colecao-ceramica",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural Grande",
-                "en": "Large Sculptural Vessel"
-              },
-              "descricao": {
-                "pt-BR": "Grés torneado à mão com esmalte natural de cinzas",
-                "en": "Hand-thrown stoneware with natural ash glaze"
-              },
-              "material": {
-                "pt-BR": "Grés de alta temperatura",
-                "en": "High-fire stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "mesa",
-              "colecao": "mobiliario",
-              "preco": "2850.00",
-              "fotoUrl": "@img/colecao-3",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Mesa de Jantar Colheita",
-                "en": "Harvest Dining Table"
-              },
-              "descricao": {
-                "pt-BR": "Carvalho maciço feito para gerações à mesa",
-                "en": "Solid oak crafted for generations of gathering"
-              },
-              "material": {
-                "pt-BR": "Carvalho branco maciço",
-                "en": "Solid white oak"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "castical",
-              "colecao": "objetos",
-              "preco": "245.00",
-              "fotoUrl": "@img/produto-vela-castical",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Conjunto de Castiçais Forja",
-                "en": "Forge Candleholder Set"
-              },
-              "descricao": {
-                "pt-BR": "Latão forjado à mão em três alturas graduadas",
-                "en": "Hand-forged brass in three graduating heights"
-              },
-              "material": {
-                "pt-BR": "Latão forjado maciço",
-                "en": "Solid forged brass"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "orbe",
-              "colecao": "iluminacao",
-              "preco": "295.00",
-              "fotoUrl": "@img/produto-2",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária de Mesa Orbe",
-                "en": "Orb Table Lamp"
-              },
-              "descricao": {
-                "pt-BR": "Vidro soprado encontra bronze escultural",
-                "en": "Mouth-blown glass meets sculptural bronze"
-              },
-              "material": {
-                "pt-BR": "Vidro soprado",
-                "en": "Mouth-blown glass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "tigela",
-              "colecao": "ceramica",
-              "preco": "145.00",
-              "fotoUrl": "@img/produto-3",
-              "fotoHover": "@img/sobre-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Tigela de Servir do Dia a Dia",
-                "en": "Everyday Serving Bowl"
-              },
-              "descricao": {
-                "pt-BR": "Formas simples para os rituais diários",
-                "en": "Simple forms for daily rituals"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "poltrona",
-              "colecao": "mobiliario",
-              "preco": "1450.00",
-              "fotoUrl": "@img/produto-poltrona",
-              "fotoHover": "@img/colecao-iluminacao",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Poltrona Trançada",
-                "en": "Woven Lounge Chair"
-              },
-              "descricao": {
-                "pt-BR": "Corda de papel dinamarquesa e nogueira escultural",
-                "en": "Danish paper cord meets sculptural walnut"
-              },
-              "material": {
-                "pt-BR": "Nogueira maciça",
-                "en": "Solid walnut"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "manta",
-              "colecao": "texteis",
-              "preco": "195.00",
-              "fotoUrl": "@img/colecao-4",
-              "fotoHover": "@img/sobre-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Manta de Linho Herança",
-                "en": "Heritage Linen Throw"
-              },
-              "descricao": {
-                "pt-BR": "Linho belga lavado em tons naturais",
-                "en": "Stonewashed Belgian linen in natural tones"
-              },
-              "material": {
-                "pt-BR": "100% linho belga",
-                "en": "100% Belgian linen"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "almofada",
-              "colecao": "texteis",
-              "preco": "165.00",
-              "fotoUrl": "@img/produto-almofada",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Almofada de Lã Feltrada à Mão",
-                "en": "Hand-Felted Wool Cushion"
-              },
-              "descricao": {
-                "pt-BR": "Feita por artesãos com técnicas tradicionais de feltragem",
-                "en": "Artisan-made using traditional felting techniques"
-              },
-              "material": {
-                "pt-BR": "100% lã neozelandesa",
-                "en": "100% New Zealand wool"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vasinho",
-              "colecao": "objetos",
-              "preco": "85.00",
-              "fotoUrl": "@img/colecao-5",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural para Uma Flor",
-                "en": "Sculptural Bud Vase"
-              },
-              "descricao": {
-                "pt-BR": "Forma minimalista para uma única haste",
-                "en": "Minimalist form for a single stem"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vela",
-              "colecao": "sazonal",
-              "preco": "65.00",
-              "fotoUrl": "@img/colecao-6",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vela Lareira de Inverno",
-                "en": "Winter Hearth Candle"
-              },
-              "descricao": {
-                "pt-BR": "Notas de cedro, fumaça e ervas secas",
-                "en": "Notes of cedar, smoke, and dried herbs"
-              },
-              "material": {
-                "pt-BR": "Cera de soja natural",
-                "en": "Natural soy wax"
-              },
-              "categoria": {
-                "pt-BR": "Coleção sazonal",
-                "en": "Seasonal Collection"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "bandeja",
-              "colecao": "novidades",
-              "preco": "175.00",
-              "fotoUrl": "@img/foto-3",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Bandeja de Mármore Polido",
-                "en": "Honed Marble Tray"
-              },
-              "descricao": {
-                "pt-BR": "Pedra natural para a beleza de todo dia",
-                "en": "Natural stone for everyday beauty"
-              },
-              "material": {
-                "pt-BR": "Mármore de Carrara",
-                "en": "Carrara marble"
-              },
-              "categoria": {
-                "pt-BR": "Novidades",
-                "en": "New Arrivals"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "caixa",
-              "colecao": "presentes",
-              "preco": "225.00",
-              "fotoUrl": "@img/produto-caixa-presente",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Caixa de Presente Selecionada",
-                "en": "Curated Gift Box"
-              },
-              "descricao": {
-                "pt-BR": "Uma seleção cuidadosa das nossas peças favoritas",
-                "en": "A thoughtful selection of our favorite pieces"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Presentes selecionados",
-                "en": "Curated Gifts"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            }
-          ]
         }
       }
     }
@@ -6540,7 +5062,7 @@
                                     {
                                       "acao": "definir",
                                       "estado": "pedidos",
-                                      "valor": "concat(estado.pedidos, [objeto([[\"numero\", 1001 + tamanho(estado.pedidos)], [\"cliente\", evento.valores], [\"itens\", mapeia(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null), l => objeto([[\"nome\", l.p.nome], [\"qtd\", l.qtd], [\"total\", qmul(l.p.preco, l.qtd)]]))], [\"total\", dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))]])])"
+                                      "valor": "concat(estado.pedidos, [objeto([[\"numero\", 1001 + tamanho(estado.pedidos)], [\"cliente\", evento.valores], [\"itens\", mapeia(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), l => objeto([[\"nome\", l.p.nome], [\"qtd\", l.qtd], [\"total\", qmul(l.p.preco, l.qtd)]]))], [\"total\", dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))]])])"
                                     },
                                     {
                                       "acao": "definir",
@@ -6636,7 +5158,7 @@
                                         ]
                                       },
                                       "repetir": {
-                                        "cada": "filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null)",
+                                        "cada": "filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null)",
                                         "como": "l",
                                         "chave": "l.id"
                                       }
@@ -6647,8 +5169,8 @@
                               {
                                 "bloco": "commerce/resumo-pedido",
                                 "props": {
-                                  "subtotal": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
-                                  "total": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
+                                  "subtotal": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
+                                  "total": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
                                   "idioma": "{idioma}",
                                   "rotulos": {
                                     "subtotal": "{t(\"resumo.subtotal\")}",
@@ -6668,7 +5190,7 @@
                         }
                       ]
                     },
-                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null)) > 0"
+                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null)) > 0"
                   },
                   {
                     "bloco": "layout/pilha",
@@ -6701,7 +5223,7 @@
                         }
                       ]
                     },
-                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(mapeia(estado.produtos, p => mescla(p, objeto([[\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.id == i.id)]])), l => l.p != null)) == 0"
+                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(ordena(mapeia(pecas, p => mescla(p, objeto([[\"id\", p.slug], [\"nome\", loc(idioma, p.nome)], [\"descricao\", loc(idioma, p.descricao)], [\"material\", loc(idioma, p.material)], [\"categoria\", loc(idioma, p.categoria)], [\"selo\", loc(idioma, p.selo)]]))), p => p.ordem), p => p.id == i.id)]])), l => l.p != null)) == 0"
                   }
                 ]
               }
@@ -6873,6 +5395,14 @@
       "traducoes": [
         "maison.textos"
       ],
+      "dados": {
+        "pecas": {
+          "dados": "maison.pecas",
+          "args": {
+            "limite": 100
+          }
+        }
+      },
       "estado": {
         "sacola": {
           "tipo": "json",
@@ -6894,389 +5424,6 @@
           "lista": true,
           "inicial": [],
           "persiste": true
-        },
-        "produtos": {
-          "tipo": "json",
-          "lista": true,
-          "inicial": [
-            {
-              "id": "arco",
-              "colecao": "iluminacao",
-              "preco": "485.00",
-              "fotoUrl": "@img/produto-1",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária Pendente Arco",
-                "en": "Arc Pendant Light"
-              },
-              "descricao": {
-                "pt-BR": "Um arco gracioso de latão curvado à mão e linho",
-                "en": "A graceful arc of hand-bent brass and linen"
-              },
-              "material": {
-                "pt-BR": "Latão maciço",
-                "en": "Solid brass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "vaso",
-              "colecao": "ceramica",
-              "preco": "320.00",
-              "fotoUrl": "@img/colecao-ceramica",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural Grande",
-                "en": "Large Sculptural Vessel"
-              },
-              "descricao": {
-                "pt-BR": "Grés torneado à mão com esmalte natural de cinzas",
-                "en": "Hand-thrown stoneware with natural ash glaze"
-              },
-              "material": {
-                "pt-BR": "Grés de alta temperatura",
-                "en": "High-fire stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "mesa",
-              "colecao": "mobiliario",
-              "preco": "2850.00",
-              "fotoUrl": "@img/colecao-3",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Mesa de Jantar Colheita",
-                "en": "Harvest Dining Table"
-              },
-              "descricao": {
-                "pt-BR": "Carvalho maciço feito para gerações à mesa",
-                "en": "Solid oak crafted for generations of gathering"
-              },
-              "material": {
-                "pt-BR": "Carvalho branco maciço",
-                "en": "Solid white oak"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "castical",
-              "colecao": "objetos",
-              "preco": "245.00",
-              "fotoUrl": "@img/produto-vela-castical",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Conjunto de Castiçais Forja",
-                "en": "Forge Candleholder Set"
-              },
-              "descricao": {
-                "pt-BR": "Latão forjado à mão em três alturas graduadas",
-                "en": "Hand-forged brass in three graduating heights"
-              },
-              "material": {
-                "pt-BR": "Latão forjado maciço",
-                "en": "Solid forged brass"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "Destaque",
-                "en": "Featured"
-              },
-              "novo": false
-            },
-            {
-              "id": "orbe",
-              "colecao": "iluminacao",
-              "preco": "295.00",
-              "fotoUrl": "@img/produto-2",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Luminária de Mesa Orbe",
-                "en": "Orb Table Lamp"
-              },
-              "descricao": {
-                "pt-BR": "Vidro soprado encontra bronze escultural",
-                "en": "Mouth-blown glass meets sculptural bronze"
-              },
-              "material": {
-                "pt-BR": "Vidro soprado",
-                "en": "Mouth-blown glass"
-              },
-              "categoria": {
-                "pt-BR": "Iluminação",
-                "en": "Lighting"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "tigela",
-              "colecao": "ceramica",
-              "preco": "145.00",
-              "fotoUrl": "@img/produto-3",
-              "fotoHover": "@img/sobre-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Tigela de Servir do Dia a Dia",
-                "en": "Everyday Serving Bowl"
-              },
-              "descricao": {
-                "pt-BR": "Formas simples para os rituais diários",
-                "en": "Simple forms for daily rituals"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Cerâmica",
-                "en": "Ceramics"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "poltrona",
-              "colecao": "mobiliario",
-              "preco": "1450.00",
-              "fotoUrl": "@img/produto-poltrona",
-              "fotoHover": "@img/colecao-iluminacao",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Poltrona Trançada",
-                "en": "Woven Lounge Chair"
-              },
-              "descricao": {
-                "pt-BR": "Corda de papel dinamarquesa e nogueira escultural",
-                "en": "Danish paper cord meets sculptural walnut"
-              },
-              "material": {
-                "pt-BR": "Nogueira maciça",
-                "en": "Solid walnut"
-              },
-              "categoria": {
-                "pt-BR": "Mobiliário",
-                "en": "Furniture"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "manta",
-              "colecao": "texteis",
-              "preco": "195.00",
-              "fotoUrl": "@img/colecao-4",
-              "fotoHover": "@img/sobre-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Manta de Linho Herança",
-                "en": "Heritage Linen Throw"
-              },
-              "descricao": {
-                "pt-BR": "Linho belga lavado em tons naturais",
-                "en": "Stonewashed Belgian linen in natural tones"
-              },
-              "material": {
-                "pt-BR": "100% linho belga",
-                "en": "100% Belgian linen"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "almofada",
-              "colecao": "texteis",
-              "preco": "165.00",
-              "fotoUrl": "@img/produto-almofada",
-              "fotoHover": "@img/sobre-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Almofada de Lã Feltrada à Mão",
-                "en": "Hand-Felted Wool Cushion"
-              },
-              "descricao": {
-                "pt-BR": "Feita por artesãos com técnicas tradicionais de feltragem",
-                "en": "Artisan-made using traditional felting techniques"
-              },
-              "material": {
-                "pt-BR": "100% lã neozelandesa",
-                "en": "100% New Zealand wool"
-              },
-              "categoria": {
-                "pt-BR": "Têxteis",
-                "en": "Textiles"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vasinho",
-              "colecao": "objetos",
-              "preco": "85.00",
-              "fotoUrl": "@img/colecao-5",
-              "fotoHover": "@img/foto-1",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vaso Escultural para Uma Flor",
-                "en": "Sculptural Bud Vase"
-              },
-              "descricao": {
-                "pt-BR": "Forma minimalista para uma única haste",
-                "en": "Minimalist form for a single stem"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Objetos e vasos",
-                "en": "Objects & Vases"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "vela",
-              "colecao": "sazonal",
-              "preco": "65.00",
-              "fotoUrl": "@img/colecao-6",
-              "fotoHover": "@img/foto-2",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Vela Lareira de Inverno",
-                "en": "Winter Hearth Candle"
-              },
-              "descricao": {
-                "pt-BR": "Notas de cedro, fumaça e ervas secas",
-                "en": "Notes of cedar, smoke, and dried herbs"
-              },
-              "material": {
-                "pt-BR": "Cera de soja natural",
-                "en": "Natural soy wax"
-              },
-              "categoria": {
-                "pt-BR": "Coleção sazonal",
-                "en": "Seasonal Collection"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            },
-            {
-              "id": "bandeja",
-              "colecao": "novidades",
-              "preco": "175.00",
-              "fotoUrl": "@img/foto-3",
-              "fotoHover": "@img/loja-capa",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Bandeja de Mármore Polido",
-                "en": "Honed Marble Tray"
-              },
-              "descricao": {
-                "pt-BR": "Pedra natural para a beleza de todo dia",
-                "en": "Natural stone for everyday beauty"
-              },
-              "material": {
-                "pt-BR": "Mármore de Carrara",
-                "en": "Carrara marble"
-              },
-              "categoria": {
-                "pt-BR": "Novidades",
-                "en": "New Arrivals"
-              },
-              "selo": {
-                "pt-BR": "Novo",
-                "en": "New"
-              },
-              "novo": true
-            },
-            {
-              "id": "caixa",
-              "colecao": "presentes",
-              "preco": "225.00",
-              "fotoUrl": "@img/produto-caixa-presente",
-              "fotoHover": "@img/hero",
-              "disponivel": true,
-              "nome": {
-                "pt-BR": "Caixa de Presente Selecionada",
-                "en": "Curated Gift Box"
-              },
-              "descricao": {
-                "pt-BR": "Uma seleção cuidadosa das nossas peças favoritas",
-                "en": "A thoughtful selection of our favorite pieces"
-              },
-              "material": {
-                "pt-BR": "Grés",
-                "en": "Stoneware"
-              },
-              "categoria": {
-                "pt-BR": "Presentes selecionados",
-                "en": "Curated Gifts"
-              },
-              "selo": {
-                "pt-BR": "",
-                "en": ""
-              },
-              "novo": false
-            }
-          ]
         }
       }
     }

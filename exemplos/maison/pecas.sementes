@@ -1,0 +1,392 @@
+[
+  {
+    "slug": "arco",
+    "ordem": 1,
+    "colecao": "iluminacao",
+    "preco": "485.00",
+    "fotoUrl": "@img/produto-1",
+    "fotoHover": "@img/sobre-1",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Luminária Pendente Arco",
+      "en": "Arc Pendant Light"
+    },
+    "descricao": {
+      "pt-BR": "Um arco gracioso de latão curvado à mão e linho",
+      "en": "A graceful arc of hand-bent brass and linen"
+    },
+    "material": {
+      "pt-BR": "Latão maciço",
+      "en": "Solid brass"
+    },
+    "categoria": {
+      "pt-BR": "Iluminação",
+      "en": "Lighting"
+    },
+    "selo": {
+      "pt-BR": "Destaque",
+      "en": "Featured"
+    },
+    "novo": false
+  },
+  {
+    "slug": "vaso",
+    "ordem": 2,
+    "colecao": "ceramica",
+    "preco": "320.00",
+    "fotoUrl": "@img/colecao-ceramica",
+    "fotoHover": "@img/foto-1",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Vaso Escultural Grande",
+      "en": "Large Sculptural Vessel"
+    },
+    "descricao": {
+      "pt-BR": "Grés torneado à mão com esmalte natural de cinzas",
+      "en": "Hand-thrown stoneware with natural ash glaze"
+    },
+    "material": {
+      "pt-BR": "Grés de alta temperatura",
+      "en": "High-fire stoneware"
+    },
+    "categoria": {
+      "pt-BR": "Cerâmica",
+      "en": "Ceramics"
+    },
+    "selo": {
+      "pt-BR": "Destaque",
+      "en": "Featured"
+    },
+    "novo": false
+  },
+  {
+    "slug": "mesa",
+    "ordem": 3,
+    "colecao": "mobiliario",
+    "preco": "2850.00",
+    "fotoUrl": "@img/colecao-3",
+    "fotoHover": "@img/foto-2",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Mesa de Jantar Colheita",
+      "en": "Harvest Dining Table"
+    },
+    "descricao": {
+      "pt-BR": "Carvalho maciço feito para gerações à mesa",
+      "en": "Solid oak crafted for generations of gathering"
+    },
+    "material": {
+      "pt-BR": "Carvalho branco maciço",
+      "en": "Solid white oak"
+    },
+    "categoria": {
+      "pt-BR": "Mobiliário",
+      "en": "Furniture"
+    },
+    "selo": {
+      "pt-BR": "Destaque",
+      "en": "Featured"
+    },
+    "novo": false
+  },
+  {
+    "slug": "castical",
+    "ordem": 4,
+    "colecao": "objetos",
+    "preco": "245.00",
+    "fotoUrl": "@img/produto-vela-castical",
+    "fotoHover": "@img/loja-capa",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Conjunto de Castiçais Forja",
+      "en": "Forge Candleholder Set"
+    },
+    "descricao": {
+      "pt-BR": "Latão forjado à mão em três alturas graduadas",
+      "en": "Hand-forged brass in three graduating heights"
+    },
+    "material": {
+      "pt-BR": "Latão forjado maciço",
+      "en": "Solid forged brass"
+    },
+    "categoria": {
+      "pt-BR": "Objetos e vasos",
+      "en": "Objects & Vases"
+    },
+    "selo": {
+      "pt-BR": "Destaque",
+      "en": "Featured"
+    },
+    "novo": false
+  },
+  {
+    "slug": "orbe",
+    "ordem": 5,
+    "colecao": "iluminacao",
+    "preco": "295.00",
+    "fotoUrl": "@img/produto-2",
+    "fotoHover": "@img/hero",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Luminária de Mesa Orbe",
+      "en": "Orb Table Lamp"
+    },
+    "descricao": {
+      "pt-BR": "Vidro soprado encontra bronze escultural",
+      "en": "Mouth-blown glass meets sculptural bronze"
+    },
+    "material": {
+      "pt-BR": "Vidro soprado",
+      "en": "Mouth-blown glass"
+    },
+    "categoria": {
+      "pt-BR": "Iluminação",
+      "en": "Lighting"
+    },
+    "selo": {
+      "pt-BR": "Novo",
+      "en": "New"
+    },
+    "novo": true
+  },
+  {
+    "slug": "tigela",
+    "ordem": 6,
+    "colecao": "ceramica",
+    "preco": "145.00",
+    "fotoUrl": "@img/produto-3",
+    "fotoHover": "@img/sobre-2",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Tigela de Servir do Dia a Dia",
+      "en": "Everyday Serving Bowl"
+    },
+    "descricao": {
+      "pt-BR": "Formas simples para os rituais diários",
+      "en": "Simple forms for daily rituals"
+    },
+    "material": {
+      "pt-BR": "Grés",
+      "en": "Stoneware"
+    },
+    "categoria": {
+      "pt-BR": "Cerâmica",
+      "en": "Ceramics"
+    },
+    "selo": {
+      "pt-BR": "",
+      "en": ""
+    },
+    "novo": false
+  },
+  {
+    "slug": "poltrona",
+    "ordem": 7,
+    "colecao": "mobiliario",
+    "preco": "1450.00",
+    "fotoUrl": "@img/produto-poltrona",
+    "fotoHover": "@img/colecao-iluminacao",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Poltrona Trançada",
+      "en": "Woven Lounge Chair"
+    },
+    "descricao": {
+      "pt-BR": "Corda de papel dinamarquesa e nogueira escultural",
+      "en": "Danish paper cord meets sculptural walnut"
+    },
+    "material": {
+      "pt-BR": "Nogueira maciça",
+      "en": "Solid walnut"
+    },
+    "categoria": {
+      "pt-BR": "Mobiliário",
+      "en": "Furniture"
+    },
+    "selo": {
+      "pt-BR": "Novo",
+      "en": "New"
+    },
+    "novo": true
+  },
+  {
+    "slug": "manta",
+    "ordem": 8,
+    "colecao": "texteis",
+    "preco": "195.00",
+    "fotoUrl": "@img/colecao-4",
+    "fotoHover": "@img/sobre-capa",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Manta de Linho Herança",
+      "en": "Heritage Linen Throw"
+    },
+    "descricao": {
+      "pt-BR": "Linho belga lavado em tons naturais",
+      "en": "Stonewashed Belgian linen in natural tones"
+    },
+    "material": {
+      "pt-BR": "100% linho belga",
+      "en": "100% Belgian linen"
+    },
+    "categoria": {
+      "pt-BR": "Têxteis",
+      "en": "Textiles"
+    },
+    "selo": {
+      "pt-BR": "",
+      "en": ""
+    },
+    "novo": false
+  },
+  {
+    "slug": "almofada",
+    "ordem": 9,
+    "colecao": "texteis",
+    "preco": "165.00",
+    "fotoUrl": "@img/produto-almofada",
+    "fotoHover": "@img/sobre-1",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Almofada de Lã Feltrada à Mão",
+      "en": "Hand-Felted Wool Cushion"
+    },
+    "descricao": {
+      "pt-BR": "Feita por artesãos com técnicas tradicionais de feltragem",
+      "en": "Artisan-made using traditional felting techniques"
+    },
+    "material": {
+      "pt-BR": "100% lã neozelandesa",
+      "en": "100% New Zealand wool"
+    },
+    "categoria": {
+      "pt-BR": "Têxteis",
+      "en": "Textiles"
+    },
+    "selo": {
+      "pt-BR": "",
+      "en": ""
+    },
+    "novo": false
+  },
+  {
+    "slug": "vasinho",
+    "ordem": 10,
+    "colecao": "objetos",
+    "preco": "85.00",
+    "fotoUrl": "@img/colecao-5",
+    "fotoHover": "@img/foto-1",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Vaso Escultural para Uma Flor",
+      "en": "Sculptural Bud Vase"
+    },
+    "descricao": {
+      "pt-BR": "Forma minimalista para uma única haste",
+      "en": "Minimalist form for a single stem"
+    },
+    "material": {
+      "pt-BR": "Grés",
+      "en": "Stoneware"
+    },
+    "categoria": {
+      "pt-BR": "Objetos e vasos",
+      "en": "Objects & Vases"
+    },
+    "selo": {
+      "pt-BR": "",
+      "en": ""
+    },
+    "novo": false
+  },
+  {
+    "slug": "vela",
+    "ordem": 11,
+    "colecao": "sazonal",
+    "preco": "65.00",
+    "fotoUrl": "@img/colecao-6",
+    "fotoHover": "@img/foto-2",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Vela Lareira de Inverno",
+      "en": "Winter Hearth Candle"
+    },
+    "descricao": {
+      "pt-BR": "Notas de cedro, fumaça e ervas secas",
+      "en": "Notes of cedar, smoke, and dried herbs"
+    },
+    "material": {
+      "pt-BR": "Cera de soja natural",
+      "en": "Natural soy wax"
+    },
+    "categoria": {
+      "pt-BR": "Coleção sazonal",
+      "en": "Seasonal Collection"
+    },
+    "selo": {
+      "pt-BR": "",
+      "en": ""
+    },
+    "novo": false
+  },
+  {
+    "slug": "bandeja",
+    "ordem": 12,
+    "colecao": "novidades",
+    "preco": "175.00",
+    "fotoUrl": "@img/foto-3",
+    "fotoHover": "@img/loja-capa",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Bandeja de Mármore Polido",
+      "en": "Honed Marble Tray"
+    },
+    "descricao": {
+      "pt-BR": "Pedra natural para a beleza de todo dia",
+      "en": "Natural stone for everyday beauty"
+    },
+    "material": {
+      "pt-BR": "Mármore de Carrara",
+      "en": "Carrara marble"
+    },
+    "categoria": {
+      "pt-BR": "Novidades",
+      "en": "New Arrivals"
+    },
+    "selo": {
+      "pt-BR": "Novo",
+      "en": "New"
+    },
+    "novo": true
+  },
+  {
+    "slug": "caixa",
+    "ordem": 13,
+    "colecao": "presentes",
+    "preco": "225.00",
+    "fotoUrl": "@img/produto-caixa-presente",
+    "fotoHover": "@img/hero",
+    "disponivel": true,
+    "nome": {
+      "pt-BR": "Caixa de Presente Selecionada",
+      "en": "Curated Gift Box"
+    },
+    "descricao": {
+      "pt-BR": "Uma seleção cuidadosa das nossas peças favoritas",
+      "en": "A thoughtful selection of our favorite pieces"
+    },
+    "material": {
+      "pt-BR": "Grés",
+      "en": "Stoneware"
+    },
+    "categoria": {
+      "pt-BR": "Presentes selecionados",
+      "en": "Curated Gifts"
+    },
+    "selo": {
+      "pt-BR": "",
+      "en": ""
+    },
+    "novo": false
+  }
+]

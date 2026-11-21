@@ -75,6 +75,61 @@
             ],
             "permissao": "publica"
           }
+        },
+        "peca": {
+          "campos": {
+            "slug": {
+              "tipo": "texto",
+              "obrigatorio": true,
+              "descricao": "identificador legível usado na URL e na sacola"
+            },
+            "colecao": {
+              "tipo": "texto"
+            },
+            "preco": {
+              "tipo": "dinheiro",
+              "obrigatorio": true
+            },
+            "fotoUrl": {
+              "tipo": "texto"
+            },
+            "fotoHover": {
+              "tipo": "texto"
+            },
+            "ordem": {
+              "tipo": "inteiro"
+            },
+            "novo": {
+              "tipo": "booleano"
+            },
+            "disponivel": {
+              "tipo": "booleano"
+            },
+            "nome": {
+              "tipo": "json",
+              "descricao": "texto por idioma: {\"pt-BR\": …, \"en\": …}"
+            },
+            "descricao": {
+              "tipo": "json"
+            },
+            "material": {
+              "tipo": "json"
+            },
+            "categoria": {
+              "tipo": "json"
+            },
+            "selo": {
+              "tipo": "json"
+            }
+          },
+          "crud": {
+            "caminho": "/pecas",
+            "operacoes": [
+              "listar",
+              "obter"
+            ],
+            "permissao": "publica"
+          }
         }
       },
       "operacoes": {}
