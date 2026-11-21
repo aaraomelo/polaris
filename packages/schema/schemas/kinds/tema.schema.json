@@ -73,7 +73,7 @@
         },
         "rodape": {
           "type": "object",
-          "description": "rodapé (site/rodape): `fundo`, `texto`, `suave` (texto secundário), `link`, `borda`, `marcaTamanho`, `marcaPeso`, `marcaEspacamento`, `descricaoTamanho`, `tituloTamanho`, `tituloPeso`, `tituloEspacamento`, `tituloCaixa`",
+          "description": "rodapé (site/rodape): `fundo`, `texto`, `suave` (texto secundário), `link`, `borda`, `marcaTamanho`, `marcaPeso`, `marcaEspacamento`, `descricaoTamanho`, `tituloTamanho`, `tituloPeso`, `tituloEspacamento`, `tituloCaixa`. Faixas (`faixas: true`): `recuo`, `gap`, `recuoX`, `divisor`, `faixaRecuoY`, `baseRecuoY`, `linkGap`, `legalGap`, `topoLargura`. Campos do rodapé (assinatura): `campoAltura`, `campoFundo`, `campoBorda`, `campoTexto`, `campoPlaceholder`, `botaoFundo`, `botaoTexto`",
           "additionalProperties": {
             "type": [
               "number",

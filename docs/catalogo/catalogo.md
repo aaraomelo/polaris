@@ -1184,6 +1184,8 @@ Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou
 | `escurece` | número ≥ 0 ≤ 0.8 | não | 0.45 | véu escuro sobre a imagem, para o texto ler |
 | `fundo` | texto | não |  | sem imagem: primaria (padrão) ou suave (outro valor vale primaria) |
 | `imagem` | texto ≤ 500 caracteres | não |  | URL segura (mesma origem: o CSP das páginas só carrega imagens do próprio site) |
+| `ocupa` | inteiro ≥ 1 ≤ 12 | não |  | quantas colunas ocupa quando está numa `layout/grade` (grid-column: span N) |
+| `proporcao` | número ≥ 0.2 ≤ 5 | não |  | largura ÷ altura da faixa (16/9 = 1,778; 3/4 = 0,75): no lugar da altura mínima |
 | `zoom` | booleano | não |  | a foto de fundo cresce e escurece no hover (tokens movimento.zoomFaixa e movimento.zoomFaixaDuracao) |
 
 **Slots**
@@ -2846,10 +2848,12 @@ Fim da página: colunas de links (cada uma com título e um menu próprio, com n
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
-| `colunas` | lista | não |  | grupos de links |
+| `colunas` | lista | não |  | grupos de links (um item sem `href` é uma linha de texto) |
 | `contato` | texto ≤ 300 caracteres | não |  | telefone, e-mail ou endereço, numa linha |
 | `copyright` | texto ≤ 300 caracteres | não |  | aviso legal, ex.: © 2026 Minha loja |
 | `descricao` | texto ≤ 300 caracteres | não |  | frase curta sob a marca |
+| `faixas` | booleano | não | false | em três faixas separadas: marca e frase (com o slot `topo` à direita), as colunas e o aviso legal com `legal` |
+| `legal` | lista | não |  | links da faixa final (política de privacidade, termos), ao lado do aviso |
 | `marca` | texto ≤ 80 caracteres | não |  | nome da marca, em destaque à esquerda das colunas |
 
 **Slots**
@@ -2857,6 +2861,7 @@ Fim da página: colunas de links (cada uma com título e um menu próprio, com n
 | Slot | Aceita | Mín. | Máx. |
 |---|---|---|---|
 | `extra` | qualquer bloco |  |  |
+| `topo` | qualquer bloco |  |  |
 
 **Exemplo: Colunas e aviso**
 

@@ -125,7 +125,7 @@ export const d_layout_destaque: Descritor = {
   chave: () => 'section', tag: () => 'section', filhos: true,
   attrs: (p, id) => {
     const img = urlSegura(p.imagem), a = inteiro(p.altura, 120, 800, 320), e = Math.min(0.8, Math.max(0, num(p.escurece) ?? 0.45))
-    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), ...(p.capa === true ? { 'data-capa': '' } : {}), ...(p.zoom === true ? { 'data-zoom': '' } : {}), style: `min-height:${p.capa === true ? (a >= 800 ? '100svh' : `min(${a}px,100svh)`) : `${a}px`}${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
+    return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), ...(p.capa === true ? { 'data-capa': '' } : {}), ...(p.zoom === true ? { 'data-zoom': '' } : {}), style: `${proporcaoDaImagem(p) ? `aspect-ratio:${proporcaoDaImagem(p)};box-sizing:border-box` : `min-height:${p.capa === true ? (a >= 800 ? '100svh' : `min(${a}px,100svh)`) : `${a}px`}`}${inteiro(p.ocupa, 1, 12, 0) ? `;grid-column:span ${inteiro(p.ocupa, 1, 12, 0)}` : ''}${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
   },
 }
 export const d_layout_contido: Descritor = { chave: () => 'div:contido', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-contido': p.largura === 'estreita' || p.largura === 'larga' ? p.largura : 'normal' }) }

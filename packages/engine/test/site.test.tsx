@@ -326,3 +326,26 @@ describe('site/cabecalho: submenu com descrição, ordem e sacola em ícone', ()
     const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('--cabecalho-submenu-hover, none'); expect(css).toContain('[data-icone=sacola]{--ic-base:')
   })
 })
+
+describe('site/rodape em faixas', () => {
+  const html = (props: object, topo?: object[]) => {
+    const r = novoReg(), pg = r.registra({ kind: 'pagina', id: 'rod2', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/', raiz: { bloco: 'site/rodape', props, ...(topo ? { slots: { topo } } : {}) } } } as never)
+    const c = compilaPrograma(r, pg); if (!c.ok) throw new Error(JSON.stringify(c.erros))
+    return renderPaginaHtml({ programa: c.programa, componentes: COMPONENTES_BASE }).html
+  }
+  const props = { faixas: true, marca: 'Maison', descricao: 'Objetos para viver', copyright: '© 2026', legal: [{ texto: 'Privacidade', href: '/p' }], colunas: [{ titulo: 'Loja', links: [{ texto: 'Tudo', href: '/t' }] }, { titulo: 'Contato', links: [{ texto: 'oi@x.com' }, { texto: 'Seg a sex' }] }] }
+  it('três faixas: marca e frase com o slot `topo`, as colunas e a faixa final com o aviso e os links legais', () => {
+    const h = html(props, [{ bloco: 'texto/pequeno', props: { texto: 'Assine' } }])
+    expect(h).toContain('data-marca="rodape-faixa"'); expect(h).toContain('data-marca="rodape-marca"'); expect(h).toContain('data-marca="rodape-topo"'); expect(h).toContain('Assine')
+    expect(h).toContain('data-marca="rodape-faixa-base"'); expect(h).toContain('data-marca="rodape-legal"'); expect(h).toContain('<a href="/p">Privacidade</a>'); expect(h).toContain('© 2026')
+    expect(h.indexOf('Assine')).toBeLessThan(h.indexOf('>Loja<')); expect(h.indexOf('>Loja<')).toBeLessThan(h.indexOf('Privacidade'))
+  })
+  it('na coluna, o item com `href` é link e o sem `href` é uma linha de texto', () => {
+    const h = html(props)
+    expect(h).toContain('<a href="/t">Tudo</a>'); expect(h).toContain('<small>oi@x.com</small>'); expect(h).not.toContain('<a>oi@x.com')
+  })
+  it('sem `faixas` o rodapé é o de antes (o slot `topo` e `legal` não aparecem)', () => {
+    const h = html({ ...props, faixas: false }, [{ bloco: 'texto/pequeno', props: { texto: 'Assine' } }]).split('<div id="polaris">')[1]!.split('<script')[0]!
+    expect(h).not.toContain('rodape-faixa'); expect(h).not.toContain('Assine'); expect(h).not.toContain('rodape-legal')
+  })
+})

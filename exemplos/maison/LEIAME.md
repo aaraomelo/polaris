@@ -17,6 +17,9 @@ O tema declara `seguirSistema: false` (sempre claro, como o template), `cabecalh
 ## Idiomas (pt-BR e en)
 As páginas **só levam chaves** (`{t("home.titulo")}`); os textos ficam em `idiomas.mjs` e saem como o catálogo `maison.textos` (kind `traducao`, `docs/i18n.md`). O padrão é pt-BR (`/produtos`) e o inglês é o **texto original do template** (`/en/produtos`), o que valida a cópia. Os produtos são dados em vários idiomas (`loc(idioma, …)`), os preços usam `qmoeda(…, idioma)`, o formulário do checkout tem rótulos por idioma e o cabeçalho tem o seletor (`tenant.idiomas`). Para acrescentar um idioma: um bloco novo em `idiomas.mjs` e o código em `IDIOMAS`.
 
+## Rodapé
+Três faixas (`site/rodape` com `faixas`): marca e frase com a assinatura de e-mail no slot `topo` (o e-mail e o "já assinou" são estado da página, o segundo persistente: não há servidor), as quatro colunas (a última com e-mail e horário como linhas de texto) e o aviso final. O que o rodapé tem de reutilizável está no `docs/blocos-base.md`.
+
 ## Cabeçalho
 Menu na ordem do template (Coleções, Loja, Sobre): **Coleções** abre no hover num painel de 2 colunas com as 8 categorias, cada uma com o nome e a frase (`grupos[].links[].descricao` e os tokens `cabecalho.submenu*`); à direita ficam o seletor de idioma e a **sacola como ícone** com o contador (`nav/link` com `icone: sacola` e `rotulo`). O coração (lista de desejos) do template não foi portado: a Maison não tem essa função.
 

@@ -29,7 +29,7 @@ const tema = {
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
       cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1, linkPeso: 500, linkAtualCor: 'var(--cor-texto-suave)', linkAtualPeso: 500, linkAtualDecoracao: 'none', iconeCor: 'var(--cor-texto)', iconeHover: 'var(--cor-superficie-alt)', gatilhoAltura: '2.5rem', gatilhoRecuoX: '1rem', gatilhoFundo: 'color-mix(in srgb, var(--cor-superficie-alt) 50%, transparent)', submenuHover: 'grid', submenuDisplay: 'grid', submenuColunas: 2, submenuGap: '0.25rem', submenuLargura: '37.5rem', submenuRecuo: '1rem', submenuFundo: 'var(--cor-fundo)', submenuBorda: 'var(--cor-borda)', submenuSombra: '0 10px 30px color-mix(in srgb, var(--cor-texto) 8%, transparent)', submenuRaio: 0, submenuItem: '0.75rem', submenuItemHover: 'var(--cor-superficie-alt)' }, // o painel das coleções abre no hover: 2 colunas, cada item com título e descrição
       // rodapé invertido: fundo escuro no claro e claro no escuro
-      rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
+      rodape: { recuo: 0, gap: 0, recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', divisor: 'color-mix(in srgb, var(--cor-fundo) 10%, transparent)', campoAltura: '3rem', campoFundo: 'transparent', campoBorda: 'color-mix(in srgb, var(--cor-fundo) 20%, transparent)', campoTexto: 'var(--cor-fundo)', campoPlaceholder: 'color-mix(in srgb, var(--cor-fundo) 40%, transparent)', botaoFundo: 'var(--cor-fundo)', botaoTexto: 'var(--cor-texto)', faixaRecuoY: '4rem', baseRecuoY: '1.5rem', linkGap: '0.75rem', fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
       // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
       botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500 },
       // a barra de categorias da loja: fixa sob o cabeçalho, translúcida com desfoque, abas em caixa alta (a escolhida invertida) e o seletor de ordem à direita
@@ -99,6 +99,7 @@ const dadosProduto = (p, i) => ({
 // o hero da loja DEPENDE da categoria escolhida (`?colecao=<slug>`): cada categoria tem foto, nome e frase próprios; sem categoria, o hero "Todas as peças"
 const HEROIS = [['iluminacao', 'loja-capa-iluminacao'], ['ceramica', 'colecao-ceramica'], ['mobiliario', 'colecao-3'], ['texteis', 'colecao-4'], ['objetos', 'colecao-5'], ['sazonal', 'colecao-6'], ['novidades', 'foto-3'], ['presentes', 'produto-2']]
 const estadoColecoes = { colecoes: { tipo: 'json', lista: true, inicial: HEROIS.map(([slug, f]) => ({ slug, foto: foto(f), nome: doDicionario(`colecao.${slug}.nome`), frase: doDicionario(`colecao.${slug}.frase`) })) } }
+const GRADE_COLECOES = [['iluminacao', 7, 1.778], ['ceramica', 5, 0.75], ['mobiliario', 4, 0.75], ['texteis', 4, 0.75], ['objetos', 4, 0.75], ['sazonal', 12, 1.778]] // [categoria, colunas, proporção]
 const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'colecao-5']
 const estadoProdutos = { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(dadosProduto) } }
 // a lista de produtos NO IDIOMA DA REQUISIÇÃO: cada campo de texto passa por `loc(idioma, …)`
@@ -130,14 +131,25 @@ const cabecalho = (atual) => b('site/cabecalho', {
   // a sacola é um ícone com o contador (só aparece com itens); o nome acessível leva a contagem
   b('nav/link', { href: H('/sacola'), icone: 'sacola', rotulo: T('nav.sacola', { n: SACOLA_TOTAL }) }, [b('texto/pequeno', { texto: `{${SACOLA_TOTAL}}` }, undefined, { se: `${SACOLA_TOTAL} > 0` })]),
 ] } })
+// a assinatura do rodapé (estado persistente, sem servidor): o e-mail digitado e se já assinou
+const estadoRodape = { email: { tipo: 'texto', inicial: '' }, inscrito: { tipo: 'booleano', inicial: false, persiste: true } }
 const rodape = () => b('site/rodape', {
-  marca: 'Maison', descricao: T('rodape.descricao'),
+  faixas: true, marca: 'Maison', descricao: T('rodape.descricao'),
   colunas: [
-    { titulo: T('rodape.loja'), links: [{ texto: T('rodape.todas'), href: H('/produtos') }, { texto: T('rodape.novidades'), href: H('/produtos?colecao=novidades') }, { texto: T('rodape.presentes'), href: H('/produtos?colecao=presentes') }] },
-    { titulo: T('rodape.casa'), links: [{ texto: T('rodape.historia'), href: H('/sobre') }, { texto: T('rodape.sacola'), href: H('/sacola') }, { texto: T('rodape.contato'), href: H('/sobre#contato') }] },
+    { titulo: T('rodape.colecoes'), links: CATEGORIAS.map((slug) => ({ texto: T(`colecao.${slug}.nome`), href: H(`/produtos?colecao=${slug}`) })) },
+    { titulo: T('rodape.loja'), links: [{ texto: T('rodape.todas'), href: H('/produtos') }, { texto: T('rodape.novidades'), href: H('/produtos?colecao=novidades') }, { texto: T('rodape.presentes'), href: H('/produtos?colecao=presentes') }, { texto: T('rodape.sacola'), href: H('/sacola') }] },
+    { titulo: T('rodape.casa'), links: [{ texto: T('rodape.historia'), href: H('/sobre') }, { texto: T('rodape.contato'), href: H('/sobre#contato') }] },
+    { titulo: T('rodape.contatoTitulo'), links: [{ texto: T('rodape.email.endereco') }, { texto: T('rodape.horario') }] },
   ],
   copyright: T('rodape.copyright'),
-})
+}, undefined, { slots: { topo: [
+  b('texto/sobretitulo', { texto: T('rodape.newsletter') }),
+  b('layout/linha', { gap: 0 }, [
+    b('entrada/texto', { valor: '{estado.email}', rotulo: T('rodape.newsletter'), placeholder: T('rodape.email') }, undefined, { eventos: { aoMudar: [{ acao: 'definir', estado: 'email', valor: 'evento' }] } }),
+    b('nav/botao', { texto: T('rodape.assinar') }, undefined, { eventos: { aoClicar: [{ acao: 'definir', estado: 'inscrito', valor: 'contem(estado.email, "@")' }] } }),
+  ], { se: '!estado.inscrito' }),
+  b('texto/pequeno', { texto: T('rodape.obrigado') }, undefined, { se: 'estado.inscrito' }),
+] } })
 const link = (href, texto, botao) => b('nav/link', { href: H(href), texto, ...(botao ? { botao } : {}) })
 // as props de um cartão de produto: o template passa os rótulos e o idioma (o bloco não tem texto fixo que o template não possa trocar)
 const propsCartao = (produto, href) => ({ fluida: true, proporcao: 0.8, produto, href, rotuloLink: '', rotuloFoto: T('produto.verDetalhes'), mostraDescricao: true, idioma: '{idioma}' })
@@ -173,21 +185,38 @@ const home = b('layout/pilha', { gap: 0 }, [
   // novidades sobre o fundo de linho
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [
     contido([
+      folga(64),
       b('layout/linha', { gap: 16, alinha: 'fim', quebra: true }, [
         b('layout/pilha', { gap: 4, cresce: true }, [sobre(T('home.novidades.eyebrow')), titulo(T('home.novidades.titulo'), 2)]),
         link('/produtos', T('home.verTudo')),
       ]),
       folga(24),
       b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: propsCartao('{p}', H('{"/produtos/" + p.id}')), repetir: { cada: NOVIDADES, como: 'p', chave: 'p.id' } }]),
+      folga(64),
     ]),
   ]),
-  folga(112),
-  // explore por coleção
+  folga(128),
+  // explore por coleção: a grade assimétrica do template (12 colunas, gap 24): 7+5, 4+4+4 e 12; as faixas largas são 16:9 e as altas 3:4
   contido([
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('home.colecoes.eyebrow')), titulo(T('home.colecoes.titulo'), 2)]),
     folga(32),
-    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda', zoom: true }, [titulo(T(`colecao.${c.slug}.nome`), 3), par(T(`colecao.${c.slug}.frase`)), link(`/produtos?colecao=${c.slug}`, T('home.colecoes.cta'))]))),
+    b('layout/grade', { colunas: 12, gap: 24, alinha: 'inicio' }, GRADE_COLECOES.map(([slug, ocupa, proporcao]) => {
+      const c = COLECOES.find((x) => x.slug === slug)
+      return b('layout/destaque', { imagem: foto(c.foto), ocupa, proporcao, escurece: 0.4, alinha: 'esquerda', zoom: true }, [sobre(T('loja.colecao')), titulo(T(`colecao.${slug}.nome`), 3), par(T(`colecao.${slug}.frase`)), link(`/produtos?colecao=${slug}`, T('home.colecoes.cta'))])
+    })),
   ], 'larga', { id: 'colecoes' }),
+  folga(128),
+  // a frase: fundo de linho, contêiner estreito, o destaque em itálico e o link para a história
+  b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [
+    contido([
+      folga(112),
+      sobre(T('home.citacao.eyebrow')),
+      b('texto/titulo', { texto: '', nivel: 2 }, [b('texto/trecho', { texto: T('home.citacao.a') }), b('texto/enfase', { texto: T('home.citacao.enfase') }), b('texto/trecho', { texto: T('home.citacao.b') })]),
+      par(T('home.citacao.texto')),
+      link('/sobre', T('home.citacao.cta')),
+      folga(112),
+    ], 'estreita'),
+  ]),
   folga(112),
   // a faixa de fotos
   contido([
@@ -422,7 +451,7 @@ const sacolaPag = b('layout/pilha', { gap: 0 }, [
 ])
 
 // toda página usa o catálogo `maison.textos` (traducoes) e tem a sacola persistente
-const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, traducoes: ['maison.textos'], ...extra, estado: { ...estadoSacola, ...(extra.estado ?? {}) } } })
+const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, traducoes: ['maison.textos'], ...extra, estado: { ...estadoSacola, ...estadoRodape, ...(extra.estado ?? {}) } } })
 const naoAchada = b('layout/pilha', { gap: 16, alinha: 'centro' }, [titulo(T('nao.titulo'), 1), par(T('nao.texto')), link('/', T('nao.voltar'), 'primario')])
 const PAGINAS = ['maison.home', 'maison.produtos', 'maison.produto', 'maison.sobre', 'maison.sacola', 'maison.checkout', 'maison.pedido', 'maison.nao']
 const tenant = (id, tenantId, nome) => ({ kind: 'tenant', id, tenantId, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, nome, segmento: 'varejo', modulos: ['loja'], tema: 'maison', paginas: PAGINAS, paginaNaoEncontrada: 'maison.nao', idiomas: IDIOMAS, idiomaPadrao: PADRAO } })

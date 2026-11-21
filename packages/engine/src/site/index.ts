@@ -19,6 +19,8 @@ const GRUPOS_DO_MENU = (se: string) => ({ bloco: 'nav/submenu', se, repetir: { c
     { bloco: 'texto/destaque', props: { texto: '{l.texto}' } }, { bloco: 'texto/pequeno', props: { texto: '{l.descricao}' } },
   ] } },
 ] } })
+const itemRodapeProp = { type: 'object', properties: { texto: { type: 'string', maxLength: 80 }, href: { type: 'string', maxLength: 500, description: 'ausente: o item é só uma linha de texto (e-mail, horário)' }, atual: { type: 'boolean' } }, required: ['texto'] }
+const colunaRodapeProp = { type: 'object', properties: { titulo: { type: 'string', maxLength: 80 }, links: { type: 'array', maxItems: 12, items: itemRodapeProp } }, required: ['titulo'] }
 const BLOCOS_CABECALHO = [
   no('bloco', 'site.cabecalho', {
     interface: 'site/cabecalho', titulo: 'Cabeçalho do site',
@@ -53,12 +55,15 @@ const BLOCOS_CABECALHO = [
 ]
 
 
-// a grade de colunas do rodapé (cada uma com título e menu próprio); `marca` dá às colunas um gancho de estilo
-const COLUNAS_RODAPE = { bloco: 'layout/grade', props: { colunas: '{tamanho(props.colunas ?? [])}', gap: 24 }, slots: { filhos: [
+// a grade de colunas do rodapé (cada uma com título e menu próprio); um item com `href` é link, sem `href` é uma linha de texto (e-mail, horário); `marca` dá às colunas um gancho de estilo
+const COLUNAS_RODAPE = { bloco: 'layout/grade', props: { colunas: '{tamanho(props.colunas ?? [])}', gap: '{props.faixas ? 40 : 24}' }, slots: { filhos: [
   { bloco: 'layout/pilha', repetir: { cada: 'props.colunas ?? []', como: 'c', chave: 'c.titulo' }, props: { gap: 8, marca: 'rodape-coluna' }, slots: { filhos: [
     { bloco: 'texto/destaque', props: { texto: '{c.titulo}' } },
-    { bloco: 'nav/menu', se: 'tamanho(c.links ?? []) > 0', props: { rotulo: '{c.titulo}' }, slots: { filhos: [
-      { bloco: 'nav/link', repetir: { cada: 'c.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+    { bloco: 'nav/menu', se: 'tamanho(filtra(c.links ?? [], x => x.href)) > 0', props: { rotulo: '{c.titulo}' }, slots: { filhos: [
+      { bloco: 'nav/link', repetir: { cada: 'filtra(c.links ?? [], x => x.href)', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+    ] } },
+    { bloco: 'layout/pilha', se: 'tamanho(filtra(c.links ?? [], x => !x.href)) > 0', props: { gap: 4, marca: 'rodape-linhas' }, slots: { filhos: [
+      { bloco: 'texto/pequeno', repetir: { cada: 'filtra(c.links ?? [], x => !x.href)', como: 'l', chave: 'l.texto' }, props: { texto: '{l.texto}' } },
     ] } },
   ] } },
 ] } }
@@ -67,29 +72,44 @@ const BLOCOS_RODAPE = [
     interface: 'site/rodape', titulo: 'Rodapé do site',
     descricao: 'Fim da página: colunas de links (cada uma com título e um menu próprio, com nome acessível), uma linha de contato/endereço, o aviso legal (`copyright`) e o slot `extra` para o que a página quiser (ex.: um formulário de assinatura). Usa `<footer>` e `<nav>` e só variáveis do tema.',
     props: { type: 'object', properties: {
-      colunas: { type: 'array', maxItems: 6, items: colunaProp, description: 'grupos de links' }, contato: { type: 'string', maxLength: 300, description: 'telefone, e-mail ou endereço, numa linha' },
+      colunas: { type: 'array', maxItems: 6, items: colunaRodapeProp, description: 'grupos de links (um item sem `href` é uma linha de texto)' }, faixas: { type: 'boolean', default: false, description: 'em três faixas separadas: marca e frase (com o slot `topo` à direita), as colunas e o aviso legal com `legal`' }, legal: { type: 'array', maxItems: 8, items: linkProp, description: 'links da faixa final (política de privacidade, termos), ao lado do aviso' }, contato: { type: 'string', maxLength: 300, description: 'telefone, e-mail ou endereço, numa linha' },
       copyright: { type: 'string', maxLength: 300, description: 'aviso legal, ex.: © 2026 Minha loja' },
       marca: { type: 'string', maxLength: 80, description: 'nome da marca, em destaque à esquerda das colunas' }, descricao: { type: 'string', maxLength: 300, description: 'frase curta sob a marca' },
     } },
-    slots: { extra: {} },
+    slots: { extra: {}, topo: {} },
     exemplos: [
       { titulo: 'Colunas e aviso', instancia: instancia('site/rodape', { colunas: [{ titulo: 'Loja', links: [{ texto: 'Produtos', href: '/produtos' }, { texto: 'Contato', href: '/contato' }] }, { titulo: 'Ajuda', links: [{ texto: 'Sobre', href: '/sobre' }] }], contato: 'contato@exemplo.com · (11) 4000-0000', copyright: '© 2026 Minha loja' }) },
       { titulo: 'Só o aviso, com extra', instancia: instancia('site/rodape', { copyright: '© 2026 Minha loja' }, { extra: [{ bloco: 'nav/link', props: { href: '/termos', texto: 'Termos de uso' } }] }) },
     ],
     modelo: { bloco: 'layout/rodape', slots: { filhos: [
-      // com `marca`: a marca (e a frase) à esquerda e as colunas à direita; sem ela, só as colunas, como antes
-      { bloco: 'layout/grade', se: 'props.marca', props: { colunas: 2, gap: 48 }, slots: { filhos: [
+      // `faixas`: marca e frase (com o slot `topo` à direita), as colunas e a faixa final (aviso e links legais)
+      { bloco: 'layout/linha', se: 'props.faixas && props.marca', props: { marca: 'rodape-faixa', alinha: 'fim', quebra: true, gap: 32 }, slots: { filhos: [
+        { bloco: 'layout/pilha', props: { gap: 12, marca: 'rodape-marca' }, slots: { filhos: [
+          { bloco: 'texto/destaque', props: { texto: '{props.marca}' } },
+          { bloco: 'texto/pequeno', se: 'props.descricao', props: { texto: '{props.descricao}' } },
+        ] } },
+        { bloco: 'layout/pilha', props: { marca: 'rodape-topo' }, slots: { filhos: [{ bloco: 'core/slot', props: { nome: 'topo' } }] } },
+      ] } },
+      { bloco: 'layout/pilha', se: 'props.faixas && tamanho(props.colunas ?? []) > 0', props: { marca: 'rodape-faixa' }, slots: { filhos: [COLUNAS_RODAPE] } },
+      { bloco: 'layout/linha', se: 'props.faixas && (props.copyright || tamanho(props.legal ?? []) > 0)', props: { marca: 'rodape-faixa-base', alinha: 'centro', quebra: true, gap: 16 }, slots: { filhos: [
+        { bloco: 'texto/pequeno', se: 'props.copyright', props: { texto: '{props.copyright}' } },
+        { bloco: 'nav/menu', se: 'tamanho(props.legal ?? []) > 0', props: { rotulo: 'Legal', marca: 'rodape-legal' }, slots: { filhos: [
+          { bloco: 'nav/link', repetir: { cada: 'props.legal ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}' } },
+        ] } },
+      ] } },
+      // sem `faixas`: com `marca`, a marca (e a frase) à esquerda e as colunas à direita; sem ela, só as colunas
+      { bloco: 'layout/grade', se: '!props.faixas && props.marca', props: { colunas: 2, gap: 48 }, slots: { filhos: [
         { bloco: 'layout/pilha', props: { gap: 12, marca: 'rodape-marca' }, slots: { filhos: [
           { bloco: 'texto/destaque', props: { texto: '{props.marca}' } },
           { bloco: 'texto/pequeno', se: 'props.descricao', props: { texto: '{props.descricao}' } },
         ] } },
         COLUNAS_RODAPE,
       ] } },
-      { ...COLUNAS_RODAPE, se: '!props.marca && tamanho(props.colunas ?? []) > 0' },
-      { bloco: 'core/slot', props: { nome: 'extra' } },
-      { bloco: 'texto/paragrafo', se: 'props.contato', props: { texto: '{props.contato}' } },
-      { bloco: 'layout/divisor', se: 'props.copyright' },
-      { bloco: 'texto/pequeno', se: 'props.copyright', props: { texto: '{props.copyright}' } },
+      { ...COLUNAS_RODAPE, se: '!props.faixas && !props.marca && tamanho(props.colunas ?? []) > 0' },
+      { bloco: 'core/slot', se: '!props.faixas', props: { nome: 'extra' } },
+      { bloco: 'texto/paragrafo', se: '!props.faixas && props.contato', props: { texto: '{props.contato}' } },
+      { bloco: 'layout/divisor', se: '!props.faixas && props.copyright' },
+      { bloco: 'texto/pequeno', se: '!props.faixas && props.copyright', props: { texto: '{props.copyright}' } },
     ] } },
   }),
 ]

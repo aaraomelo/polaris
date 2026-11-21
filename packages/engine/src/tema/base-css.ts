@@ -178,7 +178,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris section[data-imagem]{color:white}
 #polaris section[data-imagem] a[data-botao=primario]{background:white;color:black}
 #polaris section[data-imagem] a[data-botao=secundario]{color:white}
-#polaris footer{display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 3) calc(var(--espacamento-base) * 2);background:var(--rodape-fundo, var(--cor-superficie));border-top:var(--espacamento-borda) solid var(--rodape-borda, var(--cor-borda));color:var(--rodape-texto, var(--cor-texto-suave))}
+#polaris footer{display:flex;flex-direction:column;gap:var(--rodape-gap, calc(var(--espacamento-base) * 2));padding:var(--rodape-recuo, calc(var(--espacamento-base) * 3) calc(var(--espacamento-base) * 2));background:var(--rodape-fundo, var(--cor-superficie));border-top:var(--espacamento-borda) solid var(--rodape-borda, var(--cor-borda));color:var(--rodape-texto, var(--cor-texto-suave))}
 #polaris footer a{color:var(--rodape-link, var(--cor-texto-suave));transition:color var(--movimento-rapido, 0s) ease}
 #polaris footer a:hover{color:var(--rodape-texto, var(--cor-texto))}
 #polaris footer :is(h1,h2,h3,h4,h5,h6){color:var(--rodape-texto, inherit);font-size:var(--rodape-marca-tamanho, inherit)}
@@ -222,7 +222,18 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris [data-marca=rodape-marca]>strong{font-family:var(--tipografia-familia-titulo, inherit);font-size:var(--rodape-marca-tamanho, inherit);font-weight:var(--rodape-marca-peso, bold);letter-spacing:var(--rodape-marca-espacamento, normal);color:var(--rodape-texto, inherit)}
 #polaris [data-marca=rodape-marca]>small{max-width:20rem;font-size:var(--rodape-descricao-tamanho, .875em);line-height:var(--tipografia-altura-corpo, inherit);color:var(--rodape-suave, inherit)}
 #polaris [data-marca=rodape-coluna]>strong{font-size:var(--rodape-titulo-tamanho, inherit);font-weight:var(--rodape-titulo-peso, bold);letter-spacing:var(--rodape-titulo-espacamento, normal);text-transform:var(--rodape-titulo-caixa, none);color:var(--rodape-suave, inherit)}
-#polaris footer nav{flex-direction:column;align-items:flex-start;gap:var(--espacamento-base)}
+#polaris footer nav{flex-direction:column;align-items:flex-start;gap:var(--rodape-link-gap, var(--espacamento-base))}
+#polaris [data-marca=rodape-faixa]{box-sizing:border-box;justify-content:space-between;padding:var(--rodape-faixa-recuo-y, calc(var(--espacamento-base) * 3)) var(--rodape-recuo-x, 0)}
+#polaris [data-marca=rodape-faixa]:first-child{border-bottom:var(--espacamento-borda) solid var(--rodape-divisor, transparent)}
+#polaris [data-marca=rodape-faixa-base]{box-sizing:border-box;justify-content:space-between;padding:var(--rodape-base-recuo-y, calc(var(--espacamento-base) * 2)) var(--rodape-recuo-x, 0);border-top:var(--espacamento-borda) solid var(--rodape-divisor, transparent)}
+#polaris [data-marca=rodape-faixa-base]>small{color:var(--rodape-suave, inherit)}
+#polaris footer nav[data-marca=rodape-legal]{flex-direction:row;flex-wrap:wrap;gap:var(--rodape-legal-gap, calc(var(--espacamento-base) * 3))}
+#polaris [data-marca=rodape-linhas]>small{color:var(--rodape-link, inherit)}
+#polaris [data-marca=rodape-topo]{max-width:var(--rodape-topo-largura, 24rem);width:100%}
+#polaris [data-marca=rodape-topo] [data-sobretitulo]{color:var(--rodape-suave, var(--cor-primaria))}
+#polaris footer input{box-sizing:border-box;flex:1;min-width:0;height:var(--rodape-campo-altura, auto);background:var(--rodape-campo-fundo, var(--cor-superficie));color:var(--rodape-campo-texto, var(--cor-texto));border:var(--espacamento-borda) solid var(--rodape-campo-borda, var(--cor-borda))}
+#polaris footer input::placeholder{color:var(--rodape-campo-placeholder, var(--cor-texto-suave))}
+#polaris footer button{height:var(--rodape-campo-altura, auto);background:var(--rodape-botao-fundo, var(--cor-primaria));color:var(--rodape-botao-texto, var(--cor-texto-sobre-primaria));border:var(--espacamento-borda) solid var(--rodape-botao-fundo, var(--cor-primaria))}
 #polaris hr{border:0;border-top:var(--espacamento-borda) solid var(--cor-borda);width:100%}
 #polaris table{border-collapse:collapse;width:100%}
 #polaris th,#polaris td{padding:var(--espacamento-base);border-bottom:var(--espacamento-borda) solid var(--cor-borda);text-align:left}

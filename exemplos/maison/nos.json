@@ -102,6 +102,20 @@
           "submenuItemHover": "var(--cor-superficie-alt)"
         },
         "rodape": {
+          "recuo": 0,
+          "gap": 0,
+          "recuoX": "max(3rem, calc((100% - 100rem) / 2 + 3rem))",
+          "divisor": "color-mix(in srgb, var(--cor-fundo) 10%, transparent)",
+          "campoAltura": "3rem",
+          "campoFundo": "transparent",
+          "campoBorda": "color-mix(in srgb, var(--cor-fundo) 20%, transparent)",
+          "campoTexto": "var(--cor-fundo)",
+          "campoPlaceholder": "color-mix(in srgb, var(--cor-fundo) 40%, transparent)",
+          "botaoFundo": "var(--cor-fundo)",
+          "botaoTexto": "var(--cor-texto)",
+          "faixaRecuoY": "4rem",
+          "baseRecuoY": "1.5rem",
+          "linkGap": "0.75rem",
           "fundo": "var(--cor-texto)",
           "texto": "var(--cor-fundo)",
           "suave": "color-mix(in srgb, var(--cor-fundo) 50%, transparent)",
@@ -232,6 +246,14 @@
           "rodape.historia": "Nossa história",
           "rodape.sacola": "Sacola",
           "rodape.contato": "Contato",
+          "rodape.newsletter": "Fique por dentro",
+          "rodape.email": "Seu e-mail",
+          "rodape.assinar": "Assinar",
+          "rodape.obrigado": "Obrigado por assinar.",
+          "rodape.colecoes": "Coleções",
+          "rodape.contatoTitulo": "Contato",
+          "rodape.email.endereco": "ola@maison.example",
+          "rodape.horario": "Seg–Sex, 9h às 18h",
           "rodape.copyright": "© 2026 Maison. Todos os direitos reservados.",
           "colecao.iluminacao.nome": "Iluminação",
           "colecao.iluminacao.frase": "Formas escultóricas que lançam calor e sombra",
@@ -265,6 +287,12 @@
           "home.colecoes.eyebrow": "Explore por",
           "home.colecoes.titulo": "Coleções",
           "home.colecoes.cta": "Explorar",
+          "home.citacao.eyebrow": "Sobre nós",
+          "home.citacao.a": "Acreditamos na beleza da vida sem pressa, em objetos feitos com cuidado, materiais que envelhecem bem e espaços que convidam à ",
+          "home.citacao.enfase": "pausa",
+          "home.citacao.b": ".",
+          "home.citacao.texto": "Cada peça da nossa coleção é escolhida pela integridade do material, pela história de quem a faz e pela capacidade de durar com beleza. Trabalhamos com artesãos que compartilham nosso compromisso com o ofício e a sustentabilidade.",
+          "home.citacao.cta": "Ler a nossa história",
           "home.instagram.eyebrow": "Siga a casa",
           "home.instagram.texto": "Junte-se à nossa comunidade e inspire-se com ambientes selecionados e momentos de bastidores.",
           "home.foto.alt": "Foto {n} da casa",
@@ -418,6 +446,14 @@
           "rodape.historia": "Our Story",
           "rodape.sacola": "Shopping Bag",
           "rodape.contato": "Contact",
+          "rodape.newsletter": "Stay Connected",
+          "rodape.email": "Your email",
+          "rodape.assinar": "Subscribe",
+          "rodape.obrigado": "Thank you for subscribing.",
+          "rodape.colecoes": "Collections",
+          "rodape.contatoTitulo": "Contact",
+          "rodape.email.endereco": "hello@maison.example",
+          "rodape.horario": "Mon–Fri, 9am–6pm",
           "rodape.copyright": "© 2026 Maison. All rights reserved.",
           "colecao.iluminacao.nome": "Lighting",
           "colecao.iluminacao.frase": "Sculptural forms that cast warmth and shadow",
@@ -451,6 +487,12 @@
           "home.colecoes.eyebrow": "Browse by",
           "home.colecoes.titulo": "Collections",
           "home.colecoes.cta": "Explore",
+          "home.citacao.eyebrow": "About Us",
+          "home.citacao.a": "We believe in the beauty of slow living in objects made with care, materials that age gracefully, and spaces that invite ",
+          "home.citacao.enfase": "pause",
+          "home.citacao.b": ".",
+          "home.citacao.texto": "Every piece in our collection is selected for its material integrity, its maker's story, and its ability to endure beautifully. We work with artisans who share our commitment to craft and sustainability.",
+          "home.citacao.cta": "Read Our Story",
           "home.instagram.eyebrow": "Follow Us",
           "home.instagram.texto": "Join our community and get inspired by curated spaces and behind-the-scenes moments.",
           "home.foto.alt": "Home photo {n}",
@@ -972,6 +1014,12 @@
                     "slots": {
                       "filhos": [
                         {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 64
+                          }
+                        },
+                        {
                           "bloco": "layout/linha",
                           "props": {
                             "gap": 16,
@@ -1048,6 +1096,12 @@
                               }
                             ]
                           }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 64
+                          }
                         }
                       ]
                     }
@@ -1058,7 +1112,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 128
               }
             },
             {
@@ -1101,8 +1155,9 @@
                   {
                     "bloco": "layout/grade",
                     "props": {
-                      "colunas": 3,
-                      "gap": 24
+                      "colunas": 12,
+                      "gap": 24,
+                      "alinha": "inicio"
                     },
                     "slots": {
                       "filhos": [
@@ -1110,13 +1165,20 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-iluminacao",
-                            "altura": 360,
+                            "ocupa": 7,
+                            "proporcao": 1.778,
                             "escurece": 0.4,
                             "alinha": "esquerda",
                             "zoom": true
                           },
                           "slots": {
                             "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "{t(\"loja.colecao\")}"
+                                }
+                              },
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
@@ -1144,13 +1206,20 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-ceramica",
-                            "altura": 360,
+                            "ocupa": 5,
+                            "proporcao": 0.75,
                             "escurece": 0.4,
                             "alinha": "esquerda",
                             "zoom": true
                           },
                           "slots": {
                             "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "{t(\"loja.colecao\")}"
+                                }
+                              },
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
@@ -1178,13 +1247,20 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-3",
-                            "altura": 360,
+                            "ocupa": 4,
+                            "proporcao": 0.75,
                             "escurece": 0.4,
                             "alinha": "esquerda",
                             "zoom": true
                           },
                           "slots": {
                             "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "{t(\"loja.colecao\")}"
+                                }
+                              },
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
@@ -1212,13 +1288,20 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-4",
-                            "altura": 360,
+                            "ocupa": 4,
+                            "proporcao": 0.75,
                             "escurece": 0.4,
                             "alinha": "esquerda",
                             "zoom": true
                           },
                           "slots": {
                             "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "{t(\"loja.colecao\")}"
+                                }
+                              },
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
@@ -1246,13 +1329,20 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-5",
-                            "altura": 360,
+                            "ocupa": 4,
+                            "proporcao": 0.75,
                             "escurece": 0.4,
                             "alinha": "esquerda",
                             "zoom": true
                           },
                           "slots": {
                             "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "{t(\"loja.colecao\")}"
+                                }
+                              },
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
@@ -1280,13 +1370,20 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-6",
-                            "altura": 360,
+                            "ocupa": 12,
+                            "proporcao": 1.778,
                             "escurece": 0.4,
                             "alinha": "esquerda",
                             "zoom": true
                           },
                           "slots": {
                             "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "{t(\"loja.colecao\")}"
+                                }
+                              },
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
@@ -1316,6 +1413,94 @@
                 ]
               },
               "id": "colecoes"
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 128
+              }
+            },
+            {
+              "bloco": "layout/destaque",
+              "props": {
+                "fundo": "suave",
+                "altura": 120,
+                "alinha": "esquerda"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/contido",
+                    "props": {
+                      "largura": "estreita"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 112
+                          }
+                        },
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "{t(\"home.citacao.eyebrow\")}"
+                          }
+                        },
+                        {
+                          "bloco": "texto/titulo",
+                          "props": {
+                            "texto": "",
+                            "nivel": 2
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/trecho",
+                                "props": {
+                                  "texto": "{t(\"home.citacao.a\")}"
+                                }
+                              },
+                              {
+                                "bloco": "texto/enfase",
+                                "props": {
+                                  "texto": "{t(\"home.citacao.enfase\")}"
+                                }
+                              },
+                              {
+                                "bloco": "texto/trecho",
+                                "props": {
+                                  "texto": "{t(\"home.citacao.b\")}"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "texto/paragrafo",
+                          "props": {
+                            "texto": "{t(\"home.citacao.texto\")}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}",
+                            "texto": "{t(\"home.citacao.cta\")}"
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 112
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
             },
             {
               "bloco": "layout/espacador",
@@ -1503,9 +1688,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -1520,6 +1743,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -1531,17 +1758,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -1555,6 +1849,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         },
         "produtos": {
@@ -2391,9 +2694,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -2408,6 +2749,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -2419,17 +2764,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -2443,6 +2855,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         },
         "produtos": {
@@ -3336,9 +3757,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -3353,6 +3812,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -3364,17 +3827,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -3393,6 +3923,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         },
         "produtos": {
@@ -4437,9 +4976,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -4454,6 +5031,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -4465,17 +5046,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -4489,6 +5137,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         }
       }
@@ -4877,9 +5534,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -4894,6 +5589,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -4905,17 +5604,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -4929,6 +5695,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         },
         "produtos": {
@@ -5668,9 +6443,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -5685,6 +6498,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -5696,17 +6513,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -5720,6 +6604,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         },
         "pedidos": {
@@ -6349,9 +7242,47 @@
             {
               "bloco": "site/rodape",
               "props": {
+                "faixas": true,
                 "marca": "Maison",
                 "descricao": "{t(\"rodape.descricao\")}",
                 "colunas": [
+                  {
+                    "titulo": "{t(\"rodape.colecoes\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.texteis.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.objetos.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      }
+                    ]
+                  },
                   {
                     "titulo": "{t(\"rodape.loja\")}",
                     "links": [
@@ -6366,6 +7297,10 @@
                       {
                         "texto": "{t(\"rodape.presentes\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.sacola\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                       }
                     ]
                   },
@@ -6377,17 +7312,84 @@
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
                       },
                       {
-                        "texto": "{t(\"rodape.sacola\")}",
-                        "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
-                      },
-                      {
                         "texto": "{t(\"rodape.contato\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/sobre#contato\"}"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "{t(\"rodape.contatoTitulo\")}",
+                    "links": [
+                      {
+                        "texto": "{t(\"rodape.email.endereco\")}"
+                      },
+                      {
+                        "texto": "{t(\"rodape.horario\")}"
                       }
                     ]
                   }
                 ],
                 "copyright": "{t(\"rodape.copyright\")}"
+              },
+              "slots": {
+                "topo": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "{t(\"rodape.newsletter\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 0
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "entrada/texto",
+                          "props": {
+                            "valor": "{estado.email}",
+                            "rotulo": "{t(\"rodape.newsletter\")}",
+                            "placeholder": "{t(\"rodape.email\")}"
+                          },
+                          "eventos": {
+                            "aoMudar": [
+                              {
+                                "acao": "definir",
+                                "estado": "email",
+                                "valor": "evento"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "nav/botao",
+                          "props": {
+                            "texto": "{t(\"rodape.assinar\")}"
+                          },
+                          "eventos": {
+                            "aoClicar": [
+                              {
+                                "acao": "definir",
+                                "estado": "inscrito",
+                                "valor": "contem(estado.email, \"@\")"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "se": "!estado.inscrito"
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{t(\"rodape.obrigado\")}"
+                    },
+                    "se": "estado.inscrito"
+                  }
+                ]
               }
             }
           ]
@@ -6401,6 +7403,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         },
         "pedidos": {
@@ -6460,6 +7471,15 @@
           "tipo": "json",
           "lista": true,
           "inicial": [],
+          "persiste": true
+        },
+        "email": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "inscrito": {
+          "tipo": "booleano",
+          "inicial": false,
           "persiste": true
         }
       }
