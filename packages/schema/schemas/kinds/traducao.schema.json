@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "polaris://kind/traducao/v1",
+  "title": "Tradução (catálogo de mensagens por idioma)",
+  "required": [
+    "padrao",
+    "mensagens"
+  ],
+  "properties": {
+    "descricao": {
+      "type": "string"
+    },
+    "padrao": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
+      "description": "idioma de referência (BCP 47: pt, pt-BR, en…): toda chave precisa existir nele, e é o que vale quando falta o idioma pedido"
+    },
+    "mensagens": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 40,
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "maxProperties": 5000,
+        "propertyNames": {
+          "pattern": "^[a-z][A-Za-z0-9_-]*(\\.[A-Za-z0-9_-]+)*$",
+          "maxLength": 120
+        },
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "description": "idioma → { chave → mensagem }. A mensagem usa o padrão ICU MessageFormat: {nome}, {n, number}, {n, plural, one {# item} other {# itens}}, {x, select, …}. Chaves com ponto (home.hero.titulo) são só convenção"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

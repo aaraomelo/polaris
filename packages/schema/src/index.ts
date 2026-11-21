@@ -17,16 +17,17 @@ import papel from '../schemas/kinds/papel.schema.json'
 import pack from '../schemas/kinds/pack.schema.json'
 import formulario from '../schemas/kinds/formulario.schema.json'
 import cartaz from '../schemas/kinds/cartaz.schema.json'
+import traducao from '../schemas/kinds/traducao.schema.json'
 import migracao from '../schemas/migracao.schema.json'
 
-export const KINDS = ['pagina', 'bloco', 'tema', 'dados', 'servico', 'evento', 'kernel', 'documento', 'tenant', 'backend', 'papel', 'pack', 'formulario', 'cartaz'] as const
+export const KINDS = ['pagina', 'bloco', 'tema', 'dados', 'servico', 'evento', 'kernel', 'documento', 'tenant', 'backend', 'papel', 'pack', 'formulario', 'cartaz', 'traducao'] as const
 export type Kind = (typeof KINDS)[number]
 
-export const SCHEMAS = { no, comum, migracao, pagina, bloco, tema, dados, servico, evento, kernel, documento, tenant, backend, papel, pack, formulario, cartaz }
+export const SCHEMAS = { no, comum, migracao, pagina, bloco, tema, dados, servico, evento, kernel, documento, tenant, backend, papel, pack, formulario, cartaz, traducao }
 
 /** Major atual do schema de cada kind. Subir aqui exige uma migração (src/migracao.ts) e fixtures congeladas. */
 export const ESQUEMA_ATUAL: Record<Kind, number> = {
-  pagina: 1, bloco: 1, tema: 1, dados: 1, servico: 1, evento: 1, kernel: 1, documento: 1, tenant: 1, backend: 1, papel: 1, pack: 1, formulario: 1, cartaz: 1,
+  pagina: 1, bloco: 1, tema: 1, dados: 1, servico: 1, evento: 1, kernel: 1, documento: 1, tenant: 1, backend: 1, papel: 1, pack: 1, formulario: 1, cartaz: 1, traducao: 1,
 }
 export const ID_NO = 'polaris://no/v1'
 

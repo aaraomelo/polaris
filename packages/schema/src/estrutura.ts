@@ -134,6 +134,7 @@ function conferePasta(reg: Registry, raiz: Inst, base: string, ctx: Contexto, li
 
 /** Validação estrutural de um nó (pagina → /spec/raiz; bloco → /spec/modelo). Outros kinds: sem árvore. */
 export function validaEstrutura(reg: Registry, no: No, ctx: Contexto = {}, limites: Partial<Limites> = {}): Erro[] {
+  if (no.kind === 'traducao') return validaTraducao(no) // tradução: o idioma padrão existe e todo idioma só traduz chaves do padrão
   if (no.kind === 'papel') return validaPapel(reg, no, ctx) // papel: sujeitos, ações e campos contra os serviços registrados
   if (no.kind === 'pack') return validaPack(reg, no, ctx) // pack: sementes contra os serviços, guardas e ciclos
   if (no.kind === 'formulario') return validaFormulario(reg, no, ctx) // formulário: nomes, seções/passos, máscaras por tipo, regex segura e envio contra o serviço
@@ -174,4 +175,16 @@ export function validaEstrutura(reg: Registry, no: No, ctx: Contexto = {}, limit
 /** Referências quebradas + estrutura, em uma chamada. */
 export function confere(reg: Registry, no: No, ctx: Contexto = {}, limites: Partial<Limites> = {}): Erro[] {
   return [...reg.verifica(no, ctx), ...validaEstrutura(reg, no, ctx, limites)]
+}
+
+/** Catálogo de mensagens: `padrao` é um dos idiomas e nenhuma chave existe só num idioma que não seja o padrão (a chave nasce no padrão). O ICU de cada mensagem é conferido pelo compilador de páginas, nas chaves que elas usam. */
+function validaTraducao(no: No): Erro[] {
+  const s = no.spec as { padrao: string; mensagens: Record<string, Record<string, string>> }, erros: Erro[] = []
+  const base = s.mensagens?.[s.padrao]
+  if (!base) { erros.push({ caminho: '/spec/padrao', regra: 'padrao', mensagem: `o idioma padrão '${s.padrao}' não tem mensagens em spec.mensagens`, dica: `idiomas com mensagens: ${Object.keys(s.mensagens ?? {}).join(', ') || 'nenhum'}`, valor: s.padrao }); return erros }
+  for (const [idioma, msgs] of Object.entries(s.mensagens)) {
+    if (idioma === s.padrao) continue
+    for (const chave of Object.keys(msgs)) if (!(chave in base)) erros.push({ caminho: `/spec/mensagens/${idioma}/${chave}`, regra: 'chave', mensagem: `a chave '${chave}' existe em '${idioma}' mas não no idioma padrão '${s.padrao}'`, dica: `acrescente a chave em ${s.padrao} (a chave nasce no idioma padrão) ou remova-a`, valor: chave })
+  }
+  return erros
 }

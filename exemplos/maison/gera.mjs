@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { IDIOMAS, MENSAGENS, PADRAO, doDicionario } from './idiomas.mjs'
 
 const aqui = dirname(fileURLToPath(import.meta.url))
 const foto = (nome) => { readFileSync(join(aqui, 'img', `${nome}.jpg`)); return `@img/${nome}` } // confere que o arquivo existe; o ambiente troca `@img/<nome>` pelo endereço do ativo
@@ -24,14 +25,17 @@ const tema = {
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
       tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
-      layout: { largura: '80rem', larguraEstreita: '48rem', larguraLarga: '90rem' },
+      layout: { largura: '100rem', larguraEstreita: '64rem', larguraLarga: '100rem', recuo: '3rem', recuoEstreito: '1.5rem' }, // o contêiner do template (container-full 1600 px, recuo de 48; container-narrow 1024 px, recuo de 24)
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
-      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1 },
+      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1 },
       // rodapé invertido: fundo escuro no claro e claro no escuro
       rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
-      capa: { indicador: '"Rolar"' },
       // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
       botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500 },
+      // a barra de categorias da loja: fixa sob o cabeçalho, translúcida com desfoque, abas em caixa alta (a escolhida invertida) e o seletor de ordem à direita
+      abas: { gap: '0.5rem', altura: '2.25rem', recuoX: '1.25rem', recuoY: 0, tamanho: '0.75rem', peso: 500, espacamento: '0.1em', caixa: 'uppercase', cor: 'var(--cor-texto)', corHover: 'var(--cor-texto)', fundoHover: 'var(--cor-superficie-alt)', corAtiva: 'var(--cor-fundo)', fundoAtiva: 'var(--cor-texto)' },
+      barra: { fundo: 'color-mix(in srgb, var(--cor-fundo) 95%, transparent)', desfoque: 'blur(12px)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', recuoY: '1.25rem', gap: '1rem', rotuloTamanho: '0.75rem', rotuloEspacamento: '0.1em', rotuloCaixa: 'uppercase', rotuloCor: 'var(--cor-texto-suave)' },
+      selecao: { largura: '11.25rem', altura: '2.25rem', tamanho: '0.75rem', espacamento: '0.05em', fundo: 'var(--cor-fundo)' },
       cartao: { tituloTamanho: '1.25rem', tituloAltura: 1.375, tituloEspacamento: '-0.025em', tituloHover: 'var(--cor-primaria)', descricaoTamanho: '0.875rem', precoTamanho: '1rem', precoPeso: 500, precoEspacamento: '0.025em' },
       movimento: { rapido: '300ms', sublinha: '500ms', zoomDuracao: '1s', zoomCartao: 1.05, fotoAlt: '1s', rotulo: '500ms', zoomFaixa: 1.1, zoomFaixaDuracao: '1.2s', faixaVeu: 'color-mix(in srgb, var(--cor-texto) 20%, transparent)', faixaVeuDuracao: '700ms', faixaTexto: '500ms', faixaElevacao: '-0.25rem', entrada: '1.2s', zoomCapa: 1.08 },
     },
@@ -48,47 +52,57 @@ const tema = {
 }
 
 // ---- blocos ---------------------------------------------------------------------------------------------------------------------------------
+// OS TEXTOS NÃO ESTÃO AQUI: as páginas só levam chaves de tradução (`T('home.titulo')` → `{t("home.titulo")}`); os textos de cada idioma vivem em idiomas.mjs
+// e saem como o catálogo `maison.textos` (kind traducao). Trocar ou acrescentar um idioma não mexe em nenhuma página (docs/i18n.md).
+const tx = (k, params) => `t("${k}"${params ? `, objeto([${Object.entries(params).map(([n, e]) => `["${n}", ${e}]`).join(', ')}])` : ''})` // um trecho de expressão
+const T = (k, params) => `{${tx(k, params)}}` // um template (o valor inteiro da prop)
+// um caminho interno no idioma da requisição: `tenant.prefixo` é "" no padrão e "/en" nos demais (docs/i18n.md); aceita um trecho de expressão entre chaves
+const H = (caminho) => (caminho === '/' ? '{(tenant.prefixo ?? "") == "" ? "/" : tenant.prefixo}' : caminho.startsWith('{') ? `{(tenant.prefixo ?? "") + ${caminho.slice(1, -1)}}` : `{(tenant.prefixo ?? "") + ${JSON.stringify(caminho)}}`)
 const b = (bloco, props, filhos, extra = {}) => ({ bloco, ...(props ? { props } : {}), ...(filhos ? { slots: { filhos } } : {}), ...extra })
 const titulo = (texto, nivel, tamanho) => b('texto/titulo', { texto, nivel, ...(tamanho ? { tamanho } : {}) })
 // título em duas partes: a segunda em itálico, numa linha própria (a capa do template: "Objects of / Quiet Beauty")
-const tituloEnfase = (inicio, enfase, nivel) => b('texto/titulo', { nivel }, [b('texto/trecho', { texto: inicio }), b('texto/enfase', { texto: enfase, bloco: true })])
+const tituloEnfase = (inicio, enfase, nivel) => b('texto/titulo', { texto: '', nivel }, [b('texto/trecho', { texto: inicio }), b('texto/enfase', { texto: enfase, bloco: true })])
 const par = (texto) => b('texto/paragrafo', { texto })
 const sobre = (texto) => b('texto/sobretitulo', { texto })
 const contido = (filhos, largura, extra = {}) => b('layout/contido', largura ? { largura } : undefined, filhos, extra)
 const folga = (tamanho) => b('layout/espacador', { tamanho })
 
 const COLECOES = [
-  { slug: 'iluminacao', nome: 'Iluminação', frase: 'Formas escultóricas que lançam calor e sombra', foto: 'colecao-iluminacao' },
-  { slug: 'ceramica', nome: 'Cerâmica', frase: 'Peças moldadas à mão, com paciência', foto: 'colecao-ceramica' },
-  { slug: 'mobiliario', nome: 'Mobiliário', frase: 'Linhas calmas e madeira de verdade', foto: 'colecao-3' },
-  { slug: 'texteis', nome: 'Têxteis', frase: 'Linho, lã e algodão para tocar todo dia', foto: 'colecao-4' },
-  { slug: 'objetos', nome: 'Objetos e vasos', frase: 'Pequenos gestos que compõem a casa', foto: 'colecao-5' },
-  { slug: 'sazonal', nome: 'Coleção sazonal', frase: 'Luz baixa e perfume de cada estação', foto: 'colecao-6' },
+  { slug: 'iluminacao', foto: 'colecao-iluminacao' }, { slug: 'ceramica', foto: 'colecao-ceramica' }, { slug: 'mobiliario', foto: 'colecao-3' },
+  { slug: 'texteis', foto: 'colecao-4' }, { slug: 'objetos', foto: 'colecao-5' }, { slug: 'sazonal', foto: 'colecao-6' },
 ]
-// as 8 categorias do filtro da loja (as 6 coleções + novidades e presentes)
-const CATEGORIAS = [...COLECOES.map((c) => ({ slug: c.slug, nome: c.nome })), { slug: 'novidades', nome: 'Novidades' }, { slug: 'presentes', nome: 'Presentes selecionados' }]
-// os 13 produtos do template, na ordem do filtro "Destaques" (preço em reais, material e selo)
+// as 8 categorias do filtro da loja (as 6 coleções + novidades e presentes); o nome vem do dicionário (`colecao.<slug>.nome`)
+const CATEGORIAS = [...COLECOES.map((c) => c.slug), 'novidades', 'presentes']
+// os 13 produtos do template, na ordem do filtro "Destaques": só o que não é texto (o nome, a descrição e o material vêm do dicionário em vários idiomas)
 const PRODUTOS = [
-  { id: 'arco', colecao: 'iluminacao', nome: 'Luminária Pendente Arco', descricao: 'Um arco gracioso de latão curvado à mão e linho', preco: '485.00', material: 'Latão maciço', foto: 'produto-1', selo: 'Destaque' },
-  { id: 'vaso', colecao: 'ceramica', nome: 'Vaso Escultural Grande', descricao: 'Grés torneado à mão com esmalte natural de cinzas', preco: '320.00', material: 'Grés de alta temperatura', foto: 'colecao-ceramica', selo: 'Destaque' },
-  { id: 'mesa', colecao: 'mobiliario', nome: 'Mesa de Jantar Colheita', descricao: 'Carvalho maciço feito para gerações à mesa', preco: '2850.00', material: 'Carvalho branco maciço', foto: 'colecao-3', selo: 'Destaque' },
-  { id: 'castical', colecao: 'objetos', nome: 'Conjunto de Castiçais Forja', descricao: 'Latão forjado à mão em três alturas graduadas', preco: '245.00', material: 'Latão forjado maciço', foto: 'produto-vela-castical', selo: 'Destaque' },
-  { id: 'orbe', colecao: 'iluminacao', nome: 'Luminária de Mesa Orbe', descricao: 'Vidro soprado encontra bronze escultural', preco: '295.00', material: 'Vidro soprado', foto: 'produto-2', selo: 'Novo' },
-  { id: 'tigela', colecao: 'ceramica', nome: 'Tigela de Servir do Dia a Dia', descricao: 'Formas simples para os rituais diários', preco: '145.00', material: 'Grés', foto: 'produto-3' },
-  { id: 'poltrona', colecao: 'mobiliario', nome: 'Poltrona Trançada', descricao: 'Corda de papel dinamarquesa e nogueira escultural', preco: '1450.00', material: 'Nogueira maciça', foto: 'produto-poltrona', selo: 'Novo' },
-  { id: 'manta', colecao: 'texteis', nome: 'Manta de Linho Herança', descricao: 'Linho belga lavado em tons naturais', preco: '195.00', material: '100% linho belga', foto: 'colecao-4' },
-  { id: 'almofada', colecao: 'texteis', nome: 'Almofada de Lã Feltrada à Mão', descricao: 'Feita por artesãos com técnicas tradicionais de feltragem', preco: '165.00', material: '100% lã neozelandesa', foto: 'produto-almofada' },
-  { id: 'vasinho', colecao: 'objetos', nome: 'Vaso Escultural para Uma Flor', descricao: 'Forma minimalista para uma única haste', preco: '85.00', material: 'Grés', foto: 'colecao-5' },
-  { id: 'vela', colecao: 'sazonal', nome: 'Vela Lareira de Inverno', descricao: 'Notas de cedro, fumaça e ervas secas', preco: '65.00', material: 'Cera de soja natural', foto: 'colecao-6' },
-  { id: 'bandeja', colecao: 'novidades', nome: 'Bandeja de Mármore Polido', descricao: 'Pedra natural para a beleza de todo dia', preco: '175.00', material: 'Mármore de Carrara', foto: 'foto-3', selo: 'Novo' },
-  { id: 'caixa', colecao: 'presentes', nome: 'Caixa de Presente Selecionada', descricao: 'Uma seleção cuidadosa das nossas peças favoritas', preco: '225.00', material: 'Grés', foto: 'produto-caixa-presente' },
+  { id: 'arco', colecao: 'iluminacao', preco: '485.00', foto: 'produto-1', selo: 'destaque' },
+  { id: 'vaso', colecao: 'ceramica', preco: '320.00', foto: 'colecao-ceramica', selo: 'destaque' },
+  { id: 'mesa', colecao: 'mobiliario', preco: '2850.00', foto: 'colecao-3', selo: 'destaque' },
+  { id: 'castical', colecao: 'objetos', preco: '245.00', foto: 'produto-vela-castical', selo: 'destaque' },
+  { id: 'orbe', colecao: 'iluminacao', preco: '295.00', foto: 'produto-2', selo: 'novo' },
+  { id: 'tigela', colecao: 'ceramica', preco: '145.00', foto: 'produto-3' },
+  { id: 'poltrona', colecao: 'mobiliario', preco: '1450.00', foto: 'produto-poltrona', selo: 'novo' },
+  { id: 'manta', colecao: 'texteis', preco: '195.00', foto: 'colecao-4' },
+  { id: 'almofada', colecao: 'texteis', preco: '165.00', foto: 'produto-almofada' },
+  { id: 'vasinho', colecao: 'objetos', preco: '85.00', foto: 'colecao-5' },
+  { id: 'vela', colecao: 'sazonal', preco: '65.00', foto: 'colecao-6' },
+  { id: 'bandeja', colecao: 'novidades', preco: '175.00', foto: 'foto-3', selo: 'novo' },
+  { id: 'caixa', colecao: 'presentes', preco: '225.00', foto: 'produto-caixa-presente' },
 ]
-const NOME_COLECAO = Object.fromEntries(CATEGORIAS.map((c) => [c.slug, c.nome]))
 const FOTOS_HOVER = ['sobre-1', 'foto-1', 'foto-2', 'loja-capa', 'hero', 'sobre-2', 'colecao-iluminacao', 'sobre-capa'] // a segunda foto de cada peça (aparece no hover): cenas da casa, em ciclo
-const fotoHoverDe = (p) => foto(FOTOS_HOVER[PRODUTOS.indexOf(p) % FOTOS_HOVER.length])
-const paraProduto = (p) => ({ id: p.id, colecao: p.colecao, colecaoNome: NOME_COLECAO[p.colecao], categoria: NOME_COLECAO[p.colecao], fotoHover: fotoHoverDe(p), nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true, material: p.material, ...(p.selo ? { selo: p.selo } : {}) })
-const NOVIDADES = ['arco', 'orbe', 'vaso', 'tigela'].map((id) => PRODUTOS.find((p) => p.id === id))
+// o dado do produto como um catálogo o traria: o texto em vários idiomas ({ 'pt-BR': …, en: … }); a página escolhe com `loc(idioma, …)`
+const dadosProduto = (p, i) => ({
+  id: p.id, colecao: p.colecao, preco: p.preco, fotoUrl: foto(p.foto), fotoHover: foto(FOTOS_HOVER[i % FOTOS_HOVER.length]), disponivel: true,
+  nome: doDicionario(`produto.${p.id}.nome`), descricao: doDicionario(`produto.${p.id}.descricao`), material: doDicionario(`produto.${p.id}.material`),
+  categoria: doDicionario(`colecao.${p.colecao}.nome`), selo: p.selo ? doDicionario(`selo.${p.selo}`) : { 'pt-BR': '', en: '' }, novo: p.selo === 'novo',
+})
+// o hero da loja DEPENDE da categoria escolhida (`?colecao=<slug>`): cada categoria tem foto, nome e frase próprios; sem categoria, o hero "Todas as peças"
+const HEROIS = [['iluminacao', 'loja-capa-iluminacao'], ['ceramica', 'colecao-ceramica'], ['mobiliario', 'colecao-3'], ['texteis', 'colecao-4'], ['objetos', 'colecao-5'], ['sazonal', 'colecao-6'], ['novidades', 'foto-3'], ['presentes', 'produto-2']]
+const estadoColecoes = { colecoes: { tipo: 'json', lista: true, inicial: HEROIS.map(([slug, f]) => ({ slug, foto: foto(f), nome: doDicionario(`colecao.${slug}.nome`), frase: doDicionario(`colecao.${slug}.frase`) })) } }
 const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'colecao-5']
+const estadoProdutos = { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(dadosProduto) } }
+// a lista de produtos NO IDIOMA DA REQUISIÇÃO: cada campo de texto passa por `loc(idioma, …)`
+const LOC = 'mapeia(estado.produtos, p => mescla(p, objeto([["nome", loc(idioma, p.nome)], ["descricao", loc(idioma, p.descricao)], ["material", loc(idioma, p.material)], ["categoria", loc(idioma, p.categoria)], ["selo", loc(idioma, p.selo)]])))'
 
 // ---- a sacola: estado que PERSISTE no navegador (id e quantidade); o preço vem sempre do catálogo, nunca do que foi guardado -------------------------------
 const estadoSacola = { sacola: { tipo: 'json', lista: true, inicial: [], persiste: true } }
@@ -98,47 +112,56 @@ const muda = (id, delta) => `filtra(mapeia(estado.sacola, i => i.id == ${id} ? c
 const tira = (id) => `filtra(estado.sacola, i => i.id != ${id})`
 const aoClicar = (valor) => ({ aoClicar: [{ acao: 'definir', estado: 'sacola', valor }] })
 // as linhas da sacola com o produto do catálogo (item sem produto some), o total de cada uma e o subtotal (dinheiro exato)
-const LINHAS = 'filtra(mapeia(estado.sacola, i => objeto([["id", i.id], ["qtd", i.qtd], ["p", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null)'
+const LINHAS = `filtra(mapeia(estado.sacola, i => objeto([["id", i.id], ["qtd", i.qtd], ["p", acha(${LOC}, p => p.id == i.id)]])), l => l.p != null)`
 const SUBTOTAL = `dobra(${LINHAS}, "0", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))`
+const ROTULOS_RESUMO = { subtotal: T('resumo.subtotal'), total: T('resumo.total') }
 
-// ---- as partes comuns: cabeçalho e rodapé (o link da página aberta leva `atual`) -------------------------------------------------------------
+// ---- as partes comuns: cabeçalho (com o seletor de idioma) e rodapé -----------------------------------------------------------------------------
+const OUTROS_IDIOMAS = 'filtra(tenant.idiomas ?? [], i => !i.atual)'
 const cabecalho = (atual) => b('site/cabecalho', {
-  titulo: 'Maison', fixo: true, menuCentro: true, href: '/',
-  links: [{ texto: 'Loja', href: '/produtos', ...(atual === 'loja' ? { atual: true } : {}) }, { texto: 'Sobre', href: '/sobre', ...(atual === 'sobre' ? { atual: true } : {}) }, { texto: `{"Sacola (" + ${QTD_TOTAL} + ")"}`, href: '/sacola', ...(atual === 'sacola' ? { atual: true } : {}) }],
-  grupos: [{ titulo: 'Coleções', links: COLECOES.map((c) => ({ texto: c.nome, href: `/produtos?colecao=${c.slug}` })) }],
-})
+  titulo: 'Maison', fixo: true, menuCentro: true, href: H('/'),
+  links: [{ texto: T('nav.loja'), href: H('/produtos'), ...(atual === 'loja' ? { atual: true } : {}) }, { texto: T('nav.sobre'), href: H('/sobre'), ...(atual === 'sobre' ? { atual: true } : {}) }, { texto: T('nav.sacola', { n: QTD_TOTAL }), href: H('/sacola'), ...(atual === 'sacola' ? { atual: true } : {}) }],
+  grupos: [{ titulo: T('nav.colecoes'), links: COLECOES.map((c) => ({ texto: T(`colecao.${c.slug}.nome`), href: H(`/produtos?colecao=${c.slug}`) })) }],
+}, undefined, { slots: { acoes: [
+  // o seletor: um link para cada OUTRO idioma do tenant (a mesma página, no outro idioma); some quando o tenant tem um idioma só
+  { bloco: 'nav/link', repetir: { cada: OUTROS_IDIOMAS, como: 'i', chave: 'i.idioma' }, props: { href: '{i.href}', texto: '{i.idioma == "en" ? ' + tx('idioma.curto.en') + ' : ' + tx('idioma.curto.pt-BR') + '}' } },
+] } })
 const rodape = () => b('site/rodape', {
-  marca: 'Maison', descricao: 'Peças de casa e estilo de vida, escolhidas com cuidado e feitas para durar.',
+  marca: 'Maison', descricao: T('rodape.descricao'),
   colunas: [
-    { titulo: 'Loja', links: [{ texto: 'Todas as peças', href: '/produtos' }, { texto: 'Novidades', href: '/produtos?colecao=novidades' }, { texto: 'Presentes', href: '/produtos?colecao=presentes' }] },
-    { titulo: 'Casa', links: [{ texto: 'Sobre a Maison', href: '/sobre' }, { texto: 'Contato', href: '/sobre#contato' }] },
+    { titulo: T('rodape.loja'), links: [{ texto: T('rodape.todas'), href: H('/produtos') }, { texto: T('rodape.novidades'), href: H('/produtos?colecao=novidades') }, { texto: T('rodape.presentes'), href: H('/produtos?colecao=presentes') }] },
+    { titulo: T('rodape.casa'), links: [{ texto: T('rodape.historia'), href: H('/sobre') }, { texto: T('rodape.sacola'), href: H('/sacola') }, { texto: T('rodape.contato'), href: H('/sobre#contato') }] },
   ],
-  copyright: '© 2026 Maison. Todos os direitos reservados.',
+  copyright: T('rodape.copyright'),
 })
-const link = (href, texto, botao) => b('nav/link', { href, texto, ...(botao ? { botao } : {}) })
+const link = (href, texto, botao) => b('nav/link', { href: H(href), texto, ...(botao ? { botao } : {}) })
+// as props de um cartão de produto: o template passa os rótulos e o idioma (o bloco não tem texto fixo que o template não possa trocar)
+const propsCartao = (produto, href) => ({ fluida: true, proporcao: 0.8, produto, href, rotuloLink: '', rotuloFoto: T('produto.verDetalhes'), mostraDescricao: true, idioma: '{idioma}' })
 
 // ---- início ---------------------------------------------------------------------------------------------------------------------------------
+const NOVIDADES = `mapeia(["arco", "orbe", "vaso", "tigela"], id => acha(${LOC}, q => q.id == id))`
 const home = b('layout/pilha', { gap: 0 }, [
   cabecalho(),
   // abertura em tela quase cheia, com a foto e o véu escuro; o texto alinha com o resto da página
   b('layout/destaque', { imagem: foto('hero'), altura: 800, escurece: 0.3, alinha: 'esquerda', capa: true }, [
     contido([
-      sobre('Curadoria para uma vida atenta'),
-      tituloEnfase('Objetos de', 'beleza serena', 1),
-      par('Peças de casa e estilo de vida, escolhidas para dar um sentido calmo ao dia a dia.'),
-      link('/produtos', 'Ver as peças', 'primario'),
+      sobre(T('home.eyebrow')),
+      tituloEnfase(T('home.titulo1'), T('home.titulo2'), 1),
+      par(T('home.texto')),
+      link('/produtos', T('home.cta'), 'primario'),
     ]),
+    b('layout/pilha', { marca: 'indicador-capa' }, [b('texto/pequeno', { texto: T('home.rolar') })]),
   ]),
   folga(112),
   // coleção em destaque: foto à esquerda, texto à direita, centrado na vertical
   contido([
     b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
-      b('midia/imagem', { src: foto(COLECOES[0].foto), alt: COLECOES[0].nome, fluida: true, proporcao: 0.8 }),
+      b('midia/imagem', { src: foto(COLECOES[0].foto), alt: T('colecao.iluminacao.nome'), fluida: true, proporcao: 0.8 }),
       b('layout/pilha', { gap: 0, alinha: 'inicio' }, [
-        sobre('Coleção em destaque'),
-        titulo(COLECOES[0].nome, 2, 'grande'), folga(16),
-        par(`${COLECOES[0].frase}. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz.`), folga(24),
-        link(`/produtos?colecao=${COLECOES[0].slug}`, 'Ver iluminação', 'primario'),
+        sobre(T('home.destaque.eyebrow')),
+        titulo(T('colecao.iluminacao.nome'), 2, 'grande'), folga(16),
+        par(T('home.destaque.texto')), folga(24),
+        link(`/produtos?colecao=${COLECOES[0].slug}`, T('home.destaque.cta'), 'primario'),
       ]),
     ]),
   ]),
@@ -147,141 +170,150 @@ const home = b('layout/pilha', { gap: 0 }, [
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [
     contido([
       b('layout/linha', { gap: 16, alinha: 'fim', quebra: true }, [
-        b('layout/pilha', { gap: 4, cresce: true }, [sobre('Acabou de chegar'), titulo('Novidades', 2)]),
-        link('/produtos', 'Ver tudo'),
+        b('layout/pilha', { gap: 4, cresce: true }, [sobre(T('home.novidades.eyebrow')), titulo(T('home.novidades.titulo'), 2)]),
+        link('/produtos', T('home.verTudo')),
       ]),
       folga(24),
-      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p), href: `/produtos/${p.id}`, rotuloLink: '', rotuloFoto: 'Ver detalhes', mostraDescricao: true }))),
+      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: propsCartao('{p}', H('{"/produtos/" + p.id}')), repetir: { cada: NOVIDADES, como: 'p', chave: 'p.id' } }]),
     ]),
   ]),
   folga(112),
   // explore por coleção
   contido([
-    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Explore por'), titulo('Coleções', 2)]),
+    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('home.colecoes.eyebrow')), titulo(T('home.colecoes.titulo'), 2)]),
     folga(32),
-    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda', zoom: true }, [titulo(c.nome, 3), par(c.frase), link(`/produtos?colecao=${c.slug}`, 'Ver peças')]))),
+    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda', zoom: true }, [titulo(T(`colecao.${c.slug}.nome`), 3), par(T(`colecao.${c.slug}.frase`)), link(`/produtos?colecao=${c.slug}`, T('home.colecoes.cta'))]))),
   ], 'larga', { id: 'colecoes' }),
   folga(112),
   // a faixa de fotos
   contido([
-    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Siga a casa'), titulo('@maison', 2)]),
+    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('home.instagram.eyebrow')), titulo('@maisonhome', 2), par(T('home.instagram.texto'))]),
     folga(24),
-    b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: `Foto ${i + 1} da casa`, fluida: true, proporcao: 1 })]))),
+    b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: T('home.foto.alt', { n: i + 1 }), fluida: true, proporcao: 1 })]))),
   ], 'larga'),
   folga(112),
   rodape(),
 ])
 
+// a categoria do hero (0 ou 1 item): nome e frase no idioma da requisição
+const HERO_DA_CATEGORIA = 'filtra(mapeia(estado.colecoes, c => mescla(c, objeto([["nome", loc(idioma, c.nome)], ["frase", loc(idioma, c.frase)]]))), c => c.slug == (estado.colecao ?? ""))'
 // ---- produtos: filtro por categoria (?colecao=…), contagem e grade com selos --------------------------------------------------------------
-const FILTRADOS = 'filtra(estado.produtos, p => (consulta.colecao ?? "") == "" || p.colecao == consulta.colecao)'
-const filtro = (slug, nome) => b('nav/link', { href: slug ? `/produtos?colecao=${slug}` : '/produtos', texto: nome, botao: 'secundario', atual: `{(consulta.colecao ?? "") == ${JSON.stringify(slug)}}` }) // o filtro escolhido leva aria-current e fica preenchido
-const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}', href: '{"/produtos/" + p.id}', rotuloLink: '', rotuloFoto: 'Ver detalhes', mostraDescricao: true }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
+const FILTRADOS = `filtra(${LOC}, p => (estado.colecao ?? "") == "" || p.colecao == estado.colecao)`
+// a ordem escolhida no seletor (estado `ordem`): cinco critérios, como no template (preço em dinheiro exato → número só para comparar)
+const ORDENADOS = `(estado.ordem == "preco" ? ordena(${FILTRADOS}, x => qnum(x.preco)) : estado.ordem == "preco-desc" ? inverte(ordena(${FILTRADOS}, x => qnum(x.preco))) : estado.ordem == "nome" ? ordena(${FILTRADOS}, x => semAcentos(minusculas(x.nome))) : estado.ordem == "novidades" ? ordena(${FILTRADOS}, x => x.novo ? 0 : 1) : ${FILTRADOS})`
+const ORDENS = [['destaque', 'ordem.destaque'], ['novidades', 'ordem.novidades'], ['preco', 'ordem.precoAsc'], ['preco-desc', 'ordem.precoDesc'], ['nome', 'ordem.nome']]
+const aba = (slug, texto) => ({ texto, href: H(slug ? `/produtos?colecao=${slug}` : '/produtos'), soConsulta: true, atual: `{(estado.colecao ?? "") == ${JSON.stringify(slug)}}` }) // a categoria escolhida leva aria-current e fica preenchida
+// a barra de categorias: `site/abas` (as categorias) e o seletor de ordem, numa faixa fixa sob o cabeçalho
+const barraCategorias = b('layout/linha', { marca: 'barra-fixa' }, [
+  b('site/abas', { rotulo: T('loja.categorias'), itens: [aba('', T('loja.todas')), ...CATEGORIAS.map((slug) => aba(slug, T(`colecao.${slug}.nome`)))] }),
+  b('layout/linha', { marca: 'ordenar', gap: 12, alinha: 'centro' }, [
+    b('texto/rotulo', { texto: T('loja.ordenar'), para: 'ordem' }),
+    b('entrada/selecao', { valor: '{estado.ordem}' }, ORDENS.map(([v, k]) => b('entrada/opcao', { valor: v, texto: T(k), selecionada: `{estado.ordem == "${v}"}` })), { id: 'ordem', eventos: { aoMudar: [{ acao: 'definir', estado: 'ordem', valor: 'evento' }] } }),
+  ]),
+])
+const cartao = { bloco: 'commerce/cartao-produto', props: propsCartao('{p}', H('{"/produtos/" + p.id}')), repetir: { cada: ORDENADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
   { bloco: 'texto/pequeno', props: { texto: '{p.material}' } }, // o selo (Destaque, Novo) vai sobre a foto; aqui só o material
-  { bloco: 'nav/botao', props: { texto: 'Adicionar à sacola', variante: 'secundario' }, eventos: aoClicar(adiciona('p.id')) },
+  { bloco: 'nav/botao', props: { texto: T('produto.adicionar'), variante: 'secundario' }, eventos: aoClicar(adiciona('p.id')) },
 ] } }
 const produtos = b('layout/pilha', { gap: 0 }, [
   cabecalho('loja'),
-  b('layout/destaque', { imagem: foto('loja-capa'), altura: 440, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre('Loja'), titulo('Todas as peças', 1)])]),
+  // o hero muda com a categoria ativa: com categoria (foto, nome e frase dela); sem categoria, "Todas as peças"
+  { ...b('layout/destaque', { imagem: '{c.foto}', altura: 510, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre(T('loja.colecao')), titulo('{c.nome}', 1), par('{c.frase}')])]), repetir: { cada: HERO_DA_CATEGORIA, como: 'c', chave: 'c.slug' } },
+  b('layout/destaque', { imagem: foto('loja-capa'), altura: 510, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre(T('loja.eyebrow')), titulo(T('loja.titulo'), 1)])], { se: `tamanho(${HERO_DA_CATEGORIA}) == 0` }),
+  barraCategorias,
   folga(32),
   contido([
-    b('layout/linha', { gap: 8, quebra: true }, [filtro('', 'Todas'), ...CATEGORIAS.map((c) => filtro(c.slug, c.nome))]),
-    folga(24),
-    b('texto/pequeno', { texto: `{tamanho(${FILTRADOS}) + (tamanho(${FILTRADOS}) == 1 ? " peça" : " peças")}` }),
+    b('texto/pequeno', { texto: T('loja.contagem', { n: `tamanho(${FILTRADOS})` }) }),
     folga(16),
     b('layout/grade', { colunas: 4, gap: 32 }, [cartao]),
-    b('texto/paragrafo', { texto: 'Nenhuma peça nesta categoria ainda.' }, undefined, { se: `tamanho(${FILTRADOS}) == 0` }),
+    b('texto/paragrafo', { texto: T('loja.vazio') }, undefined, { se: `tamanho(${FILTRADOS}) == 0` }),
   ], 'larga'),
   folga(112),
   rodape(),
 ])
 
 // ---- sobre ----------------------------------------------------------------------------------------------------------------------------------
-const VALORES = [
-  ['01', 'Artesanato', 'Defendemos o trabalho de mãos habilidosas: artesãos que aperfeiçoaram o ofício por anos e criam objetos com um cuidado que máquina nenhuma replica.'],
-  ['02', 'Sustentabilidade', 'Escolhemos materiais naturais que envelhecem bem e artesãos que respeitam o ambiente. Qualidade acima de quantidade é menos desperdício e mais sentido.'],
-  ['03', 'Vida sem pressa', 'Num mundo em aceleração constante, acreditamos na beleza da pausa. Nossos objetos convidam a momentos de calma e presença no cotidiano.'],
-]
 const sobre_ = b('layout/pilha', { gap: 0 }, [
   cabecalho('sobre'),
   b('layout/destaque', { imagem: foto('sobre-capa'), altura: 560, escurece: 0.4, alinha: 'esquerda', capa: true }, [contido([
-    sobre('Nossa história'), titulo('Curadoria de beleza para viver', 1),
-    par('Objetos feitos com cuidado, materiais que envelhecem bem e espaços que convidam à pausa.'),
+    sobre(T('sobre.eyebrow')), tituloEnfase(T('sobre.h1a'), T('sobre.h1b'), 1),
+    par(T('sobre.capa.texto')),
   ])]),
   folga(112),
-  contido([sobre('Nossa filosofia'), par('Acreditamos que os objetos que nos cercam devem contar histórias, envelhecer com beleza e trazer uma alegria silenciosa aos momentos do dia a dia.')], 'estreita'),
+  contido([sobre(T('sobre.filosofia.eyebrow')), par(T('sobre.filosofia.texto'))], 'estreita'),
   folga(112),
   contido([b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-      sobre('O começo'), titulo('Uma busca pessoal por sentido', 2),
-      par('A Maison nasceu de uma busca pessoal por objetos que tivessem significado numa época em que tudo é descartável. Depois de anos colecionando e selecionando, abrimos as portas para dividir essas descobertas com quem valoriza o ofício acima da conveniência.'),
-      par('O que começou como uma pequena coleção virou uma seleção cuidadosa de peças para a casa e o estilo de vida, cada uma escolhida por trazer calor, textura e intenção aos espaços onde vivemos.'),
+      sobre(T('sobre.comeco.eyebrow')), titulo(T('sobre.comeco.titulo'), 2),
+      par(T('sobre.comeco.p1')),
+      par(T('sobre.comeco.p2')),
     ]),
-    b('midia/imagem', { src: foto('sobre-1'), alt: 'Sala com objetos selecionados', fluida: true, proporcao: 0.8 }),
+    b('midia/imagem', { src: foto('sobre-1'), alt: T('sobre.comeco.alt'), fluida: true, proporcao: 0.8 }),
   ])]),
   folga(112),
-  contido([titulo('“A beleza está na imperfeição das coisas feitas à mão”', 3)], 'estreita'),
+  contido([titulo(T('sobre.citacao'), 3)], 'estreita'),
   folga(112),
   contido([b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
-    b('midia/imagem', { src: foto('sobre-2'), alt: 'Peças de uma oficina', fluida: true, proporcao: 0.8 }),
+    b('midia/imagem', { src: foto('sobre-2'), alt: T('sobre.abordagem.alt'), fluida: true, proporcao: 0.8 }),
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-      sobre('Nossa abordagem'), titulo('Da oficina para a sua casa', 2),
-      par('Cada peça da nossa coleção passa pelas nossas mãos antes de chegar às suas. Visitamos oficinas, conhecemos quem faz e aprendemos a história por trás de cada objeto. Esse contato pessoal garante que o que oferecemos não é só bonito: é honesto.'),
-      par('Priorizamos materiais naturais, técnicas tradicionais e artesãos que compartilham nossos valores. Seja um vaso de cerâmica torneado à mão ou uma mesa de carvalho feita para durar gerações, acreditamos em objetos que melhoram com o tempo, e não o contrário.'),
+      sobre(T('sobre.abordagem.eyebrow')), titulo(T('sobre.abordagem.titulo'), 2),
+      par(T('sobre.abordagem.p1')),
+      par(T('sobre.abordagem.p2')),
     ]),
   ])]),
   folga(112),
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [contido([
-    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('O que nos guia'), titulo('Nossos valores', 2)]),
+    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('sobre.valores.eyebrow')), titulo(T('sobre.valores.titulo'), 2)]),
     folga(32),
-    b('layout/grade', { colunas: 3, gap: 48 }, VALORES.map(([n, t, d]) => b('layout/pilha', { gap: 8, alinha: 'inicio' }, [sobre(n), titulo(t, 3), par(d)]))),
+    b('layout/grade', { colunas: 3, gap: 48 }, [1, 2, 3].map((n) => b('layout/pilha', { gap: 8, alinha: 'inicio' }, [sobre(`0${n}`), titulo(T(`sobre.valor${n}.titulo`), 3), par(T(`sobre.valor${n}.texto`))]))),
   ])]),
   folga(112),
-  contido([b('layout/grade', { colunas: 3, gap: 24 }, ['colecao-ceramica', 'colecao-4', 'produto-almofada'].map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: `Detalhe ${i + 1} das peças`, fluida: true, proporcao: 0.8 })])))], 'larga'),
+  contido([b('layout/grade', { colunas: 3, gap: 24 }, ['colecao-ceramica', 'colecao-4', 'produto-almofada'].map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: T('sobre.detalhe.alt', { n: i + 1 }), fluida: true, proporcao: 0.8 })])))], 'larga'),
   folga(112),
   b('layout/destaque', { imagem: foto('foto-2'), altura: 420, escurece: 0.45, alinha: 'centro' }, [
-    sobre('Vamos conversar'), titulo('Tem alguma dúvida?', 2),
-    par('Teremos prazer em falar sobre as nossas peças, os artesãos ou em ajudar você a achar exatamente o que procura.'),
-    link('/produtos', 'Ver as peças', 'primario'),
+    sobre(T('sobre.contato.eyebrow')), titulo(T('sobre.contato.titulo'), 2),
+    par(T('sobre.contato.texto')),
+    link('/produtos', T('home.cta'), 'primario'),
   ], { id: 'contato' }),
   rodape(),
 ])
 
 // ---- detalhe do produto: /produtos/:id (foto, dados, adicionar à sacola e outras peças da mesma coleção) -----------------------------------------------
-const ACHADO = 'filtra(estado.produtos, p => p.id == params.id)'
-const MESMA = 'fatia(filtra(estado.produtos, o => o.colecao == p.colecao && o.id != p.id), 0, 4)'
+const ACHADO = `filtra(${LOC}, p => p.id == params.id)`
+const MESMA = `fatia(filtra(${LOC}, o => o.colecao == p.colecao && o.id != p.id), 0, 4)`
 const detalhe = b('layout/pilha', { gap: 0 }, [
   cabecalho('loja'),
   folga(48),
   { ...b('layout/pilha', { gap: 0 }, [
     contido([
-      link('/produtos', '← Todas as peças'),
+      link('/produtos', T('produto.voltar')),
       folga(24),
       b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
         b('midia/imagem', { src: '{p.fotoUrl}', alt: '{p.nome}', fluida: true, proporcao: 0.8 }),
         b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-          sobre('{p.colecaoNome}'),
+          sobre('{p.categoria}'),
           titulo('{p.nome}', 1),
-          b('commerce/preco', { valor: '{p.preco}' }),
+          b('commerce/preco', { valor: '{p.preco}', idioma: '{idioma}' }),
           par('{p.descricao}'),
-          b('texto/pequeno', { texto: '{"Material: " + p.material}' }),
-          b('texto/pequeno', { texto: 'Feita à mão, em pequenas séries. Cada peça pode variar levemente.' }),
+          b('texto/pequeno', { texto: T('produto.material', { material: 'p.material' }) }),
+          b('texto/pequeno', { texto: T('produto.nota') }),
           folga(8),
           b('layout/linha', { gap: 12, quebra: true }, [
-            b('nav/botao', { texto: 'Adicionar à sacola' }, undefined, { eventos: aoClicar(adiciona('p.id')) }),
-            link('/sacola', 'Ver a sacola'),
+            b('nav/botao', { texto: T('produto.adicionar') }, undefined, { eventos: aoClicar(adiciona('p.id')) }),
+            link('/sacola', T('produto.verSacola')),
           ]),
         ]),
       ]),
     ], 'larga'),
     folga(112),
     contido([
-      b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Da mesma coleção'), titulo('Você também pode gostar', 2)]),
+      b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('produto.mesmaColecao')), titulo(T('produto.tambem'), 2)]),
       folga(32),
-      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{o}', href: '{"/produtos/" + o.id}', rotuloLink: '', rotuloFoto: 'Ver detalhes', mostraDescricao: true }, repetir: { cada: MESMA.replace(/\bp\./g, 'p.'), como: 'o', chave: 'o.id' } }]),
+      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: propsCartao('{o}', H('{"/produtos/" + o.id}')), repetir: { cada: MESMA, como: 'o', chave: 'o.id' } }]),
     ], 'larga', { se: `tamanho(${MESMA}) > 0` }),
   ]), repetir: { cada: ACHADO, como: 'p', chave: 'p.id' } },
   contido([
-    sobre('Peça não encontrada'), titulo('Não achamos esta peça', 2), par('Ela pode ter saído da coleção.'), link('/produtos', 'Ver todas as peças', 'primario'),
+    sobre(T('produto.naoAchada.eyebrow')), titulo(T('produto.naoAchada.titulo'), 2), par(T('produto.naoAchada.texto')), link('/produtos', T('produto.verTodas'), 'primario'),
   ], 'estreita', { se: `tamanho(${ACHADO}) == 0` }),
   folga(112),
   rodape(),
@@ -290,46 +322,47 @@ const detalhe = b('layout/pilha', { gap: 0 }, [
 // ---- checkout de DEMONSTRAÇÃO: o formulário valida no navegador (sem `envio`, a ilha só avisa a página com os valores) e o pedido é gravado
 // no estado persistente `pedidos`, neste navegador. Não há pagamento, frete nem servidor: o serviço `pedidos` exige comprador autenticado (docs/commerce.md).
 const estadoPedidos = { pedidos: { tipo: 'json', lista: true, inicial: [], persiste: true } }
+// os rótulos do formulário são multilíngues pelo próprio formato do kind formulario: { 'pt-BR': …, en: … }, vindos do mesmo dicionário
 const formulario = { kind: 'formulario', id: 'maison.checkout', versao: '1.0.0', estatuto: 'publicado', spec: {
-  titulo: 'Dados de entrega',
+  titulo: doDicionario('checkout.form.titulo'),
   campos: [
-    { nome: 'nome', tipo: 'texto', rotulo: 'Nome completo', obrigatorio: true, autocompletar: 'name' },
-    { nome: 'email', tipo: 'email', rotulo: 'E-mail', obrigatorio: true },
-    { nome: 'telefone', tipo: 'telefone', rotulo: 'Telefone', obrigatorio: true },
-    { nome: 'cep', tipo: 'cep', rotulo: 'CEP', obrigatorio: true },
-    { nome: 'endereco', tipo: 'texto', rotulo: 'Endereço e número', obrigatorio: true },
-    { nome: 'cidade', tipo: 'texto', rotulo: 'Cidade', obrigatorio: true },
+    { nome: 'nome', tipo: 'texto', rotulo: doDicionario('checkout.form.nome'), obrigatorio: true, autocompletar: 'name' },
+    { nome: 'email', tipo: 'email', rotulo: doDicionario('checkout.form.email'), obrigatorio: true },
+    { nome: 'telefone', tipo: 'telefone', rotulo: doDicionario('checkout.form.telefone'), obrigatorio: true },
+    { nome: 'cep', tipo: 'cep', rotulo: doDicionario('checkout.form.cep'), obrigatorio: true },
+    { nome: 'endereco', tipo: 'texto', rotulo: doDicionario('checkout.form.endereco'), obrigatorio: true },
+    { nome: 'cidade', tipo: 'texto', rotulo: doDicionario('checkout.form.cidade'), obrigatorio: true },
   ],
-  acoes: [{ id: 'enviar', rotulo: 'Finalizar pedido', tipo: 'enviar', estilo: 'primario' }],
+  acoes: [{ id: 'enviar', rotulo: doDicionario('checkout.form.enviar'), tipo: 'enviar', estilo: 'primario' }],
 } }
 const PEDIDO = `objeto([["numero", 1001 + tamanho(estado.pedidos)], ["cliente", evento.valores], ["itens", mapeia(${LINHAS}, l => objeto([["nome", l.p.nome], ["qtd", l.qtd], ["total", qmul(l.p.preco, l.qtd)]]))], ["total", ${SUBTOTAL}]])`
 const resumoLinha = b('layout/linha', { gap: 12, alinha: 'centro', quebra: true }, [
   b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 56 }),
-  b('layout/pilha', { gap: 2, cresce: true, alinha: 'inicio' }, [b('texto/rotulo', { texto: '{l.p.nome}' }), b('texto/pequeno', { texto: '{l.qtd + " × " + (l.p.preco | qbrl)}' })]),
-  b('texto/rotulo', { texto: '{qmul(l.p.preco, l.qtd) | qbrl}' }),
+  b('layout/pilha', { gap: 2, cresce: true, alinha: 'inicio' }, [b('texto/rotulo', { texto: '{l.p.nome}' }), b('texto/pequeno', { texto: '{l.qtd + " × " + qmoeda(l.p.preco, idioma)}' })]),
+  b('texto/rotulo', { texto: '{qmoeda(qmul(l.p.preco, l.qtd), idioma)}' }),
 ])
 const checkout = b('layout/pilha', { gap: 0 }, [
   cabecalho(),
   folga(64),
   contido([
-    sobre('Quase lá'), titulo('Finalizar pedido', 1), folga(24),
+    sobre(T('checkout.eyebrow')), titulo(T('checkout.h1'), 1), folga(24),
     b('layout/grade', { colunas: 2, gap: 64 }, [
       b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-        b('form/formulario', { formulario: 'maison.checkout' }, undefined, { eventos: { aoEnviado: [
+        b('form/formulario', { formulario: 'maison.checkout', idioma: '{idioma}' }, undefined, { eventos: { aoEnviado: [
           { acao: 'definir', estado: 'pedidos', valor: `concat(estado.pedidos, [${PEDIDO}])` },
           { acao: 'definir', estado: 'sacola', valor: '[]' },
-          { acao: 'navegar', para: '/pedido' },
+          { acao: 'navegar', para: H('/pedido') },
         ] } }),
-        par('Pedido de demonstração: não há pagamento nem frete, e o pedido fica guardado só neste navegador.'),
+        par(T('checkout.aviso')),
       ]),
       b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-        titulo('Resumo', 3),
+        titulo(T('checkout.resumo'), 3),
         b('layout/pilha', { gap: 12 }, [{ ...resumoLinha, repetir: { cada: LINHAS, como: 'l', chave: 'l.id' } }]),
-        b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}` }),
-        link('/sacola', 'Voltar à sacola'),
+        b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}`, idioma: '{idioma}', rotulos: ROTULOS_RESUMO }),
+        link('/sacola', T('checkout.voltar')),
       ]),
     ], { se: `tamanho(${LINHAS}) > 0` }),
-    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Sua sacola está vazia', 3), par('Escolha peças na loja para finalizar um pedido.'), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo(T('sacola.vazia'), 3), par(T('checkout.vazia')), link('/produtos', T('home.cta'), 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
   ], 'larga'),
   folga(112),
   rodape(),
@@ -341,13 +374,13 @@ const confirmacao = b('layout/pilha', { gap: 0 }, [
   folga(64),
   contido([
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-      sobre('Pedido recebido'), titulo('{"Obrigado, " + (' + ULTIMO + '.cliente.nome | aparar) + "!"}', 1),
-      par('{"Pedido nº " + ' + ULTIMO + '.numero + ": " + (' + ULTIMO + '.total | qbrl) + ". Contato informado: " + ' + ULTIMO + '.cliente.email + "."}'),
-      b('layout/pilha', { gap: 8 }, [{ bloco: 'texto/rotulo', props: { texto: '{i.qtd + " × " + i.nome + " — " + (i.total | qbrl)}' }, repetir: { cada: ULTIMO + '.itens', como: 'i', chave: 'i.nome' } }]),
-      par('Pedido de demonstração, guardado só neste navegador: nenhum e-mail foi enviado e nada foi cobrado.'),
-      link('/produtos', 'Continuar comprando', 'primario'),
+      sobre(T('pedido.eyebrow')), titulo(T('pedido.obrigado', { nome: `aparar(${ULTIMO}.cliente.nome)` }), 1),
+      par(T('pedido.resumo', { numero: `${ULTIMO}.numero`, total: `qmoeda(${ULTIMO}.total, idioma)`, email: `${ULTIMO}.cliente.email` })),
+      b('layout/pilha', { gap: 8 }, [{ bloco: 'texto/rotulo', props: { texto: '{i.qtd + " × " + i.nome + " — " + qmoeda(i.total, idioma)}' }, repetir: { cada: ULTIMO + '.itens', como: 'i', chave: 'i.nome' } }]),
+      par(T('pedido.demo')),
+      link('/produtos', T('sacola.continuar'), 'primario'),
     ], { se: `tamanho(estado.pedidos) > 0` }),
-    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Nenhum pedido por aqui', 2), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(estado.pedidos) == 0` }),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo(T('pedido.nenhum'), 2), link('/produtos', T('home.cta'), 'primario')], { se: `tamanho(estado.pedidos) == 0` }),
   ], 'estreita'),
   folga(112),
   rodape(),
@@ -356,52 +389,56 @@ const confirmacao = b('layout/pilha', { gap: 0 }, [
 // ---- sacola: linhas com foto, quantidade (− e +), remover, subtotal e o aviso de que o pagamento ainda não existe --------------------------------------
 const linha = b('layout/linha', { gap: 24, alinha: 'centro', quebra: true }, [
   b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 96 }),
-  b('layout/pilha', { gap: 4, cresce: true, alinha: 'inicio' }, [titulo('{l.p.nome}', 3), b('texto/pequeno', { texto: '{l.p.material}' }), b('texto/pequeno', { texto: '{l.p.preco | qbrl}' })]),
+  b('layout/pilha', { gap: 4, cresce: true, alinha: 'inicio' }, [titulo('{l.p.nome}', 3), b('texto/pequeno', { texto: '{l.p.material}' }), b('texto/pequeno', { texto: '{qmoeda(l.p.preco, idioma)}' })]),
   b('layout/linha', { gap: 8, alinha: 'centro' }, [
     b('nav/botao', { texto: '−', variante: 'secundario' }, undefined, { eventos: aoClicar(muda('l.id', '-1')) }),
     b('texto/rotulo', { texto: '{l.qtd}' }),
     b('nav/botao', { texto: '+', variante: 'secundario' }, undefined, { eventos: aoClicar(muda('l.id', '1')) }),
   ]),
-  b('texto/rotulo', { texto: '{qmul(l.p.preco, l.qtd) | qbrl}' }),
-  b('nav/botao', { texto: 'Remover', variante: 'secundario' }, undefined, { eventos: aoClicar(tira('l.id')) }),
+  b('texto/rotulo', { texto: '{qmoeda(qmul(l.p.preco, l.qtd), idioma)}' }),
+  b('nav/botao', { texto: T('sacola.remover'), variante: 'secundario' }, undefined, { eventos: aoClicar(tira('l.id')) }),
 ])
 const sacolaPag = b('layout/pilha', { gap: 0 }, [
   cabecalho('sacola'),
   folga(64),
   contido([
-    sobre('Sua seleção'), titulo('Sacola', 1), folga(24),
+    sobre(T('sacola.eyebrow')), titulo(T('sacola.h1'), 1), folga(24),
     b('layout/pilha', { gap: 24 }, [{ ...linha, repetir: { cada: LINHAS, como: 'l', chave: 'l.id' } }]),
-    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Sua sacola está vazia', 3), par('Escolha peças na loja e elas ficam guardadas aqui, mesmo se você fechar a página.'), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo(T('sacola.vazia'), 3), par(T('sacola.vaziaTexto')), link('/produtos', T('home.cta'), 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
       folga(16),
-      b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}` }),
-      par('Frete e pagamento serão calculados no fechamento do pedido (ainda não disponível neste exemplo).'),
-      link('/checkout', 'Finalizar pedido', 'primario'),
-      link('/produtos', 'Continuar comprando'),
+      b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}`, idioma: '{idioma}', rotulos: ROTULOS_RESUMO }),
+      par(T('sacola.aviso')),
+      link('/checkout', T('sacola.finalizar'), 'primario'),
+      link('/produtos', T('sacola.continuar')),
     ], { se: `tamanho(${LINHAS}) > 0` }),
   ], 'estreita'),
   folga(112),
   rodape(),
 ])
 
-const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, ...extra, estado: { ...estadoSacola, ...(extra.estado ?? {}) } } })
-const naoAchada = b('layout/pilha', { gap: 16, alinha: 'centro' }, [titulo('Página não encontrada', 1), par('O endereço não existe nesta loja.'), link('/', 'Voltar ao início', 'primario')])
+// toda página usa o catálogo `maison.textos` (traducoes) e tem a sacola persistente
+const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, traducoes: ['maison.textos'], ...extra, estado: { ...estadoSacola, ...(extra.estado ?? {}) } } })
+const naoAchada = b('layout/pilha', { gap: 16, alinha: 'centro' }, [titulo(T('nao.titulo'), 1), par(T('nao.texto')), link('/', T('nao.voltar'), 'primario')])
 const PAGINAS = ['maison.home', 'maison.produtos', 'maison.produto', 'maison.sobre', 'maison.sacola', 'maison.checkout', 'maison.pedido', 'maison.nao']
-const tenant = (id, tenantId, nome) => ({ kind: 'tenant', id, tenantId, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, nome, segmento: 'varejo', modulos: ['loja'], tema: 'maison', paginas: PAGINAS, paginaNaoEncontrada: 'maison.nao' } })
+const tenant = (id, tenantId, nome) => ({ kind: 'tenant', id, tenantId, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, nome, segmento: 'varejo', modulos: ['loja'], tema: 'maison', paginas: PAGINAS, paginaNaoEncontrada: 'maison.nao', idiomas: IDIOMAS, idiomaPadrao: PADRAO } })
+
+const textos = { kind: 'traducao', id: 'maison.textos', versao: '1.0.0', estatuto: 'publicado', spec: { descricao: 'Textos da Maison em pt-BR (padrão) e en (o texto original do template)', padrao: PADRAO, mensagens: MENSAGENS } }
 
 const nos = [
   tema,
+  textos,
   formulario,
-  pagina('maison.home', '/', 'Maison', home),
-  pagina('maison.produtos', '/produtos', 'Todas as peças · Maison', produtos, { estado: { produtos: { tipo: 'json', inicial: PRODUTOS.map(paraProduto) } } }),
-  pagina('maison.produto', '/produtos/:id', 'Peça · Maison', detalhe, { params: { id: { tipo: 'texto' } }, estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
-  pagina('maison.sobre', '/sobre', 'Sobre · Maison', sobre_),
-  pagina('maison.sacola', '/sacola', 'Sacola · Maison', sacolaPag, { estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
-  pagina('maison.checkout', '/checkout', 'Finalizar pedido · Maison', checkout, { estado: { ...estadoPedidos, produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
-  pagina('maison.pedido', '/pedido', 'Pedido recebido · Maison', confirmacao, { estado: estadoPedidos }),
-  pagina('maison.nao', '/nao-encontrada', 'Página não encontrada', naoAchada),
+  pagina('maison.home', '/', 'Maison', home, { estado: estadoProdutos }),
+  pagina('maison.produtos', '/produtos', T('loja.titulo') + ' · Maison', produtos, { estado: { ...estadoProdutos, ...estadoColecoes, ordem: { tipo: 'texto', inicial: 'destaque' }, colecao: { tipo: 'texto', inicial: '', daConsulta: 'colecao' } } }),
+  pagina('maison.produto', '/produtos/:id', T('produto.titulo'), detalhe, { params: { id: { tipo: 'texto' } }, estado: estadoProdutos }),
+  pagina('maison.sobre', '/sobre', T('sobre.titulo'), sobre_),
+  pagina('maison.sacola', '/sacola', T('sacola.titulo'), sacolaPag, { estado: estadoProdutos }),
+  pagina('maison.checkout', '/checkout', T('checkout.titulo'), checkout, { estado: { ...estadoPedidos, ...estadoProdutos } }),
+  pagina('maison.pedido', '/pedido', T('pedido.titulo'), confirmacao, { estado: estadoPedidos }),
+  pagina('maison.nao', '/nao-encontrada', T('nao.titulo'), naoAchada),
   tenant('loja-demo', '11111111-1111-1111-1111-111111111111', 'Loja Demo'),
   tenant('loja-outra', '22222222-2222-2222-2222-222222222222', 'Outra Loja'),
 ]
 writeFileSync(join(aqui, 'nos.json'), `${JSON.stringify(nos, null, 2)}\n`)
-console.log(`exemplos/maison/nos.json: ${nos.length} nós (tema, ${nos.filter((n) => n.kind === 'pagina').length} páginas, ${nos.filter((n) => n.kind === 'tenant').length} tenants)`)
+console.log(`exemplos/maison/nos.json: ${nos.length} nós (tema, ${nos.filter((n) => n.kind === 'pagina').length} páginas, ${nos.filter((n) => n.kind === 'tenant').length} tenants, catálogo ${IDIOMAS.join('+')} com ${Object.keys(MENSAGENS[PADRAO]).length} chaves)`)

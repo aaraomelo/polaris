@@ -65,7 +65,8 @@ describe('contratos de serviço', () => {
     const produto = ent('catalogo', 'produto')
     for (const bloco of ['commerce.cartao-produto', 'commerce.detalhe-produto']) for (const c of props(bloco, (p) => p.produto.properties)) expect(produto, `${bloco}.${c}`).toContain(c)
     for (const c of props('commerce.carrinho', (p) => p.itens.items.properties)) expect(ent('carrinho', 'itemCarrinho'), c).toContain(c)
-    for (const c of props('commerce.resumo-pedido', (p) => p)) { expect(ent('carrinho', 'carrinho'), c).toContain(c); expect(ent('pedidos', 'pedido'), c).toContain(c) }
+    const APRESENTACAO = ['idioma', 'rotulos'] // formato do preço e textos das linhas: o template passa; não são campos do contrato
+    for (const c of props('commerce.resumo-pedido', (p) => p).filter((x) => !APRESENTACAO.includes(x))) { expect(ent('carrinho', 'carrinho'), c).toContain(c); expect(ent('pedidos', 'pedido'), c).toContain(c) }
   })
 })
 
@@ -125,6 +126,13 @@ describe('blocos de exibição: dinheiro exato, vazios, links, disponibilidade',
     const nu = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto: P('x', 'Vaso', '10.00', { fotoUrl: '/img/v.jpg', descricao: 'Grés' }), href: '/p/x' } }))
     expect(nu.querySelectorAll('img').length).toBe(1); expect(nu.querySelector('[data-marca=selo-produto]')).toBeNull(); expect(nu.querySelector('[data-marca=rotulo-produto]')).toBeNull()
     expect(nu.querySelector('[data-sobretitulo]')).toBeNull(); expect(nu.querySelector('[data-marca=cartao-produto] > small')).toBeNull() // descrição só com `mostraDescricao`
+  })
+  it('idioma: o preço usa o formato do idioma e o template traz os rótulos (padrão em português quando não vêm)', () => {
+    const txt = (props: object, bloco = 'commerce/preco') => ssr(pagina({ bloco, props })).textContent!.replace(/\s+/g, ' ').trim()
+    expect(txt({ valor: '1234.5' })).toBe('R$ 1.234,50'); expect(txt({ valor: '1234.5', idioma: 'pt-BR' })).toBe('R$ 1.234,50'); expect(txt({ valor: '1234.5', idioma: 'en' })).toBe('R$1,234.50')
+    expect(txt({ valor: '10', de: '20', idioma: 'en', rotuloDe: 'was' })).toBe('R$10.00was R$20.00')
+    expect(txt({ subtotal: '10', total: '10' }, 'commerce/resumo-pedido')).toBe('SubtotalR$ 10,00TotalR$ 10,00')
+    expect(txt({ subtotal: '10', total: '12', frete: '2', idioma: 'en', rotulos: { subtotal: 'Subtotal', frete: 'Shipping', total: 'Total' } }, 'commerce/resumo-pedido')).toBe('SubtotalR$10.00ShippingR$2.00TotalR$12.00')
   })
   it('conteúdo hostil do catálogo é texto, e foto com javascript: não vira imagem', () => {
     const d = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto: P('x', '<img src=x onerror=alert(1)>', '1', { fotoUrl: 'javascript:alert(1)' }) } }))

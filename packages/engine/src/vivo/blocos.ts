@@ -18,6 +18,8 @@ export type Descritor = {
   valor?(props: Record<string, unknown>): string
   /** o valor vai no CONTEÚDO do elemento (textarea), não no atributo `value`: o HTML estático e o React o escrevem como texto */
   valorNoTexto?: true
+  /** o `valor` é só a PROPRIEDADE `value` (o `select`): nunca vai como atributo no HTML do servidor */
+  valorSoPropriedade?: true
   /** propriedade `checked` (caixa de seleção controlada) */
   marcado?(props: Record<string, unknown>): boolean
   eventos?: Record<string, EventoDom>
@@ -49,8 +51,9 @@ const nivel = (p: Record<string, unknown>) => Math.min(6, Math.max(1, Math.trunc
 
 export const d_layout_pilha: Descritor = /* @__PURE__ */ caixa('column')
 export const d_layout_linha: Descritor = /* @__PURE__ */ caixa('row')
-/** `tamanho: 'grande'` é o título de seção maior (token `tipografia.tamanhoGrande`); sem `texto` o conteúdo vem do slot `filhos` (use `texto/trecho` e `texto/enfase`) */
-export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${p.texto === undefined ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' ? { 'data-tamanho': 'grande' } : {}) }), texto: (p) => (p.texto === undefined ? undefined : txt(p.texto)) }
+/** `tamanho: 'grande'` é o título de seção maior (token `tipografia.tamanhoGrande`); com `texto` vazio ("") o conteúdo vem do slot `filhos` (use `texto/trecho` e `texto/enfase`) */
+const tituloComFilhos = (p: Record<string, unknown>): boolean => p.texto === undefined || p.texto === ''
+export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${tituloComFilhos(p) ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' ? { 'data-tamanho': 'grande' } : {}) }), texto: (p) => (tituloComFilhos(p) ? undefined : txt(p.texto)) }
 export const d_texto_enfase: Descritor = { chave: () => 'em', tag: () => 'em', attrs: (p, id) => ({ ...comId(id), ...(p.bloco === true ? { style: 'display:block' } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
 export const d_midia_imagem: Descritor = {
@@ -64,7 +67,7 @@ export const d_nav_link: Descritor = {
     chave: (p) => (p.texto !== undefined ? 'a:t' : 'a:f'), tag: () => 'a', filhos: true,
     attrs: (p, id) => {
       const href = urlSegura(p.href)
-      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.botao === 'primario' || p.botao === 'secundario' ? { 'data-botao': p.botao } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }
+      return { ...comId(id), ...(href ? { href } : {}), ...(typeof href === 'string' && /^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}), ...(p.atual === true ? { 'aria-current': 'page' } : {}), ...(p.soConsulta === true ? { 'data-consulta': '' } : {}), ...(p.botao === 'primario' || p.botao === 'secundario' ? { 'data-botao': p.botao } : {}), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }
     },
     texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
   }
@@ -110,7 +113,14 @@ export const d_layout_secao: Descritor = { chave: () => 'details:secao', tag: ()
 export const d_layout_secao_titulo: Descritor = { chave: () => 'summary:secao', tag: () => 'summary', texto: (p) => txt(p.texto), attrs: (p, id) => ({ ...comId(id), ...(nomeDeIcone(p.icone) ? { 'data-icone': nomeDeIcone(p.icone)! } : {}) }) }
 export const d_nav_submenu: Descritor = { chave: () => 'details', tag: () => 'details', filhos: true, attrs: (_p, id) => ({ ...comId(id), 'data-submenu': '' }) }
 export const d_nav_submenu_titulo: Descritor = { chave: () => 'summary', tag: () => 'summary', texto: (p) => txt(p.texto), attrs: (_p, id) => ({ ...comId(id) }) }
-export const d_nav_menu: Descritor = { chave: () => 'nav', tag: () => 'nav', filhos: true, attrs: (p, id) => ({ ...comId(id), 'aria-label': typeof p.rotulo === 'string' && p.rotulo ? p.rotulo : 'Principal' }) }
+export const d_nav_menu: Descritor = { chave: () => 'nav', tag: () => 'nav', filhos: true, attrs: (p, id) => ({ ...comId(id), 'aria-label': typeof p.rotulo === 'string' && p.rotulo ? p.rotulo : 'Principal', ...(marcaDe(p) ? { 'data-marca': marcaDe(p)! } : {}) }) }
+/** seletor (`<select>`): as opções são os filhos (`entrada/opcao`); a escolhida leva `selecionada` (o `valor` do seletor a sincroniza depois das mudanças) */
+export const d_entrada_selecao: Descritor = {
+  chave: () => 'select', tag: () => 'select', filhos: true, valor: (p) => txt(p.valor), valorSoPropriedade: true,
+  attrs: (p, id) => ({ ...comId(id), ...rotulo(p), ...(p.desabilitado === true ? { disabled: '' } : {}) }),
+  eventos: { aoMudar: { dom: 'change', payload: (e) => (e.target as HTMLSelectElement).value } },
+}
+export const d_entrada_opcao: Descritor = { chave: () => 'option', tag: () => 'option', attrs: (p, id) => ({ ...comId(id), value: txt(p.valor), ...(p.selecionada === true ? { selected: '' } : {}) }), texto: (p) => txt(p.texto) }
 export const d_layout_destaque: Descritor = {
   chave: () => 'section', tag: () => 'section', filhos: true,
   attrs: (p, id) => {
@@ -248,4 +258,6 @@ export const DESCRITORES_BASE: DescritoresDom = {
   'nav/link': d_nav_link,
   'nav/botao': d_nav_botao,
   'entrada/texto': d_entrada_texto,
+  'entrada/selecao': d_entrada_selecao,
+  'entrada/opcao': d_entrada_opcao,
 }

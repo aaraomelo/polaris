@@ -40,7 +40,7 @@ describe('blocos nativos do cabeçalho', () => {
 
 describe('site/cabecalho', () => {
   it('é um nó válido; a marca liga ao início, o menu tem um link por item e só o `atual` leva aria-current', () => {
-    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.rodape', 'site.hero', 'site.busca', 'site.menu-lateral']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/rodape', 'site/hero', 'site/busca', 'site/menu-lateral']))
+    expect(BLOCOS_SITE.map((b) => b.id)).toEqual(['site.cabecalho', 'site.abas', 'site.rodape', 'site.hero', 'site.busca', 'site.menu-lateral']); expect(novoReg().ids('bloco')).toEqual(expect.arrayContaining(['site/cabecalho', 'site/abas', 'site/rodape', 'site/hero', 'site/busca', 'site/menu-lateral']))
     const d = ssr(pagina(cab({ titulo: 'Loja Demo', links: LINKS })))
     const h = d.querySelector('header')!; expect(h).toBeTruthy(); const marca = h.querySelector(':scope > a')!; expect(marca.getAttribute('href')).toBe('/'); expect(marca.textContent).toBe('Loja Demo')
     const links = [...h.querySelectorAll('nav a')]; expect(links.map((a) => a.textContent)).toEqual(['Início', 'Produtos', 'Contato']); expect(links.map((a) => a.getAttribute('href'))).toEqual(['/', '/produtos', '/contato'])
@@ -293,5 +293,14 @@ describe('seção recolhível (layout/secao)', () => {
     const d = ssr(pagina({ bloco: 'layout/pilha', slots: { filhos: [{ bloco: 'layout/secao', props: { aberta: true }, slots: { filhos: [{ bloco: 'layout/secao-titulo', props: { texto: 'Identificação', icone: 'editar' } }, { bloco: 'texto/paragrafo', props: { texto: 'x' } }] } }, { bloco: 'layout/secao', slots: { filhos: [{ bloco: 'layout/secao-titulo', props: { texto: 'Avançado' } }] } }] } } as never)).querySelectorAll('details[data-secao]')
     expect([d[0]!.hasAttribute('open'), d[1]!.hasAttribute('open')]).toEqual([true, false]); const s = d[0]!.querySelector('summary')!; expect([s.textContent, s.getAttribute('data-icone'), d[0]!.firstElementChild === s, d[1]!.querySelector('summary')!.hasAttribute('data-icone')]).toEqual(['Identificação', 'editar', true, false])
     const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('details[data-secao][open]>summary::after{transform:rotate(180deg)}'); expect(css).toContain('details[data-secao]>summary[data-icone]::before{color:var(--cor-primaria)}')
+  })
+})
+
+describe('site/abas', () => {
+  it('um `nav` com nome acessível e o gancho `abas`, um link por item e só o `atual` leva aria-current', () => {
+    const r = novoReg(), pg = r.registra({ kind: 'pagina', id: 'abas', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/', raiz: { bloco: 'site/abas', props: { rotulo: 'Categorias', itens: [{ texto: 'Todas', href: '/p', atual: true }, { texto: 'Luz', href: '/p?c=luz' }] } } } } as never)
+    const c = compilaPrograma(r, pg); if (!c.ok) throw new Error(JSON.stringify(c.erros))
+    const html = renderPaginaHtml({ programa: c.programa, componentes: COMPONENTES_BASE }).html
+    expect(html).toContain('<nav aria-label="Categorias" data-marca="abas">'); expect(html.match(/<a /g)!.length).toBe(2); expect(html.match(/aria-current="page"/g)!.length).toBe(1)
   })
 })

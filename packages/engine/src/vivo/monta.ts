@@ -13,6 +13,7 @@ import { descritoresPadrao } from '../expr/padrao'
 import { caminhosMudados } from '../estado/caminho'
 import { chavesDeCaminhos, cruza, depsCabeca, depsValor, MARCA, raizDe, usaTotal } from './dep'
 import { aplicaLista, planoLista } from './lista'
+import { ligaConsulta } from './consulta'
 import { Divergencia, Pos } from './pos'
 import type { CodigoDef } from '../codigo/def'
 import type { ConfigCodigo } from '../codigo/sessao'
@@ -550,12 +551,14 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
     }
   }
 
+  const desligaConsulta = ligaConsulta(programa, o.container, modelo)
+
   return {
     modelo, store: modelo.store, despacha: modelo.despacha, flush: modelo.flush,
     chega(dados) { for (const [nome, ok, v] of dados) modelo.despacha(ok ? { t: 'dado', nome, valor: v } : { t: 'erro', nome, erro: String(v) }) },
     titulo: () => { const t = programa.pagina.titulo; if (!t) return ''; const v = valorDeC(t, modelo.escopo, funcoes); return v === null || v === undefined || typeof v === 'object' ? '' : String(v) },
     diagnostico: () => ({ controladores: stats.controladores, hidratou }),
-    destroi() { desassina(); desassinaPersistencia(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
+    destroi() { desassina(); desassinaPersistencia(); desligaConsulta(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
   }
 }
 

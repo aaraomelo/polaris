@@ -57,3 +57,12 @@ export const fq_qbrl: Funcao = { min: 1, max: 1, fn: (x) => {
   } }
 export const fq_qnum: Funcao = { min: 1, max: 1, fn: (x) => { const q = r(x); return q ? Q.paraNumero(q) : undefined } }
 
+
+/** Reais por idioma, exato e sem Intl: pt/es "R$ 1.234,50", en "R$1,234.50". Só para EXIBIR. */
+export const fq_qmoeda: Funcao = { min: 2, max: 2, fn: (x, idioma) => {
+  const q = r(x); if (!q) return undefined
+  const e = Q.arredondaEscalado(q, 2, 'longe'); if (e === undefined) return undefined
+  const base = (typeof idioma === 'string' ? idioma : '').split('-')[0], pt = Q.decimalPtBR(e < 0n ? -e : e, 2)
+  const sinal = e < 0n ? '-' : ''
+  return base === 'en' ? `${sinal}R$${pt.replace(/[.,]/g, (c) => (c === '.' ? ',' : '.'))}` : `${sinal}R$ ${pt}`
+} }

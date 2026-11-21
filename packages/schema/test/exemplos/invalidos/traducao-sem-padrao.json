@@ -1,0 +1,8 @@
+{
+  "kind": "traducao",
+  "id": "loja",
+  "versao": "1.0.0",
+  "spec": {
+    "mensagens": { "pt-BR": { "home.titulo": "Olá" } }
+  }
+}

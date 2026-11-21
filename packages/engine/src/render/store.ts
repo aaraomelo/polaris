@@ -30,7 +30,10 @@ export function reduz(s: Store, a: AcaoStore): Store {
   }
 }
 
-export type SementeStore = { estado?: Record<string, unknown> | undefined; dados?: Record<string, unknown> | undefined; status?: Record<string, StatusDado> | undefined; erros?: Record<string, string> | undefined }
+export type SementeStore = {
+  /** a consulta da URL (?nome=valor): inicia os estados com `daConsulta` */
+  consulta?: Record<string, unknown> | undefined
+ estado?: Record<string, unknown> | undefined; dados?: Record<string, unknown> | undefined; status?: Record<string, StatusDado> | undefined; erros?: Record<string, string> | undefined }
 
 const tem = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 
@@ -38,7 +41,8 @@ const tem = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 export function iniciaStore(programa: Programa, semente: SementeStore = {}): Store {
   const estado: Record<string, unknown> = {}
   for (const [nome, d] of Object.entries(programa.pagina.estado)) {
-    estado[nome] = semente.estado && tem(semente.estado, nome) ? semente.estado[nome] : d.inicial
+    const daUrl = d.daConsulta && semente.consulta && tem(semente.consulta, d.daConsulta) ? semente.consulta[d.daConsulta] : undefined // `daConsulta`: começa com o valor da URL
+    estado[nome] = semente.estado && tem(semente.estado, nome) ? semente.estado[nome] : typeof daUrl === 'string' ? daUrl : d.inicial
   }
   const dados: Record<string, unknown> = {}
   const status: Record<string, StatusDado> = {}

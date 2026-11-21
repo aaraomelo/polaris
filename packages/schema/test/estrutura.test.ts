@@ -203,3 +203,18 @@ describe('exemplos de bloco (catálogo)', () => {
     expect(() => r.registra(bloco([{ titulo: 't', instancia: { bloco: 'l/item' }, extra: 1 }]))).toThrow()
   })
 })
+
+describe('tradução (catálogo de mensagens)', () => {
+  const tr = (spec: unknown) => ({ kind: 'traducao', id: 't', versao: '1.0.0', spec }) as unknown as No
+  it('o idioma padrão precisa ter mensagens', () => {
+    const e = validaEstrutura(new Registry(), tr({ padrao: 'pt-BR', mensagens: { en: { a: 'x' } } }))
+    expect(e.map((x) => x.caminho)).toEqual(['/spec/padrao']); expect(e[0]!.dica).toContain('en')
+  })
+  it('a chave nasce no padrão: traduzir uma chave que o padrão não tem é erro (com o caminho da chave)', () => {
+    const e = validaEstrutura(new Registry(), tr({ padrao: 'pt-BR', mensagens: { 'pt-BR': { a: 'a' }, en: { a: 'a', so_en: 'x' } } }))
+    expect(e.map((x) => x.caminho)).toEqual(['/spec/mensagens/en/so_en'])
+  })
+  it('falta de tradução NÃO é erro (cai no idioma padrão): só o contrário é', () => {
+    expect(validaEstrutura(new Registry(), tr({ padrao: 'pt-BR', mensagens: { 'pt-BR': { a: 'a', b: 'b' }, en: { a: 'a' } } }))).toEqual([])
+  })
+})

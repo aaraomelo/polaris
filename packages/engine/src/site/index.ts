@@ -171,6 +171,18 @@ const BLOCOS_LATERAL = [
   }),
 ]
 
-export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_RODAPE, ...BLOCOS_HERO, ...BLOCOS_BUSCA, ...BLOCOS_LATERAL]
+// Abas de navegação: a fileira de links de categoria de uma loja (um é o atual). Rola na horizontal em tela estreita, sem barra visível.
+const BLOCOS_ABAS = [
+  no('bloco', 'site.abas', {
+    interface: 'site/abas', titulo: 'Abas de navegação',
+    descricao: 'Fileira de abas (links) para trocar de categoria ou de visão: `itens` com `texto`, `href` e `atual` (a aba escolhida, `aria-current`). É um `nav` com nome acessível (`rotulo`); rola na horizontal quando não cabe. O visual (caixa alta, aba ativa preenchida) vem dos tokens `abas.*` do tema.',
+    props: { type: 'object', properties: { rotulo: { type: 'string', maxLength: 80, description: 'nome acessível do menu (padrão "Principal")' }, itens: { type: 'array', maxItems: 24, items: { ...linkProp, properties: { ...linkProp.properties, soConsulta: { type: 'boolean', description: 'trocar de aba só muda a consulta da URL (sem recarregar a página)' } } }, description: 'as abas, na ordem' } }, required: ['itens'] },
+    exemplos: [{ titulo: 'Categorias', instancia: instancia('site/abas', { rotulo: 'Categorias', itens: [{ texto: 'Todas', href: '/produtos', atual: true }, { texto: 'Iluminação', href: '/produtos?c=luz' }, { texto: 'Cerâmica', href: '/produtos?c=ceramica' }] }) }],
+    modelo: { bloco: 'nav/menu', props: { rotulo: '{props.rotulo}', marca: 'abas' }, slots: { filhos: [
+      { bloco: 'nav/link', repetir: { cada: 'props.itens ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}', soConsulta: '{l.soConsulta == true}' } },
+    ] } },
+  }),
+]
+export const BLOCOS_SITE = [...BLOCOS_CABECALHO, ...BLOCOS_ABAS, ...BLOCOS_RODAPE, ...BLOCOS_HERO, ...BLOCOS_BUSCA, ...BLOCOS_LATERAL]
 export function registraSite(reg: Registry): void { for (const n of BLOCOS_SITE) reg.registra(n as never) }
 export { NOMES_ICONES } from '../icones/nomes'

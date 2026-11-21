@@ -1,5 +1,6 @@
 import * as E from '../estado/caminho'
 import { camposDoSchema, elementosDoBloco, percorre, semIds } from './arvore'
+import { escolheIdioma, formataMensagem } from './icu'
 import { LIMITES_EXPR, type Funcao } from './tipos'
 
 // Biblioteca padrão: funções puras e totais (nunca lançam; entrada inválida → undefined ou texto vazio).
@@ -198,3 +199,10 @@ export const f_pct: Funcao = { min: 1, max: 2, fn: (x, c) => { const n = aNum(x)
 export const f_data: Funcao = { min: 1, max: 1, fn: (x) => { const d = dataDe(x); return d ? df(typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) ? 'dUTC' : 'dBR', { timeZone: typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x) ? 'UTC' : FUSO }).format(d) : '' } }
 export const f_dataHora: Funcao = { min: 1, max: 1, fn: (x) => { const d = dataDe(x); return d ? df('dh', { timeZone: FUSO, dateStyle: 'short', timeStyle: 'short' }).format(d) : '' } }
 
+
+// i18n: `t("chave")` vira, na compilação, `traduz(idioma, {pt-BR: …, en: …, "*": …}, params)` com as mensagens que a página usa; aqui só se escolhe e se formata (ICU).
+export const f_traduz: Funcao = { min: 2, max: 3, fn: (idioma, entrada, params) => {
+  const m = typeof entrada === 'string' ? entrada : ehObj(entrada) ? escolheIdioma(entrada, idioma) : undefined
+  return typeof m === 'string' ? formataMensagem(m, params, typeof idioma === 'string' && idioma ? idioma : 'en') : ''
+} }
+export const f_loc: Funcao = { min: 2, max: 2, fn: (idioma, v) => (ehObj(v) ? escolheIdioma(v, idioma) : v) }

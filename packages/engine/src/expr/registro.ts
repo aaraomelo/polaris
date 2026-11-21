@@ -188,6 +188,24 @@ export const REGISTRO: Def[] = [
   { nome: 'padrao', tipo: 'funcao', assinatura: 'padrao(x, d) → qualquer', descricao: 'Troca por `d` apenas `null`, ausente e `""` (diferente de `??`, que mantém o `""`); `0` e `false` ficam.', exemplos: [
     { expr: 'padrao(null, "x")', saida: 'x' }, { expr: 'padrao("", "x")', saida: 'x' }, { expr: 'padrao(0, 5)', saida: 0 },
   ], leis: [{ expr: 'padrao(padrao(a, b), c) == padrao(a, padrao(b, c))', gera: { a: 'escalar', b: 'escalar', c: 'escalar' } }] },
+  { nome: 'traduz', tipo: 'funcao', assinatura: 'traduz(idioma, mensagens, params?) → texto', descricao: 'Escolhe a mensagem no idioma (exato, depois o idioma-base `pt-BR` → `pt`, depois qualquer região, depois `"*"`) e a formata no padrão ICU MessageFormat: `{nome}`, `{n, number}`, `{n, plural, one {…} other {# …}}`, `{x, select, a {…} other {…}}` (`#` é o número; regras de plural do CLDR). No código de páginas escreve-se `t("chave", params)`: o compilador troca por `traduz(idioma, {…})` com as mensagens do catálogo (`kind: traducao`) que a página usa. Total: mensagem malformada volta como está.', exemplos: [
+    { expr: 'traduz("en", objeto([["pt-BR", "Olá"], ["en", "Hi"]]))', saida: 'Hi' },
+    { expr: 'traduz("pt-BR", objeto([["pt", "Olá, {nome}!"], ["en", "Hi, {nome}!"]]), objeto([["nome", "Ana"]]))', saida: 'Olá, Ana!' },
+    { expr: 'traduz("pt-PT", objeto([["pt-BR", "Oi"], ["en", "Hi"]]))', saida: 'Oi' },
+    { expr: 'traduz("fr", objeto([["*", "Oi"], ["en", "Hi"]]))', saida: 'Oi' },
+    { expr: 'traduz("en", objeto([["en", "{n, plural, =0 {No items} one {# item} other {# items}}"]]), objeto([["n", 1]]))', saida: '1 item' },
+    { expr: 'traduz("en", objeto([["en", "{n, plural, =0 {No items} one {# item} other {# items}}"]]), objeto([["n", 1234]]))', saida: '1,234 items' },
+    { expr: 'traduz("pt-BR", objeto([["pt-BR", "{n, plural, one {# peça} other {# peças}}"]]), objeto([["n", 0]]))', saida: '0 peça' },
+    { expr: 'traduz("en", objeto([["en", "{g, select, f {She} m {He} other {They}} left"]]), objeto([["g", "f"]]))', saida: 'She left' },
+    { expr: 'traduz("en", objeto([["en", "It\'\'s {x}"]]), objeto([["x", 2]]))', saida: "It's 2" },
+    { expr: 'traduz("en", objeto([["en", "{broken"]]))', saida: '{broken' },
+    { expr: 'traduz("en", 5)', saida: '' },
+  ] },
+  { nome: 'loc', tipo: 'funcao', assinatura: 'loc(idioma, valor) → valor', descricao: 'O valor localizado: se for um objeto `{ "pt-BR": …, "en": … }`, escolhe pelo idioma (mesma ordem de `traduz`); qualquer outro valor passa como está. Serve para dados que trazem o texto em vários idiomas (o nome de um produto).', exemplos: [
+    { expr: 'loc("en", objeto([["pt-BR", "Vaso"], ["en", "Vase"]]))', saida: 'Vase' },
+    { expr: 'loc("pt-BR", "Vaso")', saida: 'Vaso' },
+    { expr: 'loc("fr", objeto([["pt-BR", "Vaso"]]))', indefinido: U },
+  ] },
   { nome: 'brl', tipo: 'funcao', assinatura: 'brl(x) → texto', descricao: 'Moeda em reais (pt-BR), sempre 2 casas. Só para EXIBIR: o cálculo de dinheiro não usa ponto flutuante.', exemplos: [{ expr: 'brl(1234.5)', saida: 'R$ 1.234,50' }, { expr: 'brl("x")', saida: '' }] },
   { nome: 'pct', tipo: 'funcao', assinatura: 'pct(x, casas = 0) → texto', descricao: 'Fração como porcentagem (0,256 → 25,6%).', exemplos: [{ expr: 'pct(0.256, 1)', saida: '25,6%' }, { expr: 'pct(0.5)', saida: '50%' }] },
   { nome: 'data', tipo: 'funcao', assinatura: 'data(x) → texto', descricao: 'Data em dd/mm/aaaa. "AAAA-MM-DD" puro não escorrega de dia; instantes usam o fuso de São Paulo.', exemplos: [{ expr: 'data("2026-06-08")', saida: '08/06/2026' }, { expr: 'data("lixo")', saida: '' }] },
@@ -242,6 +260,7 @@ export const REGISTRO: Def[] = [
     { expr: 'racional(qdec(a, 4)) == racional(a)', gera: { a: 'decimal' } },
   ] },
   { nome: 'qformata', tipo: 'funcao', assinatura: 'qformata(x, casas = 2, modo = "longe") → texto pt-BR', descricao: 'Como `qdec`, formatado em pt-BR (milhar com ponto, decimal com vírgula), exato e sem Intl.', exemplos: [{ expr: 'qformata("1234567.891")', saida: '1.234.567,89' }, { expr: 'qformata("-1234.5")', saida: '-1.234,50' }, { expr: 'qformata("0.5", 0, "par")', saida: '0' }] },
+  { nome: 'qmoeda', tipo: 'funcao', assinatura: 'qmoeda(x, idioma) → texto', descricao: 'Reais com 2 casas e arredondamento comercial exato, no formato do idioma: `pt`/`es` → `R$ 1.234,50`, `en` → `R$1,234.50`. Só para EXIBIR (como `qbrl`).', exemplos: [{ expr: 'qmoeda("1234.5", "pt-BR")', saida: 'R$ 1.234,50' }, { expr: 'qmoeda("1234.5", "en")', saida: 'R$1,234.50' }, { expr: 'qmoeda("x", "en")', indefinido: U }] },
   { nome: 'qbrl', tipo: 'funcao', assinatura: 'qbrl(x) → texto', descricao: 'Reais com 2 casas, arredondamento comercial (`longe`), exato. Igual a `brl` onde o double é exato; correto onde o double não é.', exemplos: [{ expr: 'qbrl("1234.5")', saida: 'R$ 1.234,50' }, { expr: 'qbrl("-0.005")', saida: '-R$ 0,01' }, { expr: 'qbrl("0.1") == brl(0.1)', saida: true }], leis: [{ expr: 'qbrl(a) == brl(qnum(qdec(a, 2)))', gera: { a: 'decimal' } }] },
   { nome: 'qnum', tipo: 'funcao', assinatura: 'qnum(x) → número', descricao: 'Aproximação em double (arredondada corretamente quando numerador e denominador cabem em 53 bits). Use só para exibir ou desenhar; nunca para calcular dinheiro.', exemplos: [{ expr: 'qnum("1/4")', saida: 0.25 }, { expr: 'qnum("1/3")', saida: 1 / 3 }] },
 

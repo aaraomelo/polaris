@@ -186,6 +186,7 @@ export class Registry {
           refs.push({ kind: 'dados', id: typeof d === 'string' ? d : d.dados, caminho: typeof d === 'string' ? `/spec/dados/${nome}` : `/spec/dados/${nome}/dados` })
         }
         if (s.layout) refs.push({ kind: 'bloco', id: s.layout, caminho: '/spec/layout' })
+        ;(s.traducoes ?? []).forEach((id: string, n: number) => refs.push({ kind: 'traducao', id, caminho: `/spec/traducoes/${n}` }))
         instancias(s.raiz, '/spec/raiz')
         break
       case 'bloco':

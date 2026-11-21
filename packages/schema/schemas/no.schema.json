@@ -26,7 +26,8 @@
         "papel",
         "pack",
         "formulario",
-        "cartaz"
+        "cartaz",
+        "traducao"
       ]
     },
     "id": {
@@ -378,6 +379,25 @@
         "properties": {
           "spec": {
             "$ref": "polaris://kind/cartaz/v1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "traducao"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "spec": {
+            "$ref": "polaris://kind/traducao/v1"
           }
         }
       }

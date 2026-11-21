@@ -2,6 +2,6 @@
   {
     "caminho": "/kind",
     "regra": "enum",
-    "mensagem": "valor \"quiral\" não é permitido; aceitos: 'pagina', 'bloco', 'tema', 'dados', 'servico', 'evento', 'kernel', 'documento', 'tenant', 'backend', 'papel', 'pack', 'formulario', 'cartaz'"
+    "mensagem": "valor \"quiral\" não é permitido; aceitos: 'pagina', 'bloco', 'tema', 'dados', 'servico', 'evento', 'kernel', 'documento', 'tenant', 'backend', 'papel', 'pack', 'formulario', 'cartaz', 'traducao'"
   }
 ]

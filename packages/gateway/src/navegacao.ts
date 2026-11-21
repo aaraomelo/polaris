@@ -85,6 +85,7 @@ export const ROTEADOR_JS = `(function (w, d) {
   });
   w.addEventListener('popstate', function () {
     if (w.location.pathname + w.location.search === ult) return; // só mudou a âncora
+    if (w.history.state && w.history.state.plc) return; // entrada só de consulta (estado daConsulta): quem acompanha é o runtime da página, sem recarregar
     vai(w.location.href, false, function () { w.location.reload(); });
   });
   // SUGESTÕES AO VIVO da busca (form/sugestoes-ao-vivo): a cada pausa na digitação busca no servidor ("url?busca=termo&limite=n") e mostra uma lista com título, descrição e miniatura; só textContent (nunca HTML montado), miniatura só de caminho do próprio site

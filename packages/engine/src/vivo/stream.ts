@@ -42,6 +42,8 @@ export type OpcoesStreamVivo = OpcoesCarga & {
   nonce?: string
   /** folhas de estilo (href), p.ex. o CSS do tema; vão no <head> antes do conteúdo (sem flash sem estilo) */
   estilos?: string[]
+  /** a mesma página em cada idioma (idioma → caminho): vira `<link rel="alternate" hreflang>` no <head> (SEO) */
+  alternativas?: Record<string, string>
   /** modo do tema (`data-modo` no <html>); sem ele, segue prefers-color-scheme */
   modo?: string
   /** executor isolado dos blocos de código (SSR); o `agora` é decidido UMA vez aqui e vai no estado para o cliente reproduzir a saída */
@@ -61,7 +63,7 @@ export async function* streamVivo(programa: Programa, opcoes: OpcoesStreamVivo):
   const codigo = opcoes.codigo ? { ...opcoes.codigo, agora: opcoes.codigo.agora ?? new Date().toISOString() } : undefined
   const base = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma, ...(codigo ? { codigo } : {}) }
   const entrada = (s: Store) => ({ ...base, estado: s.estado, dados: s.dados, status: s.status, erros: s.erros })
-  let store: Store = iniciaStore(programa, { ...(opcoes.estado ? { estado: opcoes.estado } : {}), dados: bloq.dados, status: bloq.status, erros: bloq.erros })
+  let store: Store = iniciaStore(programa, { consulta: opcoes.consulta, ...(opcoes.estado ? { estado: opcoes.estado } : {}), dados: bloq.dados, status: bloq.status, erros: bloq.erros })
 
   const pendentes = new Map(Object.entries(cargas.stream))
   const aplica = (nome: string, r: { ok: true; valor: unknown } | { ok: false; erro: string }) => { store = reduz(store, r.ok ? { t: 'dado', nome, valor: r.valor } : { t: 'erro', nome, erro: r.erro }) }
@@ -70,7 +72,7 @@ export async function* streamVivo(programa: Programa, opcoes: OpcoesStreamVivo):
   const shell = pagina.render(entrada(store))
   const nonce = opcoes.nonce ? ` nonce="${esc(opcoes.nonce)}"` : ''
   const seed = { params: opcoes.params, consulta: opcoes.consulta, tenant: opcoes.tenant, idioma: opcoes.idioma, estado: store.estado, dados: store.dados, status: store.status, erros: store.erros, ...(codigo?.agora ? { agora: codigo.agora } : {}) }
-  const links = (opcoes.estilos ?? []).map((h) => `<link rel="stylesheet" href="${esc(h)}">`).join('')
+  const links = (opcoes.estilos ?? []).map((h) => `<link rel="stylesheet" href="${esc(h)}">`).join('') + Object.entries(opcoes.alternativas ?? {}).map(([l, u]) => `<link rel="alternate" hreflang="${esc(l)}" href="${esc(u)}">`).join('')
   yield `<!doctype html><html lang="${esc(opcoes.lang ?? opcoes.idioma ?? 'pt-BR')}"${opcoes.modo ? ` data-modo="${esc(opcoes.modo)}"` : ''}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(shell.titulo)}</title>${links}` +
     `<script${nonce}>${BOOT}</script><script${nonce} async src="${esc(opcoes.clienteSrc)}"></script></head>` +
     `<body><div id="polaris">${shell.corpo}</div>` +

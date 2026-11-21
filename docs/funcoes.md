@@ -955,6 +955,38 @@ Troca por `d` apenas `null`, ausente e `""` (diferente de `??`, que mantém o `"
 **Leis** (testadas com entradas aleatórias):
 - `padrao(padrao(a, b), c) == padrao(a, padrao(b, c))`
 
+### `traduz`
+
+`traduz(idioma, mensagens, params?) → texto`
+
+Escolhe a mensagem no idioma (exato, depois o idioma-base `pt-BR` → `pt`, depois qualquer região, depois `"*"`) e a formata no padrão ICU MessageFormat: `{nome}`, `{n, number}`, `{n, plural, one {…} other {# …}}`, `{x, select, a {…} other {…}}` (`#` é o número; regras de plural do CLDR). No código de páginas escreve-se `t("chave", params)`: o compilador troca por `traduz(idioma, {…})` com as mensagens do catálogo (`kind: traducao`) que a página usa. Total: mensagem malformada volta como está.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `traduz("en", objeto([["pt-BR", "Olá"], ["en", "Hi"]]))` |  | `"Hi"` |
+| `traduz("pt-BR", objeto([["pt", "Olá, {nome}!"], ["en", "Hi, {nome}!"]]), objeto([["nome", "Ana"]]))` |  | `"Olá, Ana!"` |
+| `traduz("pt-PT", objeto([["pt-BR", "Oi"], ["en", "Hi"]]))` |  | `"Oi"` |
+| `traduz("fr", objeto([["*", "Oi"], ["en", "Hi"]]))` |  | `"Oi"` |
+| `traduz("en", objeto([["en", "{n, plural, =0 {No items} one {# item} other {# items}}"]]), objeto([["n", 1]]))` |  | `"1 item"` |
+| `traduz("en", objeto([["en", "{n, plural, =0 {No items} one {# item} other {# items}}"]]), objeto([["n", 1234]]))` |  | `"1,234 items"` |
+| `traduz("pt-BR", objeto([["pt-BR", "{n, plural, one {# peça} other {# peças}}"]]), objeto([["n", 0]]))` |  | `"0 peça"` |
+| `traduz("en", objeto([["en", "{g, select, f {She} m {He} other {They}} left"]]), objeto([["g", "f"]]))` |  | `"She left"` |
+| `traduz("en", objeto([["en", "It''s {x}"]]), objeto([["x", 2]]))` |  | `"It's 2"` |
+| `traduz("en", objeto([["en", "{broken"]]))` |  | `"{broken"` |
+| `traduz("en", 5)` |  | `""` |
+
+### `loc`
+
+`loc(idioma, valor) → valor`
+
+O valor localizado: se for um objeto `{ "pt-BR": …, "en": … }`, escolhe pelo idioma (mesma ordem de `traduz`); qualquer outro valor passa como está. Serve para dados que trazem o texto em vários idiomas (o nome de um produto).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `loc("en", objeto([["pt-BR", "Vaso"], ["en", "Vase"]]))` |  | `"Vase"` |
+| `loc("pt-BR", "Vaso")` |  | `"Vaso"` |
+| `loc("fr", objeto([["pt-BR", "Vaso"]]))` |  | _(ausente)_ |
+
 ### `brl`
 
 `brl(x) → texto`
@@ -1299,6 +1331,18 @@ Como `qdec`, formatado em pt-BR (milhar com ponto, decimal com vírgula), exato 
 | `qformata("1234567.891")` |  | `"1.234.567,89"` |
 | `qformata("-1234.5")` |  | `"-1.234,50"` |
 | `qformata("0.5", 0, "par")` |  | `"0"` |
+
+### `qmoeda`
+
+`qmoeda(x, idioma) → texto`
+
+Reais com 2 casas e arredondamento comercial exato, no formato do idioma: `pt`/`es` → `R$ 1.234,50`, `en` → `R$1,234.50`. Só para EXIBIR (como `qbrl`).
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `qmoeda("1234.5", "pt-BR")` |  | `"R$ 1.234,50"` |
+| `qmoeda("1234.5", "en")` |  | `"R$1,234.50"` |
+| `qmoeda("x", "en")` |  | _(ausente)_ |
 
 ### `qbrl`
 

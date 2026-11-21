@@ -34,7 +34,7 @@ describe('API de autoria do Studio', () => {
   })
   it('catálogo de blocos: schema de props e slots para montar o formulário', async () => {
     const r = (await app.inject({ url: '/studio/blocos', headers: h(A, 'ana') })).json().blocos as any[]
-    expect(r.find((b) => b.id === 'texto/titulo')).toMatchObject({ props: { type: 'object', required: ['texto'] }, composto: false }); expect(r.find((b) => b.id === 'layout/pilha').slots).toHaveProperty('filhos'); expect(r.length).toBeGreaterThan(20)
+    expect(r.find((b) => b.id === 'texto/titulo')).toMatchObject({ props: { type: 'object', required: ['texto'] }, composto: false }); expect(r.find((b) => b.id === 'texto/titulo').slots).toHaveProperty('filhos') // o título também se monta com filhos (texto vazio + trecho e ênfase) expect(r.find((b) => b.id === 'layout/pilha').slots).toHaveProperty('filhos'); expect(r.length).toBeGreaterThan(20)
   })
   it('PUT cria a versão (201), mesmo conteúdo não duplica (200), GET devolve a do tenant; antes dela, a base', async () => {
     expect((await app.inject({ url: '/studio/nos/tema/padrao', headers: h(A, 'ana') })).json()).toMatchObject({ origem: 'base', seq: null })

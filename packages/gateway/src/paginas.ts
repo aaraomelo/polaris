@@ -135,7 +135,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
   }
   const texto = (reply: FastifyReply, status: number, msg = NEGADO_TXT(status)) => reply.status(status).header('content-security-policy', "default-src 'none'; frame-ancestors 'none'").type('text/plain; charset=utf-8').send(msg)
 
-  async function renderiza(reply: FastifyReply, req: FastifyRequest, ctx: CtxGw, tenantNo: string, paginaId: string, status: number, params: Record<string, unknown>, idioma: string | undefined, reg: Registry, previa: number | null = null) {
+  async function renderiza(reply: FastifyReply, req: FastifyRequest, ctx: CtxGw, tenantNo: string, paginaId: string, status: number, params: Record<string, unknown>, idioma: string | undefined, reg: Registry, previa: number | null = null, alternativas: Record<string, string> = {}) {
     let programa: Programa
     try { programa = d.programaDe(ctx, paginaId).programa } catch { return texto(reply, 500, 'a página tem erros e não pode ser exibida') }
     const clienteSrc = await clienteDe(programa), ilha = await ilhaDe(programa)
@@ -145,7 +145,13 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
     const nonce = randomBytes(16).toString('base64')
     const falhas: unknown[] = []
     const navegando = req.headers[CABECALHO_NAV] === '1' // clique num link do site: a página inteira de uma vez (sem pedaços em streaming), para o cliente trocar o conteúdo
-    const g = streamVivo(programa, { ...(d.opcoesCarga(ctx, programa, req, { params, consulta }, falhas) as object), clienteSrc, nonce, ...(navegando ? { esperaTudo: true } : {}), estilos: temaDe(reg, ctx, tenantNo), ...(idioma ? { lang: idioma } : {}) } as never)
+    const carga = d.opcoesCarga(ctx, programa, req, { params, consulta }, falhas) as { tenant?: Record<string, unknown> }
+    // o seletor de idioma: a mesma página em cada idioma do tenant (`tenant.idiomas` nas expressões; vazio com um idioma só)
+    const idiomas = Object.entries(alternativas).map(([l, href]) => ({ idioma: l, href, atual: l === idioma }))
+    // o prefixo de URL do idioma da requisição ("" no idioma padrão, "/en" nos demais): os links internos da página o usam (`{tenant.prefixo + "/produtos"}`) e continuam no mesmo idioma
+    const padrao = (reg.resolve('tenant', tenantNo, { tenantId: ctx.tenantId })?.no.spec as { idiomaPadrao?: string } | undefined)?.idiomaPadrao
+    const prefixo = idioma && padrao && idioma !== padrao ? `/${idioma}` : ''
+    const g = streamVivo(programa, { ...carga, ...(idioma ? { idioma } : {}), tenant: { ...carga.tenant, prefixo, ...(idiomas.length > 1 ? { idiomas } : {}) }, ...(idiomas.length > 1 ? { alternativas } : {}), clienteSrc, nonce, ...(navegando ? { esperaTudo: true } : {}), estilos: temaDe(reg, ctx, tenantNo), ...(idioma ? { lang: idioma } : {}) } as never)
     const it = g[Symbol.asyncIterator]()
     let primeiro: IteratorResult<string>
     try { primeiro = await it.next() } catch (e) { d.log.warn('página fora do runtime', { pagina: paginaId, erro: (e as Error).message }); return texto(reply, 501, 'a página usa recursos que o navegador ainda não suporta') }
@@ -219,7 +225,7 @@ export function instalaPaginas(app: FastifyInstance, o: OpcoesPaginas, d: DepsPa
       case 'invalida': return texto(reply, 400, 'requisição inválida')
       case 'negado': return r.pagina ? renderiza(reply, req, ctx, tenantNo, r.pagina, r.status, {}, undefined, reg, previa) : texto(reply, r.status)
       case 'nao-encontrada': return r.pagina ? renderiza(reply, req, ctx, tenantNo, r.pagina, 404, {}, undefined, reg, previa) : texto(reply, 404)
-      case 'pagina': return renderiza(reply, req, ctx, tenantNo, r.pagina, 200, r.params, r.idioma || undefined, reg, previa)
+      case 'pagina': return renderiza(reply, req, ctx, tenantNo, r.pagina, 200, r.params, r.idioma || undefined, reg, previa, r.alternativas)
     }
   }
   app.get('/favicon.ico', async (_req, reply) => reply.status(204).header('cache-control', 'public, max-age=86400').send()) // sem ícone próprio ainda: 204, não um 404 em todo carregamento

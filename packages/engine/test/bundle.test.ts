@@ -19,16 +19,16 @@ async function empacota(entrada: string) {
 const PROIBIDOS = [/node_modules\/\.pnpm\/ajv@/, /fast-uri/, /ajv-formats/, /packages\/schema\/schemas\//, /quickjs/, /node:/]
 
 describe('orçamento do bundle do cliente', () => {
-  it('o avaliador de expressões com a biblioteca INTEIRA (parser + avalia + todas as funções) não arrasta nada do servidor e cabe em 10,5 KB gz', async () => {
+  it('o avaliador de expressões com a biblioteca INTEIRA (parser + avalia + todas as funções) não arrasta nada do servidor e cabe em 11,5 KB gz', async () => {
     const b = await empacota(`import { parseExpr, avalia, FUNCOES_PADRAO } from './src/expr/index'; console.log(avalia(parseExpr(document.title), {}, FUNCOES_PADRAO))`)
     for (const re of PROIBIDOS) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
-    expect(b.gz).toBeLessThan(10.5 * 1024) // (10 KB → 10,5 KB com `elementosDoBloco` e `semIds`, as funções da árvore do Studio) a biblioteca completa cresceu (listas, aritmética exata, caminhos); a página real carrega só o que usa (aot.test.ts)
+    expect(b.gz).toBeLessThan(11.5 * 1024) // (10,5 → 11,5 KB: `traduz`, `loc`, `qmoeda` e o formatador ICU do i18n) (10 KB → 10,5 KB com `elementosDoBloco` e `semIds`, as funções da árvore do Studio) a biblioteca completa cresceu (listas, aritmética exata, caminhos); a página real carrega só o que usa (aot.test.ts)
   })
 
-  it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 162 KB gz', async () => {
+  it('o cliente de hidratação (React + engine + blocos base) não tem Ajv/schemas/QuickJS e fica abaixo de 164 KB gz', async () => {
     const b = await empacota(`import { hidrata } from './src/render/cliente'; import { COMPONENTES_BASE } from './src/render/base'; hidrata(COMPONENTES_BASE)`)
     for (const re of PROIBIDOS) expect(b.entradas.filter((e) => re.test(e)), String(re)).toEqual([])
-    expect(b.gz).toBeLessThan(162 * 1024) // 160 → 161 → 162 KB: os blocos novos do Studio (midia/tela, as props alvo e arrasta, o papel status) e as primitivas de layout do tema Maison (layout/contido, texto/sobretitulo, imagem fluida, alinha da grade) entram no cliente de hidratação
+    expect(b.gz).toBeLessThan(164 * 1024) // 160 → 161 → 162 → 164 KB (as funções do i18n entram na biblioteca completa): os blocos novos do Studio (midia/tela, as props alvo e arrasta, o papel status) e as primitivas de layout do tema Maison (layout/contido, texto/sobretitulo, imagem fluida, alinha da grade) entram no cliente de hidratação
     const proprio = b.entradas.filter((e) => /packages\/engine\/src/.test(e) || /^src\//.test(e))
     expect(proprio.length).toBeGreaterThan(5) // a medição enxerga o nosso código (não é um bundle vazio)
   })

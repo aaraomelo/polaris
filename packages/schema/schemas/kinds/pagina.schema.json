@@ -85,6 +85,11 @@
           "persiste": {
             "type": "boolean",
             "description": "guarda o valor no navegador de quem visita (localStorage da origem da loja, chave por nome) e o devolve ao abrir qualquer página que declare o mesmo nome; o servidor sempre renderiza `inicial`"
+          },
+          "daConsulta": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,39}$",
+            "description": "liga o estado ao parâmetro da URL (?nome=valor): começa com o valor da URL (ou `inicial` se ausente), acompanha o botão voltar e escreve de volta na URL quando muda, SEM recarregar a página. Só `tipo: texto`. Com links `soConsulta`, trocar de categoria ou de filtro atualiza só o que depende do estado"
           }
         },
         "additionalProperties": false
@@ -123,6 +128,15 @@
     "layoutProps": {
       "type": "object",
       "description": "props (templates) passadas ao bloco de layout, avaliadas no escopo da página"
+    },
+    "traducoes": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 8,
+      "items": {
+        "$ref": "polaris://comum/v1#/$defs/identificador"
+      },
+      "description": "catálogos de mensagens (kind traducao) que a página usa em `t(\"chave\")`; o primeiro que tem a chave vale"
     }
   },
   "type": "object",

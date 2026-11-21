@@ -28,8 +28,8 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'layout/espacador': { titulo: 'Espaçador', descricao: 'Espaço vertical em pixels (padrão 8). Não é lido por leitores de tela.', exemplos: [
     { titulo: '32 px', instancia: { bloco: 'layout/pilha', slots: { filhos: [par('Antes'), { bloco: 'layout/espacador', props: { tamanho: 32 } }, par('Depois')] } } },
   ] },
-  'texto/titulo': { titulo: 'Título', descricao: 'Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o tamanho maior de seção do tema. Sem `texto`, o título é montado com os filhos (`texto/trecho` e `texto/enfase`: a segunda linha em itálico, por exemplo).', exemplos: [
-    { titulo: 'Com ênfase em itálico', instancia: { bloco: 'texto/titulo', props: { nivel: 1 }, slots: { filhos: [{ bloco: 'texto/trecho', props: { texto: 'Objetos de' } }, { bloco: 'texto/enfase', props: { texto: 'beleza serena', bloco: true } }] } } },
+  'texto/titulo': { titulo: 'Título', descricao: 'Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o tamanho maior de seção do tema. Com `texto` vazio (`""`), o título é montado com os filhos (`texto/trecho` e `texto/enfase`: a segunda linha em itálico, por exemplo).', exemplos: [
+    { titulo: 'Com ênfase em itálico', instancia: { bloco: 'texto/titulo', props: { texto: '', nivel: 1 }, slots: { filhos: [{ bloco: 'texto/trecho', props: { texto: 'Objetos de' } }, { bloco: 'texto/enfase', props: { texto: 'beleza serena', bloco: true } }] } } },
     { titulo: 'Nível 2', instancia: { bloco: 'texto/titulo', props: { texto: 'Mais vendidos', nivel: 2 } } },
   ] },
   'texto/paragrafo': { titulo: 'Parágrafo', descricao: 'Texto corrido. O conteúdo é sempre escapado (nunca HTML).', exemplos: [
@@ -79,6 +79,10 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'entrada/numero': { titulo: 'Campo numérico', descricao: 'Campo `number` com `min`, `max` e `passo`. `aoMudar` recebe um número, ou `null` se o campo estiver vazio.', exemplos: [
     { titulo: 'Quantidade', instancia: { bloco: 'entrada/numero', props: { valor: 2, rotulo: 'Quantidade', min: 1, max: 10, passo: 1 } } },
   ] },
+  'entrada/selecao': { titulo: 'Seletor', descricao: 'Lista suspensa (`select` nativo, acessível e sem JavaScript próprio): as opções são os filhos (`entrada/opcao`); `valor` é o escolhido e `aoMudar` recebe o valor novo. Marque `selecionada` na opção que combina com `valor` (é o que o servidor escreve). Dê um `rotulo` ou ligue um `texto/rotulo` por `para`.', exemplos: [
+    { titulo: 'Ordenar', instancia: { bloco: 'entrada/selecao', props: { rotulo: 'Ordenar por', valor: 'preco' }, slots: { filhos: [{ bloco: 'entrada/opcao', props: { valor: 'destaque', texto: 'Destaques' } }, { bloco: 'entrada/opcao', props: { valor: 'preco', texto: 'Menor preço', selecionada: true } }] } } },
+  ] },
+  'entrada/opcao': { titulo: 'Opção do seletor', descricao: 'Uma opção de `entrada/selecao`: `valor` (o que o seletor devolve) e `texto` (o que se lê).', exemplos: [{ titulo: 'Opção', instancia: { bloco: 'entrada/opcao', props: { valor: 'a', texto: 'Opção A' } } }] },
   'entrada/caixa': { titulo: 'Caixa de seleção', descricao: 'Checkbox controlado: `marcado` vem do estado e `aoMudar` recebe um booleano.', exemplos: [
     { titulo: 'Marcada', instancia: { bloco: 'entrada/caixa', props: { marcado: true, rotulo: 'Aceito os termos' } } },
     { titulo: 'Desabilitada', instancia: { bloco: 'entrada/caixa', props: { marcado: false, rotulo: 'Opção indisponível', desabilitado: true } } },

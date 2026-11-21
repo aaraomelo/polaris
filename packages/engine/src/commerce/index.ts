@@ -110,16 +110,16 @@ const instancia = (bloco: string, props: Record<string, unknown>, slots?: Record
 export const BLOCOS_COMMERCE = [
   no('bloco', 'commerce.preco', {
     interface: 'commerce/preco', titulo: 'Preço', descricao: 'Preço em reais, com o preço anterior riscado de forma semântica ("de …") quando informado. Aceita texto decimal exato ou número.',
-    props: { type: 'object', properties: { valor: dinheiro, de: dinheiro }, required: ['valor'] },
+    props: { type: 'object', properties: { valor: dinheiro, de: dinheiro, idioma: { type: 'string', description: 'idioma do formato do preço (pt-BR: R$ 1.234,50; en: R$1,234.50); sem ele, pt-BR' }, rotuloDe: { type: 'string', maxLength: 40, description: 'palavra antes do preço anterior (padrão "de")' } }, required: ['valor'] },
     exemplos: [{ titulo: 'Simples', instancia: instancia('commerce/preco', { valor: '49.90' }) }, { titulo: 'Com preço anterior', instancia: instancia('commerce/preco', { valor: '49.90', de: '59.90' }) }],
     modelo: { bloco: 'layout/linha', props: { gap: 8, alinha: 'centro' }, slots: { filhos: [
-      { bloco: 'texto/destaque', props: { texto: '{qbrl(props.valor)}' } },
-      { bloco: 'texto/pequeno', se: 'props.de', props: { texto: 'de {qbrl(props.de)}' } },
+      { bloco: 'texto/destaque', props: { texto: '{qmoeda(props.valor, props.idioma)}' } },
+      { bloco: 'texto/pequeno', se: 'props.de', props: { texto: '{(props.rotuloDe ?? "de") + " " + qmoeda(props.de, props.idioma)}' } },
     ] } },
   }),
   no('bloco', 'commerce.cartao-produto', {
     interface: 'commerce/cartao-produto', titulo: 'Cartão de produto', descricao: 'Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `acoes` recebe botões da página (ex.: "Adicionar").',
-    props: { type: 'object', properties: { produto: produtoProp, href: { type: 'string' }, mostraDescricao: { type: 'boolean', description: 'mostra a descrição do produto sob o nome' }, rotuloFoto: { type: 'string', maxLength: 40, description: 'rótulo que sobe sobre a foto no hover (ex.: Ver detalhes)' }, rotuloLink: { type: 'string', maxLength: 40, description: 'texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe' }, fluida: { type: 'boolean', description: 'a foto ocupa toda a largura do cartão (em vez dos 240 px fixos)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura da foto (0,8 = retrato 4:5), com corte' } }, required: ['produto'] }, slots: { acoes: {} },
+    props: { type: 'object', properties: { produto: produtoProp, href: { type: 'string' }, mostraDescricao: { type: 'boolean', description: 'mostra a descrição do produto sob o nome' }, rotuloFoto: { type: 'string', maxLength: 40, description: 'rótulo que sobe sobre a foto no hover (ex.: Ver detalhes)' }, idioma: { type: 'string', description: 'idioma do formato do preço' }, rotuloIndisponivel: { type: 'string', maxLength: 40, description: 'texto do selo de produto indisponível (padrão "Indisponível")' }, rotuloLink: { type: 'string', maxLength: 40, description: 'texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe' }, fluida: { type: 'boolean', description: 'a foto ocupa toda a largura do cartão (em vez dos 240 px fixos)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura da foto (0,8 = retrato 4:5), com corte' } }, required: ['produto'] }, slots: { acoes: {} },
     exemplos: [
       { titulo: 'Com ação', instancia: instancia('commerce/cartao-produto', { produto: PRODUTO_EX, href: '/produto/p1' }, { acoes: [{ bloco: 'nav/botao', props: { texto: 'Adicionar' } }] }) },
       { titulo: 'Esgotado', instancia: instancia('commerce/cartao-produto', { produto: ESGOTADO_EX }) },
@@ -131,8 +131,8 @@ export const BLOCOS_COMMERCE = [
       { bloco: 'texto/sobretitulo', se: 'props.produto.categoria', props: { texto: '{props.produto.categoria}' } },
       { bloco: 'texto/titulo', props: { texto: '{props.produto.nome}', nivel: 3 } },
       { bloco: 'texto/pequeno', se: 'props.mostraDescricao && props.produto.descricao', props: { texto: '{props.produto.descricao}' } },
-      { bloco: 'commerce/preco', props: { valor: '{props.produto.preco}', de: '{props.produto.precoDe}' } },
-      { bloco: 'feedback/selo', se: 'props.produto.disponivel == false', props: { texto: 'Indisponível', tom: 'erro' } },
+      { bloco: 'commerce/preco', props: { valor: '{props.produto.preco}', de: '{props.produto.precoDe}', idioma: '{props.idioma}' } },
+      { bloco: 'feedback/selo', se: 'props.produto.disponivel == false', props: { texto: '{props.rotuloIndisponivel ?? "Indisponível"}', tom: 'erro' } },
       { bloco: 'nav/link', se: 'props.href && props.rotuloLink != ""', props: { href: '{props.href}', texto: '{props.rotuloLink ?? "Ver detalhes"}' } },
       slotAcoes,
     ] } },
@@ -169,13 +169,13 @@ export const BLOCOS_COMMERCE = [
   }),
   no('bloco', 'commerce.resumo-pedido', {
     interface: 'commerce/resumo-pedido', titulo: 'Resumo do pedido', descricao: 'Subtotal, desconto, frete e total (mesma forma de `carrinho` e `pedido` dos contratos). Desconto e frete só aparecem se forem diferentes de zero.',
-    props: { type: 'object', properties: { subtotal: dinheiro, desconto: dinheiro, frete: dinheiro, total: dinheiro }, required: ['subtotal', 'total'] },
+    props: { type: 'object', properties: { subtotal: dinheiro, desconto: dinheiro, frete: dinheiro, total: dinheiro, idioma: { type: 'string', description: 'idioma do formato do preço (pt-BR: R$ 1.234,50; en: R$1,234.50); sem ele, pt-BR' }, rotulos: { type: 'object', description: 'os textos das linhas (subtotal, desconto, frete, total); o template passa os rótulos traduzidos. Padrão em português', properties: { subtotal: { type: 'string' }, desconto: { type: 'string' }, frete: { type: 'string' }, total: { type: 'string' } } } }, required: ['subtotal', 'total'] },
     exemplos: [{ titulo: 'Com frete e desconto', instancia: instancia('commerce/resumo-pedido', { subtotal: '68.30', desconto: '5.00', frete: '12.00', total: '75.30' }) }],
     modelo: { bloco: 'tabela/tabela', slots: { filhos: [{ bloco: 'tabela/corpo', slots: { filhos: [
-      linha([td('Subtotal'), td('{qbrl(props.subtotal)}')]),
-      linha([td('Desconto'), td('-{qbrl(props.desconto)}')], { se: 'props.desconto && qcmp(props.desconto, "0") > 0' }),
-      linha([td('Frete'), td('{qbrl(props.frete)}')], { se: 'props.frete && qcmp(props.frete, "0") > 0' }),
-      linha([td('Total', { cabecalho: true }), td('{qbrl(props.total)}', { cabecalho: true })]),
+      linha([td('{props.rotulos.subtotal ?? "Subtotal"}'), td('{qmoeda(props.subtotal, props.idioma)}')]),
+      linha([td('{props.rotulos.desconto ?? "Desconto"}'), td('-{qmoeda(props.desconto, props.idioma)}')], { se: 'props.desconto && qcmp(props.desconto, "0") > 0' }),
+      linha([td('{props.rotulos.frete ?? "Frete"}'), td('{qmoeda(props.frete, props.idioma)}')], { se: 'props.frete && qcmp(props.frete, "0") > 0' }),
+      linha([td('{props.rotulos.total ?? "Total"}', { cabecalho: true }), td('{qmoeda(props.total, props.idioma)}', { cabecalho: true })]),
     ] } }] } },
   }),
   no('bloco', 'commerce.carrinho', {

@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-68 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+71 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -84,10 +84,12 @@ Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `ac
 |---|---|---|---|---|
 | `fluida` | booleano | não |  | a foto ocupa toda a largura do cartão (em vez dos 240 px fixos) |
 | `href` | texto | não |  |  |
+| `idioma` | texto | não |  | idioma do formato do preço |
 | `mostraDescricao` | booleano | não |  | mostra a descrição do produto sob o nome |
 | `produto` | objeto | sim |  |  |
 | `proporcao` | número ≥ 0.2 ≤ 5 | não |  | largura ÷ altura da foto (0,8 = retrato 4:5), com corte |
 | `rotuloFoto` | texto ≤ 40 caracteres | não |  | rótulo que sobe sobre a foto no hover (ex.: Ver detalhes) |
+| `rotuloIndisponivel` | texto ≤ 40 caracteres | não |  | texto do selo de produto indisponível (padrão "Indisponível") |
 | `rotuloLink` | texto ≤ 40 caracteres | não |  | texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe |
 
 **Slots**
@@ -206,6 +208,8 @@ Preço em reais, com o preço anterior riscado de forma semântica ("de …") qu
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `de` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `idioma` | texto | não |  | idioma do formato do preço (pt-BR: R$ 1.234,50; en: R$1,234.50); sem ele, pt-BR |
+| `rotuloDe` | texto ≤ 40 caracteres | não |  | palavra antes do preço anterior (padrão "de") |
 | `valor` | texto \| número | sim |  | valor em reais: texto decimal exato ("49.90") ou número |
 
 **Exemplo: Simples**
@@ -241,6 +245,8 @@ Subtotal, desconto, frete e total (mesma forma de `carrinho` e `pedido` dos cont
 |---|---|---|---|---|
 | `desconto` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
 | `frete` | texto \| número | não |  | valor em reais: texto decimal exato ("49.90") ou número |
+| `idioma` | texto | não |  | idioma do formato do preço (pt-BR: R$ 1.234,50; en: R$1,234.50); sem ele, pt-BR |
+| `rotulos` | objeto | não |  | os textos das linhas (subtotal, desconto, frete, total); o template passa os rótulos traduzidos. Padrão em português |
 | `subtotal` | texto \| número | sim |  | valor em reais: texto decimal exato ("49.90") ou número |
 | `total` | texto \| número | sim |  | valor em reais: texto decimal exato ("49.90") ou número |
 
@@ -535,6 +541,85 @@ Campo `number` com `min`, `max` e `passo`. `aoMudar` recebe um número, ou `null
     "min": 1,
     "max": 10,
     "passo": 1
+  }
+}
+```
+
+### Opção do seletor (`entrada/opcao`)
+
+Uma opção de `entrada/selecao`: `valor` (o que o seletor devolve) e `texto` (o que se lê).
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `selecionada` | booleano | não |  | a opção escolhida (marque a que combina com `valor` do seletor) |
+| `texto` | texto | sim |  |  |
+| `valor` | texto | sim |  |  |
+
+**Exemplo: Opção**
+
+```json
+{
+  "bloco": "entrada/opcao",
+  "props": {
+    "valor": "a",
+    "texto": "Opção A"
+  }
+}
+```
+
+### Seletor (`entrada/selecao`)
+
+Lista suspensa (`select` nativo, acessível e sem JavaScript próprio): as opções são os filhos (`entrada/opcao`); `valor` é o escolhido e `aoMudar` recebe o valor novo. Marque `selecionada` na opção que combina com `valor` (é o que o servidor escreve). Dê um `rotulo` ou ligue um `texto/rotulo` por `para`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `desabilitado` | booleano | não |  |  |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
+| `valor` | texto | não |  |  |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoMudar` | texto |
+
+**Exemplo: Ordenar**
+
+```json
+{
+  "bloco": "entrada/selecao",
+  "props": {
+    "rotulo": "Ordenar por",
+    "valor": "preco"
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "entrada/opcao",
+        "props": {
+          "valor": "destaque",
+          "texto": "Destaques"
+        }
+      },
+      {
+        "bloco": "entrada/opcao",
+        "props": {
+          "valor": "preco",
+          "texto": "Menor preço",
+          "selecionada": true
+        }
+      }
+    ]
   }
 }
 ```
@@ -2257,6 +2342,7 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 | `botao` | texto ≤ 12 caracteres | não |  | primario ou secundario: o link com aparência de botão |
 | `href` | texto | sim |  |  |
 | `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
+| `soConsulta` | booleano | não |  | o link só muda a consulta da URL (?nome=valor) da MESMA página: o estado ligado a ela (`daConsulta`) muda e a URL acompanha, sem recarregar nem voltar ao topo |
 | `texto` | texto | não |  |  |
 
 **Slots**
@@ -2319,6 +2405,7 @@ Grupo de links de navegação (`<nav>`), com nome acessível em `rotulo` (padrã
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `marca` | texto | não |  | gancho de estilo: vira data-marca, que o CSS do tema usa |
 | `rotulo` | texto ≤ 80 caracteres | não |  |  |
 
 **Slots**
@@ -2439,6 +2526,43 @@ O `<summary>` de um `nav/submenu`: o texto clicável que abre e fecha o grupo (`
 ```
 
 ## site
+
+### Abas de navegação (`site/abas`)
+
+Fileira de abas (links) para trocar de categoria ou de visão: `itens` com `texto`, `href` e `atual` (a aba escolhida, `aria-current`). É um `nav` com nome acessível (`rotulo`); rola na horizontal quando não cabe. O visual (caixa alta, aba ativa preenchida) vem dos tokens `abas.*` do tema.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `itens` | lista | sim |  | as abas, na ordem |
+| `rotulo` | texto ≤ 80 caracteres | não |  | nome acessível do menu (padrão "Principal") |
+
+**Exemplo: Categorias**
+
+```json
+{
+  "bloco": "site/abas",
+  "props": {
+    "rotulo": "Categorias",
+    "itens": [
+      {
+        "texto": "Todas",
+        "href": "/produtos",
+        "atual": true
+      },
+      {
+        "texto": "Iluminação",
+        "href": "/produtos?c=luz"
+      },
+      {
+        "texto": "Cerâmica",
+        "href": "/produtos?c=ceramica"
+      }
+    ]
+  }
+}
+```
 
 ### Barra de busca (`site/busca`)
 
@@ -3325,7 +3449,7 @@ A linha pequena em caixa alta e letras espaçadas que vem antes de um título ("
 
 ### Título (`texto/titulo`)
 
-Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o tamanho maior de seção do tema. Sem `texto`, o título é montado com os filhos (`texto/trecho` e `texto/enfase`: a segunda linha em itálico, por exemplo).
+Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o tamanho maior de seção do tema. Com `texto` vazio (`""`), o título é montado com os filhos (`texto/trecho` e `texto/enfase`: a segunda linha em itálico, por exemplo).
 
 **Props**
 
@@ -3333,7 +3457,7 @@ Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o taman
 |---|---|---|---|---|
 | `nivel` | inteiro ≥ 1 ≤ 6 | não | 1 |  |
 | `tamanho` | "grande" | não |  | título de seção maior (token tipografia.tamanhoGrande) |
-| `texto` | texto | não |  |  |
+| `texto` | texto | sim |  | o texto do título; vazio ("") faz o título ser montado com os filhos (`texto/trecho`, `texto/enfase`) |
 
 **Slots**
 
@@ -3347,6 +3471,7 @@ Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o taman
 {
   "bloco": "texto/titulo",
   "props": {
+    "texto": "",
     "nivel": 1
   },
   "slots": {

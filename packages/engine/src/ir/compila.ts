@@ -2,6 +2,7 @@ import { confere, sugere, type Contexto, type Erro, type No, type Registry } fro
 import { confereValor } from '../dados/args'
 import { ExprErro, parseExpr, validaExpr, type Expr, FUNCOES_PADRAO, analisa, deAst, formata } from '../expr/index'
 import { parseTemplate, TemplateErro, type Template } from '../template'
+import { reescreveT, type Catalogo } from './i18n'
 import {
   ESCOPO_ARGS, ESCOPO_BLOCO, ESCOPO_PAGINA, RESERVADOS, SLOT_CONTEUDO, SLOT_NATIVO,
   type CampoParametro, type FonteDados, type IRAcao, type IRBloco, type IRBlocoModelo, type IRDado, type IREstado, type IRNo, type IRPagina, type ImplBloco, type Valor,
@@ -28,6 +29,8 @@ type PaginaCx = { estado: IREstado; dados: Record<string, IRDado>; fontes: Recor
 
 class Cx {
   readonly erros: Erro[] = []
+  /** catálogos de tradução da página (spec.traducoes): `t("chave")` é trocada por `traduz(…)` com as mensagens deles */
+  catalogos: Catalogo[] = []
   readonly usa = new Set<string>()
   /** variáveis usadas pelas expressões PRÓPRIAS do nó em compilação (props, se, repetir.cada), para achar fronteiras de streaming */
   proprio: Set<string> | null = null
@@ -37,11 +40,13 @@ class Cx {
   }
 }
 
-function checaExpr(cx: Cx, ast: Expr, escopo: readonly string[], caminho: string, fonte: string, base: number): void {
+function checaExpr(cx: Cx, ast0: Expr, escopo: readonly string[], caminho: string, fonte: string, base: number): Expr {
+  const ast = reescreveT(ast0, cx.catalogos, (m, d) => cx.erro(caminho, 'traducao', `${m} (em '${fonte}')`, d, fonte))
   for (const v of analisa(ast).variaveis) if (escopo.includes(v)) { cx.usa.add(v); cx.proprio?.add(v) }
   for (const p of validaExpr(ast, escopo, FUNCOES_PADRAO)) {
     cx.erro(caminho, 'binding', `${p.mensagem} (em '${fonte}'${base < 0 ? '' : `, posição ${base + p.pos}`})`, p.dica, fonte)
   }
+  return ast
 }
 
 function exprPura(cx: Cx, src: ExprSrc, escopo: readonly string[], caminho: string): Expr | undefined {
@@ -49,18 +54,25 @@ function exprPura(cx: Cx, src: ExprSrc, escopo: readonly string[], caminho: stri
     // AST canônico: os erros apontam o caminho JSON dentro do próprio nó
     const r = deAst(src)
     if (!r.ok) { for (const e of r.erros) cx.erro(`${caminho}${e.caminho}`, 'expressao', e.mensagem, e.dica); return undefined }
-    checaExpr(cx, r.expr, escopo, caminho, formata(r.expr), -1)
-    return r.expr
+    return checaExpr(cx, r.expr, escopo, caminho, formata(r.expr), -1)
   }
   try {
-    const ast = parseExpr(src)
-    checaExpr(cx, ast, escopo, caminho, src, 0)
-    return ast
+    return checaExpr(cx, parseExpr(src), escopo, caminho, src, 0)
   } catch (e) {
     if (e instanceof ExprErro) cx.erro(caminho, 'expressao', `${e.message} (em '${src}', posição ${e.pos})`, e.dica, src)
     else throw e
     return undefined
   }
+}
+
+/** os catálogos de tradução da página; um que não existe é erro (a referência quebrada também é pega por `confere`) */
+function carregaCatalogos(cx: Cx, ids: readonly string[]): void {
+  ids.forEach((id, i) => {
+    const r = cx.reg.resolve('traducao', id, cx.ctx)
+    if (!r) { cx.erro(`/spec/traducoes/${i}`, 'traducao', `o catálogo de tradução '${id}' não existe`, 'crie um nó kind: traducao com esse id'); return }
+    const s = r.no.spec as { padrao: string; mensagens: Record<string, Record<string, string>> }
+    cx.catalogos.push({ id, padrao: s.padrao, mensagens: s.mensagens })
+  })
 }
 
 function compilaTexto(cx: Cx, src: string, escopo: readonly string[], caminho: string): Valor {
@@ -72,9 +84,8 @@ function compilaTexto(cx: Cx, src: string, escopo: readonly string[], caminho: s
     throw e
   }
   if (t.t === 'lit') return { t: 'lit', v: t.v }
-  if (t.t === 'expr') { checaExpr(cx, t.ast, escopo, caminho, t.fonte, t.offset); return { t: 'expr', ast: t.ast, fonte: t.fonte } }
-  for (const p of t.partes) if (typeof p !== 'string') checaExpr(cx, p.ast, escopo, caminho, p.fonte, p.offset)
-  return { t: 'tpl', partes: t.partes.map((p) => (typeof p === 'string' ? p : { ast: p.ast, fonte: p.fonte })) }
+  if (t.t === 'expr') return { t: 'expr', ast: checaExpr(cx, t.ast, escopo, caminho, t.fonte, t.offset), fonte: t.fonte }
+  return { t: 'tpl', partes: t.partes.map((p) => (typeof p === 'string' ? p : { ast: checaExpr(cx, p.ast, escopo, caminho, p.fonte, p.offset), fonte: p.fonte })) }
 }
 
 function compilaValor(cx: Cx, v: unknown, escopo: readonly string[], caminho: string): Valor {
@@ -268,7 +279,7 @@ function varsDeValor(v: Valor): string[] {
 }
 
 type DadoSrc = string | { dados: string; args?: Record<string, unknown>; stream?: boolean }
-type EstadoSrc = Record<string, { tipo: string; inicial?: unknown; lista?: boolean; persiste?: boolean }>
+type EstadoSrc = Record<string, { tipo: string; inicial?: unknown; lista?: boolean; persiste?: boolean; daConsulta?: string }>
 
 function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
   const out: IREstado = {}
@@ -279,7 +290,8 @@ function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
       const r = confereValor({ tipo: d.tipo, ...(d.lista !== undefined ? { lista: d.lista } : {}) }, inicial)
       if (!r.ok) cx.erro(`/spec/estado/${nome}/inicial`, 'estado', `o valor inicial de '${nome}' deveria ser ${r.esperado}`, undefined, inicial)
     }
-    out[nome] = { tipo: d.tipo, inicial, ...(d.lista ? { lista: true } : {}), ...(d.persiste ? { persiste: true } : {}) }
+    if (d.daConsulta && (d.tipo !== 'texto' || d.lista)) cx.erro(`/spec/estado/${nome}/daConsulta`, 'estado', `daConsulta só vale para estado de tipo texto (o valor vem da URL)`, `use tipo: texto e sem lista`)
+    out[nome] = { tipo: d.tipo, inicial, ...(d.lista ? { lista: true } : {}), ...(d.persiste ? { persiste: true } : {}), ...(d.daConsulta ? { daConsulta: d.daConsulta } : {}) }
   }
   return out
 }
@@ -357,6 +369,7 @@ export function compilaPagina(reg: Registry, no: No, ctx: Contexto = {}): Result
 
   const stream = new Set(Object.entries(dados).filter(([, d]) => d.stream).map(([n]) => n))
   const cx = new Cx(reg, ctx, 'pagina', [], { estado, dados, fontes, stream })
+  carregaCatalogos(cx, (spec as { traducoes?: string[] }).traducoes ?? [])
   cx.erros.push(...base.erros)
   for (const v of base.usa) cx.usa.add(v)
   const escopo = [...ESCOPO_PAGINA, ...Object.keys(dados)]

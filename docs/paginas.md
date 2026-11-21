@@ -52,6 +52,16 @@ Uma entrada de `spec.estado` com `"persiste": true` é guardada no `localStorage
 - Cada loja tem uma origem própria, então uma loja não lê o que outra guardou. Mas o valor fica **na máquina de quem visita** e pode ser alterado por ela: guarde só escolhas (ids e quantidades), nunca preço ou permissão, e recalcule do catálogo ao exibir (a sacola do exemplo faz isso).
 - Não há sincronização entre aparelhos nem com o servidor; para isso o caminho é o serviço `carrinho` (`docs/commerce.md`), que ainda não tem carregador no cliente das páginas.
 
+## Estado ligado à URL (`daConsulta`)
+Um estado `texto` com `"daConsulta": "colecao"` nasce do parâmetro da URL (`?colecao=lighting`, ou `inicial` se ausente), acompanha o botão voltar e **escreve de volta na URL** quando muda por ação (sem criar entrada no histórico). Com links `soConsulta: true` (`nav/link`, e `itens[].soConsulta` em `site/abas`) para a **mesma página**, trocar de categoria ou de filtro **não recarrega a página**: o runtime cancela a navegação, empurra a URL no histórico e muda só o estado; o scroll fica e **só o que depende do estado é reescrito** (o cabeçalho, o rodapé e a barra continuam os mesmos nós). Link para outra página, ou com Ctrl/Cmd, segue a navegação normal. Sem JavaScript o link funciona como link comum (a URL leva a categoria e o servidor renderiza a página certa).
+
+```json
+"estado": { "colecao": { "tipo": "texto", "inicial": "", "daConsulta": "colecao" } }
+```
+
+### Quanto custa mudar o estado
+Medido no navegador (loja de 13 produtos): trocar de categoria reescreve 2 atributos (`aria-current`), o hero e a lista (35 nós saem e 4 entram, de 280 no total), sem nova requisição além da foto do hero, em 2 a 6 ms. Em escala (jsdom, mesma loja com N produtos, 4 expressões que repetem o filtro): 100 itens 2 ms, 1.000 itens 12 ms, 5.000 itens 41 ms. O custo é **linear em N e multiplicado por quantas expressões repetem a mesma derivação**: um valor derivado usado em vários lugares é recalculado em cada um. O próximo passo natural é um valor derivado de página (calculado uma vez por mudança do que ele lê).
+
 ## Limites (conhecidos)
 - As `guarda` das páginas comparam com os **papéis** do token (não há mapa papel → permissão).
 - O serviço só resolve o tenant de uma chamada **anônima** pelo mapa de desenvolvimento `POLARIS_HOSTS`. Em produção, páginas públicas com dados de serviço ainda não têm esse caminho (o serviço atende só com token).

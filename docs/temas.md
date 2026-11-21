@@ -39,6 +39,10 @@ Cada token vira uma variável CSS lida pelo CSS base **com fallback para o visua
 | `rodape` | `fundo`, `texto`, `link`, `borda`, `marcaTamanho` | rodapé invertido ou de outra cor |
 | `botao` | `caixa`, `espacamento`, `tamanho`, `peso` | botões e links de botão (ex.: caixa alta com espaçamento) |
 | `movimento` | `rapido` (cor, fundo e borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto do cartão no hover), `fotoAlt` (fade da 2ª foto), `rotulo` (rótulo sobre a foto), `zoomFaixa`, `zoomFaixaDuracao`, `faixaVeu`, `faixaVeuDuracao`, `faixaTexto`, `faixaElevacao` (faixa com `zoom`), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da capa) | sem eles não há transição |
+| `abas` | `gap`, `altura`, `recuoX`, `recuoY`, `tamanho`, `peso`, `espacamento`, `caixa`, `cor`, `corHover`, `fundoHover`, `corAtiva`, `fundoAtiva` | `site/abas`: a fileira de categorias (a ativa preenchida) |
+| `barra` | `topo` (padrão: a altura do cabeçalho), `fundo`, `desfoque`, `borda`, `recuoX`, `recuoY`, `gap`, `rotuloTamanho`, `rotuloEspacamento`, `rotuloCaixa`, `rotuloCor` | a barra fixa (`layout/linha` com `marca: "barra-fixa"`) e o rótulo "ordenar por" |
+| `selecao` | `largura`, `altura`, `tamanho`, `espacamento`, `fundo` | `entrada/selecao` |
+| `layout` | `largura`, `larguraEstreita`, `larguraLarga`, `recuo`, `recuoEstreito` | o contêiner (`layout/contido`): largura máxima e recuo lateral |
 | `cartao` | `tituloTamanho`, `tituloAltura`, `tituloEspacamento`, `tituloHover`, `categoriaCor`, `categoriaTamanho`, `categoriaEspacamento`, `descricaoTamanho`, `precoTamanho`, `precoPeso`, `precoEspacamento`, `seloFundo`, `seloTexto`, `seloMargem` | o cartão de produto (`commerce/cartao-produto`) |
 | `tipografia` | `tamanhoExibicao`, `alturaExibicao`, `espacamentoExibicao` (o `h1` da capa), `alturaTitulo`, `espacamentoTitulo` (todos os títulos), `alturaCorpo` (parágrafos), `tamanhoSobretitulo`, `espacamentoSobretitulo`, `margemSobretitulo` | escala tipográfica fina |
 

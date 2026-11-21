@@ -50,6 +50,23 @@ describe('servidor de páginas', () => {
     e.reg.registra({ kind: 'tenant', id: 'comform', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'comform', segmento: 'varejo', modulos: ['loja'], paginas: ['p.home', 'p.contato'] } } as never); modo.id = 'comform'
     try { await verifica() } finally { modo.id = undefined }
   })
+  it('i18n: /ola em pt-BR e /en/ola em inglês pelo MESMO template (só chaves), com lang, hreflang e o seletor `tenant.idiomas`', async () => {
+    e.reg.registra({ kind: 'traducao', id: 'g', versao: '1.0.0', estatuto: 'publicado', spec: { padrao: 'pt-BR', mensagens: { 'pt-BR': { ola: 'Olá, mundo', 'idioma.pt-BR': 'Português', 'idioma.en': 'Inglês' }, en: { ola: 'Hello, world', 'idioma.pt-BR': 'Portuguese', 'idioma.en': 'English' } } } } as never)
+    e.reg.registra(pag('p.ola', { rota: '/ola', titulo: '{t("ola")}', traducoes: ['g'], raiz: { bloco: 'layout/pilha', slots: { filhos: [
+      P('texto/titulo', { texto: '{t("ola")}' }),
+      { bloco: 'nav/link', se: 'tamanho(tenant.idiomas ?? []) > 0', repetir: { cada: 'tenant.idiomas ?? []', como: 'i', chave: 'i.idioma' }, props: { href: '{i.href}', texto: '{i.idioma == "en" ? t("idioma.en") : t("idioma.pt-BR")}' } },
+    ] } } }) as never)
+    e.reg.registra({ kind: 'tenant', id: 'i18n', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'i18n', segmento: 'varejo', modulos: ['loja'], paginas: ['p.home', 'p.ola'], idiomas: ['pt-BR', 'en'], idiomaPadrao: 'pt-BR' } } as never); modo.id = 'i18n'
+    try {
+      const pt = await e.req('GET', '/ola', { host: 'a.loja.test' }), en = await e.req('GET', '/en/ola', { host: 'a.loja.test' })
+      expect(pt.statusCode, pt.body.slice(0, 300)).toBe(200); expect(en.statusCode, en.body.slice(0, 300)).toBe(200)
+      expect(pt.body).toContain('<html lang="pt-BR">'); expect(en.body).toContain('<html lang="en">')
+      expect(pt.body).toContain('<h1>Olá, mundo</h1>'); expect(en.body).toContain('<h1>Hello, world</h1>'); expect(en.body).toContain('<title>Hello, world</title>')
+      for (const r of [pt, en]) { expect(r.body).toContain('rel="alternate" hreflang="pt-BR" href="/ola"'); expect(r.body).toContain('rel="alternate" hreflang="en" href="/en/ola"') }
+      expect(JSON.stringify(en.body.match(/"tenant":\{[^}]*\}/)?.[0])).toContain('prefixo\\":\\"/en'); expect(pt.body).toMatch(/"tenant":\{[^}]*"prefixo":""/) // o prefixo dos links internos: "" no padrão, /en no inglês
+      expect(en.body).toMatch(/<a href="\/ola"[^>]*>Portuguese<\/a>/); expect(en.body).toMatch(/<a href="\/en\/ola"[^>]*>English<\/a>/); expect(pt.body).toMatch(/<a href="\/en\/ola"[^>]*>Inglês<\/a>/)
+    } finally { modo.id = undefined }
+  })
   it('tema com `fontes`: o CSS leva o @font-face (mesma origem), o arquivo é servido como font/woff2 com cache eterno; sem `fontes` não há @font-face', async () => {
     e.reg.registra({ kind: 'tema', id: 'comfonte', versao: '1.0.0', estatuto: 'publicado', spec: { fontes: ['cormorant-garamond', 'inter', 'nao-existe'], tokens: { cor: { primaria: '#123456' } } } } as never)
     e.reg.registra({ kind: 'tenant', id: 'comfonte', tenantId: A, versao: '1.0.0', estatuto: 'publicado', spec: { alias: 'comfonte', segmento: 'varejo', modulos: ['loja'], tema: 'comfonte', paginas: ['p.home'] } } as never); modo.id = 'comfonte'

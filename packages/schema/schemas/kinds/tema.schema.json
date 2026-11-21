@@ -47,7 +47,7 @@
         },
         "layout": {
           "type": "object",
-          "description": "larguras do conteúdo: `largura`, `larguraEstreita` e `larguraLarga` (ex.: 80rem), usadas por layout/contido",
+          "description": "larguras e recuo do conteúdo: `largura`, `larguraEstreita` e `larguraLarga` (ex.: 80rem) e `recuo`/`recuoEstreito` (recuo lateral), usados por layout/contido",
           "additionalProperties": {
             "type": [
               "number",
@@ -60,7 +60,7 @@
         },
         "cabecalho": {
           "type": "object",
-          "description": "cabeçalho (site/cabecalho): `altura`, `fundo`, `desfoque` (ex.: blur(4px)), `borda`, `marcaTamanho`, `marcaPeso`, `linkTamanho`, `linkEspacamento`, `linkCaixa`, `linkCor`, `sublinhaHover` (1 liga o sublinhado animado). Cada valor vira variável CSS com fallback no CSS base",
+          "description": "cabeçalho (site/cabecalho): `altura`, `recuoX` (recuo lateral; ex.: alinhar ao contêiner), `fundo`, `desfoque` (ex.: blur(4px)), `borda`, `marcaTamanho`, `marcaPeso`, `linkTamanho`, `linkEspacamento`, `linkCaixa`, `linkCor`, `sublinhaHover` (1 liga o sublinhado animado). Cada valor vira variável CSS com fallback no CSS base",
           "additionalProperties": {
             "type": [
               "number",
@@ -126,6 +126,45 @@
         "capa": {
           "type": "object",
           "description": "capa (layout/destaque com `capa`): `indicador` é o texto do indicador de rolagem entre aspas (ex.: \"Rolar\"); sem ele não há indicador",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "abas": {
+          "type": "object",
+          "description": "abas de navegação (site/abas): `gap`, `altura`, `recuoX`, `recuoY`, `tamanho`, `peso`, `espacamento`, `caixa`, `cor`, `corHover`, `fundoHover`, `corAtiva`, `fundoAtiva`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "barra": {
+          "type": "object",
+          "description": "barra fixa (layout com marca `barra-fixa`): `topo` (padrão: a altura do cabeçalho), `fundo`, `desfoque`, `borda`, `recuoX`, `recuoY`, `gap`, `rotuloTamanho`, `rotuloEspacamento`, `rotuloCaixa`, `rotuloCor`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "selecao": {
+          "type": "object",
+          "description": "seletor (entrada/selecao): `largura`, `altura`, `tamanho`, `espacamento`, `fundo`",
           "additionalProperties": {
             "type": [
               "number",

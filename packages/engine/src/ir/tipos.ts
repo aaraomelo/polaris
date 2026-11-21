@@ -71,7 +71,7 @@ export type FonteDados = {
   timeoutMs?: number
 }
 
-export type IREstado = Record<string, { tipo: string; inicial: unknown; lista?: boolean; persiste?: boolean }>
+export type IREstado = Record<string, { tipo: string; inicial: unknown; lista?: boolean; persiste?: boolean; daConsulta?: string }>
 
 export type IRPagina = {
   tipo: 'pagina'
