@@ -267,6 +267,72 @@
             "tipo": "booleano"
           }
         }
+      },
+      "listaModelos": {
+        "campos": {
+          "modelos": {
+            "tipo": "json",
+            "descricao": "os modelos do tenant (cabeças, sem os nós): slug, nome, versao, idiomas, nNos, seq"
+          }
+        }
+      },
+      "manifestoModelo": {
+        "campos": {
+          "seq": {
+            "tipo": "inteiro"
+          },
+          "autor": {
+            "tipo": "texto"
+          },
+          "nota": {
+            "tipo": "texto"
+          },
+          "criadoEm": {
+            "tipo": "texto"
+          },
+          "modelo": {
+            "tipo": "json"
+          },
+          "nos": {
+            "tipo": "json",
+            "descricao": "kind, id, hash e bytes de cada nó"
+          }
+        }
+      },
+      "noDoModelo": {
+        "campos": {
+          "kind": {
+            "tipo": "texto"
+          },
+          "id": {
+            "tipo": "texto"
+          },
+          "versao": {
+            "tipo": "texto"
+          },
+          "spec": {
+            "tipo": "json"
+          }
+        }
+      },
+      "modeloAplicado": {
+        "campos": {
+          "ok": {
+            "tipo": "booleano"
+          },
+          "nos": {
+            "tipo": "inteiro"
+          },
+          "fotos": {
+            "tipo": "json"
+          },
+          "site": {
+            "tipo": "booleano"
+          },
+          "release": {
+            "tipo": "inteiro"
+          }
+        }
       }
     },
     "operacoes": {
@@ -632,6 +698,62 @@
           }
         },
         "saida": "ativoRemovido",
+        "permissao": "studio"
+      },
+      "listarModelos": {
+        "metodo": "GET",
+        "caminho": "/templates",
+        "saida": "listaModelos",
+        "permissao": "studio"
+      },
+      "manifestoDoModelo": {
+        "metodo": "GET",
+        "caminho": "/templates/:slug/manifesto",
+        "entrada": {
+          "slug": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "manifestoModelo",
+        "permissao": "studio"
+      },
+      "abrirNoDoModelo": {
+        "metodo": "GET",
+        "caminho": "/templates/:slug/nos/:kind/:id",
+        "entrada": {
+          "slug": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "kind": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "id": {
+            "tipo": "texto",
+            "obrigatorio": true
+          }
+        },
+        "saida": "noDoModelo",
+        "permissao": "studio"
+      },
+      "aplicarModelo": {
+        "metodo": "POST",
+        "caminho": "/templates/:slug/aplicar",
+        "entrada": {
+          "slug": {
+            "tipo": "texto",
+            "obrigatorio": true
+          },
+          "publicar": {
+            "tipo": "booleano"
+          },
+          "nota": {
+            "tipo": "texto"
+          }
+        },
+        "saida": "modeloAplicado",
         "permissao": "studio"
       }
     }

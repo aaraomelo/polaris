@@ -86,7 +86,7 @@ describe('ambiente local', () => {
     const json = async (r: { json(): Promise<unknown> }) => (await r.json()) as any
     expect((await get(l, 'loja-demo', '/studio/templates')).status).toBe(401)
     // a lista é leve (sem os nós); o modelo da Maison veio do site, por tenant
-    const lista = await json(await get(l, 'loja-demo', '/studio/templates', ed)) as Array<Record<string, any>>
+    const lista = (await json(await get(l, 'loja-demo', '/studio/templates', ed))).modelos as Array<Record<string, any>>
     const maison = lista.find((t) => t.slug === 'maison')!; expect(maison).toMatchObject({ nome: 'Maison', idiomas: ['pt-BR', 'en'], versao: '1.0.0', seq: 1 }); expect(maison.nNos).toBeGreaterThan(10); expect(maison.nos).toBeUndefined()
     // ler traz os nós, e eles registram sem erro num registro limpo
     const cheio = await json(await get(l, 'loja-demo', '/studio/templates/maison', ed)); const reg = new Registry(); registraBase(reg); registraTemas(reg); registraSite(reg); registraCommerce(reg)
@@ -106,13 +106,13 @@ describe('ambiente local', () => {
     expect((await req(l, 'loja-demo', 'PUT', '/studio/templates/minimo', ed, corpo('Oi'))).status).toBe(201)
     expect(await json(await req(l, 'loja-demo', 'PUT', '/studio/templates/minimo', ed, corpo('Oi')))).toMatchObject({ seq: 1, novo: false })
     expect(await json(await req(l, 'loja-demo', 'PUT', '/studio/templates/minimo', ed, corpo('Olá', { versao: '1.1.0' })))).toMatchObject({ seq: 2, novo: true })
-    expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo/historico', ed))).map((h: any) => [h.seq, h.versao])).toEqual([[2, '1.1.0'], [1, '1.0.0']])
+    expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo/historico', ed))).versoes.map((h: any) => [h.seq, h.versao])).toEqual([[2, '1.1.0'], [1, '1.0.0']])
     expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo?seq=1', ed))).modelo.nos[0].spec.titulo).toBe('Oi'); expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo', ed))).modelo.nos[0].spec.titulo).toBe('Olá')
     // validação do pacote inteiro: bloco inexistente, kind proibido, versão fora do padrão
     const ruim = await req(l, 'loja-demo', 'PUT', '/studio/templates/ruim', ed, corpo('x', { nos: [{ ...pagina('x'), spec: { rota: '/x', titulo: 'x', raiz: { bloco: 'nao/existe' } } }, { kind: 'servico', id: 's', versao: '1.0.0', spec: {} }] })); expect(ruim.status).toBe(422); expect(JSON.stringify(await json(ruim))).toContain('servico')
     expect((await req(l, 'loja-demo', 'PUT', '/studio/templates/ruim', ed, corpo('x', { versao: 'um' }))).status).toBe(422)
     // isolamento: a outra loja não vê o modelo do tenant demo
-    expect((await json(await get(l, 'loja-outra', '/studio/templates', edOutra)) as Array<{ slug: string }>).map((t) => t.slug)).not.toContain('minimo'); expect((await get(l, 'loja-outra', '/studio/templates/minimo', edOutra)).status).toBe(404)
+    expect(((await json(await get(l, 'loja-outra', '/studio/templates', edOutra))).modelos as Array<{ slug: string }>).map((t) => t.slug)).not.toContain('minimo'); expect((await get(l, 'loja-outra', '/studio/templates/minimo', edOutra)).status).toBe(404)
     // aplicar: faltando uma imagem (@img/…) nada é gravado; o modelo da Maison aplica, o site continua de pé e a release sai
     expect((await req(l, 'loja-demo', 'PUT', '/studio/templates/com-foto', ed, corpo('Foto', { nos: [{ kind: 'pagina', id: 'cf.home', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/cf', titulo: 'cf', raiz: { bloco: 'midia/imagem', props: { src: '@img/nao-enviada', alt: 'x' } } } }] }))).status).toBe(201)
     const semFoto = await req(l, 'loja-demo', 'POST', '/studio/templates/com-foto/aplicar', ed, {}); expect(semFoto.status).toBe(422); expect(JSON.stringify(await json(semFoto))).toContain('nao-enviada')
@@ -126,7 +126,7 @@ describe('ambiente local', () => {
     const sobre = await (await get(l, 'loja-demo', '/en/sobre')).text(); expect(sobre).toContain('Our Story') // o site, agora servido pela release do tenant, segue de pé (com o texto da tradução aplicada)
     // remover: o modelo some da lista e da leitura, e o histórico guarda a lápide
     expect((await req(l, 'loja-demo', 'DELETE', '/studio/templates/minimo', ed)).status).toBe(204); expect((await get(l, 'loja-demo', '/studio/templates/minimo', ed)).status).toBe(404)
-    expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo/historico', ed)))[0]).toMatchObject({ seq: 3, removido: true })
+    expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo/historico', ed))).versoes[0]).toMatchObject({ seq: 3, removido: true })
   })
 
   it('Studio → Publicar → site: a edição salva só aparece depois de publicada, no tenant certo; página nova ganha rota sozinha', async () => {

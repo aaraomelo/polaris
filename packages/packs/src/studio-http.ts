@@ -264,7 +264,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
   app.get('/studio/templates', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
     if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
-    return o.templates.lista(s.tenantId)
+    return { modelos: await o.templates.lista(s.tenantId) }
   })
   app.get<{ Params: { slug: string }; Querystring: { seq?: string } }>('/studio/templates/:slug', async (req, reply) => {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
@@ -294,7 +294,7 @@ export function rotasStudio(app: FastifyInstance, o: OpcoesStudio): void {
     const s = await sessao(req, reply, 'studio.ver'); if (!s) return reply
     if (!o.templates) return erro(reply, 501, 'nao_implementado', 'modelos não estão disponíveis neste ambiente')
     if (!SLUG_M.test(req.params.slug)) return erro(reply, 400, 'requisicao_invalida', 'slug inválido')
-    return o.templates.historico(s.tenantId, req.params.slug, req.query.limite && /^\d{1,3}$/.test(req.query.limite) ? Number(req.query.limite) : 50)
+    return { versoes: await o.templates.historico(s.tenantId, req.params.slug, req.query.limite && /^\d{1,3}$/.test(req.query.limite) ? Number(req.query.limite) : 50) }
   })
   app.put<{ Params: { slug: string } }>('/studio/templates/:slug', { bodyLimit: 4 * 1024 * 1024 + 4096 }, async (req, reply) => {
     const s = await sessao(req, reply, 'studio.editar', 3); if (!s) return reply

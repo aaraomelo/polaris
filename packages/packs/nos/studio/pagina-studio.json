@@ -434,6 +434,98 @@
  },
  {
   "kind": "dados",
+  "id": "studio.modelos",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "listarModelos"
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.manifesto",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "manifestoDoModelo"
+   },
+   "parametros": {
+    "slug": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.nomodelo",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "abrirNoDoModelo"
+   },
+   "parametros": {
+    "slug": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "kind": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "id": {
+     "tipo": "texto",
+     "obrigatorio": true
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
+  "id": "studio.aplicar",
+  "versao": "1.0.0",
+  "estatuto": "publicado",
+  "spec": {
+   "fonte": {
+    "tipo": "servico",
+    "servico": "studio",
+    "operacao": "aplicarModelo"
+   },
+   "parametros": {
+    "slug": {
+     "tipo": "texto",
+     "obrigatorio": true
+    },
+    "publicar": {
+     "tipo": "booleano"
+    },
+    "nota": {
+     "tipo": "texto"
+    }
+   },
+   "carregar": "manual",
+   "timeoutMs": 15000
+  }
+ },
+ {
+  "kind": "dados",
   "id": "studio.diagrama",
   "versao": "1.0.0",
   "estatuto": "publicado",
@@ -587,6 +679,10 @@
    "rota": "/studio",
    "titulo": "Polaris Studio",
    "dados": {
+    "modelos": "studio.modelos",
+    "manifesto": "studio.manifesto",
+    "nomodelo": "studio.nomodelo",
+    "aplicar": "studio.aplicar",
     "ativos": "studio.ativos",
     "imgenviar": "studio.imgenviar",
     "imgremover": "studio.imgremover",
@@ -613,6 +709,13 @@
     "pagsite": "studio.pagsite"
    },
    "estado": {
+    "modeloSlug": {
+     "tipo": "texto",
+     "inicial": ""
+    },
+    "noModelo": {
+     "tipo": "json"
+    },
     "criando": {
      "tipo": "texto",
      "inicial": ""
@@ -1227,6 +1330,41 @@
                   {
                    "acao": "executar",
                    "dados": "releases",
+                   "args": {},
+                   "emErro": [
+                    {
+                     "acao": "definir",
+                     "estado": "tipoAviso",
+                     "valor": "\"erro\""
+                    },
+                    {
+                     "acao": "definir",
+                     "estado": "aviso",
+                     "valor": "erro"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "nav/botao",
+                "props": {
+                 "texto": "Modelos",
+                 "variante": "secundario",
+                 "atual": "{estado.painel == \"modelos\"}",
+                 "icone": "lista"
+                },
+                "eventos": {
+                 "aoClicar": [
+                  {
+                   "acao": "definir",
+                   "estado": "painel",
+                   "valor": "estado.painel == \"modelos\" ? \"\" : \"modelos\""
+                  },
+                  {
+                   "acao": "executar",
+                   "dados": "modelos",
                    "args": {},
                    "emErro": [
                     {
@@ -3591,6 +3729,331 @@
                    },
                    "props": {
                     "texto": "~ {n}"
+                   }
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "bloco": "layout/pilha",
+             "se": "estado.painel == \"modelos\" && modelos",
+             "props": {
+              "gap": 8
+             },
+             "slots": {
+              "filhos": [
+               {
+                "bloco": "texto/titulo",
+                "props": {
+                 "texto": "Modelos de site",
+                 "nivel": 3
+                }
+               },
+               {
+                "bloco": "texto/paragrafo",
+                "se": "tamanho(modelos.modelos ?? []) == 0",
+                "props": {
+                 "texto": "Nenhum modelo guardado neste tenant."
+                }
+               },
+               {
+                "bloco": "layout/cartao",
+                "repetir": {
+                 "cada": "modelos.modelos ?? []",
+                 "como": "m",
+                 "chave": "m.slug"
+                },
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "layout/linha",
+                   "props": {
+                    "gap": 8,
+                    "alinha": "centro",
+                    "quebra": true
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "texto/titulo",
+                      "props": {
+                       "texto": "{m.nome}",
+                       "nivel": 4
+                      }
+                     },
+                     {
+                      "bloco": "feedback/selo",
+                      "props": {
+                       "texto": "v{m.versao}",
+                       "tom": "neutro"
+                      }
+                     },
+                     {
+                      "bloco": "texto/paragrafo",
+                      "props": {
+                       "texto": "{m.nNos} nós · {junta(m.idiomas, \", \")} · versão guardada {m.seq}"
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "bloco": "texto/paragrafo",
+                   "se": "m.descricao",
+                   "props": {
+                    "texto": "{m.descricao}"
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "props": {
+                    "gap": 6,
+                    "alinha": "centro",
+                    "quebra": true
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Ver os nós",
+                       "variante": "secundario",
+                       "icone": "lista"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "definir",
+                         "estado": "modeloSlug",
+                         "valor": "m.slug"
+                        },
+                        {
+                         "acao": "definir",
+                         "estado": "noModelo",
+                         "valor": "null"
+                        },
+                        {
+                         "acao": "executar",
+                         "dados": "manifesto",
+                         "args": {
+                          "slug": "{m.slug}"
+                         },
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Aplicar ao site (rascunho)",
+                       "variante": "secundario",
+                       "icone": "salvar"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "aplicar",
+                         "args": {
+                          "slug": "{m.slug}"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"sucesso\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "\"Modelo aplicado: \" + resultado.nos + \" nós gravados como rascunho. Use Publicar para colocar no ar.\""
+                          },
+                          {
+                           "acao": "executar",
+                           "dados": "nos"
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     },
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "Aplicar e publicar",
+                       "variante": "primario",
+                       "icone": "publicar"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "aplicar",
+                         "args": {
+                          "slug": "{m.slug}",
+                          "publicar": "true"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"sucesso\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "\"Modelo aplicado e publicado: release \" + resultado.release + \".\""
+                          },
+                          {
+                           "acao": "executar",
+                           "dados": "nos"
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "layout/cartao",
+                "se": "manifesto && estado.modeloSlug",
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/titulo",
+                   "props": {
+                    "texto": "Nós de \"{estado.modeloSlug}\" (versão {manifesto.seq})",
+                    "nivel": 4
+                   }
+                  },
+                  {
+                   "bloco": "texto/paragrafo",
+                   "props": {
+                    "texto": "Só o manifesto foi baixado; o conteúdo de um nó vem ao clicar nele."
+                   }
+                  },
+                  {
+                   "bloco": "layout/linha",
+                   "repetir": {
+                    "cada": "manifesto.nos ?? []",
+                    "como": "n",
+                    "chave": "n.kind + \":\" + n.id"
+                   },
+                   "props": {
+                    "gap": 8,
+                    "alinha": "centro"
+                   },
+                   "slots": {
+                    "filhos": [
+                     {
+                      "bloco": "nav/botao",
+                      "props": {
+                       "texto": "{n.kind}: {n.id} · {n.bytes} B",
+                       "variante": "secundario",
+                       "atual": "{estado.noModelo && estado.noModelo.kind == n.kind && estado.noModelo.id == n.id}"
+                      },
+                      "eventos": {
+                       "aoClicar": [
+                        {
+                         "acao": "executar",
+                         "dados": "nomodelo",
+                         "args": {
+                          "slug": "{estado.modeloSlug}",
+                          "kind": "{n.kind}",
+                          "id": "{n.id}"
+                         },
+                         "depois": [
+                          {
+                           "acao": "definir",
+                           "estado": "noModelo",
+                           "valor": "resultado"
+                          }
+                         ],
+                         "emErro": [
+                          {
+                           "acao": "definir",
+                           "estado": "tipoAviso",
+                           "valor": "\"erro\""
+                          },
+                          {
+                           "acao": "definir",
+                           "estado": "aviso",
+                           "valor": "erro"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               },
+               {
+                "bloco": "layout/cartao",
+                "se": "estado.noModelo",
+                "slots": {
+                 "filhos": [
+                  {
+                   "bloco": "texto/titulo",
+                   "props": {
+                    "texto": "{estado.noModelo.kind}: {estado.noModelo.id}",
+                    "nivel": 4
+                   }
+                  },
+                  {
+                   "bloco": "entrada/area",
+                   "props": {
+                    "valor": "{paraJson(estado.noModelo, 2)}",
+                    "rotulo": "JSON do nó (somente leitura)",
+                    "linhas": 14,
+                    "desabilitado": true
                    }
                   }
                  ]

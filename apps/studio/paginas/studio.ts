@@ -27,6 +27,10 @@ export const DADOS = [
   dado('voltar', 'voltarRelease', { para: campo('inteiro'), nota: campo('texto') }),
   dado('diffrel', 'compararReleases', { de: campo('inteiro', { obrigatorio: true }), para: campo('inteiro', { obrigatorio: true }) }),
   dado('publicar', 'publicarSite', { nota: campo('texto') }),
+  dado('modelos', 'listarModelos', {}),
+  dado('manifesto', 'manifestoDoModelo', { slug: campo('texto', { obrigatorio: true }) }),
+  dado('nomodelo', 'abrirNoDoModelo', { slug: campo('texto', { obrigatorio: true }), kind: campo('texto', { obrigatorio: true }), id: campo('texto', { obrigatorio: true }) }),
+  dado('aplicar', 'aplicarModelo', { slug: campo('texto', { obrigatorio: true }), publicar: campo('booleano'), nota: campo('texto') }),
   dado('diagrama', 'diagramar', { tipo: campo('texto', { obrigatorio: true }), no: campo('json'), selecionado: campo('texto') }),
   dado('ativos', 'listarAtivos', {}, 'auto'), // auto: as listas de imagens dos campos do editor (logo, imagem…) precisam dele
   dado('imgenviar', 'enviarAtivo', { nome: campo('texto', { obrigatorio: true }), dados: campo('texto', { obrigatorio: true }) }),
@@ -791,6 +795,29 @@ type OpP = NonNullable<Parameters<typeof P>[1]>
 const cartao = (filhos: Inst[], o: Omit<OpP, 'filhos' | 'slots'> = {}): Inst => P('layout/cartao', { ...o, filhos })
 const selo = (t: string, tom: 'neutro' | 'sucesso' | 'alerta' | 'erro', se?: string): Inst => P('feedback/selo', { ...(se ? { se } : {}), props: { texto: t, tom } })
 
+/** os modelos (templates) de site: a lista leve; o manifesto de um modelo (só kind/id/tamanho); cada nó só é buscado ao clicar (leitura fragmentada); e aplicar ao site (rascunho ou já publicando) */
+const modelosVista = (): Inst => pilha([
+  titulo('Modelos de site', 3),
+  texto('Nenhum modelo guardado neste tenant.', { se: 'tamanho(modelos.modelos ?? []) == 0' }),
+  cartao([
+    linha([titulo('{m.nome}', 4), selo('v{m.versao}', 'neutro'), texto('{m.nNos} nós · {junta(m.idiomas, ", ")} · versão guardada {m.seq}')], { props: { gap: 8, quebra: true } }),
+    texto('{m.descricao}', { se: 'm.descricao' }),
+    linha([
+      botao('Ver os nós', [def('modeloSlug', 'm.slug'), def('noModelo', 'null'), exe('manifesto', { slug: '{m.slug}' }, undefined, aviso('erro', 'erro'))], { props: { icone: 'lista' } }),
+      botao('Aplicar ao site (rascunho)', [exe('aplicar', { slug: '{m.slug}' }, [...aviso('sucesso', '"Modelo aplicado: " + resultado.nos + " nós gravados como rascunho. Use Publicar para colocar no ar."'), exe('nos')], aviso('erro', 'erro'))], { props: { icone: 'salvar' } }),
+      botao('Aplicar e publicar', [exe('aplicar', { slug: '{m.slug}', publicar: 'true' }, [...aviso('sucesso', '"Modelo aplicado e publicado: release " + resultado.release + "."'), exe('nos')], aviso('erro', 'erro'))], { props: { variante: 'primario', icone: 'publicar' } }),
+    ], { props: { gap: 6, quebra: true } }),
+  ], { repetir: { cada: 'modelos.modelos ?? []', como: 'm', chave: 'm.slug' } }),
+  cartao([
+    titulo('Nós de "{estado.modeloSlug}" (versão {manifesto.seq})', 4),
+    texto('Só o manifesto foi baixado; o conteúdo de um nó vem ao clicar nele.'),
+    linha([botao('{n.kind}: {n.id} · {n.bytes} B', [exe('nomodelo', { slug: '{estado.modeloSlug}', kind: '{n.kind}', id: '{n.id}' }, [def('noModelo', 'resultado')], aviso('erro', 'erro'))], { props: { atual: '{estado.noModelo && estado.noModelo.kind == n.kind && estado.noModelo.id == n.id}' } })], { repetir: { cada: 'manifesto.nos ?? []', como: 'n', chave: 'n.kind + ":" + n.id' } }),
+  ], { se: 'manifesto && estado.modeloSlug' }),
+  cartao([
+    titulo('{estado.noModelo.kind}: {estado.noModelo.id}', 4),
+    P('entrada/area', { props: { valor: '{paraJson(estado.noModelo, 2)}', rotulo: 'JSON do nó (somente leitura)', linhas: 14, desabilitado: true } }),
+  ], { se: 'estado.noModelo' }),
+], { se: 'estado.painel == "modelos" && modelos', gap: 8 })
 const releasesVista = (): Inst => pilha([
   titulo('Releases', 3),
   cartao([
@@ -906,8 +933,9 @@ const formCriar = (): Inst => pilha([linha([
 
 export const PAGINA = no('pagina', 'studio.app', {
   rota: '/studio', titulo: 'Polaris Studio',
-  dados: { ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema', pagsite: 'studio.pagsite' },
+  dados: { modelos: 'studio.modelos', manifesto: 'studio.manifesto', nomodelo: 'studio.nomodelo', aplicar: 'studio.aplicar', ativos: 'studio.ativos', imgenviar: 'studio.imgenviar', imgremover: 'studio.imgremover', diagrama: 'studio.diagrama', nos: 'studio.nos', blocos: 'studio.blocos', abrir: 'studio.abrir', salvar: 'studio.salvar', previa: 'studio.previa', versoes: 'studio.versoes', versao: 'studio.versao', diff: 'studio.diff', comentarios: 'studio.comentarios', comentar: 'studio.comentar', resolver: 'studio.resolver', restaurar: 'studio.restaurar', publicar: 'studio.publicar', site: 'studio.site', releases: 'studio.releases', voltar: 'studio.voltar', linkprev: 'studio.linkprev', diffrel: 'studio.diffrel', definetema: 'studio.definetema', pagsite: 'studio.pagsite' },
   estado: {
+    modeloSlug: { tipo: 'texto', inicial: '' }, noModelo: { tipo: 'json' },
     criando: { tipo: 'texto', inicial: '' }, novoId: { tipo: 'texto', inicial: '' }, novaRota: { tipo: 'texto', inicial: '/' }, novoTokenNome: { tipo: 'texto', inicial: '' }, novoTokenValor: { tipo: 'texto', inicial: '' },
     recolhidos: { tipo: 'json', inicial: [] }, paletaAberta: { tipo: 'booleano', inicial: false }, copiado: { tipo: 'json' }, abaCel: { tipo: 'texto', inicial: 'blocos' }, selElemento: { tipo: 'json' }, prevAmpla: { tipo: 'booleano', inicial: false }, editProp: { tipo: 'texto', inicial: '' }, jsonProp: { tipo: 'texto', inicial: '' }, jsonPropErro: { tipo: 'texto', inicial: '' }, tmpBloco: { tipo: 'json' }, tmpOrig: { tipo: 'json' }, tmpAlvo: { tipo: 'json' }, tmpOk: { tipo: 'booleano', inicial: false }, tmpOrig2: { tipo: 'json' }, tmpZona: { tipo: 'texto', inicial: '' }, tmpOrigE: { tipo: 'json' }, tmpAlvoE: { tipo: 'json' }, tmpOkE: { tipo: 'booleano', inicial: false }, tmpDentro: { tipo: 'booleano', inicial: false }, tmpCaminho: { tipo: 'json', inicial: [] }, tmpPos: { tipo: 'inteiro', inicial: 0 }, catBloco: { tipo: 'texto', inicial: '' }, catCampo: { tipo: 'texto', inicial: '' }, buscaBloco: { tipo: 'texto', inicial: '' }, painel: { tipo: 'texto', inicial: '' }, tipoDiagrama: { tipo: 'texto', inicial: 'fluxo' }, msgImagem: { tipo: 'texto', inicial: '' }, selCampo: { tipo: 'json', inicial: [] }, abaForm: { tipo: 'texto', inicial: 'campos' }, abaCartaz: { tipo: 'texto', inicial: 'elementos' }, selEl: { tipo: 'inteiro', inicial: -1 }, passoPrevia: { tipo: 'texto', inicial: '' }, valoresTeste: { tipo: 'texto', inicial: '{}' }, jsonTexto: { tipo: 'texto', inicial: '' }, jsonErro: { tipo: 'texto', inicial: '' }, linkPrevia: { tipo: 'json' }, modoPrevia: { tipo: 'texto', inicial: 'claro' }, pendente: { tipo: 'json' }, confirmaRestaurar: { tipo: 'booleano', inicial: false }, confirmaCriar: { tipo: 'booleano', inicial: false }, aba: { tipo: 'texto', inicial: 'editor' }, de: { tipo: 'texto', inicial: '' }, para: { tipo: 'texto', inicial: '' }, novoComentario: { tipo: 'texto', inicial: '' }, respondendo: { tipo: 'texto', inicial: '' },
     aberto: { tipo: 'json' }, no: { tipo: 'json' }, noSalvo: { tipo: 'json' }, passado: { tipo: 'json', inicial: [] }, futuro: { tipo: 'json', inicial: [] }, chaveEdicao: { tipo: 'texto', inicial: '' },
@@ -929,6 +957,7 @@ export const PAGINA = no('pagina', 'studio.app', {
         pilha([
           P('texto/pequeno', { props: { texto: 'Ferramentas' } }),
           botao('Releases', [def('painel', 'estado.painel == "releases" ? "" : "releases"'), exe('releases', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "releases"}', icone: 'releases' } }),
+          botao('Modelos', [def('painel', 'estado.painel == "modelos" ? "" : "modelos"'), exe('modelos', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "modelos"}', icone: 'lista' } }),
           botao('Imagens', [def('painel', 'estado.painel == "imagens" ? "" : "imagens"'), def('msgImagem', '""'), exe('ativos', {}, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "imagens"}', icone: 'imagens' } }),
           botao('Diagramas', [def('painel', 'estado.painel == "diagramas" ? "" : "diagramas"'), def('tipoDiagrama', '"fluxo"'), exe('diagrama', { tipo: 'fluxo' }, undefined, aviso('erro', 'erro'))], { props: { atual: '{estado.painel == "diagramas"}', icone: 'diagramas' } }),
         ], { gap: 0 }),
@@ -940,6 +969,7 @@ export const PAGINA = no('pagina', 'studio.app', {
       pilha([titulo('Bem-vindo ao Studio', 2), texto('Escolha uma página, um tema, um formulário ou um cartaz no menu à esquerda para editar, ou abra uma ferramenta (releases, imagens, diagramas).')], { se: '!estado.no && !estado.painel && estado.criando == ""', props: { gap: 8 } }),
       linha([texto('Prévia:'), botao('Claro', [def('modoPrevia', '"claro"'), atualizaPrevia], { props: { atual: '{estado.modoPrevia == "claro"}', icone: 'tema-escuro' } }), botao('Escuro', [def('modoPrevia', '"escuro"'), atualizaPrevia], { props: { atual: '{estado.modoPrevia == "escuro"}', icone: 'tema-escuro' } })], { se: 'estado.no', props: { gap: 6, papel: 'toolbar', rotulo: 'Modo da prévia' } }),
       releasesVista(),
+      modelosVista(),
       imagensVista(),
       formCriar(),
       barraPendente(),
