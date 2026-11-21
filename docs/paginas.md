@@ -67,3 +67,6 @@ Medido no navegador (loja de 13 produtos): trocar de categoria reescreve 2 atrib
 - O serviço só resolve o tenant de uma chamada **anônima** pelo mapa de desenvolvimento `POLARIS_HOSTS`. Em produção, páginas públicas com dados de serviço ainda não têm esse caminho (o serviço atende só com token).
 - Páginas que o runtime do navegador não suporta respondem 501; ações que chamam serviços no cliente (`executar`) dependem do carregador do hospedeiro, que o site ainda não tem.
 - Sem cache de HTML entre requisições (a tabela de rotas, os programas e o cliente têm cache).
+
+## Baixar um arquivo (`acao: "baixar"`)
+Uma ação gera um arquivo no navegador sem ir ao servidor: `{ "acao": "baixar", "nome": "carteira.csv", "tipo": "text/csv", "valor": "csvTexto(estado.contas, [\"nome\", \"arr\"])" }`. O `nome` é um template (sem pastas, até 100 caracteres; barras e caracteres de caminho viram `-`), `tipo` é `text/csv` (com BOM para o Excel), `text/plain` ou `application/json`, e `valor` é a expressão do conteúdo (texto, até 5 MB). As funções `csv`, `csvTexto` e `textoDeBase64` leem e geram CSV (ver `docs/funcoes.md`: texto que começa com `=`, `+`, `-` ou `@` ganha um apóstrofo para não virar fórmula na planilha); com `entrada/arquivo` (`aoEscolher` traz `dados` em base64) dá para importar um CSV do computador sem enviar o arquivo a lugar nenhum.

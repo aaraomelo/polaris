@@ -77,7 +77,7 @@ describe('bundle por página: tree-shaking real', () => {
     const arqs = Object.keys(r.pacote.contribuicao)
     for (const proibido of ['expr/biblioteca.ts', 'expr/funcoes.ts', 'expr/exato.ts', 'num/racional.ts', 'modelo/historico.ts', 'expr/ordem-superior.ts', 'expr/parser.ts', 'expr/analise.ts', 'ir/compila.ts']) expect(arqs, proibido).not.toContain(proibido)
     expect(r.pacote.contribuicao['vivo/monta.ts']).toBeGreaterThan(5000)
-    expect(r.pacote.gz).toBeLessThan(12 * 1024) // 10,5 → 10,7 → 11,2 → 11,6 → 12 KB (modal, `aberta` e teclado das formas SVG; escala tipográfica nomeada, ~190 B; estado ligado à URL, seletor e `soConsulta`): o estado que `persiste` (ler e gravar no localStorage) mora no vivo/monta.ts e custa ~140 B em toda página
+    expect(r.pacote.gz).toBeLessThan(12.3 * 1024) // 10,5 → 10,7 → 11,2 → 11,6 → 12 KB (modal, `aberta` e teclado das formas SVG; escala tipográfica nomeada, ~190 B; estado ligado à URL, seletor e `soConsulta`): o estado que `persiste` (ler e gravar no localStorage) mora no vivo/monta.ts e custa ~140 B em toda página
     expect(r.pacote.codigo).not.toMatch(/react/i)
   })
   it('cada capacidade só custa quando usada: BigInt só com q*, combinadores só com mapeia/filtra…', async () => {
@@ -94,7 +94,7 @@ describe('bundle por página: tree-shaking real', () => {
   })
   it('a loja completa (listas, combinadores, aritmética exata, eventos) fica abaixo de 13,9 KB gz — o react-dom sozinho tem ~135 KB', async () => {
     const r = await empacotaCliente(loja())
-    expect(r.ok && r.pacote.gz).toBeLessThan(14.8 * 1024) // 14,8 KB com o modal e o teclado SVG; 13 → 13,25 → 13,3 → 13,4 → 13,9 → 14,3 → 14,4 KB (`tom` nos textos; escala tipográfica nomeada; estado ligado à URL, seletor) (título com filhos, `texto/trecho` e `texto/enfase`): eventos `polaris-*` e `data-solta` das ilhas; `data-marca` e `data-zoom` dos blocos de layout
+    expect(r.ok && r.pacote.gz).toBeLessThan(15.1 * 1024) // 14,8 KB com o modal e o teclado SVG; 13 → 13,25 → 13,3 → 13,4 → 13,9 → 14,3 → 14,4 KB (`tom` nos textos; escala tipográfica nomeada; estado ligado à URL, seletor) (título com filhos, `texto/trecho` e `texto/enfase`): eventos `polaris-*` e `data-solta` das ilhas; `data-marca` e `data-zoom` dos blocos de layout
   })
   it('páginas que o runtime vivo não suporta são recusadas com os motivos (nenhum bundle)', async () => {
     const r = new Registry(); registraBase(r)

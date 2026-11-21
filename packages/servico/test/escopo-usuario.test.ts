@@ -8,7 +8,7 @@ import { criaServico, dbDePglite, regrasDoRegistry, type Contexto } from '../src
 // Escopo por usuário: cada registro é de quem o criou (coluna `dono`, do token, nunca do corpo); um usuário não lê, altera nem remove o que é de outro, mesmo dentro do mesmo tenant.
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222'
 const SVC: No = { kind: 'servico', id: 'pulso', versao: '1.0.0', estatuto: 'publicado', spec: { entidades: {
-  conta: { escopo: 'usuario', campos: { nome: { tipo: 'texto', obrigatorio: true }, saude: { tipo: 'inteiro' } }, crud: { caminho: '/contas' } },
+  conta: { escopo: 'usuario', campos: { nome: { tipo: 'texto', obrigatorio: true }, saude: { tipo: 'inteiro' } }, crud: { caminho: '/contas', operacoes: ['listar', 'obter', 'criar', 'atualizar', 'remover', 'lote', 'limpar'] } },
   geral: { campos: { texto: { tipo: 'texto' } }, crud: { caminho: '/gerais' } },
 }, operacoes: {} } } as never
 const papel = { kind: 'papel', id: 'cs', versao: '1.0.0', estatuto: 'publicado', spec: { regras: [{ acoes: ['manage'], sujeitos: ['pulso.conta', 'pulso.geral'] }] } } as never
@@ -39,6 +39,14 @@ describe('escopo: usuario', () => {
     // o mesmo nome de usuário em OUTRO tenant é outra pessoa: nada vaza
     expect(json(await req('cris', 'GET', '/contas'))).toEqual([])
     expect((await req('ana', 'DELETE', `/contas/${id}`)).statusCode).toBe(204); expect(json(await req('ana', 'GET', '/contas'))).toEqual([])
+  })
+  it('lote cria vários de uma vez (numa transação só: um item inválido desfaz tudo) e limpar apaga só os do próprio usuário', async () => {
+    const ok = await req('ana', 'POST', '/contas/lote', { itens: [{ nome: 'L1', saude: 10 }, { nome: 'L2', saude: 20 }, { nome: 'L3' }] }); expect(ok.statusCode).toBe(201); expect(json(ok).map((c: any) => c.nome)).toEqual(['L1', 'L2', 'L3'])
+    expect((await req('ana', 'POST', '/contas/lote', { itens: [{ nome: 'bom' }, { saude: 5 }] })).statusCode).toBe(400) // o segundo não tem nome: nada é gravado
+    expect((await req('ana', 'POST', '/contas/lote', { itens: [] })).statusCode).toBe(400); expect((await req('ana', 'POST', '/contas/lote', { itens: [{ nome: 'x', dono: 'bia' }] })).statusCode).toBe(400)
+    expect(json(await req('ana', 'GET', '/contas')).map((c: any) => c.nome).sort()).toEqual(['L1', 'L2', 'L3'])
+    await req('bia', 'POST', '/contas', { nome: 'da bia' })
+    expect((await req('ana', 'DELETE', '/contas')).statusCode).toBe(204); expect(json(await req('ana', 'GET', '/contas'))).toEqual([]); expect(json(await req('bia', 'GET', '/contas')).map((c: any) => c.nome).sort()).toEqual(['Da Bia', 'da bia'])
   })
   it('entidade sem escopo continua compartilhada no tenant', async () => {
     await req('ana', 'POST', '/gerais', { texto: 'x' }); expect(json(await req('bia', 'GET', '/gerais')).map((g: any) => g.texto)).toEqual(['x'])

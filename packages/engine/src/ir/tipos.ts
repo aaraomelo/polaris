@@ -31,6 +31,7 @@ export type IRAcao =
   | { acao: 'definir'; estado: string; valor: Expr; fonte: string; caminho: string }
   | { acao: 'executar'; dados: string; args: Record<string, Valor>; depois: IRAcao[]; emErro: IRAcao[]; caminho: string }
   | { acao: 'navegar'; para: Valor; caminho: string }
+  | { acao: 'baixar'; nome: Valor; conteudo: Expr; tipo: string; caminho: string }
 
 type Comum = { caminho: string; se?: Expr; repetir?: { cada: Expr; como: string; chave?: Expr } }
 

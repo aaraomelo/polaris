@@ -215,6 +215,44 @@ export const f_raiz: Funcao = { min: 1, max: 1, fn: (x) => { const n = aNum(x); 
 export const f_compacto: Funcao = { min: 1, max: 2, fn: (x, idioma) => { const n = aNum(x); if (n === undefined) return ''; const loc = typeof idioma === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(idioma) ? idioma : 'en'; const f = new Intl.NumberFormat(loc, { notation: 'compact', maximumFractionDigits: n >= 1e6 ? 1 : n >= 1e3 ? 0 : 1 }).format(n); return f.replace(/K$/, 'k') } }
 /** data curta no idioma ("May 24 ’27", "24 mai ’27") a partir de AAAA-MM-DD */
 export const f_dataCurta: Funcao = { min: 1, max: 2, fn: (x, idioma) => { if (typeof x !== 'string' || !/^\d{4}-\d{2}-\d{2}/.test(x)) return ''; const loc = typeof idioma === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(idioma) ? idioma : 'en', d = new Date(`${x.slice(0, 10)}T00:00:00Z`); if (Number.isNaN(d.getTime())) return ''; const p = Object.fromEntries(new Intl.DateTimeFormat(loc, { timeZone: 'UTC', month: 'short', day: 'numeric', year: '2-digit' }).formatToParts(d).map((q) => [q.type, q.value])) as Record<string, string>; const mes = (p.month ?? '').replace(/\.$/, ''); return loc.startsWith('en') ? `${mes} ${p.day} ’${p.year}` : `${p.day} ${mes} ’${p.year}` } }
+/** o texto (UTF-8) de bytes em base64, como os que `entrada/arquivo` entrega em `dados`; inválido, vazio */
+export const f_textoDeBase64: Funcao = { min: 1, max: 1, fn: (b) => { if (typeof b !== 'string' || b.length > 8_000_000 || !/^[A-Za-z0-9+/]*={0,2}$/.test(b)) return ''; try { const bin = atob(b), bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes).replace(/^\ufeff/, '') } catch { return '' } } }
+/** CSV → lista de objetos: a primeira linha dá os nomes das colunas (sem espaços nas pontas); aspas, vírgula/ponto e vírgula/tabulação (detectados na 1ª linha) e quebras dentro de aspas valem; até 5000 linhas e 100 colunas */
+export const f_csv: Funcao = { min: 1, max: 1, fn: (t) => {
+  if (typeof t !== 'string' || t.length > 5_000_000) return undefined
+  const s = t.replace(/^\ufeff/, ''), primeira = s.split(/\r?\n/, 1)[0] ?? '', sep = [',', ';', '\t'].reduce((m, c) => (primeira.split(c).length > primeira.split(m).length ? c : m), ',')
+  const linhas: string[][] = []; let campo = '', linha: string[] = [], aspas = false
+  const fimCampo = () => { linha.push(campo); campo = '' }, fimLinha = () => { fimCampo(); if (!(linha.length === 1 && linha[0] === '')) linhas.push(linha); linha = [] }
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]!
+    if (aspas) { if (c === '"') { if (s[i + 1] === '"') { campo += '"'; i++ } else aspas = false } else campo += c }
+    else if (c === '"' && campo === '') aspas = true
+    else if (c === sep) fimCampo()
+    else if (c === '\n') fimLinha()
+    else if (c !== '\r') campo += c
+    if (linhas.length > 5001) return undefined
+  }
+  if (campo !== '' || linha.length) fimLinha()
+  if (!linhas.length) return []
+  const cab = linhas[0]!.map((h) => h.trim()); if (cab.length > 100) return undefined
+  return linhas.slice(1).map((l) => Object.fromEntries(cab.map((h, i) => [h, (l[i] ?? '').trim()]).filter(([h]) => h !== '')))
+} }
+/** lista de objetos → texto CSV com as colunas dadas (a primeira linha são os nomes); aspas quando preciso e proteção contra fórmula de planilha (texto que começa com = + - @ ganha um apóstrofo) */
+export const f_csvTexto: Funcao = { min: 2, max: 2, fn: (l, cols) => {
+  if (!Array.isArray(l) || !Array.isArray(cols) || l.length > 20000 || cols.length > 100 || cols.some((c) => typeof c !== 'string')) return undefined
+  const cel = (v: unknown): string => { let t = v === null || v === undefined ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v); if (typeof v === 'string' && /^[=+\-@\t\r]/.test(t) && Number.isNaN(Number(t))) t = `'${t}`; return /[",\r\n;]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t }
+  return [cols.map(cel).join(','), ...l.map((o) => cols.map((c) => cel(o && typeof o === 'object' ? (o as Record<string, unknown>)[c as string] : undefined)).join(','))].join('\r\n')
+} }
+/** fatia de rosca (ou de pizza com r0 = 0) como caminho SVG: centro, raios interno e externo e ângulos em graus a partir de 12 h, no sentido horário; 360° vira um anel inteiro */
+export const f_arco: Funcao = { min: 6, max: 6, fn: (cx, cy, r0, r1, a0, a1) => {
+  const [x, y, ri, re, aa, ab] = [cx, cy, r0, r1, a0, a1].map(aNum); if ([x, y, ri, re, aa, ab].some((n) => n === undefined) || ri! < 0 || re! <= ri!) return undefined
+  const p = (r: number, a: number) => `${Math.round((x! + r * Math.sin((a * Math.PI) / 180)) * 100) / 100} ${Math.round((y! - r * Math.cos((a * Math.PI) / 180)) * 100) / 100}`
+  const varre = Math.min(360, Math.max(0, ab! - aa!)); if (varre === 0) return ''
+  const fim = varre >= 359.999 ? aa! + 359.99 : aa! + varre, grande = varre > 180 ? 1 : 0
+  const ext = `M${p(re!, aa!)}A${re} ${re} 0 ${grande} 1 ${p(re!, fim)}`
+  if (ri === 0) return `${ext}L${x} ${y}Z`
+  return `${ext}L${p(ri!, fim)}A${ri} ${ri} 0 ${grande} 0 ${p(ri!, aa!)}Z`
+} }
 export const f_padrao: Funcao = { min: 2, max: 2, fn: (x, d) => (x === null || x === undefined || x === '' ? d : x) }
 // formatadores
 export const f_brl: Funcao = { min: 1, max: 1, fn: (x) => { const n = aNum(x); return n === undefined ? '' : nf('brl', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) } }

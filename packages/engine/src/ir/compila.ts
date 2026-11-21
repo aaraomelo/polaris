@@ -13,7 +13,7 @@ import {
 
 /** expressão como o autor escreveu: texto (açúcar) ou AST canônico em JSON */
 type ExprSrc = string | Record<string, unknown>
-type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar'; estado?: string; valor?: ExprSrc; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
+type AcaoSrc = { acao: 'definir' | 'executar' | 'navegar' | 'baixar'; nome?: string; tipo?: string; estado?: string; valor?: ExprSrc; dados?: string; args?: Record<string, unknown>; depois?: AcaoSrc[]; emErro?: AcaoSrc[]; para?: string }
 type Inst = {
   bloco: string; id?: string; props?: unknown; slots?: Record<string, Inst[]>
   se?: ExprSrc; repetir?: { cada: ExprSrc; como: string; chave?: ExprSrc }; eventos?: Record<string, AcaoSrc[]>; esqueleto?: Inst
@@ -176,6 +176,9 @@ function compilaAcoes(cx: Cx, lista: AcaoSrc[], caminho: string, escopo: readonl
         depois: compilaAcoes(cx, a.depois ?? [], `${c}/depois`, [...escopo, 'resultado'], prof + 1, contador),
         emErro: compilaAcoes(cx, a.emErro ?? [], `${c}/emErro`, [...escopo, 'erro'], prof + 1, contador),
       })
+    } else if (a.acao === 'baixar') {
+      const conteudo = exprPura(cx, a.valor!, escopo, `${c}/valor`)
+      if (conteudo) out.push({ acao: 'baixar', nome: compilaTexto(cx, a.nome!, escopo, `${c}/nome`), conteudo, tipo: a.tipo === 'text/csv' || a.tipo === 'application/json' ? a.tipo : 'text/plain', caminho: c })
     } else {
       out.push({ acao: 'navegar', para: compilaTexto(cx, a.para!, escopo, `${c}/para`), caminho: c })
     }

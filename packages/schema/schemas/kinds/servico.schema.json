@@ -60,7 +60,9 @@
                     "obter",
                     "criar",
                     "atualizar",
-                    "remover"
+                    "remover",
+                    "lote",
+                    "limpar"
                   ]
                 },
                 "description": "padrão: as cinco"

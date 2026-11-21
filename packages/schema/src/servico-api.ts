@@ -6,7 +6,8 @@ import type { No } from './index'
 // (Fastify, @polaris/servico), então documentação e comportamento não têm como divergir.
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-export type CrudOp = 'listar' | 'obter' | 'criar' | 'atualizar' | 'remover'
+/** `lote` cria vários registros numa transação só (POST <caminho>/lote, até 500); `limpar` remove todos os do alcance de quem chama (DELETE <caminho>). Nenhuma das duas está no padrão: só vale se declarada em `crud.operacoes` */
+export type CrudOp = 'listar' | 'obter' | 'criar' | 'atualizar' | 'remover' | 'lote' | 'limpar'
 type Ent = { escopo?: 'usuario'; campos: Record<string, Campo & { descricao?: string }>; busca?: { campos: string[]; modo?: 'exata' | 'aproximada' }; crud?: { caminho: string; operacoes?: CrudOp[]; permissao?: string } }
 type Op = { metodo: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; caminho: string; entrada?: Record<string, Campo>; saida?: string; lista?: boolean; permissao?: string; publica?: string[] }
 type Spec = { entidades: Record<string, Ent>; operacoes: Record<string, Op>; consome?: string[] }
@@ -21,6 +22,8 @@ export type Rota = {
   caminhoFastify: string
   params: string[]
   origem: { tipo: 'operacao' } | { tipo: 'crud'; crud: CrudOp; entidade: string }
+  /** só em `lote`: o schema de UM item do corpo `{ itens: [...] }` */
+  itens?: Record<string, unknown>
   /** campos de query (GET/DELETE) ou de corpo (demais), SEM os parâmetros de caminho */
   entrada: Record<string, Campo>
   /** entidade devolvida; ausente = 204 */
@@ -73,7 +76,7 @@ export function esquemaDeEntidade(ent: Ent, modo: 'saida' | 'entrada' | 'alterac
 }
 
 /** `criar` responde 201; o resto, 200 (ou 204 sem saída) */
-export const codigoSucesso = (r: Pick<Rota, 'origem' | 'saida'>): '200' | '201' | '204' => (r.saida === undefined ? '204' : r.origem.tipo === 'crud' && r.origem.crud === 'criar' ? '201' : '200')
+export const codigoSucesso = (r: Pick<Rota, 'origem' | 'saida'>): '200' | '201' | '204' => (r.saida === undefined ? '204' : r.origem.tipo === 'crud' && (r.origem.crud === 'criar' || r.origem.crud === 'lote') ? '201' : '200')
 const ids = (caminho: string): string[] => [...caminho.matchAll(/:([A-Za-z][A-Za-z0-9]*)/g)].map((m) => m[1]!)
 const aOpenApi = (c: string) => c.replace(/:([A-Za-z][A-Za-z0-9]*)/g, '{$1}')
 
@@ -85,7 +88,7 @@ export function rotasDe(no: No): Rota[] {
   const add = (r: Omit<Rota, 'caminho' | 'params' | 'caminhoFastify' | 'acao' | 'sujeito'> & { caminhoFastify: string }) => {
     if (usados.has(r.id)) throw new EmissaoErro(`servico ${no.id}: operação duplicada '${r.id}' (uma operação declarada colide com a rota CRUD gerada)`)
     usados.add(r.id)
-    const acao = r.origem.tipo === 'crud' ? r.origem.crud : r.id
+    const acao = r.origem.tipo === 'crud' ? (r.origem.crud === 'lote' ? 'criar' : r.origem.crud === 'limpar' ? 'remover' : r.origem.crud) : r.id // lote vale como criar e limpar como remover para as regras de acesso
     const sujeito = `${no.id}.${r.origem.tipo === 'crud' ? r.origem.entidade : (r.saida ?? 'operacoes')}`
     rotas.push({ ...r, acao, sujeito, caminho: aOpenApi(r.caminhoFastify), params: ids(r.caminhoFastify) })
   }
@@ -102,6 +105,7 @@ export function rotasDe(no: No): Rota[] {
     const permissao = modoDeAcesso(ent.crud.permissao)
     if (ent.escopo === 'usuario' && permissao === 'publica') throw new EmissaoErro(`servico ${no.id}: a entidade '${nome}' tem escopo por usuário e não pode ter crud público (não há usuário para dono dos registros)`)
     const ops = ent.crud.operacoes ?? ['listar', 'obter', 'criar', 'atualizar', 'remover']
+    if (ent.escopo === undefined && ops.includes('limpar')) { /* sem escopo, limpar apaga tudo do tenant que o papel alcança: permitido, mas só se declarado */ }
     const idParam = { id: { tipo: 'uuid', obrigatorio: true } } as Record<string, Campo>
     if (ent.busca) {
       if ('busca' in ent.campos) throw new EmissaoErro(`servico ${no.id}: a entidade '${nome}' tem um campo chamado 'busca', que é o nome do parâmetro de busca`)
@@ -115,6 +119,8 @@ export function rotasDe(no: No): Rota[] {
       if (op === 'obter') add({ ...base, id: `obter${cap(nome)}`, metodo: 'get', caminhoFastify: `${caminho}/:id`, entrada: {}, lista: false })
       if (op === 'criar') add({ ...base, id: `criar${cap(nome)}`, metodo: 'post', caminhoFastify: caminho, entrada: ent.campos, lista: false })
       if (op === 'atualizar') add({ ...base, id: `atualizar${cap(nome)}`, metodo: 'patch', caminhoFastify: `${caminho}/:id`, entrada: Object.fromEntries(Object.entries(ent.campos).map(([k, c]) => [k, { ...c, obrigatorio: false, padrao: undefined }])) as Record<string, Campo>, lista: false })
+      if (op === 'lote') add({ ...base, id: `criarLote${cap(nome)}`, metodo: 'post', caminhoFastify: `${caminho}/lote`, entrada: { itens: { tipo: 'json', obrigatorio: true } }, lista: true, itens: esquemaDeEntidade(ent, 'entrada') })
+      if (op === 'limpar') { const { saida: _s, ...sem } = { ...base, id: `limpar${cap(nome)}`, metodo: 'delete' as const, caminhoFastify: caminho, entrada: {}, lista: false }; add(sem) }
       if (op === 'remover') { const { saida: _s, ...sem } = { ...base, id: `remover${cap(nome)}`, metodo: 'delete' as const, caminhoFastify: `${caminho}/:id`, entrada: {}, lista: false }; add(sem) }
     }
     void idParam
@@ -136,7 +142,7 @@ export function esquemasHttp(r: Rota): { params?: Record<string, unknown>; query
   return {
     ...(r.params.length ? { params: { type: 'object', properties: Object.fromEntries(r.params.map((p) => [p, { type: 'string', format: 'uuid' }])), required: r.params, additionalProperties: false } } : {}),
     ...(emQuery ? { querystring: { type: 'object', ...props(r.entrada, crud), properties: { ...props(r.entrada, false).properties, ...(crud && 'busca' in r.entrada ? { busca: { type: 'string', maxLength: 100, description: DESC_BUSCA } } : {}), ...(r.lista ? PAGINA_HTTP : {}) }, additionalProperties: false } } : {}),
-    ...(!emQuery ? { body: { type: 'object', ...props(r.entrada, crud && r.origem.tipo === 'crud' && r.origem.crud === 'atualizar'), additionalProperties: false } } : {}),
+    ...(!emQuery ? { body: r.itens ? { type: 'object', properties: { itens: { type: 'array', minItems: 1, maxItems: 500, items: r.itens } }, required: ['itens'], additionalProperties: false } : { type: 'object', ...props(r.entrada, crud && r.origem.tipo === 'crud' && r.origem.crud === 'atualizar'), additionalProperties: false } } : {}),
   }
 }
 
@@ -163,7 +169,7 @@ export function emiteOpenApi(no: No): string {
       ...(emQuery ? Object.entries(r.entrada).map(([k, c]) => (r.origem.tipo === 'crud' && k === 'busca' ? { name: k, in: 'query', required: false, description: DESC_BUSCA, schema: { type: 'string', maxLength: 100 } } : { name: k, in: 'query', required: !!c.obrigatorio, schema: esquemaDoCampo(c) })) : []),
       ...(r.lista ? [{ name: 'pagina', in: 'query', required: false, schema: { type: 'integer', minimum: 1, default: 1 } }, { name: 'limite', in: 'query', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 24 } }] : []),
     ]
-    const entradaCorpo = r.origem.tipo === 'crud' && r.origem.crud === 'criar' ? ref(r.origem.entidade, 'Entrada') : r.origem.tipo === 'crud' && r.origem.crud === 'atualizar' ? ref(r.origem.entidade, 'Alteracao')
+    const entradaCorpo = r.itens ? { type: 'object', properties: { itens: { type: 'array', minItems: 1, maxItems: 500, items: ref(r.origem.tipo === 'crud' ? r.origem.entidade : '', 'Entrada') } }, required: ['itens'], additionalProperties: false } : r.origem.tipo === 'crud' && r.origem.crud === 'criar' ? ref(r.origem.entidade, 'Entrada') : r.origem.tipo === 'crud' && r.origem.crud === 'atualizar' ? ref(r.origem.entidade, 'Alteracao')
       : { type: 'object', properties: Object.fromEntries(Object.entries(r.entrada).map(([k, c]) => [k, esquemaDoCampo(c)])), required: Object.entries(r.entrada).filter(([, c]) => c.obrigatorio && c.padrao === undefined).map(([k]) => k), additionalProperties: false }
     const sucesso = r.saida === undefined ? { '204': { description: 'sem conteúdo' } }
       : { [codigoSucesso(r)]: { description: r.lista ? 'lista paginada' : codigoSucesso(r) === '201' ? 'criado' : 'ok', content: { 'application/json': { schema: r.lista ? { type: 'array', items: ref(r.saida) } : ref(r.saida) } } } }

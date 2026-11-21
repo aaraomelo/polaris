@@ -2,6 +2,6 @@
   {
     "caminho": "/spec/raiz/eventos/aoClicar/0/acao",
     "regra": "enum",
-    "mensagem": "valor \"explodir\" não é permitido; aceitos: 'definir', 'executar', 'navegar'"
+    "mensagem": "valor \"explodir\" não é permitido; aceitos: 'definir', 'executar', 'navegar', 'baixar'"
   }
 ]

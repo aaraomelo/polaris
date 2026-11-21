@@ -25,6 +25,8 @@ export type ContextoAcoes = {
   vivo: { atual: boolean }
   carregador?: Carregador
   navegar?: (url: string) => void
+  /** entrega um arquivo gerado (ação `baixar`); o padrão do navegador cria um Blob e clica num link de download */
+  baixar?: (arquivo: { nome: string; tipo: string; conteudo: string }) => void
   onErro?: (e: ErroRuntime) => void
   funcoes?: Funcoes
 }
@@ -51,6 +53,15 @@ export async function executaAcoes(acoes: IRAcao[], capturado: Escopo, extra: Re
         if (!url) { cx.onErro?.({ caminho: a.caminho, regra: 'navegacao', mensagem: 'destino de navegação ausente ou inseguro' }); continue }
         if (cx.navegar) cx.navegar(url)
         else if (typeof window !== 'undefined') window.location.assign(url)
+      } else if (a.acao === 'baixar') {
+        const n = valorDeC(a.nome, escopo(), funcoes), c = avaliaC(a.conteudo, escopo(), funcoes)
+        const nome = (typeof n === 'string' ? n : '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').replace(/^\.+/, '').slice(0, 100), conteudo = typeof c === 'string' ? c : ''
+        if (!nome || conteudo.length > 5_000_000) { cx.onErro?.({ caminho: a.caminho, regra: 'acao', mensagem: 'baixar: nome do arquivo ausente ou conteúdo grande demais (5 MB)' }); continue }
+        if (cx.baixar) cx.baixar({ nome, tipo: a.tipo, conteudo })
+        else if (typeof document !== 'undefined') {
+          const url = URL.createObjectURL(new Blob([a.tipo === 'text/csv' ? '\ufeff' : '', conteudo], { type: `${a.tipo};charset=utf-8` })), l = document.createElement('a')
+          l.href = url; l.download = nome; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000)
+        }
       } else {
         await executa(a, escopo(), extra, cx, capturado)
       }

@@ -176,7 +176,8 @@
           "enum": [
             "definir",
             "executar",
-            "navegar"
+            "navegar",
+            "baixar"
           ]
         },
         "estado": {
@@ -216,6 +217,19 @@
         "para": {
           "$ref": "#/$defs/template",
           "description": "navegar: URL ou rota de destino"
+        },
+        "nome": {
+          "$ref": "#/$defs/template",
+          "description": "baixar: nome do arquivo (template; sem pastas, até 100 caracteres)"
+        },
+        "tipo": {
+          "enum": [
+            "text/csv",
+            "text/plain",
+            "application/json"
+          ],
+          "default": "text/plain",
+          "description": "baixar: tipo do arquivo"
         }
       },
       "allOf": [
@@ -286,6 +300,31 @@
             },
             "required": [
               "para"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "acao": {
+                "const": "baixar"
+              }
+            },
+            "required": [
+              "acao"
+            ]
+          },
+          "then": {
+            "properties": {
+              "acao": {},
+              "nome": {},
+              "valor": {},
+              "tipo": {}
+            },
+            "required": [
+              "nome",
+              "valor"
             ],
             "additionalProperties": false
           }

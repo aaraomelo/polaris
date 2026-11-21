@@ -944,6 +944,54 @@ Data curta no idioma: `en` → `May 24 ’27`; `pt-BR` → `24 mai ’27`.
 | `dataCurta("2027-05-24", "pt-BR")` |  | `"24 mai ’27"` |
 | `dataCurta("x")` |  | `""` |
 
+### `textoDeBase64`
+
+`textoDeBase64(b64) → texto`
+
+O texto (UTF-8, sem BOM) de bytes em base64, como os que `entrada/arquivo` entrega em `dados`; inválido, vazio.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `textoDeBase64("YSxi")` |  | `"a,b"` |
+| `textoDeBase64("%%")` |  | `""` |
+
+### `csv`
+
+`csv(texto) → lista de objetos`
+
+Lê um CSV: a primeira linha dá os nomes das colunas; aspas, vírgula, ponto e vírgula ou tabulação (detectados na 1ª linha) e quebras dentro de aspas valem. Até 5000 linhas e 100 colunas; texto grande demais, ausente.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `csv("nome,arr
+Acme,100
+Beta,5")` |  | `[{"nome":"Acme","arr":"100"},{"nome":"Beta","arr":"5"}]` |
+| `csv("a;b
+1;2")` |  | `[{"a":"1","b":"2"}]` |
+| `csv(1)` |  | _(ausente)_ |
+
+### `csvTexto`
+
+`csvTexto(lista, colunas) → texto`
+
+Lista de objetos → CSV com as colunas dadas (a 1ª linha são os nomes). Põe aspas quando preciso e protege contra fórmula de planilha: texto que começa com = + - @ ganha um apóstrofo.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `csvTexto([objeto([["a", 1], ["b", "x,y"]])], ["a", "b"])` |  | `"a,b\r\n1,\"x,y\""` |
+| `csvTexto([objeto([["a", "=1+1"]])], ["a"])` |  | `"a\r\n'=1+1"` |
+
+### `arco`
+
+`arco(cx, cy, r0, r1, a0, a1) → texto`
+
+Fatia de rosca (ou de pizza com r0 = 0) como caminho SVG para `grafico/caminho`: centro, raios interno e externo e ângulos em graus a partir de 12 h, no sentido horário; 360° vira um anel inteiro.
+
+| Expressão | Escopo | Resultado |
+|---|---|---|
+| `arco(50, 50, 0, 40, 0, 90)` |  | `"M50 10A40 40 0 0 1 90 50L50 50Z"` |
+| `arco(0, 0, 5, 3, 0, 90)` |  | _(ausente)_ |
+
 ### `mediana`
 
 `mediana(lista) → número`

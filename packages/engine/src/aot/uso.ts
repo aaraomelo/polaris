@@ -23,6 +23,7 @@ export function usoDoPrograma(programa: Programa): Uso {
   const acao = (a: IRAcao): void => {
     if (a.acao === 'definir') expr(a.valor)
     else if (a.acao === 'navegar') valor(a.para)
+    else if (a.acao === 'baixar') { valor(a.nome); expr(a.conteudo) }
     else { Object.values(a.args).forEach(valor); a.depois.forEach(acao); a.emErro.forEach(acao) }
   }
   const visto = new WeakSet<IRNo>()

@@ -29,6 +29,8 @@ export type OpcoesNucleo = SementeStore & {
   idioma?: string
   carregador?: Carregador
   navegar?: (url: string) => void
+  /** entrega o arquivo gerado pela ação `baixar` (padrão: download pelo navegador) */
+  baixar?: (arquivo: { nome: string; tipo: string; conteudo: string }) => void
   onErro?: (e: ErroRuntime) => void
   funcoes?: Funcoes
   /** mundo fechado: só as chaves que a página declara poder mudar aceitam `despacha` externo (habilita a poda de nós estáticos) */
@@ -128,6 +130,7 @@ export function criaModeloNucleo(o: OpcoesNucleo): ModeloNucleo {
     dispatch: (a) => { pendentes.push(a); if (!agendado) { agendado = true; queueMicrotask(flush) } },
     ...(o.carregador ? { carregador: o.carregador } : {}),
     ...(o.navegar ? { navegar: o.navegar } : {}),
+    ...(o.baixar ? { baixar: o.baixar } : {}),
     ...(o.onErro ? { onErro: o.onErro } : {}),
   }
 

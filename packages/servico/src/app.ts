@@ -189,6 +189,25 @@ export function criaServico(no: No, o: OpcoesServico): FastifyInstance {
         if (!noEscopo(r.rows[0]!)) throw proibido() // o registro criado cairia fora do alcance do papel: a transação desfaz
         return projeta(r.rows[0]!)
       }
+      case 'lote': {
+        const itens = (e.entrada.itens ?? []) as Array<Record<string, unknown>>, criados: Array<Record<string, unknown>> = []
+        for (const item of itens) {
+          const campos = Object.keys(item)
+          if (escrita !== null) { const fora = campos.filter((c) => !escrita.includes(c)); if (fora.length) throw new ErroApi(403, 'campo_proibido', `sem permissão para informar: ${fora.join(', ')}`) }
+          const r = await e.q(`INSERT INTO ${t} ("tenant_id"${dono !== null ? ', "dono"' : ''}${campos.map((c) => `, ${coluna(c)}`).join('')}) VALUES ($1${dono !== null ? ', $2' : ''}${campos.map((_, i) => `, $${i + (dono !== null ? 3 : 2)}`).join('')}) RETURNING ${colunas(ent)}`, [e.ctx.tenantId, ...(dono !== null ? [dono] : []), ...campos.map((c) => valor(c, item[c]))])
+          if (!noEscopo(r.rows[0]!)) throw proibido()
+          criados.push(projeta(r.rows[0]!))
+        }
+        return criados // a transação é uma só: qualquer item inválido desfaz o lote inteiro
+      }
+      case 'limpar': {
+        const ps: unknown[] = []
+        const onde: string[] = []
+        if (dono !== null) { ps.push(dono); onde.push(`"dono" = $${ps.length}`) }
+        if (cond) onde.push(`(${aSql(cond, coluna, ps, tipos as Tipos)})`)
+        await e.q(`DELETE FROM ${t}${onde.length ? ` WHERE ${onde.join(' AND ')}` : ''}`, ps)
+        return undefined
+      }
       case 'atualizar': {
         const campos = Object.keys(e.entrada)
         if (!campos.length) throw new ErroApi(400, 'requisicao_invalida', 'informe ao menos um campo para atualizar')
