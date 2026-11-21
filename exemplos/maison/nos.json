@@ -43,6 +43,74 @@
           "tamanhoBase": "16px",
           "tamanhoH1": "clamp(2.75rem, 6.5vw, 5rem)",
           "tamanhoExibicao": "clamp(3rem, 8.5vw, 8rem)",
+          "escala": {
+            "exibicao": {
+              "tamanho": "clamp(3rem, 8.5vw, 8rem)",
+              "peso": 400,
+              "altura": 0.9,
+              "espacamento": "-0.025em"
+            },
+            "hero": {
+              "tamanho": "clamp(3rem, 5vw, 4.5rem)",
+              "peso": 500,
+              "altura": 1,
+              "espacamento": "-0.025em"
+            },
+            "sobre-hero": {
+              "tamanho": "clamp(3rem, 6vw, 6rem)",
+              "peso": 400,
+              "altura": 1,
+              "espacamento": "-0.02em"
+            },
+            "declaracao": {
+              "tamanho": "clamp(1.875rem, 3.5vw, 3rem)",
+              "peso": 500,
+              "altura": 1,
+              "espacamento": "-0.025em"
+            },
+            "secao": {
+              "tamanho": "clamp(1.75rem, 2.6vw, 2.25rem)",
+              "peso": 500,
+              "altura": 1.11,
+              "espacamento": "-0.025em"
+            },
+            "citacao": {
+              "tamanho": "clamp(2.25rem, 4.2vw, 3.75rem)",
+              "peso": 400,
+              "altura": 1,
+              "espacamento": 0
+            },
+            "chamada": {
+              "tamanho": "clamp(2.25rem, 4.2vw, 3.75rem)",
+              "peso": 500,
+              "altura": 1,
+              "espacamento": "-0.025em"
+            },
+            "valor": {
+              "tamanho": "1.5rem",
+              "peso": 500,
+              "altura": 1.33,
+              "espacamento": "-0.025em"
+            },
+            "lead": {
+              "tamanho": "1.125rem",
+              "peso": 400,
+              "altura": 1.55,
+              "espacamento": "normal"
+            },
+            "longo": {
+              "tamanho": "1rem",
+              "peso": 400,
+              "altura": 1.8,
+              "espacamento": "normal"
+            },
+            "olho": {
+              "tamanho": "0.625rem",
+              "peso": 600,
+              "altura": 1.5,
+              "espacamento": "0.3em"
+            }
+          },
           "pesoExibicao": 400,
           "tamanhoMedio": "clamp(1.875rem, 3vw, 2.25rem)",
           "tamanhoGrande": "clamp(2.5rem, 5vw, 3.75rem)",
@@ -368,15 +436,21 @@
           "sobre.h1b": "para viver",
           "sobre.capa.texto": "Objetos feitos com cuidado, materiais que envelhecem bem e espaços que convidam à pausa.",
           "sobre.filosofia.eyebrow": "Nossa filosofia",
-          "sobre.filosofia.texto": "Acreditamos que os objetos que nos cercam devem contar histórias, envelhecer com beleza e trazer uma alegria silenciosa aos momentos do dia a dia.",
+          "sobre.filosofia.a": "Acreditamos que os objetos que nos cercam devem contar histórias, envelhecer com beleza e trazer uma ",
+          "sobre.filosofia.enfase": "alegria",
+          "sobre.filosofia.b": " silenciosa aos momentos do dia a dia.",
           "sobre.comeco.eyebrow": "O começo",
-          "sobre.comeco.titulo": "Uma busca pessoal por sentido",
+          "sobre.comeco.titulo": "Uma busca pessoal",
+          "sobre.comeco.enfase": "por sentido",
           "sobre.comeco.p1": "A Maison nasceu de uma busca pessoal por objetos que tivessem significado numa época em que tudo é descartável. Depois de anos colecionando e selecionando, abrimos as portas para dividir essas descobertas com quem valoriza o ofício acima da conveniência.",
           "sobre.comeco.p2": "O que começou como uma pequena coleção virou uma seleção cuidadosa de peças para a casa e o estilo de vida, cada uma escolhida por trazer calor, textura e intenção aos espaços onde vivemos.",
           "sobre.comeco.alt": "Sala com objetos selecionados",
-          "sobre.citacao": "“A beleza está na imperfeição das coisas feitas à mão”",
+          "sobre.citacao.a": "“A beleza está na ",
+          "sobre.citacao.enfase": "imperfeição",
+          "sobre.citacao.b": " das coisas feitas à mão”",
           "sobre.abordagem.eyebrow": "Nossa abordagem",
-          "sobre.abordagem.titulo": "Da oficina para a sua casa",
+          "sobre.abordagem.titulo": "Da oficina",
+          "sobre.abordagem.enfase": "para a sua casa",
           "sobre.abordagem.p1": "Cada peça da nossa coleção passa pelas nossas mãos antes de chegar às suas. Visitamos oficinas, conhecemos quem faz e aprendemos a história por trás de cada objeto. Esse contato pessoal garante que o que oferecemos não é só bonito: é honesto.",
           "sobre.abordagem.p2": "Priorizamos materiais naturais, técnicas tradicionais e artesãos que compartilham nossos valores. Seja um vaso de cerâmica torneado à mão ou uma mesa de carvalho feita para durar gerações, acreditamos em objetos que melhoram com o tempo, e não o contrário.",
           "sobre.abordagem.alt": "Peças de uma oficina",
@@ -568,15 +642,21 @@
           "sobre.h1b": "for Living",
           "sobre.capa.texto": "Objects made with care, materials that age gracefully, and spaces that invite pause.",
           "sobre.filosofia.eyebrow": "Our Philosophy",
-          "sobre.filosofia.texto": "We believe that the objects we surround ourselves with should tell stories, age beautifully, and bring quiet joy to everyday moments.",
+          "sobre.filosofia.a": "We believe that the objects we surround ourselves with should tell stories, age beautifully, and bring quiet ",
+          "sobre.filosofia.enfase": "joy",
+          "sobre.filosofia.b": " to everyday moments.",
           "sobre.comeco.eyebrow": "The Beginning",
-          "sobre.comeco.titulo": "A Personal Quest for Meaning",
+          "sobre.comeco.titulo": "A Personal Quest",
+          "sobre.comeco.enfase": "for Meaning",
           "sobre.comeco.p1": "Maison began as a personal quest—a search for objects that felt meaningful in an age of disposable everything. After years of collecting and curating, we opened our doors to share these discoveries with others who value craftsmanship over convenience.",
           "sobre.comeco.p2": "What started as a small collection has grown into a carefully edited selection of home goods and lifestyle pieces, each chosen for its ability to bring warmth, texture, and intention to the spaces we inhabit.",
           "sobre.comeco.alt": "Living room with curated objects",
-          "sobre.citacao": "“Beauty lies in the imperfection of things made by hand”",
+          "sobre.citacao.a": "“Beauty lies in the ",
+          "sobre.citacao.enfase": "imperfection",
+          "sobre.citacao.b": " of things made by hand”",
           "sobre.abordagem.eyebrow": "Our Approach",
-          "sobre.abordagem.titulo": "From Workshop to Home",
+          "sobre.abordagem.titulo": "From Workshop",
+          "sobre.abordagem.enfase": "to Home",
           "sobre.abordagem.p1": "Every piece in our collection passes through our hands before reaching yours. We visit workshops, meet makers, and learn the stories behind each object. This personal connection ensures that what we offer isn't just beautiful—it's honest.",
           "sobre.abordagem.p2": "We prioritize natural materials, traditional techniques, and makers who share our values. Whether it''s a hand-thrown ceramic vessel or a solid oak table built to last generations, we believe in objects that get better with time, not worse.",
           "sobre.abordagem.alt": "Pieces from a workshop",
@@ -892,7 +972,8 @@
                           "bloco": "texto/titulo",
                           "props": {
                             "texto": "",
-                            "nivel": 1
+                            "nivel": 1,
+                            "escala": "exibicao"
                           },
                           "slots": {
                             "filhos": [
@@ -2450,14 +2531,16 @@
                         {
                           "bloco": "texto/sobretitulo",
                           "props": {
-                            "texto": "{t(\"loja.colecao\")}"
+                            "texto": "{t(\"loja.colecao\")}",
+                            "escala": "olho"
                           }
                         },
                         {
                           "bloco": "texto/titulo",
                           "props": {
                             "texto": "{c.nome}",
-                            "nivel": 1
+                            "nivel": 1,
+                            "escala": "hero"
                           }
                         },
                         {
@@ -2495,14 +2578,16 @@
                         {
                           "bloco": "texto/sobretitulo",
                           "props": {
-                            "texto": "{t(\"loja.eyebrow\")}"
+                            "texto": "{t(\"loja.eyebrow\")}",
+                            "escala": "olho"
                           }
                         },
                         {
                           "bloco": "texto/titulo",
                           "props": {
                             "texto": "{t(\"loja.titulo\")}",
-                            "nivel": 1
+                            "nivel": 1,
+                            "escala": "hero"
                           }
                         }
                       ]
@@ -4514,7 +4599,7 @@
               "bloco": "layout/destaque",
               "props": {
                 "imagem": "@img/sobre-capa",
-                "altura": 560,
+                "altura": 800,
                 "escurece": 0.4,
                 "alinha": "esquerda",
                 "capa": true
@@ -4535,7 +4620,8 @@
                           "bloco": "texto/titulo",
                           "props": {
                             "texto": "",
-                            "nivel": 1
+                            "nivel": 1,
+                            "escala": "sobre-hero"
                           },
                           "slots": {
                             "filhos": [
@@ -4558,7 +4644,8 @@
                         {
                           "bloco": "texto/paragrafo",
                           "props": {
-                            "texto": "{t(\"sobre.capa.texto\")}"
+                            "texto": "{t(\"sobre.capa.texto\")}",
+                            "escala": "lead"
                           }
                         }
                       ]
@@ -4570,7 +4657,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 160
               }
             },
             {
@@ -4583,13 +4670,38 @@
                   {
                     "bloco": "texto/sobretitulo",
                     "props": {
-                      "texto": "{t(\"sobre.filosofia.eyebrow\")}"
+                      "texto": "{t(\"sobre.filosofia.eyebrow\")}",
+                      "escala": "olho"
                     }
                   },
                   {
-                    "bloco": "texto/paragrafo",
+                    "bloco": "texto/titulo",
                     "props": {
-                      "texto": "{t(\"sobre.filosofia.texto\")}"
+                      "texto": "",
+                      "nivel": 2,
+                      "escala": "declaracao"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/trecho",
+                          "props": {
+                            "texto": "{t(\"sobre.filosofia.a\")}"
+                          }
+                        },
+                        {
+                          "bloco": "texto/enfase",
+                          "props": {
+                            "texto": "{t(\"sobre.filosofia.enfase\")}"
+                          }
+                        },
+                        {
+                          "bloco": "texto/trecho",
+                          "props": {
+                            "texto": "{t(\"sobre.filosofia.b\")}"
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -4598,7 +4710,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 160
               }
             },
             {
@@ -4631,20 +4743,40 @@
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
-                                  "texto": "{t(\"sobre.comeco.titulo\")}",
-                                  "nivel": 2
+                                  "texto": "",
+                                  "nivel": 2,
+                                  "escala": "secao"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/trecho",
+                                      "props": {
+                                        "texto": "{t(\"sobre.comeco.titulo\")}"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/enfase",
+                                      "props": {
+                                        "texto": "{t(\"sobre.comeco.enfase\")}",
+                                        "bloco": true
+                                      }
+                                    }
+                                  ]
                                 }
                               },
                               {
                                 "bloco": "texto/paragrafo",
                                 "props": {
-                                  "texto": "{t(\"sobre.comeco.p1\")}"
+                                  "texto": "{t(\"sobre.comeco.p1\")}",
+                                  "escala": "longo"
                                 }
                               },
                               {
                                 "bloco": "texto/paragrafo",
                                 "props": {
-                                  "texto": "{t(\"sobre.comeco.p2\")}"
+                                  "texto": "{t(\"sobre.comeco.p2\")}",
+                                  "escala": "longo"
                                 }
                               }
                             ]
@@ -4668,7 +4800,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 128
               }
             },
             {
@@ -4681,8 +4813,31 @@
                   {
                     "bloco": "texto/titulo",
                     "props": {
-                      "texto": "{t(\"sobre.citacao\")}",
-                      "nivel": 3
+                      "texto": "",
+                      "nivel": 2,
+                      "escala": "citacao"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/trecho",
+                          "props": {
+                            "texto": "{t(\"sobre.citacao.a\")}"
+                          }
+                        },
+                        {
+                          "bloco": "texto/enfase",
+                          "props": {
+                            "texto": "{t(\"sobre.citacao.enfase\")}"
+                          }
+                        },
+                        {
+                          "bloco": "texto/trecho",
+                          "props": {
+                            "texto": "{t(\"sobre.citacao.b\")}"
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -4691,7 +4846,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 128
               }
             },
             {
@@ -4733,20 +4888,40 @@
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
-                                  "texto": "{t(\"sobre.abordagem.titulo\")}",
-                                  "nivel": 2
+                                  "texto": "",
+                                  "nivel": 2,
+                                  "escala": "secao"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/trecho",
+                                      "props": {
+                                        "texto": "{t(\"sobre.abordagem.titulo\")}"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/enfase",
+                                      "props": {
+                                        "texto": "{t(\"sobre.abordagem.enfase\")}",
+                                        "bloco": true
+                                      }
+                                    }
+                                  ]
                                 }
                               },
                               {
                                 "bloco": "texto/paragrafo",
                                 "props": {
-                                  "texto": "{t(\"sobre.abordagem.p1\")}"
+                                  "texto": "{t(\"sobre.abordagem.p1\")}",
+                                  "escala": "longo"
                                 }
                               },
                               {
                                 "bloco": "texto/paragrafo",
                                 "props": {
-                                  "texto": "{t(\"sobre.abordagem.p2\")}"
+                                  "texto": "{t(\"sobre.abordagem.p2\")}",
+                                  "escala": "longo"
                                 }
                               }
                             ]
@@ -4761,7 +4936,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 128
               }
             },
             {
@@ -4777,6 +4952,12 @@
                     "bloco": "layout/contido",
                     "slots": {
                       "filhos": [
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 96
+                          }
+                        },
                         {
                           "bloco": "layout/pilha",
                           "props": {
@@ -4804,7 +4985,7 @@
                         {
                           "bloco": "layout/espacador",
                           "props": {
-                            "tamanho": 32
+                            "tamanho": 48
                           }
                         },
                         {
@@ -4818,7 +4999,7 @@
                               {
                                 "bloco": "layout/pilha",
                                 "props": {
-                                  "gap": 8,
+                                  "gap": 12,
                                   "alinha": "inicio"
                                 },
                                 "slots": {
@@ -4833,13 +5014,15 @@
                                       "bloco": "texto/titulo",
                                       "props": {
                                         "texto": "{t(\"sobre.valor1.titulo\")}",
-                                        "nivel": 3
+                                        "nivel": 3,
+                                        "escala": "valor"
                                       }
                                     },
                                     {
                                       "bloco": "texto/paragrafo",
                                       "props": {
-                                        "texto": "{t(\"sobre.valor1.texto\")}"
+                                        "texto": "{t(\"sobre.valor1.texto\")}",
+                                        "escala": "longo"
                                       }
                                     }
                                   ]
@@ -4848,7 +5031,7 @@
                               {
                                 "bloco": "layout/pilha",
                                 "props": {
-                                  "gap": 8,
+                                  "gap": 12,
                                   "alinha": "inicio"
                                 },
                                 "slots": {
@@ -4863,13 +5046,15 @@
                                       "bloco": "texto/titulo",
                                       "props": {
                                         "texto": "{t(\"sobre.valor2.titulo\")}",
-                                        "nivel": 3
+                                        "nivel": 3,
+                                        "escala": "valor"
                                       }
                                     },
                                     {
                                       "bloco": "texto/paragrafo",
                                       "props": {
-                                        "texto": "{t(\"sobre.valor2.texto\")}"
+                                        "texto": "{t(\"sobre.valor2.texto\")}",
+                                        "escala": "longo"
                                       }
                                     }
                                   ]
@@ -4878,7 +5063,7 @@
                               {
                                 "bloco": "layout/pilha",
                                 "props": {
-                                  "gap": 8,
+                                  "gap": 12,
                                   "alinha": "inicio"
                                 },
                                 "slots": {
@@ -4893,19 +5078,27 @@
                                       "bloco": "texto/titulo",
                                       "props": {
                                         "texto": "{t(\"sobre.valor3.titulo\")}",
-                                        "nivel": 3
+                                        "nivel": 3,
+                                        "escala": "valor"
                                       }
                                     },
                                     {
                                       "bloco": "texto/paragrafo",
                                       "props": {
-                                        "texto": "{t(\"sobre.valor3.texto\")}"
+                                        "texto": "{t(\"sobre.valor3.texto\")}",
+                                        "escala": "longo"
                                       }
                                     }
                                   ]
                                 }
                               }
                             ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 96
                           }
                         }
                       ]
@@ -4917,7 +5110,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 24
               }
             },
             {
@@ -5001,14 +5194,14 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 112
+                "tamanho": 24
               }
             },
             {
               "bloco": "layout/destaque",
               "props": {
                 "imagem": "@img/foto-2",
-                "altura": 420,
+                "altura": 600,
                 "escurece": 0.45,
                 "alinha": "centro"
               },
@@ -5024,7 +5217,8 @@
                     "bloco": "texto/titulo",
                     "props": {
                       "texto": "{t(\"sobre.contato.titulo\")}",
-                      "nivel": 2
+                      "nivel": 2,
+                      "escala": "chamada"
                     }
                   },
                   {
@@ -5038,7 +5232,9 @@
                     "props": {
                       "href": "{(tenant.prefixo ?? \"\") + \"/produtos\"}",
                       "texto": "{t(\"home.cta\")}",
-                      "botao": "primario"
+                      "botao": "primario",
+                      "icone": "seta",
+                      "iconeApos": true
                     }
                   }
                 ]

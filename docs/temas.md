@@ -46,6 +46,8 @@ Cada token vira uma variável CSS lida pelo CSS base **com fallback para o visua
 | `cartao` | `tituloTamanho`, `tituloAltura`, `tituloEspacamento`, `tituloHover`, `categoriaCor`, `categoriaTamanho`, `categoriaEspacamento`, `descricaoTamanho`, `precoTamanho`, `precoPeso`, `precoEspacamento`, `seloFundo`, `seloTexto`, `seloMargem` | o cartão de produto (`commerce/cartao-produto`) |
 | `tipografia` | `tamanhoExibicao`, `alturaExibicao`, `espacamentoExibicao` (o `h1` da capa), `alturaTitulo`, `espacamentoTitulo` (todos os títulos), `alturaCorpo` (parágrafos), `tamanhoSobretitulo`, `espacamentoSobretitulo`, `margemSobretitulo` | escala tipográfica fina |
 
+**Escala tipográfica nomeada** (`tipografia.escala.<nome>`): cada entrada define `tamanho`, `peso`, `altura` e `espacamento` e vira as variáveis `--tipografia-escala-<nome>-*`. Os blocos `texto/titulo`, `texto/paragrafo` e `texto/sobretitulo` aceitam `escala: "<nome>"` e passam a ler esses tokens, cada um caindo no padrão do bloco quando falta. Assim o mesmo bloco troca de tamanho/peso por contexto (hero, declaração, citação, corpo longo, olho) sem CSS próprio nem props soltas; um tema sem a escala não muda.
+
 ### Fontes embutidas
 `spec.fontes: ["cormorant-garamond", "inter"]` pede fontes **embutidas na plataforma** (lista fixa em `packages/engine/src/fontes`, subconjunto latino, fonte variável, licença OFL: `packages/engine/fontes/LICENCAS.md`). O gateway emite o `@font-face` (`font-display: swap`) e serve cada arquivo como ativo da **própria origem** (`/_polaris/a/<hash>.woff2`, cache eterno), então a CSP não muda (`font-src 'self'`). Nome desconhecido é ignorado e a pilha do sistema vale. Fontes só do tenant (upload) não existem; as builds estáticas (AOT) e o catálogo ainda não embutem o arquivo.
 

@@ -3337,6 +3337,7 @@ Texto corrido. O conteúdo é sempre escapado (nunca HTML).
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `escala` | texto | não |  | escala tipográfica nomeada: lê os tokens do tema `tipografia.escala.<nome>.tamanho\|peso\|altura\|espacamento` (cada um cai no padrão do bloco quando falta) |
 | `texto` | texto | sim |  |  |
 
 **Exemplo: Texto simples**
@@ -3430,6 +3431,7 @@ A linha pequena em caixa alta e letras espaçadas que vem antes de um título ("
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `escala` | texto | não |  | escala tipográfica nomeada: lê os tokens do tema `tipografia.escala.<nome>.tamanho\|peso\|altura\|espacamento` (cada um cai no padrão do bloco quando falta) |
 | `texto` | texto ≤ 200 caracteres | sim |  |  |
 
 **Exemplo: Antes de um título**
@@ -3465,6 +3467,7 @@ Cabeçalho h1 a h6 conforme `nivel` (padrão 1). `tamanho: "grande"` usa o taman
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `escala` | texto | não |  | escala tipográfica nomeada: lê os tokens do tema `tipografia.escala.<nome>.tamanho\|peso\|altura\|espacamento` (cada um cai no padrão do bloco quando falta) |
 | `nivel` | inteiro ≥ 1 ≤ 6 | não | 1 |  |
 | `tamanho` | "grande" \| "medio" | não |  | título de seção maior (tokens tipografia.tamanhoGrande e tamanhoMedio) |
 | `texto` | texto | sim |  | o texto do título; vazio ("") faz o título ser montado com os filhos (`texto/trecho`, `texto/enfase`) |

@@ -32,6 +32,17 @@ const ALINHA: Record<string, string> = { inicio: 'flex-start', centro: 'center',
 /** a proporção válida da imagem (largura ÷ altura entre 0,2 e 5), ou 0 */
 /** gancho de estilo: `marca` (letras minúsculas, dígitos e hífen) vira `data-marca`, que o CSS do tema usa (ex.: o cartão de produto) */
 export const marcaDe = (p: Record<string, unknown>): string | undefined => (typeof p.marca === 'string' && /^[a-z][a-z0-9-]{0,31}$/.test(p.marca) ? p.marca : undefined)
+/** escala tipográfica nomeada: `escala: "hero"` lê os tokens `tipografia.escala.hero.{tamanho,peso,altura,espacamento}` do tema (cada um com o padrão do bloco quando o token falta) */
+const escalaDe = (p: Record<string, unknown>): string | undefined => (typeof p.escala === 'string' && /^[a-z][a-z0-9-]{0,23}$/.test(p.escala) ? p.escala : undefined)
+export type BaseEscala = { tamanho: string; peso: string; altura: string; espacamento: string }
+export const baseTitulo = (nivel: number): BaseEscala => ({ tamanho: nivel <= 3 ? `var(--tipografia-tamanho-h${nivel}, ${['2em', '1.5em', '1.17em'][nivel - 1]})` : '1em', peso: 'var(--tipografia-peso-titulo, bold)', altura: 'var(--tipografia-altura-titulo, 1.25)', espacamento: 'var(--tipografia-espacamento-titulo, normal)' })
+export const BASE_PARAGRAFO: BaseEscala = { tamanho: 'inherit', peso: 'inherit', altura: 'var(--tipografia-altura-corpo, inherit)', espacamento: 'normal' }
+export const BASE_SOBRETITULO: BaseEscala = { tamanho: 'var(--tipografia-tamanho-sobretitulo, .75em)', peso: '600', altura: '1.5', espacamento: 'var(--tipografia-espacamento-sobretitulo, .25em)' }
+const varEscala = (n: string, k: string, base: string) => `var(--tipografia-escala-${n}-${k}, ${base})`
+/** o `style` da escala (texto, para o HTML) ou `undefined` */
+export const estiloEscala = (p: Record<string, unknown>, b: BaseEscala): string | undefined => { const n = escalaDe(p); return n ? `font-size:${varEscala(n, 'tamanho', b.tamanho)};font-weight:${varEscala(n, 'peso', b.peso)};line-height:${varEscala(n, 'altura', b.altura)};letter-spacing:${varEscala(n, 'espacamento', b.espacamento)}` : undefined }
+/** o mesmo, como objeto de estilo do React */
+export const estiloEscalaObj = (p: Record<string, unknown>, b: BaseEscala): Record<string, string> | undefined => { const n = escalaDe(p); return n ? { fontSize: varEscala(n, 'tamanho', b.tamanho), fontWeight: varEscala(n, 'peso', b.peso), lineHeight: varEscala(n, 'altura', b.altura), letterSpacing: varEscala(n, 'espacamento', b.espacamento) } : undefined }
 export const proporcaoDaImagem = (p: Record<string, unknown>): number => { const v = typeof p.proporcao === 'number' && Number.isFinite(p.proporcao) ? p.proporcao : 0; return v >= 0.2 && v <= 5 ? Math.round(v * 1000) / 1000 : 0 }
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
@@ -53,9 +64,9 @@ export const d_layout_pilha: Descritor = /* @__PURE__ */ caixa('column')
 export const d_layout_linha: Descritor = /* @__PURE__ */ caixa('row')
 /** `tamanho: 'grande'` é o título de seção maior (token `tipografia.tamanhoGrande`); com `texto` vazio ("") o conteúdo vem do slot `filhos` (use `texto/trecho` e `texto/enfase`) */
 const tituloComFilhos = (p: Record<string, unknown>): boolean => p.texto === undefined || p.texto === ''
-export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${tituloComFilhos(p) ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' || p.tamanho === 'medio' ? { 'data-tamanho': p.tamanho as string } : {}) }), texto: (p) => (tituloComFilhos(p) ? undefined : txt(p.texto)) }
+export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${tituloComFilhos(p) ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' || p.tamanho === 'medio' ? { 'data-tamanho': p.tamanho as string } : {}), ...(estiloEscala(p, baseTitulo(nivel(p))) ? { style: estiloEscala(p, baseTitulo(nivel(p)))! } : {}) }), texto: (p) => (tituloComFilhos(p) ? undefined : txt(p.texto)) }
 export const d_texto_enfase: Descritor = { chave: () => 'em', tag: () => 'em', attrs: (p, id) => ({ ...comId(id), ...(p.bloco === true ? { style: 'display:block' } : {}) }), texto: (p) => txt(p.texto) }
-export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (_, id) => comId(id), texto: (p) => txt(p.texto) }
+export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (p, id) => ({ ...comId(id), ...(estiloEscala(p, BASE_PARAGRAFO) ? { style: estiloEscala(p, BASE_PARAGRAFO)! } : {}) }), texto: (p) => txt(p.texto) }
 export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
@@ -135,7 +146,7 @@ export const d_layout_espacador: Descritor = { chave: () => 'div', tag: () => 'd
 export const d_texto_rotulo: Descritor = { chave: () => 'label', tag: () => 'label', attrs: (p, id) => ({ ...comId(id), ...(typeof p.para === 'string' && p.para ? { for: p.para } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_destaque: Descritor = /* @__PURE__ */ folha('strong')
 export const d_texto_trecho: Descritor = /* @__PURE__ */ folha('span')
-export const d_texto_sobretitulo: Descritor = { chave: () => 'p:sobretitulo', tag: () => 'p', attrs: (_, id) => ({ ...comId(id), 'data-sobretitulo': '' }), texto: (p) => txt(p.texto) }
+export const d_texto_sobretitulo: Descritor = { chave: () => 'p:sobretitulo', tag: () => 'p', attrs: (p, id) => ({ ...comId(id), 'data-sobretitulo': '', ...(estiloEscala(p, BASE_SOBRETITULO) ? { style: estiloEscala(p, BASE_SOBRETITULO)! } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_pequeno: Descritor = /* @__PURE__ */ folha('small')
 export const d_texto_codigo: Descritor = /* @__PURE__ */ folha('code')
 export const d_lista_lista: Descritor = { chave: (p) => (p.ordenada === true ? 'ol' : 'ul'), tag: (p) => (p.ordenada === true ? 'ol' : 'ul'), attrs: (_, id) => comId(id), filhos: true }

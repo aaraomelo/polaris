@@ -24,7 +24,21 @@ const tema = {
       },
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
-      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', pesoExibicao: 400, tamanhoMedio: 'clamp(1.875rem, 3vw, 2.25rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
+      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)',
+      // a escala nomeada do template (tamanho, peso, entrelinha e espaçamento por contexto), usada com `escala: "<nome>"` nos blocos de texto
+      escala: {
+        exibicao: { tamanho: 'clamp(3rem, 8.5vw, 8rem)', peso: 400, altura: 0.9, espacamento: '-0.025em' },
+        hero: { tamanho: 'clamp(3rem, 5vw, 4.5rem)', peso: 500, altura: 1, espacamento: '-0.025em' },
+        'sobre-hero': { tamanho: 'clamp(3rem, 6vw, 6rem)', peso: 400, altura: 1, espacamento: '-0.02em' },
+        declaracao: { tamanho: 'clamp(1.875rem, 3.5vw, 3rem)', peso: 500, altura: 1, espacamento: '-0.025em' },
+        secao: { tamanho: 'clamp(1.75rem, 2.6vw, 2.25rem)', peso: 500, altura: 1.11, espacamento: '-0.025em' },
+        citacao: { tamanho: 'clamp(2.25rem, 4.2vw, 3.75rem)', peso: 400, altura: 1, espacamento: 0 },
+        chamada: { tamanho: 'clamp(2.25rem, 4.2vw, 3.75rem)', peso: 500, altura: 1, espacamento: '-0.025em' },
+        valor: { tamanho: '1.5rem', peso: 500, altura: 1.33, espacamento: '-0.025em' },
+        lead: { tamanho: '1.125rem', peso: 400, altura: 1.55, espacamento: 'normal' },
+        longo: { tamanho: '1rem', peso: 400, altura: 1.8, espacamento: 'normal' },
+        olho: { tamanho: '0.625rem', peso: 600, altura: 1.5, espacamento: '0.3em' },
+      }, pesoExibicao: 400, tamanhoMedio: 'clamp(1.875rem, 3vw, 2.25rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
       layout: { largura: '100rem', larguraEstreita: '64rem', larguraLarga: '100rem', recuo: '3rem', recuoEstreito: '1.5rem' }, // o contêiner do template (container-full 1600 px, recuo de 48; container-narrow 1024 px, recuo de 24)
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
       cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 400, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1, linkPeso: 500, linkAtualCor: 'var(--cor-texto-suave)', linkAtualPeso: 500, linkAtualDecoracao: 'none', iconeCor: 'var(--cor-texto)', iconeHover: 'var(--cor-superficie-alt)', gatilhoAltura: '2.5rem', gatilhoRecuoX: '1rem', gatilhoFundo: 'color-mix(in srgb, var(--cor-superficie-alt) 50%, transparent)', submenuHover: 'grid', submenuDisplay: 'grid', submenuColunas: 2, submenuGap: '0.25rem', submenuLargura: '37.5rem', submenuRecuo: '1rem', submenuFundo: 'var(--cor-fundo)', submenuBorda: 'var(--cor-borda)', submenuSombra: '0 10px 30px color-mix(in srgb, var(--cor-texto) 8%, transparent)', submenuRaio: 0, submenuItem: '0.75rem', submenuItemHover: 'var(--cor-superficie-alt)' }, // o painel das coleções abre no hover: 2 colunas, cada item com título e descrição
@@ -61,11 +75,12 @@ const T = (k, params) => `{${tx(k, params)}}` // um template (o valor inteiro da
 // um caminho interno no idioma da requisição: `tenant.prefixo` é "" no padrão e "/en" nos demais (docs/i18n.md); aceita um trecho de expressão entre chaves
 const H = (caminho) => (caminho === '/' ? '{(tenant.prefixo ?? "") == "" ? "/" : tenant.prefixo}' : caminho.startsWith('{') ? `{(tenant.prefixo ?? "") + ${caminho.slice(1, -1)}}` : `{(tenant.prefixo ?? "") + ${JSON.stringify(caminho)}}`)
 const b = (bloco, props, filhos, extra = {}) => ({ bloco, ...(props ? { props } : {}), ...(filhos ? { slots: { filhos } } : {}), ...extra })
-const titulo = (texto, nivel, tamanho) => b('texto/titulo', { texto, nivel, ...(tamanho ? { tamanho } : {}) })
-// título em duas partes: a segunda em itálico, numa linha própria (a capa do template: "Objects of / Quiet Beauty")
-const tituloEnfase = (inicio, enfase, nivel) => b('texto/titulo', { texto: '', nivel }, [b('texto/trecho', { texto: inicio }), b('texto/enfase', { texto: enfase, bloco: true })])
-const par = (texto) => b('texto/paragrafo', { texto })
-const sobre = (texto) => b('texto/sobretitulo', { texto })
+const titulo = (texto, nivel, tamanho, escala) => b('texto/titulo', { texto, nivel, ...(tamanho ? { tamanho } : {}), ...(escala ? { escala } : {}) })
+// título em partes (a ênfase em itálico, na linha de baixo ou na mesma): [texto, ênfase, texto…] (o template: "Objects of / Quiet Beauty")
+const tituloPartes = (partes, nivel, escala) => b('texto/titulo', { texto: '', nivel, ...(escala ? { escala } : {}) }, partes.map((p) => (p.enfase !== undefined ? b('texto/enfase', { texto: p.enfase, ...(p.bloco ? { bloco: true } : {}) }) : b('texto/trecho', { texto: p.texto }))))
+const tituloEnfase = (inicio, enfase, nivel, escala) => tituloPartes([{ texto: inicio }, { enfase, bloco: true }], nivel, escala)
+const par = (texto, escala) => b('texto/paragrafo', { texto, ...(escala ? { escala } : {}) })
+const sobre = (texto, escala) => b('texto/sobretitulo', { texto, ...(escala ? { escala } : {}) })
 const contido = (filhos, largura, extra = {}) => b('layout/contido', largura ? { largura } : undefined, filhos, extra)
 const folga = (tamanho) => b('layout/espacador', { tamanho })
 
@@ -164,7 +179,7 @@ const home = b('layout/pilha', { gap: 0 }, [
   b('layout/destaque', { imagem: foto('hero'), altura: 800, escurece: 0.3, alinha: 'esquerda', capa: true }, [
     contido([
       sobre(T('home.eyebrow')),
-      tituloEnfase(T('home.titulo1'), T('home.titulo2'), 1),
+      tituloEnfase(T('home.titulo1'), T('home.titulo2'), 1, 'exibicao'),
       par(T('home.texto')),
       link('/produtos', T('home.cta'), 'primario', { icone: 'seta', iconeApos: true }),
     ]),
@@ -253,8 +268,8 @@ const cartao = { bloco: 'commerce/cartao-produto', props: propsCartao('{p}', H('
 const produtos = b('layout/pilha', { gap: 0 }, [
   cabecalho('loja'),
   // o hero muda com a categoria ativa: com categoria (foto, nome e frase dela); sem categoria, "Todas as peças"
-  { ...b('layout/destaque', { imagem: '{c.foto}', altura: 510, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre(T('loja.colecao')), titulo('{c.nome}', 1), par('{c.frase}')])]), repetir: { cada: HERO_DA_CATEGORIA, como: 'c', chave: 'c.slug' } },
-  b('layout/destaque', { imagem: foto('loja-capa'), altura: 510, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre(T('loja.eyebrow')), titulo(T('loja.titulo'), 1)])], { se: `tamanho(${HERO_DA_CATEGORIA}) == 0` }),
+  { ...b('layout/destaque', { imagem: '{c.foto}', altura: 510, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre(T('loja.colecao'), 'olho'), titulo('{c.nome}', 1, undefined, 'hero'), par('{c.frase}')])]), repetir: { cada: HERO_DA_CATEGORIA, como: 'c', chave: 'c.slug' } },
+  b('layout/destaque', { imagem: foto('loja-capa'), altura: 510, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre(T('loja.eyebrow'), 'olho'), titulo(T('loja.titulo'), 1, undefined, 'hero')])], { se: `tamanho(${HERO_DA_CATEGORIA}) == 0` }),
   barraCategorias,
   folga(32),
   contido([
@@ -270,45 +285,47 @@ const produtos = b('layout/pilha', { gap: 0 }, [
 // ---- sobre ----------------------------------------------------------------------------------------------------------------------------------
 const sobre_ = b('layout/pilha', { gap: 0 }, [
   cabecalho('sobre'),
-  b('layout/destaque', { imagem: foto('sobre-capa'), altura: 560, escurece: 0.4, alinha: 'esquerda', capa: true }, [contido([
-    sobre(T('sobre.eyebrow')), tituloEnfase(T('sobre.h1a'), T('sobre.h1b'), 1),
-    par(T('sobre.capa.texto')),
+  b('layout/destaque', { imagem: foto('sobre-capa'), altura: 800, escurece: 0.4, alinha: 'esquerda', capa: true }, [contido([
+    sobre(T('sobre.eyebrow')), tituloEnfase(T('sobre.h1a'), T('sobre.h1b'), 1, 'sobre-hero'),
+    par(T('sobre.capa.texto'), 'lead'),
   ])]),
-  folga(112),
-  contido([sobre(T('sobre.filosofia.eyebrow')), par(T('sobre.filosofia.texto'))], 'estreita'),
-  folga(112),
+  folga(160),
+  contido([sobre(T('sobre.filosofia.eyebrow'), 'olho'), tituloPartes([{ texto: T('sobre.filosofia.a') }, { enfase: T('sobre.filosofia.enfase') }, { texto: T('sobre.filosofia.b') }], 2, 'declaracao')], 'estreita'),
+  folga(160),
   contido([b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-      sobre(T('sobre.comeco.eyebrow')), titulo(T('sobre.comeco.titulo'), 2),
-      par(T('sobre.comeco.p1')),
-      par(T('sobre.comeco.p2')),
+      sobre(T('sobre.comeco.eyebrow')), tituloEnfase(T('sobre.comeco.titulo'), T('sobre.comeco.enfase'), 2, 'secao'),
+      par(T('sobre.comeco.p1'), 'longo'),
+      par(T('sobre.comeco.p2'), 'longo'),
     ]),
     b('midia/imagem', { src: foto('sobre-1'), alt: T('sobre.comeco.alt'), fluida: true, proporcao: 0.8 }),
   ])]),
-  folga(112),
-  contido([titulo(T('sobre.citacao'), 3)], 'estreita'),
-  folga(112),
+  folga(128),
+  contido([tituloPartes([{ texto: T('sobre.citacao.a') }, { enfase: T('sobre.citacao.enfase') }, { texto: T('sobre.citacao.b') }], 2, 'citacao')], 'estreita'),
+  folga(128),
   contido([b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
     b('midia/imagem', { src: foto('sobre-2'), alt: T('sobre.abordagem.alt'), fluida: true, proporcao: 0.8 }),
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-      sobre(T('sobre.abordagem.eyebrow')), titulo(T('sobre.abordagem.titulo'), 2),
-      par(T('sobre.abordagem.p1')),
-      par(T('sobre.abordagem.p2')),
+      sobre(T('sobre.abordagem.eyebrow')), tituloEnfase(T('sobre.abordagem.titulo'), T('sobre.abordagem.enfase'), 2, 'secao'),
+      par(T('sobre.abordagem.p1'), 'longo'),
+      par(T('sobre.abordagem.p2'), 'longo'),
     ]),
   ])]),
-  folga(112),
+  folga(128),
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [contido([
+    folga(96),
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre(T('sobre.valores.eyebrow')), titulo(T('sobre.valores.titulo'), 2)]),
-    folga(32),
-    b('layout/grade', { colunas: 3, gap: 48 }, [1, 2, 3].map((n) => b('layout/pilha', { gap: 8, alinha: 'inicio' }, [sobre(`0${n}`), titulo(T(`sobre.valor${n}.titulo`), 3), par(T(`sobre.valor${n}.texto`))]))),
+    folga(48),
+    b('layout/grade', { colunas: 3, gap: 48 }, [1, 2, 3].map((n) => b('layout/pilha', { gap: 12, alinha: 'inicio' }, [sobre(`0${n}`), titulo(T(`sobre.valor${n}.titulo`), 3, undefined, 'valor'), par(T(`sobre.valor${n}.texto`), 'longo')]))),
+    folga(96),
   ])]),
-  folga(112),
+  folga(24),
   contido([b('layout/grade', { colunas: 3, gap: 24 }, ['colecao-ceramica', 'colecao-4', 'produto-almofada'].map((f, i) => b('layout/pilha', { recorta: true }, [b('midia/imagem', { src: foto(f), alt: T('sobre.detalhe.alt', { n: i + 1 }), fluida: true, proporcao: 0.8 })])))], 'larga'),
-  folga(112),
-  b('layout/destaque', { imagem: foto('foto-2'), altura: 420, escurece: 0.45, alinha: 'centro' }, [
-    sobre(T('sobre.contato.eyebrow')), titulo(T('sobre.contato.titulo'), 2),
+  folga(24),
+  b('layout/destaque', { imagem: foto('foto-2'), altura: 600, escurece: 0.45, alinha: 'centro' }, [
+    sobre(T('sobre.contato.eyebrow')), titulo(T('sobre.contato.titulo'), 2, undefined, 'chamada'),
     par(T('sobre.contato.texto')),
-    link('/produtos', T('home.cta'), 'primario'),
+    link('/produtos', T('home.cta'), 'primario', { icone: 'seta', iconeApos: true }),
   ], { id: 'contato' }),
   rodape(),
 ])

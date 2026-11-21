@@ -21,7 +21,7 @@ O mesmo vale para um serviço (entidades, CRUD, operações → API HTTP, tabela
 
 | Área | Onde | Estado |
 |---|---|---|
-| Contrato e validação (14 kinds, migração por major) | `packages/schema` | pronto |
+| Contrato e validação (15 kinds, migração por major) | `packages/schema` | pronto |
 | Runtime próprio sem React, AOT por página, SSR com streaming | `packages/engine` | pronto (React só como oráculo de teste) |
 | Serviços gerados do schema (Fastify, Postgres com RLS, outbox/inbox) | `packages/servico` | pronto |
 | Gateway/BFF (JWT, tenant só do token, REST + GraphQL, cache, taxa) | `packages/gateway` | pronto |
@@ -55,7 +55,7 @@ Os testes de paridade (documentos e kernels) usam Chrome e `poppler-utils` quand
 
 ## Documentação
 
-Por tema em [`docs/`](docs/): [fluxo de trabalho](docs/fluxo.md), [serviços](docs/servicos.md), [gateway](docs/gateway.md), [páginas](docs/paginas.md), [formulários](docs/formularios.md), [identidade](docs/identidade.md), [imagens](docs/imagens.md), [multi-tenant](docs/multitenancy.md), [packs](docs/packs.md), [documentos](docs/documentos.md), [Sign Maker](docs/sign-maker.md), [computação](docs/computacao.md), [Studio](docs/studio.md), [deploy](docs/deploy.md), [segurança](docs/seguranca.md), [qualidade](docs/qualidade.md).
+Por tema em [`docs/`](docs/): [fluxo de trabalho](docs/fluxo.md), [serviços](docs/servicos.md), [gateway](docs/gateway.md), [páginas](docs/paginas.md), [formulários](docs/formularios.md), [idiomas](docs/i18n.md), [identidade](docs/identidade.md), [imagens](docs/imagens.md), [multi-tenant](docs/multitenancy.md), [packs](docs/packs.md), [documentos](docs/documentos.md), [Sign Maker](docs/sign-maker.md), [computação](docs/computacao.md), [Studio](docs/studio.md), [deploy](docs/deploy.md), [segurança](docs/seguranca.md), [qualidade](docs/qualidade.md).
 As decisões de arquitetura estão em [`docs/adr/`](docs/adr/README.md) (formato curto: contexto, decisão, consequências, evidência).
 
 ## Segurança e qualidade
