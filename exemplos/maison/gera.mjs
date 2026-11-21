@@ -27,7 +27,7 @@ const tema = {
       tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', tamanhoGrande: 'clamp(2.5rem, 5vw, 3.75rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: 'clamp(1.5rem, 2.4vw, 1.875rem)', alturaTitulo: 1, espacamentoTitulo: '-0.025em', alturaCorpo: 1.625, tamanhoSobretitulo: '0.6875rem', espacamentoSobretitulo: '0.3em', margemSobretitulo: '1rem' },
       layout: { largura: '100rem', larguraEstreita: '64rem', larguraLarga: '100rem', recuo: '3rem', recuoEstreito: '1.5rem' }, // o contêiner do template (container-full 1600 px, recuo de 48; container-narrow 1024 px, recuo de 24)
       // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
-      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1 },
+      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', recuoX: 'max(3rem, calc((100% - 100rem) / 2 + 3rem))', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1, linkPeso: 500, linkAtualCor: 'var(--cor-texto-suave)', linkAtualPeso: 500, linkAtualDecoracao: 'none', iconeCor: 'var(--cor-texto)', iconeHover: 'var(--cor-superficie-alt)', gatilhoAltura: '2.5rem', gatilhoRecuoX: '1rem', gatilhoFundo: 'color-mix(in srgb, var(--cor-superficie-alt) 50%, transparent)', submenuHover: 'grid', submenuDisplay: 'grid', submenuColunas: 2, submenuGap: '0.25rem', submenuLargura: '37.5rem', submenuRecuo: '1rem', submenuFundo: 'var(--cor-fundo)', submenuBorda: 'var(--cor-borda)', submenuSombra: '0 10px 30px color-mix(in srgb, var(--cor-texto) 8%, transparent)', submenuRaio: 0, submenuItem: '0.75rem', submenuItemHover: 'var(--cor-superficie-alt)' }, // o painel das coleções abre no hover: 2 colunas, cada item com título e descrição
       // rodapé invertido: fundo escuro no claro e claro no escuro
       rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', suave: 'color-mix(in srgb, var(--cor-fundo) 50%, transparent)', link: 'color-mix(in srgb, var(--cor-fundo) 60%, transparent)', borda: 'transparent', marcaTamanho: 'clamp(1.875rem, 3vw, 2.25rem)', marcaPeso: 400, marcaEspacamento: '-0.025em', descricaoTamanho: '0.875rem', tituloTamanho: '0.6875rem', tituloPeso: 600, tituloEspacamento: '0.25em', tituloCaixa: 'uppercase' },
       // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
@@ -118,13 +118,17 @@ const ROTULOS_RESUMO = { subtotal: T('resumo.subtotal'), total: T('resumo.total'
 
 // ---- as partes comuns: cabeçalho (com o seletor de idioma) e rodapé -----------------------------------------------------------------------------
 const OUTROS_IDIOMAS = 'filtra(tenant.idiomas ?? [], i => !i.atual)'
+const SACOLA_TOTAL = QTD_TOTAL
 const cabecalho = (atual) => b('site/cabecalho', {
-  titulo: 'Maison', fixo: true, menuCentro: true, href: H('/'),
-  links: [{ texto: T('nav.loja'), href: H('/produtos'), ...(atual === 'loja' ? { atual: true } : {}) }, { texto: T('nav.sobre'), href: H('/sobre'), ...(atual === 'sobre' ? { atual: true } : {}) }, { texto: T('nav.sacola', { n: QTD_TOTAL }), href: H('/sacola'), ...(atual === 'sacola' ? { atual: true } : {}) }],
-  grupos: [{ titulo: T('nav.colecoes'), links: COLECOES.map((c) => ({ texto: T(`colecao.${c.slug}.nome`), href: H(`/produtos?colecao=${c.slug}`) })) }],
+  titulo: 'Maison', fixo: true, menuCentro: true, href: H('/'), gruposAntes: true,
+  links: [{ texto: T('nav.loja'), href: H('/produtos'), ...(atual === 'loja' ? { atual: true } : {}) }, { texto: T('nav.sobre'), href: H('/sobre'), ...(atual === 'sobre' ? { atual: true } : {}) }],
+  // o menu "Coleções": abre no hover num painel de 2 colunas, cada coleção com o nome e a frase
+  grupos: [{ titulo: T('nav.colecoes'), links: CATEGORIAS.map((slug) => ({ texto: T(`colecao.${slug}.nome`), descricao: T(`colecao.${slug}.frase`), href: H(`/produtos?colecao=${slug}`) })) }],
 }, undefined, { slots: { acoes: [
   // o seletor: um link para cada OUTRO idioma do tenant (a mesma página, no outro idioma); some quando o tenant tem um idioma só
   { bloco: 'nav/link', repetir: { cada: OUTROS_IDIOMAS, como: 'i', chave: 'i.idioma' }, props: { href: '{i.href}', texto: '{i.idioma == "en" ? ' + tx('idioma.curto.en') + ' : ' + tx('idioma.curto.pt-BR') + '}' } },
+  // a sacola é um ícone com o contador (só aparece com itens); o nome acessível leva a contagem
+  b('nav/link', { href: H('/sacola'), icone: 'sacola', rotulo: T('nav.sacola', { n: SACOLA_TOTAL }) }, [b('texto/pequeno', { texto: `{${SACOLA_TOTAL}}` }, undefined, { se: `${SACOLA_TOTAL} > 0` })]),
 ] } })
 const rodape = () => b('site/rodape', {
   marca: 'Maison', descricao: T('rodape.descricao'),

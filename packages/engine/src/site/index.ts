@@ -8,8 +8,17 @@ const no = (kind: string, id: string, spec: object) => ({ kind, id, versao: '1.0
 const instancia = (bloco: string, props: Record<string, unknown>, slots?: Record<string, Inst[]>): Inst => ({ bloco, props, ...(slots ? { slots } : {}) })
 
 const linkProp = { type: 'object', properties: { texto: { type: 'string', maxLength: 80 }, href: { type: 'string', maxLength: 500 }, atual: { type: 'boolean', description: 'a página aberta (aria-current)' } }, required: ['texto', 'href'] }
-const colunaProp = { type: 'object', properties: { titulo: { type: 'string', maxLength: 80 }, links: { type: 'array', maxItems: 12, items: linkProp } }, required: ['titulo'] }
+const linkComDescricaoProp = { ...linkProp, properties: { ...linkProp.properties, descricao: { type: 'string', maxLength: 160, description: 'frase sob o título (nos submenus: o item vira título + descrição)' } } }
+const colunaProp = { type: 'object', properties: { titulo: { type: 'string', maxLength: 80 }, links: { type: 'array', maxItems: 12, items: linkComDescricaoProp } }, required: ['titulo'] }
 
+// os submenus do cabeçalho (`grupos`): cada item é um link de texto, ou, com `descricao`, um link com o título e a descrição embaixo
+const GRUPOS_DO_MENU = (se: string) => ({ bloco: 'nav/submenu', se, repetir: { cada: 'props.grupos ?? []', como: 'g', chave: 'g.titulo' }, slots: { filhos: [
+  { bloco: 'nav/submenu-titulo', props: { texto: '{g.titulo}' } },
+  { bloco: 'nav/link', repetir: { cada: 'filtra(g.links ?? [], x => !x.descricao)', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
+  { bloco: 'nav/link', repetir: { cada: 'filtra(g.links ?? [], x => x.descricao)', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', atual: '{l.atual == true}' }, slots: { filhos: [
+    { bloco: 'texto/destaque', props: { texto: '{l.texto}' } }, { bloco: 'texto/pequeno', props: { texto: '{l.descricao}' } },
+  ] } },
+] } })
 const BLOCOS_CABECALHO = [
   no('bloco', 'site.cabecalho', {
     interface: 'site/cabecalho', titulo: 'Cabeçalho do site',
@@ -17,7 +26,7 @@ const BLOCOS_CABECALHO = [
     props: { type: 'object', properties: {
       titulo: { type: 'string', maxLength: 80, description: 'nome da marca' }, logo: { type: 'string', maxLength: 500, description: 'URL segura da imagem da marca' },
       href: { type: 'string', maxLength: 500, default: '/', description: 'para onde a marca leva' }, links: { type: 'array', maxItems: 12, items: linkProp, description: 'o menu' }, grupos: { type: 'array', maxItems: 6, items: colunaProp, description: 'submenus: cada grupo (`titulo` e `links`) é um item recolhível que abre uma lista de links, depois dos `links`; um nível só' },
-      rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false }, menuCentro: { type: 'boolean', default: false, description: 'centraliza o menu entre a marca e as ações' },
+      rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false }, gruposAntes: { type: 'boolean', default: false, description: 'os submenus (`grupos`) vêm antes dos `links` no menu' }, menuCentro: { type: 'boolean', default: false, description: 'centraliza o menu entre a marca e as ações' },
       tituloNivel: { type: 'integer', minimum: 1, maximum: 6, description: 'faz do nome da marca um título (h1…h6) em vez de texto em destaque: use 1 em aplicações cujo painel não tem outro h1' }, menuRecolhivel: { type: 'boolean', default: true, description: 'no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista' }, rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir o menu' },
     } },
     slots: { acoes: {} },
@@ -34,11 +43,9 @@ const BLOCOS_CABECALHO = [
       { bloco: 'nav/alternador', id: 'cabecalho-alternador', se: 'props.menuRecolhivel != false', props: { rotulo: '{props.rotuloAlternador ?? "Abrir o menu"}' } },
       { bloco: 'texto/rotulo', se: 'props.menuRecolhivel != false', props: { texto: 'Menu', para: 'cabecalho-alternador' } },
       { bloco: 'nav/menu', se: 'tamanho(props.links ?? []) + tamanho(props.grupos ?? []) > 0', props: { rotulo: '{props.rotuloMenu ?? "Principal"}' }, slots: { filhos: [
+        GRUPOS_DO_MENU('props.gruposAntes'),
         { bloco: 'nav/link', repetir: { cada: 'props.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
-        { bloco: 'nav/submenu', repetir: { cada: 'props.grupos ?? []', como: 'g', chave: 'g.titulo' }, slots: { filhos: [
-          { bloco: 'nav/submenu-titulo', props: { texto: '{g.titulo}' } },
-          { bloco: 'nav/link', repetir: { cada: 'g.links ?? []', como: 'l', chave: 'l.href' }, props: { href: '{l.href}', texto: '{l.texto}', atual: '{l.atual == true}' } },
-        ] } },
+        GRUPOS_DO_MENU('!props.gruposAntes'),
       ] } },
       { bloco: 'core/slot', props: { nome: 'acoes' } },
     ] } },

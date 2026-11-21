@@ -60,7 +60,7 @@
         },
         "cabecalho": {
           "type": "object",
-          "description": "cabeçalho (site/cabecalho): `altura`, `recuoX` (recuo lateral; ex.: alinhar ao contêiner), `fundo`, `desfoque` (ex.: blur(4px)), `borda`, `marcaTamanho`, `marcaPeso`, `linkTamanho`, `linkEspacamento`, `linkCaixa`, `linkCor`, `sublinhaHover` (1 liga o sublinhado animado). Cada valor vira variável CSS com fallback no CSS base",
+          "description": "cabeçalho (site/cabecalho): `altura`, `recuoX` (recuo lateral; ex.: alinhar ao contêiner), `fundo`, `desfoque` (ex.: blur(4px)), `borda`, `marcaTamanho`, `marcaPeso`, `linkTamanho`, `linkEspacamento`, `linkCaixa`, `linkCor`, `sublinhaHover` (1 liga o sublinhado animado). Cada valor vira variável CSS com fallback no CSS base. Submenus: `submenuHover` (grid/block abre no hover; padrão: só no clique), `submenuDisplay`, `submenuColunas`, `submenuGap`, `submenuLargura`, `submenuRecuo`, `submenuFundo`, `submenuBorda`, `submenuSombra`, `submenuRaio`, `submenuItem`, `submenuItemHover`, `submenuTamanho`; gatilho: `gatilhoAltura`, `gatilhoRecuoX`, `gatilhoFundo`",
           "additionalProperties": {
             "type": [
               "number",

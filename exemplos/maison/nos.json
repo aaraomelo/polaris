@@ -78,7 +78,28 @@
           "linkCaixa": "uppercase",
           "linkCor": "var(--cor-texto-suave)",
           "linkHover": "var(--cor-texto)",
-          "sublinhaHover": 1
+          "sublinhaHover": 1,
+          "linkPeso": 500,
+          "linkAtualCor": "var(--cor-texto-suave)",
+          "linkAtualPeso": 500,
+          "linkAtualDecoracao": "none",
+          "iconeCor": "var(--cor-texto)",
+          "iconeHover": "var(--cor-superficie-alt)",
+          "gatilhoAltura": "2.5rem",
+          "gatilhoRecuoX": "1rem",
+          "gatilhoFundo": "color-mix(in srgb, var(--cor-superficie-alt) 50%, transparent)",
+          "submenuHover": "grid",
+          "submenuDisplay": "grid",
+          "submenuColunas": 2,
+          "submenuGap": "0.25rem",
+          "submenuLargura": "37.5rem",
+          "submenuRecuo": "1rem",
+          "submenuFundo": "var(--cor-fundo)",
+          "submenuBorda": "var(--cor-borda)",
+          "submenuSombra": "0 10px 30px color-mix(in srgb, var(--cor-texto) 8%, transparent)",
+          "submenuRaio": 0,
+          "submenuItem": "0.75rem",
+          "submenuItemHover": "var(--cor-superficie-alt)"
         },
         "rodape": {
           "fundo": "var(--cor-texto)",
@@ -670,6 +691,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -678,10 +700,6 @@
                   {
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                   }
                 ],
                 "grupos": [
@@ -690,27 +708,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -728,6 +762,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]
@@ -1912,6 +1965,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -1921,10 +1975,6 @@
                   {
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                   }
                 ],
                 "grupos": [
@@ -1933,27 +1983,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -1971,6 +2037,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]
@@ -2879,6 +2964,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -2888,10 +2974,6 @@
                   {
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                   }
                 ],
                 "grupos": [
@@ -2900,27 +2982,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -2938,6 +3036,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]
@@ -3686,6 +3803,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -3695,10 +3813,6 @@
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}",
                     "atual": true
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                   }
                 ],
                 "grupos": [
@@ -3707,27 +3821,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -3745,6 +3875,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]
@@ -4367,6 +4516,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -4375,11 +4525,6 @@
                   {
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
-                    "atual": true
                   }
                 ],
                 "grupos": [
@@ -4388,27 +4533,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -4426,6 +4587,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]
@@ -5159,6 +5339,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -5167,10 +5348,6 @@
                   {
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                   }
                 ],
                 "grupos": [
@@ -5179,27 +5356,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -5217,6 +5410,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]
@@ -5924,6 +6136,7 @@
                 "fixo": true,
                 "menuCentro": true,
                 "href": "{(tenant.prefixo ?? \"\") == \"\" ? \"/\" : tenant.prefixo}",
+                "gruposAntes": true,
                 "links": [
                   {
                     "texto": "{t(\"nav.loja\")}",
@@ -5932,10 +6145,6 @@
                   {
                     "texto": "{t(\"nav.sobre\")}",
                     "href": "{(tenant.prefixo ?? \"\") + \"/sobre\"}"
-                  },
-                  {
-                    "texto": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}",
-                    "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}"
                   }
                 ],
                 "grupos": [
@@ -5944,27 +6153,43 @@
                     "links": [
                       {
                         "texto": "{t(\"colecao.iluminacao.nome\")}",
+                        "descricao": "{t(\"colecao.iluminacao.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=iluminacao\"}"
                       },
                       {
                         "texto": "{t(\"colecao.ceramica.nome\")}",
+                        "descricao": "{t(\"colecao.ceramica.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=ceramica\"}"
                       },
                       {
                         "texto": "{t(\"colecao.mobiliario.nome\")}",
+                        "descricao": "{t(\"colecao.mobiliario.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=mobiliario\"}"
                       },
                       {
                         "texto": "{t(\"colecao.texteis.nome\")}",
+                        "descricao": "{t(\"colecao.texteis.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=texteis\"}"
                       },
                       {
                         "texto": "{t(\"colecao.objetos.nome\")}",
+                        "descricao": "{t(\"colecao.objetos.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=objetos\"}"
                       },
                       {
                         "texto": "{t(\"colecao.sazonal.nome\")}",
+                        "descricao": "{t(\"colecao.sazonal.frase\")}",
                         "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=sazonal\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.novidades.nome\")}",
+                        "descricao": "{t(\"colecao.novidades.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=novidades\"}"
+                      },
+                      {
+                        "texto": "{t(\"colecao.presentes.nome\")}",
+                        "descricao": "{t(\"colecao.presentes.frase\")}",
+                        "href": "{(tenant.prefixo ?? \"\") + \"/produtos?colecao=presentes\"}"
                       }
                     ]
                   }
@@ -5982,6 +6207,25 @@
                     "props": {
                       "href": "{i.href}",
                       "texto": "{i.idioma == \"en\" ? t(\"idioma.curto.en\") : t(\"idioma.curto.pt-BR\")}"
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "{(tenant.prefixo ?? \"\") + \"/sacola\"}",
+                      "icone": "sacola",
+                      "rotulo": "{t(\"nav.sacola\", objeto([[\"n\", soma(mapeia(estado.sacola, i => i.qtd))]]))}"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/pequeno",
+                          "props": {
+                            "texto": "{soma(mapeia(estado.sacola, i => i.qtd))}"
+                          },
+                          "se": "soma(mapeia(estado.sacola, i => i.qtd)) > 0"
+                        }
+                      ]
                     }
                   }
                 ]

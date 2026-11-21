@@ -202,7 +202,7 @@ describe('submenu do cabeçalho (grupos)', () => {
     expect(ssr(pagina(cab({ titulo: 'x' }))).querySelector('header nav')).toBeNull()
   })
   it('o tema posiciona o painel com ::details-content (computador) e deixa em linha no celular', () => {
-    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('nav>details[data-submenu][open]::details-content{position:absolute'); expect(css).toContain('details[data-submenu]:not([open])::details-content{display:none}'); // fechado: nada do painel (borda, padding) aparece expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*details-content\{position:static/)
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('nav>details[data-submenu]:is([open],:hover)::details-content{position:absolute'); expect(css).toContain('details[data-submenu]:not([open])::details-content{display:none}'); // fechado: nada do painel (borda, padding) aparece expect(css).toMatch(/@media \(max-width:40rem\)\{[^@]*details-content\{position:static/)
   })
 })
 
@@ -275,7 +275,7 @@ describe('ícones (midia/icone e `icone` de botões e links)', () => {
     expect(um('nav/link', { href: '/x', texto: 'x', icone: 'entrar' }).querySelector('a')!.getAttribute('data-icone')).toBe('entrar')
   })
   it('o tema traz uma regra por ícone (duas imagens, só máscara: sem cor literal) e a estrutura dos três usos', () => {
-    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(60); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a,summary)[data-icone]::before')
+    const css = cssDoTema(TEMA_PADRAO); expect((css.match(/\[data-icone=[a-z-]+\]\{--ic-base:/g) ?? []).length).toBe(62); expect(css).toContain('span[data-icone]::after'); expect(css).toContain(':is(button,a,summary)[data-icone]::before')
     for (const n of ['salvar', 'layout-pilha', 'cartaz', 'tema-escuro']) expect(css, n).toContain(`[data-icone=${n}]{--ic-base:url("data:image/svg+xml,`)
   })
 })
@@ -283,7 +283,7 @@ describe('ícones (midia/icone e `icone` de botões e links)', () => {
 describe('lista de nomes dos ícones', () => {
   it('nomes.ts (o que o navegador carrega) coincide com dados.ts (as imagens que só o CSS usa)', async () => {
     const { ICONES, FAMILIAS_ICONES } = await import('../src/icones/dados'), { NOMES_ICONES } = await import('../src/icones/nomes')
-    expect([...NOMES_ICONES].sort()).toEqual(Object.keys(ICONES).sort()); expect(FAMILIAS_ICONES.flatMap((f) => f[1]).sort()).toEqual([...NOMES_ICONES].sort()); expect(NOMES_ICONES.length).toBe(60)
+    expect([...NOMES_ICONES].sort()).toEqual(Object.keys(ICONES).sort()); expect(FAMILIAS_ICONES.flatMap((f) => f[1]).sort()).toEqual([...NOMES_ICONES].sort()); expect(NOMES_ICONES.length).toBe(62)
     for (const [n, i] of Object.entries(ICONES)) { expect(i.base.length + i.acento.length, n).toBeGreaterThan(10); expect(i.base + i.acento, n).not.toMatch(/<script|on[a-z]+=|href=|javascript:/i) }
   })
 })
@@ -302,5 +302,27 @@ describe('site/abas', () => {
     const c = compilaPrograma(r, pg); if (!c.ok) throw new Error(JSON.stringify(c.erros))
     const html = renderPaginaHtml({ programa: c.programa, componentes: COMPONENTES_BASE }).html
     expect(html).toContain('<nav aria-label="Categorias" data-marca="abas">'); expect(html.match(/<a /g)!.length).toBe(2); expect(html.match(/aria-current="page"/g)!.length).toBe(1)
+  })
+})
+
+describe('site/cabecalho: submenu com descrição, ordem e sacola em ícone', () => {
+  const html = (props: object, acoes?: object[]) => {
+    const r = novoReg(), pg = r.registra({ kind: 'pagina', id: 'cab2', versao: '1.0.0', estatuto: 'publicado', spec: { rota: '/', raiz: { bloco: 'site/cabecalho', props, ...(acoes ? { slots: { acoes } } : {}) } } } as never)
+    const c = compilaPrograma(r, pg); if (!c.ok) throw new Error(JSON.stringify(c.erros))
+    return renderPaginaHtml({ programa: c.programa, componentes: COMPONENTES_BASE }).html
+  }
+  const grupos = [{ titulo: 'Coleções', links: [{ texto: 'Luz', descricao: 'Formas que lançam sombra', href: '/l' }, { texto: 'Vasos', href: '/v' }] }]
+  it('com `descricao` o item do submenu vira link com título e frase; sem, continua link de texto', () => {
+    const h = html({ titulo: 'M', links: [{ texto: 'Loja', href: '/p' }], grupos })
+    expect(h).toContain('<a href="/l"><strong>Luz</strong><small>Formas que lançam sombra</small></a>'); expect(h).toContain('<a href="/v">Vasos</a>')
+  })
+  it('`gruposAntes` põe o submenu antes dos links (o menu do template: Coleções, Loja, Sobre)', () => {
+    const antes = html({ titulo: 'M', links: [{ texto: 'Loja', href: '/p' }], grupos, gruposAntes: true }), depois = html({ titulo: 'M', links: [{ texto: 'Loja', href: '/p' }], grupos })
+    expect(antes.indexOf('<details')).toBeLessThan(antes.indexOf('>Loja<')); expect(depois.indexOf('<details')).toBeGreaterThan(depois.indexOf('>Loja<'))
+  })
+  it('ícone com nome acessível (`rotulo`) e o ícone `sacola` existe; o CSS só abre no hover com o token', () => {
+    const h = html({ titulo: 'M' }, [{ bloco: 'nav/link', props: { href: '/s', icone: 'sacola', rotulo: 'Sacola (2)' } }])
+    expect(h).toContain('aria-label="Sacola (2)"'); expect(h).toContain('data-icone="sacola"')
+    const css = cssDoTema(TEMA_PADRAO); expect(css).toContain('--cabecalho-submenu-hover, none'); expect(css).toContain('[data-icone=sacola]{--ic-base:')
   })
 })

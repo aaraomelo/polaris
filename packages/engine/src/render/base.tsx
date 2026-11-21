@@ -147,7 +147,7 @@ export const COMPONENTES_BASE: Componentes = {
   'nav/link': ({ props, slots, id }) => {
     const href = urlSegura(props.href)
     const externo = typeof href === 'string' && /^https?:/i.test(href)
-    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}), ...(props.soConsulta === true ? { 'data-consulta': '' } : {}), ...(props.botao === 'primario' || props.botao === 'secundario' ? { 'data-botao': props.botao } : {}), ...(nomeDeIcone(props.icone) ? { 'data-icone': nomeDeIcone(props.icone) } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
+    return createElement('a', { ...(id ? { id } : {}), ...(href ? { href } : {}), ...(externo ? { rel: 'noopener noreferrer' } : {}), ...(props.atual === true ? { 'aria-current': 'page' } : {}), ...(props.soConsulta === true ? { 'data-consulta': '' } : {}), ...rotuloDe(props), ...(props.botao === 'primario' || props.botao === 'secundario' ? { 'data-botao': props.botao } : {}), ...(nomeDeIcone(props.icone) ? { 'data-icone': nomeDeIcone(props.icone) } : {}) }, props.texto !== undefined ? txt(props.texto) : slots.filhos)
   },
 }
 
@@ -215,7 +215,7 @@ export const BLOCOS_BASE = [
   bloco('feedback/selo', { props: { type: 'object', properties: { texto: { type: 'string' }, tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } }, required: ['texto'] } }),
   bloco('feedback/alerta', { slots: { filhos: {} }, props: { type: 'object', properties: { tom: { enum: ['neutro', 'sucesso', 'alerta', 'erro'], default: 'neutro' } } } }),
   bloco('midia/icone', { props: { type: 'object', properties: { nome: { type: 'string', enum: NOMES_ICONES, description: 'o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…)' }, tamanho: { type: 'number', minimum: 8, maximum: 96, description: 'lado em px (padrão 1,25 em, acompanha o texto)' }, rotulo: { type: 'string', maxLength: 200, description: 'nome acessível; sem ele o ícone é decorativo (aria-hidden)' }, acento: { type: 'boolean', description: 'o detalhe de acento na cor de destaque do tema' } }, required: ['nome'] } }),
-  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, botao: { type: 'string', maxLength: 12, description: 'primario ou secundario: o link com aparência de botão' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' }, soConsulta: { type: 'boolean', description: 'o link só muda a consulta da URL (?nome=valor) da MESMA página: o estado ligado a ela (`daConsulta`) muda e a URL acompanha, sem recarregar nem voltar ao topo' }, icone: ICONE_PROP }, required: ['href'] } }),
+  bloco('nav/link', { slots: { filhos: {} }, props: { type: 'object', properties: { href: { type: 'string' }, texto: { type: 'string' }, botao: { type: 'string', maxLength: 12, description: 'primario ou secundario: o link com aparência de botão' }, atual: { type: 'boolean', description: 'a página atual: o link leva aria-current="page"' }, rotulo: ROTULO, soConsulta: { type: 'boolean', description: 'o link só muda a consulta da URL (?nome=valor) da MESMA página: o estado ligado a ela (`daConsulta`) muda e a URL acompanha, sem recarregar nem voltar ao topo' }, icone: ICONE_PROP }, required: ['href'] } }),
 ]
 
 /** Registra no Registry o core/slot e os blocos base. */

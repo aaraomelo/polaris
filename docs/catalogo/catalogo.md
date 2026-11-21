@@ -1995,7 +1995,7 @@ Lista de itens; `ordenada` numera. Só aceita `lista/item`.
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `acento` | booleano | não |  | o detalhe de acento na cor de destaque do tema |
-| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
+| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" \| "sacola" \| "coracao" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível; sem ele o ícone é decorativo (aria-hidden) |
 | `tamanho` | número ≥ 8 ≤ 96 | não |  | lado em px (padrão 1,25 em, acompanha o texto) |
 
@@ -2342,6 +2342,7 @@ Link para uma URL segura (javascript:, data: e similares são recusados). Links 
 | `botao` | texto ≤ 12 caracteres | não |  | primario ou secundario: o link com aparência de botão |
 | `href` | texto | sim |  |  |
 | `icone` | texto | não |  | ícone da família Grafite antes do texto (nomes em `midia/icone`); aceita um valor de dado; um nome que não existe não pinta nada |
+| `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do campo (aria-label); obrigatório na prática quando não há um `texto/rotulo` ligado por `para` |
 | `soConsulta` | booleano | não |  | o link só muda a consulta da URL (?nome=valor) da MESMA página: o estado ligado a ela (`daConsulta`) muda e a URL acompanha, sem recarregar nem voltar ao topo |
 | `texto` | texto | não |  |  |
 
@@ -2646,6 +2647,7 @@ Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação 
 |---|---|---|---|---|
 | `fixo` | booleano | não | false |  |
 | `grupos` | lista | não |  | submenus: cada grupo (`titulo` e `links`) é um item recolhível que abre uma lista de links, depois dos `links`; um nível só |
+| `gruposAntes` | booleano | não | false | os submenus (`grupos`) vêm antes dos `links` no menu |
 | `href` | texto ≤ 500 caracteres | não | "/" | para onde a marca leva |
 | `links` | lista | não |  | o menu |
 | `logo` | texto ≤ 500 caracteres | não |  | URL segura da imagem da marca |
