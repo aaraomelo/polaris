@@ -3,7 +3,7 @@ import type { Registry } from '@polaris/schema'
 import { registraNativos } from '../ir/nativos'
 import type { Componentes } from './tipos'
 import { DOCS_BASE } from './base-doc'
-import { QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valoresIniciaisJson, dimensao, entradasJson, ident } from '../vivo/blocos'
+import { proporcaoDaImagem, QUADRO_MAX, PULA, arquivoEscolhido, arquivoRecusado, idFormulario, valoresIniciaisJson, dimensao, entradasJson, ident } from '../vivo/blocos'
 
 // Biblioteca nativa mínima (layout, texto, mídia, link). Serve de base e de prova do contrato;
 // a biblioteca completa de blocos é a épica E3. Cada bloco tem schema (registrado no Registry) e implementação.
@@ -45,7 +45,7 @@ export const COMPONENTES_BASE: Componentes = {
     const src = urlSegura(props.src)
     if (!src) return null
     const sz = tamanhosDe(props.tamanhos, num(props.largura)), ss = sz ? srcsetDe(src) : undefined // sem `tamanhos` nem `largura` o navegador não sabe o espaço da imagem: sem srcset
-    return createElement('img', { ...(id ? { id } : {}), src, ...(ss ? { srcSet: ss, sizes: sz } : {}), alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto' } })
+    return createElement('img', { ...(id ? { id } : {}), src, ...(ss ? { srcSet: ss, sizes: sz } : {}), alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto', ...(props.fluida === true || proporcaoDaImagem(props) ? { width: '100%' } : {}), ...(proporcaoDaImagem(props) ? { aspectRatio: proporcaoDaImagem(props), objectFit: 'cover' } : {}) } })
   },
   'computacao/canvas-gl': ({ props, id }) => (ident(props.kernel) ? createElement('canvas', { ...(id ? { id } : {}), width: dimensao(props.largura), height: dimensao(props.altura), role: 'img', 'aria-label': txt(props.alt), 'data-polaris-kernel': ident(props.kernel), 'data-polaris-entradas': entradasJson(props.entradas) }, txt(props.alt)) : null),
   'entrada/area': ({ props, on, id }) =>
@@ -69,9 +69,9 @@ export const COMPONENTES_BASE: Componentes = {
   'layout/grade': ({ props, slots, id }) => {
     const n = num(props.colunas), gap = num(props.gap)
     const cols = n === undefined ? 2 : Math.min(12, Math.max(1, Math.trunc(n)))
-    return createElement('div', { ...(id ? { id } : {}), style: { display: 'grid', gridTemplateColumns: `repeat(${cols},minmax(0,1fr))`, ...(gap !== undefined ? { gap } : {}) } }, slots.filhos)
+    return createElement('div', { ...(id ? { id } : {}), style: { display: 'grid', gridTemplateColumns: `repeat(${cols},minmax(0,1fr))`, ...(gap !== undefined ? { gap } : {}), ...(typeof props.alinha === 'string' && ALINHA[props.alinha] ? { alignItems: ALINHA[props.alinha] } : {}) } }, slots.filhos)
   },
-  'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}) }, slots.filhos),
+  'layout/cabecalho': ({ props, slots, id }) => createElement('header', { ...(id ? { id } : {}), ...(props.fixo === true ? { 'data-fixo': '' } : {}), ...(props.centro === true ? { 'data-centro': '' } : {}) }, slots.filhos),
   'layout/painel': ({ slots, id }) => createElement('div', { ...(id ? { id } : {}), 'data-painel': '' }, slots.filhos),
   'layout/lateral': ({ props, slots, id }) => createElement('aside', { ...(id ? { id } : {}), 'data-lateral': '', ...rotuloDe(props.rotulo === undefined ? { rotulo: 'Navegação lateral' } : props) }, slots.filhos),
   'layout/principal': ({ slots, id }) => createElement('main', { ...(id ? { id } : {}), 'data-principal': '' }, slots.filhos),
@@ -99,11 +99,13 @@ export const COMPONENTES_BASE: Componentes = {
     const img = urlSegura(props.imagem), a = Math.min(800, Math.max(120, Math.trunc(num(props.altura) ?? 320))), e = Math.min(0.8, Math.max(0, num(props.escurece) ?? 0.45))
     return createElement('section', { ...(id ? { id } : {}), 'data-alinha': props.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': props.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), style: { minHeight: a, ...(img ? { backgroundImage: `linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` } : {}) } }, slots.filhos)
   },
+  'layout/contido': ({ props, slots, id }) => createElement('div', { ...(id ? { id } : {}), 'data-contido': props.largura === 'estreita' || props.largura === 'larga' ? props.largura : 'normal' }, slots.filhos),
   'layout/rodape': ({ slots, id }) => createElement('footer', id ? { id } : null, slots.filhos),
   'layout/divisor': ({ id }) => createElement('hr', id ? { id } : null),
   'layout/espacador': ({ props, id }) => createElement('div', { ...(id ? { id } : {}), 'aria-hidden': 'true', style: { height: num(props.tamanho) ?? 8 } }),
   'texto/rotulo': ({ props, id }) => createElement('label', { ...(id ? { id } : {}), ...(typeof props.para === 'string' && props.para ? { htmlFor: props.para } : {}) }, txt(props.texto)),
   'texto/destaque': ({ props, id }) => createElement('strong', id ? { id } : null, txt(props.texto)),
+  'texto/sobretitulo': ({ props, id }) => createElement('p', { ...(id ? { id } : {}), 'data-sobretitulo': '' }, txt(props.texto)),
   'texto/pequeno': ({ props, id }) => createElement('small', id ? { id } : null, txt(props.texto)),
   'texto/codigo': ({ props, id }) => createElement('code', id ? { id } : null, txt(props.texto)),
   'lista/lista': ({ props, slots, id }) => createElement(props.ordenada === true ? 'ol' : 'ul', id ? { id } : null, slots.filhos),
@@ -147,15 +149,16 @@ export const BLOCOS_BASE = [
   bloco('layout/linha', { slots: { filhos: {} }, props: { type: 'object', properties: { papel: { enum: ['toolbar', 'group', 'list', 'status'], description: 'papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar)' }, rotulo: { type: 'string', maxLength: 200, description: 'nome acessível do grupo (aria-label)' }, largura: { type: 'number', minimum: 40, maximum: 2000, description: 'largura fixa em px (dentro de uma linha)' }, cresce: { type: 'boolean', description: 'ocupa o espaço que sobra na linha (flex 1, sem estourar)' }, gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'] }, quebra: { type: 'boolean', description: 'quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura' }, solta: { type: 'boolean', description: 'zona de soltar: itens com `arrasta` (botões) arrastados para dentro dela chegam em `aoSoltar` como `{ valor, alvo, zona }` (zona: antes, dentro ou depois do item sob o ponteiro); a ilha `@polaris/engine/tela` faz o arrastar' } } }, eventos: { aoSoltar: { payload: 'json' } } }),
   bloco('texto/titulo', { props: { type: 'object', properties: { texto: { type: 'string' }, nivel: { type: 'integer', minimum: 1, maximum: 6, default: 1 } }, required: ['texto'] } }),
   bloco('texto/paragrafo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
-  bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 }, tamanhos: { type: 'string', maxLength: 200 } }, required: ['src'] } }),
+  bloco('midia/imagem', { props: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' }, fluida: { type: 'boolean', description: 'ocupa toda a largura do contêiner (a altura segue a proporção da foto)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura (0,8 = retrato 4:5): a imagem preenche a largura e é cortada para essa proporção (object-fit: cover)' }, largura: { type: 'number', minimum: 1 }, altura: { type: 'number', minimum: 1 }, tamanhos: { type: 'string', maxLength: 200 } }, required: ['src'] } }),
   bloco('computacao/canvas-gl', { props: { type: 'object', properties: { kernel: { type: 'string', pattern: '^[a-z][A-Za-z0-9._-]{0,63}$', description: 'id do nó kernel (o artefato é servido em /kernels/<id>.json)' }, largura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, altura: { type: 'integer', minimum: 1, maximum: 2048, default: 300 }, alt: { type: 'string' }, entradas: { type: 'object', description: 'valores das entradas escalares do kernel (número ou booleano)' } }, required: ['kernel', 'alt'] } }),
   bloco('entrada/area', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, linhas: { type: 'integer', minimum: 1, maximum: 40, default: 4 }, desabilitado: { type: 'boolean' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
   bloco('midia/quadro', { props: { type: 'object', properties: { html: { type: 'string', maxLength: 262144, description: 'documento HTML completo a exibir' }, titulo: { type: 'string', maxLength: 200, description: 'nome acessível do quadro (obrigatório)' }, altura: { type: 'integer', minimum: 40, maximum: 4000, default: 320 } }, required: ['html', 'titulo'] } }),
   bloco('form/formulario', { props: { type: 'object', properties: { formulario: { type: 'string', pattern: '^[a-z0-9][a-z0-9._-]{0,127}$', description: 'id do nó `formulario` (do tenant ou da plataforma)' }, valores: { type: 'object', description: 'valores iniciais por campo (edição); só primitivos e listas deles' }, idioma: { type: 'string', pattern: '^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$', description: 'idioma das mensagens (padrão: o do visitante)' } }, required: ['formulario'] }, eventos: { aoEnviado: { payload: 'json' }, aoErro: { payload: 'json' } } }),
   bloco('nav/botao', { props: { type: 'object', properties: { texto: { type: 'string' }, desabilitado: { type: 'boolean' }, atual: { type: 'boolean', description: 'o item escolhido (aria-current), ex.: no menu lateral' }, icone: ICONE_PROP, expandido: { type: 'boolean', description: 'botão que abre/fecha algo: leva aria-expanded (verdadeiro/falso)' }, arrasta: { type: 'string', maxLength: 120, description: 'torna o botão arrastável (`draggable`) e leva este valor ao soltar numa `midia/tela` (evento `aoSoltar`); letras, números, _ e -' }, alvo: { type: 'string', maxLength: 120, description: 'identifica o que o botão representa (data-alvo; letras, números, _ e -): o hospedeiro usa para realçar o item correspondente' }, variante: { type: 'string', enum: ['primario', 'secundario', 'fantasma'], description: 'primario (padrão): cheio na cor primária; secundario: contorno; fantasma: só o texto' } }, required: ['texto'] }, eventos: { aoClicar: {} } }),
   bloco('entrada/texto', { props: { type: 'object', properties: { valor: { type: 'string' }, rotulo: ROTULO, placeholder: { type: 'string' }, desabilitado: { type: 'boolean' }, lista: { type: 'string', description: 'id de um `form/sugestoes` da página: o navegador oferece as opções ao digitar (a lista de valores disponíveis)' } } }, eventos: { aoMudar: { payload: 'texto' } } }),
-  bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 } } } }),
-  bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false } } } }),
+  bloco('layout/grade', { slots: { filhos: {} }, props: { type: 'object', properties: { colunas: { type: 'integer', minimum: 1, maximum: 12, default: 2 }, gap: { type: 'number', minimum: 0 }, alinha: { enum: ['inicio', 'centro', 'fim', 'esticar'], description: 'alinhamento vertical das células (padrão: esticar)' } } } }),
+  bloco('layout/contido', { slots: { filhos: {} }, props: { type: 'object', properties: { largura: { enum: ['estreita', 'normal', 'larga'], default: 'normal', description: 'a largura máxima do conteúdo (centrado, com margens): estreita, normal ou larga; os valores vêm do tema (`layout.largura*`)' } } } }),
+  bloco('layout/cabecalho', { slots: { filhos: {} }, props: { type: 'object', properties: { fixo: { type: 'boolean', default: false }, centro: { type: 'boolean', default: false, description: 'o menu fica centralizado entre a marca e as ações' } } } }),
   bloco('layout/painel', { slots: { filhos: {} } }),
   bloco('layout/lateral', { slots: { filhos: {} }, props: { type: 'object', properties: { rotulo: ROTULO } } }),
   bloco('layout/principal', { slots: { filhos: {} } }),
@@ -184,6 +187,7 @@ export const BLOCOS_BASE = [
   bloco('layout/espacador', { props: { type: 'object', properties: { tamanho: { type: 'number', minimum: 0, default: 8 } } } }),
   bloco('texto/rotulo', { props: { type: 'object', properties: { texto: { type: 'string' }, para: { type: 'string' } }, required: ['texto'] } }),
   bloco('texto/destaque', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
+  bloco('texto/sobretitulo', { props: { type: 'object', properties: { texto: { type: 'string', maxLength: 200 } }, required: ['texto'] } }),
   bloco('texto/pequeno', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('texto/codigo', { props: { type: 'object', properties: { texto: { type: 'string' } }, required: ['texto'] } }),
   bloco('lista/lista', { slots: { filhos: { aceita: ['lista/item'] } }, props: { type: 'object', properties: { ordenada: { type: 'boolean', default: false } } } }),

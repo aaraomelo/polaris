@@ -44,6 +44,19 @@
           "propertyNames": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
           }
+        },
+        "layout": {
+          "type": "object",
+          "description": "larguras do conteúdo: `largura`, `larguraEstreita` e `larguraLarga` (ex.: 80rem), usadas por layout/contido",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
         }
       },
       "additionalProperties": false

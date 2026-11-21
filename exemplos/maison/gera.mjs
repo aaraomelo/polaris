@@ -21,7 +21,8 @@ const tema = {
       },
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
-      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px' },
+      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: '1.625rem' },
+      layout: { largura: '80rem', larguraEstreita: '48rem', larguraLarga: '90rem' },
     },
     modos: {
       escuro: {
@@ -39,7 +40,9 @@ const tema = {
 const b = (bloco, props, filhos, extra = {}) => ({ bloco, ...(props ? { props } : {}), ...(filhos ? { slots: { filhos } } : {}), ...extra })
 const titulo = (texto, nivel) => b('texto/titulo', { texto, nivel })
 const par = (texto) => b('texto/paragrafo', { texto })
-const sobre = (texto) => b('texto/pequeno', { texto: texto.toUpperCase() }) // a "sobretítulo" do template (em caixa alta)
+const sobre = (texto) => b('texto/sobretitulo', { texto })
+const contido = (filhos, largura, extra = {}) => b('layout/contido', largura ? { largura } : undefined, filhos, extra)
+const folga = (tamanho) => b('layout/espacador', { tamanho })
 
 const COLECOES = [
   { nome: 'Iluminação', frase: 'Formas escultóricas que lançam calor e sombra', foto: 'colecao-iluminacao' },
@@ -59,45 +62,59 @@ const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'coleca
 
 const home = b('layout/pilha', { gap: 0 }, [
   b('site/cabecalho', {
-    titulo: 'Maison', fixo: true, href: '/',
+    titulo: 'Maison', fixo: true, menuCentro: true, href: '/',
     links: [{ texto: 'Loja', href: '#novidades' }, { texto: 'Sobre', href: '#sobre' }],
     grupos: [{ titulo: 'Coleções', links: COLECOES.map((c) => ({ texto: c.nome, href: '#colecoes' })) }],
   }),
-  // abertura em tela quase cheia, com a foto e o véu escuro
+  // abertura em tela quase cheia, com a foto e o véu escuro; o texto alinha com o resto da página
   b('layout/destaque', { imagem: foto('hero'), altura: 760, escurece: 0.35, alinha: 'esquerda' }, [
-    sobre('Curadoria para uma vida atenta'),
-    titulo('Objetos de beleza serena', 1),
-    par('Peças de casa e estilo de vida, escolhidas para dar um sentido calmo ao dia a dia.'),
-    b('nav/link', { href: '#colecoes', texto: 'Ver as coleções', botao: 'primario' }),
-  ]),
-  // coleção em destaque: foto à esquerda, texto à direita
-  b('layout/grade', { colunas: 2, gap: 64 }, [
-    b('midia/imagem', { src: foto(COLECOES[0].foto), alt: COLECOES[0].nome, largura: 640 }),
-    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
-      sobre('Coleção em destaque'),
-      titulo(COLECOES[0].nome, 2),
-      par(`${COLECOES[0].frase}. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz.`),
-      b('nav/link', { href: '#colecoes', texto: 'Ver iluminação', botao: 'primario' }),
+    contido([
+      sobre('Curadoria para uma vida atenta'),
+      titulo('Objetos de beleza serena', 1),
+      par('Peças de casa e estilo de vida, escolhidas para dar um sentido calmo ao dia a dia.'),
+      b('nav/link', { href: '#colecoes', texto: 'Ver as coleções', botao: 'primario' }),
     ]),
   ]),
+  folga(96),
+  // coleção em destaque: foto à esquerda, texto à direita, centrado na vertical
+  contido([
+    b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
+      b('midia/imagem', { src: foto(COLECOES[0].foto), alt: COLECOES[0].nome, fluida: true, proporcao: 0.8 }),
+      b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+        sobre('Coleção em destaque'),
+        titulo(COLECOES[0].nome, 2),
+        par(`${COLECOES[0].frase}. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz.`),
+        b('nav/link', { href: '#colecoes', texto: 'Ver iluminação', botao: 'primario' }),
+      ]),
+    ]),
+  ]),
+  folga(96),
   // novidades sobre o fundo de linho
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [
-    b('layout/linha', { gap: 16, alinha: 'fim', quebra: true }, [
-      b('layout/pilha', { gap: 4, cresce: true }, [sobre('Acabou de chegar'), titulo('Novidades', 2)]),
-      b('nav/link', { href: '#novidades', texto: 'Ver tudo' }),
+    contido([
+      b('layout/linha', { gap: 16, alinha: 'fim', quebra: true }, [
+        b('layout/pilha', { gap: 4, cresce: true }, [sobre('Acabou de chegar'), titulo('Novidades', 2)]),
+        b('nav/link', { href: '#novidades', texto: 'Ver tudo' }),
+      ]),
+      folga(24),
+      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: { id: p.id, nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true }, href: `#${p.id}` }))),
     ]),
-    b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { produto: { id: p.id, nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true }, href: `#${p.id}` }))),
   ], { id: 'novidades' }),
+  folga(96),
   // explore por coleção
-  b('layout/pilha', { gap: 32, alinha: 'centro' }, [
-    sobre('Explore por'), titulo('Coleções', 2),
-    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 320, escurece: 0.4, alinha: 'esquerda' }, [titulo(c.nome, 3), par(c.frase)]))),
-  ], { id: 'colecoes' }),
+  contido([
+    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Explore por'), titulo('Coleções', 2)]),
+    folga(32),
+    b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda' }, [titulo(c.nome, 3), par(c.frase)]))),
+  ], 'larga', { id: 'colecoes' }),
+  folga(96),
   // a faixa de fotos
-  b('layout/pilha', { gap: 16, alinha: 'centro' }, [
-    sobre('Siga a casa'), titulo('@maison', 2),
-    b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('midia/imagem', { src: foto(f), alt: `Foto ${i + 1} da casa`, largura: 200 }))),
-  ], { id: 'sobre' }),
+  contido([
+    b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Siga a casa'), titulo('@maison', 2)]),
+    folga(24),
+    b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('midia/imagem', { src: foto(f), alt: `Foto ${i + 1} da casa`, fluida: true, proporcao: 1 }))),
+  ], 'larga', { id: 'sobre' }),
+  folga(96),
   b('site/rodape', {
     colunas: [
       { titulo: 'Loja', links: [{ texto: 'Novidades', href: '#novidades' }, { texto: 'Coleções', href: '#colecoes' }] },

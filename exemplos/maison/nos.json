@@ -35,7 +35,15 @@
           "familia": "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
           "familiaTitulo": "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif",
           "pesoTitulo": 500,
-          "tamanhoBase": "16px"
+          "tamanhoBase": "16px",
+          "tamanhoH1": "clamp(2.75rem, 6.5vw, 5rem)",
+          "tamanhoH2": "clamp(2rem, 4vw, 3rem)",
+          "tamanhoH3": "1.625rem"
+        },
+        "layout": {
+          "largura": "80rem",
+          "larguraEstreita": "48rem",
+          "larguraLarga": "90rem"
         }
       },
       "modos": {
@@ -81,6 +89,7 @@
               "props": {
                 "titulo": "Maison",
                 "fixo": true,
+                "menuCentro": true,
                 "href": "/",
                 "links": [
                   {
@@ -136,83 +145,33 @@
               "slots": {
                 "filhos": [
                   {
-                    "bloco": "texto/pequeno",
-                    "props": {
-                      "texto": "CURADORIA PARA UMA VIDA ATENTA"
-                    }
-                  },
-                  {
-                    "bloco": "texto/titulo",
-                    "props": {
-                      "texto": "Objetos de beleza serena",
-                      "nivel": 1
-                    }
-                  },
-                  {
-                    "bloco": "texto/paragrafo",
-                    "props": {
-                      "texto": "Peças de casa e estilo de vida, escolhidas para dar um sentido calmo ao dia a dia."
-                    }
-                  },
-                  {
-                    "bloco": "nav/link",
-                    "props": {
-                      "href": "#colecoes",
-                      "texto": "Ver as coleções",
-                      "botao": "primario"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "bloco": "layout/grade",
-              "props": {
-                "colunas": 2,
-                "gap": 64
-              },
-              "slots": {
-                "filhos": [
-                  {
-                    "bloco": "midia/imagem",
-                    "props": {
-                      "src": "@img/colecao-iluminacao",
-                      "alt": "Iluminação",
-                      "largura": 640
-                    }
-                  },
-                  {
-                    "bloco": "layout/pilha",
-                    "props": {
-                      "gap": 16,
-                      "alinha": "inicio"
-                    },
+                    "bloco": "layout/contido",
                     "slots": {
                       "filhos": [
                         {
-                          "bloco": "texto/pequeno",
+                          "bloco": "texto/sobretitulo",
                           "props": {
-                            "texto": "COLEÇÃO EM DESTAQUE"
+                            "texto": "Curadoria para uma vida atenta"
                           }
                         },
                         {
                           "bloco": "texto/titulo",
                           "props": {
-                            "texto": "Iluminação",
-                            "nivel": 2
+                            "texto": "Objetos de beleza serena",
+                            "nivel": 1
                           }
                         },
                         {
                           "bloco": "texto/paragrafo",
                           "props": {
-                            "texto": "Formas escultóricas que lançam calor e sombra. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz."
+                            "texto": "Peças de casa e estilo de vida, escolhidas para dar um sentido calmo ao dia a dia."
                           }
                         },
                         {
                           "bloco": "nav/link",
                           "props": {
                             "href": "#colecoes",
-                            "texto": "Ver iluminação",
+                            "texto": "Ver as coleções",
                             "botao": "primario"
                           }
                         }
@@ -220,6 +179,84 @@
                     }
                   }
                 ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/grade",
+                    "props": {
+                      "colunas": 2,
+                      "gap": 64,
+                      "alinha": "centro"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "midia/imagem",
+                          "props": {
+                            "src": "@img/colecao-iluminacao",
+                            "alt": "Iluminação",
+                            "fluida": true,
+                            "proporcao": 0.8
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 16,
+                            "alinha": "inicio"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "Coleção em destaque"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "Iluminação",
+                                  "nivel": 2
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "Formas escultóricas que lançam calor e sombra. Descubra formas escultóricas que transformam qualquer espaço num santuário de luz."
+                                }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "#colecoes",
+                                  "texto": "Ver iluminação",
+                                  "botao": "primario"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
               }
             },
             {
@@ -232,110 +269,131 @@
               "slots": {
                 "filhos": [
                   {
-                    "bloco": "layout/linha",
-                    "props": {
-                      "gap": 16,
-                      "alinha": "fim",
-                      "quebra": true
-                    },
+                    "bloco": "layout/contido",
                     "slots": {
                       "filhos": [
                         {
-                          "bloco": "layout/pilha",
+                          "bloco": "layout/linha",
                           "props": {
-                            "gap": 4,
-                            "cresce": true
+                            "gap": 16,
+                            "alinha": "fim",
+                            "quebra": true
                           },
                           "slots": {
                             "filhos": [
                               {
-                                "bloco": "texto/pequeno",
+                                "bloco": "layout/pilha",
                                 "props": {
-                                  "texto": "ACABOU DE CHEGAR"
+                                  "gap": 4,
+                                  "cresce": true
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "Acabou de chegar"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "Novidades",
+                                        "nivel": 2
+                                      }
+                                    }
+                                  ]
                                 }
                               },
                               {
-                                "bloco": "texto/titulo",
+                                "bloco": "nav/link",
                                 "props": {
-                                  "texto": "Novidades",
-                                  "nivel": 2
+                                  "href": "#novidades",
+                                  "texto": "Ver tudo"
                                 }
                               }
                             ]
                           }
                         },
                         {
-                          "bloco": "nav/link",
+                          "bloco": "layout/espacador",
                           "props": {
-                            "href": "#novidades",
-                            "texto": "Ver tudo"
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "bloco": "layout/grade",
-                    "props": {
-                      "colunas": 4,
-                      "gap": 32
-                    },
-                    "slots": {
-                      "filhos": [
-                        {
-                          "bloco": "commerce/cartao-produto",
-                          "props": {
-                            "produto": {
-                              "id": "arco",
-                              "nome": "Luminária Arco",
-                              "descricao": "Um arco gracioso de latão curvado à mão e linho",
-                              "preco": "485.00",
-                              "fotoUrl": "@img/produto-1",
-                              "disponivel": true
-                            },
-                            "href": "#arco"
+                            "tamanho": 24
                           }
                         },
                         {
-                          "bloco": "commerce/cartao-produto",
+                          "bloco": "layout/grade",
                           "props": {
-                            "produto": {
-                              "id": "pendente",
-                              "nome": "Pendente de Vidro",
-                              "descricao": "Vidro soprado encontra o bronze escultural",
-                              "preco": "295.00",
-                              "fotoUrl": "@img/produto-2",
-                              "disponivel": true
-                            },
-                            "href": "#pendente"
-                          }
-                        },
-                        {
-                          "bloco": "commerce/cartao-produto",
-                          "props": {
-                            "produto": {
-                              "id": "vaso",
-                              "nome": "Vaso de Grés",
-                              "descricao": "Grés torneado à mão, com esmalte de cinzas",
-                              "preco": "320.00",
-                              "fotoUrl": "@img/produto-3",
-                              "disponivel": true
-                            },
-                            "href": "#vaso"
-                          }
-                        },
-                        {
-                          "bloco": "commerce/cartao-produto",
-                          "props": {
-                            "produto": {
-                              "id": "tigela",
-                              "nome": "Tigela de Grés",
-                              "descricao": "Formas simples para os rituais do dia a dia",
-                              "preco": "145.00",
-                              "fotoUrl": "@img/colecao-ceramica",
-                              "disponivel": true
-                            },
-                            "href": "#tigela"
+                            "colunas": 4,
+                            "gap": 32
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "commerce/cartao-produto",
+                                "props": {
+                                  "fluida": true,
+                                  "proporcao": 0.8,
+                                  "produto": {
+                                    "id": "arco",
+                                    "nome": "Luminária Arco",
+                                    "descricao": "Um arco gracioso de latão curvado à mão e linho",
+                                    "preco": "485.00",
+                                    "fotoUrl": "@img/produto-1",
+                                    "disponivel": true
+                                  },
+                                  "href": "#arco"
+                                }
+                              },
+                              {
+                                "bloco": "commerce/cartao-produto",
+                                "props": {
+                                  "fluida": true,
+                                  "proporcao": 0.8,
+                                  "produto": {
+                                    "id": "pendente",
+                                    "nome": "Pendente de Vidro",
+                                    "descricao": "Vidro soprado encontra o bronze escultural",
+                                    "preco": "295.00",
+                                    "fotoUrl": "@img/produto-2",
+                                    "disponivel": true
+                                  },
+                                  "href": "#pendente"
+                                }
+                              },
+                              {
+                                "bloco": "commerce/cartao-produto",
+                                "props": {
+                                  "fluida": true,
+                                  "proporcao": 0.8,
+                                  "produto": {
+                                    "id": "vaso",
+                                    "nome": "Vaso de Grés",
+                                    "descricao": "Grés torneado à mão, com esmalte de cinzas",
+                                    "preco": "320.00",
+                                    "fotoUrl": "@img/produto-3",
+                                    "disponivel": true
+                                  },
+                                  "href": "#vaso"
+                                }
+                              },
+                              {
+                                "bloco": "commerce/cartao-produto",
+                                "props": {
+                                  "fluida": true,
+                                  "proporcao": 0.8,
+                                  "produto": {
+                                    "id": "tigela",
+                                    "nome": "Tigela de Grés",
+                                    "descricao": "Formas simples para os rituais do dia a dia",
+                                    "preco": "145.00",
+                                    "fotoUrl": "@img/colecao-ceramica",
+                                    "disponivel": true
+                                  },
+                                  "href": "#tigela"
+                                }
+                              }
+                            ]
                           }
                         }
                       ]
@@ -346,24 +404,46 @@
               "id": "novidades"
             },
             {
-              "bloco": "layout/pilha",
+              "bloco": "layout/espacador",
               "props": {
-                "gap": 32,
-                "alinha": "centro"
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "larga"
               },
               "slots": {
                 "filhos": [
                   {
-                    "bloco": "texto/pequeno",
+                    "bloco": "layout/pilha",
                     "props": {
-                      "texto": "EXPLORE POR"
+                      "gap": 8,
+                      "alinha": "centro"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "Explore por"
+                          }
+                        },
+                        {
+                          "bloco": "texto/titulo",
+                          "props": {
+                            "texto": "Coleções",
+                            "nivel": 2
+                          }
+                        }
+                      ]
                     }
                   },
                   {
-                    "bloco": "texto/titulo",
+                    "bloco": "layout/espacador",
                     "props": {
-                      "texto": "Coleções",
-                      "nivel": 2
+                      "tamanho": 32
                     }
                   },
                   {
@@ -378,7 +458,7 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-iluminacao",
-                            "altura": 320,
+                            "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
                           },
@@ -404,7 +484,7 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-ceramica",
-                            "altura": 320,
+                            "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
                           },
@@ -430,7 +510,7 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-3",
-                            "altura": 320,
+                            "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
                           },
@@ -456,7 +536,7 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-4",
-                            "altura": 320,
+                            "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
                           },
@@ -482,7 +562,7 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-5",
-                            "altura": 320,
+                            "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
                           },
@@ -508,7 +588,7 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-6",
-                            "altura": 320,
+                            "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
                           },
@@ -538,24 +618,46 @@
               "id": "colecoes"
             },
             {
-              "bloco": "layout/pilha",
+              "bloco": "layout/espacador",
               "props": {
-                "gap": 16,
-                "alinha": "centro"
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "larga"
               },
               "slots": {
                 "filhos": [
                   {
-                    "bloco": "texto/pequeno",
+                    "bloco": "layout/pilha",
                     "props": {
-                      "texto": "SIGA A CASA"
+                      "gap": 8,
+                      "alinha": "centro"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "Siga a casa"
+                          }
+                        },
+                        {
+                          "bloco": "texto/titulo",
+                          "props": {
+                            "texto": "@maison",
+                            "nivel": 2
+                          }
+                        }
+                      ]
                     }
                   },
                   {
-                    "bloco": "texto/titulo",
+                    "bloco": "layout/espacador",
                     "props": {
-                      "texto": "@maison",
-                      "nivel": 2
+                      "tamanho": 24
                     }
                   },
                   {
@@ -571,7 +673,8 @@
                           "props": {
                             "src": "@img/hero",
                             "alt": "Foto 1 da casa",
-                            "largura": 200
+                            "fluida": true,
+                            "proporcao": 1
                           }
                         },
                         {
@@ -579,7 +682,8 @@
                           "props": {
                             "src": "@img/foto-1",
                             "alt": "Foto 2 da casa",
-                            "largura": 200
+                            "fluida": true,
+                            "proporcao": 1
                           }
                         },
                         {
@@ -587,7 +691,8 @@
                           "props": {
                             "src": "@img/foto-2",
                             "alt": "Foto 3 da casa",
-                            "largura": 200
+                            "fluida": true,
+                            "proporcao": 1
                           }
                         },
                         {
@@ -595,7 +700,8 @@
                           "props": {
                             "src": "@img/foto-3",
                             "alt": "Foto 4 da casa",
-                            "largura": 200
+                            "fluida": true,
+                            "proporcao": 1
                           }
                         },
                         {
@@ -603,7 +709,8 @@
                           "props": {
                             "src": "@img/colecao-ceramica",
                             "alt": "Foto 5 da casa",
-                            "largura": 200
+                            "fluida": true,
+                            "proporcao": 1
                           }
                         },
                         {
@@ -611,7 +718,8 @@
                           "props": {
                             "src": "@img/colecao-5",
                             "alt": "Foto 6 da casa",
-                            "largura": 200
+                            "fluida": true,
+                            "proporcao": 1
                           }
                         }
                       ]
@@ -620,6 +728,12 @@
                 ]
               },
               "id": "sobre"
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
             },
             {
               "bloco": "site/rodape",

@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-64 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+66 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -82,8 +82,10 @@ Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `ac
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `fluida` | booleano | não |  | a foto ocupa toda a largura do cartão (em vez dos 240 px fixos) |
 | `href` | texto | não |  |  |
 | `produto` | objeto | sim |  |  |
+| `proporcao` | número ≥ 0.2 ≤ 5 | não |  | largura ÷ altura da foto (0,8 = retrato 4:5), com corte |
 
 **Slots**
 
@@ -903,6 +905,7 @@ Faixa do topo da página (`<header>`): ponto de referência para leitores de tel
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `centro` | booleano | não | false | o menu fica centralizado entre a marca e as ações |
 | `fixo` | booleano | não | false |  |
 
 **Slots**
@@ -1010,6 +1013,68 @@ Caixa com borda, fundo de superfície e espaçamento interno, para agrupar um it
               }
             }
           ]
+        }
+      }
+    ]
+  }
+}
+```
+
+### Contêiner (largura máxima) (`layout/contido`)
+
+Limita e centraliza o conteúdo: largura máxima (`estreita`, `normal` ou `larga`, definidas pelo tema em `layout.largura`, `layout.larguraEstreita` e `layout.larguraLarga`) e margens laterais. Dentro de uma abertura (`layout/destaque`) ou de uma faixa de fundo, mantém o texto alinhado com o resto da página enquanto o fundo vai de ponta a ponta.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `largura` | "estreita" \| "normal" \| "larga" | não | "normal" | a largura máxima do conteúdo (centrado, com margens): estreita, normal ou larga; os valores vêm do tema (`layout.largura*`) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Exemplo: Texto no contêiner normal**
+
+```json
+{
+  "bloco": "layout/contido",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/titulo",
+        "props": {
+          "texto": "Nossa história",
+          "nivel": 2
+        }
+      },
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "O conteúdo fica centrado, com largura máxima e margens, em telas largas e estreitas."
+        }
+      }
+    ]
+  }
+}
+```
+
+**Exemplo: Contêiner estreito para leitura**
+
+```json
+{
+  "bloco": "layout/contido",
+  "props": {
+    "largura": "estreita"
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Linhas curtas leem melhor: use a largura estreita em textos longos."
         }
       }
     ]
@@ -1161,6 +1226,7 @@ Distribui os filhos em colunas iguais (1 a 12). Padrão: 2 colunas.
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  | alinhamento vertical das células (padrão: esticar) |
 | `colunas` | inteiro ≥ 1 ≤ 12 | não | 2 |  |
 | `gap` | número ≥ 0 | não |  |  |
 
@@ -1931,7 +1997,9 @@ Imagem carregada sob demanda. Só aceita URLs seguras (http, https ou relativas)
 |---|---|---|---|---|
 | `alt` | texto | não |  |  |
 | `altura` | número ≥ 1 | não |  |  |
+| `fluida` | booleano | não |  | ocupa toda a largura do contêiner (a altura segue a proporção da foto) |
 | `largura` | número ≥ 1 | não |  |  |
+| `proporcao` | número ≥ 0.2 ≤ 5 | não |  | largura ÷ altura (0,8 = retrato 4:5): a imagem preenche a largura e é cortada para essa proporção (object-fit: cover) |
 | `src` | texto | sim |  |  |
 | `tamanhos` | texto ≤ 200 caracteres | não |  |  |
 
@@ -2448,6 +2516,7 @@ Topo da página: marca (logo e/ou nome, ligada ao início), menu de navegação 
 | `href` | texto ≤ 500 caracteres | não | "/" | para onde a marca leva |
 | `links` | lista | não |  | o menu |
 | `logo` | texto ≤ 500 caracteres | não |  | URL segura da imagem da marca |
+| `menuCentro` | booleano | não | false | centraliza o menu entre a marca e as ações |
 | `menuRecolhivel` | booleano | não | true | no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista |
 | `rotuloAlternador` | texto ≤ 60 caracteres | não | "Abrir o menu" |  |
 | `rotuloMenu` | texto ≤ 80 caracteres | não | "Principal" |  |
@@ -3179,6 +3248,41 @@ Rótulo de campo. `para` liga ao `id` do campo (clicar no rótulo foca o campo).
         "id": "nome",
         "props": {
           "placeholder": "Seu nome"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Sobretítulo (`texto/sobretitulo`)
+
+A linha pequena em caixa alta e letras espaçadas que vem antes de um título ("Coleção em destaque"), na cor primária do tema (ou na do texto, sobre uma foto). É um parágrafo, não um título: o título de verdade continua sendo `texto/titulo`.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `texto` | texto ≤ 200 caracteres | sim |  |  |
+
+**Exemplo: Antes de um título**
+
+```json
+{
+  "bloco": "layout/pilha",
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/sobretitulo",
+        "props": {
+          "texto": "Coleção em destaque"
+        }
+      },
+      {
+        "bloco": "texto/titulo",
+        "props": {
+          "texto": "Iluminação",
+          "nivel": 2
         }
       }
     ]

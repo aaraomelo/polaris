@@ -27,6 +27,8 @@ export type DescritoresDom = Record<string, Descritor>
 const txt = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '')
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
 const ALINHA: Record<string, string> = { inicio: 'flex-start', centro: 'center', fim: 'flex-end', esticar: 'stretch' }
+/** a proporção válida da imagem (largura ÷ altura entre 0,2 e 5), ou 0 */
+export const proporcaoDaImagem = (p: Record<string, unknown>): number => { const v = typeof p.proporcao === 'number' && Number.isFinite(p.proporcao) ? p.proporcao : 0; return v >= 0.2 && v <= 5 ? Math.round(v * 1000) / 1000 : 0 }
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
 const larguraCaixa = (v: unknown): string | undefined => (typeof v === 'number' && Number.isFinite(v) ? `${Math.min(2000, Math.max(40, Math.round(v)))}px` : undefined)
@@ -51,7 +53,7 @@ export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
       const w = num(p.largura), h = num(p.altura), src = urlSegura(p.src) ?? '', sz = tamanhosDe(p.tamanhos, w), ss = sz ? srcsetDe(src) : undefined
-      return { ...comId(id), src, ...(ss ? { srcset: ss, sizes: sz! } : {}), alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: 'max-width:100%;height:auto' } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
+      return { ...comId(id), src, ...(ss ? { srcset: ss, sizes: sz! } : {}), alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: `max-width:100%;height:auto${p.fluida === true || proporcaoDaImagem(p) ? ';width:100%' : ''}${proporcaoDaImagem(p) ? `;aspect-ratio:${proporcaoDaImagem(p)};object-fit:cover` : ''}` } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
     },
   }
 export const d_nav_link: Descritor = {
@@ -85,9 +87,9 @@ const contem = (tag: string): Descritor => ({ chave: () => tag, tag: () => tag, 
 
 export const d_layout_grade: Descritor = {
   chave: () => 'div', tag: () => 'div', filhos: true,
-  attrs: (p, id) => { const gap = num(p.gap); return { ...comId(id), style: `display:grid;grid-template-columns:repeat(${inteiro(p.colunas, 1, 12, 2)},minmax(0,1fr))${gap !== undefined ? `;gap:${px(gap)}` : ''}` } },
+  attrs: (p, id) => { const gap = num(p.gap), al = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined; return { ...comId(id), style: `display:grid;grid-template-columns:repeat(${inteiro(p.colunas, 1, 12, 2)},minmax(0,1fr))${gap !== undefined ? `;gap:${px(gap)}` : ''}${al ? `;align-items:${al}` : ''}` } },
 }
-export const d_layout_cabecalho: Descritor = { chave: () => 'header', tag: () => 'header', filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.fixo === true ? { 'data-fixo': '' } : {}) }) }
+export const d_layout_cabecalho: Descritor = { chave: () => 'header', tag: () => 'header', filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.fixo === true ? { 'data-fixo': '' } : {}), ...(p.centro === true ? { 'data-centro': '' } : {}) }) }
 export const d_midia_icone: Descritor = {
   chave: (p) => (nomeDeIcone(p.nome) ? 'span:icone' : null), tag: () => 'span',
   attrs: (p, id) => { const t = tamanhoDeIcone(p.tamanho), r = typeof p.rotulo === 'string' && p.rotulo.trim() ? p.rotulo.trim().slice(0, 200) : ''; return { ...comId(id), 'data-icone': nomeDeIcone(p.nome)!, ...(p.acento === true ? { 'data-acento': '' } : {}), ...(t ? { style: `--icone-tamanho:${t}` } : {}), ...(r ? { role: 'img', 'aria-label': r } : { 'aria-hidden': 'true' }) } },
@@ -112,11 +114,13 @@ export const d_layout_destaque: Descritor = {
     return { ...comId(id), 'data-alinha': p.alinha === 'esquerda' ? 'esquerda' : 'centro', 'data-fundo': p.fundo === 'suave' ? 'suave' : 'primaria', ...(img ? { 'data-imagem': '' } : {}), style: `min-height:${a}px${img ? `;background-image:linear-gradient(rgba(0,0,0,${e}),rgba(0,0,0,${e})),${cssUrl(img)}` : ''}` }
   },
 }
+export const d_layout_contido: Descritor = { chave: () => 'div:contido', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), 'data-contido': p.largura === 'estreita' || p.largura === 'larga' ? p.largura : 'normal' }) }
 export const d_layout_rodape: Descritor = { chave: () => 'footer', tag: () => 'footer', filhos: true, attrs: (_, id) => comId(id) }
 export const d_layout_divisor: Descritor = { chave: () => 'hr', tag: () => 'hr', attrs: (_, id) => comId(id) }
 export const d_layout_espacador: Descritor = { chave: () => 'div', tag: () => 'div', attrs: (p, id) => ({ ...comId(id), 'aria-hidden': 'true', style: `height:${px(num(p.tamanho) ?? 8)}` }) }
 export const d_texto_rotulo: Descritor = { chave: () => 'label', tag: () => 'label', attrs: (p, id) => ({ ...comId(id), ...(typeof p.para === 'string' && p.para ? { for: p.para } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_destaque: Descritor = /* @__PURE__ */ folha('strong')
+export const d_texto_sobretitulo: Descritor = { chave: () => 'p:sobretitulo', tag: () => 'p', attrs: (_, id) => ({ ...comId(id), 'data-sobretitulo': '' }), texto: (p) => txt(p.texto) }
 export const d_texto_pequeno: Descritor = /* @__PURE__ */ folha('small')
 export const d_texto_codigo: Descritor = /* @__PURE__ */ folha('code')
 export const d_lista_lista: Descritor = { chave: (p) => (p.ordenada === true ? 'ol' : 'ul'), tag: (p) => (p.ordenada === true ? 'ol' : 'ul'), attrs: (_, id) => comId(id), filhos: true }
@@ -220,9 +224,9 @@ export const d_feedback_selo: Descritor = { chave: () => 'span', tag: () => 'spa
 export const d_feedback_alerta: Descritor = { chave: () => 'div', tag: () => 'div', filhos: true, attrs: (p, id) => ({ ...comId(id), role: 'alert', ...tom(p) }) }
 
 export const DESCRITORES_BASE: DescritoresDom = {
-  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'midia/icone': d_midia_icone, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'layout/cartao': d_layout_cartao, 'layout/secao': d_layout_secao, 'layout/secao-titulo': d_layout_secao_titulo, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
+  'nav/alternador': d_nav_alternador, 'form/busca': d_form_busca, 'entrada/busca': d_entrada_busca, 'form/sugestoes': d_form_sugestoes, 'form/sugestoes-ao-vivo': d_form_sugestoes_ao_vivo, 'form/opcao': d_form_opcao, 'nav/enviar': d_nav_enviar, 'layout/destaque': d_layout_destaque, 'layout/contido': d_layout_contido, 'layout/rodape': d_layout_rodape, 'layout/cabecalho': d_layout_cabecalho, 'nav/menu': d_nav_menu, 'midia/icone': d_midia_icone, 'layout/painel': d_layout_painel, 'layout/lateral': d_layout_lateral, 'layout/principal': d_layout_principal, 'layout/cartao': d_layout_cartao, 'layout/secao': d_layout_secao, 'layout/secao-titulo': d_layout_secao_titulo, 'nav/submenu': d_nav_submenu, 'nav/submenu-titulo': d_nav_submenu_titulo,
   'midia/tela': d_midia_tela, 'layout/grade': d_layout_grade, 'layout/divisor': d_layout_divisor, 'layout/espacador': d_layout_espacador,
-  'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/codigo': d_texto_codigo,
+  'texto/rotulo': d_texto_rotulo, 'texto/destaque': d_texto_destaque, 'texto/pequeno': d_texto_pequeno, 'texto/sobretitulo': d_texto_sobretitulo, 'texto/codigo': d_texto_codigo,
   'lista/lista': d_lista_lista, 'lista/item': d_lista_item,
   'tabela/tabela': d_tabela_tabela, 'tabela/cabecalho': d_tabela_cabecalho, 'tabela/corpo': d_tabela_corpo, 'tabela/linha': d_tabela_linha, 'tabela/celula': d_tabela_celula,
   'entrada/numero': d_entrada_numero, 'entrada/caixa': d_entrada_caixa,

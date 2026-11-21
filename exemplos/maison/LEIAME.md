@@ -11,5 +11,8 @@ pnpm local --memoria --site exemplos/maison       # http://loja-demo.polaris.loc
 - Texto em pt-BR e nomes de coleções e produtos de **exemplo** (o template tem outros).
 - A auditoria de contraste (AA) passa nos dois modos; por isso o terracota e o cinza do texto suave são um pouco mais escuros que os do template.
 
+## Primitivas de layout criadas para o porte
+`layout/contido` (largura máxima centrada), `texto/sobretitulo`, imagem `fluida` com `proporcao`, `alinha` na grade, `centro` no cabeçalho e a escala tipográfica do tema (`tamanhoH1..H3`, `familiaTitulo`, `layout.largura*`). Estão descritas em `docs/blocos-base.md`; nenhum tema existente muda.
+
 ## O que ainda não está igual ao template
-Falta **acabamento de layout**, que pede primitivas novas na plataforma: um contêiner com largura máxima e margens (hoje as seções vão de ponta a ponta), imagens fluidas (as imagens têm largura fixa em px), escala tipográfica do tema (o título da abertura é grande e em itálico no template) e o cabeçalho claro e translúcido com o menu centralizado. As páginas de produtos, detalhe, sacola, checkout e sobre ainda não foram portadas.
+O cabeçalho do template é translúcido (desfoque) e a fonte Cormorant Garamond não é carregada (CSP): os títulos usam a serifa do sistema. As páginas de produtos, detalhe, sacola, checkout e sobre ainda não foram portadas.

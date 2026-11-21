@@ -1,6 +1,6 @@
 import { nomeDeIcone, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 import { emissoresDe } from '../vivo/emissor'
-import { DESCRITORES_BASE } from '../vivo/blocos'
+import { DESCRITORES_BASE, proporcaoDaImagem } from '../vivo/blocos'
 import { escHtml, px } from './escape'
 
 // Emissores estáticos: o mesmo HTML que os componentes React de render/base.tsx produzem (conferido por teste diferencial),
@@ -35,7 +35,7 @@ const MAO: Emissores = {
     if (!src) return ''
     const w = num(props.largura), h = num(props.altura)
     const sz = tamanhosDe(props.tamanhos, w), ss = sz ? srcsetDe(src) : undefined
-    return `<img${idAttr(id)} src="${escHtml(src)}"${ss ? ` srcset="${escHtml(ss)}" sizes="${escHtml(sz!)}"` : ''} alt="${escHtml(txt(props.alt))}"${w !== undefined ? ` width="${w}"` : ''}${h !== undefined ? ` height="${h}"` : ''} loading="lazy" style="max-width:100%;height:auto"/>`
+    return `<img${idAttr(id)} src="${escHtml(src)}"${ss ? ` srcset="${escHtml(ss)}" sizes="${escHtml(sz!)}"` : ''} alt="${escHtml(txt(props.alt))}"${w !== undefined ? ` width="${w}"` : ''}${h !== undefined ? ` height="${h}"` : ''} loading="lazy" style="max-width:100%;height:auto${props.fluida === true || proporcaoDaImagem(props) ? ';width:100%' : ''}${proporcaoDaImagem(props) ? `;aspect-ratio:${proporcaoDaImagem(props)};object-fit:cover` : ''}"/>`
   },
   'nav/link': ({ props, filhos, id }) => {
     const href = urlSegura(props.href)

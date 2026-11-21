@@ -26,3 +26,6 @@ Escrita só com variáveis (conferido: nenhuma cor literal, e todo `var(--x)` qu
 
 ## Acessibilidade
 `auditaTema(no)` confere em cada modo os pares críticos (AA: 4,5 para texto, 3 para UI): texto/fundo, texto/superfície, texto suave, texto sobre primária (também no hover), link primário/superfície, selos de sucesso/alerta/erro. O tema `padrao` passa nos dois modos (teste). **Achado nos presets do Tiffany**: `nco-red` tem link primário sobre superfície escura com contraste 3,06 (mínimo 4,5); fica registrado em teste, e quem usar esse preset deve ajustar `primaria` ou usar `primariaClara` para texto.
+
+## Tokens opcionais de tipografia e de layout
+Além de `cor`, `raio`, `espacamento` e `tipografia.familia`/`tamanhoBase`, um tema pode declarar `tipografia.familiaTitulo`, `pesoTitulo`, `tamanhoH1`, `tamanhoH2` e `tamanhoH3` (os títulos usam a fonte do corpo e os tamanhos 2, 1,5 e 1,17 em quando faltam) e o grupo `layout` com `largura`, `larguraEstreita` e `larguraLarga` (o bloco `layout/contido`; recuo no CSS base: 72, 48 e 90 rem). Exemplo completo: `exemplos/maison` (`gera.mjs`).

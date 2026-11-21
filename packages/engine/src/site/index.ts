@@ -17,7 +17,7 @@ const BLOCOS_CABECALHO = [
     props: { type: 'object', properties: {
       titulo: { type: 'string', maxLength: 80, description: 'nome da marca' }, logo: { type: 'string', maxLength: 500, description: 'URL segura da imagem da marca' },
       href: { type: 'string', maxLength: 500, default: '/', description: 'para onde a marca leva' }, links: { type: 'array', maxItems: 12, items: linkProp, description: 'o menu' }, grupos: { type: 'array', maxItems: 6, items: colunaProp, description: 'submenus: cada grupo (`titulo` e `links`) é um item recolhível que abre uma lista de links, depois dos `links`; um nível só' },
-      rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false },
+      rotuloMenu: { type: 'string', maxLength: 80, default: 'Principal' }, fixo: { type: 'boolean', default: false }, menuCentro: { type: 'boolean', default: false, description: 'centraliza o menu entre a marca e as ações' },
       tituloNivel: { type: 'integer', minimum: 1, maximum: 6, description: 'faz do nome da marca um título (h1…h6) em vez de texto em destaque: use 1 em aplicações cujo painel não tem outro h1' }, menuRecolhivel: { type: 'boolean', default: true, description: 'no celular (até 40 rem de largura) o menu e as ações ficam atrás de um botão "Menu", sem JavaScript; false mantém tudo à vista' }, rotuloAlternador: { type: 'string', maxLength: 60, default: 'Abrir o menu' },
     } },
     slots: { acoes: {} },
@@ -25,7 +25,7 @@ const BLOCOS_CABECALHO = [
       { titulo: 'Marca e menu', instancia: instancia('site/cabecalho', { titulo: 'Loja Demo', links: [{ texto: 'Início', href: '/', atual: true }, { texto: 'Produtos', href: '/produtos' }, { texto: 'Contato', href: '/contato' }] }) },
       { titulo: 'Com ação e fixo', instancia: instancia('site/cabecalho', { titulo: 'Loja Demo', fixo: true, links: [{ texto: 'Início', href: '/' }] }, { acoes: [{ bloco: 'nav/link', props: { href: '/entrar', texto: 'Entrar' } }] }) },
     ],
-    modelo: { bloco: 'layout/cabecalho', props: { fixo: '{props.fixo}' }, slots: { filhos: [
+    modelo: { bloco: 'layout/cabecalho', props: { fixo: '{props.fixo}', centro: '{props.menuCentro}' }, slots: { filhos: [
       { bloco: 'nav/link', props: { href: '{props.href ?? "/"}' }, slots: { filhos: [
         { bloco: 'midia/imagem', se: 'props.logo', props: { src: '{props.logo}', alt: '', altura: 32 } },
         { bloco: 'texto/destaque', se: 'props.titulo && !props.tituloNivel', props: { texto: '{props.titulo}' } },
