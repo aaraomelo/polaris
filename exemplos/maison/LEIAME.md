@@ -1,6 +1,6 @@
 # Maison: o template "Homeware store" do Lovable portado para o Polaris
 
-O porte cobre o **tema** (`maison`: paleta terracota, linho e carvão, claro e escuro, títulos em serifa) e três páginas: **início** (`/`), **produtos** (`/produtos`, com filtro por categoria em `?colecao=…`, contagem e selos) **sobre** (`/sobre`, com a seção de contato) e **sacola** (`/sacola`).
+O porte cobre o **tema** (`maison`: paleta terracota, linho e carvão, claro e escuro, títulos em serifa) e três páginas: **início** (`/`), **produtos** (`/produtos`, com filtro por categoria em `?colecao=…`, contagem e selos) **detalhe do produto** (`/produtos/:id`, com "Você também pode gostar" da mesma coleção e aviso para id inexistente), **sobre** (`/sobre`, com a seção de contato) e **sacola** (`/sacola`).
 
 ```bash
 node exemplos/maison/gera.mjs                     # gera nos.json (tema, páginas, tenants) a partir deste script
@@ -18,4 +18,4 @@ O botão "Adicionar à sacola" dos cartões grava `{id, qtd}` no estado `sacola`
 `layout/contido` (largura máxima centrada), `texto/sobretitulo`, imagem `fluida` com `proporcao`, `alinha` na grade, `centro` no cabeçalho e a escala tipográfica do tema (`tamanhoH1..H3`, `familiaTitulo`, `layout.largura*`). Estão descritas em `docs/blocos-base.md`; nenhum tema existente muda.
 
 ## O que ainda não está igual ao template
-O cabeçalho do template é translúcido (desfoque) e a fonte Cormorant Garamond não é carregada (CSP): os títulos usam a serifa do sistema. Detalhe do produto, checkout (frete e pagamento) e ordenação da loja ainda não foram portados; o checkout pede o serviço `carrinho`/`pedidos` no cliente.
+O cabeçalho do template é translúcido (desfoque) e a fonte Cormorant Garamond não é carregada (CSP): os títulos usam a serifa do sistema. Checkout (frete e pagamento) e ordenação da loja ainda não foram portados; um id de produto que não existe mostra o aviso, mas responde 200 (o parâmetro é `texto`, sem checar o catálogo); o checkout pede o serviço `carrinho`/`pedidos` no cliente.

@@ -70,7 +70,8 @@ const PRODUTOS = [
   { id: 'bandeja', colecao: 'novidades', nome: 'Bandeja de Mármore Polido', descricao: 'Pedra natural para a beleza de todo dia', preco: '175.00', material: 'Mármore de Carrara', foto: 'foto-3', selo: 'Novo' },
   { id: 'caixa', colecao: 'presentes', nome: 'Caixa de Presente Selecionada', descricao: 'Uma seleção cuidadosa das nossas peças favoritas', preco: '225.00', material: 'Grés', foto: 'produto-caixa-presente' },
 ]
-const paraProduto = (p) => ({ id: p.id, colecao: p.colecao, nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true, material: p.material, ...(p.selo ? { selo: p.selo } : {}) })
+const NOME_COLECAO = Object.fromEntries(CATEGORIAS.map((c) => [c.slug, c.nome]))
+const paraProduto = (p) => ({ id: p.id, colecao: p.colecao, colecaoNome: NOME_COLECAO[p.colecao], nome: p.nome, descricao: p.descricao, preco: p.preco, fotoUrl: foto(p.foto), disponivel: true, material: p.material, ...(p.selo ? { selo: p.selo } : {}) })
 const NOVIDADES = ['arco', 'orbe', 'vaso', 'tigela'].map((id) => PRODUTOS.find((p) => p.id === id))
 const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'colecao-5']
 
@@ -134,7 +135,7 @@ const home = b('layout/pilha', { gap: 0 }, [
         link('/produtos', 'Ver tudo'),
       ]),
       folga(24),
-      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p) }))),
+      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p), href: `/produtos/${p.id}` }))),
     ]),
   ]),
   folga(96),
@@ -158,7 +159,7 @@ const home = b('layout/pilha', { gap: 0 }, [
 // ---- produtos: filtro por categoria (?colecao=…), contagem e grade com selos --------------------------------------------------------------
 const FILTRADOS = 'filtra(estado.produtos, p => (consulta.colecao ?? "") == "" || p.colecao == consulta.colecao)'
 const filtro = (slug, nome) => b('nav/link', { href: slug ? `/produtos?colecao=${slug}` : '/produtos', texto: nome, botao: 'secundario', atual: `{(consulta.colecao ?? "") == ${JSON.stringify(slug)}}` }) // o filtro escolhido leva aria-current e fica preenchido
-const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}' }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
+const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}', href: '{"/produtos/" + p.id}' }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
   { bloco: 'texto/pequeno', props: { texto: '{(p.selo ? p.selo + " · " : "") + p.material}' } }, // o selo (Destaque, Novo) e o material, na linha pequena sob o preço
   { bloco: 'nav/botao', props: { texto: 'Adicionar à sacola', variante: 'secundario' }, eventos: aoClicar(adiciona('p.id')) },
 ] } }
@@ -229,6 +230,47 @@ const sobre_ = b('layout/pilha', { gap: 0 }, [
   rodape(),
 ])
 
+// ---- detalhe do produto: /produtos/:id (foto, dados, adicionar à sacola e outras peças da mesma coleção) -----------------------------------------------
+const ACHADO = 'filtra(estado.produtos, p => p.id == params.id)'
+const MESMA = 'fatia(filtra(estado.produtos, o => o.colecao == p.colecao && o.id != p.id), 0, 4)'
+const detalhe = b('layout/pilha', { gap: 0 }, [
+  cabecalho('loja'),
+  folga(48),
+  { ...b('layout/pilha', { gap: 0 }, [
+    contido([
+      link('/produtos', '← Todas as peças'),
+      folga(24),
+      b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
+        b('midia/imagem', { src: '{p.fotoUrl}', alt: '{p.nome}', fluida: true, proporcao: 0.8 }),
+        b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+          sobre('{p.colecaoNome}'),
+          titulo('{p.nome}', 1),
+          b('commerce/preco', { valor: '{p.preco}' }),
+          par('{p.descricao}'),
+          b('texto/pequeno', { texto: '{"Material: " + p.material}' }),
+          b('texto/pequeno', { texto: 'Feita à mão, em pequenas séries. Cada peça pode variar levemente.' }),
+          folga(8),
+          b('layout/linha', { gap: 12, quebra: true }, [
+            b('nav/botao', { texto: 'Adicionar à sacola' }, undefined, { eventos: aoClicar(adiciona('p.id')) }),
+            link('/sacola', 'Ver a sacola'),
+          ]),
+        ]),
+      ]),
+    ], 'larga'),
+    folga(96),
+    contido([
+      b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Da mesma coleção'), titulo('Você também pode gostar', 2)]),
+      folga(32),
+      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{o}', href: '{"/produtos/" + o.id}' }, repetir: { cada: MESMA.replace(/\bp\./g, 'p.'), como: 'o', chave: 'o.id' } }]),
+    ], 'larga', { se: `tamanho(${MESMA}) > 0` }),
+  ]), repetir: { cada: ACHADO, como: 'p', chave: 'p.id' } },
+  contido([
+    sobre('Peça não encontrada'), titulo('Não achamos esta peça', 2), par('Ela pode ter saído da coleção.'), link('/produtos', 'Ver todas as peças', 'primario'),
+  ], 'estreita', { se: `tamanho(${ACHADO}) == 0` }),
+  folga(96),
+  rodape(),
+])
+
 // ---- sacola: linhas com foto, quantidade (− e +), remover, subtotal e o aviso de que o pagamento ainda não existe --------------------------------------
 const linha = b('layout/linha', { gap: 24, alinha: 'centro', quebra: true }, [
   b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 96 }),
@@ -261,13 +303,14 @@ const sacolaPag = b('layout/pilha', { gap: 0 }, [
 
 const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, ...extra, estado: { ...estadoSacola, ...(extra.estado ?? {}) } } })
 const naoAchada = b('layout/pilha', { gap: 16, alinha: 'centro' }, [titulo('Página não encontrada', 1), par('O endereço não existe nesta loja.'), link('/', 'Voltar ao início', 'primario')])
-const PAGINAS = ['maison.home', 'maison.produtos', 'maison.sobre', 'maison.sacola', 'maison.nao']
+const PAGINAS = ['maison.home', 'maison.produtos', 'maison.produto', 'maison.sobre', 'maison.sacola', 'maison.nao']
 const tenant = (id, tenantId, nome) => ({ kind: 'tenant', id, tenantId, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, nome, segmento: 'varejo', modulos: ['loja'], tema: 'maison', paginas: PAGINAS, paginaNaoEncontrada: 'maison.nao' } })
 
 const nos = [
   tema,
   pagina('maison.home', '/', 'Maison', home),
   pagina('maison.produtos', '/produtos', 'Todas as peças · Maison', produtos, { estado: { produtos: { tipo: 'json', inicial: PRODUTOS.map(paraProduto) } } }),
+  pagina('maison.produto', '/produtos/:id', 'Peça · Maison', detalhe, { params: { id: { tipo: 'texto' } }, estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
   pagina('maison.sobre', '/sobre', 'Sobre · Maison', sobre_),
   pagina('maison.sacola', '/sacola', 'Sacola · Maison', sacolaPag, { estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
   pagina('maison.nao', '/nao-encontrada', 'Página não encontrada', naoAchada),
