@@ -9,6 +9,11 @@ import { fileURLToPath } from 'node:url'
 import { existsSync } from 'node:fs'
 import { chromium } from 'playwright-core'
 import { afterAll, describe, expect, it } from 'vitest'
+import { registraBase } from '@polaris/engine'
+import { registraCommerce } from '@polaris/engine/commerce'
+import { registraSite } from '@polaris/engine/site'
+import { registraTemas } from '@polaris/engine/tema'
+import { Registry } from '@polaris/schema'
 import { PAPEIS_LOCAIS, SENHA_LOCAL, emailLocal, sobeLocal, type Local } from '../src/local'
 
 // O ambiente local de ponta a ponta: Postgres (PGlite com protocolo), serviço migrado, gateway, Studio e o login de desenvolvimento.
@@ -73,6 +78,25 @@ describe('ambiente local', () => {
     const detalhe = await get(l, 'loja-demo', '/produtos/mesa'); expect(detalhe.status).toBe(200); expect(await detalhe.text()).toContain('2850')
     // o catálogo é do tenant: a outra loja tem o seu
     const outra = await (await get(l, 'loja-outra', '/api/loja/pecas?limite=100')).json() as unknown[]; expect(outra).toHaveLength(13)
+  })
+
+  it('API de templates: o modelo da Maison fica no banco (por tenant), volta inteiro e válido, e o gerente guarda e remove outros', async () => {
+    const l = await sobeLocal({ dados: null, porta: 0, silencioso: true, site: join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'exemplos', 'maison') }); abertos.push(l)
+    const gerente = await l.token('loja-demo', ['gerente']), outro = await l.token('loja-outra', ['gerente'])
+    expect((await get(l, 'loja-demo', '/api/loja/templates')).status).toBe(401) // não é pública
+    const lista = (await (await get(l, 'loja-demo', '/api/loja/templates?limite=100', gerente)).json()) as Array<{ id: string; slug: string; nome: string; idiomas: string[]; nos: unknown[] }>
+    const maison = lista.find((t) => t.slug === 'maison')!; expect(maison).toMatchObject({ nome: 'Maison', idiomas: ['pt-BR', 'en'] }); expect(maison.nos.length).toBeGreaterThan(10)
+    // o que volta do banco é o MESMO pacote de nós: registra num registro limpo (base + temas + site + commerce) sem erro
+    const reg = new Registry(); registraBase(reg); registraTemas(reg); registraSite(reg); registraCommerce(reg)
+    for (const n of maison.nos) reg.registra(n as never)
+    expect(reg.ids('pagina' as never)).toEqual(expect.arrayContaining(['maison.home', 'maison.produtos', 'maison.sobre'])); expect(reg.ids('traducao' as never)).toContain('maison.textos')
+    // o gerente cria, lê e remove um modelo; a outra loja não o vê
+    const novo = await req(l, 'loja-demo', 'POST', '/api/loja/templates', gerente, { slug: 'minimo', nome: 'Mínimo', nos: [{ kind: 'pagina', id: 'm.home', versao: '1.0.0', spec: { rota: '/', titulo: 'x', raiz: { bloco: 'texto/titulo', props: { texto: 'Oi', nivel: 1 } } } }] }); expect(novo.status).toBe(201)
+    const id = ((await novo.json()) as { id: string }).id
+    expect(((await (await get(l, 'loja-outra', '/api/loja/templates?limite=100', outro)).json()) as Array<{ slug: string }>).map((t) => t.slug)).not.toContain('minimo')
+    expect((await get(l, 'loja-outra', `/api/loja/templates/${id}`, outro)).status).toBe(404)
+    expect((await req(l, 'loja-demo', 'DELETE', `/api/loja/templates/${id}`, gerente)).status).toBe(204)
+    expect((await get(l, 'loja-demo', `/api/loja/templates/${id}`, gerente)).status).toBe(404)
   })
 
   it('Studio → Publicar → site: a edição salva só aparece depois de publicada, no tenant certo; página nova ganha rota sozinha', async () => {

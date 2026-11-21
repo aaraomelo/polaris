@@ -32,6 +32,9 @@ A barra de categorias é `site/abas` (as categorias) mais `entrada/selecao` ("Or
 ## Os produtos vêm da API do catálogo
 Nenhum produto está escrito nas páginas. O nó `dados` `maison.pecas` chama a operação `listarPeca` do serviço `loja` (entidade `peca`, em `exemplos/loja/nos.json`, listagem pública) e a página recebe a lista como `pecas`; a expressão `LOC` do gerador escolhe o texto pelo idioma da requisição (`loc(idioma, …)`) e ordena por `ordem`. Os textos são colunas `json` por idioma (`{ "pt-BR": …, "en": … }`); a foto, a foto do hover, o selo, a categoria e `novo` também são campos da peça. No ambiente local, `pecas.sementes` (gerado por `gera.mjs`) semeia `loja.peca` de cada tenant, com as fotos `@img/<nome>` trocadas pelo endereço do ativo. Mudou a peça na API, mudou o site (cache de 30 s dos dados). O id da peça na URL e na sacola é o `slug`.
 
+## O modelo no banco
+No ambiente local o pacote de nós da Maison também é guardado na API de templates (`/api/loja/templates`, ver `docs/ambiente-dev.md`): o gerente lê o modelo inteiro do banco e ele registra sem erro num registro limpo. Aplicar o modelo a um tenant pelo armazém de nós é o próximo passo.
+
 ## A sacola (estado persistente)
 O botão "Adicionar à sacola" dos cartões grava `{id, qtd}` no estado `sacola`, que **persiste no navegador** (`persiste: true`, `docs/paginas.md`): o contador do cabeçalho e a página `/sacola` leem o mesmo valor em qualquer página. A sacola mostra foto, quantidade (− e +), remover e o subtotal em dinheiro exato (`qsoma`/`qmul`); o preço vem do catálogo da página, não do que foi guardado. Não há frete nem pagamento: o fechamento do pedido ainda não existe.
 

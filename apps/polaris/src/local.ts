@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm'
@@ -134,6 +134,18 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
       for (const t of TENANTS_LOCAIS) for (const q of pecas)
         await db.query(`INSERT INTO loja.peca (tenant_id, slug, colecao, preco, foto_url, foto_hover, ordem, novo, disponivel, nome, descricao, material, categoria, selo) SELECT $1, $2::text, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb, $13::jsonb, $14::jsonb WHERE NOT EXISTS (SELECT 1 FROM loja.peca WHERE tenant_id = $1 AND slug = $2::text)`,
           [t.id, q.slug, q.colecao ?? null, q.preco, foto(q.fotoUrl), foto(q.fotoHover), q.ordem ?? null, q.novo === true, q.disponivel !== false, JSON.stringify(q.nome ?? {}), JSON.stringify(q.descricao ?? {}), JSON.stringify(q.material ?? {}), JSON.stringify(q.categoria ?? {}), JSON.stringify(q.selo ?? {})])
+    }
+    // o MODELO do site (template) guardado no banco: os nós da pasta do site viram UMA linha de `loja.template` por tenant (idempotente, por slug), com as fotos como `@img/<nome>` (portável: quem aplica resolve os ativos do tenant)
+    if (pastaImgs && existsSync(pastaImgs) && (await db.query(`SELECT 1 FROM information_schema.tables WHERE table_schema = 'loja' AND table_name = 'template'`)).rows.length) {
+      const nosDoSite: unknown[] = [], anda = (d: string) => { for (const e of readdirSync(d).sort()) { const f = join(d, e); if (statSync(f).isDirectory()) anda(f); else if (e.endsWith('.json')) { const j = JSON.parse(readFileSync(f, 'utf8')) as unknown; nosDoSite.push(...(Array.isArray(j) ? j : [j])) } } }
+      anda(pastaImgs)
+      if (nosDoSite.length) {
+        const slug = basename(pastaImgs).toLowerCase().replace(/[^a-z0-9-]/g, '-'), nomeM = slug.charAt(0).toUpperCase() + slug.slice(1)
+        const idiomas = (nosDoSite as Array<{ kind?: string; spec?: { idiomas?: string[] } }>).find((n) => n.kind === 'tenant' && n.spec?.idiomas)?.spec?.idiomas ?? ['pt-BR']
+        await db.exec('RESET ROLE')
+        for (const t of TENANTS_LOCAIS)
+          await db.query(`INSERT INTO loja.template (tenant_id, slug, nome, descricao, segmento, versao, idiomas, nos) SELECT $1, $2::text, $3, $4, 'varejo', '1.0.0', $5::jsonb, $6::jsonb WHERE NOT EXISTS (SELECT 1 FROM loja.template WHERE tenant_id = $1 AND slug = $2::text)`, [t.id, slug, nomeM, `Modelo de site carregado de ${slug}/ (${nosDoSite.length} nós)`, JSON.stringify(idiomas), JSON.stringify(nosDoSite)])
+      }
     }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw); registraSite(regGw); registraCommerce(regGw) // os blocos de comércio (cartão de produto etc.) também valem nas páginas dos tenants de demonstração
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw, (t) => t.replace(/@img\/([A-Za-z0-9_-]+)/g, (m, n: string) => (fotos[n] ?? m)))
