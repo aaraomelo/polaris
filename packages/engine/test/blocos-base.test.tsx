@@ -75,6 +75,8 @@ const CASOS: Array<[string, object]> = [
   ['form/busca (padrões; destino de fora vale o padrão)', P('layout/pilha', { slots: { filhos: [P('form/busca', { props: { acao: 'https://evil.com/x' }, slots: { filhos: [P('entrada/busca'), P('nav/enviar')] } }), P('form/busca', { props: { acao: '//evil.com' } }), P('entrada/busca', { props: { nome: '1 inválido' } })] } })],
   ['entrada/arquivo', P('entrada/arquivo', { id: 'b', props: { rotulo: 'Imagem', aceita: 'image/png,image/jpeg', tamanhoMax: 5000, desabilitado: true } })],
   ['entrada/arquivo (padrões)', P('entrada/arquivo', { id: 'b' })],
+  ['layout/destaque capa (tela cheia, e altura menor limitada à tela)', P('layout/pilha', { slots: { filhos: [P('layout/destaque', { id: 'a', props: { imagem: '/img/a.jpg', altura: 800, capa: true }, slots: { filhos: [par('a')] } }), P('layout/destaque', { id: 'b', props: { imagem: '/img/b.jpg', altura: 440, capa: true, alinha: 'esquerda' }, slots: { filhos: [par('b')] } })] } })],
+  ['layout/pilha e linha com recorta', P('layout/pilha', { props: { recorta: true }, slots: { filhos: [P('layout/linha', { props: { recorta: true, gap: 4 }, slots: { filhos: [par('a')] } })] } })],
   ['layout/destaque (padrões)', P('layout/destaque', { id: 'b', slots: { filhos: [par('a')] } })],
   ['layout/destaque (imagem, véu, esquerda, altura)', P('layout/destaque', { id: 'b', props: { imagem: '/img/banner (1).jpg', altura: 400, escurece: 0.6, alinha: 'esquerda' }, slots: { filhos: [par('a')] } })],
   ['layout/destaque (suave; imagem insegura some; valores no limite)', P('layout/destaque', { id: 'b', props: { imagem: 'javascript:alert(1)', altura: 120, escurece: 0.8, fundo: 'suave', alinha: 'xx' }, slots: { filhos: [par('a')] } })],

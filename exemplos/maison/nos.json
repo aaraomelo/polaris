@@ -5,6 +5,7 @@
     "versao": "1.0.0",
     "estatuto": "publicado",
     "spec": {
+      "seguirSistema": false,
       "tokens": {
         "cor": {
           "primaria": "#9f5a3c",
@@ -37,6 +38,9 @@
           "pesoTitulo": 500,
           "tamanhoBase": "16px",
           "tamanhoH1": "clamp(2.75rem, 6.5vw, 5rem)",
+          "tamanhoExibicao": "clamp(3rem, 8.5vw, 8rem)",
+          "alturaExibicao": 0.9,
+          "espacamentoExibicao": "-0.025em",
           "tamanhoH2": "clamp(2rem, 4vw, 3rem)",
           "tamanhoH3": "1.625rem"
         },
@@ -44,6 +48,43 @@
           "largura": "80rem",
           "larguraEstreita": "48rem",
           "larguraLarga": "90rem"
+        },
+        "cabecalho": {
+          "altura": "clamp(4rem, 8vw, 5rem)",
+          "fundo": "color-mix(in srgb, var(--cor-fundo) 80%, transparent)",
+          "desfoque": "blur(4px)",
+          "borda": "transparent",
+          "marcaTamanho": "clamp(1.5rem, 2.4vw, 1.875rem)",
+          "marcaFamilia": "var(--tipografia-familia-titulo)",
+          "marcaPeso": 500,
+          "marcaEspacamento": "-0.025em",
+          "marcaHover": "var(--cor-primaria)",
+          "linkTamanho": "0.75rem",
+          "linkEspacamento": "0.15em",
+          "linkCaixa": "uppercase",
+          "linkCor": "var(--cor-texto-suave)",
+          "linkHover": "var(--cor-texto)",
+          "sublinhaHover": 1
+        },
+        "rodape": {
+          "fundo": "var(--cor-texto)",
+          "texto": "var(--cor-fundo)",
+          "link": "color-mix(in srgb, var(--cor-fundo) 70%, transparent)",
+          "borda": "transparent"
+        },
+        "botao": {
+          "caixa": "uppercase",
+          "espacamento": "0.1em",
+          "tamanho": "0.8125rem",
+          "peso": 500
+        },
+        "movimento": {
+          "rapido": "300ms",
+          "sublinha": "500ms",
+          "zoomDuracao": "700ms",
+          "zoomCartao": 1.05,
+          "entrada": "1.2s",
+          "zoomCapa": 1.08
         }
       },
       "modos": {
@@ -198,9 +239,10 @@
               "bloco": "layout/destaque",
               "props": {
                 "imagem": "@img/hero",
-                "altura": 760,
-                "escurece": 0.35,
-                "alinha": "esquerda"
+                "altura": 800,
+                "escurece": 0.3,
+                "alinha": "esquerda",
+                "capa": true
               },
               "slots": {
                 "filhos": [
@@ -244,7 +286,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -316,7 +358,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -406,7 +448,8 @@
                                     "material": "Latão maciço",
                                     "selo": "Destaque"
                                   },
-                                  "href": "/produtos/arco"
+                                  "href": "/produtos/arco",
+                                  "rotuloLink": ""
                                 }
                               },
                               {
@@ -426,7 +469,8 @@
                                     "material": "Vidro soprado",
                                     "selo": "Novo"
                                   },
-                                  "href": "/produtos/orbe"
+                                  "href": "/produtos/orbe",
+                                  "rotuloLink": ""
                                 }
                               },
                               {
@@ -446,7 +490,8 @@
                                     "material": "Grés de alta temperatura",
                                     "selo": "Destaque"
                                   },
-                                  "href": "/produtos/vaso"
+                                  "href": "/produtos/vaso",
+                                  "rotuloLink": ""
                                 }
                               },
                               {
@@ -465,7 +510,8 @@
                                     "disponivel": true,
                                     "material": "Grés"
                                   },
-                                  "href": "/produtos/tigela"
+                                  "href": "/produtos/tigela",
+                                  "rotuloLink": ""
                                 }
                               }
                             ]
@@ -480,7 +526,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -736,7 +782,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -847,7 +893,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -977,7 +1023,8 @@
                 "imagem": "@img/loja-capa",
                 "altura": 440,
                 "escurece": 0.35,
-                "alinha": "esquerda"
+                "alinha": "esquerda",
+                "capa": true
               },
               "slots": {
                 "filhos": [
@@ -1141,7 +1188,8 @@
                             "fluida": true,
                             "proporcao": 0.8,
                             "produto": "{p}",
-                            "href": "{\"/produtos/\" + p.id}"
+                            "href": "{\"/produtos/\" + p.id}",
+                            "rotuloLink": ""
                           },
                           "repetir": {
                             "cada": "filtra(estado.produtos, p => (consulta.colecao ?? \"\") == \"\" || p.colecao == consulta.colecao)",
@@ -1191,7 +1239,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -1617,7 +1665,7 @@
                   {
                     "bloco": "layout/espacador",
                     "props": {
-                      "tamanho": 96
+                      "tamanho": 112
                     }
                   },
                   {
@@ -1671,7 +1719,8 @@
                                   "fluida": true,
                                   "proporcao": 0.8,
                                   "produto": "{o}",
-                                  "href": "{\"/produtos/\" + o.id}"
+                                  "href": "{\"/produtos/\" + o.id}",
+                                  "rotuloLink": ""
                                 },
                                 "repetir": {
                                   "cada": "fatia(filtra(estado.produtos, o => o.colecao == p.colecao && o.id != p.id), 0, 4)",
@@ -1735,7 +1784,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2026,7 +2075,8 @@
                 "imagem": "@img/sobre-capa",
                 "altura": 560,
                 "escurece": 0.4,
-                "alinha": "esquerda"
+                "alinha": "esquerda",
+                "capa": true
               },
               "slots": {
                 "filhos": [
@@ -2062,7 +2112,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2090,7 +2140,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2160,7 +2210,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2183,7 +2233,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2253,7 +2303,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2409,7 +2459,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2463,7 +2513,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -2883,7 +2933,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -3384,7 +3434,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {
@@ -3781,7 +3831,7 @@
             {
               "bloco": "layout/espacador",
               "props": {
-                "tamanho": 96
+                "tamanho": 112
               }
             },
             {

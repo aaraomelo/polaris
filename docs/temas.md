@@ -29,3 +29,16 @@ Escrita só com variáveis (conferido: nenhuma cor literal, e todo `var(--x)` qu
 
 ## Tokens opcionais de tipografia e de layout
 Além de `cor`, `raio`, `espacamento` e `tipografia.familia`/`tamanhoBase`, um tema pode declarar `tipografia.familiaTitulo`, `pesoTitulo`, `tamanhoH1`, `tamanhoH2` e `tamanhoH3` (os títulos usam a fonte do corpo e os tamanhos 2, 1,5 e 1,17 em quando faltam) e o grupo `layout` com `largura`, `larguraEstreita` e `larguraLarga` (o bloco `layout/contido`; recuo no CSS base: 72, 48 e 90 rem). Exemplo completo: `exemplos/maison` (`gera.mjs`).
+
+### Cabeçalho, rodapé, botão e movimento (tokens opcionais)
+Cada token vira uma variável CSS lida pelo CSS base **com fallback para o visual de antes**: um tema que não os declara não muda.
+
+| Grupo | Tokens | Efeito |
+|---|---|---|
+| `cabecalho` | `altura`, `fundo`, `desfoque` (ex.: `blur(4px)`), `borda`, `marcaTamanho`, `marcaPeso`, `marcaEspacamento`, `marcaFamilia`, `marcaHover`, `linkTamanho`, `linkEspacamento`, `linkCaixa`, `linkCor`, `linkHover`, `sublinhaHover` | cabeçalho translúcido com desfoque, marca e links tipográficos; `sublinhaHover: 1` liga o sublinhado que cresce no hover |
+| `rodape` | `fundo`, `texto`, `link`, `borda`, `marcaTamanho` | rodapé invertido ou de outra cor |
+| `botao` | `caixa`, `espacamento`, `tamanho`, `peso` | botões e links de botão (ex.: caixa alta com espaçamento) |
+| `movimento` | `rapido` (cor, fundo e borda), `sublinha`, `zoomDuracao`, `zoomCartao` (escala da foto do cartão no hover), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da foto da capa) | sem eles não há transição |
+| `tipografia` | `tamanhoExibicao`, `alturaExibicao`, `espacamentoExibicao` | o `h1` de uma capa (`layout/destaque` com `capa`) |
+
+`seguirSistema: false` (no spec do tema) tira o `@media (prefers-color-scheme: dark)`: o escuro só vale com `data-modo="escuro"` no `<html>`. Os valores passam pela mesma validação de CSS dos outros tokens (sem `url(`, `;` ou comentários); use `var(--cor-…)` para derivar das cores do tema (`color-mix(in srgb, var(--cor-fundo) 80%, transparent)`). As animações respeitam `prefers-reduced-motion`.

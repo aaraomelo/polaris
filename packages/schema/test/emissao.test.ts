@@ -77,6 +77,12 @@ describe('css (tema)', () => {
 `)
   })
 
+  it('`seguirSistema: false` tira o @media do modo escuro: o escuro só vale com data-modo="escuro"', () => {
+    const t = (seguir?: boolean) => emite(no('tema', 't', { ...(seguir === undefined ? {} : { seguirSistema: seguir }), tokens: { cor: { primaria: '#111' } }, modos: { escuro: { cor: { primaria: '#eee' } } } }), 'css')
+    expect(t()).toContain('prefers-color-scheme'); expect(t(true)).toContain('prefers-color-scheme')
+    expect(t(false)).not.toContain('prefers-color-scheme'); expect(t(false)).toContain('[data-modo="escuro"]')
+  })
+
   it('a saída não depende da ordem das chaves, nem nos tokens aninhados', () => {
     const a = no('tema', 't', { tokens: { tipografia: { corpo: { z: '1', a: '2' }, base: { m: '3' } }, cor: { b: '#2', a: '#1' } } })
     const b = no('tema', 't', { tokens: { cor: { a: '#1', b: '#2' }, tipografia: { base: { m: '3' }, corpo: { a: '2', z: '1' } } } })

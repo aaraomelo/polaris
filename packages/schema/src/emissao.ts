@@ -143,13 +143,13 @@ function declaracoes(tokens: Record<string, unknown>): string[] {
 }
 
 function emiteCss(no: No): string {
-  const spec = no.spec as { tokens: Record<string, unknown>; modos?: Record<string, Record<string, unknown>> }
+  const spec = no.spec as { tokens: Record<string, unknown>; modos?: Record<string, Record<string, unknown>>; seguirSistema?: boolean }
   const blocos = [`/* polaris: tema ${no.id}@${no.versao} */`, `:root {\n${declaracoes(spec.tokens).join('\n')}\n}`]
   for (const modo of Object.keys(spec.modos ?? {}).sort()) {
     if (!/^[a-z0-9-]+$/.test(modo)) throw new EmissaoErro(`tema: nome de modo inválido: ${JSON.stringify(modo)}`)
     const decl = declaracoes(spec.modos![modo]!).join('\n')
     blocos.push(`[data-modo="${modo}"] {\n${decl}\n}`)
-    if (modo === 'escuro') blocos.push(`@media (prefers-color-scheme: dark) {\n  :root:not([data-modo]) {\n${decl.replace(/^/gm, '  ')}\n  }\n}`)
+    if (modo === 'escuro' && spec.seguirSistema !== false) blocos.push(`@media (prefers-color-scheme: dark) {\n  :root:not([data-modo]) {\n${decl.replace(/^/gm, '  ')}\n  }\n}`)
   }
   return blocos[0] + '\n' + blocos.slice(1).join('\n\n') + '\n'
 }

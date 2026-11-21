@@ -113,17 +113,23 @@ export const BLOCOS_COMMERCE = [
   }),
   no('bloco', 'commerce.cartao-produto', {
     interface: 'commerce/cartao-produto', titulo: 'Cartão de produto', descricao: 'Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `acoes` recebe botões da página (ex.: "Adicionar").',
-    props: { type: 'object', properties: { produto: produtoProp, href: { type: 'string' }, fluida: { type: 'boolean', description: 'a foto ocupa toda a largura do cartão (em vez dos 240 px fixos)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura da foto (0,8 = retrato 4:5), com corte' } }, required: ['produto'] }, slots: { acoes: {} },
+    props: { type: 'object', properties: { produto: produtoProp, href: { type: 'string' }, rotuloLink: { type: 'string', maxLength: 40, description: 'texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe' }, fluida: { type: 'boolean', description: 'a foto ocupa toda a largura do cartão (em vez dos 240 px fixos)' }, proporcao: { type: 'number', minimum: 0.2, maximum: 5, description: 'largura ÷ altura da foto (0,8 = retrato 4:5), com corte' } }, required: ['produto'] }, slots: { acoes: {} },
     exemplos: [
       { titulo: 'Com ação', instancia: instancia('commerce/cartao-produto', { produto: PRODUTO_EX, href: '/produto/p1' }, { acoes: [{ bloco: 'nav/botao', props: { texto: 'Adicionar' } }] }) },
       { titulo: 'Esgotado', instancia: instancia('commerce/cartao-produto', { produto: ESGOTADO_EX }) },
     ],
     modelo: { bloco: 'layout/pilha', props: { gap: 8 }, slots: { filhos: [
-      { bloco: 'midia/imagem', se: 'props.produto.fotoUrl', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } },
+      // a foto leva ao detalhe quando há `href`; o recorte deixa o zoom do hover (token movimento.zoomCartao) dentro da caixa
+      { bloco: 'nav/link', se: 'props.produto.fotoUrl && props.href', props: { href: '{props.href}' }, slots: { filhos: [
+        { bloco: 'layout/pilha', props: { recorta: true }, slots: { filhos: [{ bloco: 'midia/imagem', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } }] } },
+      ] } },
+      { bloco: 'layout/pilha', se: 'props.produto.fotoUrl && !props.href', props: { recorta: true }, slots: { filhos: [
+        { bloco: 'midia/imagem', props: { src: '{props.produto.fotoUrl}', alt: '{props.produto.nome}', largura: 240, fluida: '{props.fluida}', proporcao: '{props.proporcao}' } },
+      ] } },
       { bloco: 'texto/titulo', props: { texto: '{props.produto.nome}', nivel: 3 } },
       { bloco: 'commerce/preco', props: { valor: '{props.produto.preco}', de: '{props.produto.precoDe}' } },
       { bloco: 'feedback/selo', se: 'props.produto.disponivel == false', props: { texto: 'Indisponível', tom: 'erro' } },
-      { bloco: 'nav/link', se: 'props.href', props: { href: '{props.href}', texto: 'Ver detalhes' } },
+      { bloco: 'nav/link', se: 'props.href && props.rotuloLink != ""', props: { href: '{props.href}', texto: '{props.rotuloLink ?? "Ver detalhes"}' } },
       slotAcoes,
     ] } },
   }),

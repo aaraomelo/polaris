@@ -25,6 +25,8 @@ Origem dos campos: o modelo do tiffany-erp (`Product`, `ProductVariant`, `Order`
 
 São **composições declarativas** sobre os blocos base (`modelo`): nenhum código novo no runtime, então herdam hidratação, streaming, tema e tree-shaking. Paridade React × vivo conferida para todo exemplo.
 
+`commerce/cartao-produto`: com `href`, a **foto** também leva ao detalhe (dentro de uma caixa que recorta, para o zoom do hover do tema); `rotuloLink` troca o texto do link sob o preço (padrão "Ver detalhes") e, vazio (`""`), o esconde.
+
 ## Por que o slot `acoes`
 O modelo de um bloco não tem estado nem eventos (por desenho: ele é uma função das props). Então os blocos **exibem** e deixam um slot `acoes`; a página põe ali os botões e campos com os eventos dela. O conteúdo do slot é montado no escopo da página: enxerga `estado`, `dados` e a variável do `repetir` (cada "Adicionar" sabe de qual cartão veio: testado).
 

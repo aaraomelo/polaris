@@ -13,6 +13,7 @@ const foto = (nome) => { readFileSync(join(aqui, 'img', `${nome}.jpg`)); return 
 const tema = {
   kind: 'tema', id: 'maison', versao: '1.0.0', estatuto: 'publicado',
   spec: {
+    seguirSistema: false, // sempre claro, como o template; o escuro só com data-modo="escuro"
     tokens: {
       cor: {
         primaria: '#9f5a3c', primariaHover: '#7f4830', primariaClara: '#f3ece2', secundaria: '#2a2622', destaque: '#c07859',
@@ -21,8 +22,15 @@ const tema = {
       },
       raio: { pequeno: 0, grande: 4 },
       espacamento: { base: '0.5rem', borda: 1 },
-      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: '1.625rem' },
+      tipografia: { familia: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif", pesoTitulo: 500, tamanhoBase: '16px', tamanhoH1: 'clamp(2.75rem, 6.5vw, 5rem)', tamanhoExibicao: 'clamp(3rem, 8.5vw, 8rem)', alturaExibicao: 0.9, espacamentoExibicao: '-0.025em', tamanhoH2: 'clamp(2rem, 4vw, 3rem)', tamanhoH3: '1.625rem' },
       layout: { largura: '80rem', larguraEstreita: '48rem', larguraLarga: '90rem' },
+      // cabeçalho translúcido com desfoque, que a capa da home atravessa por baixo; links pequenos em caixa alta com sublinhado que cresce
+      cabecalho: { altura: 'clamp(4rem, 8vw, 5rem)', fundo: 'color-mix(in srgb, var(--cor-fundo) 80%, transparent)', desfoque: 'blur(4px)', borda: 'transparent', marcaTamanho: 'clamp(1.5rem, 2.4vw, 1.875rem)', marcaFamilia: 'var(--tipografia-familia-titulo)', marcaPeso: 500, marcaEspacamento: '-0.025em', marcaHover: 'var(--cor-primaria)', linkTamanho: '0.75rem', linkEspacamento: '0.15em', linkCaixa: 'uppercase', linkCor: 'var(--cor-texto-suave)', linkHover: 'var(--cor-texto)', sublinhaHover: 1 },
+      // rodapé invertido: fundo escuro no claro e claro no escuro
+      rodape: { fundo: 'var(--cor-texto)', texto: 'var(--cor-fundo)', link: 'color-mix(in srgb, var(--cor-fundo) 70%, transparent)', borda: 'transparent' },
+      // transições do template: cor 300 ms, sublinhado 500 ms, foto do cartão 700 ms a 105%, entrada da capa 1,2 s e zoom lento de 20 s a 108%
+      botao: { caixa: 'uppercase', espacamento: '0.1em', tamanho: '0.8125rem', peso: 500 },
+      movimento: { rapido: '300ms', sublinha: '500ms', zoomDuracao: '700ms', zoomCartao: 1.05, entrada: '1.2s', zoomCapa: 1.08 },
     },
     modos: {
       escuro: {
@@ -105,7 +113,7 @@ const link = (href, texto, botao) => b('nav/link', { href, texto, ...(botao ? { 
 const home = b('layout/pilha', { gap: 0 }, [
   cabecalho(),
   // abertura em tela quase cheia, com a foto e o véu escuro; o texto alinha com o resto da página
-  b('layout/destaque', { imagem: foto('hero'), altura: 760, escurece: 0.35, alinha: 'esquerda' }, [
+  b('layout/destaque', { imagem: foto('hero'), altura: 800, escurece: 0.3, alinha: 'esquerda', capa: true }, [
     contido([
       sobre('Curadoria para uma vida atenta'),
       titulo('Objetos de beleza serena', 1),
@@ -113,7 +121,7 @@ const home = b('layout/pilha', { gap: 0 }, [
       link('/produtos', 'Ver as peças', 'primario'),
     ]),
   ]),
-  folga(96),
+  folga(112),
   // coleção em destaque: foto à esquerda, texto à direita, centrado na vertical
   contido([
     b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
@@ -126,7 +134,7 @@ const home = b('layout/pilha', { gap: 0 }, [
       ]),
     ]),
   ]),
-  folga(96),
+  folga(112),
   // novidades sobre o fundo de linho
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [
     contido([
@@ -135,37 +143,37 @@ const home = b('layout/pilha', { gap: 0 }, [
         link('/produtos', 'Ver tudo'),
       ]),
       folga(24),
-      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p), href: `/produtos/${p.id}` }))),
+      b('layout/grade', { colunas: 4, gap: 32 }, NOVIDADES.map((p) => b('commerce/cartao-produto', { fluida: true, proporcao: 0.8, produto: paraProduto(p), href: `/produtos/${p.id}`, rotuloLink: '' }))),
     ]),
   ]),
-  folga(96),
+  folga(112),
   // explore por coleção
   contido([
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Explore por'), titulo('Coleções', 2)]),
     folga(32),
     b('layout/grade', { colunas: 3, gap: 24 }, COLECOES.map((c) => b('layout/destaque', { imagem: foto(c.foto), altura: 360, escurece: 0.4, alinha: 'esquerda' }, [titulo(c.nome, 3), par(c.frase), link(`/produtos?colecao=${c.slug}`, 'Ver peças')]))),
   ], 'larga', { id: 'colecoes' }),
-  folga(96),
+  folga(112),
   // a faixa de fotos
   contido([
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Siga a casa'), titulo('@maison', 2)]),
     folga(24),
     b('layout/grade', { colunas: 6, gap: 8 }, FOTOS.map((f, i) => b('midia/imagem', { src: foto(f), alt: `Foto ${i + 1} da casa`, fluida: true, proporcao: 1 }))),
   ], 'larga'),
-  folga(96),
+  folga(112),
   rodape(),
 ])
 
 // ---- produtos: filtro por categoria (?colecao=…), contagem e grade com selos --------------------------------------------------------------
 const FILTRADOS = 'filtra(estado.produtos, p => (consulta.colecao ?? "") == "" || p.colecao == consulta.colecao)'
 const filtro = (slug, nome) => b('nav/link', { href: slug ? `/produtos?colecao=${slug}` : '/produtos', texto: nome, botao: 'secundario', atual: `{(consulta.colecao ?? "") == ${JSON.stringify(slug)}}` }) // o filtro escolhido leva aria-current e fica preenchido
-const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}', href: '{"/produtos/" + p.id}' }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
+const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}', href: '{"/produtos/" + p.id}', rotuloLink: '' }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
   { bloco: 'texto/pequeno', props: { texto: '{(p.selo ? p.selo + " · " : "") + p.material}' } }, // o selo (Destaque, Novo) e o material, na linha pequena sob o preço
   { bloco: 'nav/botao', props: { texto: 'Adicionar à sacola', variante: 'secundario' }, eventos: aoClicar(adiciona('p.id')) },
 ] } }
 const produtos = b('layout/pilha', { gap: 0 }, [
   cabecalho('loja'),
-  b('layout/destaque', { imagem: foto('loja-capa'), altura: 440, escurece: 0.35, alinha: 'esquerda' }, [contido([sobre('Loja'), titulo('Todas as peças', 1)])]),
+  b('layout/destaque', { imagem: foto('loja-capa'), altura: 440, escurece: 0.35, alinha: 'esquerda', capa: true }, [contido([sobre('Loja'), titulo('Todas as peças', 1)])]),
   folga(32),
   contido([
     b('layout/linha', { gap: 8, quebra: true }, [filtro('', 'Todas'), ...CATEGORIAS.map((c) => filtro(c.slug, c.nome))]),
@@ -175,7 +183,7 @@ const produtos = b('layout/pilha', { gap: 0 }, [
     b('layout/grade', { colunas: 4, gap: 32 }, [cartao]),
     b('texto/paragrafo', { texto: 'Nenhuma peça nesta categoria ainda.' }, undefined, { se: `tamanho(${FILTRADOS}) == 0` }),
   ], 'larga'),
-  folga(96),
+  folga(112),
   rodape(),
 ])
 
@@ -187,13 +195,13 @@ const VALORES = [
 ]
 const sobre_ = b('layout/pilha', { gap: 0 }, [
   cabecalho('sobre'),
-  b('layout/destaque', { imagem: foto('sobre-capa'), altura: 560, escurece: 0.4, alinha: 'esquerda' }, [contido([
+  b('layout/destaque', { imagem: foto('sobre-capa'), altura: 560, escurece: 0.4, alinha: 'esquerda', capa: true }, [contido([
     sobre('Nossa história'), titulo('Curadoria de beleza para viver', 1),
     par('Objetos feitos com cuidado, materiais que envelhecem bem e espaços que convidam à pausa.'),
   ])]),
-  folga(96),
+  folga(112),
   contido([sobre('Nossa filosofia'), par('Acreditamos que os objetos que nos cercam devem contar histórias, envelhecer com beleza e trazer uma alegria silenciosa aos momentos do dia a dia.')], 'estreita'),
-  folga(96),
+  folga(112),
   contido([b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
       sobre('O começo'), titulo('Uma busca pessoal por sentido', 2),
@@ -202,9 +210,9 @@ const sobre_ = b('layout/pilha', { gap: 0 }, [
     ]),
     b('midia/imagem', { src: foto('sobre-1'), alt: 'Sala com objetos selecionados', fluida: true, proporcao: 0.8 }),
   ])]),
-  folga(96),
+  folga(112),
   contido([titulo('“A beleza está na imperfeição das coisas feitas à mão”', 3)], 'estreita'),
-  folga(96),
+  folga(112),
   contido([b('layout/grade', { colunas: 2, gap: 64, alinha: 'centro' }, [
     b('midia/imagem', { src: foto('sobre-2'), alt: 'Peças de uma oficina', fluida: true, proporcao: 0.8 }),
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
@@ -213,15 +221,15 @@ const sobre_ = b('layout/pilha', { gap: 0 }, [
       par('Priorizamos materiais naturais, técnicas tradicionais e artesãos que compartilham nossos valores. Seja um vaso de cerâmica torneado à mão ou uma mesa de carvalho feita para durar gerações, acreditamos em objetos que melhoram com o tempo, e não o contrário.'),
     ]),
   ])]),
-  folga(96),
+  folga(112),
   b('layout/destaque', { fundo: 'suave', altura: 120, alinha: 'esquerda' }, [contido([
     b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('O que nos guia'), titulo('Nossos valores', 2)]),
     folga(32),
     b('layout/grade', { colunas: 3, gap: 48 }, VALORES.map(([n, t, d]) => b('layout/pilha', { gap: 8, alinha: 'inicio' }, [sobre(n), titulo(t, 3), par(d)]))),
   ])]),
-  folga(96),
+  folga(112),
   contido([b('layout/grade', { colunas: 3, gap: 24 }, ['colecao-ceramica', 'colecao-4', 'produto-almofada'].map((f, i) => b('midia/imagem', { src: foto(f), alt: `Detalhe ${i + 1} das peças`, fluida: true, proporcao: 0.8 })))], 'larga'),
-  folga(96),
+  folga(112),
   b('layout/destaque', { imagem: foto('foto-2'), altura: 420, escurece: 0.45, alinha: 'centro' }, [
     sobre('Vamos conversar'), titulo('Tem alguma dúvida?', 2),
     par('Teremos prazer em falar sobre as nossas peças, os artesãos ou em ajudar você a achar exatamente o que procura.'),
@@ -257,17 +265,17 @@ const detalhe = b('layout/pilha', { gap: 0 }, [
         ]),
       ]),
     ], 'larga'),
-    folga(96),
+    folga(112),
     contido([
       b('layout/pilha', { gap: 8, alinha: 'centro' }, [sobre('Da mesma coleção'), titulo('Você também pode gostar', 2)]),
       folga(32),
-      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{o}', href: '{"/produtos/" + o.id}' }, repetir: { cada: MESMA.replace(/\bp\./g, 'p.'), como: 'o', chave: 'o.id' } }]),
+      b('layout/grade', { colunas: 4, gap: 32 }, [{ bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{o}', href: '{"/produtos/" + o.id}', rotuloLink: '' }, repetir: { cada: MESMA.replace(/\bp\./g, 'p.'), como: 'o', chave: 'o.id' } }]),
     ], 'larga', { se: `tamanho(${MESMA}) > 0` }),
   ]), repetir: { cada: ACHADO, como: 'p', chave: 'p.id' } },
   contido([
     sobre('Peça não encontrada'), titulo('Não achamos esta peça', 2), par('Ela pode ter saído da coleção.'), link('/produtos', 'Ver todas as peças', 'primario'),
   ], 'estreita', { se: `tamanho(${ACHADO}) == 0` }),
-  folga(96),
+  folga(112),
   rodape(),
 ])
 
@@ -315,7 +323,7 @@ const checkout = b('layout/pilha', { gap: 0 }, [
     ], { se: `tamanho(${LINHAS}) > 0` }),
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Sua sacola está vazia', 3), par('Escolha peças na loja para finalizar um pedido.'), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
   ], 'larga'),
-  folga(96),
+  folga(112),
   rodape(),
 ])
 // confirmação: o último pedido gravado neste navegador
@@ -333,7 +341,7 @@ const confirmacao = b('layout/pilha', { gap: 0 }, [
     ], { se: `tamanho(estado.pedidos) > 0` }),
     b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Nenhum pedido por aqui', 2), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(estado.pedidos) == 0` }),
   ], 'estreita'),
-  folga(96),
+  folga(112),
   rodape(),
 ])
 
@@ -364,7 +372,7 @@ const sacolaPag = b('layout/pilha', { gap: 0 }, [
       link('/produtos', 'Continuar comprando'),
     ], { se: `tamanho(${LINHAS}) > 0` }),
   ], 'estreita'),
-  folga(96),
+  folga(112),
   rodape(),
 ])
 

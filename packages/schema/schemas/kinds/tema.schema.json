@@ -57,6 +57,58 @@
           "propertyNames": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
           }
+        },
+        "cabecalho": {
+          "type": "object",
+          "description": "cabeçalho (site/cabecalho): `altura`, `fundo`, `desfoque` (ex.: blur(4px)), `borda`, `marcaTamanho`, `marcaPeso`, `linkTamanho`, `linkEspacamento`, `linkCaixa`, `linkCor`, `sublinhaHover` (1 liga o sublinhado animado). Cada valor vira variável CSS com fallback no CSS base",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "rodape": {
+          "type": "object",
+          "description": "rodapé (site/rodape): `fundo`, `texto`, `link`, `borda`, `marcaTamanho`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "movimento": {
+          "type": "object",
+          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto no hover), `entrada` (duração da entrada da capa), `zoomCapa` (escala final do zoom lento). Sem estes tokens não há transição",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "botao": {
+          "type": "object",
+          "description": "botões e links de botão: `caixa` (uppercase), `espacamento` (letter-spacing), `tamanho` e `peso`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
         }
       },
       "additionalProperties": false
@@ -67,6 +119,10 @@
       "additionalProperties": {
         "type": "object"
       }
+    },
+    "seguirSistema": {
+      "type": "boolean",
+      "description": "false: o modo escuro só vale com data-modo=\"escuro\" no <html>, sem seguir a preferência do sistema (padrão: true)"
     }
   },
   "type": "object",

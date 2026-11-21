@@ -106,6 +106,15 @@ describe('blocos de exibição: dinheiro exato, vazios, links, disponibilidade',
     const e = ssr(pagina({ bloco: 'commerce/carrinho', props: { itens: [] } }))
     expect(e.textContent).toContain('Seu carrinho está vazio.'); expect(e.querySelector('table')).toBeNull()
   })
+  it('cartão: a foto leva ao detalhe (dentro de uma caixa que recorta) e `rotuloLink` vazio esconde o link de texto', () => {
+    const produto = P('x', 'Vaso', '10.00', { fotoUrl: '/img/v.jpg' })
+    const com = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto, href: '/p/x' } }))
+    expect(com.querySelector('a[href="/p/x"] [data-recorta] img')).not.toBeNull(); expect([...com.querySelectorAll('a')].map((a) => a.textContent)).toContain('Ver detalhes')
+    const sem = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto, href: '/p/x', rotuloLink: '' } }))
+    expect(sem.querySelector('a[href="/p/x"] [data-recorta] img')).not.toBeNull(); expect([...sem.querySelectorAll('a')].length).toBe(1)
+    const solto = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto } }))
+    expect(solto.querySelector('a')).toBeNull(); expect(solto.querySelector('[data-recorta] img')).not.toBeNull()
+  })
   it('conteúdo hostil do catálogo é texto, e foto com javascript: não vira imagem', () => {
     const d = ssr(pagina({ bloco: 'commerce/cartao-produto', props: { produto: P('x', '<img src=x onerror=alert(1)>', '1', { fotoUrl: 'javascript:alert(1)' }) } }))
     expect(d.querySelector('img')).toBeNull(); expect(d.querySelector('h3')!.textContent).toBe('<img src=x onerror=alert(1)>')

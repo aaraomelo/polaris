@@ -16,6 +16,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris [data-contido=larga]{max-width:var(--layout-largura-larga, 90rem)}
 #polaris a{color:var(--cor-primaria)}
 #polaris a:hover{color:var(--cor-primaria-hover)}
+#polaris :is(a,button){transition:color var(--movimento-rapido, 0s) ease,background-color var(--movimento-rapido, 0s) ease,border-color var(--movimento-rapido, 0s) ease}
 #polaris :focus-visible{outline:2px solid var(--cor-destaque);outline-offset:2px}
 #polaris button{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75) calc(var(--espacamento-base) * 1.5);font:inherit;cursor:pointer}
 #polaris button:hover:not(:disabled){background:var(--cor-primaria-hover)}
@@ -46,13 +47,21 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris label{display:inline-block}
 #polaris small{color:var(--cor-texto-suave)}
 #polaris code{background:var(--cor-superficie-alt);border-radius:var(--raio-pequeno);padding:.1em .4em;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-#polaris header{display:flex;align-items:center;gap:calc(var(--espacamento-base) * 2);padding:var(--espacamento-base) calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border-bottom:var(--espacamento-borda) solid var(--cor-borda)}
+#polaris header{display:flex;align-items:center;gap:calc(var(--espacamento-base) * 2);padding:var(--espacamento-base) calc(var(--espacamento-base) * 2);box-sizing:border-box;min-height:var(--cabecalho-altura, auto);background:var(--cabecalho-fundo, var(--cor-superficie));border-bottom:var(--espacamento-borda) solid var(--cabecalho-borda, var(--cor-borda));-webkit-backdrop-filter:var(--cabecalho-desfoque, none);backdrop-filter:var(--cabecalho-desfoque, none);transition:background-color var(--movimento-rapido, 0s) ease,border-color var(--movimento-rapido, 0s) ease}
 #polaris header[data-fixo]{position:sticky;top:0;z-index:10}
-#polaris header>a>:is(h1,h2,h3,h4,h5,h6){margin:0;font-size:1em;font-weight:700;line-height:inherit}
+#polaris header>a>:is(h1,h2,h3,h4,h5,h6,strong){margin:0;font-size:var(--cabecalho-marca-tamanho, 1em);font-weight:var(--cabecalho-marca-peso, 700);letter-spacing:var(--cabecalho-marca-espacamento, normal);line-height:inherit}
+#polaris header>a>strong{font-family:var(--cabecalho-marca-familia, inherit)}
+#polaris header>a{transition:color var(--movimento-rapido, 0s) ease}
+#polaris header>a:hover{color:var(--cabecalho-marca-hover, var(--cor-primaria-hover))}
 #polaris header>a{display:flex;align-items:center;gap:var(--espacamento-base);color:var(--cor-texto);text-decoration:none}
 #polaris nav{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--espacamento-base) * 2)}
 #polaris header>nav{flex:1}
 #polaris header[data-centro]>nav{justify-content:center}
+#polaris header nav a,#polaris header nav summary{position:relative;font-size:var(--cabecalho-link-tamanho, inherit);letter-spacing:var(--cabecalho-link-espacamento, normal);text-transform:var(--cabecalho-link-caixa, none);transition:color var(--movimento-rapido, 0s) ease}
+#polaris header nav a{color:var(--cabecalho-link-cor, var(--cor-primaria))}
+#polaris header nav a:hover{color:var(--cabecalho-link-hover, var(--cor-primaria-hover))}
+#polaris header nav a::after{content:'';position:absolute;left:0;right:0;bottom:-.25em;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform var(--movimento-sublinha, 0s) cubic-bezier(0,0,.2,1)}
+#polaris header nav a:hover::after,#polaris header nav a[aria-current=page]::after{transform:scaleX(var(--cabecalho-sublinha-hover, 0))}
 #polaris [data-painel]{display:grid;grid-template-columns:var(--largura-lateral, 16rem) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100vh;overflow:hidden}
 #polaris [data-painel]>header{grid-column:1/-1;grid-row:1}
 #polaris [data-painel]>aside[data-lateral]{grid-column:1;grid-row:2;overflow:auto;border-right:var(--espacamento-borda) solid var(--cor-borda);background:var(--cor-superficie);padding:calc(var(--espacamento-base) * 1.5);display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 1.5)}
@@ -116,26 +125,46 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris nav a{text-decoration:none}
 #polaris nav a[aria-current=page]{color:var(--cor-texto);font-weight:600;text-decoration:underline}
 #polaris section[data-alinha]{display:flex;flex-direction:column;justify-content:center;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 6) calc(var(--espacamento-base) * 3);background-size:cover;background-position:center;border-radius:var(--raio-grande)}
+#polaris section[data-capa]{box-sizing:border-box;position:relative;overflow:hidden;justify-content:flex-end;border-radius:0;margin-top:calc(var(--cabecalho-altura, 0px) * -1);padding-top:calc(var(--cabecalho-altura, 0px) + var(--espacamento-base) * 6);padding-inline:0;padding-bottom:calc(var(--espacamento-base) * 14)}
+#polaris section[data-capa]>*{position:relative;z-index:1}
+#polaris section[data-capa][data-imagem]::before{content:'';position:absolute;inset:0;z-index:0;background:inherit;background-size:cover;background-position:center}
+@media (prefers-reduced-motion:no-preference){
+#polaris section[data-capa][data-imagem]::before{animation:pl-zoom-capa var(--movimento-zoom-capa-duracao, 20s) ease-out forwards}
+#polaris section[data-capa] [data-contido]>*,#polaris section[data-capa]>*:not([data-contido]){animation:pl-entra var(--movimento-entrada, 0s) ease-out both}
+#polaris section[data-capa] [data-contido]>:nth-child(2){animation-delay:.1s}
+#polaris section[data-capa] [data-contido]>:nth-child(3){animation-delay:.2s}
+#polaris section[data-capa] [data-contido]>:nth-child(4){animation-delay:.3s}
+}
+@keyframes pl-zoom-capa{from{transform:scale(1)}to{transform:scale(var(--movimento-zoom-capa, 1))}}
+@keyframes pl-entra{from{opacity:0;transform:translateY(1rem)}to{opacity:1;transform:none}}
+#polaris section[data-capa] h1{font-size:var(--tipografia-tamanho-exibicao, var(--tipografia-tamanho-h1, 2em));line-height:var(--tipografia-altura-exibicao, 1.25);letter-spacing:var(--tipografia-espacamento-exibicao, normal)}
 #polaris section[data-fundo=primaria]{background-color:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris section[data-fundo=suave]{background-color:var(--cor-superficie-alt);color:var(--cor-texto)}
 #polaris section[data-alinha=centro]{align-items:center;text-align:center}
 #polaris section[data-alinha=esquerda]{align-items:flex-start;text-align:left}
 #polaris section[data-alinha] h1,#polaris section[data-alinha] h2,#polaris section[data-alinha] p{margin:0}
 #polaris section[data-alinha] a:not([data-botao]){color:inherit}
-#polaris a[data-botao]{display:inline-block;padding:calc(var(--espacamento-base) * 1.25) calc(var(--espacamento-base) * 2.5);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);font-weight:600;text-decoration:none}
+#polaris a[data-botao]{display:inline-block;padding:calc(var(--espacamento-base) * 1.25) calc(var(--espacamento-base) * 2.5);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);font-weight:var(--botao-peso, 600);font-size:var(--botao-tamanho, inherit);letter-spacing:var(--botao-espacamento, normal);text-transform:var(--botao-caixa, none);text-decoration:none}
 #polaris a[data-botao=primario]{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=primario]:hover{background:var(--cor-primaria-hover);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=secundario]{background:transparent;color:var(--cor-primaria);border-color:currentColor}
 #polaris a[data-botao][aria-current]{background:var(--cor-primaria);border-color:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
+#polaris section[data-capa][data-fundo] a[data-botao=primario]{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
+#polaris section[data-capa][data-fundo] a[data-botao=primario]:hover{background:var(--cor-primaria-hover);color:var(--cor-texto-sobre-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=primario]{background:var(--cor-texto-sobre-primaria);color:var(--cor-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=secundario]{color:var(--cor-texto-sobre-primaria)}
 /* com imagem de fundo o véu (scrim) é SEMPRE preto, então o texto é branco em qualquer tema: a cor sobre-primária seria escura no modo escuro e sumiria na foto. É o par fixo do véu, não uma cor da marca (por isso as palavras-chave, e não variáveis) */
 #polaris section[data-imagem]{color:white}
 #polaris section[data-imagem] a[data-botao=primario]{background:white;color:black}
 #polaris section[data-imagem] a[data-botao=secundario]{color:white}
-#polaris footer{display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 3) calc(var(--espacamento-base) * 2);background:var(--cor-superficie);border-top:var(--espacamento-borda) solid var(--cor-borda);color:var(--cor-texto-suave)}
-#polaris footer a{color:var(--cor-texto-suave)}
-#polaris footer a:hover{color:var(--cor-texto)}
+#polaris footer{display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 2);padding:calc(var(--espacamento-base) * 3) calc(var(--espacamento-base) * 2);background:var(--rodape-fundo, var(--cor-superficie));border-top:var(--espacamento-borda) solid var(--rodape-borda, var(--cor-borda));color:var(--rodape-texto, var(--cor-texto-suave))}
+#polaris footer a{color:var(--rodape-link, var(--cor-texto-suave));transition:color var(--movimento-rapido, 0s) ease}
+#polaris footer a:hover{color:var(--rodape-texto, var(--cor-texto))}
+#polaris footer :is(h1,h2,h3,h4,h5,h6){color:var(--rodape-texto, inherit);font-size:var(--rodape-marca-tamanho, inherit)}
+#polaris a:has(>[data-recorta]){display:block}
+#polaris [data-recorta]{overflow:hidden}
+#polaris [data-recorta]>img{transition:transform var(--movimento-zoom-duracao, 0s) ease-out}
+#polaris [data-recorta]:hover>img{transform:scale(var(--movimento-zoom-cartao, 1))}
 #polaris footer nav{flex-direction:column;align-items:flex-start;gap:var(--espacamento-base)}
 #polaris hr{border:0;border-top:var(--espacamento-borda) solid var(--cor-borda);width:100%}
 #polaris table{border-collapse:collapse;width:100%}

@@ -86,6 +86,7 @@ Foto, nome e preço de um produto. `href` (opcional) liga ao detalhe. O slot `ac
 | `href` | texto | não |  |  |
 | `produto` | objeto | sim |  |  |
 | `proporcao` | número ≥ 0.2 ≤ 5 | não |  | largura ÷ altura da foto (0,8 = retrato 4:5), com corte |
+| `rotuloLink` | texto ≤ 40 caracteres | não |  | texto do link sob o preço (padrão "Ver detalhes"); vazio esconde o link, e a foto continua levando ao detalhe |
 
 **Slots**
 
@@ -1084,7 +1085,7 @@ Limita e centraliza o conteúdo: largura máxima (`estreita`, `normal` ou `larga
 
 ### Destaque (`layout/destaque`)
 
-Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou uma `imagem` de fundo com véu escuro (`escurece`) para o texto ler. `alinha`: centro ou esquerda; `altura` mínima em px. O texto e os botões ficam nos filhos; a imagem precisa ser do próprio site (o CSP das páginas só carrega imagens da mesma origem).
+Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou uma `imagem` de fundo com véu escuro (`escurece`) para o texto ler. `alinha`: centro ou esquerda; `altura` mínima em px. O texto e os botões ficam nos filhos; a imagem precisa ser do próprio site (o CSP das páginas só carrega imagens da mesma origem). `capa: true` faz dela uma capa (hero): texto embaixo, sobe por baixo do cabeçalho, foto com zoom lento e entrada do texto (tokens `cabecalho.altura` e `movimento.*`).
 
 **Props**
 
@@ -1092,6 +1093,7 @@ Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou
 |---|---|---|---|---|
 | `alinha` | texto | não |  | centro (padrão) ou esquerda (outro valor vale centro) |
 | `altura` | número ≥ 120 ≤ 800 | não | 320 | altura mínima em px |
+| `capa` | booleano | não |  | faixa de capa (hero): o texto fica embaixo, a faixa sobe por baixo do cabeçalho; com `altura` 800 ocupa a tela toda (100svh), senão no máximo a tela (token cabecalho.altura), a foto faz um zoom lento e o texto entra (tokens movimento.*) |
 | `escurece` | número ≥ 0 ≤ 0.8 | não | 0.45 | véu escuro sobre a imagem, para o texto ler |
 | `fundo` | texto | não |  | sem imagem: primaria (padrão) ou suave (outro valor vale primaria) |
 | `imagem` | texto ≤ 500 caracteres | não |  | URL segura (mesma origem: o CSP das páginas só carrega imagens do próprio site) |
@@ -1342,6 +1344,7 @@ Coloca os filhos lado a lado (flex row).
 | `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
 | `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap); sem isso a linha pode passar da largura |
+| `recorta` | booleano | não |  | corta o que passa da caixa (a foto que cresce no hover, com o token movimento.zoomCartao, fica dentro dela) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
 | `solta` | booleano | não |  | zona de soltar: itens com `arrasta` (botões) arrastados para dentro dela chegam em `aoSoltar` como `{ valor, alvo, zona }` (zona: antes, dentro ou depois do item sob o ponteiro); a ilha `@polaris/engine/tela` faz o arrastar |
 
@@ -1474,7 +1477,7 @@ Estrutura de aplicação: uma grade com o cabeçalho (`site/cabecalho`) no topo,
 
 ### Pilha (`layout/pilha`)
 
-Empilha os filhos na vertical (flex column). Base de quase toda página.
+Empilha os filhos na vertical (flex column). Base de quase toda página. `recorta: true` corta o que passa da caixa (foto que cresce no hover).
 
 **Props**
 
@@ -1486,6 +1489,7 @@ Empilha os filhos na vertical (flex column). Base de quase toda página.
 | `largura` | número ≥ 40 ≤ 2000 | não |  | largura fixa em px (dentro de uma linha) |
 | `papel` | "toolbar" \| "group" \| "list" \| "status" | não |  | papel ARIA do grupo (barra de ferramentas, grupo, lista ou status: região viva que o leitor de tela anuncia ao mudar) |
 | `quebra` | booleano | não |  | quebra em várias linhas quando falta espaço (flex-wrap) |
+| `recorta` | booleano | não |  | corta o que passa da caixa (a foto que cresce no hover, com o token movimento.zoomCartao, fica dentro dela) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível do grupo (aria-label) |
 | `solta` | booleano | não |  | zona de soltar: itens com `arrasta` (botões) arrastados para dentro dela chegam em `aoSoltar` como `{ valor, alvo, zona }` (zona: antes, dentro ou depois do item sob o ponteiro); a ilha `@polaris/engine/tela` faz o arrastar |
 

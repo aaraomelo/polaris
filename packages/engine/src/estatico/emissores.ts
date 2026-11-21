@@ -19,7 +19,8 @@ const caixa = (direcao: 'column' | 'row'): Emissor => ({ props, filhos, id }) =>
   const gap = num(props.gap)
   const alinha = typeof props.alinha === 'string' ? ALINHA[props.alinha] : undefined
   const papel = props.papel === 'toolbar' || props.papel === 'group' || props.papel === 'list' || props.papel === 'status' ? ` role="${props.papel}"` : '', nome = typeof props.rotulo === 'string' && props.rotulo.trim() ? ` aria-label="${escHtml(props.rotulo.trim().slice(0, 200))}"` : ''
-  return `<div${idAttr(id)}${papel}${nome} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${props.quebra === true ? ';flex-wrap:wrap' : ''}${typeof props.largura === 'number' && Number.isFinite(props.largura) ? `;width:${Math.min(2000, Math.max(40, Math.round(props.largura)))}px;flex:none` : ''}${props.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}">${filhos.filhos ?? ''}</div>`
+  const recorta = props.recorta === true ? ' data-recorta=""' : ''
+  return `<div${idAttr(id)}${papel}${nome}${recorta} style="display:flex;flex-direction:${direcao}${gap !== undefined ? `;gap:${px(gap)}` : ''}${alinha ? `;align-items:${alinha}` : ''}${props.quebra === true ? ';flex-wrap:wrap' : ''}${typeof props.largura === 'number' && Number.isFinite(props.largura) ? `;width:${Math.min(2000, Math.max(40, Math.round(props.largura)))}px;flex:none` : ''}${props.cresce === true ? ';flex:1 1 0%;min-width:0' : ''}">${filhos.filhos ?? ''}</div>`
 }
 
 const MAO: Emissores = {

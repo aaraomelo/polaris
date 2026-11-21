@@ -12,7 +12,7 @@ const td = (texto: string, props: Record<string, unknown> = {}): Inst => ({ bloc
 const th = (texto: string): Inst => td(texto, { cabecalho: true })
 
 export const DOCS_BASE: Record<string, DocBloco> = {
-  'layout/pilha': { titulo: 'Pilha', descricao: 'Empilha os filhos na vertical (flex column). Base de quase toda página.', exemplos: [
+  'layout/pilha': { titulo: 'Pilha', descricao: 'Empilha os filhos na vertical (flex column). Base de quase toda página. `recorta: true` corta o que passa da caixa (foto que cresce no hover).', exemplos: [
     { titulo: 'Com espaçamento', instancia: { bloco: 'layout/pilha', props: { gap: 8 }, slots: { filhos: cx('Primeiro', 'Segundo', 'Terceiro') } } },
     { titulo: 'Centralizada', instancia: { bloco: 'layout/pilha', props: { gap: 4, alinha: 'centro' }, slots: { filhos: cx('Curto', 'Um texto bem mais comprido') } } },
   ] },
@@ -122,7 +122,7 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'entrada/arquivo': { titulo: 'Arquivo', descricao: 'Seletor de UM arquivo. `aceita` filtra o seletor; `tamanhoMax` (bytes, padrão 2 MB) recusa antes de ler. `aoEscolher` roda só com arquivo que serve e recebe `{ nome, tipo, tamanho, dados }` (bytes em base64); `aoRecusar` roda só quando não serve (nenhum arquivo ou acima de `tamanhoMax`) e recebe `{ erro }`, sem ler o arquivo. O servidor deve revalidar tudo: o tipo declarado aqui não vale nada.', exemplos: [
     { titulo: 'Imagens', instancia: { bloco: 'entrada/arquivo', props: { rotulo: 'Escolha uma imagem', aceita: 'image/png,image/jpeg,image/gif,image/webp' } } },
   ] },
-  'layout/destaque': { titulo: 'Destaque', descricao: 'Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou uma `imagem` de fundo com véu escuro (`escurece`) para o texto ler. `alinha`: centro ou esquerda; `altura` mínima em px. O texto e os botões ficam nos filhos; a imagem precisa ser do próprio site (o CSP das páginas só carrega imagens da mesma origem).', exemplos: [
+  'layout/destaque': { titulo: 'Destaque', descricao: 'Faixa de destaque (`<section>`): fundo da cor primária do tema (ou `suave`), ou uma `imagem` de fundo com véu escuro (`escurece`) para o texto ler. `alinha`: centro ou esquerda; `altura` mínima em px. O texto e os botões ficam nos filhos; a imagem precisa ser do próprio site (o CSP das páginas só carrega imagens da mesma origem). `capa: true` faz dela uma capa (hero): texto embaixo, sobe por baixo do cabeçalho, foto com zoom lento e entrada do texto (tokens `cabecalho.altura` e `movimento.*`).', exemplos: [
     { titulo: 'Fundo do tema', instancia: { bloco: 'layout/destaque', props: { altura: 200 }, slots: { filhos: [{ bloco: 'texto/titulo', props: { texto: 'Oferta da semana', nivel: 2 } }] } } },
     { titulo: 'Suave, à esquerda', instancia: { bloco: 'layout/destaque', props: { fundo: 'suave', alinha: 'esquerda', altura: 160 }, slots: { filhos: [{ bloco: 'texto/paragrafo', props: { texto: 'Entrega grátis acima de R$ 99' } }] } } },
   ] },
