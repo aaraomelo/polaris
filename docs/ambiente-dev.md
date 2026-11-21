@@ -72,6 +72,6 @@ Imagem multi-etapa, usuário não-root, sistema de arquivos somente leitura, `ca
 
 Se a pasta tiver um arquivo `peca.sementes` (JSON, extensão que o carregador de nós ignora), ele **semeia o catálogo** (`loja.peca`) de cada tenant, idempotente por `slug`; `@img/<nome>` nos campos de foto vira o endereço do ativo. É assim que a Maison lê os produtos da API em vez de tê-los na página.
 
-`pnpm local --site exemplos/maison --modelo exemplos/saude` guarda outras pastas (`--modelo`, repetível) **só como modelos** no banco, sem pô-las no ar; as sementes `<entidade>.sementes` de qualquer pasta semeiam a API do serviço `loja`.
+Por padrão o ambiente local guarda na API de modelos **toda pasta de `exemplos/` com `nos.json`** (Maison, painel de saúde, loja-site), mesmo as que não vão ao ar; `--site` escolhe a que vai ao ar. `pnpm local --site exemplos/maison --modelo exemplos/saude` guarda outras pastas (`--modelo`, repetível) **só como modelos** no banco, sem pô-las no ar; as sementes `<entidade>.sementes` de qualquer pasta semeiam a API do serviço `loja`.
 
 **Modelos (templates) de site**: com `--site`, os nós da pasta (tema, páginas, dados, traduções, tenants) também ficam **no banco**, como o modelo `<pasta>` de cada tenant (`plataforma.template_versao`, versões imutáveis; ver `docs/modelos.md`). A API é a do Studio (`/studio/templates`, papéis `studio.*`) e o modelo traz as fotos como `@img/<nome>` (portável: ao **aplicar**, troca-se pelos ativos do tenant).

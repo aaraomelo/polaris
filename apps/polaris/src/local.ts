@@ -43,7 +43,7 @@ export type OpcoesLocal = {
   nos?: string
   /** os nós do SITE dos tenants de demonstração: tenants e páginas (padrão: exemplos/loja-site; `null` = sem site) */
   site?: string | null
-  /** outras pastas de site que ficam SÓ como modelos no banco (`/studio/templates`), sem ir ao ar: aplique um modelo pelo Studio */
+  /** pastas de site guardadas como modelos no banco (`/studio/templates`), sem ir ao ar: aplique um modelo pelo Studio. Padrão: toda pasta de `exemplos/` com `nos.json` */
   modelos?: string[]
   /** o Studio empacotado (padrão: apps/studio/dist) */
   studioDir?: string
@@ -97,7 +97,10 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     const ativos = criaAtivos({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } } })
     const fotos: Record<string, string> = {} // nome do arquivo (sem extensão) → endereço do ativo salvo, para as páginas apontarem por `@img/<nome>`
     const pastaImgs = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site || ''
-    const pastas = [...(pastaImgs ? [pastaImgs] : []), ...(o.modelos ?? [])]
+    // os modelos que ficam guardados no banco: os pedidos (`modelos`) ou, por padrão, TODA pasta de `exemplos/` que tem `nos.json` (a Maison, o painel de saúde…): o ambiente local sempre os tem na API de modelos
+    const exemplosDir = join(RAIZ, 'exemplos')
+    const descobertos = o.modelos ?? (existsSync(exemplosDir) ? readdirSync(exemplosDir).filter((d) => d !== 'loja' && existsSync(join(exemplosDir, d, 'nos.json'))).sort().map((d) => join(exemplosDir, d)) : [])
+    const pastas = [...new Set([...(pastaImgs ? [pastaImgs] : []), ...descobertos])]
     for (const pasta of pastas) {
       for (const [arq, nome] of [['banner.png', 'banner-de-exemplo'], ['logo.png', 'logo-de-exemplo']] as const) {
         const f = join(pasta, arq); if (!existsSync(f)) continue
@@ -153,7 +156,7 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw, (t) => t.replace(/@img\/([A-Za-z0-9_-]+)/g, (m, n: string) => (fotos[n] ?? m)))
     // o MODELO do site (template) guardado no banco (`plataforma.template_versao`, por tenant, versões imutáveis): os nós da pasta do site viram o modelo `<pasta>` de cada tenant (idempotente: conteúdo igual não cria versão),
     // com as fotos ainda como `@img/<nome>` (portável: quem APLICA o modelo troca pelos ativos do tenant)
-    for (const pastaM of [...(siteDir ? [siteDir] : []), ...(o.modelos ?? [])]) if (existsSync(pastaM)) {
+    for (const pastaM of [...new Set([...(siteDir ? [siteDir] : []), ...descobertos])]) if (existsSync(pastaM)) {
       const nosDoSite: Array<Record<string, any>> = [], anda = (d: string) => { for (const e of readdirSync(d).sort()) { const f = join(d, e); if (statSync(f).isDirectory()) anda(f); else if (e.endsWith('.json')) { const j = JSON.parse(readFileSync(f, 'utf8')) as unknown; nosDoSite.push(...(Array.isArray(j) ? j : [j]) as Array<Record<string, any>>) } } }
       anda(pastaM)
       if (nosDoSite.length) {

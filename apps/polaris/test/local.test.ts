@@ -129,6 +129,13 @@ describe('ambiente local', () => {
     expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo/historico', ed))).versoes[0]).toMatchObject({ seq: 3, removido: true })
   })
 
+  it('por padrão o ambiente local guarda na API de modelos TODA pasta de exemplos/ com nos.json (maison, saude, loja-site), mesmo as que não vão ao ar', async () => {
+    const l = await sobeLocal({ dados: null, porta: 0, silencioso: true, site: join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'exemplos', 'maison') }); abertos.push(l)
+    const ed = await l.token('loja-demo', ['studio.editor'])
+    const slugs = ((await (await get(l, 'loja-demo', '/studio/templates', ed)).json()) as { modelos: Array<{ slug: string }> }).modelos.map((m) => m.slug)
+    expect(slugs).toEqual(expect.arrayContaining(['maison', 'saude'])); expect((await (await get(l, 'loja-demo', '/en')).text())).toContain('Maison') // o site no ar continua sendo o pedido
+  })
+
   it('segundo modelo (painel de saúde de clientes): guardado ao lado da Maison, dados na API (160 contas em 2 páginas) e aplicável ao tenant, que passa a servir o painel', async () => {
     const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'exemplos')
     const l = await sobeLocal({ dados: null, porta: 0, silencioso: true, site: join(raiz, 'maison'), modelos: [join(raiz, 'saude')] }); abertos.push(l)
