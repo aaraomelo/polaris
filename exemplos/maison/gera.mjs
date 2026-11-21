@@ -74,10 +74,21 @@ const paraProduto = (p) => ({ id: p.id, colecao: p.colecao, nome: p.nome, descri
 const NOVIDADES = ['arco', 'orbe', 'vaso', 'tigela'].map((id) => PRODUTOS.find((p) => p.id === id))
 const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'colecao-5']
 
+// ---- a sacola: estado que PERSISTE no navegador (id e quantidade); o preço vem sempre do catálogo, nunca do que foi guardado -------------------------------
+const estadoSacola = { sacola: { tipo: 'json', lista: true, inicial: [], persiste: true } }
+const QTD_TOTAL = 'soma(mapeia(estado.sacola, i => i.qtd))'
+const adiciona = (id) => `acha(estado.sacola, i => i.id == ${id}) ? mapeia(estado.sacola, i => i.id == ${id} ? com(i, ["qtd"], i.qtd + 1) : i) : concat(estado.sacola, [objeto([["id", ${id}], ["qtd", 1]])])`
+const muda = (id, delta) => `filtra(mapeia(estado.sacola, i => i.id == ${id} ? com(i, ["qtd"], i.qtd + ${delta}) : i), i => i.qtd > 0)`
+const tira = (id) => `filtra(estado.sacola, i => i.id != ${id})`
+const aoClicar = (valor) => ({ aoClicar: [{ acao: 'definir', estado: 'sacola', valor }] })
+// as linhas da sacola com o produto do catálogo (item sem produto some), o total de cada uma e o subtotal (dinheiro exato)
+const LINHAS = 'filtra(mapeia(estado.sacola, i => objeto([["id", i.id], ["qtd", i.qtd], ["p", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null)'
+const SUBTOTAL = `dobra(${LINHAS}, "0", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))`
+
 // ---- as partes comuns: cabeçalho e rodapé (o link da página aberta leva `atual`) -------------------------------------------------------------
 const cabecalho = (atual) => b('site/cabecalho', {
   titulo: 'Maison', fixo: true, menuCentro: true, href: '/',
-  links: [{ texto: 'Loja', href: '/produtos', ...(atual === 'loja' ? { atual: true } : {}) }, { texto: 'Sobre', href: '/sobre', ...(atual === 'sobre' ? { atual: true } : {}) }],
+  links: [{ texto: 'Loja', href: '/produtos', ...(atual === 'loja' ? { atual: true } : {}) }, { texto: 'Sobre', href: '/sobre', ...(atual === 'sobre' ? { atual: true } : {}) }, { texto: `{"Sacola (" + ${QTD_TOTAL} + ")"}`, href: '/sacola', ...(atual === 'sacola' ? { atual: true } : {}) }],
   grupos: [{ titulo: 'Coleções', links: COLECOES.map((c) => ({ texto: c.nome, href: `/produtos?colecao=${c.slug}` })) }],
 })
 const rodape = () => b('site/rodape', {
@@ -149,6 +160,7 @@ const FILTRADOS = 'filtra(estado.produtos, p => (consulta.colecao ?? "") == "" |
 const filtro = (slug, nome) => b('nav/link', { href: slug ? `/produtos?colecao=${slug}` : '/produtos', texto: nome, botao: 'secundario', atual: `{(consulta.colecao ?? "") == ${JSON.stringify(slug)}}` }) // o filtro escolhido leva aria-current e fica preenchido
 const cartao = { bloco: 'commerce/cartao-produto', props: { fluida: true, proporcao: 0.8, produto: '{p}' }, repetir: { cada: FILTRADOS, como: 'p', chave: 'p.id' }, slots: { acoes: [
   { bloco: 'texto/pequeno', props: { texto: '{(p.selo ? p.selo + " · " : "") + p.material}' } }, // o selo (Destaque, Novo) e o material, na linha pequena sob o preço
+  { bloco: 'nav/botao', props: { texto: 'Adicionar à sacola', variante: 'secundario' }, eventos: aoClicar(adiciona('p.id')) },
 ] } }
 const produtos = b('layout/pilha', { gap: 0 }, [
   cabecalho('loja'),
@@ -217,9 +229,39 @@ const sobre_ = b('layout/pilha', { gap: 0 }, [
   rodape(),
 ])
 
-const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, ...extra } })
+// ---- sacola: linhas com foto, quantidade (− e +), remover, subtotal e o aviso de que o pagamento ainda não existe --------------------------------------
+const linha = b('layout/linha', { gap: 24, alinha: 'centro', quebra: true }, [
+  b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 96 }),
+  b('layout/pilha', { gap: 4, cresce: true, alinha: 'inicio' }, [titulo('{l.p.nome}', 3), b('texto/pequeno', { texto: '{l.p.material}' }), b('texto/pequeno', { texto: '{l.p.preco | qbrl}' })]),
+  b('layout/linha', { gap: 8, alinha: 'centro' }, [
+    b('nav/botao', { texto: '−', variante: 'secundario' }, undefined, { eventos: aoClicar(muda('l.id', '-1')) }),
+    b('texto/rotulo', { texto: '{l.qtd}' }),
+    b('nav/botao', { texto: '+', variante: 'secundario' }, undefined, { eventos: aoClicar(muda('l.id', '1')) }),
+  ]),
+  b('texto/rotulo', { texto: '{qmul(l.p.preco, l.qtd) | qbrl}' }),
+  b('nav/botao', { texto: 'Remover', variante: 'secundario' }, undefined, { eventos: aoClicar(tira('l.id')) }),
+])
+const sacolaPag = b('layout/pilha', { gap: 0 }, [
+  cabecalho('sacola'),
+  folga(64),
+  contido([
+    sobre('Sua seleção'), titulo('Sacola', 1), folga(24),
+    b('layout/pilha', { gap: 24 }, [{ ...linha, repetir: { cada: LINHAS, como: 'l', chave: 'l.id' } }]),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Sua sacola está vazia', 3), par('Escolha peças na loja e elas ficam guardadas aqui, mesmo se você fechar a página.'), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+      folga(16),
+      b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}` }),
+      par('Frete e pagamento serão calculados no fechamento do pedido (ainda não disponível neste exemplo).'),
+      link('/produtos', 'Continuar comprando'),
+    ], { se: `tamanho(${LINHAS}) > 0` }),
+  ], 'estreita'),
+  folga(96),
+  rodape(),
+])
+
+const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, ...extra, estado: { ...estadoSacola, ...(extra.estado ?? {}) } } })
 const naoAchada = b('layout/pilha', { gap: 16, alinha: 'centro' }, [titulo('Página não encontrada', 1), par('O endereço não existe nesta loja.'), link('/', 'Voltar ao início', 'primario')])
-const PAGINAS = ['maison.home', 'maison.produtos', 'maison.sobre', 'maison.nao']
+const PAGINAS = ['maison.home', 'maison.produtos', 'maison.sobre', 'maison.sacola', 'maison.nao']
 const tenant = (id, tenantId, nome) => ({ kind: 'tenant', id, tenantId, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, nome, segmento: 'varejo', modulos: ['loja'], tema: 'maison', paginas: PAGINAS, paginaNaoEncontrada: 'maison.nao' } })
 
 const nos = [
@@ -227,6 +269,7 @@ const nos = [
   pagina('maison.home', '/', 'Maison', home),
   pagina('maison.produtos', '/produtos', 'Todas as peças · Maison', produtos, { estado: { produtos: { tipo: 'json', inicial: PRODUTOS.map(paraProduto) } } }),
   pagina('maison.sobre', '/sobre', 'Sobre · Maison', sobre_),
+  pagina('maison.sacola', '/sacola', 'Sacola · Maison', sacolaPag, { estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
   pagina('maison.nao', '/nao-encontrada', 'Página não encontrada', naoAchada),
   tenant('loja-demo', '11111111-1111-1111-1111-111111111111', 'Loja Demo'),
   tenant('loja-outra', '22222222-2222-2222-2222-222222222222', 'Outra Loja'),

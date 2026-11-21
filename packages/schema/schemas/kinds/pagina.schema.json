@@ -81,6 +81,10 @@
           "inicial": {},
           "lista": {
             "type": "boolean"
+          },
+          "persiste": {
+            "type": "boolean",
+            "description": "guarda o valor no navegador de quem visita (localStorage da origem da loja, chave por nome) e o devolve ao abrir qualquer página que declare o mesmo nome; o servidor sempre renderiza `inicial`"
           }
         },
         "additionalProperties": false

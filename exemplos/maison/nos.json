@@ -99,6 +99,10 @@
                   {
                     "texto": "Sobre",
                     "href": "/sobre"
+                  },
+                  {
+                    "texto": "{\"Sacola (\" + soma(mapeia(estado.sacola, i => i.qtd)) + \")\"}",
+                    "href": "/sacola"
                   }
                 ],
                 "grupos": [
@@ -822,6 +826,14 @@
             }
           ]
         }
+      },
+      "estado": {
+        "sacola": {
+          "tipo": "json",
+          "lista": true,
+          "inicial": [],
+          "persiste": true
+        }
       }
     }
   },
@@ -856,6 +868,10 @@
                   {
                     "texto": "Sobre",
                     "href": "/sobre"
+                  },
+                  {
+                    "texto": "{\"Sacola (\" + soma(mapeia(estado.sacola, i => i.qtd)) + \")\"}",
+                    "href": "/sacola"
                   }
                 ],
                 "grupos": [
@@ -1074,6 +1090,22 @@
                                 "props": {
                                   "texto": "{(p.selo ? p.selo + \" · \" : \"\") + p.material}"
                                 }
+                              },
+                              {
+                                "bloco": "nav/botao",
+                                "props": {
+                                  "texto": "Adicionar à sacola",
+                                  "variante": "secundario"
+                                },
+                                "eventos": {
+                                  "aoClicar": [
+                                    {
+                                      "acao": "definir",
+                                      "estado": "sacola",
+                                      "valor": "acha(estado.sacola, i => i.id == p.id) ? mapeia(estado.sacola, i => i.id == p.id ? com(i, [\"qtd\"], i.qtd + 1) : i) : concat(estado.sacola, [objeto([[\"id\", p.id], [\"qtd\", 1]])])"
+                                    }
+                                  ]
+                                }
                               }
                             ]
                           }
@@ -1139,6 +1171,12 @@
         }
       },
       "estado": {
+        "sacola": {
+          "tipo": "json",
+          "lista": true,
+          "inicial": [],
+          "persiste": true
+        },
         "produtos": {
           "tipo": "json",
           "inicial": [
@@ -1315,6 +1353,10 @@
                     "texto": "Sobre",
                     "href": "/sobre",
                     "atual": true
+                  },
+                  {
+                    "texto": "{\"Sacola (\" + soma(mapeia(estado.sacola, i => i.qtd)) + \")\"}",
+                    "href": "/sacola"
                   }
                 ],
                 "grupos": [
@@ -1877,6 +1919,528 @@
             }
           ]
         }
+      },
+      "estado": {
+        "sacola": {
+          "tipo": "json",
+          "lista": true,
+          "inicial": [],
+          "persiste": true
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "maison.sacola",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/sacola",
+      "titulo": "Sacola · Maison",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 0
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "site/cabecalho",
+              "props": {
+                "titulo": "Maison",
+                "fixo": true,
+                "menuCentro": true,
+                "href": "/",
+                "links": [
+                  {
+                    "texto": "Loja",
+                    "href": "/produtos"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  },
+                  {
+                    "texto": "{\"Sacola (\" + soma(mapeia(estado.sacola, i => i.qtd)) + \")\"}",
+                    "href": "/sacola",
+                    "atual": true
+                  }
+                ],
+                "grupos": [
+                  {
+                    "titulo": "Coleções",
+                    "links": [
+                      {
+                        "texto": "Iluminação",
+                        "href": "/produtos?colecao=iluminacao"
+                      },
+                      {
+                        "texto": "Cerâmica",
+                        "href": "/produtos?colecao=ceramica"
+                      },
+                      {
+                        "texto": "Mobiliário",
+                        "href": "/produtos?colecao=mobiliario"
+                      },
+                      {
+                        "texto": "Têxteis",
+                        "href": "/produtos?colecao=texteis"
+                      },
+                      {
+                        "texto": "Objetos e vasos",
+                        "href": "/produtos?colecao=objetos"
+                      },
+                      {
+                        "texto": "Coleção sazonal",
+                        "href": "/produtos?colecao=sazonal"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 64
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "estreita"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "Sua seleção"
+                    }
+                  },
+                  {
+                    "bloco": "texto/titulo",
+                    "props": {
+                      "texto": "Sacola",
+                      "nivel": 1
+                    }
+                  },
+                  {
+                    "bloco": "layout/espacador",
+                    "props": {
+                      "tamanho": 24
+                    }
+                  },
+                  {
+                    "bloco": "layout/pilha",
+                    "props": {
+                      "gap": 24
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/linha",
+                          "props": {
+                            "gap": 24,
+                            "alinha": "centro",
+                            "quebra": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "midia/imagem",
+                                "props": {
+                                  "src": "{l.p.fotoUrl}",
+                                  "alt": "{l.p.nome}",
+                                  "proporcao": 0.8,
+                                  "largura": 96
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 4,
+                                  "cresce": true,
+                                  "alinha": "inicio"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "{l.p.nome}",
+                                        "nivel": 3
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/pequeno",
+                                      "props": {
+                                        "texto": "{l.p.material}"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/pequeno",
+                                      "props": {
+                                        "texto": "{l.p.preco | qbrl}"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/linha",
+                                "props": {
+                                  "gap": 8,
+                                  "alinha": "centro"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "−",
+                                        "variante": "secundario"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "sacola",
+                                            "valor": "filtra(mapeia(estado.sacola, i => i.id == l.id ? com(i, [\"qtd\"], i.qtd + -1) : i), i => i.qtd > 0)"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/rotulo",
+                                      "props": {
+                                        "texto": "{l.qtd}"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "+",
+                                        "variante": "secundario"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "sacola",
+                                            "valor": "filtra(mapeia(estado.sacola, i => i.id == l.id ? com(i, [\"qtd\"], i.qtd + 1) : i), i => i.qtd > 0)"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "texto/rotulo",
+                                "props": {
+                                  "texto": "{qmul(l.p.preco, l.qtd) | qbrl}"
+                                }
+                              },
+                              {
+                                "bloco": "nav/botao",
+                                "props": {
+                                  "texto": "Remover",
+                                  "variante": "secundario"
+                                },
+                                "eventos": {
+                                  "aoClicar": [
+                                    {
+                                      "acao": "definir",
+                                      "estado": "sacola",
+                                      "valor": "filtra(estado.sacola, i => i.id != l.id)"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "repetir": {
+                            "cada": "filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null)",
+                            "como": "l",
+                            "chave": "l.id"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bloco": "layout/pilha",
+                    "props": {
+                      "gap": 16,
+                      "alinha": "inicio"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/titulo",
+                          "props": {
+                            "texto": "Sua sacola está vazia",
+                            "nivel": 3
+                          }
+                        },
+                        {
+                          "bloco": "texto/paragrafo",
+                          "props": {
+                            "texto": "Escolha peças na loja e elas ficam guardadas aqui, mesmo se você fechar a página."
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos",
+                            "texto": "Ver as peças",
+                            "botao": "primario"
+                          }
+                        }
+                      ]
+                    },
+                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null)) == 0"
+                  },
+                  {
+                    "bloco": "layout/pilha",
+                    "props": {
+                      "gap": 16,
+                      "alinha": "inicio"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 16
+                          }
+                        },
+                        {
+                          "bloco": "commerce/resumo-pedido",
+                          "props": {
+                            "subtotal": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}",
+                            "total": "{dobra(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null), \"0\", (acc, l) => qsoma(acc, qmul(l.p.preco, l.qtd)))}"
+                          }
+                        },
+                        {
+                          "bloco": "texto/paragrafo",
+                          "props": {
+                            "texto": "Frete e pagamento serão calculados no fechamento do pedido (ainda não disponível neste exemplo)."
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos",
+                            "texto": "Continuar comprando"
+                          }
+                        }
+                      ]
+                    },
+                    "se": "tamanho(filtra(mapeia(estado.sacola, i => objeto([[\"id\", i.id], [\"qtd\", i.qtd], [\"p\", acha(estado.produtos, p => p.id == i.id)]])), l => l.p != null)) > 0"
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Todas as peças",
+                        "href": "/produtos"
+                      },
+                      {
+                        "texto": "Novidades",
+                        "href": "/produtos?colecao=novidades"
+                      },
+                      {
+                        "texto": "Presentes",
+                        "href": "/produtos?colecao=presentes"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Casa",
+                    "links": [
+                      {
+                        "texto": "Sobre a Maison",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Contato",
+                        "href": "/sobre#contato"
+                      }
+                    ]
+                  }
+                ],
+                "copyright": "© 2026 Maison. Todos os direitos reservados."
+              }
+            }
+          ]
+        }
+      },
+      "estado": {
+        "sacola": {
+          "tipo": "json",
+          "lista": true,
+          "inicial": [],
+          "persiste": true
+        },
+        "produtos": {
+          "tipo": "json",
+          "lista": true,
+          "inicial": [
+            {
+              "id": "arco",
+              "colecao": "iluminacao",
+              "nome": "Luminária Pendente Arco",
+              "descricao": "Um arco gracioso de latão curvado à mão e linho",
+              "preco": "485.00",
+              "fotoUrl": "@img/produto-1",
+              "disponivel": true,
+              "material": "Latão maciço",
+              "selo": "Destaque"
+            },
+            {
+              "id": "vaso",
+              "colecao": "ceramica",
+              "nome": "Vaso Escultural Grande",
+              "descricao": "Grés torneado à mão com esmalte natural de cinzas",
+              "preco": "320.00",
+              "fotoUrl": "@img/colecao-ceramica",
+              "disponivel": true,
+              "material": "Grés de alta temperatura",
+              "selo": "Destaque"
+            },
+            {
+              "id": "mesa",
+              "colecao": "mobiliario",
+              "nome": "Mesa de Jantar Colheita",
+              "descricao": "Carvalho maciço feito para gerações à mesa",
+              "preco": "2850.00",
+              "fotoUrl": "@img/colecao-3",
+              "disponivel": true,
+              "material": "Carvalho branco maciço",
+              "selo": "Destaque"
+            },
+            {
+              "id": "castical",
+              "colecao": "objetos",
+              "nome": "Conjunto de Castiçais Forja",
+              "descricao": "Latão forjado à mão em três alturas graduadas",
+              "preco": "245.00",
+              "fotoUrl": "@img/produto-vela-castical",
+              "disponivel": true,
+              "material": "Latão forjado maciço",
+              "selo": "Destaque"
+            },
+            {
+              "id": "orbe",
+              "colecao": "iluminacao",
+              "nome": "Luminária de Mesa Orbe",
+              "descricao": "Vidro soprado encontra bronze escultural",
+              "preco": "295.00",
+              "fotoUrl": "@img/produto-2",
+              "disponivel": true,
+              "material": "Vidro soprado",
+              "selo": "Novo"
+            },
+            {
+              "id": "tigela",
+              "colecao": "ceramica",
+              "nome": "Tigela de Servir do Dia a Dia",
+              "descricao": "Formas simples para os rituais diários",
+              "preco": "145.00",
+              "fotoUrl": "@img/produto-3",
+              "disponivel": true,
+              "material": "Grés"
+            },
+            {
+              "id": "poltrona",
+              "colecao": "mobiliario",
+              "nome": "Poltrona Trançada",
+              "descricao": "Corda de papel dinamarquesa e nogueira escultural",
+              "preco": "1450.00",
+              "fotoUrl": "@img/produto-poltrona",
+              "disponivel": true,
+              "material": "Nogueira maciça",
+              "selo": "Novo"
+            },
+            {
+              "id": "manta",
+              "colecao": "texteis",
+              "nome": "Manta de Linho Herança",
+              "descricao": "Linho belga lavado em tons naturais",
+              "preco": "195.00",
+              "fotoUrl": "@img/colecao-4",
+              "disponivel": true,
+              "material": "100% linho belga"
+            },
+            {
+              "id": "almofada",
+              "colecao": "texteis",
+              "nome": "Almofada de Lã Feltrada à Mão",
+              "descricao": "Feita por artesãos com técnicas tradicionais de feltragem",
+              "preco": "165.00",
+              "fotoUrl": "@img/produto-almofada",
+              "disponivel": true,
+              "material": "100% lã neozelandesa"
+            },
+            {
+              "id": "vasinho",
+              "colecao": "objetos",
+              "nome": "Vaso Escultural para Uma Flor",
+              "descricao": "Forma minimalista para uma única haste",
+              "preco": "85.00",
+              "fotoUrl": "@img/colecao-5",
+              "disponivel": true,
+              "material": "Grés"
+            },
+            {
+              "id": "vela",
+              "colecao": "sazonal",
+              "nome": "Vela Lareira de Inverno",
+              "descricao": "Notas de cedro, fumaça e ervas secas",
+              "preco": "65.00",
+              "fotoUrl": "@img/colecao-6",
+              "disponivel": true,
+              "material": "Cera de soja natural"
+            },
+            {
+              "id": "bandeja",
+              "colecao": "novidades",
+              "nome": "Bandeja de Mármore Polido",
+              "descricao": "Pedra natural para a beleza de todo dia",
+              "preco": "175.00",
+              "fotoUrl": "@img/foto-3",
+              "disponivel": true,
+              "material": "Mármore de Carrara",
+              "selo": "Novo"
+            },
+            {
+              "id": "caixa",
+              "colecao": "presentes",
+              "nome": "Caixa de Presente Selecionada",
+              "descricao": "Uma seleção cuidadosa das nossas peças favoritas",
+              "preco": "225.00",
+              "fotoUrl": "@img/produto-caixa-presente",
+              "disponivel": true,
+              "material": "Grés"
+            }
+          ]
+        }
       }
     }
   },
@@ -1919,6 +2483,14 @@
             }
           ]
         }
+      },
+      "estado": {
+        "sacola": {
+          "tipo": "json",
+          "lista": true,
+          "inicial": [],
+          "persiste": true
+        }
       }
     }
   },
@@ -1940,6 +2512,7 @@
         "maison.home",
         "maison.produtos",
         "maison.sobre",
+        "maison.sacola",
         "maison.nao"
       ],
       "paginaNaoEncontrada": "maison.nao"
@@ -1963,6 +2536,7 @@
         "maison.home",
         "maison.produtos",
         "maison.sobre",
+        "maison.sacola",
         "maison.nao"
       ],
       "paginaNaoEncontrada": "maison.nao"

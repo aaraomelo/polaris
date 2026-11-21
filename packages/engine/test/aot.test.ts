@@ -77,7 +77,7 @@ describe('bundle por página: tree-shaking real', () => {
     const arqs = Object.keys(r.pacote.contribuicao)
     for (const proibido of ['expr/biblioteca.ts', 'expr/funcoes.ts', 'expr/exato.ts', 'num/racional.ts', 'modelo/historico.ts', 'expr/ordem-superior.ts', 'expr/parser.ts', 'expr/analise.ts', 'ir/compila.ts']) expect(arqs, proibido).not.toContain(proibido)
     expect(r.pacote.contribuicao['vivo/monta.ts']).toBeGreaterThan(5000)
-    expect(r.pacote.gz).toBeLessThan(10.5 * 1024)
+    expect(r.pacote.gz).toBeLessThan(10.7 * 1024) // 10,5 → 10,7 KB: o estado que `persiste` (ler e gravar no localStorage) mora no vivo/monta.ts e custa ~140 B em toda página
     expect(r.pacote.codigo).not.toMatch(/react/i)
   })
   it('cada capacidade só custa quando usada: BigInt só com q*, combinadores só com mapeia/filtra…', async () => {

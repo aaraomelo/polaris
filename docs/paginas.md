@@ -39,6 +39,18 @@ O navegador não manda `Authorization` ao navegar, então a sessão do site é u
 - `Secure` é padrão; só `cookieSeguro: false` (desenvolvimento, http) o tira. No `pnpm local`, `/entrar` tem o botão "site como …", que grava o cookie e volta para a página pedida.
 - Quem emite o token em produção é o provedor de identidade; o formulário de login que o chama ainda não existe (o `/entrar` do `pnpm local` é só de desenvolvimento).
 
+## Estado que persiste no navegador
+Uma entrada de `spec.estado` com `"persiste": true` é guardada no `localStorage` da origem da loja (chave `polaris:estado:<nome>`) a cada mudança e devolvida ao abrir **qualquer página que declare o mesmo nome**. É como a sacola de compras do exemplo `exemplos/maison` atravessa as páginas e sobrevive ao fechar a aba.
+
+```json
+"estado": { "sacola": { "tipo": "json", "lista": true, "inicial": [], "persiste": true } }
+```
+
+- O servidor sempre renderiza `inicial` (ele não vê o navegador); o valor guardado entra logo depois da hidratação e a página se atualiza.
+- O valor lido é conferido (tipo e, com `lista`, ser lista); texto corrompido ou de outro formato é ignorado e vale o `inicial`. Cota cheia ou armazenamento bloqueado não derrubam a página: ela funciona sem guardar.
+- Cada loja tem uma origem própria, então uma loja não lê o que outra guardou. Mas o valor fica **na máquina de quem visita** e pode ser alterado por ela: guarde só escolhas (ids e quantidades), nunca preço ou permissão, e recalcule do catálogo ao exibir (a sacola do exemplo faz isso).
+- Não há sincronização entre aparelhos nem com o servidor; para isso o caminho é o serviço `carrinho` (`docs/commerce.md`), que ainda não tem carregador no cliente das páginas.
+
 ## Limites (conhecidos)
 - As `guarda` das páginas comparam com os **papéis** do token (não há mapa papel → permissão).
 - O serviço só resolve o tenant de uma chamada **anônima** pelo mapa de desenvolvimento `POLARIS_HOSTS`. Em produção, páginas públicas com dados de serviço ainda não têm esse caminho (o serviço atende só com token).

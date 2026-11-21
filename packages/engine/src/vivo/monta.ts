@@ -534,12 +534,28 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
   const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar']
   for (const t of tipos) o.container.addEventListener(t, ouve)
 
+  // estado que `persiste`: só no navegador, depois de hidratar (o servidor renderiza `inicial`). Valor de outro formato (com `lista`, não-lista) ou ilegível é ignorado; armazenamento indisponível não derruba a página.
+  let desassinaPersistencia = () => {}
+  const persistidos = o.hidrata ? Object.keys(programa.pagina.estado).filter((n) => programa.pagina.estado[n]!.persiste) : []
+  if (persistidos.length) {
+    let ls: Storage | undefined
+    try { ls = localStorage } catch { /* origem opaca ou bloqueado */ }
+    if (ls) {
+      const k = (n: string) => `polaris:estado:${n}`
+      for (const n of persistidos) {
+        try { const v = JSON.parse(ls.getItem(k(n)) ?? 'null') as unknown; if (v !== null && (!programa.pagina.estado[n]!.lista || Array.isArray(v))) modelo.despacha({ t: 'estado', nome: n, valor: v }) } catch { /* corrompido: vale o inicial */ }
+      }
+      modelo.flush()
+      desassinaPersistencia = modelo.assina((m) => { for (const n of persistidos) if (m.antes.estado[n] !== m.depois.estado[n]) try { ls.setItem(k(n), JSON.stringify(m.depois.estado[n] ?? null)) } catch { /* cota cheia */ } })
+    }
+  }
+
   return {
     modelo, store: modelo.store, despacha: modelo.despacha, flush: modelo.flush,
     chega(dados) { for (const [nome, ok, v] of dados) modelo.despacha(ok ? { t: 'dado', nome, valor: v } : { t: 'erro', nome, erro: String(v) }) },
     titulo: () => { const t = programa.pagina.titulo; if (!t) return ''; const v = valorDeC(t, modelo.escopo, funcoes); return v === null || v === undefined || typeof v === 'object' ? '' : String(v) },
     diagnostico: () => ({ controladores: stats.controladores, hidratou }),
-    destroi() { desassina(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
+    destroi() { desassina(); desassinaPersistencia(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
   }
 }
 

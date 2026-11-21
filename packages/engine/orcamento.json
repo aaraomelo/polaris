@@ -1,8 +1,8 @@
 {
-  "_": "Orçamento de performance do runtime (2026-11-20: contador 11400 → 11450 B pela zona de soltar das caixas de layout, `solta` e `aoSoltar`). Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
+  "_": "Orçamento de performance do runtime (2026-11-20: contador 11400 → 11450 B pela zona de soltar das caixas de layout, `solta` e `aoSoltar`; 11450 → 11650 B pelo estado que `persiste` no navegador, ~175 B em todo cliente). Bundle e SSR são verificados por test/orcamento.test.ts (roda no CI: regressão bloqueia o PR). As metas de navegador são verificadas por `node bench/navegador/cdp.mjs 3 --verifica` (precisa de Chrome; rode antes de mudar o runtime).",
   "bundle_gz_bytes": {
     "estatica-simples": 11100,
-    "contador": 11450,
+    "contador": 11650,
     "lista-formatos": 11800,
     "dinheiro-exato": 12000,
     "com-bloco-de-codigo": 17300

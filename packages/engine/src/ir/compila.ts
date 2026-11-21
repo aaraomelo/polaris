@@ -268,7 +268,7 @@ function varsDeValor(v: Valor): string[] {
 }
 
 type DadoSrc = string | { dados: string; args?: Record<string, unknown>; stream?: boolean }
-type EstadoSrc = Record<string, { tipo: string; inicial?: unknown; lista?: boolean }>
+type EstadoSrc = Record<string, { tipo: string; inicial?: unknown; lista?: boolean; persiste?: boolean }>
 
 function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
   const out: IREstado = {}
@@ -279,7 +279,7 @@ function compilaEstado(cx: Cx, src: EstadoSrc): IREstado {
       const r = confereValor({ tipo: d.tipo, ...(d.lista !== undefined ? { lista: d.lista } : {}) }, inicial)
       if (!r.ok) cx.erro(`/spec/estado/${nome}/inicial`, 'estado', `o valor inicial de '${nome}' deveria ser ${r.esperado}`, undefined, inicial)
     }
-    out[nome] = { tipo: d.tipo, inicial, ...(d.lista ? { lista: true } : {}) }
+    out[nome] = { tipo: d.tipo, inicial, ...(d.lista ? { lista: true } : {}), ...(d.persiste ? { persiste: true } : {}) }
   }
   return out
 }

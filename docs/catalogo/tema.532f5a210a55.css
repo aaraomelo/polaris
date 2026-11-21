@@ -63,8 +63,16 @@
 
 /* polaris: estilos base dos blocos (usa só variáveis do tema) */
 body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var(--tipografia-familia);font-size:var(--tipografia-tamanho-base);line-height:1.5}
-#polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:1.25}
+#polaris h1,#polaris h2,#polaris h3,#polaris h4,#polaris h5,#polaris h6{margin:0 0 var(--espacamento-base);line-height:1.25;font-family:var(--tipografia-familia-titulo, var(--tipografia-familia));font-weight:var(--tipografia-peso-titulo, bold)}
+#polaris h1{font-size:var(--tipografia-tamanho-h1, 2em)}
+#polaris h2{font-size:var(--tipografia-tamanho-h2, 1.5em)}
+#polaris h3{font-size:var(--tipografia-tamanho-h3, 1.17em)}
 #polaris p{margin:0 0 var(--espacamento-base)}
+#polaris [data-sobretitulo]{margin:0 0 var(--espacamento-base);font-size:.75em;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--cor-primaria)}
+#polaris section[data-imagem] [data-sobretitulo]{color:inherit;opacity:.85}
+#polaris [data-contido]{box-sizing:border-box;width:100%;max-width:var(--layout-largura, 72rem);margin-inline:auto;padding-inline:calc(var(--espacamento-base) * 3)}
+#polaris [data-contido=estreita]{max-width:var(--layout-largura-estreita, 48rem)}
+#polaris [data-contido=larga]{max-width:var(--layout-largura-larga, 90rem)}
 #polaris a{color:var(--cor-primaria)}
 #polaris a:hover{color:var(--cor-primaria-hover)}
 #polaris :focus-visible{outline:2px solid var(--cor-destaque);outline-offset:2px}
@@ -103,6 +111,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris header>a{display:flex;align-items:center;gap:var(--espacamento-base);color:var(--cor-texto);text-decoration:none}
 #polaris nav{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--espacamento-base) * 2)}
 #polaris header>nav{flex:1}
+#polaris header[data-centro]>nav{justify-content:center}
 #polaris [data-painel]{display:grid;grid-template-columns:var(--largura-lateral, 16rem) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100vh;overflow:hidden}
 #polaris [data-painel]>header{grid-column:1/-1;grid-row:1}
 #polaris [data-painel]>aside[data-lateral]{grid-column:1;grid-row:2;overflow:auto;border-right:var(--espacamento-borda) solid var(--cor-borda);background:var(--cor-superficie);padding:calc(var(--espacamento-base) * 1.5);display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 1.5)}
@@ -176,6 +185,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris a[data-botao=primario]{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=primario]:hover{background:var(--cor-primaria-hover);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=secundario]{background:transparent;color:var(--cor-primaria);border-color:currentColor}
+#polaris a[data-botao][aria-current]{background:var(--cor-primaria);border-color:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=primario]{background:var(--cor-texto-sobre-primaria);color:var(--cor-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=secundario]{color:var(--cor-texto-sobre-primaria)}
 /* com imagem de fundo o véu (scrim) é SEMPRE preto, então o texto é branco em qualquer tema: a cor sobre-primária seria escura no modo escuro e sumiria na foto. É o par fixo do véu, não uma cor da marca (por isso as palavras-chave, e não variáveis) */
