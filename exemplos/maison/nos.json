@@ -94,11 +94,11 @@
                 "links": [
                   {
                     "texto": "Loja",
-                    "href": "#novidades"
+                    "href": "/produtos"
                   },
                   {
                     "texto": "Sobre",
-                    "href": "#sobre"
+                    "href": "/sobre"
                   }
                 ],
                 "grupos": [
@@ -107,27 +107,27 @@
                     "links": [
                       {
                         "texto": "Iluminação",
-                        "href": "#colecoes"
+                        "href": "/produtos?colecao=iluminacao"
                       },
                       {
                         "texto": "Cerâmica",
-                        "href": "#colecoes"
-                      },
-                      {
-                        "texto": "Têxteis",
-                        "href": "#colecoes"
+                        "href": "/produtos?colecao=ceramica"
                       },
                       {
                         "texto": "Mobiliário",
-                        "href": "#colecoes"
+                        "href": "/produtos?colecao=mobiliario"
                       },
                       {
-                        "texto": "Objetos",
-                        "href": "#colecoes"
+                        "texto": "Têxteis",
+                        "href": "/produtos?colecao=texteis"
                       },
                       {
-                        "texto": "Velas e aromas",
-                        "href": "#colecoes"
+                        "texto": "Objetos e vasos",
+                        "href": "/produtos?colecao=objetos"
+                      },
+                      {
+                        "texto": "Coleção sazonal",
+                        "href": "/produtos?colecao=sazonal"
                       }
                     ]
                   }
@@ -170,8 +170,8 @@
                         {
                           "bloco": "nav/link",
                           "props": {
-                            "href": "#colecoes",
-                            "texto": "Ver as coleções",
+                            "href": "/produtos",
+                            "texto": "Ver as peças",
                             "botao": "primario"
                           }
                         }
@@ -239,7 +239,7 @@
                               {
                                 "bloco": "nav/link",
                                 "props": {
-                                  "href": "#colecoes",
+                                  "href": "/produtos?colecao=iluminacao",
                                   "texto": "Ver iluminação",
                                   "botao": "primario"
                                 }
@@ -308,7 +308,7 @@
                               {
                                 "bloco": "nav/link",
                                 "props": {
-                                  "href": "#novidades",
+                                  "href": "/produtos",
                                   "texto": "Ver tudo"
                                 }
                               }
@@ -336,13 +336,15 @@
                                   "proporcao": 0.8,
                                   "produto": {
                                     "id": "arco",
-                                    "nome": "Luminária Arco",
+                                    "colecao": "iluminacao",
+                                    "nome": "Luminária Pendente Arco",
                                     "descricao": "Um arco gracioso de latão curvado à mão e linho",
                                     "preco": "485.00",
                                     "fotoUrl": "@img/produto-1",
-                                    "disponivel": true
-                                  },
-                                  "href": "#arco"
+                                    "disponivel": true,
+                                    "material": "Latão maciço",
+                                    "selo": "Destaque"
+                                  }
                                 }
                               },
                               {
@@ -351,14 +353,16 @@
                                   "fluida": true,
                                   "proporcao": 0.8,
                                   "produto": {
-                                    "id": "pendente",
-                                    "nome": "Pendente de Vidro",
-                                    "descricao": "Vidro soprado encontra o bronze escultural",
+                                    "id": "orbe",
+                                    "colecao": "iluminacao",
+                                    "nome": "Luminária de Mesa Orbe",
+                                    "descricao": "Vidro soprado encontra bronze escultural",
                                     "preco": "295.00",
                                     "fotoUrl": "@img/produto-2",
-                                    "disponivel": true
-                                  },
-                                  "href": "#pendente"
+                                    "disponivel": true,
+                                    "material": "Vidro soprado",
+                                    "selo": "Novo"
+                                  }
                                 }
                               },
                               {
@@ -368,13 +372,15 @@
                                   "proporcao": 0.8,
                                   "produto": {
                                     "id": "vaso",
-                                    "nome": "Vaso de Grés",
-                                    "descricao": "Grés torneado à mão, com esmalte de cinzas",
+                                    "colecao": "ceramica",
+                                    "nome": "Vaso Escultural Grande",
+                                    "descricao": "Grés torneado à mão com esmalte natural de cinzas",
                                     "preco": "320.00",
-                                    "fotoUrl": "@img/produto-3",
-                                    "disponivel": true
-                                  },
-                                  "href": "#vaso"
+                                    "fotoUrl": "@img/colecao-ceramica",
+                                    "disponivel": true,
+                                    "material": "Grés de alta temperatura",
+                                    "selo": "Destaque"
+                                  }
                                 }
                               },
                               {
@@ -384,13 +390,14 @@
                                   "proporcao": 0.8,
                                   "produto": {
                                     "id": "tigela",
-                                    "nome": "Tigela de Grés",
-                                    "descricao": "Formas simples para os rituais do dia a dia",
+                                    "colecao": "ceramica",
+                                    "nome": "Tigela de Servir do Dia a Dia",
+                                    "descricao": "Formas simples para os rituais diários",
                                     "preco": "145.00",
-                                    "fotoUrl": "@img/colecao-ceramica",
-                                    "disponivel": true
-                                  },
-                                  "href": "#tigela"
+                                    "fotoUrl": "@img/produto-3",
+                                    "disponivel": true,
+                                    "material": "Grés"
+                                  }
                                 }
                               }
                             ]
@@ -400,8 +407,7 @@
                     }
                   }
                 ]
-              },
-              "id": "novidades"
+              }
             },
             {
               "bloco": "layout/espacador",
@@ -476,6 +482,13 @@
                                 "props": {
                                   "texto": "Formas escultóricas que lançam calor e sombra"
                                 }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "/produtos?colecao=iluminacao",
+                                  "texto": "Ver peças"
+                                }
                               }
                             ]
                           }
@@ -502,6 +515,13 @@
                                 "props": {
                                   "texto": "Peças moldadas à mão, com paciência"
                                 }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "/produtos?colecao=ceramica",
+                                  "texto": "Ver peças"
+                                }
                               }
                             ]
                           }
@@ -510,32 +530,6 @@
                           "bloco": "layout/destaque",
                           "props": {
                             "imagem": "@img/colecao-3",
-                            "altura": 360,
-                            "escurece": 0.4,
-                            "alinha": "esquerda"
-                          },
-                          "slots": {
-                            "filhos": [
-                              {
-                                "bloco": "texto/titulo",
-                                "props": {
-                                  "texto": "Têxteis",
-                                  "nivel": 3
-                                }
-                              },
-                              {
-                                "bloco": "texto/paragrafo",
-                                "props": {
-                                  "texto": "Linho, lã e algodão para tocar todo dia"
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "bloco": "layout/destaque",
-                          "props": {
-                            "imagem": "@img/colecao-4",
                             "altura": 360,
                             "escurece": 0.4,
                             "alinha": "esquerda"
@@ -554,6 +548,46 @@
                                 "props": {
                                   "texto": "Linhas calmas e madeira de verdade"
                                 }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "/produtos?colecao=mobiliario",
+                                  "texto": "Ver peças"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/destaque",
+                          "props": {
+                            "imagem": "@img/colecao-4",
+                            "altura": 360,
+                            "escurece": 0.4,
+                            "alinha": "esquerda"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "Têxteis",
+                                  "nivel": 3
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "Linho, lã e algodão para tocar todo dia"
+                                }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "/produtos?colecao=texteis",
+                                  "texto": "Ver peças"
+                                }
                               }
                             ]
                           }
@@ -571,7 +605,7 @@
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
-                                  "texto": "Objetos",
+                                  "texto": "Objetos e vasos",
                                   "nivel": 3
                                 }
                               },
@@ -579,6 +613,13 @@
                                 "bloco": "texto/paragrafo",
                                 "props": {
                                   "texto": "Pequenos gestos que compõem a casa"
+                                }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "/produtos?colecao=objetos",
+                                  "texto": "Ver peças"
                                 }
                               }
                             ]
@@ -597,14 +638,21 @@
                               {
                                 "bloco": "texto/titulo",
                                 "props": {
-                                  "texto": "Velas e aromas",
+                                  "texto": "Coleção sazonal",
                                   "nivel": 3
                                 }
                               },
                               {
                                 "bloco": "texto/paragrafo",
                                 "props": {
-                                  "texto": "Luz baixa e perfume suave"
+                                  "texto": "Luz baixa e perfume de cada estação"
+                                }
+                              },
+                              {
+                                "bloco": "nav/link",
+                                "props": {
+                                  "href": "/produtos?colecao=sazonal",
+                                  "texto": "Ver peças"
                                 }
                               }
                             ]
@@ -726,8 +774,7 @@
                     }
                   }
                 ]
-              },
-              "id": "sobre"
+              }
             },
             {
               "bloco": "layout/espacador",
@@ -743,12 +790,16 @@
                     "titulo": "Loja",
                     "links": [
                       {
-                        "texto": "Novidades",
-                        "href": "#novidades"
+                        "texto": "Todas as peças",
+                        "href": "/produtos"
                       },
                       {
-                        "texto": "Coleções",
-                        "href": "#colecoes"
+                        "texto": "Novidades",
+                        "href": "/produtos?colecao=novidades"
+                      },
+                      {
+                        "texto": "Presentes",
+                        "href": "/produtos?colecao=presentes"
                       }
                     ]
                   },
@@ -757,11 +808,1066 @@
                     "links": [
                       {
                         "texto": "Sobre a Maison",
-                        "href": "#sobre"
+                        "href": "/sobre"
                       },
                       {
                         "texto": "Contato",
-                        "href": "/contato"
+                        "href": "/sobre#contato"
+                      }
+                    ]
+                  }
+                ],
+                "copyright": "© 2026 Maison. Todos os direitos reservados."
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "maison.produtos",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/produtos",
+      "titulo": "Todas as peças · Maison",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 0
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "site/cabecalho",
+              "props": {
+                "titulo": "Maison",
+                "fixo": true,
+                "menuCentro": true,
+                "href": "/",
+                "links": [
+                  {
+                    "texto": "Loja",
+                    "href": "/produtos",
+                    "atual": true
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre"
+                  }
+                ],
+                "grupos": [
+                  {
+                    "titulo": "Coleções",
+                    "links": [
+                      {
+                        "texto": "Iluminação",
+                        "href": "/produtos?colecao=iluminacao"
+                      },
+                      {
+                        "texto": "Cerâmica",
+                        "href": "/produtos?colecao=ceramica"
+                      },
+                      {
+                        "texto": "Mobiliário",
+                        "href": "/produtos?colecao=mobiliario"
+                      },
+                      {
+                        "texto": "Têxteis",
+                        "href": "/produtos?colecao=texteis"
+                      },
+                      {
+                        "texto": "Objetos e vasos",
+                        "href": "/produtos?colecao=objetos"
+                      },
+                      {
+                        "texto": "Coleção sazonal",
+                        "href": "/produtos?colecao=sazonal"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/destaque",
+              "props": {
+                "imagem": "@img/loja-capa",
+                "altura": 440,
+                "escurece": 0.35,
+                "alinha": "esquerda"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/contido",
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "Loja"
+                          }
+                        },
+                        {
+                          "bloco": "texto/titulo",
+                          "props": {
+                            "texto": "Todas as peças",
+                            "nivel": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 32
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "larga"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/linha",
+                    "props": {
+                      "gap": 8,
+                      "quebra": true
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos",
+                            "texto": "Todas",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=iluminacao",
+                            "texto": "Iluminação",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"iluminacao\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=ceramica",
+                            "texto": "Cerâmica",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"ceramica\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=mobiliario",
+                            "texto": "Mobiliário",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"mobiliario\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=texteis",
+                            "texto": "Têxteis",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"texteis\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=objetos",
+                            "texto": "Objetos e vasos",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"objetos\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=sazonal",
+                            "texto": "Coleção sazonal",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"sazonal\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=novidades",
+                            "texto": "Novidades",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"novidades\"}"
+                          }
+                        },
+                        {
+                          "bloco": "nav/link",
+                          "props": {
+                            "href": "/produtos?colecao=presentes",
+                            "texto": "Presentes selecionados",
+                            "botao": "secundario",
+                            "atual": "{(consulta.colecao ?? \"\") == \"presentes\"}"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bloco": "layout/espacador",
+                    "props": {
+                      "tamanho": 24
+                    }
+                  },
+                  {
+                    "bloco": "texto/pequeno",
+                    "props": {
+                      "texto": "{tamanho(filtra(estado.produtos, p => (consulta.colecao ?? \"\") == \"\" || p.colecao == consulta.colecao)) + (tamanho(filtra(estado.produtos, p => (consulta.colecao ?? \"\") == \"\" || p.colecao == consulta.colecao)) == 1 ? \" peça\" : \" peças\")}"
+                    }
+                  },
+                  {
+                    "bloco": "layout/espacador",
+                    "props": {
+                      "tamanho": 16
+                    }
+                  },
+                  {
+                    "bloco": "layout/grade",
+                    "props": {
+                      "colunas": 4,
+                      "gap": 32
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "commerce/cartao-produto",
+                          "props": {
+                            "fluida": true,
+                            "proporcao": 0.8,
+                            "produto": "{p}"
+                          },
+                          "repetir": {
+                            "cada": "filtra(estado.produtos, p => (consulta.colecao ?? \"\") == \"\" || p.colecao == consulta.colecao)",
+                            "como": "p",
+                            "chave": "p.id"
+                          },
+                          "slots": {
+                            "acoes": [
+                              {
+                                "bloco": "texto/pequeno",
+                                "props": {
+                                  "texto": "{(p.selo ? p.selo + \" · \" : \"\") + p.material}"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bloco": "texto/paragrafo",
+                    "props": {
+                      "texto": "Nenhuma peça nesta categoria ainda."
+                    },
+                    "se": "tamanho(filtra(estado.produtos, p => (consulta.colecao ?? \"\") == \"\" || p.colecao == consulta.colecao)) == 0"
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Todas as peças",
+                        "href": "/produtos"
+                      },
+                      {
+                        "texto": "Novidades",
+                        "href": "/produtos?colecao=novidades"
+                      },
+                      {
+                        "texto": "Presentes",
+                        "href": "/produtos?colecao=presentes"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Casa",
+                    "links": [
+                      {
+                        "texto": "Sobre a Maison",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Contato",
+                        "href": "/sobre#contato"
+                      }
+                    ]
+                  }
+                ],
+                "copyright": "© 2026 Maison. Todos os direitos reservados."
+              }
+            }
+          ]
+        }
+      },
+      "estado": {
+        "produtos": {
+          "tipo": "json",
+          "inicial": [
+            {
+              "id": "arco",
+              "colecao": "iluminacao",
+              "nome": "Luminária Pendente Arco",
+              "descricao": "Um arco gracioso de latão curvado à mão e linho",
+              "preco": "485.00",
+              "fotoUrl": "@img/produto-1",
+              "disponivel": true,
+              "material": "Latão maciço",
+              "selo": "Destaque"
+            },
+            {
+              "id": "vaso",
+              "colecao": "ceramica",
+              "nome": "Vaso Escultural Grande",
+              "descricao": "Grés torneado à mão com esmalte natural de cinzas",
+              "preco": "320.00",
+              "fotoUrl": "@img/colecao-ceramica",
+              "disponivel": true,
+              "material": "Grés de alta temperatura",
+              "selo": "Destaque"
+            },
+            {
+              "id": "mesa",
+              "colecao": "mobiliario",
+              "nome": "Mesa de Jantar Colheita",
+              "descricao": "Carvalho maciço feito para gerações à mesa",
+              "preco": "2850.00",
+              "fotoUrl": "@img/colecao-3",
+              "disponivel": true,
+              "material": "Carvalho branco maciço",
+              "selo": "Destaque"
+            },
+            {
+              "id": "castical",
+              "colecao": "objetos",
+              "nome": "Conjunto de Castiçais Forja",
+              "descricao": "Latão forjado à mão em três alturas graduadas",
+              "preco": "245.00",
+              "fotoUrl": "@img/produto-vela-castical",
+              "disponivel": true,
+              "material": "Latão forjado maciço",
+              "selo": "Destaque"
+            },
+            {
+              "id": "orbe",
+              "colecao": "iluminacao",
+              "nome": "Luminária de Mesa Orbe",
+              "descricao": "Vidro soprado encontra bronze escultural",
+              "preco": "295.00",
+              "fotoUrl": "@img/produto-2",
+              "disponivel": true,
+              "material": "Vidro soprado",
+              "selo": "Novo"
+            },
+            {
+              "id": "tigela",
+              "colecao": "ceramica",
+              "nome": "Tigela de Servir do Dia a Dia",
+              "descricao": "Formas simples para os rituais diários",
+              "preco": "145.00",
+              "fotoUrl": "@img/produto-3",
+              "disponivel": true,
+              "material": "Grés"
+            },
+            {
+              "id": "poltrona",
+              "colecao": "mobiliario",
+              "nome": "Poltrona Trançada",
+              "descricao": "Corda de papel dinamarquesa e nogueira escultural",
+              "preco": "1450.00",
+              "fotoUrl": "@img/produto-poltrona",
+              "disponivel": true,
+              "material": "Nogueira maciça",
+              "selo": "Novo"
+            },
+            {
+              "id": "manta",
+              "colecao": "texteis",
+              "nome": "Manta de Linho Herança",
+              "descricao": "Linho belga lavado em tons naturais",
+              "preco": "195.00",
+              "fotoUrl": "@img/colecao-4",
+              "disponivel": true,
+              "material": "100% linho belga"
+            },
+            {
+              "id": "almofada",
+              "colecao": "texteis",
+              "nome": "Almofada de Lã Feltrada à Mão",
+              "descricao": "Feita por artesãos com técnicas tradicionais de feltragem",
+              "preco": "165.00",
+              "fotoUrl": "@img/produto-almofada",
+              "disponivel": true,
+              "material": "100% lã neozelandesa"
+            },
+            {
+              "id": "vasinho",
+              "colecao": "objetos",
+              "nome": "Vaso Escultural para Uma Flor",
+              "descricao": "Forma minimalista para uma única haste",
+              "preco": "85.00",
+              "fotoUrl": "@img/colecao-5",
+              "disponivel": true,
+              "material": "Grés"
+            },
+            {
+              "id": "vela",
+              "colecao": "sazonal",
+              "nome": "Vela Lareira de Inverno",
+              "descricao": "Notas de cedro, fumaça e ervas secas",
+              "preco": "65.00",
+              "fotoUrl": "@img/colecao-6",
+              "disponivel": true,
+              "material": "Cera de soja natural"
+            },
+            {
+              "id": "bandeja",
+              "colecao": "novidades",
+              "nome": "Bandeja de Mármore Polido",
+              "descricao": "Pedra natural para a beleza de todo dia",
+              "preco": "175.00",
+              "fotoUrl": "@img/foto-3",
+              "disponivel": true,
+              "material": "Mármore de Carrara",
+              "selo": "Novo"
+            },
+            {
+              "id": "caixa",
+              "colecao": "presentes",
+              "nome": "Caixa de Presente Selecionada",
+              "descricao": "Uma seleção cuidadosa das nossas peças favoritas",
+              "preco": "225.00",
+              "fotoUrl": "@img/produto-caixa-presente",
+              "disponivel": true,
+              "material": "Grés"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "maison.sobre",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/sobre",
+      "titulo": "Sobre · Maison",
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "gap": 0
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "site/cabecalho",
+              "props": {
+                "titulo": "Maison",
+                "fixo": true,
+                "menuCentro": true,
+                "href": "/",
+                "links": [
+                  {
+                    "texto": "Loja",
+                    "href": "/produtos"
+                  },
+                  {
+                    "texto": "Sobre",
+                    "href": "/sobre",
+                    "atual": true
+                  }
+                ],
+                "grupos": [
+                  {
+                    "titulo": "Coleções",
+                    "links": [
+                      {
+                        "texto": "Iluminação",
+                        "href": "/produtos?colecao=iluminacao"
+                      },
+                      {
+                        "texto": "Cerâmica",
+                        "href": "/produtos?colecao=ceramica"
+                      },
+                      {
+                        "texto": "Mobiliário",
+                        "href": "/produtos?colecao=mobiliario"
+                      },
+                      {
+                        "texto": "Têxteis",
+                        "href": "/produtos?colecao=texteis"
+                      },
+                      {
+                        "texto": "Objetos e vasos",
+                        "href": "/produtos?colecao=objetos"
+                      },
+                      {
+                        "texto": "Coleção sazonal",
+                        "href": "/produtos?colecao=sazonal"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/destaque",
+              "props": {
+                "imagem": "@img/sobre-capa",
+                "altura": 560,
+                "escurece": 0.4,
+                "alinha": "esquerda"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/contido",
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "Nossa história"
+                          }
+                        },
+                        {
+                          "bloco": "texto/titulo",
+                          "props": {
+                            "texto": "Curadoria de beleza para viver",
+                            "nivel": 1
+                          }
+                        },
+                        {
+                          "bloco": "texto/paragrafo",
+                          "props": {
+                            "texto": "Objetos feitos com cuidado, materiais que envelhecem bem e espaços que convidam à pausa."
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "estreita"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "Nossa filosofia"
+                    }
+                  },
+                  {
+                    "bloco": "texto/paragrafo",
+                    "props": {
+                      "texto": "Acreditamos que os objetos que nos cercam devem contar histórias, envelhecer com beleza e trazer uma alegria silenciosa aos momentos do dia a dia."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/grade",
+                    "props": {
+                      "colunas": 2,
+                      "gap": 64,
+                      "alinha": "centro"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 16,
+                            "alinha": "inicio"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "O começo"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "Uma busca pessoal por sentido",
+                                  "nivel": 2
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "A Maison nasceu de uma busca pessoal por objetos que tivessem significado numa época em que tudo é descartável. Depois de anos colecionando e selecionando, abrimos as portas para dividir essas descobertas com quem valoriza o ofício acima da conveniência."
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "O que começou como uma pequena coleção virou uma seleção cuidadosa de peças para a casa e o estilo de vida, cada uma escolhida por trazer calor, textura e intenção aos espaços onde vivemos."
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "midia/imagem",
+                          "props": {
+                            "src": "@img/sobre-1",
+                            "alt": "Sala com objetos selecionados",
+                            "fluida": true,
+                            "proporcao": 0.8
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "estreita"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "texto/titulo",
+                    "props": {
+                      "texto": "“A beleza está na imperfeição das coisas feitas à mão”",
+                      "nivel": 3
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/grade",
+                    "props": {
+                      "colunas": 2,
+                      "gap": 64,
+                      "alinha": "centro"
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "midia/imagem",
+                          "props": {
+                            "src": "@img/sobre-2",
+                            "alt": "Peças de uma oficina",
+                            "fluida": true,
+                            "proporcao": 0.8
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 16,
+                            "alinha": "inicio"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "Nossa abordagem"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "Da oficina para a sua casa",
+                                  "nivel": 2
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "Cada peça da nossa coleção passa pelas nossas mãos antes de chegar às suas. Visitamos oficinas, conhecemos quem faz e aprendemos a história por trás de cada objeto. Esse contato pessoal garante que o que oferecemos não é só bonito: é honesto."
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "Priorizamos materiais naturais, técnicas tradicionais e artesãos que compartilham nossos valores. Seja um vaso de cerâmica torneado à mão ou uma mesa de carvalho feita para durar gerações, acreditamos em objetos que melhoram com o tempo, e não o contrário."
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/destaque",
+              "props": {
+                "fundo": "suave",
+                "altura": 120,
+                "alinha": "esquerda"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/contido",
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 8,
+                            "alinha": "centro"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "O que nos guia"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "Nossos valores",
+                                  "nivel": 2
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 32
+                          }
+                        },
+                        {
+                          "bloco": "layout/grade",
+                          "props": {
+                            "colunas": 3,
+                            "gap": 48
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8,
+                                  "alinha": "inicio"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "01"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "Artesanato",
+                                        "nivel": 3
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "Defendemos o trabalho de mãos habilidosas: artesãos que aperfeiçoaram o ofício por anos e criam objetos com um cuidado que máquina nenhuma replica."
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8,
+                                  "alinha": "inicio"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "02"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "Sustentabilidade",
+                                        "nivel": 3
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "Escolhemos materiais naturais que envelhecem bem e artesãos que respeitam o ambiente. Qualidade acima de quantidade é menos desperdício e mais sentido."
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8,
+                                  "alinha": "inicio"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "03"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "Vida sem pressa",
+                                        "nivel": 3
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "Num mundo em aceleração constante, acreditamos na beleza da pausa. Nossos objetos convidam a momentos de calma e presença no cotidiano."
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "larga"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/grade",
+                    "props": {
+                      "colunas": 3,
+                      "gap": 24
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "midia/imagem",
+                          "props": {
+                            "src": "@img/colecao-ceramica",
+                            "alt": "Detalhe 1 das peças",
+                            "fluida": true,
+                            "proporcao": 0.8
+                          }
+                        },
+                        {
+                          "bloco": "midia/imagem",
+                          "props": {
+                            "src": "@img/colecao-4",
+                            "alt": "Detalhe 2 das peças",
+                            "fluida": true,
+                            "proporcao": 0.8
+                          }
+                        },
+                        {
+                          "bloco": "midia/imagem",
+                          "props": {
+                            "src": "@img/produto-almofada",
+                            "alt": "Detalhe 3 das peças",
+                            "fluida": true,
+                            "proporcao": 0.8
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/espacador",
+              "props": {
+                "tamanho": 96
+              }
+            },
+            {
+              "bloco": "layout/destaque",
+              "props": {
+                "imagem": "@img/foto-2",
+                "altura": 420,
+                "escurece": 0.45,
+                "alinha": "centro"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "texto/sobretitulo",
+                    "props": {
+                      "texto": "Vamos conversar"
+                    }
+                  },
+                  {
+                    "bloco": "texto/titulo",
+                    "props": {
+                      "texto": "Tem alguma dúvida?",
+                      "nivel": 2
+                    }
+                  },
+                  {
+                    "bloco": "texto/paragrafo",
+                    "props": {
+                      "texto": "Teremos prazer em falar sobre as nossas peças, os artesãos ou em ajudar você a achar exatamente o que procura."
+                    }
+                  },
+                  {
+                    "bloco": "nav/link",
+                    "props": {
+                      "href": "/produtos",
+                      "texto": "Ver as peças",
+                      "botao": "primario"
+                    }
+                  }
+                ]
+              },
+              "id": "contato"
+            },
+            {
+              "bloco": "site/rodape",
+              "props": {
+                "colunas": [
+                  {
+                    "titulo": "Loja",
+                    "links": [
+                      {
+                        "texto": "Todas as peças",
+                        "href": "/produtos"
+                      },
+                      {
+                        "texto": "Novidades",
+                        "href": "/produtos?colecao=novidades"
+                      },
+                      {
+                        "texto": "Presentes",
+                        "href": "/produtos?colecao=presentes"
+                      }
+                    ]
+                  },
+                  {
+                    "titulo": "Casa",
+                    "links": [
+                      {
+                        "texto": "Sobre a Maison",
+                        "href": "/sobre"
+                      },
+                      {
+                        "texto": "Contato",
+                        "href": "/sobre#contato"
                       }
                     ]
                   }
@@ -832,6 +1938,8 @@
       "tema": "maison",
       "paginas": [
         "maison.home",
+        "maison.produtos",
+        "maison.sobre",
         "maison.nao"
       ],
       "paginaNaoEncontrada": "maison.nao"
@@ -853,6 +1961,8 @@
       "tema": "maison",
       "paginas": [
         "maison.home",
+        "maison.produtos",
+        "maison.sobre",
         "maison.nao"
       ],
       "paginaNaoEncontrada": "maison.nao"

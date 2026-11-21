@@ -126,6 +126,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris a[data-botao=primario]{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=primario]:hover{background:var(--cor-primaria-hover);color:var(--cor-texto-sobre-primaria)}
 #polaris a[data-botao=secundario]{background:transparent;color:var(--cor-primaria);border-color:currentColor}
+#polaris a[data-botao][aria-current]{background:var(--cor-primaria);border-color:var(--cor-primaria);color:var(--cor-texto-sobre-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=primario]{background:var(--cor-texto-sobre-primaria);color:var(--cor-primaria)}
 #polaris section[data-fundo=primaria] a[data-botao=secundario]{color:var(--cor-texto-sobre-primaria)}
 /* com imagem de fundo o véu (scrim) é SEMPRE preto, então o texto é branco em qualquer tema: a cor sobre-primária seria escura no modo escuro e sumiria na foto. É o par fixo do véu, não uma cor da marca (por isso as palavras-chave, e não variáveis) */
