@@ -86,7 +86,7 @@
         },
         "movimento": {
           "type": "object",
-          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto do cartão no hover), `fotoAlt` (fade da 2ª foto), `rotulo` (rótulo sobre a foto), `zoomFaixa`, `zoomFaixaDuracao`, `faixaVeu`, `faixaVeuDuracao`, `faixaTexto` e `faixaElevacao` (faixa `zoom`), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da capa). Sem estes tokens não há transição. Revelação do sobretítulo das faixas `zoom` no hover: `faixaRevela` (opacidade inicial, ex.: 0) e `faixaRevelaY`",
+          "description": "transições: `rapido` (cor, fundo, borda), `sublinha`, `zoomDuracao` e `zoomCartao` (escala da foto do cartão no hover), `fotoAlt` (fade da 2ª foto), `rotulo` (rótulo sobre a foto), `zoomFaixa`, `zoomFaixaDuracao`, `faixaVeu`, `faixaVeuDuracao`, `faixaTexto` e `faixaElevacao` (faixa `zoom`), `entrada` (entrada do texto da capa), `zoomCapa` (zoom lento da capa). Sem estes tokens não há transição. Revelação do sobretítulo das faixas `zoom` no hover: `faixaRevela` (opacidade inicial, ex.: 0) e `faixaRevelaY`; gaveta e modal: `painel` (duração, ex.: 300ms) e `painelCurva` (ex.: cubic-bezier(0.22, 1, 0.36, 1)); sem `painel` não há transição",
           "additionalProperties": {
             "type": [
               "number",
@@ -99,7 +99,7 @@
         },
         "botao": {
           "type": "object",
-          "description": "botões e links de botão: `caixa` (uppercase), `espacamento` (letter-spacing), `tamanho` e `peso`; o link `botao: \"texto\"` (texto em caixa alta com seta): `textoTamanho`, `textoPeso`, `textoEspacamento`, `textoCaixa`, `textoCor`, `textoCorHover`, `textoGap`, `textoIcone`, `textoDesloca`",
+          "description": "botões e links de botão: `caixa` (uppercase), `espacamento` (letter-spacing), `tamanho` e `peso`; o link `botao: \"texto\"` (texto em caixa alta com seta): `textoTamanho`, `textoPeso`, `textoEspacamento`, `textoCaixa`, `textoCor`, `textoCorHover`, `textoGap`, `textoIcone`, `textoDesloca`; botões <button>: `controleFamilia`, `controleTamanho`, `controlePeso`, `controleEspacamento`, `controleCaixa`, `controleRecuoX`, `controleRecuoY`; variante fantasma: `fantasmaCor`, `fantasmaCorAtiva`, `fantasmaFundoHover` e as mesmas medidas (`fantasmaFamilia`, `fantasmaTamanho`, `fantasmaPeso`, `fantasmaEspacamento`, `fantasmaCaixa`, `fantasmaRecuoX`, `fantasmaRecuoY`)",
           "additionalProperties": {
             "type": [
               "number",

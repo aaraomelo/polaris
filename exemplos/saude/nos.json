@@ -45,7 +45,7 @@
           "superficie": "#18130e",
           "espessura": "1px",
           "recuo": "1.25rem",
-          "recuoTabela": "1.5rem"
+          "recuoTabela": "2rem"
         },
         "raio": {
           "pequeno": 999,
@@ -56,9 +56,9 @@
           "borda": 1
         },
         "layout": {
-          "largura": "57.5rem",
-          "larguraEstreita": "57.5rem",
-          "larguraLarga": "57.5rem",
+          "largura": "71rem",
+          "larguraEstreita": "71rem",
+          "larguraLarga": "71rem",
           "recuo": "1.5rem",
           "recuoEstreito": "1.5rem"
         },
@@ -66,22 +66,24 @@
           "familia": "'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
           "familiaTitulo": "'Newsreader', 'Iowan Old Style', Georgia, serif",
           "familiaMono": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+          "margemParagrafo": 0,
+          "margemSobretitulo": 0,
           "pesoTitulo": 400,
           "tamanhoBase": "13px",
           "alturaTitulo": 1.15,
           "espacamentoTitulo": "-0.02em",
           "escala": {
             "pagina": {
-              "tamanho": "1.75rem",
+              "tamanho": "2.25rem",
               "peso": 400,
-              "altura": 1.15,
+              "altura": 1.05,
               "espacamento": "-0.02em"
             },
             "secao": {
               "tamanho": "1.25rem",
               "peso": 400,
               "altura": 1.4,
-              "espacamento": "-0.03em"
+              "espacamento": "-0.025em"
             },
             "segmento": {
               "tamanho": "1.125rem",
@@ -110,18 +112,18 @@
               "espacamento": "-0.02em"
             },
             "olho": {
-              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
               "tamanho": "0.625rem",
               "peso": 400,
               "altura": 1.5,
-              "espacamento": "0.2em"
+              "espacamento": "0.18em"
             },
             "meta": {
               "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "caixa": "uppercase",
               "tamanho": "0.6875rem",
               "peso": 400,
               "altura": 1.5,
-              "espacamento": "0.15em"
+              "espacamento": "0.2em"
             },
             "delta": {
               "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
@@ -152,13 +154,28 @@
           }
         },
         "botao": {
-          "caixa": "uppercase",
-          "espacamento": "0.14em",
-          "tamanho": "0.6875rem",
-          "peso": 400
+          "controleFamilia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+          "controleTamanho": "0.6875rem",
+          "controlePeso": 400,
+          "controleEspacamento": "0.2em",
+          "controleCaixa": "uppercase",
+          "controleRecuoX": "0.8rem",
+          "controleRecuoY": "0.4rem",
+          "fantasmaFamilia": "'Work Sans', system-ui, sans-serif",
+          "fantasmaTamanho": "0.8125rem",
+          "fantasmaPeso": 400,
+          "fantasmaEspacamento": "-0.02em",
+          "fantasmaCaixa": "none",
+          "fantasmaRecuoX": 0,
+          "fantasmaRecuoY": 0,
+          "fantasmaCor": "var(--cor-texto-suave)",
+          "fantasmaCorAtiva": "var(--cor-texto)",
+          "fantasmaFundoHover": "transparent"
         },
         "movimento": {
-          "rapido": "200ms"
+          "rapido": "200ms",
+          "painel": "300ms",
+          "painelCurva": "cubic-bezier(0.22, 1, 0.36, 1)"
         }
       },
       "modos": {
@@ -441,7 +458,11 @@
         },
         "sel": {
           "tipo": "texto",
-          "inicial": ""
+          "inicial": "fenwick-legal"
+        },
+        "detalhe": {
+          "tipo": "booleano",
+          "inicial": false
         },
         "guia": {
           "tipo": "booleano",
@@ -485,7 +506,7 @@
                         {
                           "bloco": "layout/linha",
                           "props": {
-                            "gap": 16,
+                            "gap": 10,
                             "alinha": "centro",
                             "quebra": true
                           },
@@ -494,7 +515,7 @@
                               {
                                 "bloco": "layout/linha",
                                 "props": {
-                                  "gap": 14,
+                                  "gap": 20,
                                   "alinha": "centro",
                                   "quebra": true
                                 },
@@ -546,7 +567,7 @@
                                 "props": {
                                   "texto": "{estado.modo == \"escuro\" ? t(\"modo.claro\") : t(\"modo.escuro\")}",
                                   "variante": "primario",
-                                  "icone": "tema-escuro",
+                                  "icone": "{estado.modo == \"escuro\" ? \"sol\" : \"lua\"}",
                                   "rotulo": "{estado.modo == \"escuro\" ? t(\"modo.paraClaro\") : t(\"modo.paraEscuro\")}"
                                 },
                                 "eventos": {
@@ -592,9 +613,10 @@
                                       }
                                     },
                                     {
-                                      "bloco": "texto/pequeno",
+                                      "bloco": "texto/paragrafo",
                                       "props": {
                                         "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(soma(mapeia(filtra(concat(c1, c2), c => c.saude < 40), c => qnum(c.arr))) - soma(mapeia(filtra(concat(c1, c2), c => c.historico[8] < 40), c => qnum(c.arr))) < 0 ? \"−\" : \"+\"), compacto(absoluto(soma(mapeia(filtra(concat(c1, c2), c => c.saude < 40), c => qnum(c.arr))) - soma(mapeia(filtra(concat(c1, c2), c => c.historico[8] < 40), c => qnum(c.arr)))), idioma)], \"\")]]))}",
+                                        "escala": "delta",
                                         "tom": "risco"
                                       }
                                     }
@@ -623,9 +645,10 @@
                                       }
                                     },
                                     {
-                                      "bloco": "texto/pequeno",
+                                      "bloco": "texto/paragrafo",
                                       "props": {
                                         "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(tamanho(filtra(concat(c1, c2), c => c.saude < 40)) - tamanho(filtra(concat(c1, c2), c => c.historico[8] < 40)) < 0 ? \"−\" : \"+\"), compacto(absoluto(tamanho(filtra(concat(c1, c2), c => c.saude < 40)) - tamanho(filtra(concat(c1, c2), c => c.historico[8] < 40))), idioma)], \"\")]]))}",
+                                        "escala": "delta",
                                         "tom": "risco"
                                       }
                                     }
@@ -654,9 +677,10 @@
                                       }
                                     },
                                     {
-                                      "bloco": "texto/pequeno",
+                                      "bloco": "texto/paragrafo",
                                       "props": {
-                                        "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(mediana(mapeia(concat(c1, c2), c => c.saude)) - mediana(mapeia(concat(c1, c2), c => c.historico[8])) < 0 ? \"−\" : \"+\"), compacto(absoluto(mediana(mapeia(concat(c1, c2), c => c.saude)) - mediana(mapeia(concat(c1, c2), c => c.historico[8]))), idioma)], \"\")]]))}"
+                                        "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(mediana(mapeia(concat(c1, c2), c => c.saude)) - mediana(mapeia(concat(c1, c2), c => c.historico[8])) < 0 ? \"−\" : \"+\"), compacto(absoluto(mediana(mapeia(concat(c1, c2), c => c.saude)) - mediana(mapeia(concat(c1, c2), c => c.historico[8]))), idioma)], \"\")]]))}",
+                                        "escala": "delta"
                                       }
                                     }
                                   ]
@@ -684,9 +708,10 @@
                                       }
                                     },
                                     {
-                                      "bloco": "texto/pequeno",
+                                      "bloco": "texto/paragrafo",
                                       "props": {
-                                        "texto": "{t(\"kpi.contas\", objeto([[\"n\", tamanho(filtra(concat(c1, c2), c => c.renovacao <= \"2027-02-19\"))]]))}"
+                                        "texto": "{t(\"kpi.contas\", objeto([[\"n\", tamanho(filtra(concat(c1, c2), c => c.renovacao <= \"2027-02-19\"))]]))}",
+                                        "escala": "delta"
                                       }
                                     }
                                   ]
@@ -698,7 +723,7 @@
                         {
                           "bloco": "layout/linha",
                           "props": {
-                            "gap": 32,
+                            "gap": 40,
                             "alinha": "centro",
                             "quebra": true
                           },
@@ -707,7 +732,7 @@
                               {
                                 "bloco": "layout/linha",
                                 "props": {
-                                  "gap": 4,
+                                  "gap": 10,
                                   "alinha": "centro",
                                   "papel": "group",
                                   "rotulo": "visão"
@@ -729,6 +754,14 @@
                                             "valor": "\"combinado\""
                                           }
                                         ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "·",
+                                        "escala": "nota",
+                                        "tom": "suave"
                                       }
                                     },
                                     {
@@ -754,7 +787,7 @@
                               {
                                 "bloco": "layout/linha",
                                 "props": {
-                                  "gap": 4,
+                                  "gap": 24,
                                   "alinha": "centro",
                                   "papel": "group",
                                   "rotulo": "segmento"
@@ -845,8 +878,8 @@
                               {
                                 "bloco": "grafico/svg",
                                 "props": {
-                                  "largura": 920,
-                                  "altura": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112)}",
+                                  "largura": 1088,
+                                  "altura": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130)}",
                                   "rotulo": "{t(\"grafico.rotulo\")}"
                                 },
                                 "slots": {
@@ -854,22 +887,24 @@
                                     {
                                       "bloco": "grafico/reta",
                                       "props": {
-                                        "x1": "{escala(40, 0, 100, 62, 872)}",
+                                        "x1": "{escala(40, 0, 100, -51, 1030)}",
                                         "y1": 30,
-                                        "x2": "{escala(40, 0, 100, 62, 872)}",
-                                        "y2": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 52}",
+                                        "x2": "{escala(40, 0, 100, -51, 1030)}",
+                                        "y2": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 40}",
                                         "tom": "eixo"
                                       }
                                     },
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": "{escala(40, 0, 100, 62, 872) + 6}",
+                                        "x": "{escala(40, 0, 100, -51, 1030) + 6}",
                                         "y": 20,
-                                        "texto": "{maiusculas(t(\"grafico.limite\"))}",
-                                        "tamanho": 9,
+                                        "texto": "{t(\"grafico.limite\")}",
+                                        "tamanho": 10,
+                                        "caixa": "maiuscula",
+                                        "espacamento": 0.16,
                                         "tom": "suave",
-                                        "fonte": "mono"
+                                        "fonte": "corpo"
                                       }
                                     },
                                     {
@@ -880,10 +915,10 @@
                                         "r": "{p.r}",
                                         "cor": "{p.cor}",
                                         "rotulo": "{t(\"grafico.conta\", objeto([[\"nome\", p.nome], [\"saude\", p.saude], [\"arr\", compacto(p.arr, idioma)]]))}",
-                                        "selecionado": "{estado.sel == p.slug}"
+                                        "selecionado": "{estado.detalhe && estado.sel == p.slug}"
                                       },
                                       "repetir": {
-                                        "cada": "achata(mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mapeia(enxame(mapeia(g.itens, c => objeto([[\"slug\", c.slug], [\"nome\", c.nome], [\"saude\", c.saude], [\"arr\", qnum(c.arr)], [\"x\", escala(c.saude, 0, 100, 62, 872)], [\"r\", escala(raiz(qnum(c.arr)), 100, 950, 2.5, 15)], [\"cor\", junta([\"color-mix(in oklab, var(--grafico-risco) \", texto(arredonda(maximo(0, minimo(100, escala(c.saude, 40, 80, 100, 0))))), \"%, var(--grafico-neutro))\"], \"\")]])), 1.5), p => mescla(p, objeto([[\"y\", (estado.visao == \"combinado\" ? 150 : 62 + k * 112) + p.y]])))))",
+                                        "cada": "achata(mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mapeia(enxame(mapeia(g.itens, c => objeto([[\"slug\", c.slug], [\"nome\", c.nome], [\"saude\", c.saude], [\"arr\", qnum(c.arr)], [\"x\", escala(c.saude, 0, 100, -51, 1030)], [\"r\", escala(raiz(qnum(c.arr)), 100, 950, 2.5, 15)], [\"cor\", junta([\"color-mix(in oklab, var(--grafico-risco) \", texto(arredonda(maximo(0, minimo(100, escala(c.saude, 40, 80, 100, 0))))), \"%, var(--grafico-neutro))\"], \"\")]])), 1.5), p => mescla(p, objeto([[\"y\", (estado.visao == \"combinado\" ? 110 : 70 + k * 130) + p.y]])))))",
                                         "como": "p",
                                         "chave": "p.slug"
                                       },
@@ -893,6 +928,11 @@
                                             "acao": "definir",
                                             "estado": "sel",
                                             "valor": "p.slug"
+                                          },
+                                          {
+                                            "acao": "definir",
+                                            "estado": "detalhe",
+                                            "valor": "true"
                                           }
                                         ]
                                       }
@@ -900,8 +940,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": 120,
-                                        "y": "{62 + g.i * 112 - 2}",
+                                        "x": 141,
+                                        "y": "{70 + g.i * 130 - 2}",
                                         "texto": "{objeto([[\"enterprise\", t(\"seg.enterprise\")], [\"mid-market\", t(\"seg.mid-market\")], [\"smb\", t(\"seg.smb\")]])[g.k]}",
                                         "ancora": "fim",
                                         "tamanho": 18,
@@ -917,8 +957,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": 120,
-                                        "y": "{62 + g.i * 112 + 18}",
+                                        "x": 141,
+                                        "y": "{70 + g.i * 130 + 18}",
                                         "texto": "{junta([texto(tamanho(g.itens)), \" · $\", compacto(soma(mapeia(g.itens, c => qnum(c.arr))), idioma)], \"\")}",
                                         "ancora": "fim",
                                         "tamanho": 10,
@@ -934,8 +974,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": "{escala(20, 0, 100, 62, 872)}",
-                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "x": "{escala(20, 0, 100, -51, 1030)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 20}",
                                         "texto": "20",
                                         "ancora": "centro",
                                         "tamanho": 11,
@@ -946,8 +986,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": "{escala(40, 0, 100, 62, 872)}",
-                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "x": "{escala(40, 0, 100, -51, 1030)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 20}",
                                         "texto": "40",
                                         "ancora": "centro",
                                         "tamanho": 11,
@@ -958,8 +998,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": "{escala(60, 0, 100, 62, 872)}",
-                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "x": "{escala(60, 0, 100, -51, 1030)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 20}",
                                         "texto": "60",
                                         "ancora": "centro",
                                         "tamanho": 11,
@@ -970,8 +1010,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": "{escala(80, 0, 100, 62, 872)}",
-                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "x": "{escala(80, 0, 100, -51, 1030)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 20}",
                                         "texto": "80",
                                         "ancora": "centro",
                                         "tamanho": 11,
@@ -982,8 +1022,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": "{escala(100, 0, 100, 62, 872)}",
-                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "x": "{escala(100, 0, 100, -51, 1030)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 20}",
                                         "texto": "100",
                                         "ancora": "centro",
                                         "tamanho": 11,
@@ -994,8 +1034,8 @@
                                     {
                                       "bloco": "grafico/rotulo",
                                       "props": {
-                                        "x": 467,
-                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 4}",
+                                        "x": 598,
+                                        "y": "{(estado.visao == \"combinado\" ? 238 : 100 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 130) - 2}",
                                         "texto": "{t(\"grafico.eixo\")}",
                                         "ancora": "centro",
                                         "tamanho": 11,
@@ -1119,6 +1159,9 @@
                                         "filhos": [
                                           {
                                             "bloco": "tabela/linha",
+                                            "props": {
+                                              "clicavel": true
+                                            },
                                             "slots": {
                                               "filhos": [
                                                 {
@@ -1146,6 +1189,11 @@
                                                                     "acao": "definir",
                                                                     "estado": "sel",
                                                                     "valor": "c.slug"
+                                                                  },
+                                                                  {
+                                                                    "acao": "definir",
+                                                                    "estado": "detalhe",
+                                                                    "valor": "true"
                                                                   }
                                                                 ]
                                                               }
@@ -1254,6 +1302,20 @@
                                                 }
                                               ]
                                             },
+                                            "eventos": {
+                                              "aoClicar": [
+                                                {
+                                                  "acao": "definir",
+                                                  "estado": "sel",
+                                                  "valor": "c.slug"
+                                                },
+                                                {
+                                                  "acao": "definir",
+                                                  "estado": "detalhe",
+                                                  "valor": "true"
+                                                }
+                                              ]
+                                            },
                                             "repetir": {
                                               "cada": "mapeia(mapeia(fatia(ordena(concat(c1, c2), c => c.queda - qnum(c.arr) / 1000000000), 0, 8), c => mescla(c, objeto([[\"lo\", primeiro(ordena(c.historico, v => v))], [\"hi\", ultimo(ordena(c.historico, v => v))]]))), c => mescla(c, objeto([[\"pts\", mapeia(c.historico, (v, i) => [i * 6, escala(v, c.lo, c.hi, 22, 2)])]])))",
                                               "como": "c",
@@ -1293,7 +1355,8 @@
               "bloco": "layout/gaveta",
               "props": {
                 "rotulo": "{t(\"detalhe.rotulo\")}",
-                "largura": 27
+                "largura": 30,
+                "aberta": "{estado.detalhe}"
               },
               "slots": {
                 "filhos": [
@@ -1358,8 +1421,8 @@
                                   "aoClicar": [
                                     {
                                       "acao": "definir",
-                                      "estado": "sel",
-                                      "valor": "\"\""
+                                      "estado": "detalhe",
+                                      "valor": "false"
                                     }
                                   ]
                                 }
@@ -1652,6 +1715,15 @@
                   }
                 ]
               },
+              "eventos": {
+                "aoFechar": [
+                  {
+                    "acao": "definir",
+                    "estado": "detalhe",
+                    "valor": "false"
+                  }
+                ]
+              },
               "repetir": {
                 "cada": "filtra(concat(c1, c2), c => c.slug == estado.sel)",
                 "como": "s",
@@ -1662,7 +1734,8 @@
               "bloco": "layout/gaveta",
               "props": {
                 "rotulo": "{t(\"guia.titulo\")}",
-                "largura": 28
+                "largura": 30,
+                "aberta": "{estado.guia}"
               },
               "slots": {
                 "filhos": [
@@ -1872,7 +1945,15 @@
                   }
                 ]
               },
-              "se": "estado.guia"
+              "eventos": {
+                "aoFechar": [
+                  {
+                    "acao": "definir",
+                    "estado": "guia",
+                    "valor": "false"
+                  }
+                ]
+              }
             }
           ]
         }

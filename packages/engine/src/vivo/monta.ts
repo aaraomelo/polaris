@@ -524,16 +524,29 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
   } else constroiTudo(false)
 
   const desassina = modelo.assina((m) => atualizaNos(raiz.nos, m.mudou, o.onErro))
-  const ouve = (e: Event) => {
+  const ouve = (e: Event, tipo = e.type) => {
     for (let n = e.target as Node | null; n && n !== o.container; n = n.parentNode) {
       const ent = handlers.get(n)
-      const fn = ent?.h[e.type]
-      if (fn) { fn(e); modelo.flush(); ent!.sync?.(); if (e.type[0] === 'p') break } // os eventos `polaris-*` (as ilhas) valem só para o bloco mais próximo, não sobem para os ancestrais
+      const fn = ent?.h[tipo]
+      if (fn) { fn(e); modelo.flush(); ent!.sync?.(); if (tipo[0] === 'p') break } // os eventos `polaris-*` (as ilhas) valem só para o bloco mais próximo, não sobem para os ancestrais
     }
   }
   // os eventos do DOM que os blocos declaram: `click`, `input`, `change` e os personalizados da tela de edição e da zona de soltar (o formulário avisa por outro caminho)
-  const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar', 'polaris-enviado', 'polaris-erro']
+  const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar', 'polaris-enviado', 'polaris-erro', 'polaris-fechar']
   for (const t of tipos) o.container.addEventListener(t, ouve)
+  // gaveta e modal: Esc e o clique FORA do diálogo avisam `aoFechar` (o clique é visto na captura, antes de abrir outro: quem abriu o diálogo atual já o fechou)
+  const doc = o.container.ownerDocument, fecha = (d: Element) => d.dispatchEvent(new CustomEvent('polaris-fechar', { bubbles: true }))
+  const abertas = () => [...o.container.querySelectorAll('[data-gaveta]:not([data-estado=fechada]),[data-modal]:not([data-estado=fechada])')]
+  const aoEsc = (e: Event) => { if ((e as KeyboardEvent).key === 'Escape') { const l = abertas(), d = l[l.length - 1]; if (d) fecha(d) } }
+  const aoFora = (e: Event) => { for (const d of abertas()) if (!d.contains(e.target as Node)) fecha(d) }
+  doc.addEventListener('keydown', aoEsc); o.container.addEventListener('click', aoFora, true)
+  // formas SVG com role=button (as bolhas de um gráfico): Enter e espaço agem como clique, e as setas andam entre as formas do mesmo gráfico (um elemento SVG não é um botão nativo)
+  o.container.addEventListener('keydown', (e: Event) => {
+    const t = e.target as Element, k = (e as KeyboardEvent).key
+    if (t.namespaceURI !== 'http://www.w3.org/2000/svg' || t.getAttribute('role') !== 'button') return
+    if (k === 'Enter' || k === ' ') { e.preventDefault(); ouve(e, 'click') }
+    else if (k === 'ArrowRight' || k === 'ArrowLeft' || k === 'ArrowDown' || k === 'ArrowUp') { const l = [...(t.closest('svg')?.querySelectorAll('[role=button]') ?? [])], i = l.indexOf(t) + (k === 'ArrowRight' || k === 'ArrowDown' ? 1 : -1); if (l[i]) { e.preventDefault(); (l[i] as SVGElement).focus() } }
+  })
 
   // estado que `persiste`: só no navegador, depois de hidratar (o servidor renderiza `inicial`). Valor de outro formato (com `lista`, não-lista) ou ilegível é ignorado; armazenamento indisponível não derruba a página.
   let desassinaPersistencia = () => {}
@@ -558,7 +571,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
     chega(dados) { for (const [nome, ok, v] of dados) modelo.despacha(ok ? { t: 'dado', nome, valor: v } : { t: 'erro', nome, erro: String(v) }) },
     titulo: () => { const t = programa.pagina.titulo; if (!t) return ''; const v = valorDeC(t, modelo.escopo, funcoes); return v === null || v === undefined || typeof v === 'object' ? '' : String(v) },
     diagnostico: () => ({ controladores: stats.controladores, hidratou }),
-    destroi() { desassina(); desassinaPersistencia(); desligaConsulta(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); destroiNos(raiz.nos) },
+    destroi() { desassina(); desassinaPersistencia(); desligaConsulta(); modelo.destroi(); for (const t of tipos) o.container.removeEventListener(t, ouve); doc.removeEventListener('keydown', aoEsc); o.container.removeEventListener('click', aoFora, true); destroiNos(raiz.nos) },
   }
 }
 

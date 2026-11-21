@@ -57,7 +57,7 @@ export function formaSvg(bloco: string, p: Record<string, unknown>): FormaSvg {
   }
   // grafico/rotulo
   attrs.x = n2(p.x); attrs.y = n2(p.y); estilo.textAnchor = ANCORAS[String(p.ancora)] ?? 'start'; if (p.fonte === 'titulo' || p.fonte === 'mono' || p.fonte === 'corpo') estilo.fontFamily = p.fonte === 'titulo' ? 'var(--tipografia-familia-titulo, inherit)' : p.fonte === 'mono' ? 'var(--tipografia-familia-mono, monospace)' : 'var(--tipografia-familia, inherit)'; estilo.dominantBaseline = p.base === 'central' ? 'central' : 'auto'
-  const c = corOuTom(p); if (c) estilo.fill = c; if (num(p.tamanho)) estilo.fontSize = `${n2(p.tamanho)}px`
+  const c = corOuTom(p); if (c) estilo.fill = c; if (num(p.espacamento)) estilo.letterSpacing = `${n2(p.espacamento)}em`; if (p.caixa === 'maiuscula') estilo.textTransform = 'uppercase'; if (num(p.tamanho)) estilo.fontSize = `${n2(p.tamanho)}px`
   return { tag: 'svg:text', attrs, estilo, texto: typeof p.texto === 'string' ? p.texto.slice(0, 200) : typeof p.texto === 'number' ? String(p.texto) : '' }
 }
 const kebab = (k: string) => k.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)

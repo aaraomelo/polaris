@@ -32,28 +32,33 @@ const tema = {
     fontes: ['newsreader', 'work-sans', 'ibm-plex-mono'],
     seguirSistema: false, // escuro por padrão (o template); o claro é um modo (`data-modo="claro"`) que a página liga por estado persistente
     tokens: {
-      cor: cores(ESCURO), grafico: grafico(ESCURO), painel: { ...painel(ESCURO), espessura: '1px', recuo: '1.25rem', recuoTabela: '1.5rem' },
+      cor: cores(ESCURO), grafico: grafico(ESCURO), painel: { ...painel(ESCURO), espessura: '1px', recuo: '1.25rem', recuoTabela: '2rem' },
       raio: { pequeno: 999, grande: 2 }, espacamento: { base: '0.5rem', borda: 1 },
-      layout: { largura: '57.5rem', larguraEstreita: '57.5rem', larguraLarga: '57.5rem', recuo: '1.5rem', recuoEstreito: '1.5rem' },
+      layout: { largura: '71rem', larguraEstreita: '71rem', larguraLarga: '71rem', recuo: '1.5rem', recuoEstreito: '1.5rem' },
       tipografia: {
-        familia: "'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Newsreader', 'Iowan Old Style', Georgia, serif", familiaMono: MONO, pesoTitulo: 400, tamanhoBase: '13px', alturaTitulo: 1.15, espacamentoTitulo: '-0.02em',
+        familia: "'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif", familiaTitulo: "'Newsreader', 'Iowan Old Style', Georgia, serif", familiaMono: MONO, margemParagrafo: 0, margemSobretitulo: 0, pesoTitulo: 400, tamanhoBase: '13px', alturaTitulo: 1.15, espacamentoTitulo: '-0.02em',
         escala: {
-          pagina: { tamanho: '1.75rem', peso: 400, altura: 1.15, espacamento: '-0.02em' },
-          secao: { tamanho: '1.25rem', peso: 400, altura: 1.4, espacamento: '-0.03em' },
+          pagina: { tamanho: '2.25rem', peso: 400, altura: 1.05, espacamento: '-0.02em' },
+          secao: { tamanho: '1.25rem', peso: 400, altura: 1.4, espacamento: '-0.025em' },
           segmento: { tamanho: '1.125rem', peso: 400, altura: 1.3, espacamento: '-0.01em' },
           detalhe: { tamanho: '1.375rem', peso: 400, altura: 1.2, espacamento: '-0.01em' },
           indicador: { familia: MONO, tamanho: '2.75rem', peso: 400, altura: 1, espacamento: '-0.025em' },
           pontuacao: { familia: MONO, tamanho: '2.25rem', peso: 400, altura: 1, espacamento: '-0.02em' },
-          olho: { familia: MONO, tamanho: '0.625rem', peso: 400, altura: 1.5, espacamento: '0.2em' },
-          meta: { familia: MONO, tamanho: '0.6875rem', peso: 400, altura: 1.5, espacamento: '0.15em' },
+          olho: { tamanho: '0.625rem', peso: 400, altura: 1.5, espacamento: '0.18em' },
+          meta: { familia: MONO, caixa: 'uppercase', tamanho: '0.6875rem', peso: 400, altura: 1.5, espacamento: '0.2em' },
           delta: { familia: MONO, tamanho: '0.6875rem', peso: 400, altura: 1.5, espacamento: '0' },
           dado: { familia: MONO, tamanho: '0.8125rem', peso: 400, altura: 1.5, espacamento: '0' },
           nota: { tamanho: '0.6875rem', peso: 400, altura: 1.5, espacamento: '0' },
           guia: { tamanho: '0.8125rem', peso: 400, altura: 1.55, espacamento: '0' },
         },
       },
-      botao: { caixa: 'uppercase', espacamento: '0.14em', tamanho: '0.6875rem', peso: 400 },
-      movimento: { rapido: '200ms' },
+      botao: {
+        // os botões "pílula" do cabeçalho (mono, caixa alta) e as abas de texto (variante fantasma: corpo, sem recuo, cinza até serem a escolhida)
+        controleFamilia: MONO, controleTamanho: '0.6875rem', controlePeso: 400, controleEspacamento: '0.2em', controleCaixa: 'uppercase', controleRecuoX: '0.8rem', controleRecuoY: '0.4rem',
+        fantasmaFamilia: "'Work Sans', system-ui, sans-serif", fantasmaTamanho: '0.8125rem', fantasmaPeso: 400, fantasmaEspacamento: '-0.02em', fantasmaCaixa: 'none', fantasmaRecuoX: 0, fantasmaRecuoY: 0,
+        fantasmaCor: 'var(--cor-texto-suave)', fantasmaCorAtiva: 'var(--cor-texto)', fantasmaFundoHover: 'transparent',
+      },
+      movimento: { rapido: '200ms', painel: '300ms', painelCurva: 'cubic-bezier(0.22, 1, 0.36, 1)' }, // a gaveta desliza e o véu esmaece em 300 ms, como no template
     },
     modos: { claro: { cor: cores(CLARO), grafico: grafico(CLARO), painel: painel(CLARO) } },
   },
@@ -81,13 +86,13 @@ const RENOVAM = `filtra(${CONTAS}, c => c.renovacao <= "2027-02-19")`
 const SINAL = (n) => `(${n} < 0 ? "−" : "+")`
 const dif = (expr) => `junta([${SINAL(expr)}, compacto(absoluto(${expr}), idioma)], "")`
 const MEDIANA = (campo) => `mediana(mapeia(${CONTAS}, c => ${campo}))`
-const X = (s) => `escala(${s}, 0, 100, 62, 872)`
+const X = (s) => `escala(${s}, 0, 100, -51, 1030)` // a escala do template: 10,8 px por ponto, 20 em x=165 e 100 em x=1030 (o gráfico tem a largura do conteúdo, 1088)
 // o enxame: cada grupo (uma linha de bolhas) vira uma lista de círculos com x, y e r
 const SEGMENTOS = '["enterprise", "mid-market", "smb"]'
 const LINHAS_SEG = `filtra(${SEGMENTOS}, s => estado.filtro == "todos" || estado.filtro == s)`
 const GRUPOS = `(estado.visao == "combinado" ? [objeto([["k", "todos"], ["itens", ${ATIVAS}]])] : mapeia(${LINHAS_SEG}, s => objeto([["k", s], ["itens", filtra(${CONTAS}, c => c.segmento == s)]])))`
-const CY = (k) => `(estado.visao == "combinado" ? 150 : 62 + ${k} * 112)`
-const ALTURA = '(estado.visao == "combinado" ? 300 : 110 + tamanho(GRUPOS_) * 112)'.replace('GRUPOS_', GRUPOS)
+const CY = (k) => `(estado.visao == "combinado" ? 110 : 70 + ${k} * 130)`
+const ALTURA = '(estado.visao == "combinado" ? 238 : 100 + tamanho(GRUPOS_) * 130)'.replace('GRUPOS_', GRUPOS)
 const ROTULOS_LINHAS = `(estado.visao == "combinado" ? [] : mapeia(${GRUPOS}, (g, k) => mescla(g, objeto([["i", k]]))))`
 const COR = (s) => `junta(["color-mix(in oklab, var(--grafico-risco) ", texto(arredonda(maximo(0, minimo(100, escala(${s}, 40, 80, 100, 0))))), "%, var(--grafico-neutro))"], "")`
 const BOLHAS = `achata(mapeia(${GRUPOS}, (g, k) => mapeia(enxame(mapeia(g.itens, c => objeto([["slug", c.slug], ["nome", c.nome], ["saude", c.saude], ["arr", qnum(c.arr)], ["x", ${X('c.saude')}], ["r", escala(raiz(qnum(c.arr)), 100, 950, 2.5, 15)], ["cor", ${COR('c.saude')}]])), 1.5), p => mescla(p, objeto([["y", ${CY('k')} + p.y]])))))`
@@ -97,9 +102,9 @@ const ATENCAO = `mapeia(mapeia(fatia(ordena(${CONTAS}, c => c.queda - qnum(c.arr
 const NEG = (v) => `(${v} < 0 ? junta(["−", texto(absoluto(${v}))], "") : (${v} > 0 ? junta(["+", texto(${v})], "") : "0"))`
 
 // ---- peças da página -----------------------------------------------------------------------------------------------------------------------------------------------------
-const botaoModo = b('nav/botao', { texto: '{estado.modo == "escuro" ? ' + tx('modo.claro') + ' : ' + tx('modo.escuro') + '}', variante: 'primario', icone: 'tema-escuro', rotulo: '{estado.modo == "escuro" ? ' + tx('modo.paraClaro') + ' : ' + tx('modo.paraEscuro') + '}' }, undefined, { eventos: { aoClicar: [definir('modo', 'estado.modo == "escuro" ? "claro" : "escuro"')] } })
-const cabecalho = b('layout/linha', { gap: 16, alinha: 'centro', quebra: true }, [
-  b('layout/linha', { gap: 14, alinha: 'centro', quebra: true }, [
+const botaoModo = b('nav/botao', { texto: '{estado.modo == "escuro" ? ' + tx('modo.claro') + ' : ' + tx('modo.escuro') + '}', variante: 'primario', icone: '{estado.modo == "escuro" ? "sol" : "lua"}', rotulo: '{estado.modo == "escuro" ? ' + tx('modo.paraClaro') + ' : ' + tx('modo.paraEscuro') + '}' }, undefined, { eventos: { aoClicar: [definir('modo', 'estado.modo == "escuro" ? "claro" : "escuro"')] } })
+const cabecalho = b('layout/linha', { gap: 10, alinha: 'centro', quebra: true }, [
+  b('layout/linha', { gap: 20, alinha: 'centro', quebra: true }, [
     b('texto/titulo', { texto: T('titulo'), nivel: 1, escala: 'pagina' }),
     txt(T('meta', { n: `tamanho(${CONTAS})`, arr: `compacto(${ARR(CONTAS)}, idioma)` }), 'meta', {}, 'suave'),
   ]),
@@ -107,7 +112,7 @@ const cabecalho = b('layout/linha', { gap: 16, alinha: 'centro', quebra: true },
   b('nav/botao', { texto: T('guia'), variante: 'secundario' }, undefined, { eventos: { aoClicar: [definir('guia', 'true')] } }),
   botaoModo,
 ])
-const indicador = (rotulo, valor, delta, tomDelta) => b('layout/pilha', { gap: 8 }, [olho(rotulo), txt(valor, 'indicador'), b('texto/pequeno', { texto: delta, ...(tomDelta ? { tom: tomDelta } : {}) })])
+const indicador = (rotulo, valor, delta, tomDelta) => b('layout/pilha', { gap: 8 }, [olho(rotulo), txt(valor, 'indicador'), txt(delta, 'delta', {}, tomDelta)])
 const indicadores = b('layout/grade', { colunas: 4, marca: 'indicadores' }, [
   indicador(T('kpi.risco'), `{junta(["$", compacto(${ARR(EM_RISCO)}, idioma)], "")}`, T('kpi.vs', { d: dif(`${ARR(EM_RISCO)} - ${ARR(EM_RISCO_ANTES)}`) }), 'risco'),
   indicador(T('kpi.contasRisco'), `{tamanho(${EM_RISCO})}`, T('kpi.vs', { d: dif(`tamanho(${EM_RISCO}) - tamanho(${EM_RISCO_ANTES})`) }), 'risco'),
@@ -115,28 +120,28 @@ const indicadores = b('layout/grade', { colunas: 4, marca: 'indicadores' }, [
   indicador(T('kpi.renovacoes'), `{junta(["$", compacto(${ARR(RENOVAM)}, idioma)], "")}`, T('kpi.contas', { n: `tamanho(${RENOVAM})` })),
 ])
 const aba = (rotulo, estado, valor) => b('nav/botao', { texto: rotulo, variante: 'fantasma', atual: `{estado.${estado} == "${valor}"}` }, undefined, { eventos: { aoClicar: [definir(estado, `"${valor}"`)] } })
-const controles = b('layout/linha', { gap: 32, alinha: 'centro', quebra: true }, [
-  b('layout/linha', { gap: 4, alinha: 'centro', papel: 'group', rotulo: 'visão' }, [aba(T('visao.combinado'), 'visao', 'combinado'), aba(T('visao.segmento'), 'visao', 'segmento')]),
-  b('layout/linha', { gap: 4, alinha: 'centro', papel: 'group', rotulo: 'segmento' }, ['todos', 'enterprise', 'mid-market', 'smb'].map((f) => aba(T(`filtro.${f}`), 'filtro', f))),
+const controles = b('layout/linha', { gap: 40, alinha: 'centro', quebra: true }, [
+  b('layout/linha', { gap: 10, alinha: 'centro', papel: 'group', rotulo: 'visão' }, [aba(T('visao.combinado'), 'visao', 'combinado'), txt('·', 'nota', {}, 'suave'), aba(T('visao.segmento'), 'visao', 'segmento')]),
+  b('layout/linha', { gap: 24, alinha: 'centro', papel: 'group', rotulo: 'segmento' }, ['todos', 'enterprise', 'mid-market', 'smb'].map((f) => aba(T(`filtro.${f}`), 'filtro', f))),
 ])
-const circulo = b('grafico/circulo', { cx: '{p.x}', cy: '{p.y}', r: '{p.r}', cor: '{p.cor}', rotulo: T('grafico.conta', { nome: 'p.nome', saude: 'p.saude', arr: 'compacto(p.arr, idioma)' }), selecionado: '{estado.sel == p.slug}' }, undefined,
-  { repetir: { cada: BOLHAS, como: 'p', chave: 'p.slug' }, eventos: { aoClicar: [definir('sel', 'p.slug')] } })
+const circulo = b('grafico/circulo', { cx: '{p.x}', cy: '{p.y}', r: '{p.r}', cor: '{p.cor}', rotulo: T('grafico.conta', { nome: 'p.nome', saude: 'p.saude', arr: 'compacto(p.arr, idioma)' }), selecionado: '{estado.detalhe && estado.sel == p.slug}' }, undefined,
+  { repetir: { cada: BOLHAS, como: 'p', chave: 'p.slug' }, eventos: { aoClicar: [definir('sel', 'p.slug'), definir('detalhe', 'true')] } })
 const grafico_ = b('layout/pilha', { marca: 'grafico-painel' }, [
-  b('grafico/svg', { largura: 920, altura: `{${ALTURA}}`, rotulo: T('grafico.rotulo') }, [
-    b('grafico/reta', { x1: `{${X('40')}}`, y1: 30, x2: `{${X('40')}}`, y2: `{${ALTURA} - 52}`, tom: 'eixo' }),
-    b('grafico/rotulo', { x: `{${X('40')} + 6}`, y: 20, texto: `{maiusculas(${tx('grafico.limite')})}`, tamanho: 9, tom: 'suave', fonte: 'mono' }),
+  b('grafico/svg', { largura: 1088, altura: `{${ALTURA}}`, rotulo: T('grafico.rotulo') }, [
+    b('grafico/reta', { x1: `{${X('40')}}`, y1: 30, x2: `{${X('40')}}`, y2: `{${ALTURA} - 40}`, tom: 'eixo' }),
+    b('grafico/rotulo', { x: `{${X('40')} + 6}`, y: 20, texto: T('grafico.limite'), tamanho: 10, caixa: 'maiuscula', espacamento: 0.16, tom: 'suave', fonte: 'corpo' }),
     circulo,
     // rótulos das linhas (só por segmento): o nome em serifa e "contas · ARR" em mono
-    b('grafico/rotulo', { x: 120, y: '{62 + g.i * 112 - 2}', texto: '{' + SEGROT + '[g.k]}', ancora: 'fim', tamanho: 18, fonte: 'titulo', tom: 'texto' }, undefined, { repetir: { cada: ROTULOS_LINHAS, como: 'g', chave: 'g.k' } }),
-    b('grafico/rotulo', { x: 120, y: '{62 + g.i * 112 + 18}', texto: `{junta([texto(tamanho(g.itens)), " · $", compacto(${ARR('g.itens')}, idioma)], "")}`, ancora: 'fim', tamanho: 10, fonte: 'mono', tom: 'suave' }, undefined, { repetir: { cada: ROTULOS_LINHAS, como: 'g', chave: 'g.k' } }),
-    ...[20, 40, 60, 80, 100].map((v) => b('grafico/rotulo', { x: `{${X(String(v))}}`, y: `{${ALTURA} - 26}`, texto: String(v), ancora: 'centro', tamanho: 11, tom: 'suave', fonte: 'mono' })),
-    b('grafico/rotulo', { x: 467, y: `{${ALTURA} - 4}`, texto: T('grafico.eixo'), ancora: 'centro', tamanho: 11, tom: 'suave', fonte: 'corpo' }),
+    b('grafico/rotulo', { x: 141, y: '{70 + g.i * 130 - 2}', texto: '{' + SEGROT + '[g.k]}', ancora: 'fim', tamanho: 18, fonte: 'titulo', tom: 'texto' }, undefined, { repetir: { cada: ROTULOS_LINHAS, como: 'g', chave: 'g.k' } }),
+    b('grafico/rotulo', { x: 141, y: '{70 + g.i * 130 + 18}', texto: `{junta([texto(tamanho(g.itens)), " · $", compacto(${ARR('g.itens')}, idioma)], "")}`, ancora: 'fim', tamanho: 10, fonte: 'mono', tom: 'suave' }, undefined, { repetir: { cada: ROTULOS_LINHAS, como: 'g', chave: 'g.k' } }),
+    ...[20, 40, 60, 80, 100].map((v) => b('grafico/rotulo', { x: `{${X(String(v))}}`, y: `{${ALTURA} - 20}`, texto: String(v), ancora: 'centro', tamanho: 11, tom: 'suave', fonte: 'mono' })),
+    b('grafico/rotulo', { x: 598, y: `{${ALTURA} - 2}`, texto: T('grafico.eixo'), ancora: 'centro', tamanho: 11, tom: 'suave', fonte: 'corpo' }),
   ]),
 ])
 const cel = (filhos, extra = {}) => b('tabela/celula', extra, filhos)
 const cab = (k) => b('tabela/celula', { texto: T(`col.${k}`), cabecalho: true })
-const linhaTabela = b('tabela/linha', undefined, [
-  cel([b('layout/linha', { gap: 8, alinha: 'centro' }, [b('nav/botao', { texto: '{c.nome}', variante: 'fantasma' }, undefined, { eventos: { aoClicar: [definir('sel', 'c.slug')] } }), b('texto/sobretitulo', { texto: `{maiusculas(${SEGROT}[c.segmento])}`, escala: 'olho', tom: 'suave' })])]),
+const linhaTabela = b('tabela/linha', { clicavel: true }, [
+  cel([b('layout/linha', { gap: 8, alinha: 'centro' }, [b('nav/botao', { texto: '{c.nome}', variante: 'fantasma' }, undefined, { eventos: { aoClicar: [definir('sel', 'c.slug'), definir('detalhe', 'true')] } }), b('texto/sobretitulo', { texto: `{maiusculas(${SEGROT}[c.segmento])}`, escala: 'olho', tom: 'suave' })])]),
   cel(undefined, { texto: '{junta(["$", compacto(qnum(c.arr), idioma)], "")}' }),
   cel(undefined, { texto: '{c.saude}' }),
   cel([b('grafico/svg', { largura: 72, altura: 24, rotulo: '' }, [b('grafico/caminho', { pontos: '{c.pts}', cor: '{c.saude < 40 ? "var(--grafico-risco)" : "var(--grafico-neutro)"}', espessura: 1.2 }), b('grafico/circulo', { cx: 72, cy: '{ultimo(c.pts)[1]}', r: 2, cor: '{c.saude < 40 ? "var(--grafico-risco)" : "var(--grafico-neutro)"}' })])]),
@@ -147,11 +152,13 @@ const linhaTabela = b('tabela/linha', undefined, [
   cel(undefined, { texto: '{' + tx('dias', { n: 'c.ultimoContato' }) + '}', tom: '{c.ultimoContato > 30 ? "risco" : "suave"}' }),
   cel(undefined, { texto: '{dataCurta(c.renovacao, idioma)}' }),
 ])
+// a linha inteira abre o detalhe (e o nome continua sendo o botão que o teclado alcança)
+const abreLinha = { eventos: { aoClicar: [definir('sel', 'c.slug'), definir('detalhe', 'true')] } }
 const lista = b('layout/pilha', { marca: 'tabela-painel', gap: 12 }, [
   b('texto/titulo', { texto: T('lista.titulo'), nivel: 2, escala: 'secao' }),
   b('tabela/tabela', undefined, [
     b('tabela/cabecalho', undefined, [b('tabela/linha', undefined, ['conta', 'arr', 'saude', 'semanas', 'queda', 'autonomia', 'assentos', 'semana', 'contato', 'renovacao'].map(cab))]),
-    b('tabela/corpo', undefined, [{ ...linhaTabela, repetir: { cada: ATENCAO, como: 'c', chave: 'c.slug' } }]),
+    b('tabela/corpo', undefined, [{ ...linhaTabela, ...abreLinha, repetir: { cada: ATENCAO, como: 'c', chave: 'c.slug' } }]),
   ]),
   txt(T('lista.nota'), 'nota', {}, 'suave'),
 ])
@@ -177,12 +184,12 @@ const cascata = b('grafico/svg', { largura: 360, altura: 180, rotulo: T('detalhe
 ])
 const metrica = (rotulo, valor, tom) => b('layout/pilha', { gap: 4 }, [olho(rotulo), txt(valor, 'dado', {}, tom)])
 const fechar = (estado, valor) => b('nav/botao', { texto: '', icone: 'fechar', variante: 'fantasma', rotulo: T('detalhe.fechar') }, undefined, { eventos: { aoClicar: [definir(estado, valor)] } })
-const detalhe = b('layout/gaveta', { rotulo: T('detalhe.rotulo'), largura: 27 }, [
+const detalhe = b('layout/gaveta', { rotulo: T('detalhe.rotulo'), largura: 30, aberta: '{estado.detalhe}' }, [
   b('layout/pilha', { gap: 16 }, [
     b('layout/linha', { gap: 12, alinha: 'inicio' }, [
       b('layout/pilha', { gap: 6, cresce: true }, [b('texto/titulo', { texto: '{s.nome}', nivel: 2, escala: 'detalhe' }), txt(`{maiusculas(${T('detalhe.meta', { seg: `${SEGROT}[s.segmento]`, resp: 's.responsavel', data: 'dataCurta(s.renovacao, idioma)' }).slice(1, -1)})}`, 'meta', {}, 'suave')]),
       txt('{s.saude}', 'pontuacao'),
-      fechar('sel', '""'),
+      fechar('detalhe', 'false'),
     ]),
     olho(T('detalhe.trajetoria')), LINHA_DET,
     olho(T('detalhe.composicao')), cascata,
@@ -195,21 +202,21 @@ const detalhe = b('layout/gaveta', { rotulo: T('detalhe.rotulo'), largura: 27 },
   ]),
 ])
 // `s` é a conta selecionada: a gaveta se repete sobre uma lista de 0 ou 1 conta (assim a busca não se repete em cada expressão e, sem seleção, nada aparece)
-const gavetaDetalhe = { ...detalhe, repetir: { cada: `filtra(${CONTAS}, c => c.slug == estado.sel)`, como: 's', chave: 's.slug' } }
+const gavetaDetalhe = { ...detalhe, eventos: { aoFechar: [definir('detalhe', 'false')] }, repetir: { cada: `filtra(${CONTAS}, c => c.slug == estado.sel)`, como: 's', chave: 's.slug' } }
 const passo = (n) => b('layout/pilha', { gap: 6 }, [olho(`0${n}`), b('texto/titulo', { texto: T(`guia.${n}.t`), nivel: 3, escala: 'detalhe' }), txt(T(`guia.${n}.p`), 'guia', {}, 'texto')])
-const gavetaGuia = b('layout/gaveta', { rotulo: T('guia.titulo'), largura: 28 }, [
+const gavetaGuia = b('layout/gaveta', { rotulo: T('guia.titulo'), largura: 30, aberta: '{estado.guia}' }, [
   b('layout/pilha', { gap: 18 }, [
     b('layout/linha', { gap: 12, alinha: 'inicio' }, [b('layout/pilha', { gap: 6, cresce: true }, [b('texto/titulo', { texto: T('guia.titulo'), nivel: 2, escala: 'detalhe' }), olho(T('guia.sub'))]), fechar('guia', 'false')]),
     txt(T('guia.intro'), 'guia'),
     ...[1, 2, 3, 4].map(passo),
   ]),
-], { se: 'estado.guia' })
+], { eventos: { aoFechar: [definir('guia', 'false')] } })
 
 const pagina = {
   kind: 'pagina', id: 'saude.home', versao: '1.0.0', estatuto: 'publicado',
   spec: {
     rota: '/', titulo: 'Customer health', traducoes: ['saude.textos'], dados: DADOS,
-    estado: { visao: { tipo: 'texto', inicial: 'combinado' }, filtro: { tipo: 'texto', inicial: 'todos' }, sel: { tipo: 'texto', inicial: '' }, guia: { tipo: 'booleano', inicial: false }, modo: { tipo: 'texto', inicial: 'escuro', persiste: true } },
+    estado: { visao: { tipo: 'texto', inicial: 'combinado' }, filtro: { tipo: 'texto', inicial: 'todos' }, sel: { tipo: 'texto', inicial: 'fenwick-legal' }, detalhe: { tipo: 'booleano', inicial: false }, guia: { tipo: 'booleano', inicial: false }, modo: { tipo: 'texto', inicial: 'escuro', persiste: true } },
     raiz: b('layout/pilha', { modo: '{estado.modo}', gap: 0, marca: 'painel-saude' }, [
       b('layout/contido', { largura: 'normal' }, [
         b('layout/pilha', { gap: 28 }, [b('layout/espacador', { tamanho: 8 }), cabecalho, indicadores, controles, grafico_, lista, b('layout/espacador', { tamanho: 64 })]),

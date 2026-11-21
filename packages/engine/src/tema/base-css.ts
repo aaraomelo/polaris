@@ -10,7 +10,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris :is(h1,h2,h3)[data-tamanho=grande]{font-size:var(--tipografia-tamanho-grande, var(--tipografia-tamanho-h2, 1.5em))}
 #polaris h2{font-size:var(--tipografia-tamanho-h2, 1.5em)}
 #polaris h3{font-size:var(--tipografia-tamanho-h3, 1.17em)}
-#polaris p{margin:0 0 var(--espacamento-base);line-height:var(--tipografia-altura-corpo, inherit)}
+#polaris p{margin:0 0 var(--tipografia-margem-paragrafo, var(--espacamento-base));line-height:var(--tipografia-altura-corpo, inherit)}
 #polaris [data-sobretitulo]{line-height:1.5;margin:0 0 var(--tipografia-margem-sobretitulo, var(--espacamento-base));font-size:var(--tipografia-tamanho-sobretitulo, .75em);font-weight:600;letter-spacing:var(--tipografia-espacamento-sobretitulo, .25em);text-transform:uppercase;color:var(--cor-primaria)}
 #polaris section[data-imagem] [data-sobretitulo]{color:inherit;opacity:.85}
 #polaris [data-contido]{box-sizing:border-box;width:100%;max-width:var(--layout-largura, 72rem);margin-inline:auto;padding-inline:var(--layout-recuo, calc(var(--espacamento-base) * 3))}
@@ -21,12 +21,14 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris :is(a,button){transition:color var(--movimento-rapido, 0s) ease,background-color var(--movimento-rapido, 0s) ease,border-color var(--movimento-rapido, 0s) ease}
 #polaris :focus-visible{outline:2px solid var(--cor-destaque);outline-offset:2px}
 #polaris button{background:var(--cor-primaria);color:var(--cor-texto-sobre-primaria);border:var(--espacamento-borda) solid transparent;border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75) calc(var(--espacamento-base) * 1.5);font:inherit;cursor:pointer}
+#polaris button{font-family:var(--botao-controle-familia,inherit);font-size:var(--botao-controle-tamanho,inherit);font-weight:var(--botao-controle-peso,inherit);letter-spacing:var(--botao-controle-espacamento,normal);text-transform:var(--botao-controle-caixa,none);padding:var(--botao-controle-recuo-y,calc(var(--espacamento-base) * .75)) var(--botao-controle-recuo-x,calc(var(--espacamento-base) * 1.5))}
 #polaris button:hover:not(:disabled){background:var(--cor-primaria-hover)}
 #polaris button:disabled{opacity:.55;cursor:not-allowed}
 #polaris button[data-variante=secundario]{background:transparent;color:var(--cor-texto);border-color:var(--cor-borda)}
 #polaris button[data-variante=secundario]:hover:not(:disabled){background:var(--cor-superficie-alt);border-color:var(--cor-primaria)}
-#polaris button[data-variante=fantasma]{background:transparent;color:var(--cor-texto)}
-#polaris button[data-variante=fantasma]:hover:not(:disabled){background:var(--cor-superficie-alt)}
+#polaris button[data-variante=fantasma]{background:transparent;color:var(--botao-fantasma-cor,var(--cor-texto));font-family:var(--botao-fantasma-familia,var(--botao-controle-familia,inherit));font-size:var(--botao-fantasma-tamanho,var(--botao-controle-tamanho,inherit));font-weight:var(--botao-fantasma-peso,var(--botao-controle-peso,inherit));letter-spacing:var(--botao-fantasma-espacamento,var(--botao-controle-espacamento,normal));text-transform:var(--botao-fantasma-caixa,var(--botao-controle-caixa,none));padding:var(--botao-fantasma-recuo-y,var(--botao-controle-recuo-y,calc(var(--espacamento-base) * .75))) var(--botao-fantasma-recuo-x,var(--botao-controle-recuo-x,calc(var(--espacamento-base) * 1.5)))}
+#polaris button[data-variante=fantasma][aria-current]{color:var(--botao-fantasma-cor-ativa,var(--cor-texto))}
+#polaris button[data-variante=fantasma]:hover:not(:disabled){background:var(--botao-fantasma-fundo-hover,var(--cor-superficie-alt));color:var(--botao-fantasma-cor-ativa,var(--cor-texto))}
 #polaris input[type=text],#polaris input[type=number],#polaris input[type=email],#polaris input[type=tel],#polaris input[type=url],#polaris input[type=password],#polaris input[type=date],#polaris input[type=time],#polaris input[type=datetime-local],#polaris textarea,#polaris select,#polaris input[type=search]{background:var(--cor-superficie);color:var(--cor-texto);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75);font:inherit}
 #polaris form[role=search]{display:flex;align-items:center;gap:var(--espacamento-base);margin:0}
 #polaris form[role=search] input[type=search]{min-width:12ch;flex:1}
@@ -77,20 +79,36 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris [data-marca=indicadores]>*+*{border-left:1px solid var(--painel-divisoria,var(--cor-borda))}
 #polaris [data-marca=tabela-painel]{background:var(--painel-superficie,var(--cor-superficie));padding:var(--painel-recuo-tabela,1.5rem);overflow-x:auto}
 #polaris [data-marca=tabela-painel] table{width:100%;border-collapse:collapse;min-width:44rem}
-#polaris [data-marca=tabela-painel] th{font-family:var(--tipografia-familia-mono,inherit);font-size:.625rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--cor-texto-suave);text-align:right;padding:.5rem .5rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda))}
+#polaris [data-marca=tabela-painel] th{font-size:.625rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--cor-texto-suave);text-align:right;padding:.5rem .5rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda))}
 #polaris [data-marca=tabela-painel] td{font-family:var(--tipografia-familia-mono,inherit);font-size:.8125rem;text-align:right;padding:.6rem .35rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda));white-space:nowrap}
 #polaris [data-marca=tabela-painel] :is(th,td):first-child{text-align:left;font-family:inherit}
 #polaris [data-marca=tabela-painel] svg{width:4.5rem;height:1.5rem;display:block;margin-left:auto;overflow:visible}
-#polaris [data-marca=tabela-painel] button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+#polaris [data-marca=tabela-painel] button{letter-spacing:0;font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
 #polaris [data-marca=tabela-painel] button:hover{text-decoration:underline}
 #polaris [data-marca=grafico-painel] svg{width:100%;height:auto;display:block;overflow:visible}
 #polaris svg [role=button]{cursor:pointer;transition:opacity var(--movimento-duracao,.2s)}
 #polaris svg [role=button]:hover{opacity:.8}
 #polaris svg [role=button]:focus-visible{outline:2px solid var(--cor-texto);outline-offset:2px}
 #polaris svg [data-selecionado]{stroke:var(--cor-texto);stroke-width:2}
+#polaris div[data-modal]{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(var(--modal-largura,36rem),calc(100vw - 2rem));max-height:calc(100vh - 2rem);overflow:auto;z-index:60;box-sizing:border-box;padding:var(--modal-recuo,1.5rem);background:var(--modal-fundo,var(--cor-superficie,var(--cor-fundo)));color:var(--cor-texto);border:var(--espacamento-borda,1px) solid var(--cor-borda);border-radius:var(--raio-grande);box-shadow:0 0 0 100vmax var(--modal-veu,color-mix(in srgb,var(--cor-fundo) 70%,transparent))}
+#polaris tr[data-clicavel]{cursor:pointer}
+#polaris tr[data-clicavel]:hover td{background:var(--tabela-linha-hover,var(--cor-superficie-alt))}
 #polaris aside[data-gaveta]{position:fixed;top:0;bottom:0;width:min(var(--gaveta-largura,30rem),100vw);overflow:auto;z-index:50;box-sizing:border-box;padding:var(--gaveta-recuo,1.5rem);background:var(--gaveta-fundo,var(--cor-superficie,var(--cor-fundo)));color:var(--cor-texto);box-shadow:0 0 0 100vmax var(--gaveta-veu,color-mix(in srgb,var(--cor-fundo) 70%,transparent))}
 #polaris aside[data-gaveta=direita]{right:0;border-left:var(--espacamento-borda,1px) solid var(--cor-borda)}
 #polaris aside[data-gaveta=esquerda]{left:0;border-right:var(--espacamento-borda,1px) solid var(--cor-borda)}
+/* transição de gaveta e modal (tokens movimento.painel e movimento.painelCurva): com a prop aberta o painel fica montado e anima entrada e saída; sem ela, só a entrada (a página o monta com se) */
+#polaris :is(aside[data-gaveta],div[data-modal])[data-estado]{transition:transform var(--movimento-painel,0s) var(--movimento-painel-curva,ease),opacity var(--movimento-painel,0s) var(--movimento-painel-curva,ease),visibility var(--movimento-painel,0s) var(--movimento-painel-curva,ease),box-shadow var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
+#polaris aside[data-gaveta][data-estado=fechada]{visibility:hidden;box-shadow:0 0 0 100vmax transparent}
+#polaris aside[data-gaveta=direita][data-estado=fechada]{transform:translateX(100%)}
+#polaris aside[data-gaveta=esquerda][data-estado=fechada]{transform:translateX(-100%)}
+#polaris div[data-modal][data-estado=fechada]{visibility:hidden;opacity:0;transform:translate(-50%,-48%) scale(.97);box-shadow:0 0 0 100vmax transparent}
+@keyframes polaris-gaveta-direita{from{transform:translateX(100%);box-shadow:0 0 0 100vmax transparent}}
+@keyframes polaris-gaveta-esquerda{from{transform:translateX(-100%);box-shadow:0 0 0 100vmax transparent}}
+@keyframes polaris-modal{from{opacity:0;transform:translate(-50%,-48%) scale(.97);box-shadow:0 0 0 100vmax transparent}}
+#polaris aside[data-gaveta=direita]:not([data-estado]){animation:polaris-gaveta-direita var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
+#polaris aside[data-gaveta=esquerda]:not([data-estado]){animation:polaris-gaveta-esquerda var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
+#polaris div[data-modal]:not([data-estado]){animation:polaris-modal var(--movimento-painel,0s) var(--movimento-painel-curva,ease)}
+@media (prefers-reduced-motion:reduce){#polaris :is(aside[data-gaveta],div[data-modal]){transition:none!important;animation:none!important}}
 #polaris [data-painel]>aside[data-lateral]{grid-column:1;grid-row:2;overflow:auto;border-right:var(--espacamento-borda) solid var(--cor-borda);background:var(--cor-superficie);padding:calc(var(--espacamento-base) * 1.5);display:flex;flex-direction:column;gap:calc(var(--espacamento-base) * 1.5)}
 #polaris [data-painel]>main[data-principal]{grid-column:2;grid-row:2;overflow:auto;padding:calc(var(--espacamento-base) * 2);min-width:0}
 #polaris [data-lateral] nav{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:2px}

@@ -43,7 +43,10 @@ export const DOCS_BASE: Record<string, DocBloco> = {
   'grafico/rotulo': { titulo: 'Rótulo (SVG)', descricao: 'Texto dentro de `grafico/svg` na posição (`x`, `y`), com `ancora` (inicio, centro, fim), `base` e `tamanho`.', exemplos: [
     { titulo: 'Valor do eixo', instancia: { bloco: 'grafico/svg', props: { largura: 60, altura: 20 }, slots: { filhos: [{ bloco: 'grafico/rotulo', props: { x: 30, y: 10, texto: '40', ancora: 'centro', base: 'central', tamanho: 8 } }] } } },
   ] },
-  'layout/gaveta': { titulo: 'Gaveta', descricao: 'Painel lateral fixo sobre a página (detalhe de um item): `rotulo` é o nome do diálogo, `lado` (direita ou esquerda) e `largura` (rem). A página decide quando mostrá-la (`se`) e põe um botão de fechar dentro.', exemplos: [
+  'layout/modal': { titulo: 'Modal', descricao: 'Diálogo centralizado sobre a página, com véu: confirmações e formulários curtos. A página decide quando mostrá-lo (`se`); Esc e o clique fora disparam `aoFechar`, que deve desligar o `se`. `rotulo` é o nome do diálogo e `largura`, em rem.', exemplos: [
+    { titulo: 'Confirmação', instancia: { bloco: 'layout/modal', props: { rotulo: 'Confirmar exclusão', largura: 24 }, slots: { filhos: [par('Excluir esta conta?')] } } },
+  ] },
+  'layout/gaveta': { titulo: 'Gaveta', descricao: 'Painel lateral fixo sobre a página (detalhe de um item); Esc e o clique fora disparam `aoFechar`: `rotulo` é o nome do diálogo, `lado` (direita ou esquerda) e `largura` (rem). A página decide quando mostrá-la (`se`) e põe um botão de fechar dentro.', exemplos: [
     { titulo: 'Detalhe', instancia: { bloco: 'layout/gaveta', props: { rotulo: 'Detalhe da conta', largura: 28 }, slots: { filhos: [par('Conteúdo da gaveta')] } } },
   ] },
   'layout/espacador': { titulo: 'Espaçador', descricao: 'Espaço vertical em pixels (padrão 8). Não é lido por leitores de tela.', exemplos: [

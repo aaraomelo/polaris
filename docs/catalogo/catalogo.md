@@ -1,6 +1,6 @@
 # Catálogo de blocos
 
-78 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
+79 blocos. Gerado do registry (`pnpm catalogo`); não edite à mão: a fonte é o nó de cada bloco.
 
 ## commerce
 
@@ -1213,7 +1213,9 @@ Texto dentro de `grafico/svg` na posição (`x`, `y`), com `ancora` (inicio, cen
 |---|---|---|---|---|
 | `ancora` | "inicio" \| "centro" \| "fim" | não |  |  |
 | `base` | "auto" \| "central" | não |  |  |
+| `caixa` | "normal" \| "maiuscula" | não |  |  |
 | `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `espacamento` | número | não |  | espaçamento entre letras, em em (ex.: 0.16) |
 | `fonte` | "corpo" \| "titulo" \| "mono" | não |  | a família do texto: a do corpo, a dos títulos (`tipografia.familiaTitulo`) ou a monoespaçada (`tipografia.familiaMono`) |
 | `tamanho` | número ≥ 1 | não |  |  |
 | `texto` | texto \| número | não |  |  |
@@ -1642,12 +1644,13 @@ Espaço vertical em pixels (padrão 8). Não é lido por leitores de tela.
 
 ### Gaveta (`layout/gaveta`)
 
-Painel lateral fixo sobre a página (detalhe de um item): `rotulo` é o nome do diálogo, `lado` (direita ou esquerda) e `largura` (rem). A página decide quando mostrá-la (`se`) e põe um botão de fechar dentro.
+Painel lateral fixo sobre a página (detalhe de um item); Esc e o clique fora disparam `aoFechar`: `rotulo` é o nome do diálogo, `lado` (direita ou esquerda) e `largura` (rem). A página decide quando mostrá-la (`se`) e põe um botão de fechar dentro.
 
 **Props**
 
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
+| `aberta` | booleano | não |  | com ela o painel fica sempre montado e o CSS anima a entrada e a saída (ligue a um estado); sem ela, mostre-o com `se` |
 | `lado` | "direita" \| "esquerda" | não | "direita" |  |
 | `largura` | número ≥ 12 ≤ 80 | não |  | largura em rem (padrão 30) |
 | `rotulo` | texto | não |  | nome acessível do diálogo (padrão: Detalhes) |
@@ -1657,6 +1660,12 @@ Painel lateral fixo sobre a página (detalhe de um item): `rotulo` é o nome do 
 | Slot | Aceita | Mín. | Máx. |
 |---|---|---|---|
 | `filhos` | qualquer bloco |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoFechar` | — |
 
 **Exemplo: Detalhe**
 
@@ -1850,6 +1859,52 @@ Coloca os filhos lado a lado (flex row).
         "bloco": "texto/paragrafo",
         "props": {
           "texto": "C"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Modal (`layout/modal`)
+
+Diálogo centralizado sobre a página, com véu: confirmações e formulários curtos. A página decide quando mostrá-lo (`se`); Esc e o clique fora disparam `aoFechar`, que deve desligar o `se`. `rotulo` é o nome do diálogo e `largura`, em rem.
+
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `aberta` | booleano | não |  | com ela o painel fica sempre montado e o CSS anima a entrada e a saída (ligue a um estado); sem ela, mostre-o com `se` |
+| `largura` | número ≥ 12 ≤ 80 | não |  | largura em rem (padrão 36) |
+| `rotulo` | texto | não |  | nome acessível do diálogo (padrão: Diálogo) |
+
+**Slots**
+
+| Slot | Aceita | Mín. | Máx. |
+|---|---|---|---|
+| `filhos` | qualquer bloco |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoFechar` | — |
+
+**Exemplo: Confirmação**
+
+```json
+{
+  "bloco": "layout/modal",
+  "props": {
+    "rotulo": "Confirmar exclusão",
+    "largura": 24
+  },
+  "slots": {
+    "filhos": [
+      {
+        "bloco": "texto/paragrafo",
+        "props": {
+          "texto": "Excluir esta conta?"
         }
       }
     ]
@@ -2370,7 +2425,7 @@ Lista de itens; `ordenada` numera. Só aceita `lista/item`.
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `acento` | booleano | não |  | o detalhe de acento na cor de destaque do tema |
-| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" \| "sacola" \| "coracao" \| "seta" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
+| `nome` | "layout-pilha" \| "layout-linha" \| "layout-grade" \| "layout-painel" \| "layout-lateral" \| "layout-principal" \| "layout-cabecalho" \| "layout-rodape" \| "layout-destaque" \| "layout-divisor" \| "layout-espacador" \| "texto-titulo" \| "texto-paragrafo" \| "texto-pequeno" \| "texto-codigo" \| "texto-rotulo" \| "texto-destaque" \| "nav-link" \| "nav-botao" \| "nav-menu" \| "nav-submenu" \| "nav-alternador" \| "nav-enviar" \| "form-busca" \| "form-formulario" \| "form-sugestoes-ao-vivo" \| "form-opcao" \| "entrada-texto" \| "entrada-numero" \| "entrada-caixa" \| "entrada-area" \| "entrada-arquivo" \| "entrada-busca" \| "midia-imagem" \| "midia-quadro" \| "computacao-canvas-gl" \| "lista-lista" \| "tabela-tabela" \| "feedback-selo" \| "feedback-alerta" \| "cartaz" \| "salvar" \| "desfazer" \| "refazer" \| "publicar" \| "imagens" \| "diagramas" \| "releases" \| "editar" \| "apagar" \| "mais" \| "fechar" \| "chevron" \| "previa" \| "historico" \| "comentarios" \| "usuario" \| "entrar" \| "sair" \| "tema-escuro" \| "sacola" \| "coracao" \| "seta" \| "sol" \| "lua" | sim |  | o ícone (60 na família Grafite: `layout-pilha`, `salvar`, `publicar`…) |
 | `rotulo` | texto ≤ 200 caracteres | não |  | nome acessível; sem ele o ícone é decorativo (aria-hidden) |
 | `tamanho` | número ≥ 8 ≤ 96 | não |  | lado em px (padrão 1,25 em, acompanha o texto) |
 
@@ -3492,11 +3547,23 @@ Grupo `tbody`: aceita só `tabela/linha`.
 
 Uma `tr`: aceita só `tabela/celula`.
 
+**Props**
+
+| Prop | Tipo | Obrig. | Padrão | Descrição |
+|---|---|---|---|---|
+| `clicavel` | booleano | não |  | a linha inteira é clicável (cursor de mão e realce); ligue `aoClicar` |
+
 **Slots**
 
 | Slot | Aceita | Mín. | Máx. |
 |---|---|---|---|
 | `filhos` | tabela/celula |  |  |
+
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoClicar` | — |
 
 **Exemplo: Uma linha**
 
