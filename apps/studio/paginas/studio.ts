@@ -805,7 +805,7 @@ const modelosVista = (): Inst => pilha([
     linha([
       botao('Ver os nós', [def('modeloSlug', 'm.slug'), def('noModelo', 'null'), exe('manifesto', { slug: '{m.slug}' }, undefined, aviso('erro', 'erro'))], { props: { icone: 'lista' } }),
       botao('Aplicar ao site (rascunho)', [exe('aplicar', { slug: '{m.slug}' }, [...aviso('sucesso', '"Modelo aplicado: " + resultado.nos + " nós gravados como rascunho. Use Publicar para colocar no ar."'), exe('nos')], aviso('erro', 'erro'))], { props: { icone: 'salvar' } }),
-      botao('Aplicar e publicar', [exe('aplicar', { slug: '{m.slug}', publicar: 'true' }, [...aviso('sucesso', '"Modelo aplicado e publicado: release " + resultado.release + "."'), exe('nos')], aviso('erro', 'erro'))], { props: { variante: 'primario', icone: 'publicar' } }),
+      botao('Aplicar e publicar', [exe('aplicar', { slug: '{m.slug}', publicar: '{true}' }, [...aviso('sucesso', '"Modelo aplicado e publicado: release " + resultado.release + "."'), exe('nos')], aviso('erro', 'erro'))], { props: { variante: 'primario', icone: 'publicar' } }),
     ], { props: { gap: 6, quebra: true } }),
   ], { repetir: { cada: 'modelos.modelos ?? []', como: 'm', chave: 'm.slug' } }),
   cartao([

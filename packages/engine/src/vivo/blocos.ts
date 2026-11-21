@@ -1,4 +1,5 @@
-import { d_grafico_caminho, d_grafico_circulo, d_grafico_retangulo, d_grafico_reta, d_grafico_rotulo, d_grafico_svg } from './svg'
+import { corDoTom, d_grafico_caminho, d_grafico_circulo, d_grafico_retangulo, d_grafico_reta, d_grafico_rotulo, d_grafico_svg } from './svg'
+export { d_grafico_caminho, d_grafico_circulo, d_grafico_retangulo, d_grafico_reta, d_grafico_rotulo, d_grafico_svg } from './svg' // o AOT importa os descritores por nome deste módulo
 import { px } from '../estatico/escape'
 import { atributosDaTela } from '../tela/atributos'
 import { caminhoLocal, cssUrl, idDeElemento, nomeDeIcone, nomeDeParametro, tamanhoDeIcone, sugestoesAoVivo, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
@@ -41,9 +42,9 @@ export const BASE_PARAGRAFO: BaseEscala = { tamanho: 'inherit', peso: 'inherit',
 export const BASE_SOBRETITULO: BaseEscala = { tamanho: 'var(--tipografia-tamanho-sobretitulo, .75em)', peso: '600', altura: '1.5', espacamento: 'var(--tipografia-espacamento-sobretitulo, .25em)' }
 const varEscala = (n: string, k: string, base: string) => `var(--tipografia-escala-${n}-${k}, ${base})`
 /** o `style` da escala (texto, para o HTML) ou `undefined` */
-export const estiloEscala = (p: Record<string, unknown>, b: BaseEscala): string | undefined => { const n = escalaDe(p); return n ? `font-size:${varEscala(n, 'tamanho', b.tamanho)};font-weight:${varEscala(n, 'peso', b.peso)};line-height:${varEscala(n, 'altura', b.altura)};letter-spacing:${varEscala(n, 'espacamento', b.espacamento)}` : undefined }
+export const estiloEscala = (p: Record<string, unknown>, b: BaseEscala): string | undefined => { const n = escalaDe(p); return n ? `font-family:var(--tipografia-escala-${n}-familia, inherit);font-size:${varEscala(n, 'tamanho', b.tamanho)};font-weight:${varEscala(n, 'peso', b.peso)};line-height:${varEscala(n, 'altura', b.altura)};letter-spacing:${varEscala(n, 'espacamento', b.espacamento)}` : undefined }
 /** o mesmo, como objeto de estilo do React */
-export const estiloEscalaObj = (p: Record<string, unknown>, b: BaseEscala): Record<string, string> | undefined => { const n = escalaDe(p); return n ? { fontSize: varEscala(n, 'tamanho', b.tamanho), fontWeight: varEscala(n, 'peso', b.peso), lineHeight: varEscala(n, 'altura', b.altura), letterSpacing: varEscala(n, 'espacamento', b.espacamento) } : undefined }
+export const estiloEscalaObj = (p: Record<string, unknown>, b: BaseEscala): Record<string, string> | undefined => { const n = escalaDe(p); return n ? { fontFamily: `var(--tipografia-escala-${n}-familia, inherit)`, fontSize: varEscala(n, 'tamanho', b.tamanho), fontWeight: varEscala(n, 'peso', b.peso), lineHeight: varEscala(n, 'altura', b.altura), letterSpacing: varEscala(n, 'espacamento', b.espacamento) } : undefined }
 export const proporcaoDaImagem = (p: Record<string, unknown>): number => { const v = typeof p.proporcao === 'number' && Number.isFinite(p.proporcao) ? p.proporcao : 0; return v >= 0.2 && v <= 5 ? Math.round(v * 1000) / 1000 : 0 }
 const comId = (id: string | undefined): Record<string, string> => (id ? { id } : {})
 
@@ -69,7 +70,7 @@ export const d_layout_linha: Descritor = /* @__PURE__ */ caixa('row')
 const tituloComFilhos = (p: Record<string, unknown>): boolean => p.texto === undefined || p.texto === ''
 export const d_texto_titulo: Descritor = { chave: (p) => `h${nivel(p)}${tituloComFilhos(p) ? ':f' : ''}`, tag: (p) => `h${nivel(p)}`, filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.tamanho === 'grande' || p.tamanho === 'medio' ? { 'data-tamanho': p.tamanho as string } : {}), ...(estiloEscala(p, baseTitulo(nivel(p))) ? { style: estiloEscala(p, baseTitulo(nivel(p)))! } : {}) }), texto: (p) => (tituloComFilhos(p) ? undefined : txt(p.texto)) }
 export const d_texto_enfase: Descritor = { chave: () => 'em', tag: () => 'em', attrs: (p, id) => ({ ...comId(id), ...(p.bloco === true ? { style: 'display:block' } : {}) }), texto: (p) => txt(p.texto) }
-export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (p, id) => ({ ...comId(id), ...(estiloEscala(p, BASE_PARAGRAFO) ? { style: estiloEscala(p, BASE_PARAGRAFO)! } : {}) }), texto: (p) => txt(p.texto) }
+export const d_texto_paragrafo: Descritor = { chave: () => 'p', tag: () => 'p', attrs: (p, id) => ({ ...comId(id), ...(estiloEscala(p, BASE_PARAGRAFO) || corDoTom(p) ? { style: `${estiloEscala(p, BASE_PARAGRAFO) ?? ''}${estiloEscala(p, BASE_PARAGRAFO) && corDoTom(p) ? ';' : ''}${corDoTom(p) ? `color:${corDoTom(p)}` : ''}` } : {}) }), texto: (p) => txt(p.texto) }
 export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
@@ -108,7 +109,7 @@ const contem = (tag: string): Descritor => ({ chave: () => tag, tag: () => tag, 
 
 export const d_layout_grade: Descritor = {
   chave: () => 'div', tag: () => 'div', filhos: true,
-  attrs: (p, id) => { const gap = num(p.gap), al = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined; return { ...comId(id), style: `display:grid;grid-template-columns:repeat(${inteiro(p.colunas, 1, 12, 2)},minmax(0,1fr))${gap !== undefined ? `;gap:${px(gap)}` : ''}${al ? `;align-items:${al}` : ''}` } },
+  attrs: (p, id) => { const gap = num(p.gap), al = typeof p.alinha === 'string' ? ALINHA[p.alinha] : undefined; return { ...comId(id), ...(marcaDe(p) ? { 'data-marca': marcaDe(p)! } : {}), style: `display:grid;grid-template-columns:repeat(${inteiro(p.colunas, 1, 12, 2)},minmax(0,1fr))${gap !== undefined ? `;gap:${px(gap)}` : ''}${al ? `;align-items:${al}` : ''}` } },
 }
 export const d_layout_cabecalho: Descritor = { chave: () => 'header', tag: () => 'header', filhos: true, attrs: (p, id) => ({ ...comId(id), ...(p.fixo === true ? { 'data-fixo': '' } : {}), ...(p.centro === true ? { 'data-centro': '' } : {}) }) }
 export const d_midia_icone: Descritor = {
@@ -149,8 +150,8 @@ export const d_layout_espacador: Descritor = { chave: () => 'div', tag: () => 'd
 export const d_texto_rotulo: Descritor = { chave: () => 'label', tag: () => 'label', attrs: (p, id) => ({ ...comId(id), ...(typeof p.para === 'string' && p.para ? { for: p.para } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_destaque: Descritor = /* @__PURE__ */ folha('strong')
 export const d_texto_trecho: Descritor = /* @__PURE__ */ folha('span')
-export const d_texto_sobretitulo: Descritor = { chave: () => 'p:sobretitulo', tag: () => 'p', attrs: (p, id) => ({ ...comId(id), 'data-sobretitulo': '', ...(estiloEscala(p, BASE_SOBRETITULO) ? { style: estiloEscala(p, BASE_SOBRETITULO)! } : {}) }), texto: (p) => txt(p.texto) }
-export const d_texto_pequeno: Descritor = /* @__PURE__ */ folha('small')
+export const d_texto_sobretitulo: Descritor = { chave: () => 'p:sobretitulo', tag: () => 'p', attrs: (p, id) => ({ ...comId(id), 'data-sobretitulo': '', ...(estiloEscala(p, BASE_SOBRETITULO) || corDoTom(p) ? { style: `${estiloEscala(p, BASE_SOBRETITULO) ?? ''}${estiloEscala(p, BASE_SOBRETITULO) && corDoTom(p) ? ';' : ''}${corDoTom(p) ? `color:${corDoTom(p)}` : ''}` } : {}) }), texto: (p) => txt(p.texto) }
+export const d_texto_pequeno: Descritor = { chave: () => 'small', tag: () => 'small', attrs: (p, id) => ({ ...comId(id), ...(corDoTom(p) ? { style: `color:${corDoTom(p)}` } : {}) }), texto: (p) => txt(p.texto) }
 export const d_texto_codigo: Descritor = /* @__PURE__ */ folha('code')
 export const d_lista_lista: Descritor = { chave: (p) => (p.ordenada === true ? 'ol' : 'ul'), tag: (p) => (p.ordenada === true ? 'ol' : 'ul'), attrs: (_, id) => comId(id), filhos: true }
 export const d_lista_item: Descritor = /* @__PURE__ */ contem('li')
@@ -160,7 +161,7 @@ export const d_tabela_corpo: Descritor = /* @__PURE__ */ contem('tbody')
 export const d_tabela_linha: Descritor = /* @__PURE__ */ contem('tr')
 export const d_tabela_celula: Descritor = {
   chave: (p) => `${p.cabecalho === true ? 'th' : 'td'}:${p.texto !== undefined ? 't' : 'f'}`, tag: (p) => (p.cabecalho === true ? 'th' : 'td'), filhos: true,
-  attrs: (p, id) => ({ ...comId(id), ...opcional('colspan', p.colunas !== undefined ? inteiro(p.colunas, 1, 1000, 1) : undefined), ...opcional('rowspan', p.linhas !== undefined ? inteiro(p.linhas, 1, 65534, 1) : undefined) }),
+  attrs: (p, id) => ({ ...comId(id), ...(corDoTom(p) ? { style: `color:${corDoTom(p)}` } : {}), ...opcional('colspan', p.colunas !== undefined ? inteiro(p.colunas, 1, 1000, 1) : undefined), ...opcional('rowspan', p.linhas !== undefined ? inteiro(p.linhas, 1, 65534, 1) : undefined) }),
   texto: (p) => (p.texto !== undefined ? txt(p.texto) : undefined),
 }
 export const d_entrada_numero: Descritor = {

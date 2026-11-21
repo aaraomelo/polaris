@@ -18,7 +18,7 @@ export async function migraPlataforma(o: { urlMigrador: string; papelPlataforma:
     await c.query(`GRANT USAGE ON SCHEMA plataforma TO ${o.papelPlataforma}`)
     // leitura e escrita nas tabelas de estado; as imutáveis (no_versao, release, release_evento) só ganham SELECT e INSERT (o gatilho já recusa o resto)
     await c.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON plataforma.tenant, plataforma.etapa, plataforma.modulo, plataforma.dominio, plataforma.release_ponteiro TO ${o.papelPlataforma}`)
-    await c.query(`GRANT SELECT, INSERT ON plataforma.no_versao, plataforma.release, plataforma.release_evento TO ${o.papelPlataforma}`)
+    await c.query(`GRANT SELECT, INSERT ON plataforma.no_versao, plataforma.template_versao, plataforma.release, plataforma.release_evento TO ${o.papelPlataforma}`)
     // comentários do Studio: criar e resolver (UPDATE); ninguém apaga
     await c.query(`GRANT SELECT, INSERT, UPDATE ON plataforma.comentario TO ${o.papelPlataforma}`)
     // identidade: usuários e tokens (atualizados e apagados: uso único, expiração, bloqueio por tentativas) e a caixa de saída de e-mail (um trabalhador marca `enviado_em`)

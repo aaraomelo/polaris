@@ -150,7 +150,7 @@ describe('o resultado RODA: abre o HTML gerado num navegador simulado e hidrata'
     const e = r.manifesto.paginas.contador!
     let html = readFileSync(join(dir, 'core', e.arquivos.html!.nome), 'utf8')
     const js = readFileSync(join(dir, 'core', e.arquivos.cliente!.nome), 'utf8')
-    html = html.replace(`<script src="${e.arquivos.cliente!.nome}"></script>`, `<script>${js}</script>`) // o que o navegador faria ao buscar o arquivo
+    html = html.replace(`<script src="${e.arquivos.cliente!.nome}"></script>`, () => `<script>${js}</script>`) // o que o navegador faria ao buscar o arquivo
     const dom = new JSDOM(html, { runScripts: 'dangerously' })
     const w = dom.window as unknown as { document: Document; Polaris: unknown }
     const n = w.document.getElementById('n')!

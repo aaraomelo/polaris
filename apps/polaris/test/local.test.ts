@@ -129,6 +129,26 @@ describe('ambiente local', () => {
     expect((await json(await get(l, 'loja-demo', '/studio/templates/minimo/historico', ed))).versoes[0]).toMatchObject({ seq: 3, removido: true })
   })
 
+  it('segundo modelo (painel de saúde de clientes): guardado ao lado da Maison, dados na API (160 contas em 2 páginas) e aplicável ao tenant, que passa a servir o painel', async () => {
+    const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'exemplos')
+    const l = await sobeLocal({ dados: null, porta: 0, silencioso: true, site: join(raiz, 'maison'), modelos: [join(raiz, 'saude')] }); abertos.push(l)
+    const ed = await l.token('loja-demo', ['studio.editor'])
+    const json = async (r: { json(): Promise<unknown> }) => (await r.json()) as any
+    expect((await json(await get(l, 'loja-demo', '/studio/templates', ed))).modelos.map((m: any) => m.slug).sort()).toEqual(['maison', 'saude'])
+    // as contas vêm da API pública, 100 por página
+    const p1 = await json(await get(l, 'loja-demo', '/api/loja/contas?pagina=1&limite=100')), p2 = await json(await get(l, 'loja-demo', '/api/loja/contas?pagina=2&limite=100'))
+    expect(p1).toHaveLength(100); expect(p2).toHaveLength(60); const todas = [...p1, ...p2]; expect(new Set(todas.map((c: any) => c.slug)).size).toBe(160)
+    expect(todas.find((c: any) => c.slug === 'fenwick-legal')).toMatchObject({ segmento: 'enterprise', saude: 22, queda: -37, ultimoContato: 29, renovacao: expect.stringContaining('2027-05-24') }); expect(todas[0].historico).toHaveLength(13)
+    // antes: a loja (Maison); depois de aplicar e publicar: o painel, com as 160 bolhas renderizadas no servidor, KPIs derivados dos dados e o idioma da requisição
+    expect(await (await get(l, 'loja-demo', '/en')).text()).toContain('Maison')
+    const ap = await req(l, 'loja-demo', 'POST', '/studio/templates/saude/aplicar', ed, { publicar: true }); expect(ap.status).toBe(200); expect(await json(ap)).toMatchObject({ ok: true, site: true })
+    const en = await (await get(l, 'loja-demo', '/en')).text(), pt = await (await get(l, 'loja-demo', '/')).text()
+    expect(en).toContain('Customer health'); expect(pt).toContain('Saúde dos clientes'); expect(en).toContain('160 accounts'); expect(pt).toContain('160 contas'); expect(en.match(/<circle /g)!.length).toBeGreaterThanOrEqual(160)
+    expect(en).toContain('data-marca="indicadores"'); expect(en).toMatch(/aria-label="Fenwick Legal, health 22/)
+    // a outra loja continua com a Maison (o modelo foi aplicado só ao tenant que pediu)
+    expect(await (await get(l, 'loja-outra', '/en')).text()).toContain('Maison')
+  })
+
   it('Studio → Publicar → site: a edição salva só aparece depois de publicada, no tenant certo; página nova ganha rota sozinha', async () => {
     const l = await sobe(null), ed = await l.token('loja-demo', ['studio.editor'], 'ana')
     const home = ((await (await req(l, 'loja-demo', 'GET', '/studio/nos/pagina/site.home', ed)).json()) as any).no

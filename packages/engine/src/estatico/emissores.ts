@@ -1,5 +1,6 @@
 import { nomeDeIcone, srcsetDe, tamanhosDe, urlSegura } from '../render/url'
 import { emissoresDe } from '../vivo/emissor'
+import { corDoTom } from '../vivo/svg'
 import { modoDe, BASE_PARAGRAFO, DESCRITORES_BASE, baseTitulo, estiloEscala, marcaDe, proporcaoDaImagem } from '../vivo/blocos'
 import { escHtml, px } from './escape'
 
@@ -30,7 +31,7 @@ const MAO: Emissores = {
     const n = Math.min(6, Math.max(1, Math.trunc(num(props.nivel) ?? 1)))
     return `<h${n}${idAttr(id)}${props.tamanho === 'grande' || props.tamanho === 'medio' ? ` data-tamanho="${props.tamanho}"` : ''}${estiloEscala(props, baseTitulo(n)) ? ` style="${escHtml(estiloEscala(props, baseTitulo(n))!)}"` : ''}>${props.texto === undefined || props.texto === '' ? (filhos.filhos ?? "") : escHtml(txt(props.texto))}</h${n}>`
   },
-  'texto/paragrafo': ({ props, id }) => `<p${idAttr(id)}${estiloEscala(props, BASE_PARAGRAFO) ? ` style="${escHtml(estiloEscala(props, BASE_PARAGRAFO)!)}"` : ''}>${escHtml(txt(props.texto))}</p>`,
+  'texto/paragrafo': ({ props, id }) => `<p${idAttr(id)}${estiloEscala(props, BASE_PARAGRAFO) || corDoTom(props) ? ` style="${escHtml(`${estiloEscala(props, BASE_PARAGRAFO) ?? ''}${estiloEscala(props, BASE_PARAGRAFO) && corDoTom(props) ? ';' : ''}${corDoTom(props) ? `color:${corDoTom(props)}` : ''}`)}"` : ''}>${escHtml(txt(props.texto))}</p>`,
   'midia/imagem': ({ props, id }) => {
     const src = urlSegura(props.src)
     if (!src) return ''

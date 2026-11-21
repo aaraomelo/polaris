@@ -1,0 +1,1930 @@
+[
+  {
+    "kind": "tema",
+    "id": "saude",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "fontes": [
+        "newsreader",
+        "work-sans",
+        "ibm-plex-mono"
+      ],
+      "seguirSistema": false,
+      "tokens": {
+        "cor": {
+          "fundo": "#110c08",
+          "superficie": "#18130e",
+          "superficieAlt": "#1f1914",
+          "borda": "#322d28",
+          "texto": "#f2eee6",
+          "textoSuave": "#948e87",
+          "primaria": "#f2eee6",
+          "primariaHover": "#bbb7af",
+          "primariaClara": "#1f1914",
+          "secundaria": "#f2eee6",
+          "destaque": "#f46343",
+          "sucesso": "#c5bdb0",
+          "alerta": "#f46343",
+          "erro": "#f46343",
+          "textoSobrePrimaria": "#110c08"
+        },
+        "grafico": {
+          "risco": "#f46343",
+          "neutro": "#c5bdb0",
+          "destaque": "#f46343",
+          "eixo": "#948e87",
+          "suave": "#948e87",
+          "texto": "#f2eee6",
+          "escuro": "#948e87",
+          "claro": "#c5bdb0"
+        },
+        "painel": {
+          "regua": "#f2eee6",
+          "divisoria": "#322d28",
+          "superficie": "#18130e",
+          "espessura": "1px",
+          "recuo": "1.25rem",
+          "recuoTabela": "1.5rem"
+        },
+        "raio": {
+          "pequeno": 999,
+          "grande": 2
+        },
+        "espacamento": {
+          "base": "0.5rem",
+          "borda": 1
+        },
+        "layout": {
+          "largura": "57.5rem",
+          "larguraEstreita": "57.5rem",
+          "larguraLarga": "57.5rem",
+          "recuo": "1.5rem",
+          "recuoEstreito": "1.5rem"
+        },
+        "tipografia": {
+          "familia": "'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+          "familiaTitulo": "'Newsreader', 'Iowan Old Style', Georgia, serif",
+          "familiaMono": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+          "pesoTitulo": 400,
+          "tamanhoBase": "13px",
+          "alturaTitulo": 1.15,
+          "espacamentoTitulo": "-0.02em",
+          "escala": {
+            "pagina": {
+              "tamanho": "1.75rem",
+              "peso": 400,
+              "altura": 1.15,
+              "espacamento": "-0.02em"
+            },
+            "secao": {
+              "tamanho": "1.25rem",
+              "peso": 400,
+              "altura": 1.4,
+              "espacamento": "-0.03em"
+            },
+            "segmento": {
+              "tamanho": "1.125rem",
+              "peso": 400,
+              "altura": 1.3,
+              "espacamento": "-0.01em"
+            },
+            "detalhe": {
+              "tamanho": "1.375rem",
+              "peso": 400,
+              "altura": 1.2,
+              "espacamento": "-0.01em"
+            },
+            "indicador": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "2.75rem",
+              "peso": 400,
+              "altura": 1,
+              "espacamento": "-0.025em"
+            },
+            "pontuacao": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "2.25rem",
+              "peso": 400,
+              "altura": 1,
+              "espacamento": "-0.02em"
+            },
+            "olho": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "0.625rem",
+              "peso": 400,
+              "altura": 1.5,
+              "espacamento": "0.2em"
+            },
+            "meta": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "0.6875rem",
+              "peso": 400,
+              "altura": 1.5,
+              "espacamento": "0.15em"
+            },
+            "delta": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "0.6875rem",
+              "peso": 400,
+              "altura": 1.5,
+              "espacamento": "0"
+            },
+            "dado": {
+              "familia": "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+              "tamanho": "0.8125rem",
+              "peso": 400,
+              "altura": 1.5,
+              "espacamento": "0"
+            },
+            "nota": {
+              "tamanho": "0.6875rem",
+              "peso": 400,
+              "altura": 1.5,
+              "espacamento": "0"
+            },
+            "guia": {
+              "tamanho": "0.8125rem",
+              "peso": 400,
+              "altura": 1.55,
+              "espacamento": "0"
+            }
+          }
+        },
+        "botao": {
+          "caixa": "uppercase",
+          "espacamento": "0.14em",
+          "tamanho": "0.6875rem",
+          "peso": 400
+        },
+        "movimento": {
+          "rapido": "200ms"
+        }
+      },
+      "modos": {
+        "claro": {
+          "cor": {
+            "fundo": "#f6f3ed",
+            "superficie": "#eeebe4",
+            "superficieAlt": "#e8e4dd",
+            "borda": "#cbc7c0",
+            "texto": "#1d1711",
+            "textoSuave": "#68625c",
+            "primaria": "#1d1711",
+            "primariaHover": "#403933",
+            "primariaClara": "#e8e4dd",
+            "secundaria": "#1d1711",
+            "destaque": "#c0401f",
+            "sucesso": "#5d534c",
+            "alerta": "#c0401f",
+            "erro": "#c0401f",
+            "textoSobrePrimaria": "#f6f3ed"
+          },
+          "grafico": {
+            "risco": "#c0401f",
+            "neutro": "#5d534c",
+            "destaque": "#c0401f",
+            "eixo": "#68625c",
+            "suave": "#68625c",
+            "texto": "#1d1711",
+            "escuro": "#68625c",
+            "claro": "#5d534c"
+          },
+          "painel": {
+            "regua": "#1d1711",
+            "divisoria": "#cbc7c0",
+            "superficie": "#eeebe4"
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "traducao",
+    "id": "saude.textos",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "descricao": "Textos do painel de saúde em pt-BR (padrão) e en (o texto do template)",
+      "padrao": "pt-BR",
+      "mensagens": {
+        "pt-BR": {
+          "titulo": "Saúde dos clientes",
+          "meta": "{n} contas / US$ {arr} de ARR",
+          "guia": "Guia do modelo",
+          "modo.claro": "Claro",
+          "modo.escuro": "Escuro",
+          "modo.paraClaro": "Mudar para o modo claro",
+          "modo.paraEscuro": "Mudar para o modo escuro",
+          "kpi.risco": "ARR em risco",
+          "kpi.contasRisco": "Contas em risco",
+          "kpi.mediana": "Saúde mediana",
+          "kpi.renovacoes": "Renovações · próximos 90 dias",
+          "kpi.vs": "{d} vs. 4 semanas atrás",
+          "kpi.contas": "{n} contas",
+          "visao.combinado": "Combinado",
+          "visao.segmento": "Por segmento",
+          "filtro.todos": "Todos",
+          "filtro.enterprise": "Enterprise",
+          "filtro.mid-market": "Médio porte",
+          "filtro.smb": "Pequenas",
+          "seg.enterprise": "Enterprise",
+          "seg.mid-market": "Médio porte",
+          "seg.smb": "Pequenas",
+          "grafico.rotulo": "Índice de saúde de cada conta: cada bolha é uma conta, o tamanho é o ARR",
+          "grafico.limite": "Limite de risco",
+          "grafico.eixo": "Índice de saúde",
+          "grafico.conta": "{nome}, saúde {saude}, ARR US$ {arr}",
+          "lista.titulo": "Lista de atenção",
+          "col.conta": "Conta",
+          "col.arr": "ARR",
+          "col.saude": "Saúde",
+          "col.semanas": "13 sem.",
+          "col.queda": "Queda",
+          "col.autonomia": "Autonomia",
+          "col.assentos": "Assentos",
+          "col.semana": "Sem./sem.",
+          "col.contato": "Último contato",
+          "col.renovacao": "Renovação",
+          "lista.nota": "Um traço significa que a métrica não se aplica à conta, não que ela tirou zero.",
+          "autonomia.valor": "~{n} sem.",
+          "detalhe.fechar": "Fechar",
+          "detalhe.rotulo": "Detalhe da conta",
+          "detalhe.meta": "{seg} / {resp} / renova {data}",
+          "detalhe.trajetoria": "Trajetória de 13 semanas",
+          "detalhe.composicao": "Composição do índice",
+          "driver.base": "Base",
+          "driver.uso": "Tendência de uso do produto",
+          "driver.adocao": "Amplitude de adoção",
+          "driver.suporte": "Carga de suporte",
+          "driver.campeao": "Engajamento do patrocinador",
+          "driver.recursos": "Profundidade de recursos",
+          "driver.comercial": "Sinal comercial",
+          "driver.saude": "Índice de saúde",
+          "detalhe.arr": "ARR",
+          "detalhe.assentos": "Uso dos assentos",
+          "detalhe.contato": "Último contato",
+          "detalhe.queda": "Queda",
+          "detalhe.autonomia": "Autonomia",
+          "dias": "{n} d",
+          "guia.titulo": "Usando este modelo",
+          "guia.sub": "Dos dados de demonstração à sua carteira",
+          "guia.intro": "Este painel é um modelo do Polaris: páginas, tema, textos e a API de contas são nós e dados declarativos. Para torná-lo seu, troque os dados e ajuste os nós pelo Studio.",
+          "guia.1.t": "Troque as contas",
+          "guia.1.p": "Toda conta desta página é dado de demonstração, guardado na API (entidade conta do serviço loja). Cadastre as suas pela API ou carregue um CSV do seu CRM; o gráfico, os indicadores e a lista se atualizam sozinhos.",
+          "guia.2.t": "Ligue uma fonte ao vivo",
+          "guia.2.p": "A página lê as contas pelo nó de dados saude.contas. Aponte-o para outro serviço ou URL e a página continua igual.",
+          "guia.3.t": "Calcule a saúde do seu jeito",
+          "guia.3.p": "O índice vem de seis sinais nomeados sobre uma base. Troque os sinais pelos que você de fato acompanha e mantenha a composição explicável.",
+          "guia.4.t": "Guarde o histórico semanal",
+          "guia.4.p": "As linhas de tendência, a queda e a autonomia leem as últimas 13 semanas de cada conta. Grave um retrato semanal do índice e o histórico se completa com o tempo."
+        },
+        "en": {
+          "titulo": "Customer health",
+          "meta": "{n} accounts / ${arr} ARR",
+          "guia": "Template guide",
+          "modo.claro": "Light",
+          "modo.escuro": "Dark",
+          "modo.paraClaro": "Switch to light mode",
+          "modo.paraEscuro": "Switch to dark mode",
+          "kpi.risco": "ARR at risk",
+          "kpi.contasRisco": "Accounts at risk",
+          "kpi.mediana": "Median health",
+          "kpi.renovacoes": "Renewals · next 90 days",
+          "kpi.vs": "{d} vs. 4 weeks ago",
+          "kpi.contas": "{n} accounts",
+          "visao.combinado": "Combined",
+          "visao.segmento": "By segment",
+          "filtro.todos": "All",
+          "filtro.enterprise": "Enterprise",
+          "filtro.mid-market": "Mid-Market",
+          "filtro.smb": "SMB",
+          "seg.enterprise": "Enterprise",
+          "seg.mid-market": "Mid-Market",
+          "seg.smb": "SMB",
+          "grafico.rotulo": "Health score of each account: each bubble is an account, sized by ARR",
+          "grafico.limite": "Risk threshold",
+          "grafico.eixo": "Health score",
+          "grafico.conta": "{nome}, health {saude}, ${arr} ARR",
+          "lista.titulo": "Watchlist",
+          "col.conta": "Account",
+          "col.arr": "ARR",
+          "col.saude": "Health",
+          "col.semanas": "13 wks",
+          "col.queda": "Drawdown",
+          "col.autonomia": "Runway",
+          "col.assentos": "Seats",
+          "col.semana": "WoW",
+          "col.contato": "Last touch",
+          "col.renovacao": "Renewal",
+          "lista.nota": "A dash means the metric does not apply to that account, not that it scored zero.",
+          "autonomia.valor": "~{n} wks",
+          "detalhe.fechar": "Close",
+          "detalhe.rotulo": "Account detail",
+          "detalhe.meta": "{seg} / {resp} / renews {data}",
+          "detalhe.trajetoria": "13-week trajectory",
+          "detalhe.composicao": "Score composition",
+          "driver.base": "Base",
+          "driver.uso": "Product usage trend",
+          "driver.adocao": "Breadth of adoption",
+          "driver.suporte": "Support burden",
+          "driver.campeao": "Champion engagement",
+          "driver.recursos": "Feature depth",
+          "driver.comercial": "Commercial signal",
+          "driver.saude": "Health score",
+          "detalhe.arr": "ARR",
+          "detalhe.assentos": "Seat utilization",
+          "detalhe.contato": "Last touch",
+          "detalhe.queda": "Drawdown",
+          "detalhe.autonomia": "Runway",
+          "dias": "{n}d",
+          "guia.titulo": "Using this template",
+          "guia.sub": "From demo data to your book",
+          "guia.intro": "This dashboard is a Polaris template: pages, theme, texts and the accounts API are declarative nodes and data. To make it yours, swap the data and adjust the nodes in the Studio.",
+          "guia.1.t": "Swap in your accounts",
+          "guia.1.p": "Every account on this page is demo data, stored in the API (the conta entity of the loja service). Add yours through the API or load a CSV from your CRM; the chart, stats and watchlist update on their own.",
+          "guia.2.t": "Wire a live source",
+          "guia.2.p": "The page reads accounts through the saude.contas data node. Point it at another service or URL and the page stays the same.",
+          "guia.3.t": "Score health your way",
+          "guia.3.p": "The score is built from six named signals over a base. Swap them for the signals you actually track and keep the breakdown explainable.",
+          "guia.4.t": "Capture weekly history",
+          "guia.4.p": "The trend lines, drawdown and runway read each account's last 13 weeks. Save a weekly snapshot of the score and the history fills in over time."
+        }
+      }
+    }
+  },
+  {
+    "kind": "dados",
+    "id": "saude.contas1",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "fonte": {
+        "tipo": "servico",
+        "servico": "loja",
+        "operacao": "listarConta"
+      },
+      "parametros": {
+        "pagina": {
+          "tipo": "inteiro"
+        },
+        "limite": {
+          "tipo": "inteiro"
+        }
+      },
+      "carregar": "auto",
+      "cache": {
+        "ttlSegundos": 30
+      }
+    }
+  },
+  {
+    "kind": "dados",
+    "id": "saude.contas2",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "fonte": {
+        "tipo": "servico",
+        "servico": "loja",
+        "operacao": "listarConta"
+      },
+      "parametros": {
+        "pagina": {
+          "tipo": "inteiro"
+        },
+        "limite": {
+          "tipo": "inteiro"
+        }
+      },
+      "carregar": "auto",
+      "cache": {
+        "ttlSegundos": 30
+      }
+    }
+  },
+  {
+    "kind": "pagina",
+    "id": "saude.home",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "rota": "/",
+      "titulo": "Customer health",
+      "traducoes": [
+        "saude.textos"
+      ],
+      "dados": {
+        "c1": {
+          "dados": "saude.contas1",
+          "args": {
+            "pagina": 1,
+            "limite": 100
+          }
+        },
+        "c2": {
+          "dados": "saude.contas2",
+          "args": {
+            "pagina": 2,
+            "limite": 100
+          }
+        }
+      },
+      "estado": {
+        "visao": {
+          "tipo": "texto",
+          "inicial": "combinado"
+        },
+        "filtro": {
+          "tipo": "texto",
+          "inicial": "todos"
+        },
+        "sel": {
+          "tipo": "texto",
+          "inicial": ""
+        },
+        "guia": {
+          "tipo": "booleano",
+          "inicial": false
+        },
+        "modo": {
+          "tipo": "texto",
+          "inicial": "escuro",
+          "persiste": true
+        }
+      },
+      "raiz": {
+        "bloco": "layout/pilha",
+        "props": {
+          "modo": "{estado.modo}",
+          "gap": 0,
+          "marca": "painel-saude"
+        },
+        "slots": {
+          "filhos": [
+            {
+              "bloco": "layout/contido",
+              "props": {
+                "largura": "normal"
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/pilha",
+                    "props": {
+                      "gap": 28
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 8
+                          }
+                        },
+                        {
+                          "bloco": "layout/linha",
+                          "props": {
+                            "gap": 16,
+                            "alinha": "centro",
+                            "quebra": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/linha",
+                                "props": {
+                                  "gap": 14,
+                                  "alinha": "centro",
+                                  "quebra": true
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "{t(\"titulo\")}",
+                                        "nivel": 1,
+                                        "escala": "pagina"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{t(\"meta\", objeto([[\"n\", tamanho(concat(c1, c2))], [\"arr\", compacto(soma(mapeia(concat(c1, c2), c => qnum(c.arr))), idioma)]]))}",
+                                        "escala": "meta",
+                                        "tom": "suave"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "cresce": true
+                                }
+                              },
+                              {
+                                "bloco": "nav/botao",
+                                "props": {
+                                  "texto": "{t(\"guia\")}",
+                                  "variante": "secundario"
+                                },
+                                "eventos": {
+                                  "aoClicar": [
+                                    {
+                                      "acao": "definir",
+                                      "estado": "guia",
+                                      "valor": "true"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "nav/botao",
+                                "props": {
+                                  "texto": "{estado.modo == \"escuro\" ? t(\"modo.claro\") : t(\"modo.escuro\")}",
+                                  "variante": "primario",
+                                  "icone": "tema-escuro",
+                                  "rotulo": "{estado.modo == \"escuro\" ? t(\"modo.paraClaro\") : t(\"modo.paraEscuro\")}"
+                                },
+                                "eventos": {
+                                  "aoClicar": [
+                                    {
+                                      "acao": "definir",
+                                      "estado": "modo",
+                                      "valor": "estado.modo == \"escuro\" ? \"claro\" : \"escuro\""
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/grade",
+                          "props": {
+                            "colunas": 4,
+                            "marca": "indicadores"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"kpi.risco\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{junta([\"$\", compacto(soma(mapeia(filtra(concat(c1, c2), c => c.saude < 40), c => qnum(c.arr))), idioma)], \"\")}",
+                                        "escala": "indicador"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/pequeno",
+                                      "props": {
+                                        "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(soma(mapeia(filtra(concat(c1, c2), c => c.saude < 40), c => qnum(c.arr))) - soma(mapeia(filtra(concat(c1, c2), c => c.historico[8] < 40), c => qnum(c.arr))) < 0 ? \"−\" : \"+\"), compacto(absoluto(soma(mapeia(filtra(concat(c1, c2), c => c.saude < 40), c => qnum(c.arr))) - soma(mapeia(filtra(concat(c1, c2), c => c.historico[8] < 40), c => qnum(c.arr)))), idioma)], \"\")]]))}",
+                                        "tom": "risco"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"kpi.contasRisco\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{tamanho(filtra(concat(c1, c2), c => c.saude < 40))}",
+                                        "escala": "indicador"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/pequeno",
+                                      "props": {
+                                        "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(tamanho(filtra(concat(c1, c2), c => c.saude < 40)) - tamanho(filtra(concat(c1, c2), c => c.historico[8] < 40)) < 0 ? \"−\" : \"+\"), compacto(absoluto(tamanho(filtra(concat(c1, c2), c => c.saude < 40)) - tamanho(filtra(concat(c1, c2), c => c.historico[8] < 40))), idioma)], \"\")]]))}",
+                                        "tom": "risco"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"kpi.mediana\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{mediana(mapeia(concat(c1, c2), c => c.saude))}",
+                                        "escala": "indicador"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/pequeno",
+                                      "props": {
+                                        "texto": "{t(\"kpi.vs\", objeto([[\"d\", junta([(mediana(mapeia(concat(c1, c2), c => c.saude)) - mediana(mapeia(concat(c1, c2), c => c.historico[8])) < 0 ? \"−\" : \"+\"), compacto(absoluto(mediana(mapeia(concat(c1, c2), c => c.saude)) - mediana(mapeia(concat(c1, c2), c => c.historico[8]))), idioma)], \"\")]]))}"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 8
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"kpi.renovacoes\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{junta([\"$\", compacto(soma(mapeia(filtra(concat(c1, c2), c => c.renovacao <= \"2027-02-19\"), c => qnum(c.arr))), idioma)], \"\")}",
+                                        "escala": "indicador"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/pequeno",
+                                      "props": {
+                                        "texto": "{t(\"kpi.contas\", objeto([[\"n\", tamanho(filtra(concat(c1, c2), c => c.renovacao <= \"2027-02-19\"))]]))}"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/linha",
+                          "props": {
+                            "gap": 32,
+                            "alinha": "centro",
+                            "quebra": true
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/linha",
+                                "props": {
+                                  "gap": 4,
+                                  "alinha": "centro",
+                                  "papel": "group",
+                                  "rotulo": "visão"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "{t(\"visao.combinado\")}",
+                                        "variante": "fantasma",
+                                        "atual": "{estado.visao == \"combinado\"}"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "visao",
+                                            "valor": "\"combinado\""
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "{t(\"visao.segmento\")}",
+                                        "variante": "fantasma",
+                                        "atual": "{estado.visao == \"segmento\"}"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "visao",
+                                            "valor": "\"segmento\""
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/linha",
+                                "props": {
+                                  "gap": 4,
+                                  "alinha": "centro",
+                                  "papel": "group",
+                                  "rotulo": "segmento"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "{t(\"filtro.todos\")}",
+                                        "variante": "fantasma",
+                                        "atual": "{estado.filtro == \"todos\"}"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "filtro",
+                                            "valor": "\"todos\""
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "{t(\"filtro.enterprise\")}",
+                                        "variante": "fantasma",
+                                        "atual": "{estado.filtro == \"enterprise\"}"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "filtro",
+                                            "valor": "\"enterprise\""
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "{t(\"filtro.mid-market\")}",
+                                        "variante": "fantasma",
+                                        "atual": "{estado.filtro == \"mid-market\"}"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "filtro",
+                                            "valor": "\"mid-market\""
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "nav/botao",
+                                      "props": {
+                                        "texto": "{t(\"filtro.smb\")}",
+                                        "variante": "fantasma",
+                                        "atual": "{estado.filtro == \"smb\"}"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "filtro",
+                                            "valor": "\"smb\""
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "marca": "grafico-painel"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "grafico/svg",
+                                "props": {
+                                  "largura": 920,
+                                  "altura": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112)}",
+                                  "rotulo": "{t(\"grafico.rotulo\")}"
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "grafico/reta",
+                                      "props": {
+                                        "x1": "{escala(40, 0, 100, 62, 872)}",
+                                        "y1": 30,
+                                        "x2": "{escala(40, 0, 100, 62, 872)}",
+                                        "y2": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 52}",
+                                        "tom": "eixo"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": "{escala(40, 0, 100, 62, 872) + 6}",
+                                        "y": 20,
+                                        "texto": "{maiusculas(t(\"grafico.limite\"))}",
+                                        "tamanho": 9,
+                                        "tom": "suave",
+                                        "fonte": "mono"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/circulo",
+                                      "props": {
+                                        "cx": "{p.x}",
+                                        "cy": "{p.y}",
+                                        "r": "{p.r}",
+                                        "cor": "{p.cor}",
+                                        "rotulo": "{t(\"grafico.conta\", objeto([[\"nome\", p.nome], [\"saude\", p.saude], [\"arr\", compacto(p.arr, idioma)]]))}",
+                                        "selecionado": "{estado.sel == p.slug}"
+                                      },
+                                      "repetir": {
+                                        "cada": "achata(mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mapeia(enxame(mapeia(g.itens, c => objeto([[\"slug\", c.slug], [\"nome\", c.nome], [\"saude\", c.saude], [\"arr\", qnum(c.arr)], [\"x\", escala(c.saude, 0, 100, 62, 872)], [\"r\", escala(raiz(qnum(c.arr)), 100, 950, 2.5, 15)], [\"cor\", junta([\"color-mix(in oklab, var(--grafico-risco) \", texto(arredonda(maximo(0, minimo(100, escala(c.saude, 40, 80, 100, 0))))), \"%, var(--grafico-neutro))\"], \"\")]])), 1.5), p => mescla(p, objeto([[\"y\", (estado.visao == \"combinado\" ? 150 : 62 + k * 112) + p.y]])))))",
+                                        "como": "p",
+                                        "chave": "p.slug"
+                                      },
+                                      "eventos": {
+                                        "aoClicar": [
+                                          {
+                                            "acao": "definir",
+                                            "estado": "sel",
+                                            "valor": "p.slug"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": 120,
+                                        "y": "{62 + g.i * 112 - 2}",
+                                        "texto": "{objeto([[\"enterprise\", t(\"seg.enterprise\")], [\"mid-market\", t(\"seg.mid-market\")], [\"smb\", t(\"seg.smb\")]])[g.k]}",
+                                        "ancora": "fim",
+                                        "tamanho": 18,
+                                        "fonte": "titulo",
+                                        "tom": "texto"
+                                      },
+                                      "repetir": {
+                                        "cada": "(estado.visao == \"combinado\" ? [] : mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mescla(g, objeto([[\"i\", k]]))))",
+                                        "como": "g",
+                                        "chave": "g.k"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": 120,
+                                        "y": "{62 + g.i * 112 + 18}",
+                                        "texto": "{junta([texto(tamanho(g.itens)), \" · $\", compacto(soma(mapeia(g.itens, c => qnum(c.arr))), idioma)], \"\")}",
+                                        "ancora": "fim",
+                                        "tamanho": 10,
+                                        "fonte": "mono",
+                                        "tom": "suave"
+                                      },
+                                      "repetir": {
+                                        "cada": "(estado.visao == \"combinado\" ? [] : mapeia((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]]))), (g, k) => mescla(g, objeto([[\"i\", k]]))))",
+                                        "como": "g",
+                                        "chave": "g.k"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": "{escala(20, 0, 100, 62, 872)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "texto": "20",
+                                        "ancora": "centro",
+                                        "tamanho": 11,
+                                        "tom": "suave",
+                                        "fonte": "mono"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": "{escala(40, 0, 100, 62, 872)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "texto": "40",
+                                        "ancora": "centro",
+                                        "tamanho": 11,
+                                        "tom": "suave",
+                                        "fonte": "mono"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": "{escala(60, 0, 100, 62, 872)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "texto": "60",
+                                        "ancora": "centro",
+                                        "tamanho": 11,
+                                        "tom": "suave",
+                                        "fonte": "mono"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": "{escala(80, 0, 100, 62, 872)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "texto": "80",
+                                        "ancora": "centro",
+                                        "tamanho": 11,
+                                        "tom": "suave",
+                                        "fonte": "mono"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": "{escala(100, 0, 100, 62, 872)}",
+                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 26}",
+                                        "texto": "100",
+                                        "ancora": "centro",
+                                        "tamanho": 11,
+                                        "tom": "suave",
+                                        "fonte": "mono"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "grafico/rotulo",
+                                      "props": {
+                                        "x": 467,
+                                        "y": "{(estado.visao == \"combinado\" ? 300 : 110 + tamanho((estado.visao == \"combinado\" ? [objeto([[\"k\", \"todos\"], [\"itens\", filtra(concat(c1, c2), c => estado.filtro == \"todos\" || c.segmento == estado.filtro)]])] : mapeia(filtra([\"enterprise\", \"mid-market\", \"smb\"], s => estado.filtro == \"todos\" || estado.filtro == s), s => objeto([[\"k\", s], [\"itens\", filtra(concat(c1, c2), c => c.segmento == s)]])))) * 112) - 4}",
+                                        "texto": "{t(\"grafico.eixo\")}",
+                                        "ancora": "centro",
+                                        "tamanho": 11,
+                                        "tom": "suave",
+                                        "fonte": "corpo"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "marca": "tabela-painel",
+                            "gap": 12
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "{t(\"lista.titulo\")}",
+                                  "nivel": 2,
+                                  "escala": "secao"
+                                }
+                              },
+                              {
+                                "bloco": "tabela/tabela",
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "tabela/cabecalho",
+                                      "slots": {
+                                        "filhos": [
+                                          {
+                                            "bloco": "tabela/linha",
+                                            "slots": {
+                                              "filhos": [
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.conta\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.arr\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.saude\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.semanas\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.queda\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.autonomia\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.assentos\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.semana\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.contato\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"col.renovacao\")}",
+                                                    "cabecalho": true
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "bloco": "tabela/corpo",
+                                      "slots": {
+                                        "filhos": [
+                                          {
+                                            "bloco": "tabela/linha",
+                                            "slots": {
+                                              "filhos": [
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {},
+                                                  "slots": {
+                                                    "filhos": [
+                                                      {
+                                                        "bloco": "layout/linha",
+                                                        "props": {
+                                                          "gap": 8,
+                                                          "alinha": "centro"
+                                                        },
+                                                        "slots": {
+                                                          "filhos": [
+                                                            {
+                                                              "bloco": "nav/botao",
+                                                              "props": {
+                                                                "texto": "{c.nome}",
+                                                                "variante": "fantasma"
+                                                              },
+                                                              "eventos": {
+                                                                "aoClicar": [
+                                                                  {
+                                                                    "acao": "definir",
+                                                                    "estado": "sel",
+                                                                    "valor": "c.slug"
+                                                                  }
+                                                                ]
+                                                              }
+                                                            },
+                                                            {
+                                                              "bloco": "texto/sobretitulo",
+                                                              "props": {
+                                                                "texto": "{maiusculas(objeto([[\"enterprise\", t(\"seg.enterprise\")], [\"mid-market\", t(\"seg.mid-market\")], [\"smb\", t(\"seg.smb\")]])[c.segmento])}",
+                                                                "escala": "olho",
+                                                                "tom": "suave"
+                                                              }
+                                                            }
+                                                          ]
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{junta([\"$\", compacto(qnum(c.arr), idioma)], \"\")}"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{c.saude}"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {},
+                                                  "slots": {
+                                                    "filhos": [
+                                                      {
+                                                        "bloco": "grafico/svg",
+                                                        "props": {
+                                                          "largura": 72,
+                                                          "altura": 24,
+                                                          "rotulo": ""
+                                                        },
+                                                        "slots": {
+                                                          "filhos": [
+                                                            {
+                                                              "bloco": "grafico/caminho",
+                                                              "props": {
+                                                                "pontos": "{c.pts}",
+                                                                "cor": "{c.saude < 40 ? \"var(--grafico-risco)\" : \"var(--grafico-neutro)\"}",
+                                                                "espessura": 1.2
+                                                              }
+                                                            },
+                                                            {
+                                                              "bloco": "grafico/circulo",
+                                                              "props": {
+                                                                "cx": 72,
+                                                                "cy": "{ultimo(c.pts)[1]}",
+                                                                "r": 2,
+                                                                "cor": "{c.saude < 40 ? \"var(--grafico-risco)\" : \"var(--grafico-neutro)\"}"
+                                                              }
+                                                            }
+                                                          ]
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{(c.queda < 0 ? junta([\"−\", texto(absoluto(c.queda))], \"\") : (c.queda > 0 ? junta([\"+\", texto(c.queda)], \"\") : \"0\"))}",
+                                                    "tom": "{c.queda < 0 ? \"risco\" : \"suave\"}"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{c.autonomia ? t(\"autonomia.valor\", objeto([[\"n\", c.autonomia]])) : \"—\"}"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{c.assentos}%"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{(c.semana < 0 ? junta([\"−\", texto(absoluto(c.semana))], \"\") : (c.semana > 0 ? junta([\"+\", texto(c.semana)], \"\") : \"0\"))}",
+                                                    "tom": "{c.semana < 0 ? \"risco\" : \"suave\"}"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{t(\"dias\", objeto([[\"n\", c.ultimoContato]]))}",
+                                                    "tom": "{c.ultimoContato > 30 ? \"risco\" : \"suave\"}"
+                                                  }
+                                                },
+                                                {
+                                                  "bloco": "tabela/celula",
+                                                  "props": {
+                                                    "texto": "{dataCurta(c.renovacao, idioma)}"
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            "repetir": {
+                                              "cada": "mapeia(mapeia(fatia(ordena(concat(c1, c2), c => c.queda - qnum(c.arr) / 1000000000), 0, 8), c => mescla(c, objeto([[\"lo\", primeiro(ordena(c.historico, v => v))], [\"hi\", ultimo(ordena(c.historico, v => v))]]))), c => mescla(c, objeto([[\"pts\", mapeia(c.historico, (v, i) => [i * 6, escala(v, c.lo, c.hi, 22, 2)])]])))",
+                                              "como": "c",
+                                              "chave": "c.slug"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "{t(\"lista.nota\")}",
+                                  "escala": "nota",
+                                  "tom": "suave"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/espacador",
+                          "props": {
+                            "tamanho": 64
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bloco": "layout/gaveta",
+              "props": {
+                "rotulo": "{t(\"detalhe.rotulo\")}",
+                "largura": 27
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/pilha",
+                    "props": {
+                      "gap": 16
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/linha",
+                          "props": {
+                            "gap": 12,
+                            "alinha": "inicio"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 6,
+                                  "cresce": true
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "{s.nome}",
+                                        "nivel": 2,
+                                        "escala": "detalhe"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{maiusculas(t(\"detalhe.meta\", objeto([[\"seg\", objeto([[\"enterprise\", t(\"seg.enterprise\")], [\"mid-market\", t(\"seg.mid-market\")], [\"smb\", t(\"seg.smb\")]])[s.segmento]], [\"resp\", s.responsavel], [\"data\", dataCurta(s.renovacao, idioma)]])))}",
+                                        "escala": "meta",
+                                        "tom": "suave"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "{s.saude}",
+                                  "escala": "pontuacao"
+                                }
+                              },
+                              {
+                                "bloco": "nav/botao",
+                                "props": {
+                                  "texto": "",
+                                  "icone": "fechar",
+                                  "variante": "fantasma",
+                                  "rotulo": "{t(\"detalhe.fechar\")}"
+                                },
+                                "eventos": {
+                                  "aoClicar": [
+                                    {
+                                      "acao": "definir",
+                                      "estado": "sel",
+                                      "valor": "\"\""
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "{t(\"detalhe.trajetoria\")}",
+                            "escala": "olho"
+                          }
+                        },
+                        {
+                          "bloco": "grafico/svg",
+                          "props": {
+                            "largura": 340,
+                            "altura": 96,
+                            "rotulo": "{t(\"detalhe.trajetoria\")}"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "grafico/reta",
+                                "props": {
+                                  "x1": 22,
+                                  "y1": "{escala(40, primeiro(ordena(s.historico, v => v)), ultimo(ordena(s.historico, v => v)), 86, 10)}",
+                                  "x2": 340,
+                                  "y2": "{escala(40, primeiro(ordena(s.historico, v => v)), ultimo(ordena(s.historico, v => v)), 86, 10)}",
+                                  "tom": "eixo",
+                                  "tracejada": true
+                                }
+                              },
+                              {
+                                "bloco": "grafico/caminho",
+                                "props": {
+                                  "pontos": "{mapeia(s.historico, (v, i) => [22 + i * 26.5, escala(v, primeiro(ordena(s.historico, v => v)), ultimo(ordena(s.historico, v => v)), 86, 10)])}",
+                                  "tom": "{s.saude < 40 ? \"risco\" : \"neutro\"}",
+                                  "espessura": 1.4
+                                }
+                              },
+                              {
+                                "bloco": "grafico/circulo",
+                                "props": {
+                                  "cx": 340,
+                                  "cy": "{escala(s.saude, primeiro(ordena(s.historico, v => v)), ultimo(ordena(s.historico, v => v)), 86, 10)}",
+                                  "r": 2.5,
+                                  "tom": "{s.saude < 40 ? \"risco\" : \"neutro\"}"
+                                }
+                              },
+                              {
+                                "bloco": "grafico/rotulo",
+                                "props": {
+                                  "x": 0,
+                                  "y": 14,
+                                  "texto": "{ultimo(ordena(s.historico, v => v))}",
+                                  "tamanho": 9,
+                                  "tom": "suave",
+                                  "fonte": "mono"
+                                }
+                              },
+                              {
+                                "bloco": "grafico/rotulo",
+                                "props": {
+                                  "x": 0,
+                                  "y": 92,
+                                  "texto": "{primeiro(ordena(s.historico, v => v))}",
+                                  "tamanho": 9,
+                                  "tom": "suave",
+                                  "fonte": "mono"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "texto/sobretitulo",
+                          "props": {
+                            "texto": "{t(\"detalhe.composicao\")}",
+                            "escala": "olho"
+                          }
+                        },
+                        {
+                          "bloco": "grafico/svg",
+                          "props": {
+                            "largura": 360,
+                            "altura": 180,
+                            "rotulo": "{t(\"detalhe.composicao\")}"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "grafico/rotulo",
+                                "props": {
+                                  "x": 140,
+                                  "y": "{r.n * 21 + 14}",
+                                  "texto": "{objeto([[\"base\", t(\"driver.base\")], [\"uso\", t(\"driver.uso\")], [\"adocao\", t(\"driver.adocao\")], [\"suporte\", t(\"driver.suporte\")], [\"campeao\", t(\"driver.campeao\")], [\"recursos\", t(\"driver.recursos\")], [\"comercial\", t(\"driver.comercial\")], [\"saude\", t(\"driver.saude\")]])[r.k]}",
+                                  "ancora": "fim",
+                                  "tamanho": 10,
+                                  "tom": "texto",
+                                  "fonte": "corpo"
+                                },
+                                "repetir": {
+                                  "cada": "mapeia(concat(dobra(s.composicao, [objeto([[\"k\", \"base\"], [\"v\", 55], [\"ini\", 0], [\"fim\", 55]])], (acc, d) => concat(acc, [objeto([[\"k\", d.k], [\"v\", d.v], [\"ini\", ultimo(acc).fim], [\"fim\", ultimo(acc).fim + d.v]])])), [objeto([[\"k\", \"saude\"], [\"v\", s.saude], [\"ini\", 0], [\"fim\", s.saude]])]), (r, n) => mescla(r, objeto([[\"n\", n]])))",
+                                  "como": "r",
+                                  "chave": "r.k"
+                                }
+                              },
+                              {
+                                "bloco": "grafico/retangulo",
+                                "props": {
+                                  "x": "{escala(minimo(r.ini, r.fim), 0, 100, 150, 330)}",
+                                  "y": "{r.n * 21 + 5}",
+                                  "largura": "{absoluto(escala(r.fim, 0, 100, 150, 330) - escala(r.ini, 0, 100, 150, 330))}",
+                                  "altura": 12,
+                                  "tom": "{r.k == \"base\" || r.k == \"saude\" ? \"escuro\" : (r.v < 0 ? \"risco\" : \"claro\")}"
+                                },
+                                "repetir": {
+                                  "cada": "mapeia(concat(dobra(s.composicao, [objeto([[\"k\", \"base\"], [\"v\", 55], [\"ini\", 0], [\"fim\", 55]])], (acc, d) => concat(acc, [objeto([[\"k\", d.k], [\"v\", d.v], [\"ini\", ultimo(acc).fim], [\"fim\", ultimo(acc).fim + d.v]])])), [objeto([[\"k\", \"saude\"], [\"v\", s.saude], [\"ini\", 0], [\"fim\", s.saude]])]), (r, n) => mescla(r, objeto([[\"n\", n]])))",
+                                  "como": "r",
+                                  "chave": "r.k"
+                                }
+                              },
+                              {
+                                "bloco": "grafico/rotulo",
+                                "props": {
+                                  "x": 356,
+                                  "y": "{r.n * 21 + 14}",
+                                  "texto": "{r.k == \"base\" || r.k == \"saude\" ? texto(r.v) : (r.v < 0 ? junta([\"−\", texto(absoluto(r.v))], \"\") : (r.v > 0 ? junta([\"+\", texto(r.v)], \"\") : \"0\"))}",
+                                  "ancora": "fim",
+                                  "tamanho": 10,
+                                  "tom": "texto",
+                                  "fonte": "mono"
+                                },
+                                "repetir": {
+                                  "cada": "mapeia(concat(dobra(s.composicao, [objeto([[\"k\", \"base\"], [\"v\", 55], [\"ini\", 0], [\"fim\", 55]])], (acc, d) => concat(acc, [objeto([[\"k\", d.k], [\"v\", d.v], [\"ini\", ultimo(acc).fim], [\"fim\", ultimo(acc).fim + d.v]])])), [objeto([[\"k\", \"saude\"], [\"v\", s.saude], [\"ini\", 0], [\"fim\", s.saude]])]), (r, n) => mescla(r, objeto([[\"n\", n]])))",
+                                  "como": "r",
+                                  "chave": "r.k"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/divisor"
+                        },
+                        {
+                          "bloco": "layout/grade",
+                          "props": {
+                            "colunas": 3,
+                            "gap": 16
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 4
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"detalhe.arr\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{junta([\"$\", compacto(qnum(s.arr), idioma)], \"\")}",
+                                        "escala": "dado"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 4
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"detalhe.assentos\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{s.assentos}%",
+                                        "escala": "dado"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 4
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"detalhe.contato\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{t(\"dias\", objeto([[\"n\", s.ultimoContato]]))}",
+                                        "escala": "dado"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 4
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"detalhe.queda\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{(s.queda < 0 ? junta([\"−\", texto(absoluto(s.queda))], \"\") : (s.queda > 0 ? junta([\"+\", texto(s.queda)], \"\") : \"0\"))}",
+                                        "escala": "dado",
+                                        "tom": "{s.queda < 0 ? \"risco\" : \"suave\"}"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 4
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"detalhe.autonomia\")}",
+                                        "escala": "olho"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/paragrafo",
+                                      "props": {
+                                        "texto": "{s.autonomia ? t(\"autonomia.valor\", objeto([[\"n\", s.autonomia]])) : \"—\"}",
+                                        "escala": "dado"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "texto/paragrafo",
+                          "props": {
+                            "texto": "{t(\"lista.nota\")}",
+                            "escala": "nota",
+                            "tom": "suave"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "repetir": {
+                "cada": "filtra(concat(c1, c2), c => c.slug == estado.sel)",
+                "como": "s",
+                "chave": "s.slug"
+              }
+            },
+            {
+              "bloco": "layout/gaveta",
+              "props": {
+                "rotulo": "{t(\"guia.titulo\")}",
+                "largura": 28
+              },
+              "slots": {
+                "filhos": [
+                  {
+                    "bloco": "layout/pilha",
+                    "props": {
+                      "gap": 18
+                    },
+                    "slots": {
+                      "filhos": [
+                        {
+                          "bloco": "layout/linha",
+                          "props": {
+                            "gap": 12,
+                            "alinha": "inicio"
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "layout/pilha",
+                                "props": {
+                                  "gap": 6,
+                                  "cresce": true
+                                },
+                                "slots": {
+                                  "filhos": [
+                                    {
+                                      "bloco": "texto/titulo",
+                                      "props": {
+                                        "texto": "{t(\"guia.titulo\")}",
+                                        "nivel": 2,
+                                        "escala": "detalhe"
+                                      }
+                                    },
+                                    {
+                                      "bloco": "texto/sobretitulo",
+                                      "props": {
+                                        "texto": "{t(\"guia.sub\")}",
+                                        "escala": "olho"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "bloco": "nav/botao",
+                                "props": {
+                                  "texto": "",
+                                  "icone": "fechar",
+                                  "variante": "fantasma",
+                                  "rotulo": "{t(\"detalhe.fechar\")}"
+                                },
+                                "eventos": {
+                                  "aoClicar": [
+                                    {
+                                      "acao": "definir",
+                                      "estado": "guia",
+                                      "valor": "false"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "texto/paragrafo",
+                          "props": {
+                            "texto": "{t(\"guia.intro\")}",
+                            "escala": "guia"
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 6
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "01",
+                                  "escala": "olho"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "{t(\"guia.1.t\")}",
+                                  "nivel": 3,
+                                  "escala": "detalhe"
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "{t(\"guia.1.p\")}",
+                                  "escala": "guia",
+                                  "tom": "texto"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 6
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "02",
+                                  "escala": "olho"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "{t(\"guia.2.t\")}",
+                                  "nivel": 3,
+                                  "escala": "detalhe"
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "{t(\"guia.2.p\")}",
+                                  "escala": "guia",
+                                  "tom": "texto"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 6
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "03",
+                                  "escala": "olho"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "{t(\"guia.3.t\")}",
+                                  "nivel": 3,
+                                  "escala": "detalhe"
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "{t(\"guia.3.p\")}",
+                                  "escala": "guia",
+                                  "tom": "texto"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "bloco": "layout/pilha",
+                          "props": {
+                            "gap": 6
+                          },
+                          "slots": {
+                            "filhos": [
+                              {
+                                "bloco": "texto/sobretitulo",
+                                "props": {
+                                  "texto": "04",
+                                  "escala": "olho"
+                                }
+                              },
+                              {
+                                "bloco": "texto/titulo",
+                                "props": {
+                                  "texto": "{t(\"guia.4.t\")}",
+                                  "nivel": 3,
+                                  "escala": "detalhe"
+                                }
+                              },
+                              {
+                                "bloco": "texto/paragrafo",
+                                "props": {
+                                  "texto": "{t(\"guia.4.p\")}",
+                                  "escala": "guia",
+                                  "tom": "texto"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "se": "estado.guia"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "kind": "tenant",
+    "id": "loja-demo",
+    "tenantId": "11111111-1111-1111-1111-111111111111",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "alias": "loja-demo",
+      "nome": "Loja Demo",
+      "segmento": "varejo",
+      "modulos": [
+        "loja"
+      ],
+      "tema": "saude",
+      "paginas": [
+        "saude.home"
+      ],
+      "idiomas": [
+        "pt-BR",
+        "en"
+      ],
+      "idiomaPadrao": "pt-BR"
+    }
+  },
+  {
+    "kind": "tenant",
+    "id": "loja-outra",
+    "tenantId": "22222222-2222-2222-2222-222222222222",
+    "versao": "1.0.0",
+    "estatuto": "publicado",
+    "spec": {
+      "alias": "loja-outra",
+      "nome": "Outra Loja",
+      "segmento": "varejo",
+      "modulos": [
+        "loja"
+      ],
+      "tema": "saude",
+      "paginas": [
+        "saude.home"
+      ],
+      "idiomas": [
+        "pt-BR",
+        "en"
+      ],
+      "idiomaPadrao": "pt-BR"
+    }
+  }
+]

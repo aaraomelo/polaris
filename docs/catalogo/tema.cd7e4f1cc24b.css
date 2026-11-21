@@ -127,6 +127,26 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris header nav a[aria-current=page]{color:var(--cabecalho-link-atual-cor, var(--cor-texto));font-weight:var(--cabecalho-link-atual-peso, 600);text-decoration:var(--cabecalho-link-atual-decoracao, underline)}
 #polaris [data-painel]{display:grid;grid-template-columns:var(--largura-lateral, 16rem) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100vh;overflow:hidden}
 #polaris [data-painel]>header{grid-column:1/-1;grid-row:1}
+/* modo do tema numa caixa (prop modo): a caixa pinta o próprio fundo e a cor do texto com os tokens do modo; no topo da página ocupa a altura toda */
+#polaris [data-modo]{background:var(--cor-fundo);color:var(--cor-texto)}
+#polaris>[data-modo]{min-height:100vh}
+/* painel de indicadores (marcas: indicadores, tabela-painel, abas-painel): régua, divisórias e superfície vêm dos tokens painel.* do tema */
+#polaris [data-marca=indicadores]{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:var(--painel-espessura,1px) solid var(--painel-regua,var(--cor-borda));border-bottom:var(--painel-espessura,1px) solid var(--painel-regua,var(--cor-borda))}
+#polaris [data-marca=indicadores]>*{padding:var(--painel-recuo,1.25rem) 1rem;text-align:center;align-items:center}
+#polaris [data-marca=indicadores]>*+*{border-left:1px solid var(--painel-divisoria,var(--cor-borda))}
+#polaris [data-marca=tabela-painel]{background:var(--painel-superficie,var(--cor-superficie));padding:var(--painel-recuo-tabela,1.5rem);overflow-x:auto}
+#polaris [data-marca=tabela-painel] table{width:100%;border-collapse:collapse;min-width:44rem}
+#polaris [data-marca=tabela-painel] th{font-family:var(--tipografia-familia-mono,inherit);font-size:.625rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--cor-texto-suave);text-align:right;padding:.5rem .5rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda))}
+#polaris [data-marca=tabela-painel] td{font-family:var(--tipografia-familia-mono,inherit);font-size:.8125rem;text-align:right;padding:.6rem .35rem;border-bottom:1px solid var(--painel-divisoria,var(--cor-borda));white-space:nowrap}
+#polaris [data-marca=tabela-painel] :is(th,td):first-child{text-align:left;font-family:inherit}
+#polaris [data-marca=tabela-painel] svg{width:4.5rem;height:1.5rem;display:block;margin-left:auto;overflow:visible}
+#polaris [data-marca=tabela-painel] button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+#polaris [data-marca=tabela-painel] button:hover{text-decoration:underline}
+#polaris [data-marca=grafico-painel] svg{width:100%;height:auto;display:block;overflow:visible}
+#polaris svg [role=button]{cursor:pointer;transition:opacity var(--movimento-duracao,.2s)}
+#polaris svg [role=button]:hover{opacity:.8}
+#polaris svg [role=button]:focus-visible{outline:2px solid var(--cor-texto);outline-offset:2px}
+#polaris svg [data-selecionado]{stroke:var(--cor-texto);stroke-width:2}
 #polaris aside[data-gaveta]{position:fixed;top:0;bottom:0;width:min(var(--gaveta-largura,30rem),100vw);overflow:auto;z-index:50;box-sizing:border-box;padding:var(--gaveta-recuo,1.5rem);background:var(--gaveta-fundo,var(--cor-superficie,var(--cor-fundo)));color:var(--cor-texto);box-shadow:0 0 0 100vmax var(--gaveta-veu,color-mix(in srgb,var(--cor-fundo) 70%,transparent))}
 #polaris aside[data-gaveta=direita]{right:0;border-left:var(--espacamento-borda,1px) solid var(--cor-borda)}
 #polaris aside[data-gaveta=esquerda]{left:0;border-right:var(--espacamento-borda,1px) solid var(--cor-borda)}

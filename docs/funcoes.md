@@ -970,15 +970,15 @@ Interpolação linear: leva `v` do intervalo [d0, d1] para [r0, r1] (sem cortar,
 
 ### `enxame`
 
-`enxame(xs, rs, folga?) → lista`
+`enxame(itens, folga?) → lista`
 
-Layout de "enxame" (beeswarm): dadas as posições `xs` e os raios `rs` de círculos, devolve o deslocamento vertical de cada um (na mesma ordem) para que nenhum se sobreponha (distância ≥ soma dos raios + folga, padrão 1), o mais perto possível de 0.
+Layout de "enxame" (beeswarm): `itens` é uma lista de objetos com `x` e `r` (posição e raio de um círculo); devolve a mesma lista com `y` acrescentado, o deslocamento vertical que evita sobreposição (distância ≥ soma dos raios + folga, padrão 1), o mais perto possível de 0.
 
 | Expressão | Escopo | Resultado |
 |---|---|---|
-| `enxame([10, 10], [5, 5], 0)` |  | `[0,10]` |
-| `enxame([0, 100], [5, 5])` |  | `[0,0]` |
-| `enxame([1], [])` |  | _(ausente)_ |
+| `enxame([objeto([["x", 10], ["r", 5]]), objeto([["x", 10], ["r", 5]])], 0)` |  | `[{"x":10,"r":5,"y":0},{"x":10,"r":5,"y":10}]` |
+| `enxame([objeto([["x", 0], ["r", 5]]), objeto([["x", 100], ["r", 5]])])[1].y` |  | `0` |
+| `enxame([1])` |  | _(ausente)_ |
 
 ### `minimo`
 

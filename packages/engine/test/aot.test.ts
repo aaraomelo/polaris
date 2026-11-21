@@ -94,7 +94,7 @@ describe('bundle por página: tree-shaking real', () => {
   })
   it('a loja completa (listas, combinadores, aritmética exata, eventos) fica abaixo de 13,9 KB gz — o react-dom sozinho tem ~135 KB', async () => {
     const r = await empacotaCliente(loja())
-    expect(r.ok && r.pacote.gz).toBeLessThan(14.3 * 1024) // 13 → 13,25 → 13,3 → 13,4 → 13,9 → 14,3 KB (escala tipográfica nomeada; estado ligado à URL, seletor) (título com filhos, `texto/trecho` e `texto/enfase`): eventos `polaris-*` e `data-solta` das ilhas; `data-marca` e `data-zoom` dos blocos de layout
+    expect(r.ok && r.pacote.gz).toBeLessThan(14.4 * 1024) // 13 → 13,25 → 13,3 → 13,4 → 13,9 → 14,3 → 14,4 KB (`tom` nos textos; escala tipográfica nomeada; estado ligado à URL, seletor) (título com filhos, `texto/trecho` e `texto/enfase`): eventos `polaris-*` e `data-solta` das ilhas; `data-marca` e `data-zoom` dos blocos de layout
   })
   it('páginas que o runtime vivo não suporta são recusadas com os motivos (nenhum bundle)', async () => {
     const r = new Registry(); registraBase(r)

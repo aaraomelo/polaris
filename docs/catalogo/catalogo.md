@@ -1057,6 +1057,12 @@ Um círculo dentro de `grafico/svg`. `cor` (CSS seguro) ou `tom` (token `grafico
 | `selecionado` | booleano | não |  |  |
 | `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
 
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoClicar` | — |
+
 **Exemplo: Bolhas**
 
 ```json
@@ -1155,6 +1161,12 @@ Barra ou fundo dentro de `grafico/svg` (`x`, `y`, `largura`, `altura`, `raio`). 
 | `x` | número | não |  |  |
 | `y` | número | não |  |  |
 
+**Eventos**
+
+| Evento | Payload |
+|---|---|
+| `aoClicar` | — |
+
 **Exemplo: Barras**
 
 ```json
@@ -1202,6 +1214,7 @@ Texto dentro de `grafico/svg` na posição (`x`, `y`), com `ancora` (inicio, cen
 | `ancora` | "inicio" \| "centro" \| "fim" | não |  |  |
 | `base` | "auto" \| "central" | não |  |  |
 | `cor` | texto ≤ 200 caracteres | não |  | cor CSS segura: var(), color-mix(), oklch(), rgb(), hsl() ou #hex |
+| `fonte` | "corpo" \| "titulo" \| "mono" | não |  | a família do texto: a do corpo, a dos títulos (`tipografia.familiaTitulo`) ou a monoespaçada (`tipografia.familiaMono`) |
 | `tamanho` | número ≥ 1 | não |  |  |
 | `texto` | texto \| número | não |  |  |
 | `tom` | texto | não |  | nome da cor do tema (token `grafico.<tom>`) |
@@ -1678,6 +1691,7 @@ Distribui os filhos em colunas iguais (1 a 12). Padrão: 2 colunas.
 | `alinha` | "inicio" \| "centro" \| "fim" \| "esticar" | não |  | alinhamento vertical das células (padrão: esticar) |
 | `colunas` | inteiro ≥ 1 ≤ 12 | não | 2 |  |
 | `gap` | número ≥ 0 | não |  |  |
+| `marca` | texto | não |  | gancho de estilo (`data-marca`) que o tema usa, ex.: `indicadores` |
 
 **Slots**
 
@@ -3347,6 +3361,7 @@ Grupo `thead`: aceita só `tabela/linha`.
 | `colunas` | inteiro ≥ 1 ≤ 1000 | não |  |  |
 | `linhas` | inteiro ≥ 1 ≤ 65534 | não |  |  |
 | `texto` | texto | não |  |  |
+| `tom` | texto | não |  | cor do texto pelo nome do tom do tema (token `grafico.<tom>`) |
 
 **Slots**
 
@@ -3698,6 +3713,7 @@ Texto corrido. O conteúdo é sempre escapado (nunca HTML).
 |---|---|---|---|---|
 | `escala` | texto | não |  | escala tipográfica nomeada: lê os tokens do tema `tipografia.escala.<nome>.tamanho\|peso\|altura\|espacamento` (cada um cai no padrão do bloco quando falta) |
 | `texto` | texto | sim |  |  |
+| `tom` | texto | não |  | cor do texto pelo nome do tom do tema (token `grafico.<tom>`) |
 
 **Exemplo: Texto simples**
 
@@ -3730,6 +3746,7 @@ Observações e notas de rodapé, em cor suave.
 | Prop | Tipo | Obrig. | Padrão | Descrição |
 |---|---|---|---|---|
 | `texto` | texto | sim |  |  |
+| `tom` | texto | não |  | cor do texto pelo nome do tom do tema (token `grafico.<tom>`) |
 
 **Exemplo: Nota**
 
@@ -3792,6 +3809,7 @@ A linha pequena em caixa alta e letras espaçadas que vem antes de um título ("
 |---|---|---|---|---|
 | `escala` | texto | não |  | escala tipográfica nomeada: lê os tokens do tema `tipografia.escala.<nome>.tamanho\|peso\|altura\|espacamento` (cada um cai no padrão do bloco quando falta) |
 | `texto` | texto ≤ 200 caracteres | sim |  |  |
+| `tom` | texto | não |  | cor do texto pelo nome do tom do tema (token `grafico.<tom>`) |
 
 **Exemplo: Antes de um título**
 

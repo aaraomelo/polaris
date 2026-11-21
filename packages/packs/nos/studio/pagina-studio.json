@@ -3918,7 +3918,7 @@
                          "dados": "aplicar",
                          "args": {
                           "slug": "{m.slug}",
-                          "publicar": "true"
+                          "publicar": "{true}"
                          },
                          "depois": [
                           {

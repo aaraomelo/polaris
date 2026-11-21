@@ -1,0 +1,8795 @@
+[
+  {
+    "slug": "bastion-health",
+    "nome": "Bastion Health",
+    "segmento": "enterprise",
+    "arr": "601000.00",
+    "saude": 34,
+    "historico": [
+      48,
+      49,
+      49,
+      45,
+      45,
+      42,
+      40,
+      39,
+      36,
+      38,
+      35,
+      35,
+      34
+    ],
+    "queda": -15,
+    "autonomia": null,
+    "assentos": 32,
+    "semana": -2,
+    "ultimoContato": 55,
+    "renovacao": "2027-11-30",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": -5
+      },
+      {
+        "k": "suporte",
+        "v": -6
+      },
+      {
+        "k": "campeao",
+        "v": -1
+      },
+      {
+        "k": "recursos",
+        "v": -8
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "meridian-systems",
+    "nome": "Meridian Systems",
+    "segmento": "enterprise",
+    "arr": "374000.00",
+    "saude": 25,
+    "historico": [
+      52,
+      52,
+      44,
+      43,
+      40,
+      37,
+      35,
+      32,
+      31,
+      30,
+      28,
+      25,
+      25
+    ],
+    "queda": -27,
+    "autonomia": 2,
+    "assentos": 53,
+    "semana": -3,
+    "ultimoContato": 52,
+    "renovacao": "2026-12-12",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -10
+      },
+      {
+        "k": "adocao",
+        "v": -2
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -8
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": -12
+      }
+    ]
+  },
+  {
+    "slug": "halcyon-labs",
+    "nome": "Halcyon Labs",
+    "segmento": "enterprise",
+    "arr": "485000.00",
+    "saude": 24,
+    "historico": [
+      33,
+      33,
+      33,
+      33,
+      32,
+      31,
+      28,
+      28,
+      27,
+      26,
+      24,
+      23,
+      24
+    ],
+    "queda": -9,
+    "autonomia": null,
+    "assentos": 32,
+    "semana": -2,
+    "ultimoContato": 42,
+    "renovacao": "2027-11-28",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -7
+      },
+      {
+        "k": "adocao",
+        "v": -2
+      },
+      {
+        "k": "suporte",
+        "v": -6
+      },
+      {
+        "k": "campeao",
+        "v": -9
+      },
+      {
+        "k": "recursos",
+        "v": -9
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "fairhaven-energy",
+    "nome": "Fairhaven Energy",
+    "segmento": "enterprise",
+    "arr": "903000.00",
+    "saude": 35,
+    "historico": [
+      58,
+      58,
+      52,
+      50,
+      48,
+      47,
+      43,
+      43,
+      42,
+      41,
+      39,
+      37,
+      35
+    ],
+    "queda": -23,
+    "autonomia": null,
+    "assentos": 60,
+    "semana": -5,
+    "ultimoContato": 18,
+    "renovacao": "2027-03-05",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": -6
+      },
+      {
+        "k": "suporte",
+        "v": -2
+      },
+      {
+        "k": "campeao",
+        "v": -7
+      },
+      {
+        "k": "recursos",
+        "v": -4
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "kestrel-foods",
+    "nome": "Kestrel Foods",
+    "segmento": "enterprise",
+    "arr": "522000.00",
+    "saude": 96,
+    "historico": [
+      106,
+      106,
+      104,
+      101,
+      100,
+      100,
+      101,
+      100,
+      97,
+      99,
+      96,
+      96,
+      96
+    ],
+    "queda": -10,
+    "autonomia": null,
+    "assentos": 65,
+    "semana": -1,
+    "ultimoContato": 37,
+    "renovacao": "2026-12-18",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 9
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "foxglove-foods",
+    "nome": "Foxglove Foods",
+    "segmento": "enterprise",
+    "arr": "319000.00",
+    "saude": 78,
+    "historico": [
+      84,
+      83,
+      84,
+      81,
+      82,
+      81,
+      79,
+      79,
+      80,
+      79,
+      78,
+      79,
+      78
+    ],
+    "queda": -6,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": 1,
+    "ultimoContato": 21,
+    "renovacao": "2027-03-14",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 5
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "ironpine-foods",
+    "nome": "Ironpine Foods",
+    "segmento": "enterprise",
+    "arr": "693000.00",
+    "saude": 87,
+    "historico": [
+      99,
+      99,
+      99,
+      95,
+      96,
+      92,
+      91,
+      91,
+      91,
+      91,
+      89,
+      88,
+      87
+    ],
+    "queda": -12,
+    "autonomia": null,
+    "assentos": 68,
+    "semana": 0,
+    "ultimoContato": 30,
+    "renovacao": "2026-12-04",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": 1
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 25
+      }
+    ]
+  },
+  {
+    "slug": "stonebridge-partners",
+    "nome": "Stonebridge Partners",
+    "segmento": "enterprise",
+    "arr": "383000.00",
+    "saude": 98,
+    "historico": [
+      102,
+      103,
+      103,
+      101,
+      101,
+      100,
+      102,
+      99,
+      100,
+      99,
+      97,
+      100,
+      98
+    ],
+    "queda": -5,
+    "autonomia": null,
+    "assentos": 97,
+    "semana": -1,
+    "ultimoContato": 31,
+    "renovacao": "2027-07-10",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 10
+      },
+      {
+        "k": "comercial",
+        "v": 9
+      }
+    ]
+  },
+  {
+    "slug": "nightingale-partners",
+    "nome": "Nightingale Partners",
+    "segmento": "enterprise",
+    "arr": "825000.00",
+    "saude": 95,
+    "historico": [
+      104,
+      106,
+      102,
+      103,
+      100,
+      101,
+      99,
+      99,
+      97,
+      96,
+      97,
+      96,
+      95
+    ],
+    "queda": -11,
+    "autonomia": null,
+    "assentos": 83,
+    "semana": 2,
+    "ultimoContato": 17,
+    "renovacao": "2027-11-17",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 12
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "redfern-legal",
+    "nome": "Redfern Legal",
+    "segmento": "enterprise",
+    "arr": "456000.00",
+    "saude": 85,
+    "historico": [
+      97,
+      93,
+      93,
+      93,
+      91,
+      91,
+      90,
+      88,
+      88,
+      88,
+      87,
+      87,
+      85
+    ],
+    "queda": -12,
+    "autonomia": null,
+    "assentos": 84,
+    "semana": 2,
+    "ultimoContato": 31,
+    "renovacao": "2027-09-23",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 8
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "quarry-petroleum",
+    "nome": "Quarry Petroleum",
+    "segmento": "enterprise",
+    "arr": "361000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      89,
+      90,
+      90,
+      89,
+      90,
+      90,
+      90,
+      89,
+      90,
+      89,
+      90,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 71,
+    "semana": 2,
+    "ultimoContato": 13,
+    "renovacao": "2027-07-20",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "whitcombe-bank",
+    "nome": "Whitcombe Bank",
+    "segmento": "enterprise",
+    "arr": "293000.00",
+    "saude": 93,
+    "historico": [
+      92,
+      93,
+      93,
+      92,
+      92,
+      93,
+      92,
+      92,
+      93,
+      93,
+      92,
+      93,
+      93
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 77,
+    "semana": -1,
+    "ultimoContato": 38,
+    "renovacao": "2027-03-06",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 14
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "kingsley-legal",
+    "nome": "Kingsley Legal",
+    "segmento": "enterprise",
+    "arr": "888000.00",
+    "saude": 89,
+    "historico": [
+      89,
+      88,
+      88,
+      89,
+      88,
+      89,
+      89,
+      89,
+      89,
+      88,
+      88,
+      89,
+      89
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 91,
+    "semana": 0,
+    "ultimoContato": 26,
+    "renovacao": "2027-04-14",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": -1
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 14
+      }
+    ]
+  },
+  {
+    "slug": "brightwater-claims",
+    "nome": "Brightwater Claims",
+    "segmento": "enterprise",
+    "arr": "578000.00",
+    "saude": 98,
+    "historico": [
+      103,
+      102,
+      100,
+      101,
+      99,
+      99,
+      98,
+      98,
+      99,
+      98,
+      98,
+      98,
+      98
+    ],
+    "queda": -5,
+    "autonomia": null,
+    "assentos": 75,
+    "semana": 2,
+    "ultimoContato": 5,
+    "renovacao": "2027-02-05",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 5
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 18
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "millbrook-analytics",
+    "nome": "Millbrook Analytics",
+    "segmento": "enterprise",
+    "arr": "323000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      86,
+      87,
+      87,
+      85,
+      87,
+      87,
+      87,
+      86,
+      87,
+      86,
+      87,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 64,
+    "semana": 3,
+    "ultimoContato": 8,
+    "renovacao": "2027-08-07",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 24
+      }
+    ]
+  },
+  {
+    "slug": "pemberton-partners",
+    "nome": "Pemberton Partners",
+    "segmento": "enterprise",
+    "arr": "727000.00",
+    "saude": 91,
+    "historico": [
+      94,
+      94,
+      94,
+      93,
+      92,
+      91,
+      92,
+      93,
+      92,
+      92,
+      90,
+      92,
+      91
+    ],
+    "queda": -3,
+    "autonomia": null,
+    "assentos": 76,
+    "semana": 1,
+    "ultimoContato": 29,
+    "renovacao": "2027-06-08",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 10
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "lakeshore-energy",
+    "nome": "Lakeshore Energy",
+    "segmento": "enterprise",
+    "arr": "606000.00",
+    "saude": 89,
+    "historico": [
+      89,
+      89,
+      88,
+      89,
+      87,
+      89,
+      88,
+      89,
+      89,
+      89,
+      89,
+      89,
+      89
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 68,
+    "semana": -1,
+    "ultimoContato": 22,
+    "renovacao": "2026-12-02",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 1
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 22
+      }
+    ]
+  },
+  {
+    "slug": "larkspur-analytics",
+    "nome": "Larkspur Analytics",
+    "segmento": "enterprise",
+    "arr": "485000.00",
+    "saude": 55,
+    "historico": [
+      55,
+      55,
+      55,
+      55,
+      55,
+      55,
+      55,
+      55,
+      55,
+      55,
+      55,
+      53,
+      55
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 83,
+    "semana": 2,
+    "ultimoContato": 19,
+    "renovacao": "2028-01-08",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -3
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": -3
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "hollowell-claims",
+    "nome": "Hollowell Claims",
+    "segmento": "enterprise",
+    "arr": "333000.00",
+    "saude": 92,
+    "historico": [
+      104,
+      104,
+      104,
+      100,
+      100,
+      99,
+      96,
+      95,
+      97,
+      94,
+      94,
+      92,
+      92
+    ],
+    "queda": -12,
+    "autonomia": null,
+    "assentos": 75,
+    "semana": 2,
+    "ultimoContato": 16,
+    "renovacao": "2026-12-02",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 5
+      }
+    ]
+  },
+  {
+    "slug": "northwind-textiles",
+    "nome": "Northwind Textiles",
+    "segmento": "enterprise",
+    "arr": "460000.00",
+    "saude": 98,
+    "historico": [
+      102,
+      102,
+      102,
+      102,
+      99,
+      99,
+      100,
+      100,
+      100,
+      99,
+      98,
+      98,
+      98
+    ],
+    "queda": -4,
+    "autonomia": null,
+    "assentos": 76,
+    "semana": -2,
+    "ultimoContato": 32,
+    "renovacao": "2027-07-19",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": 1
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 14
+      },
+      {
+        "k": "recursos",
+        "v": 12
+      },
+      {
+        "k": "comercial",
+        "v": 9
+      }
+    ]
+  },
+  {
+    "slug": "silverline-software",
+    "nome": "Silverline Software",
+    "segmento": "enterprise",
+    "arr": "545000.00",
+    "saude": 95,
+    "historico": [
+      94,
+      94,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      94,
+      94,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 96,
+    "semana": 3,
+    "ultimoContato": 18,
+    "renovacao": "2027-04-14",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 9
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 1
+      }
+    ]
+  },
+  {
+    "slug": "bastion-systems",
+    "nome": "Bastion Systems",
+    "segmento": "enterprise",
+    "arr": "845000.00",
+    "saude": 88,
+    "historico": [
+      88,
+      87,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      87,
+      87,
+      88
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 68,
+    "semana": 1,
+    "ultimoContato": 24,
+    "renovacao": "2027-01-18",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": -7
+      }
+    ]
+  },
+  {
+    "slug": "fenwick-legal",
+    "nome": "Fenwick Legal",
+    "segmento": "enterprise",
+    "arr": "720000.00",
+    "saude": 22,
+    "historico": [
+      59,
+      59,
+      59,
+      50,
+      44,
+      41,
+      38,
+      33,
+      32,
+      28,
+      27,
+      25,
+      22
+    ],
+    "queda": -37,
+    "autonomia": null,
+    "assentos": 31,
+    "semana": -2,
+    "ultimoContato": 29,
+    "renovacao": "2027-05-24",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -21
+      },
+      {
+        "k": "adocao",
+        "v": -8
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": -16
+      },
+      {
+        "k": "recursos",
+        "v": -1
+      },
+      {
+        "k": "comercial",
+        "v": 11
+      }
+    ]
+  },
+  {
+    "slug": "marlowe-capital",
+    "nome": "Marlowe Capital",
+    "segmento": "enterprise",
+    "arr": "840000.00",
+    "saude": 54,
+    "historico": [
+      88,
+      88,
+      78,
+      77,
+      74,
+      71,
+      67,
+      63,
+      62,
+      60,
+      57,
+      56,
+      54
+    ],
+    "queda": -34,
+    "autonomia": 2,
+    "assentos": 63,
+    "semana": -6,
+    "ultimoContato": 47,
+    "renovacao": "2027-03-15",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": -5
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "ironpine-energy",
+    "nome": "Ironpine Energy",
+    "segmento": "enterprise",
+    "arr": "610000.00",
+    "saude": 28,
+    "historico": [
+      65,
+      65,
+      64,
+      65,
+      55,
+      51,
+      45,
+      43,
+      39,
+      35,
+      33,
+      31,
+      28
+    ],
+    "queda": -37,
+    "autonomia": null,
+    "assentos": 50,
+    "semana": -4,
+    "ultimoContato": 32,
+    "renovacao": "2027-04-18",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -4
+      },
+      {
+        "k": "adocao",
+        "v": -4
+      },
+      {
+        "k": "suporte",
+        "v": -7
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": -11
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "norvale-petroleum",
+    "nome": "Norvale Petroleum",
+    "segmento": "enterprise",
+    "arr": "566000.00",
+    "saude": 51,
+    "historico": [
+      82,
+      76,
+      71,
+      68,
+      67,
+      64,
+      61,
+      60,
+      58,
+      57,
+      56,
+      52,
+      51
+    ],
+    "queda": -31,
+    "autonomia": 2,
+    "assentos": 65,
+    "semana": -7,
+    "ultimoContato": 36,
+    "renovacao": "2027-08-14",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": -1
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": -5
+      },
+      {
+        "k": "recursos",
+        "v": -6
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "bastion-claims",
+    "nome": "Bastion Claims",
+    "segmento": "enterprise",
+    "arr": "455000.00",
+    "saude": 31,
+    "historico": [
+      61,
+      62,
+      56,
+      51,
+      49,
+      45,
+      44,
+      41,
+      38,
+      37,
+      33,
+      33,
+      31
+    ],
+    "queda": -31,
+    "autonomia": null,
+    "assentos": 40,
+    "semana": -4,
+    "ultimoContato": 2,
+    "renovacao": "2027-10-16",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": -5
+      },
+      {
+        "k": "suporte",
+        "v": -2
+      },
+      {
+        "k": "campeao",
+        "v": -7
+      },
+      {
+        "k": "recursos",
+        "v": -9
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "blackfell-ports",
+    "nome": "Blackfell Ports",
+    "segmento": "enterprise",
+    "arr": "388000.00",
+    "saude": 26,
+    "historico": [
+      63,
+      55,
+      50,
+      47,
+      44,
+      42,
+      38,
+      35,
+      33,
+      33,
+      30,
+      28,
+      26
+    ],
+    "queda": -37,
+    "autonomia": null,
+    "assentos": 32,
+    "semana": -4,
+    "ultimoContato": 10,
+    "renovacao": "2027-06-26",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -9
+      },
+      {
+        "k": "adocao",
+        "v": -3
+      },
+      {
+        "k": "suporte",
+        "v": -4
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": -3
+      },
+      {
+        "k": "comercial",
+        "v": -10
+      }
+    ]
+  },
+  {
+    "slug": "strathmore-group",
+    "nome": "Strathmore Group",
+    "segmento": "enterprise",
+    "arr": "472000.00",
+    "saude": 47,
+    "historico": [
+      81,
+      81,
+      81,
+      81,
+      71,
+      68,
+      62,
+      60,
+      58,
+      55,
+      51,
+      51,
+      47
+    ],
+    "queda": -34,
+    "autonomia": 1,
+    "assentos": 56,
+    "semana": -7,
+    "ultimoContato": 34,
+    "renovacao": "2027-08-17",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": -6
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -4
+      },
+      {
+        "k": "recursos",
+        "v": -4
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "redmoor-aviation",
+    "nome": "Redmoor Aviation",
+    "segmento": "enterprise",
+    "arr": "342000.00",
+    "saude": 30,
+    "historico": [
+      64,
+      63,
+      64,
+      64,
+      54,
+      50,
+      46,
+      43,
+      39,
+      38,
+      33,
+      32,
+      30
+    ],
+    "queda": -34,
+    "autonomia": null,
+    "assentos": 56,
+    "semana": -2,
+    "ultimoContato": 62,
+    "renovacao": "2027-11-09",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -7
+      },
+      {
+        "k": "adocao",
+        "v": -10
+      },
+      {
+        "k": "suporte",
+        "v": -7
+      },
+      {
+        "k": "campeao",
+        "v": -7
+      },
+      {
+        "k": "recursos",
+        "v": -8
+      },
+      {
+        "k": "comercial",
+        "v": 14
+      }
+    ]
+  },
+  {
+    "slug": "hollowell-labs",
+    "nome": "Hollowell Labs",
+    "segmento": "mid-market",
+    "arr": "170000.00",
+    "saude": 24,
+    "historico": [
+      50,
+      50,
+      50,
+      44,
+      39,
+      37,
+      36,
+      34,
+      31,
+      30,
+      26,
+      26,
+      24
+    ],
+    "queda": -26,
+    "autonomia": null,
+    "assentos": 68,
+    "semana": -6,
+    "ultimoContato": 61,
+    "renovacao": "2027-03-01",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -8
+      },
+      {
+        "k": "adocao",
+        "v": -4
+      },
+      {
+        "k": "suporte",
+        "v": -10
+      },
+      {
+        "k": "campeao",
+        "v": -6
+      },
+      {
+        "k": "recursos",
+        "v": -3
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "cedarpoint-mutual",
+    "nome": "Cedarpoint Mutual",
+    "segmento": "mid-market",
+    "arr": "238000.00",
+    "saude": 22,
+    "historico": [
+      39,
+      39,
+      39,
+      34,
+      34,
+      32,
+      28,
+      28,
+      26,
+      26,
+      24,
+      24,
+      22
+    ],
+    "queda": -17,
+    "autonomia": null,
+    "assentos": 36,
+    "semana": -3,
+    "ultimoContato": 19,
+    "renovacao": "2027-02-13",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -10
+      },
+      {
+        "k": "adocao",
+        "v": -2
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -9
+      },
+      {
+        "k": "recursos",
+        "v": -2
+      },
+      {
+        "k": "comercial",
+        "v": -10
+      }
+    ]
+  },
+  {
+    "slug": "hollowell-capital",
+    "nome": "Hollowell Capital",
+    "segmento": "mid-market",
+    "arr": "146000.00",
+    "saude": 26,
+    "historico": [
+      45,
+      47,
+      47,
+      41,
+      38,
+      37,
+      36,
+      33,
+      31,
+      29,
+      27,
+      28,
+      26
+    ],
+    "queda": -21,
+    "autonomia": null,
+    "assentos": 49,
+    "semana": -5,
+    "ultimoContato": 58,
+    "renovacao": "2027-04-28",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -4
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": -7
+      },
+      {
+        "k": "recursos",
+        "v": -4
+      },
+      {
+        "k": "comercial",
+        "v": -15
+      }
+    ]
+  },
+  {
+    "slug": "mapleton-media",
+    "nome": "Mapleton Media",
+    "segmento": "mid-market",
+    "arr": "225000.00",
+    "saude": 24,
+    "historico": [
+      45,
+      45,
+      45,
+      45,
+      40,
+      37,
+      34,
+      33,
+      31,
+      27,
+      26,
+      25,
+      24
+    ],
+    "queda": -21,
+    "autonomia": null,
+    "assentos": 46,
+    "semana": -4,
+    "ultimoContato": 35,
+    "renovacao": "2026-12-14",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": -1
+      },
+      {
+        "k": "suporte",
+        "v": -4
+      },
+      {
+        "k": "campeao",
+        "v": -10
+      },
+      {
+        "k": "recursos",
+        "v": -14
+      },
+      {
+        "k": "comercial",
+        "v": -5
+      }
+    ]
+  },
+  {
+    "slug": "northwind-software",
+    "nome": "Northwind Software",
+    "segmento": "mid-market",
+    "arr": "152000.00",
+    "saude": 35,
+    "historico": [
+      56,
+      55,
+      54,
+      56,
+      50,
+      46,
+      45,
+      44,
+      42,
+      40,
+      38,
+      36,
+      35
+    ],
+    "queda": -21,
+    "autonomia": null,
+    "assentos": 38,
+    "semana": -1,
+    "ultimoContato": 62,
+    "renovacao": "2027-01-02",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -3
+      },
+      {
+        "k": "adocao",
+        "v": -6
+      },
+      {
+        "k": "suporte",
+        "v": -5
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": -7
+      }
+    ]
+  },
+  {
+    "slug": "ivywood-media",
+    "nome": "Ivywood Media",
+    "segmento": "mid-market",
+    "arr": "153000.00",
+    "saude": 28,
+    "historico": [
+      38,
+      38,
+      38,
+      35,
+      35,
+      34,
+      31,
+      31,
+      29,
+      29,
+      28,
+      27,
+      28
+    ],
+    "queda": -10,
+    "autonomia": null,
+    "assentos": 31,
+    "semana": -2,
+    "ultimoContato": 15,
+    "renovacao": "2026-12-01",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": -1
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": -8
+      },
+      {
+        "k": "recursos",
+        "v": -5
+      },
+      {
+        "k": "comercial",
+        "v": -10
+      }
+    ]
+  },
+  {
+    "slug": "norvale-media",
+    "nome": "Norvale Media",
+    "segmento": "mid-market",
+    "arr": "194000.00",
+    "saude": 28,
+    "historico": [
+      39,
+      39,
+      37,
+      34,
+      34,
+      32,
+      31,
+      32,
+      32,
+      30,
+      29,
+      28,
+      28
+    ],
+    "queda": -11,
+    "autonomia": null,
+    "assentos": 49,
+    "semana": -1,
+    "ultimoContato": 40,
+    "renovacao": "2027-04-27",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": -8
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -8
+      },
+      {
+        "k": "recursos",
+        "v": -7
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "kingsley-group",
+    "nome": "Kingsley Group",
+    "segmento": "mid-market",
+    "arr": "74000.00",
+    "saude": 33,
+    "historico": [
+      56,
+      56,
+      51,
+      48,
+      45,
+      42,
+      43,
+      40,
+      38,
+      37,
+      35,
+      33,
+      33
+    ],
+    "queda": -23,
+    "autonomia": null,
+    "assentos": 26,
+    "semana": -5,
+    "ultimoContato": 10,
+    "renovacao": "2026-12-11",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": -4
+      },
+      {
+        "k": "suporte",
+        "v": -4
+      },
+      {
+        "k": "campeao",
+        "v": -8
+      },
+      {
+        "k": "recursos",
+        "v": -8
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "upland-mutual",
+    "nome": "Upland Mutual",
+    "segmento": "mid-market",
+    "arr": "78000.00",
+    "saude": 29,
+    "historico": [
+      47,
+      46,
+      47,
+      41,
+      40,
+      40,
+      37,
+      34,
+      35,
+      32,
+      30,
+      30,
+      29
+    ],
+    "queda": -18,
+    "autonomia": 2,
+    "assentos": 32,
+    "semana": -3,
+    "ultimoContato": 60,
+    "renovacao": "2027-06-15",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -8
+      },
+      {
+        "k": "adocao",
+        "v": -9
+      },
+      {
+        "k": "suporte",
+        "v": -2
+      },
+      {
+        "k": "campeao",
+        "v": -6
+      },
+      {
+        "k": "recursos",
+        "v": -8
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "upland-aviation",
+    "nome": "Upland Aviation",
+    "segmento": "mid-market",
+    "arr": "162000.00",
+    "saude": 25,
+    "historico": [
+      33,
+      33,
+      30,
+      30,
+      30,
+      27,
+      27,
+      28,
+      27,
+      26,
+      26,
+      25,
+      25
+    ],
+    "queda": -8,
+    "autonomia": null,
+    "assentos": 58,
+    "semana": -7,
+    "ultimoContato": 24,
+    "renovacao": "2027-01-15",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": -7
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": -11
+      },
+      {
+        "k": "recursos",
+        "v": -5
+      },
+      {
+        "k": "comercial",
+        "v": -8
+      }
+    ]
+  },
+  {
+    "slug": "ivywood-logistics",
+    "nome": "Ivywood Logistics",
+    "segmento": "mid-market",
+    "arr": "233000.00",
+    "saude": 99,
+    "historico": [
+      98,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      98,
+      98,
+      99,
+      99,
+      99
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 69,
+    "semana": 3,
+    "ultimoContato": 2,
+    "renovacao": "2027-04-10",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "verity-claims",
+    "nome": "Verity Claims",
+    "segmento": "mid-market",
+    "arr": "128000.00",
+    "saude": 76,
+    "historico": [
+      76,
+      76,
+      76,
+      76,
+      75,
+      76,
+      75,
+      76,
+      75,
+      75,
+      76,
+      75,
+      76
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 77,
+    "semana": 1,
+    "ultimoContato": 22,
+    "renovacao": "2027-04-14",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 1
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": -3
+      }
+    ]
+  },
+  {
+    "slug": "driftwood-foods",
+    "nome": "Driftwood Foods",
+    "segmento": "mid-market",
+    "arr": "174000.00",
+    "saude": 71,
+    "historico": [
+      71,
+      70,
+      71,
+      71,
+      71,
+      71,
+      71,
+      71,
+      70,
+      71,
+      70,
+      70,
+      71
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 77,
+    "semana": 3,
+    "ultimoContato": 39,
+    "renovacao": "2027-10-30",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": -10
+      }
+    ]
+  },
+  {
+    "slug": "meridian-labs",
+    "nome": "Meridian Labs",
+    "segmento": "mid-market",
+    "arr": "74000.00",
+    "saude": 95,
+    "historico": [
+      95,
+      94,
+      94,
+      94,
+      94,
+      95,
+      95,
+      93,
+      94,
+      94,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 69,
+    "semana": -2,
+    "ultimoContato": 12,
+    "renovacao": "2027-03-07",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 10
+      },
+      {
+        "k": "comercial",
+        "v": -1
+      }
+    ]
+  },
+  {
+    "slug": "ainsley-steel",
+    "nome": "Ainsley Steel",
+    "segmento": "mid-market",
+    "arr": "72000.00",
+    "saude": 92,
+    "historico": [
+      92,
+      90,
+      92,
+      91,
+      92,
+      92,
+      92,
+      92,
+      91,
+      92,
+      91,
+      90,
+      92
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 81,
+    "semana": 0,
+    "ultimoContato": 7,
+    "renovacao": "2027-10-08",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 10
+      },
+      {
+        "k": "comercial",
+        "v": 5
+      }
+    ]
+  },
+  {
+    "slug": "cobalt-petroleum",
+    "nome": "Cobalt Petroleum",
+    "segmento": "mid-market",
+    "arr": "146000.00",
+    "saude": 95,
+    "historico": [
+      95,
+      94,
+      94,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      94,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 62,
+    "semana": 4,
+    "ultimoContato": 11,
+    "renovacao": "2027-11-13",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 14
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": -1
+      }
+    ]
+  },
+  {
+    "slug": "ashford-mutual",
+    "nome": "Ashford Mutual",
+    "segmento": "mid-market",
+    "arr": "155000.00",
+    "saude": 94,
+    "historico": [
+      93,
+      93,
+      94,
+      94,
+      94,
+      94,
+      94,
+      93,
+      94,
+      92,
+      94,
+      94,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 65,
+    "semana": -1,
+    "ultimoContato": 32,
+    "renovacao": "2027-11-30",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": -2
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 23
+      }
+    ]
+  },
+  {
+    "slug": "larkspur-aviation",
+    "nome": "Larkspur Aviation",
+    "segmento": "mid-market",
+    "arr": "107000.00",
+    "saude": 67,
+    "historico": [
+      67,
+      67,
+      67,
+      67,
+      66,
+      67,
+      67,
+      67,
+      67,
+      67,
+      67,
+      66,
+      67
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 77,
+    "semana": 0,
+    "ultimoContato": 24,
+    "renovacao": "2026-12-12",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 7
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": -3
+      }
+    ]
+  },
+  {
+    "slug": "nightingale-systems",
+    "nome": "Nightingale Systems",
+    "segmento": "mid-market",
+    "arr": "74000.00",
+    "saude": 95,
+    "historico": [
+      94,
+      94,
+      94,
+      94,
+      94,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 76,
+    "semana": 3,
+    "ultimoContato": 19,
+    "renovacao": "2027-11-12",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 5
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 15
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "redfern-analytics",
+    "nome": "Redfern Analytics",
+    "segmento": "mid-market",
+    "arr": "88000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      86,
+      87,
+      87,
+      87,
+      87,
+      86,
+      87,
+      87,
+      87,
+      87,
+      87,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 61,
+    "semana": 3,
+    "ultimoContato": 13,
+    "renovacao": "2027-03-21",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 12
+      }
+    ]
+  },
+  {
+    "slug": "zephyr-petroleum",
+    "nome": "Zephyr Petroleum",
+    "segmento": "mid-market",
+    "arr": "70000.00",
+    "saude": 76,
+    "historico": [
+      75,
+      76,
+      76,
+      75,
+      76,
+      76,
+      76,
+      76,
+      76,
+      75,
+      76,
+      76,
+      76
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 93,
+    "semana": 1,
+    "ultimoContato": 10,
+    "renovacao": "2026-12-14",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": -2
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "eastvale-steel",
+    "nome": "Eastvale Steel",
+    "segmento": "mid-market",
+    "arr": "69000.00",
+    "saude": 89,
+    "historico": [
+      89,
+      88,
+      89,
+      89,
+      88,
+      88,
+      89,
+      87,
+      89,
+      89,
+      89,
+      88,
+      89
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 60,
+    "semana": 1,
+    "ultimoContato": 23,
+    "renovacao": "2028-01-03",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 14
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "upland-health",
+    "nome": "Upland Health",
+    "segmento": "mid-market",
+    "arr": "124000.00",
+    "saude": 73,
+    "historico": [
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      72,
+      72,
+      73
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 97,
+    "semana": 0,
+    "ultimoContato": 26,
+    "renovacao": "2027-06-03",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "larkspur-labs",
+    "nome": "Larkspur Labs",
+    "segmento": "mid-market",
+    "arr": "155000.00",
+    "saude": 100,
+    "historico": [
+      109,
+      110,
+      109,
+      108,
+      105,
+      105,
+      105,
+      104,
+      102,
+      100,
+      102,
+      101,
+      100
+    ],
+    "queda": -10,
+    "autonomia": null,
+    "assentos": 97,
+    "semana": 0,
+    "ultimoContato": 13,
+    "renovacao": "2028-01-14",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 9
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": 20
+      }
+    ]
+  },
+  {
+    "slug": "zephyr-retail",
+    "nome": "Zephyr Retail",
+    "segmento": "mid-market",
+    "arr": "68000.00",
+    "saude": 88,
+    "historico": [
+      91,
+      90,
+      91,
+      89,
+      89,
+      89,
+      88,
+      88,
+      89,
+      90,
+      88,
+      90,
+      88
+    ],
+    "queda": -3,
+    "autonomia": null,
+    "assentos": 92,
+    "semana": 3,
+    "ultimoContato": 35,
+    "renovacao": "2027-10-22",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 7
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 5
+      }
+    ]
+  },
+  {
+    "slug": "tidewater-software",
+    "nome": "Tidewater Software",
+    "segmento": "mid-market",
+    "arr": "148000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      89,
+      89,
+      89,
+      90,
+      90,
+      89,
+      90,
+      89,
+      89,
+      89,
+      90,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 57,
+    "semana": 2,
+    "ultimoContato": 40,
+    "renovacao": "2027-12-19",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "meridian-analytics",
+    "nome": "Meridian Analytics",
+    "segmento": "mid-market",
+    "arr": "110000.00",
+    "saude": 97,
+    "historico": [
+      97,
+      96,
+      97,
+      96,
+      97,
+      97,
+      97,
+      96,
+      97,
+      97,
+      97,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 61,
+    "semana": 4,
+    "ultimoContato": 25,
+    "renovacao": "2027-12-17",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 9
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "norvale-partners",
+    "nome": "Norvale Partners",
+    "segmento": "mid-market",
+    "arr": "97000.00",
+    "saude": 73,
+    "historico": [
+      73,
+      72,
+      72,
+      72,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 98,
+    "semana": 2,
+    "ultimoContato": 18,
+    "renovacao": "2027-10-17",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "ivywood-analytics",
+    "nome": "Ivywood Analytics",
+    "segmento": "mid-market",
+    "arr": "70000.00",
+    "saude": 96,
+    "historico": [
+      95,
+      96,
+      96,
+      94,
+      96,
+      96,
+      94,
+      95,
+      96,
+      96,
+      96,
+      95,
+      96
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 57,
+    "semana": 0,
+    "ultimoContato": 35,
+    "renovacao": "2027-01-18",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 8
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "fenwick-bank",
+    "nome": "Fenwick Bank",
+    "segmento": "mid-market",
+    "arr": "77000.00",
+    "saude": 98,
+    "historico": [
+      98,
+      98,
+      98,
+      97,
+      98,
+      98,
+      98,
+      97,
+      98,
+      98,
+      98,
+      98,
+      98
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 95,
+    "semana": -2,
+    "ultimoContato": 17,
+    "renovacao": "2027-05-31",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "upland-bank",
+    "nome": "Upland Bank",
+    "segmento": "mid-market",
+    "arr": "65000.00",
+    "saude": 91,
+    "historico": [
+      91,
+      91,
+      90,
+      90,
+      91,
+      91,
+      91,
+      90,
+      91,
+      90,
+      91,
+      90,
+      91
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 96,
+    "semana": 4,
+    "ultimoContato": 31,
+    "renovacao": "2027-02-06",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 7
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "kestrel-retail",
+    "nome": "Kestrel Retail",
+    "segmento": "mid-market",
+    "arr": "82000.00",
+    "saude": 93,
+    "historico": [
+      92,
+      93,
+      92,
+      93,
+      93,
+      92,
+      93,
+      92,
+      93,
+      93,
+      92,
+      93,
+      93
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 93,
+    "semana": -1,
+    "ultimoContato": 36,
+    "renovacao": "2028-01-09",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 23
+      }
+    ]
+  },
+  {
+    "slug": "nightingale-group",
+    "nome": "Nightingale Group",
+    "segmento": "mid-market",
+    "arr": "196000.00",
+    "saude": 87,
+    "historico": [
+      86,
+      87,
+      87,
+      87,
+      87,
+      86,
+      87,
+      86,
+      86,
+      87,
+      87,
+      87,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 64,
+    "semana": 2,
+    "ultimoContato": 19,
+    "renovacao": "2027-10-17",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 8
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 15
+      }
+    ]
+  },
+  {
+    "slug": "juniper-group",
+    "nome": "Juniper Group",
+    "segmento": "mid-market",
+    "arr": "122000.00",
+    "saude": 69,
+    "historico": [
+      69,
+      69,
+      68,
+      69,
+      69,
+      68,
+      68,
+      69,
+      69,
+      69,
+      68,
+      68,
+      69
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": -1,
+    "ultimoContato": 32,
+    "renovacao": "2027-08-05",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 5
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": -2
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "ainsley-bank",
+    "nome": "Ainsley Bank",
+    "segmento": "mid-market",
+    "arr": "104000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      89,
+      89,
+      90,
+      90,
+      90,
+      90,
+      88,
+      89,
+      90,
+      90,
+      89,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 86,
+    "semana": 4,
+    "ultimoContato": 1,
+    "renovacao": "2027-10-10",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "glenmoor-health",
+    "nome": "Glenmoor Health",
+    "segmento": "mid-market",
+    "arr": "97000.00",
+    "saude": 93,
+    "historico": [
+      93,
+      92,
+      93,
+      92,
+      93,
+      93,
+      93,
+      93,
+      92,
+      93,
+      93,
+      93,
+      93
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 70,
+    "semana": 1,
+    "ultimoContato": 37,
+    "renovacao": "2027-02-11",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "alderbrook-foods",
+    "nome": "Alderbrook Foods",
+    "segmento": "mid-market",
+    "arr": "170000.00",
+    "saude": 73,
+    "historico": [
+      78,
+      79,
+      79,
+      76,
+      75,
+      77,
+      76,
+      75,
+      75,
+      74,
+      75,
+      74,
+      73
+    ],
+    "queda": -6,
+    "autonomia": null,
+    "assentos": 75,
+    "semana": 0,
+    "ultimoContato": 13,
+    "renovacao": "2027-02-05",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -3
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 16
+      }
+    ]
+  },
+  {
+    "slug": "stonebridge-capital",
+    "nome": "Stonebridge Capital",
+    "segmento": "mid-market",
+    "arr": "109000.00",
+    "saude": 92,
+    "historico": [
+      92,
+      92,
+      92,
+      91,
+      91,
+      91,
+      92,
+      92,
+      91,
+      91,
+      92,
+      91,
+      92
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 83,
+    "semana": -1,
+    "ultimoContato": 1,
+    "renovacao": "2026-12-07",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": 13
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 1
+      }
+    ]
+  },
+  {
+    "slug": "newhaven-energy",
+    "nome": "Newhaven Energy",
+    "segmento": "mid-market",
+    "arr": "179000.00",
+    "saude": 95,
+    "historico": [
+      95,
+      93,
+      94,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      94,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 70,
+    "semana": 2,
+    "ultimoContato": 9,
+    "renovacao": "2027-03-11",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": 11
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "quarry-aviation",
+    "nome": "Quarry Aviation",
+    "segmento": "mid-market",
+    "arr": "210000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      87,
+      87,
+      87,
+      86,
+      86,
+      86,
+      87,
+      87,
+      85,
+      86,
+      86,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 78,
+    "semana": 0,
+    "ultimoContato": 19,
+    "renovacao": "2027-12-04",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "marlowe-logistics",
+    "nome": "Marlowe Logistics",
+    "segmento": "mid-market",
+    "arr": "216000.00",
+    "saude": 97,
+    "historico": [
+      97,
+      96,
+      97,
+      97,
+      97,
+      97,
+      96,
+      97,
+      97,
+      97,
+      97,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 62,
+    "semana": 0,
+    "ultimoContato": 9,
+    "renovacao": "2027-06-14",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 13
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 11
+      }
+    ]
+  },
+  {
+    "slug": "birchfield-analytics",
+    "nome": "Birchfield Analytics",
+    "segmento": "mid-market",
+    "arr": "118000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      90,
+      90,
+      90,
+      89,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 88,
+    "semana": 3,
+    "ultimoContato": 30,
+    "renovacao": "2027-03-08",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 12
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 7
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "greystone-claims",
+    "nome": "Greystone Claims",
+    "segmento": "mid-market",
+    "arr": "67000.00",
+    "saude": 93,
+    "historico": [
+      93,
+      93,
+      92,
+      93,
+      92,
+      93,
+      93,
+      93,
+      93,
+      93,
+      93,
+      92,
+      93
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 88,
+    "semana": -1,
+    "ultimoContato": 17,
+    "renovacao": "2027-01-07",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "larkspur-foods",
+    "nome": "Larkspur Foods",
+    "segmento": "mid-market",
+    "arr": "198000.00",
+    "saude": 98,
+    "historico": [
+      97,
+      98,
+      97,
+      97,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 63,
+    "semana": -1,
+    "ultimoContato": 36,
+    "renovacao": "2027-03-31",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": -1
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 20
+      }
+    ]
+  },
+  {
+    "slug": "newhaven-logistics",
+    "nome": "Newhaven Logistics",
+    "segmento": "mid-market",
+    "arr": "241000.00",
+    "saude": 49,
+    "historico": [
+      49,
+      49,
+      48,
+      49,
+      49,
+      48,
+      49,
+      49,
+      49,
+      49,
+      49,
+      49,
+      49
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 73,
+    "semana": 2,
+    "ultimoContato": 4,
+    "renovacao": "2027-07-30",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -7
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "hollowell-petroleum",
+    "nome": "Hollowell Petroleum",
+    "segmento": "mid-market",
+    "arr": "137000.00",
+    "saude": 98,
+    "historico": [
+      97,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      97,
+      98,
+      98
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 64,
+    "semana": 3,
+    "ultimoContato": 21,
+    "renovacao": "2026-12-09",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 8
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 15
+      }
+    ]
+  },
+  {
+    "slug": "tidewater-labs",
+    "nome": "Tidewater Labs",
+    "segmento": "mid-market",
+    "arr": "72000.00",
+    "saude": 100,
+    "historico": [
+      99,
+      100,
+      100,
+      100,
+      99,
+      100,
+      100,
+      99,
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 69,
+    "semana": -1,
+    "ultimoContato": 40,
+    "renovacao": "2027-04-06",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "silverline-health",
+    "nome": "Silverline Health",
+    "segmento": "mid-market",
+    "arr": "138000.00",
+    "saude": 90,
+    "historico": [
+      99,
+      95,
+      96,
+      96,
+      96,
+      94,
+      93,
+      93,
+      90,
+      92,
+      91,
+      91,
+      90
+    ],
+    "queda": -9,
+    "autonomia": null,
+    "assentos": 96,
+    "semana": -2,
+    "ultimoContato": 29,
+    "renovacao": "2027-07-16",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 5
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 11
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "fenwick-capital",
+    "nome": "Fenwick Capital",
+    "segmento": "mid-market",
+    "arr": "78000.00",
+    "saude": 93,
+    "historico": [
+      92,
+      93,
+      93,
+      91,
+      93,
+      93,
+      92,
+      93,
+      93,
+      93,
+      92,
+      93,
+      93
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 57,
+    "semana": 4,
+    "ultimoContato": 25,
+    "renovacao": "2027-11-08",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 13
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 8
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "glenmoor-media",
+    "nome": "Glenmoor Media",
+    "segmento": "mid-market",
+    "arr": "208000.00",
+    "saude": 90,
+    "historico": [
+      99,
+      99,
+      96,
+      94,
+      95,
+      93,
+      93,
+      93,
+      94,
+      93,
+      91,
+      92,
+      90
+    ],
+    "queda": -9,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": -1,
+    "ultimoContato": 37,
+    "renovacao": "2027-10-16",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 17
+      }
+    ]
+  },
+  {
+    "slug": "redfern-steel",
+    "nome": "Redfern Steel",
+    "segmento": "mid-market",
+    "arr": "235000.00",
+    "saude": 99,
+    "historico": [
+      99,
+      99,
+      98,
+      99,
+      99,
+      99,
+      99,
+      99,
+      98,
+      99,
+      99,
+      98,
+      99
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 64,
+    "semana": 2,
+    "ultimoContato": 27,
+    "renovacao": "2027-08-23",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 13
+      },
+      {
+        "k": "adocao",
+        "v": 16
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "norvale-ports",
+    "nome": "Norvale Ports",
+    "segmento": "mid-market",
+    "arr": "111000.00",
+    "saude": 97,
+    "historico": [
+      97,
+      97,
+      96,
+      97,
+      97,
+      97,
+      97,
+      95,
+      96,
+      97,
+      96,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 78,
+    "semana": 2,
+    "ultimoContato": 33,
+    "renovacao": "2027-12-26",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "meridian-aviation",
+    "nome": "Meridian Aviation",
+    "segmento": "mid-market",
+    "arr": "230000.00",
+    "saude": 87,
+    "historico": [
+      86,
+      87,
+      86,
+      87,
+      87,
+      86,
+      86,
+      87,
+      87,
+      87,
+      87,
+      86,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 66,
+    "semana": -1,
+    "ultimoContato": 17,
+    "renovacao": "2026-12-15",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 1
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": 10
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "upland-labs",
+    "nome": "Upland Labs",
+    "segmento": "mid-market",
+    "arr": "203000.00",
+    "saude": 97,
+    "historico": [
+      96,
+      96,
+      97,
+      96,
+      96,
+      97,
+      97,
+      96,
+      97,
+      96,
+      97,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 79,
+    "semana": 3,
+    "ultimoContato": 36,
+    "renovacao": "2027-05-15",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 24
+      }
+    ]
+  },
+  {
+    "slug": "strathmore-systems",
+    "nome": "Strathmore Systems",
+    "segmento": "mid-market",
+    "arr": "86000.00",
+    "saude": 73,
+    "historico": [
+      72,
+      72,
+      73,
+      72,
+      73,
+      73,
+      72,
+      73,
+      73,
+      73,
+      73,
+      73,
+      73
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 93,
+    "semana": -1,
+    "ultimoContato": 3,
+    "renovacao": "2027-02-10",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": -3
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 14
+      }
+    ]
+  },
+  {
+    "slug": "pinecrest-health",
+    "nome": "Pinecrest Health",
+    "segmento": "smb",
+    "arr": "27000.00",
+    "saude": 36,
+    "historico": [
+      58,
+      54,
+      50,
+      49,
+      45,
+      45,
+      43,
+      42,
+      42,
+      38,
+      39,
+      38,
+      36
+    ],
+    "queda": -22,
+    "autonomia": null,
+    "assentos": 37,
+    "semana": -6,
+    "ultimoContato": 60,
+    "renovacao": "2027-01-13",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": -7
+      },
+      {
+        "k": "campeao",
+        "v": -6
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": -10
+      }
+    ]
+  },
+  {
+    "slug": "elmhurst-bank",
+    "nome": "Elmhurst Bank",
+    "segmento": "smb",
+    "arr": "28000.00",
+    "saude": 32,
+    "historico": [
+      49,
+      49,
+      46,
+      41,
+      42,
+      40,
+      37,
+      38,
+      35,
+      36,
+      33,
+      32,
+      32
+    ],
+    "queda": -17,
+    "autonomia": 2,
+    "assentos": 49,
+    "semana": -3,
+    "ultimoContato": 14,
+    "renovacao": "2027-02-10",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -4
+      },
+      {
+        "k": "adocao",
+        "v": -9
+      },
+      {
+        "k": "suporte",
+        "v": -3
+      },
+      {
+        "k": "campeao",
+        "v": -9
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "nightingale-analytics",
+    "nome": "Nightingale Analytics",
+    "segmento": "smb",
+    "arr": "30000.00",
+    "saude": 28,
+    "historico": [
+      37,
+      37,
+      37,
+      36,
+      34,
+      31,
+      31,
+      32,
+      31,
+      31,
+      28,
+      29,
+      28
+    ],
+    "queda": -9,
+    "autonomia": null,
+    "assentos": 27,
+    "semana": -7,
+    "ultimoContato": 3,
+    "renovacao": "2027-05-23",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -6
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": -9
+      },
+      {
+        "k": "campeao",
+        "v": -5
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": -9
+      }
+    ]
+  },
+  {
+    "slug": "driftwood-textiles",
+    "nome": "Driftwood Textiles",
+    "segmento": "smb",
+    "arr": "32000.00",
+    "saude": 20,
+    "historico": [
+      43,
+      43,
+      37,
+      35,
+      31,
+      32,
+      28,
+      26,
+      25,
+      24,
+      23,
+      21,
+      20
+    ],
+    "queda": -23,
+    "autonomia": null,
+    "assentos": 48,
+    "semana": -5,
+    "ultimoContato": 65,
+    "renovacao": "2027-05-28",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": -14
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": -9
+      },
+      {
+        "k": "recursos",
+        "v": -3
+      },
+      {
+        "k": "comercial",
+        "v": -10
+      }
+    ]
+  },
+  {
+    "slug": "juniper-systems",
+    "nome": "Juniper Systems",
+    "segmento": "smb",
+    "arr": "59000.00",
+    "saude": 12,
+    "historico": [
+      23,
+      22,
+      23,
+      21,
+      18,
+      19,
+      16,
+      17,
+      15,
+      13,
+      13,
+      12,
+      12
+    ],
+    "queda": -11,
+    "autonomia": null,
+    "assentos": 65,
+    "semana": -3,
+    "ultimoContato": 16,
+    "renovacao": "2027-07-09",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -4
+      },
+      {
+        "k": "adocao",
+        "v": -10
+      },
+      {
+        "k": "suporte",
+        "v": -5
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": -6
+      },
+      {
+        "k": "comercial",
+        "v": -20
+      }
+    ]
+  },
+  {
+    "slug": "granite-claims",
+    "nome": "Granite Claims",
+    "segmento": "smb",
+    "arr": "24000.00",
+    "saude": 28,
+    "historico": [
+      49,
+      45,
+      43,
+      38,
+      39,
+      38,
+      34,
+      34,
+      33,
+      33,
+      32,
+      29,
+      28
+    ],
+    "queda": -21,
+    "autonomia": 2,
+    "assentos": 40,
+    "semana": -3,
+    "ultimoContato": 35,
+    "renovacao": "2027-11-11",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": -2
+      },
+      {
+        "k": "suporte",
+        "v": -4
+      },
+      {
+        "k": "campeao",
+        "v": -2
+      },
+      {
+        "k": "recursos",
+        "v": -8
+      },
+      {
+        "k": "comercial",
+        "v": -12
+      }
+    ]
+  },
+  {
+    "slug": "brightwater-software",
+    "nome": "Brightwater Software",
+    "segmento": "smb",
+    "arr": "28000.00",
+    "saude": 23,
+    "historico": [
+      37,
+      37,
+      34,
+      33,
+      30,
+      30,
+      29,
+      27,
+      28,
+      24,
+      23,
+      24,
+      23
+    ],
+    "queda": -14,
+    "autonomia": null,
+    "assentos": 65,
+    "semana": -3,
+    "ultimoContato": 56,
+    "renovacao": "2026-12-25",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -5
+      },
+      {
+        "k": "adocao",
+        "v": -3
+      },
+      {
+        "k": "suporte",
+        "v": -4
+      },
+      {
+        "k": "campeao",
+        "v": -2
+      },
+      {
+        "k": "recursos",
+        "v": -11
+      },
+      {
+        "k": "comercial",
+        "v": -7
+      }
+    ]
+  },
+  {
+    "slug": "kingsley-claims",
+    "nome": "Kingsley Claims",
+    "segmento": "smb",
+    "arr": "29000.00",
+    "saude": 37,
+    "historico": [
+      63,
+      63,
+      63,
+      57,
+      53,
+      51,
+      50,
+      45,
+      44,
+      43,
+      42,
+      39,
+      37
+    ],
+    "queda": -26,
+    "autonomia": null,
+    "assentos": 39,
+    "semana": -4,
+    "ultimoContato": 57,
+    "renovacao": "2027-03-12",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -6
+      },
+      {
+        "k": "adocao",
+        "v": -6
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": -3
+      },
+      {
+        "k": "comercial",
+        "v": -8
+      }
+    ]
+  },
+  {
+    "slug": "ravenwood-legal",
+    "nome": "Ravenwood Legal",
+    "segmento": "smb",
+    "arr": "31000.00",
+    "saude": 35,
+    "historico": [
+      47,
+      47,
+      47,
+      48,
+      44,
+      43,
+      41,
+      41,
+      40,
+      39,
+      36,
+      37,
+      35
+    ],
+    "queda": -13,
+    "autonomia": 3,
+    "assentos": 39,
+    "semana": -7,
+    "ultimoContato": 2,
+    "renovacao": "2026-12-18",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -9
+      },
+      {
+        "k": "adocao",
+        "v": -7
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -3
+      },
+      {
+        "k": "recursos",
+        "v": -3
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "blackfell-logistics",
+    "nome": "Blackfell Logistics",
+    "segmento": "smb",
+    "arr": "27000.00",
+    "saude": 51,
+    "historico": [
+      55,
+      53,
+      52,
+      54,
+      53,
+      53,
+      53,
+      52,
+      52,
+      53,
+      50,
+      51,
+      51
+    ],
+    "queda": -4,
+    "autonomia": null,
+    "assentos": 58,
+    "semana": -1,
+    "ultimoContato": 16,
+    "renovacao": "2026-12-27",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": -5
+      },
+      {
+        "k": "suporte",
+        "v": -3
+      },
+      {
+        "k": "campeao",
+        "v": -1
+      },
+      {
+        "k": "recursos",
+        "v": -6
+      },
+      {
+        "k": "comercial",
+        "v": 13
+      }
+    ]
+  },
+  {
+    "slug": "glenmoor-bank",
+    "nome": "Glenmoor Bank",
+    "segmento": "smb",
+    "arr": "55000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      89,
+      90,
+      89,
+      89,
+      90,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 85,
+    "semana": 0,
+    "ultimoContato": 34,
+    "renovacao": "2027-07-08",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 1
+      }
+    ]
+  },
+  {
+    "slug": "meridian-petroleum",
+    "nome": "Meridian Petroleum",
+    "segmento": "smb",
+    "arr": "22000.00",
+    "saude": 94,
+    "historico": [
+      93,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      93,
+      93,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": -1,
+    "ultimoContato": 20,
+    "renovacao": "2027-04-13",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": 21
+      }
+    ]
+  },
+  {
+    "slug": "lakeshore-systems",
+    "nome": "Lakeshore Systems",
+    "segmento": "smb",
+    "arr": "31000.00",
+    "saude": 86,
+    "historico": [
+      96,
+      96,
+      94,
+      93,
+      90,
+      91,
+      90,
+      88,
+      87,
+      88,
+      88,
+      88,
+      86
+    ],
+    "queda": -10,
+    "autonomia": null,
+    "assentos": 76,
+    "semana": 1,
+    "ultimoContato": 2,
+    "renovacao": "2027-05-08",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 1
+      }
+    ]
+  },
+  {
+    "slug": "kestrel-energy",
+    "nome": "Kestrel Energy",
+    "segmento": "smb",
+    "arr": "23000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      87,
+      86,
+      87,
+      87,
+      86,
+      86,
+      86,
+      87,
+      87,
+      87,
+      87,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 85,
+    "semana": -1,
+    "ultimoContato": 7,
+    "renovacao": "2027-09-24",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "elmhurst-partners",
+    "nome": "Elmhurst Partners",
+    "segmento": "smb",
+    "arr": "22000.00",
+    "saude": 85,
+    "historico": [
+      95,
+      95,
+      95,
+      91,
+      91,
+      90,
+      89,
+      88,
+      88,
+      86,
+      85,
+      84,
+      85
+    ],
+    "queda": -10,
+    "autonomia": null,
+    "assentos": 81,
+    "semana": 0,
+    "ultimoContato": 25,
+    "renovacao": "2026-12-03",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 5
+      },
+      {
+        "k": "adocao",
+        "v": 1
+      },
+      {
+        "k": "suporte",
+        "v": 11
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 13
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "cedarpoint-media",
+    "nome": "Cedarpoint Media",
+    "segmento": "smb",
+    "arr": "32000.00",
+    "saude": 49,
+    "historico": [
+      48,
+      49,
+      49,
+      49,
+      48,
+      49,
+      49,
+      49,
+      49,
+      48,
+      49,
+      49,
+      49
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 96,
+    "semana": -2,
+    "ultimoContato": 13,
+    "renovacao": "2027-12-06",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -4
+      },
+      {
+        "k": "adocao",
+        "v": -5
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": -2
+      },
+      {
+        "k": "recursos",
+        "v": -4
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "ravenwood-steel",
+    "nome": "Ravenwood Steel",
+    "segmento": "smb",
+    "arr": "38000.00",
+    "saude": 91,
+    "historico": [
+      90,
+      90,
+      91,
+      89,
+      90,
+      91,
+      91,
+      91,
+      91,
+      90,
+      91,
+      90,
+      91
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 83,
+    "semana": 0,
+    "ultimoContato": 40,
+    "renovacao": "2027-04-10",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "granite-retail",
+    "nome": "Granite Retail",
+    "segmento": "smb",
+    "arr": "18000.00",
+    "saude": 55,
+    "historico": [
+      61,
+      62,
+      61,
+      58,
+      60,
+      60,
+      56,
+      57,
+      55,
+      55,
+      56,
+      55,
+      55
+    ],
+    "queda": -7,
+    "autonomia": null,
+    "assentos": 69,
+    "semana": 1,
+    "ultimoContato": 39,
+    "renovacao": "2027-04-09",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": -5
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": -2
+      },
+      {
+        "k": "comercial",
+        "v": 10
+      }
+    ]
+  },
+  {
+    "slug": "newhaven-legal",
+    "nome": "Newhaven Legal",
+    "segmento": "smb",
+    "arr": "29000.00",
+    "saude": 73,
+    "historico": [
+      80,
+      81,
+      81,
+      78,
+      78,
+      77,
+      78,
+      76,
+      74,
+      76,
+      75,
+      73,
+      73
+    ],
+    "queda": -8,
+    "autonomia": null,
+    "assentos": 92,
+    "semana": -2,
+    "ultimoContato": 2,
+    "renovacao": "2027-09-26",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -3
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": -1
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 11
+      }
+    ]
+  },
+  {
+    "slug": "granite-group",
+    "nome": "Granite Group",
+    "segmento": "smb",
+    "arr": "34000.00",
+    "saude": 95,
+    "historico": [
+      107,
+      106,
+      106,
+      107,
+      105,
+      101,
+      101,
+      101,
+      97,
+      97,
+      97,
+      95,
+      95
+    ],
+    "queda": -12,
+    "autonomia": null,
+    "assentos": 91,
+    "semana": -1,
+    "ultimoContato": 4,
+    "renovacao": "2027-01-30",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 4
+      },
+      {
+        "k": "comercial",
+        "v": 9
+      }
+    ]
+  },
+  {
+    "slug": "millbrook-textiles",
+    "nome": "Millbrook Textiles",
+    "segmento": "smb",
+    "arr": "37000.00",
+    "saude": 100,
+    "historico": [
+      110,
+      110,
+      110,
+      109,
+      107,
+      105,
+      105,
+      104,
+      104,
+      102,
+      102,
+      101,
+      100
+    ],
+    "queda": -10,
+    "autonomia": null,
+    "assentos": 79,
+    "semana": 0,
+    "ultimoContato": 17,
+    "renovacao": "2026-12-24",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 10
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 11
+      }
+    ]
+  },
+  {
+    "slug": "granite-energy",
+    "nome": "Granite Energy",
+    "segmento": "smb",
+    "arr": "63000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      85,
+      87,
+      87,
+      87,
+      86,
+      87,
+      87,
+      87,
+      86,
+      85,
+      87,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 72,
+    "semana": 0,
+    "ultimoContato": 13,
+    "renovacao": "2028-01-01",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 5
+      }
+    ]
+  },
+  {
+    "slug": "foxglove-aviation",
+    "nome": "Foxglove Aviation",
+    "segmento": "smb",
+    "arr": "66000.00",
+    "saude": 60,
+    "historico": [
+      60,
+      59,
+      60,
+      60,
+      59,
+      59,
+      58,
+      60,
+      60,
+      60,
+      59,
+      60,
+      60
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 81,
+    "semana": 0,
+    "ultimoContato": 29,
+    "renovacao": "2027-01-15",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": -8
+      }
+    ]
+  },
+  {
+    "slug": "granite-media",
+    "nome": "Granite Media",
+    "segmento": "smb",
+    "arr": "34000.00",
+    "saude": 65,
+    "historico": [
+      65,
+      65,
+      65,
+      65,
+      65,
+      65,
+      65,
+      64,
+      65,
+      65,
+      65,
+      64,
+      65
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 67,
+    "semana": 0,
+    "ultimoContato": 37,
+    "renovacao": "2027-03-06",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": -4
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": -3
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "tidewater-legal",
+    "nome": "Tidewater Legal",
+    "segmento": "smb",
+    "arr": "24000.00",
+    "saude": 95,
+    "historico": [
+      103,
+      102,
+      103,
+      100,
+      99,
+      99,
+      100,
+      97,
+      97,
+      96,
+      97,
+      94,
+      95
+    ],
+    "queda": -8,
+    "autonomia": null,
+    "assentos": 60,
+    "semana": -2,
+    "ultimoContato": 11,
+    "renovacao": "2027-06-17",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 10
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 12
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "birchfield-foods",
+    "nome": "Birchfield Foods",
+    "segmento": "smb",
+    "arr": "61000.00",
+    "saude": 74,
+    "historico": [
+      74,
+      74,
+      74,
+      74,
+      74,
+      74,
+      74,
+      73,
+      74,
+      74,
+      74,
+      73,
+      74
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 91,
+    "semana": 0,
+    "ultimoContato": 14,
+    "renovacao": "2027-07-28",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 0
+      }
+    ]
+  },
+  {
+    "slug": "juniper-claims",
+    "nome": "Juniper Claims",
+    "segmento": "smb",
+    "arr": "54000.00",
+    "saude": 93,
+    "historico": [
+      92,
+      93,
+      92,
+      93,
+      93,
+      93,
+      92,
+      92,
+      91,
+      93,
+      93,
+      93,
+      93
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 92,
+    "semana": -2,
+    "ultimoContato": 9,
+    "renovacao": "2026-11-30",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 12
+      },
+      {
+        "k": "campeao",
+        "v": 8
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "nightingale-energy",
+    "nome": "Nightingale Energy",
+    "segmento": "smb",
+    "arr": "24000.00",
+    "saude": 86,
+    "historico": [
+      86,
+      85,
+      86,
+      86,
+      86,
+      86,
+      85,
+      86,
+      86,
+      86,
+      86,
+      85,
+      86
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 72,
+    "semana": -2,
+    "ultimoContato": 16,
+    "renovacao": "2027-06-19",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 8
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": -1
+      },
+      {
+        "k": "comercial",
+        "v": 5
+      }
+    ]
+  },
+  {
+    "slug": "larkspur-software",
+    "nome": "Larkspur Software",
+    "segmento": "smb",
+    "arr": "26000.00",
+    "saude": 91,
+    "historico": [
+      91,
+      91,
+      91,
+      90,
+      90,
+      91,
+      89,
+      91,
+      91,
+      91,
+      91,
+      91,
+      91
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 78,
+    "semana": 3,
+    "ultimoContato": 11,
+    "renovacao": "2027-09-19",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 8
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "pemberton-foods",
+    "nome": "Pemberton Foods",
+    "segmento": "smb",
+    "arr": "30000.00",
+    "saude": 94,
+    "historico": [
+      100,
+      101,
+      101,
+      101,
+      99,
+      97,
+      98,
+      97,
+      95,
+      94,
+      95,
+      96,
+      94
+    ],
+    "queda": -7,
+    "autonomia": null,
+    "assentos": 98,
+    "semana": 4,
+    "ultimoContato": 36,
+    "renovacao": "2027-10-31",
+    "responsavel": "Sofia Marchetti",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": 13
+      }
+    ]
+  },
+  {
+    "slug": "juniper-textiles",
+    "nome": "Juniper Textiles",
+    "segmento": "smb",
+    "arr": "23000.00",
+    "saude": 96,
+    "historico": [
+      96,
+      96,
+      96,
+      95,
+      96,
+      96,
+      95,
+      96,
+      95,
+      95,
+      96,
+      94,
+      96
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": 1,
+    "ultimoContato": 6,
+    "renovacao": "2026-12-28",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 12
+      },
+      {
+        "k": "comercial",
+        "v": 12
+      }
+    ]
+  },
+  {
+    "slug": "pinecrest-petroleum",
+    "nome": "Pinecrest Petroleum",
+    "segmento": "smb",
+    "arr": "50000.00",
+    "saude": 93,
+    "historico": [
+      102,
+      102,
+      102,
+      99,
+      99,
+      97,
+      97,
+      97,
+      95,
+      96,
+      95,
+      93,
+      93
+    ],
+    "queda": -9,
+    "autonomia": null,
+    "assentos": 60,
+    "semana": 3,
+    "ultimoContato": 33,
+    "renovacao": "2027-04-03",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": 12
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "harlow-energy",
+    "nome": "Harlow Energy",
+    "segmento": "smb",
+    "arr": "39000.00",
+    "saude": 97,
+    "historico": [
+      96,
+      96,
+      97,
+      97,
+      96,
+      97,
+      97,
+      97,
+      97,
+      97,
+      97,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": 1,
+    "ultimoContato": 33,
+    "renovacao": "2027-06-29",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 15
+      },
+      {
+        "k": "campeao",
+        "v": -1
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "bastion-steel",
+    "nome": "Bastion Steel",
+    "segmento": "smb",
+    "arr": "48000.00",
+    "saude": 79,
+    "historico": [
+      85,
+      86,
+      86,
+      84,
+      84,
+      83,
+      81,
+      81,
+      82,
+      79,
+      81,
+      81,
+      79
+    ],
+    "queda": -7,
+    "autonomia": null,
+    "assentos": 81,
+    "semana": 1,
+    "ultimoContato": 28,
+    "renovacao": "2026-12-09",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -2
+      },
+      {
+        "k": "adocao",
+        "v": -1
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 4
+      },
+      {
+        "k": "comercial",
+        "v": 16
+      }
+    ]
+  },
+  {
+    "slug": "redfern-bank",
+    "nome": "Redfern Bank",
+    "segmento": "smb",
+    "arr": "38000.00",
+    "saude": 51,
+    "historico": [
+      51,
+      50,
+      50,
+      51,
+      50,
+      51,
+      51,
+      51,
+      51,
+      51,
+      50,
+      51,
+      51
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 95,
+    "semana": 4,
+    "ultimoContato": 12,
+    "renovacao": "2027-03-28",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -3
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": -2
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": -8
+      }
+    ]
+  },
+  {
+    "slug": "ivywood-software",
+    "nome": "Ivywood Software",
+    "segmento": "smb",
+    "arr": "28000.00",
+    "saude": 97,
+    "historico": [
+      101,
+      102,
+      102,
+      102,
+      100,
+      101,
+      99,
+      98,
+      100,
+      98,
+      96,
+      99,
+      97
+    ],
+    "queda": -5,
+    "autonomia": null,
+    "assentos": 89,
+    "semana": 0,
+    "ultimoContato": 33,
+    "renovacao": "2027-04-10",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 6
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": 8
+      }
+    ]
+  },
+  {
+    "slug": "larkspur-group",
+    "nome": "Larkspur Group",
+    "segmento": "smb",
+    "arr": "56000.00",
+    "saude": 97,
+    "historico": [
+      96,
+      97,
+      97,
+      97,
+      97,
+      97,
+      97,
+      97,
+      96,
+      97,
+      97,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 79,
+    "semana": 1,
+    "ultimoContato": 29,
+    "renovacao": "2027-02-01",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 12
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 12
+      }
+    ]
+  },
+  {
+    "slug": "oakridge-capital",
+    "nome": "Oakridge Capital",
+    "segmento": "smb",
+    "arr": "33000.00",
+    "saude": 87,
+    "historico": [
+      86,
+      87,
+      87,
+      86,
+      85,
+      87,
+      87,
+      87,
+      87,
+      87,
+      86,
+      86,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 73,
+    "semana": 0,
+    "ultimoContato": 13,
+    "renovacao": "2027-10-12",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "verity-retail",
+    "nome": "Verity Retail",
+    "segmento": "smb",
+    "arr": "38000.00",
+    "saude": 88,
+    "historico": [
+      87,
+      88,
+      87,
+      88,
+      88,
+      86,
+      87,
+      88,
+      88,
+      88,
+      87,
+      87,
+      88
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 65,
+    "semana": 0,
+    "ultimoContato": 20,
+    "renovacao": "2027-04-09",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "thornfield-claims",
+    "nome": "Thornfield Claims",
+    "segmento": "smb",
+    "arr": "27000.00",
+    "saude": 88,
+    "historico": [
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      88,
+      87,
+      88,
+      88
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 90,
+    "semana": -2,
+    "ultimoContato": 14,
+    "renovacao": "2027-03-19",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 12
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "driftwood-health",
+    "nome": "Driftwood Health",
+    "segmento": "smb",
+    "arr": "23000.00",
+    "saude": 94,
+    "historico": [
+      94,
+      94,
+      93,
+      94,
+      94,
+      94,
+      93,
+      94,
+      93,
+      94,
+      94,
+      94,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 61,
+    "semana": -2,
+    "ultimoContato": 28,
+    "renovacao": "2027-12-29",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 8
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "mapleton-labs",
+    "nome": "Mapleton Labs",
+    "segmento": "smb",
+    "arr": "53000.00",
+    "saude": 96,
+    "historico": [
+      95,
+      95,
+      96,
+      95,
+      96,
+      96,
+      96,
+      96,
+      96,
+      96,
+      95,
+      96,
+      96
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 57,
+    "semana": 2,
+    "ultimoContato": 9,
+    "renovacao": "2026-12-21",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 8
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 12
+      }
+    ]
+  },
+  {
+    "slug": "ironpine-textiles",
+    "nome": "Ironpine Textiles",
+    "segmento": "smb",
+    "arr": "20000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      90,
+      89,
+      90,
+      90,
+      90,
+      89,
+      89,
+      90,
+      90,
+      90,
+      89,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 84,
+    "semana": 4,
+    "ultimoContato": 11,
+    "renovacao": "2028-01-10",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 8
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 10
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 4
+      },
+      {
+        "k": "comercial",
+        "v": 2
+      }
+    ]
+  },
+  {
+    "slug": "vantage-ports",
+    "nome": "Vantage Ports",
+    "segmento": "smb",
+    "arr": "59000.00",
+    "saude": 98,
+    "historico": [
+      105,
+      106,
+      106,
+      105,
+      104,
+      103,
+      101,
+      101,
+      101,
+      99,
+      100,
+      98,
+      98
+    ],
+    "queda": -8,
+    "autonomia": null,
+    "assentos": 82,
+    "semana": 0,
+    "ultimoContato": 23,
+    "renovacao": "2027-09-03",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 10
+      },
+      {
+        "k": "campeao",
+        "v": 15
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 6
+      }
+    ]
+  },
+  {
+    "slug": "greystone-capital",
+    "nome": "Greystone Capital",
+    "segmento": "smb",
+    "arr": "22000.00",
+    "saude": 82,
+    "historico": [
+      82,
+      81,
+      82,
+      82,
+      81,
+      82,
+      82,
+      82,
+      82,
+      81,
+      81,
+      82,
+      82
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 60,
+    "semana": -1,
+    "ultimoContato": 3,
+    "renovacao": "2026-12-13",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 12
+      },
+      {
+        "k": "adocao",
+        "v": 0
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": -12
+      }
+    ]
+  },
+  {
+    "slug": "millbrook-health",
+    "nome": "Millbrook Health",
+    "segmento": "smb",
+    "arr": "23000.00",
+    "saude": 76,
+    "historico": [
+      74,
+      75,
+      75,
+      76,
+      76,
+      76,
+      76,
+      76,
+      76,
+      76,
+      74,
+      76,
+      76
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 94,
+    "semana": -2,
+    "ultimoContato": 31,
+    "renovacao": "2026-12-06",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 7
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": -4
+      }
+    ]
+  },
+  {
+    "slug": "fairhaven-foods",
+    "nome": "Fairhaven Foods",
+    "segmento": "smb",
+    "arr": "39000.00",
+    "saude": 94,
+    "historico": [
+      93,
+      93,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      93,
+      93,
+      94,
+      94,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 93,
+    "semana": 3,
+    "ultimoContato": 29,
+    "renovacao": "2027-09-16",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 12
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": 12
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": -5
+      }
+    ]
+  },
+  {
+    "slug": "ravenwood-software",
+    "nome": "Ravenwood Software",
+    "segmento": "smb",
+    "arr": "22000.00",
+    "saude": 80,
+    "historico": [
+      80,
+      80,
+      80,
+      79,
+      79,
+      80,
+      80,
+      79,
+      80,
+      80,
+      80,
+      80,
+      80
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 71,
+    "semana": 1,
+    "ultimoContato": 18,
+    "renovacao": "2026-12-24",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 1
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 13
+      }
+    ]
+  },
+  {
+    "slug": "irongate-health",
+    "nome": "Irongate Health",
+    "segmento": "smb",
+    "arr": "21000.00",
+    "saude": 96,
+    "historico": [
+      99,
+      98,
+      99,
+      98,
+      99,
+      98,
+      96,
+      97,
+      96,
+      96,
+      98,
+      95,
+      96
+    ],
+    "queda": -3,
+    "autonomia": null,
+    "assentos": 59,
+    "semana": 0,
+    "ultimoContato": 11,
+    "renovacao": "2026-11-28",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 9
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": -1
+      }
+    ]
+  },
+  {
+    "slug": "foxglove-logistics",
+    "nome": "Foxglove Logistics",
+    "segmento": "smb",
+    "arr": "32000.00",
+    "saude": 85,
+    "historico": [
+      83,
+      84,
+      85,
+      84,
+      85,
+      85,
+      85,
+      84,
+      84,
+      85,
+      85,
+      84,
+      85
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 71,
+    "semana": 0,
+    "ultimoContato": 14,
+    "renovacao": "2027-11-07",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 12
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": -5
+      }
+    ]
+  },
+  {
+    "slug": "orchard-steel",
+    "nome": "Orchard Steel",
+    "segmento": "smb",
+    "arr": "18000.00",
+    "saude": 90,
+    "historico": [
+      94,
+      95,
+      95,
+      93,
+      94,
+      92,
+      93,
+      92,
+      90,
+      90,
+      92,
+      90,
+      90
+    ],
+    "queda": -5,
+    "autonomia": null,
+    "assentos": 81,
+    "semana": -1,
+    "ultimoContato": 9,
+    "renovacao": "2027-06-10",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 2
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": 16
+      }
+    ]
+  },
+  {
+    "slug": "verity-legal",
+    "nome": "Verity Legal",
+    "segmento": "smb",
+    "arr": "45000.00",
+    "saude": 89,
+    "historico": [
+      93,
+      93,
+      91,
+      93,
+      93,
+      90,
+      91,
+      92,
+      89,
+      90,
+      91,
+      89,
+      89
+    ],
+    "queda": -4,
+    "autonomia": null,
+    "assentos": 72,
+    "semana": 1,
+    "ultimoContato": 11,
+    "renovacao": "2027-01-22",
+    "responsavel": "Tomas Vega",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 11
+      },
+      {
+        "k": "adocao",
+        "v": 11
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "yarrow-software",
+    "nome": "Yarrow Software",
+    "segmento": "smb",
+    "arr": "26000.00",
+    "saude": 95,
+    "historico": [
+      103,
+      103,
+      103,
+      100,
+      100,
+      99,
+      97,
+      99,
+      98,
+      96,
+      97,
+      95,
+      95
+    ],
+    "queda": -8,
+    "autonomia": null,
+    "assentos": 80,
+    "semana": 3,
+    "ultimoContato": 32,
+    "renovacao": "2026-12-15",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 14
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 11
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": -8
+      }
+    ]
+  },
+  {
+    "slug": "blackfell-energy",
+    "nome": "Blackfell Energy",
+    "segmento": "smb",
+    "arr": "24000.00",
+    "saude": 92,
+    "historico": [
+      92,
+      92,
+      91,
+      91,
+      92,
+      91,
+      91,
+      92,
+      91,
+      90,
+      91,
+      91,
+      92
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 73,
+    "semana": 1,
+    "ultimoContato": 5,
+    "renovacao": "2028-01-06",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 16
+      }
+    ]
+  },
+  {
+    "slug": "redmoor-petroleum",
+    "nome": "Redmoor Petroleum",
+    "segmento": "smb",
+    "arr": "52000.00",
+    "saude": 61,
+    "historico": [
+      67,
+      68,
+      68,
+      65,
+      65,
+      64,
+      65,
+      62,
+      63,
+      62,
+      62,
+      61,
+      61
+    ],
+    "queda": -7,
+    "autonomia": null,
+    "assentos": 94,
+    "semana": 1,
+    "ultimoContato": 8,
+    "renovacao": "2026-12-26",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": -2
+      },
+      {
+        "k": "suporte",
+        "v": -4
+      },
+      {
+        "k": "campeao",
+        "v": 3
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "ivywood-health",
+    "nome": "Ivywood Health",
+    "segmento": "smb",
+    "arr": "60000.00",
+    "saude": 94,
+    "historico": [
+      93,
+      94,
+      93,
+      93,
+      93,
+      94,
+      94,
+      94,
+      94,
+      94,
+      93,
+      94,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 96,
+    "semana": -1,
+    "ultimoContato": 6,
+    "renovacao": "2027-06-05",
+    "responsavel": "Amara Singh",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 12
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 14
+      },
+      {
+        "k": "comercial",
+        "v": -5
+      }
+    ]
+  },
+  {
+    "slug": "upland-software",
+    "nome": "Upland Software",
+    "segmento": "smb",
+    "arr": "26000.00",
+    "saude": 96,
+    "historico": [
+      107,
+      107,
+      106,
+      103,
+      103,
+      102,
+      102,
+      100,
+      98,
+      98,
+      98,
+      96,
+      96
+    ],
+    "queda": -11,
+    "autonomia": null,
+    "assentos": 95,
+    "semana": -1,
+    "ultimoContato": 13,
+    "renovacao": "2026-12-26",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 12
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 4
+      },
+      {
+        "k": "comercial",
+        "v": 7
+      }
+    ]
+  },
+  {
+    "slug": "thornfield-health",
+    "nome": "Thornfield Health",
+    "segmento": "smb",
+    "arr": "26000.00",
+    "saude": 50,
+    "historico": [
+      50,
+      50,
+      49,
+      50,
+      50,
+      49,
+      50,
+      50,
+      50,
+      50,
+      50,
+      50,
+      50
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 63,
+    "semana": 2,
+    "ultimoContato": 13,
+    "renovacao": "2027-01-12",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 1
+      },
+      {
+        "k": "adocao",
+        "v": -3
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": -4
+      },
+      {
+        "k": "recursos",
+        "v": -4
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "granite-ports",
+    "nome": "Granite Ports",
+    "segmento": "smb",
+    "arr": "27000.00",
+    "saude": 84,
+    "historico": [
+      90,
+      90,
+      90,
+      87,
+      88,
+      87,
+      88,
+      85,
+      85,
+      86,
+      86,
+      85,
+      84
+    ],
+    "queda": -6,
+    "autonomia": null,
+    "assentos": 59,
+    "semana": 1,
+    "ultimoContato": 5,
+    "renovacao": "2027-07-05",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": -1
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": 11
+      }
+    ]
+  },
+  {
+    "slug": "umber-analytics",
+    "nome": "Umber Analytics",
+    "segmento": "smb",
+    "arr": "17000.00",
+    "saude": 97,
+    "historico": [
+      97,
+      96,
+      97,
+      97,
+      97,
+      97,
+      97,
+      96,
+      97,
+      97,
+      96,
+      97,
+      97
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 67,
+    "semana": -2,
+    "ultimoContato": 34,
+    "renovacao": "2027-09-24",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 13
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 12
+      },
+      {
+        "k": "recursos",
+        "v": 7
+      },
+      {
+        "k": "comercial",
+        "v": -1
+      }
+    ]
+  },
+  {
+    "slug": "silverline-media",
+    "nome": "Silverline Media",
+    "segmento": "smb",
+    "arr": "22000.00",
+    "saude": 91,
+    "historico": [
+      91,
+      91,
+      91,
+      90,
+      90,
+      89,
+      91,
+      91,
+      91,
+      91,
+      91,
+      90,
+      91
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 85,
+    "semana": -2,
+    "ultimoContato": 2,
+    "renovacao": "2027-01-10",
+    "responsavel": "Yara Haddad",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": 0
+      },
+      {
+        "k": "recursos",
+        "v": 9
+      },
+      {
+        "k": "comercial",
+        "v": 11
+      }
+    ]
+  },
+  {
+    "slug": "upland-steel",
+    "nome": "Upland Steel",
+    "segmento": "smb",
+    "arr": "40000.00",
+    "saude": 74,
+    "historico": [
+      77,
+      77,
+      76,
+      77,
+      76,
+      75,
+      74,
+      76,
+      74,
+      75,
+      75,
+      73,
+      74
+    ],
+    "queda": -3,
+    "autonomia": null,
+    "assentos": 66,
+    "semana": 3,
+    "ultimoContato": 29,
+    "renovacao": "2027-11-17",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 2
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": -1
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 3
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "upland-petroleum",
+    "nome": "Upland Petroleum",
+    "segmento": "smb",
+    "arr": "56000.00",
+    "saude": 86,
+    "historico": [
+      85,
+      86,
+      85,
+      86,
+      85,
+      85,
+      86,
+      86,
+      86,
+      86,
+      86,
+      85,
+      86
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 79,
+    "semana": 2,
+    "ultimoContato": 29,
+    "renovacao": "2027-04-08",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 0
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 2
+      },
+      {
+        "k": "campeao",
+        "v": 8
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": 17
+      }
+    ]
+  },
+  {
+    "slug": "zephyr-health",
+    "nome": "Zephyr Health",
+    "segmento": "smb",
+    "arr": "50000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      87,
+      86,
+      87,
+      87,
+      87,
+      86,
+      87,
+      86,
+      87,
+      87,
+      86,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 58,
+    "semana": -1,
+    "ultimoContato": 12,
+    "renovacao": "2027-03-29",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 7
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 7
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "foxglove-ports",
+    "nome": "Foxglove Ports",
+    "segmento": "smb",
+    "arr": "42000.00",
+    "saude": 88,
+    "historico": [
+      88,
+      88,
+      87,
+      88,
+      86,
+      88,
+      88,
+      87,
+      87,
+      88,
+      87,
+      87,
+      88
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 83,
+    "semana": 1,
+    "ultimoContato": 10,
+    "renovacao": "2027-06-02",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 11
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 2
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "glenmoor-steel",
+    "nome": "Glenmoor Steel",
+    "segmento": "smb",
+    "arr": "30000.00",
+    "saude": 98,
+    "historico": [
+      98,
+      97,
+      98,
+      98,
+      97,
+      98,
+      97,
+      98,
+      98,
+      97,
+      98,
+      97,
+      98
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 61,
+    "semana": -1,
+    "ultimoContato": 28,
+    "renovacao": "2027-07-29",
+    "responsavel": "Jonas Lind",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 6
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 9
+      }
+    ]
+  },
+  {
+    "slug": "brightwater-analytics",
+    "nome": "Brightwater Analytics",
+    "segmento": "smb",
+    "arr": "42000.00",
+    "saude": 87,
+    "historico": [
+      87,
+      87,
+      87,
+      86,
+      87,
+      87,
+      86,
+      87,
+      87,
+      87,
+      85,
+      87,
+      87
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 64,
+    "semana": 0,
+    "ultimoContato": 12,
+    "renovacao": "2028-01-06",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 2
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 6
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": 9
+      }
+    ]
+  },
+  {
+    "slug": "oakridge-group",
+    "nome": "Oakridge Group",
+    "segmento": "smb",
+    "arr": "29000.00",
+    "saude": 94,
+    "historico": [
+      94,
+      94,
+      94,
+      94,
+      92,
+      93,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 92,
+    "semana": 1,
+    "ultimoContato": 39,
+    "renovacao": "2026-12-12",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 9
+      }
+    ]
+  },
+  {
+    "slug": "vantage-mutual",
+    "nome": "Vantage Mutual",
+    "segmento": "smb",
+    "arr": "21000.00",
+    "saude": 90,
+    "historico": [
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      89,
+      89,
+      90,
+      89,
+      90
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 68,
+    "semana": 3,
+    "ultimoContato": 32,
+    "renovacao": "2027-03-09",
+    "responsavel": "Noah Bergstrom",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": 3
+      },
+      {
+        "k": "suporte",
+        "v": 1
+      },
+      {
+        "k": "campeao",
+        "v": 4
+      },
+      {
+        "k": "recursos",
+        "v": 5
+      },
+      {
+        "k": "comercial",
+        "v": 19
+      }
+    ]
+  },
+  {
+    "slug": "greystone-bank",
+    "nome": "Greystone Bank",
+    "segmento": "smb",
+    "arr": "31000.00",
+    "saude": 92,
+    "historico": [
+      91,
+      92,
+      92,
+      91,
+      91,
+      91,
+      92,
+      90,
+      92,
+      92,
+      91,
+      91,
+      92
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 87,
+    "semana": 4,
+    "ultimoContato": 40,
+    "renovacao": "2027-06-04",
+    "responsavel": "Priya Raman",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 4
+      },
+      {
+        "k": "adocao",
+        "v": 10
+      },
+      {
+        "k": "suporte",
+        "v": 4
+      },
+      {
+        "k": "campeao",
+        "v": 9
+      },
+      {
+        "k": "recursos",
+        "v": 6
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "ravenwood-petroleum",
+    "nome": "Ravenwood Petroleum",
+    "segmento": "smb",
+    "arr": "35000.00",
+    "saude": 94,
+    "historico": [
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      94,
+      92,
+      94,
+      93,
+      94
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 67,
+    "semana": 3,
+    "ultimoContato": 40,
+    "renovacao": "2027-07-30",
+    "responsavel": "Ines Duarte",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 9
+      },
+      {
+        "k": "adocao",
+        "v": 8
+      },
+      {
+        "k": "suporte",
+        "v": 3
+      },
+      {
+        "k": "campeao",
+        "v": 10
+      },
+      {
+        "k": "recursos",
+        "v": 11
+      },
+      {
+        "k": "comercial",
+        "v": -2
+      }
+    ]
+  },
+  {
+    "slug": "driftwood-steel",
+    "nome": "Driftwood Steel",
+    "segmento": "smb",
+    "arr": "31000.00",
+    "saude": 86,
+    "historico": [
+      86,
+      85,
+      85,
+      86,
+      85,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 86,
+    "semana": -1,
+    "ultimoContato": 29,
+    "renovacao": "2027-08-22",
+    "responsavel": "Diego Salas",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 5
+      },
+      {
+        "k": "suporte",
+        "v": 7
+      },
+      {
+        "k": "campeao",
+        "v": 5
+      },
+      {
+        "k": "recursos",
+        "v": 0
+      },
+      {
+        "k": "comercial",
+        "v": 4
+      }
+    ]
+  },
+  {
+    "slug": "ivywood-legal",
+    "nome": "Ivywood Legal",
+    "segmento": "smb",
+    "arr": "61000.00",
+    "saude": 95,
+    "historico": [
+      95,
+      94,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 63,
+    "semana": 0,
+    "ultimoContato": 13,
+    "renovacao": "2027-05-27",
+    "responsavel": "Lena Okafor",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 6
+      },
+      {
+        "k": "adocao",
+        "v": 7
+      },
+      {
+        "k": "suporte",
+        "v": 5
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 8
+      },
+      {
+        "k": "comercial",
+        "v": 3
+      }
+    ]
+  },
+  {
+    "slug": "verity-steel",
+    "nome": "Verity Steel",
+    "segmento": "smb",
+    "arr": "37000.00",
+    "saude": 95,
+    "historico": [
+      94,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95,
+      95
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 80,
+    "semana": 0,
+    "ultimoContato": 4,
+    "renovacao": "2027-07-16",
+    "responsavel": "Marcus Hale",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 10
+      },
+      {
+        "k": "adocao",
+        "v": 4
+      },
+      {
+        "k": "suporte",
+        "v": 10
+      },
+      {
+        "k": "campeao",
+        "v": 11
+      },
+      {
+        "k": "recursos",
+        "v": 12
+      },
+      {
+        "k": "comercial",
+        "v": -7
+      }
+    ]
+  },
+  {
+    "slug": "lakeshore-capital",
+    "nome": "Lakeshore Capital",
+    "segmento": "smb",
+    "arr": "17000.00",
+    "saude": 53,
+    "historico": [
+      53,
+      53,
+      53,
+      53,
+      52,
+      53,
+      52,
+      53,
+      53,
+      53,
+      52,
+      53,
+      53
+    ],
+    "queda": 0,
+    "autonomia": null,
+    "assentos": 69,
+    "semana": -1,
+    "ultimoContato": 11,
+    "renovacao": "2027-04-08",
+    "responsavel": "Felix Weber",
+    "composicao": [
+      {
+        "k": "uso",
+        "v": 3
+      },
+      {
+        "k": "adocao",
+        "v": -3
+      },
+      {
+        "k": "suporte",
+        "v": 0
+      },
+      {
+        "k": "campeao",
+        "v": -2
+      },
+      {
+        "k": "recursos",
+        "v": 1
+      },
+      {
+        "k": "comercial",
+        "v": -1
+      }
+    ]
+  }
+]

@@ -43,6 +43,8 @@ export type OpcoesLocal = {
   nos?: string
   /** os nós do SITE dos tenants de demonstração: tenants e páginas (padrão: exemplos/loja-site; `null` = sem site) */
   site?: string | null
+  /** outras pastas de site que ficam SÓ como modelos no banco (`/studio/templates`), sem ir ao ar: aplique um modelo pelo Studio */
+  modelos?: string[]
   /** o Studio empacotado (padrão: apps/studio/dist) */
   studioDir?: string
   /** porta do Postgres para `psql` (padrão: qualquer) */
@@ -95,15 +97,18 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
     const ativos = criaAtivos({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } } })
     const fotos: Record<string, string> = {} // nome do arquivo (sem extensão) → endereço do ativo salvo, para as páginas apontarem por `@img/<nome>`
     const pastaImgs = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site || ''
-    for (const [arq, nome] of [['banner.png', 'banner-de-exemplo'], ['logo.png', 'logo-de-exemplo']] as const) {
-      const f = pastaImgs ? join(pastaImgs, arq) : ''; if (!f || !existsSync(f)) continue
-      const dados = readFileSync(f).toString('base64'); for (const t of TENANTS_LOCAIS) await ativos.salva(t.id, 'sistema', { nome, dados })
-    }
-    // e as fotos da pasta `<site>/img/` (png, jpg, webp), cada uma pelo nome do arquivo sem a extensão (o gerador do site as aponta pelo SHA-256)
-    const imgDir = pastaImgs ? join(pastaImgs, 'img') : ''
-    if (imgDir && existsSync(imgDir)) for (const arq of readdirSync(imgDir).sort()) {
-      if (!/\.(png|jpe?g|webp)$/i.test(arq)) continue
-      const dados = readFileSync(join(imgDir, arq)).toString('base64'), nome = arq.replace(/\.[^.]+$/, ''); for (const t of TENANTS_LOCAIS) { const r = await ativos.salva(t.id, 'sistema', { nome, dados }); if (r.ok) fotos[nome] = r.ativo.caminho; else console.warn(`foto ${arq} recusada: ${r.erro}`) }
+    const pastas = [...(pastaImgs ? [pastaImgs] : []), ...(o.modelos ?? [])]
+    for (const pasta of pastas) {
+      for (const [arq, nome] of [['banner.png', 'banner-de-exemplo'], ['logo.png', 'logo-de-exemplo']] as const) {
+        const f = join(pasta, arq); if (!existsSync(f)) continue
+        const dados = readFileSync(f).toString('base64'); for (const t of TENANTS_LOCAIS) await ativos.salva(t.id, 'sistema', { nome, dados })
+      }
+      // e as fotos da pasta `<site>/img/` (png, jpg, webp), cada uma pelo nome do arquivo sem a extensão (o gerador do site as aponta pelo SHA-256)
+      const imgDir = join(pasta, 'img')
+      if (existsSync(imgDir)) for (const arq of readdirSync(imgDir).sort()) {
+        if (!/\.(png|jpe?g|webp)$/i.test(arq)) continue
+        const dados = readFileSync(join(imgDir, arq)).toString('base64'), nome = arq.replace(/\.[^.]+$/, ''); for (const t of TENANTS_LOCAIS) { const r = await ativos.salva(t.id, 'sistema', { nome, dados }); if (r.ok) fotos[nome] = r.ativo.caminho; else console.warn(`foto ${arq} recusada: ${r.erro}`) }
+      }
     }
     // 3. o serviço de exemplo (migra o próprio esquema com o papel migrador) e o gateway na frente, com o Studio
     const reg = carregaNos(nosDir)
@@ -125,25 +130,34 @@ export async function sobeLocal(o: OpcoesLocal = {}): Promise<Local> {
         for (const t of TENANTS_LOCAIS) await db.query(`INSERT INTO loja.destaque (tenant_id, titulo, descricao) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM loja.destaque WHERE tenant_id = $1 AND titulo = $2)`, [t.id, titulo, descricao])
     }
     if ((await db.query(`SELECT 1 FROM information_schema.columns WHERE table_schema = 'loja' AND table_name = 'destaque' AND column_name = 'imagem'`)).rows.length) await db.exec(`UPDATE loja.destaque SET imagem = CASE WHEN titulo ILIKE '%caf%' THEN '/_polaris/img/96898dfdb1b73039f83a5f27f9e13bd533e63b543a343bcc5771ed7c6f47aa5a.webp?w=160' ELSE '/_polaris/img/c38943ee25435ff89d04ab37d73a7a1ef42e7c9b77985059cb368ea709dfd385.png' END WHERE imagem IS NULL`) // miniaturas de exemplo (as imagens que o seed já hospeda)
-    // o catálogo do site (a API de produtos): `<site>/pecas.sementes` (JSON; não é lido como nó, por isso a extensão) semeia `loja.peca` de cada tenant (idempotente, por slug); `@img/<nome>` vira o endereço do ativo da foto
-    const arqPecas = pastaImgs ? join(pastaImgs, 'pecas.sementes') : ''
-    if (arqPecas && existsSync(arqPecas) && (await db.query(`SELECT 1 FROM information_schema.tables WHERE table_schema = 'loja' AND table_name = 'peca'`)).rows.length) {
+    // as SEMENTES do site (os dados que a API do serviço `loja` devolve): `<pasta>/<entidade>.sementes` (JSON, uma lista de objetos; a extensão evita que o carregador de nós o leia) semeia `loja.<entidade>`
+    // de cada tenant que ainda não tem linhas dela. Campos em camelCase viram colunas em snake_case, objetos e listas vão como jsonb e `@img/<nome>` vira o endereço do ativo.
+    for (const pasta of pastas) for (const arq of readdirSync(pasta).filter((a) => /^[a-z][A-Za-z0-9]*\.sementes$/.test(a)).sort()) {
+      const entidade = arq.replace(/\.sementes$/, ''), tabela = entidade.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)
+      const cols = (await db.query(`SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'loja' AND table_name = $1`, [tabela])).rows as Array<{ column_name: string; data_type: string }>
+      if (!cols.length) { console.warn(`sementes ${arq}: a tabela loja.${tabela} não existe (a entidade '${entidade}' está no serviço?)`); continue }
       await db.exec('RESET ROLE')
-      const foto = (u: unknown) => (typeof u === 'string' ? u.replace(/@img\/([A-Za-z0-9_-]+)/g, (m, n: string) => (fotos[n] ?? m)) : null)
-      const pecas = JSON.parse(readFileSync(arqPecas, 'utf8')) as Array<Record<string, any>>
-      for (const t of TENANTS_LOCAIS) for (const q of pecas)
-        await db.query(`INSERT INTO loja.peca (tenant_id, slug, colecao, preco, foto_url, foto_hover, ordem, novo, disponivel, nome, descricao, material, categoria, selo) SELECT $1, $2::text, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb, $13::jsonb, $14::jsonb WHERE NOT EXISTS (SELECT 1 FROM loja.peca WHERE tenant_id = $1 AND slug = $2::text)`,
-          [t.id, q.slug, q.colecao ?? null, q.preco, foto(q.fotoUrl), foto(q.fotoHover), q.ordem ?? null, q.novo === true, q.disponivel !== false, JSON.stringify(q.nome ?? {}), JSON.stringify(q.descricao ?? {}), JSON.stringify(q.material ?? {}), JSON.stringify(q.categoria ?? {}), JSON.stringify(q.selo ?? {})])
+      const foto = (u: unknown) => (typeof u === 'string' ? u.replace(/@img\/([A-Za-z0-9_-]+)/g, (m, n: string) => (fotos[n] ?? m)) : u)
+      const linhas = JSON.parse(readFileSync(join(pasta, arq), 'utf8')) as Array<Record<string, unknown>>
+      for (const t of TENANTS_LOCAIS) {
+        if ((await db.query(`SELECT 1 FROM loja.${tabela} WHERE tenant_id = $1 LIMIT 1`, [t.id])).rows.length) continue
+        for (const l of linhas) {
+          const campos = Object.entries(l).map(([k, v]) => [k.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`), v] as const).filter(([c]) => cols.some((x) => x.column_name === c))
+          const jsonb = (c: string) => cols.find((x) => x.column_name === c)?.data_type.startsWith('json')
+          const marcas = campos.map(([c], n) => `$${n + 2}${jsonb(c) ? '::jsonb' : ''}`).join(', ')
+          await db.query(`INSERT INTO loja.${tabela} (tenant_id, ${campos.map(([c]) => c).join(', ')}) VALUES ($1, ${marcas})`, [t.id, ...campos.map(([c, v]) => (jsonb(c) ? JSON.stringify(v ?? null) : foto(v) ?? null))])
+        }
+      }
     }
     const regGw = carregaNos(nosDir); registraBase(regGw); registraTemas(regGw); registraSite(regGw); registraCommerce(regGw) // os blocos de comércio (cartão de produto etc.) também valem nas páginas dos tenants de demonstração
     const siteDir = o.site === undefined ? join(RAIZ, 'exemplos', 'loja-site') : o.site; if (siteDir) carregaNos(siteDir, regGw, (t) => t.replace(/@img\/([A-Za-z0-9_-]+)/g, (m, n: string) => (fotos[n] ?? m)))
     // o MODELO do site (template) guardado no banco (`plataforma.template_versao`, por tenant, versões imutáveis): os nós da pasta do site viram o modelo `<pasta>` de cada tenant (idempotente: conteúdo igual não cria versão),
     // com as fotos ainda como `@img/<nome>` (portável: quem APLICA o modelo troca pelos ativos do tenant)
-    if (siteDir && existsSync(siteDir)) {
+    for (const pastaM of [...(siteDir ? [siteDir] : []), ...(o.modelos ?? [])]) if (existsSync(pastaM)) {
       const nosDoSite: Array<Record<string, any>> = [], anda = (d: string) => { for (const e of readdirSync(d).sort()) { const f = join(d, e); if (statSync(f).isDirectory()) anda(f); else if (e.endsWith('.json')) { const j = JSON.parse(readFileSync(f, 'utf8')) as unknown; nosDoSite.push(...(Array.isArray(j) ? j : [j]) as Array<Record<string, any>>) } } }
-      anda(siteDir)
+      anda(pastaM)
       if (nosDoSite.length) {
-        const slug = basename(siteDir).toLowerCase().replace(/[^a-z0-9-]/g, '-'), idiomas = nosDoSite.find((n) => n.kind === 'tenant' && n.spec?.idiomas)?.spec.idiomas ?? ['pt-BR']
+        const slug = basename(pastaM).toLowerCase().replace(/[^a-z0-9-]/g, '-'), idiomas = nosDoSite.find((n) => n.kind === 'tenant' && n.spec?.idiomas)?.spec.idiomas ?? ['pt-BR']
         const modelos = criaTemplates({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } }, base: regGw, armazem: criaArmazemDeNos({ q: async (sql, params) => { const r = await db.query(sql, params as unknown[]); return { rows: r.rows as Array<Record<string, unknown>>, rowCount: r.affectedRows ?? r.rows.length } }, base: regGw }) })
         for (const t of TENANTS_LOCAIS) {
           const r = await modelos.salva(t.id, 'sistema', slug, { nome: slug.charAt(0).toUpperCase() + slug.slice(1), descricao: `Modelo de site carregado de ${slug}/`, segmento: 'varejo', versao: '1.0.0', idiomas, nos: nosDoSite }, 'semente do ambiente local')

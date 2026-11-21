@@ -130,6 +130,73 @@
             ],
             "permissao": "publica"
           }
+        },
+        "conta": {
+          "campos": {
+            "slug": {
+              "tipo": "texto",
+              "obrigatorio": true
+            },
+            "nome": {
+              "tipo": "texto",
+              "obrigatorio": true
+            },
+            "segmento": {
+              "tipo": "texto",
+              "descricao": "enterprise, mid-market ou smb"
+            },
+            "arr": {
+              "tipo": "dinheiro",
+              "obrigatorio": true,
+              "descricao": "receita recorrente anual"
+            },
+            "saude": {
+              "tipo": "inteiro",
+              "descricao": "índice de saúde atual (0 a 100)"
+            },
+            "historico": {
+              "tipo": "json",
+              "descricao": "índice de saúde nas últimas 13 semanas, da mais antiga à atual"
+            },
+            "queda": {
+              "tipo": "inteiro",
+              "descricao": "saúde atual menos o pico das 13 semanas (≤ 0)"
+            },
+            "autonomia": {
+              "tipo": "inteiro",
+              "descricao": "semanas de uso restantes; ausente quando não se aplica"
+            },
+            "assentos": {
+              "tipo": "inteiro",
+              "descricao": "uso dos assentos (%)"
+            },
+            "semana": {
+              "tipo": "inteiro",
+              "descricao": "variação da saúde na semana"
+            },
+            "ultimoContato": {
+              "tipo": "inteiro",
+              "descricao": "dias desde o último contato"
+            },
+            "renovacao": {
+              "tipo": "data"
+            },
+            "responsavel": {
+              "tipo": "texto"
+            },
+            "composicao": {
+              "tipo": "json",
+              "descricao": "o que compõe o índice: lista de {k, v} (variações sobre a base 55)"
+            }
+          },
+          "crud": {
+            "caminho": "/contas",
+            "operacoes": [
+              "listar",
+              "obter"
+            ],
+            "permissao": "publica"
+          }
         }
       },
       "operacoes": {}

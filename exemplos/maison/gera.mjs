@@ -118,7 +118,7 @@ const HEROIS = [['iluminacao', 'loja-capa-iluminacao'], ['ceramica', 'colecao-ce
 const estadoColecoes = { colecoes: { tipo: 'json', lista: true, inicial: HEROIS.map(([slug, f]) => ({ slug, foto: foto(f), nome: doDicionario(`colecao.${slug}.nome`), frase: doDicionario(`colecao.${slug}.frase`) })) } }
 const GRADE_COLECOES = [['iluminacao', 7, 1.778], ['ceramica', 5, 0.75], ['mobiliario', 4, 0.75], ['texteis', 4, 0.75], ['objetos', 4, 0.75], ['sazonal', 12, 1.778]] // [categoria, colunas, proporção]
 const FOTOS = ['hero', 'foto-1', 'foto-2', 'foto-3', 'colecao-ceramica', 'colecao-5']
-// os produtos vêm da API do catálogo (serviço `loja`, entidade `peca`, `listarPeca`): o nó `dados` abaixo os entrega à página como `pecas`; as sementes do ambiente local ficam em `pecas.sementes`
+// os produtos vêm da API do catálogo (serviço `loja`, entidade `peca`, `listarPeca`): o nó `dados` abaixo os entrega à página como `pecas`; as sementes do ambiente local ficam em `peca.sementes`
 const dadosPecas = { kind: 'dados', id: 'maison.pecas', versao: '1.0.0', estatuto: 'publicado', spec: { fonte: { tipo: 'servico', servico: 'loja', operacao: 'listarPeca' }, parametros: { limite: { tipo: 'inteiro' } }, carregar: 'auto', cache: { ttlSegundos: 30 } } }
 const DADOS_PECAS = { pecas: { dados: 'maison.pecas', args: { limite: 100 } } }
 // a lista de produtos NO IDIOMA DA REQUISIÇÃO: cada campo de texto passa por `loc(idioma, …)`
@@ -498,6 +498,6 @@ const nos = [
   tenant('loja-outra', '22222222-2222-2222-2222-222222222222', 'Outra Loja'),
 ]
 // as sementes do catálogo (a API de produtos) do ambiente local: o que o gerente cadastraria; as fotos `@img/<nome>` viram ativos do tenant
-writeFileSync(join(aqui, 'pecas.sementes'), `${JSON.stringify(PRODUTOS.map((p, i) => { const d = dadosProduto(p, i); const { id, ...resto } = d; return { slug: id, ordem: i + 1, ...resto } }), null, 2)}\n`)
+writeFileSync(join(aqui, 'peca.sementes'), `${JSON.stringify(PRODUTOS.map((p, i) => { const d = dadosProduto(p, i); const { id, ...resto } = d; return { slug: id, ordem: i + 1, ...resto } }), null, 2)}\n`)
 writeFileSync(join(aqui, 'nos.json'), `${JSON.stringify(nos, null, 2)}\n`)
 console.log(`exemplos/maison/nos.json: ${nos.length} nós (tema, ${nos.filter((n) => n.kind === 'pagina').length} páginas, ${nos.filter((n) => n.kind === 'tenant').length} tenants, catálogo ${IDIOMAS.join('+')} com ${Object.keys(MENSAGENS[PADRAO]).length} chaves)`)

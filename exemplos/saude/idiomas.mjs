@@ -1,0 +1,37 @@
+// Os textos do painel de saúde por idioma (pt-BR é o padrão; en é o texto do template). As páginas só levam as CHAVES (`t("kpi.risco")`); trocar ou somar um idioma não mexe em página nenhuma.
+export const IDIOMAS = ['pt-BR', 'en']
+export const PADRAO = 'pt-BR'
+const D = {
+  'titulo': ['Saúde dos clientes', 'Customer health'],
+  'meta': ['{n} contas / US$ {arr} de ARR', '{n} accounts / ${arr} ARR'],
+  'guia': ['Guia do modelo', 'Template guide'],
+  'modo.claro': ['Claro', 'Light'], 'modo.escuro': ['Escuro', 'Dark'],
+  'modo.paraClaro': ['Mudar para o modo claro', 'Switch to light mode'], 'modo.paraEscuro': ['Mudar para o modo escuro', 'Switch to dark mode'],
+  'kpi.risco': ['ARR em risco', 'ARR at risk'], 'kpi.contasRisco': ['Contas em risco', 'Accounts at risk'], 'kpi.mediana': ['Saúde mediana', 'Median health'], 'kpi.renovacoes': ['Renovações · próximos 90 dias', 'Renewals · next 90 days'],
+  'kpi.vs': ['{d} vs. 4 semanas atrás', '{d} vs. 4 weeks ago'], 'kpi.contas': ['{n} contas', '{n} accounts'],
+  'visao.combinado': ['Combinado', 'Combined'], 'visao.segmento': ['Por segmento', 'By segment'],
+  'filtro.todos': ['Todos', 'All'], 'filtro.enterprise': ['Enterprise', 'Enterprise'], 'filtro.mid-market': ['Médio porte', 'Mid-Market'], 'filtro.smb': ['Pequenas', 'SMB'],
+  'seg.enterprise': ['Enterprise', 'Enterprise'], 'seg.mid-market': ['Médio porte', 'Mid-Market'], 'seg.smb': ['Pequenas', 'SMB'],
+  'grafico.rotulo': ['Índice de saúde de cada conta: cada bolha é uma conta, o tamanho é o ARR', 'Health score of each account: each bubble is an account, sized by ARR'],
+  'grafico.limite': ['Limite de risco', 'Risk threshold'], 'grafico.eixo': ['Índice de saúde', 'Health score'],
+  'grafico.conta': ['{nome}, saúde {saude}, ARR US$ {arr}', '{nome}, health {saude}, ${arr} ARR'],
+  'lista.titulo': ['Lista de atenção', 'Watchlist'],
+  'col.conta': ['Conta', 'Account'], 'col.arr': ['ARR', 'ARR'], 'col.saude': ['Saúde', 'Health'], 'col.semanas': ['13 sem.', '13 wks'], 'col.queda': ['Queda', 'Drawdown'], 'col.autonomia': ['Autonomia', 'Runway'],
+  'col.assentos': ['Assentos', 'Seats'], 'col.semana': ['Sem./sem.', 'WoW'], 'col.contato': ['Último contato', 'Last touch'], 'col.renovacao': ['Renovação', 'Renewal'],
+  'lista.nota': ['Um traço significa que a métrica não se aplica à conta, não que ela tirou zero.', 'A dash means the metric does not apply to that account, not that it scored zero.'],
+  'autonomia.valor': ['~{n} sem.', '~{n} wks'],
+  'detalhe.fechar': ['Fechar', 'Close'], 'detalhe.rotulo': ['Detalhe da conta', 'Account detail'],
+  'detalhe.meta': ['{seg} / {resp} / renova {data}', '{seg} / {resp} / renews {data}'],
+  'detalhe.trajetoria': ['Trajetória de 13 semanas', '13-week trajectory'], 'detalhe.composicao': ['Composição do índice', 'Score composition'],
+  'driver.base': ['Base', 'Base'], 'driver.uso': ['Tendência de uso do produto', 'Product usage trend'], 'driver.adocao': ['Amplitude de adoção', 'Breadth of adoption'], 'driver.suporte': ['Carga de suporte', 'Support burden'],
+  'driver.campeao': ['Engajamento do patrocinador', 'Champion engagement'], 'driver.recursos': ['Profundidade de recursos', 'Feature depth'], 'driver.comercial': ['Sinal comercial', 'Commercial signal'], 'driver.saude': ['Índice de saúde', 'Health score'],
+  'detalhe.arr': ['ARR', 'ARR'], 'detalhe.assentos': ['Uso dos assentos', 'Seat utilization'], 'detalhe.contato': ['Último contato', 'Last touch'], 'detalhe.queda': ['Queda', 'Drawdown'], 'detalhe.autonomia': ['Autonomia', 'Runway'],
+  'dias': ['{n} d', '{n}d'],
+  'guia.titulo': ['Usando este modelo', 'Using this template'], 'guia.sub': ['Dos dados de demonstração à sua carteira', 'From demo data to your book'],
+  'guia.intro': ['Este painel é um modelo do Polaris: páginas, tema, textos e a API de contas são nós e dados declarativos. Para torná-lo seu, troque os dados e ajuste os nós pelo Studio.', 'This dashboard is a Polaris template: pages, theme, texts and the accounts API are declarative nodes and data. To make it yours, swap the data and adjust the nodes in the Studio.'],
+  'guia.1.t': ['Troque as contas', 'Swap in your accounts'], 'guia.1.p': ['Toda conta desta página é dado de demonstração, guardado na API (entidade conta do serviço loja). Cadastre as suas pela API ou carregue um CSV do seu CRM; o gráfico, os indicadores e a lista se atualizam sozinhos.', 'Every account on this page is demo data, stored in the API (the conta entity of the loja service). Add yours through the API or load a CSV from your CRM; the chart, stats and watchlist update on their own.'],
+  'guia.2.t': ['Ligue uma fonte ao vivo', 'Wire a live source'], 'guia.2.p': ['A página lê as contas pelo nó de dados saude.contas. Aponte-o para outro serviço ou URL e a página continua igual.', 'The page reads accounts through the saude.contas data node. Point it at another service or URL and the page stays the same.'],
+  'guia.3.t': ['Calcule a saúde do seu jeito', 'Score health your way'], 'guia.3.p': ['O índice vem de seis sinais nomeados sobre uma base. Troque os sinais pelos que você de fato acompanha e mantenha a composição explicável.', 'The score is built from six named signals over a base. Swap them for the signals you actually track and keep the breakdown explainable.'],
+  'guia.4.t': ['Guarde o histórico semanal', 'Capture weekly history'], 'guia.4.p': ['As linhas de tendência, a queda e a autonomia leem as últimas 13 semanas de cada conta. Grave um retrato semanal do índice e o histórico se completa com o tempo.', 'The trend lines, drawdown and runway read each account\'s last 13 weeks. Save a weekly snapshot of the score and the history fills in over time.'],
+}
+export const MENSAGENS = Object.fromEntries(IDIOMAS.map((l, i) => [l, Object.fromEntries(Object.entries(D).map(([k, v]) => [k, v[i]]))]))

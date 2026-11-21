@@ -200,6 +200,19 @@
           "propertyNames": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
           }
+        },
+        "painel": {
+          "type": "object",
+          "description": "painel de indicadores (marcas `indicadores`, `tabela-painel`): `regua`, `divisoria`, `superficie`, `espessura`, `recuo`, `recuoTabela`",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
         }
       },
       "additionalProperties": false

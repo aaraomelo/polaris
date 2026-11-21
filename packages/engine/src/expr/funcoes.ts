@@ -196,10 +196,11 @@ export const f_maximo: Funcao = { min: 1, max: 16, fn: (...xs) => { const ns = x
 export const f_mediana: Funcao = { min: 1, max: 1, fn: (l) => { if (!Array.isArray(l) || !l.length) return undefined; const ns = l.map(aNum); if (ns.some((n) => n === undefined)) return undefined; const o = (ns as number[]).slice().sort((a, b) => a - b), m = o.length >> 1; return o.length % 2 ? o[m] : (o[m - 1]! + o[m]!) / 2 } }
 /** interpolação linear: leva `v` do intervalo [d0, d1] para [r0, r1] (sem cortar); domínio de largura zero, ausente */
 export const f_escala: Funcao = { min: 5, max: 5, fn: (v, d0, d1, r0, r1) => { const [a, b, c, d, e] = [v, d0, d1, r0, r1].map(aNum); if ([a, b, c, d, e].some((n) => n === undefined) || c === b) return undefined; return Math.round((d! + ((a! - b!) / (c! - b!)) * (e! - d!)) * 1000) / 1000 } }
-/** "enxame" (beeswarm): dadas as posições `xs` e os raios `rs` de círculos, devolve o deslocamento `y` de cada um (na mesma ordem) para que nenhum se sobreponha (distância ≥ r₁ + r₂ + folga), o mais perto possível de y = 0 */
-export const f_enxame: Funcao = { min: 2, max: 3, fn: (xs, rs, folga) => {
-  if (!Array.isArray(xs) || !Array.isArray(rs) || xs.length !== rs.length || xs.length > 2000) return undefined
-  const x = xs.map(aNum), r = rs.map(aNum), g = aNum(folga) ?? 1; if (x.some((n) => n === undefined) || r.some((n) => n === undefined || n < 0)) return undefined
+/** "enxame" (beeswarm): dada uma lista de objetos com `x` e `r` (posição e raio de um círculo), devolve a mesma lista com `y` acrescentado: o deslocamento vertical que evita sobreposição (distância ≥ r₁ + r₂ + folga), o mais perto possível de 0 */
+export const f_enxame: Funcao = { min: 1, max: 2, fn: (itens, folga) => {
+  if (!Array.isArray(itens) || itens.length > 2000) return undefined
+  const g = aNum(folga) ?? 1, x: number[] = [], r: number[] = []
+  for (const it of itens) { if (!it || typeof it !== 'object' || Array.isArray(it)) return undefined; const o = it as Record<string, unknown>, a = aNum(o.x), b = aNum(o.r); if (a === undefined || b === undefined || b < 0) return undefined; x.push(a); r.push(b) }
   const ordem = x.map((_, i) => i).sort((a, b) => x[a]! - x[b]! || a - b), colocados: Array<{ x: number; y: number; r: number }> = [], ys: number[] = new Array(x.length).fill(0)
   for (const i of ordem) {
     const cands = [0]; for (const p of colocados) { const d = r[i]! + p.r + g, dx = x[i]! - p.x; if (Math.abs(dx) < d) { const h = Math.sqrt(d * d - dx * dx); cands.push(p.y + h, p.y - h) } }
@@ -207,7 +208,7 @@ export const f_enxame: Funcao = { min: 2, max: 3, fn: (xs, rs, folga) => {
     let y = cands[cands.length - 1]!; for (const c of cands) if (colocados.every((p) => Math.hypot(x[i]! - p.x, c - p.y) >= r[i]! + p.r + g - 1e-6)) { y = c; break }
     colocados.push({ x: x[i]!, y, r: r[i]! }); ys[i] = Math.round(y * 100) / 100
   }
-  return ys
+  return itens.map((it, i) => ({ ...(it as object), y: ys[i] }))
 } }
 export const f_raiz: Funcao = { min: 1, max: 1, fn: (x) => { const n = aNum(x); return n === undefined || n < 0 ? undefined : Math.sqrt(n) } }
 /** número compacto no idioma ("6,7 mi" em pt, "6.7M" em en, "621k"); o prefixo (moeda) é do texto */

@@ -20,6 +20,8 @@ export const caminhoDe = (p: Record<string, unknown>): string | undefined => {
   return pts.length ? pts.map((q, i) => `${i ? 'L' : 'M'}${n2(q[0])} ${n2(q[1])}`).join('') : undefined
 }
 
+/** a cor de um texto pelo nome do tom (token `grafico.<tom>` do tema): `tom: "risco"` → `color:var(--grafico-risco)` */
+export const corDoTom = (p: Record<string, unknown>): string | undefined => { const t = tomDe(p); return t ? `var(--grafico-${t}, inherit)` : undefined }
 export type FormaSvg = { tag: string; attrs: Record<string, string>; estilo: Record<string, string>; texto?: string }
 /** o que cada primitiva desenha (fonte única para o descritor do cliente/servidor e para o emissor React) */
 export function formaSvg(bloco: string, p: Record<string, unknown>): FormaSvg {
@@ -54,7 +56,7 @@ export function formaSvg(bloco: string, p: Record<string, unknown>): FormaSvg {
     return { tag: 'svg:path', attrs, estilo }
   }
   // grafico/rotulo
-  attrs.x = n2(p.x); attrs.y = n2(p.y); estilo.textAnchor = ANCORAS[String(p.ancora)] ?? 'start'; estilo.dominantBaseline = p.base === 'central' ? 'central' : 'auto'
+  attrs.x = n2(p.x); attrs.y = n2(p.y); estilo.textAnchor = ANCORAS[String(p.ancora)] ?? 'start'; if (p.fonte === 'titulo' || p.fonte === 'mono' || p.fonte === 'corpo') estilo.fontFamily = p.fonte === 'titulo' ? 'var(--tipografia-familia-titulo, inherit)' : p.fonte === 'mono' ? 'var(--tipografia-familia-mono, monospace)' : 'var(--tipografia-familia, inherit)'; estilo.dominantBaseline = p.base === 'central' ? 'central' : 'auto'
   const c = corOuTom(p); if (c) estilo.fill = c; if (num(p.tamanho)) estilo.fontSize = `${n2(p.tamanho)}px`
   return { tag: 'svg:text', attrs, estilo, texto: typeof p.texto === 'string' ? p.texto.slice(0, 200) : typeof p.texto === 'number' ? String(p.texto) : '' }
 }
