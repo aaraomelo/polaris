@@ -49,3 +49,32 @@ describe('estado que persiste no navegador', () => {
     expect(localStorage.getItem(chave)).toBe('[1,1,1]')
   })
 })
+
+describe('ilha de formulário → página (aoEnviado e aoErro)', () => {
+  const res = compilaPrograma(r, r.registra(no('pagina', 'form-eventos', { rota: '/f', estado: { nome: { tipo: 'texto', inicial: '' }, falhas: { tipo: 'inteiro', inicial: 0 } }, raiz: P('layout/pilha', { slots: { filhos: [
+    P('form/formulario', { id: 'f', props: { formulario: 'contato' }, eventos: { aoEnviado: [{ acao: 'definir', estado: 'nome', valor: 'evento.valores.nome' }], aoErro: [{ acao: 'definir', estado: 'falhas', valor: 'estado.falhas + 1' }] } }),
+    P('texto/paragrafo', { id: 'eco', props: { texto: 'nome={estado.nome};falhas={estado.falhas}' } }),
+  ] } }) })))
+  if (!res.ok) throw new Error(JSON.stringify(res.erros))
+  it('o evento que a ilha dispara (sobe até o contêiner) roda as ações da página, com o detalhe em `evento`', () => {
+    const c = document.createElement('div'); document.body.appendChild(c)
+    montaVivo({ programa: res.programa, container: c, onErro: () => {} })
+    const ponto = c.querySelector('#f')!
+    ponto.dispatchEvent(new CustomEvent('polaris-enviado', { bubbles: true, detail: { valores: { nome: 'Ana' } } }))
+    expect(c.querySelector('#eco')!.textContent).toBe('nome=Ana;falhas=0')
+    ponto.dispatchEvent(new CustomEvent('polaris-erro', { bubbles: true, detail: { erros: [] } }))
+    expect(c.querySelector('#eco')!.textContent).toBe('nome=Ana;falhas=1')
+  })
+})
+
+describe('estado persistente que a página só LÊ (nenhuma ação o escreve)', () => {
+  beforeEach(() => { localStorage.clear(); document.body.innerHTML = '' })
+  it('o valor guardado aparece mesmo assim (no modo fechado o runtime só aceitaria o que alguma ação escreve)', () => {
+    localStorage.setItem('polaris:estado:itens', '[1,1,1]')
+    const res = compilaPrograma(r, r.registra(no('pagina', 'so-le', { rota: '/l', estado: { itens: { tipo: 'json', lista: true, inicial: [], persiste: true } }, raiz: P('texto/paragrafo', { id: 'n', props: { texto: 'n={tamanho(estado.itens)}' } }) })))
+    if (!res.ok) throw new Error(JSON.stringify(res.erros))
+    const c = document.createElement('div'); document.body.appendChild(c)
+    montaVivo({ programa: res.programa, container: c, hidrata: true, fechado: true, onErro: () => {} })
+    expect(c.querySelector('#n')!.textContent).toBe('n=3')
+  })
+})

@@ -271,6 +271,72 @@ const detalhe = b('layout/pilha', { gap: 0 }, [
   rodape(),
 ])
 
+// ---- checkout de DEMONSTRAÇÃO: o formulário valida no navegador (sem `envio`, a ilha só avisa a página com os valores) e o pedido é gravado
+// no estado persistente `pedidos`, neste navegador. Não há pagamento, frete nem servidor: o serviço `pedidos` exige comprador autenticado (docs/commerce.md).
+const estadoPedidos = { pedidos: { tipo: 'json', lista: true, inicial: [], persiste: true } }
+const formulario = { kind: 'formulario', id: 'maison.checkout', versao: '1.0.0', estatuto: 'publicado', spec: {
+  titulo: 'Dados de entrega',
+  campos: [
+    { nome: 'nome', tipo: 'texto', rotulo: 'Nome completo', obrigatorio: true, autocompletar: 'name' },
+    { nome: 'email', tipo: 'email', rotulo: 'E-mail', obrigatorio: true },
+    { nome: 'telefone', tipo: 'telefone', rotulo: 'Telefone', obrigatorio: true },
+    { nome: 'cep', tipo: 'cep', rotulo: 'CEP', obrigatorio: true },
+    { nome: 'endereco', tipo: 'texto', rotulo: 'Endereço e número', obrigatorio: true },
+    { nome: 'cidade', tipo: 'texto', rotulo: 'Cidade', obrigatorio: true },
+  ],
+  acoes: [{ id: 'enviar', rotulo: 'Finalizar pedido', tipo: 'enviar', estilo: 'primario' }],
+} }
+const PEDIDO = `objeto([["numero", 1001 + tamanho(estado.pedidos)], ["cliente", evento.valores], ["itens", mapeia(${LINHAS}, l => objeto([["nome", l.p.nome], ["qtd", l.qtd], ["total", qmul(l.p.preco, l.qtd)]]))], ["total", ${SUBTOTAL}]])`
+const resumoLinha = b('layout/linha', { gap: 12, alinha: 'centro', quebra: true }, [
+  b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 56 }),
+  b('layout/pilha', { gap: 2, cresce: true, alinha: 'inicio' }, [b('texto/rotulo', { texto: '{l.p.nome}' }), b('texto/pequeno', { texto: '{l.qtd + " × " + (l.p.preco | qbrl)}' })]),
+  b('texto/rotulo', { texto: '{qmul(l.p.preco, l.qtd) | qbrl}' }),
+])
+const checkout = b('layout/pilha', { gap: 0 }, [
+  cabecalho(),
+  folga(64),
+  contido([
+    sobre('Quase lá'), titulo('Finalizar pedido', 1), folga(24),
+    b('layout/grade', { colunas: 2, gap: 64 }, [
+      b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+        b('form/formulario', { formulario: 'maison.checkout' }, undefined, { eventos: { aoEnviado: [
+          { acao: 'definir', estado: 'pedidos', valor: `concat(estado.pedidos, [${PEDIDO}])` },
+          { acao: 'definir', estado: 'sacola', valor: '[]' },
+          { acao: 'navegar', para: '/pedido' },
+        ] } }),
+        par('Pedido de demonstração: não há pagamento nem frete, e o pedido fica guardado só neste navegador.'),
+      ]),
+      b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+        titulo('Resumo', 3),
+        b('layout/pilha', { gap: 12 }, [{ ...resumoLinha, repetir: { cada: LINHAS, como: 'l', chave: 'l.id' } }]),
+        b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}` }),
+        link('/sacola', 'Voltar à sacola'),
+      ]),
+    ], { se: `tamanho(${LINHAS}) > 0` }),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Sua sacola está vazia', 3), par('Escolha peças na loja para finalizar um pedido.'), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(${LINHAS}) == 0` }),
+  ], 'larga'),
+  folga(96),
+  rodape(),
+])
+// confirmação: o último pedido gravado neste navegador
+const ULTIMO = 'ultimo(estado.pedidos)'
+const confirmacao = b('layout/pilha', { gap: 0 }, [
+  cabecalho(),
+  folga(64),
+  contido([
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [
+      sobre('Pedido recebido'), titulo('{"Obrigado, " + (' + ULTIMO + '.cliente.nome | aparar) + "!"}', 1),
+      par('{"Pedido nº " + ' + ULTIMO + '.numero + ": " + (' + ULTIMO + '.total | qbrl) + ". Contato informado: " + ' + ULTIMO + '.cliente.email + "."}'),
+      b('layout/pilha', { gap: 8 }, [{ bloco: 'texto/rotulo', props: { texto: '{i.qtd + " × " + i.nome + " — " + (i.total | qbrl)}' }, repetir: { cada: ULTIMO + '.itens', como: 'i', chave: 'i.nome' } }]),
+      par('Pedido de demonstração, guardado só neste navegador: nenhum e-mail foi enviado e nada foi cobrado.'),
+      link('/produtos', 'Continuar comprando', 'primario'),
+    ], { se: `tamanho(estado.pedidos) > 0` }),
+    b('layout/pilha', { gap: 16, alinha: 'inicio' }, [titulo('Nenhum pedido por aqui', 2), link('/produtos', 'Ver as peças', 'primario')], { se: `tamanho(estado.pedidos) == 0` }),
+  ], 'estreita'),
+  folga(96),
+  rodape(),
+])
+
 // ---- sacola: linhas com foto, quantidade (− e +), remover, subtotal e o aviso de que o pagamento ainda não existe --------------------------------------
 const linha = b('layout/linha', { gap: 24, alinha: 'centro', quebra: true }, [
   b('midia/imagem', { src: '{l.p.fotoUrl}', alt: '{l.p.nome}', proporcao: 0.8, largura: 96 }),
@@ -294,6 +360,7 @@ const sacolaPag = b('layout/pilha', { gap: 0 }, [
       folga(16),
       b('commerce/resumo-pedido', { subtotal: `{${SUBTOTAL}}`, total: `{${SUBTOTAL}}` }),
       par('Frete e pagamento serão calculados no fechamento do pedido (ainda não disponível neste exemplo).'),
+      link('/checkout', 'Finalizar pedido', 'primario'),
       link('/produtos', 'Continuar comprando'),
     ], { se: `tamanho(${LINHAS}) > 0` }),
   ], 'estreita'),
@@ -303,16 +370,19 @@ const sacolaPag = b('layout/pilha', { gap: 0 }, [
 
 const pagina = (id, rota, titulo, raiz, extra = {}) => ({ kind: 'pagina', id, versao: '1.0.0', estatuto: 'publicado', spec: { rota, titulo, raiz, ...extra, estado: { ...estadoSacola, ...(extra.estado ?? {}) } } })
 const naoAchada = b('layout/pilha', { gap: 16, alinha: 'centro' }, [titulo('Página não encontrada', 1), par('O endereço não existe nesta loja.'), link('/', 'Voltar ao início', 'primario')])
-const PAGINAS = ['maison.home', 'maison.produtos', 'maison.produto', 'maison.sobre', 'maison.sacola', 'maison.nao']
+const PAGINAS = ['maison.home', 'maison.produtos', 'maison.produto', 'maison.sobre', 'maison.sacola', 'maison.checkout', 'maison.pedido', 'maison.nao']
 const tenant = (id, tenantId, nome) => ({ kind: 'tenant', id, tenantId, versao: '1.0.0', estatuto: 'publicado', spec: { alias: id, nome, segmento: 'varejo', modulos: ['loja'], tema: 'maison', paginas: PAGINAS, paginaNaoEncontrada: 'maison.nao' } })
 
 const nos = [
   tema,
+  formulario,
   pagina('maison.home', '/', 'Maison', home),
   pagina('maison.produtos', '/produtos', 'Todas as peças · Maison', produtos, { estado: { produtos: { tipo: 'json', inicial: PRODUTOS.map(paraProduto) } } }),
   pagina('maison.produto', '/produtos/:id', 'Peça · Maison', detalhe, { params: { id: { tipo: 'texto' } }, estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
   pagina('maison.sobre', '/sobre', 'Sobre · Maison', sobre_),
   pagina('maison.sacola', '/sacola', 'Sacola · Maison', sacolaPag, { estado: { produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
+  pagina('maison.checkout', '/checkout', 'Finalizar pedido · Maison', checkout, { estado: { ...estadoPedidos, produtos: { tipo: 'json', lista: true, inicial: PRODUTOS.map(paraProduto) } } }),
+  pagina('maison.pedido', '/pedido', 'Pedido recebido · Maison', confirmacao, { estado: estadoPedidos }),
   pagina('maison.nao', '/nao-encontrada', 'Página não encontrada', naoAchada),
   tenant('loja-demo', '11111111-1111-1111-1111-111111111111', 'Loja Demo'),
   tenant('loja-outra', '22222222-2222-2222-2222-222222222222', 'Outra Loja'),

@@ -45,7 +45,7 @@ export const COMPONENTES_BASE: Componentes = {
     const src = urlSegura(props.src)
     if (!src) return null
     const sz = tamanhosDe(props.tamanhos, num(props.largura)), ss = sz ? srcsetDe(src) : undefined // sem `tamanhos` nem `largura` o navegador não sabe o espaço da imagem: sem srcset
-    return createElement('img', { ...(id ? { id } : {}), src, ...(ss ? { srcSet: ss, sizes: sz } : {}), alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto', ...(props.fluida === true || proporcaoDaImagem(props) ? { width: '100%' } : {}), ...(proporcaoDaImagem(props) ? { aspectRatio: proporcaoDaImagem(props), objectFit: 'cover' } : {}) } })
+    return createElement('img', { ...(id ? { id } : {}), src, ...(ss ? { srcSet: ss, sizes: sz } : {}), alt: txt(props.alt), ...(num(props.largura) !== undefined ? { width: num(props.largura) } : {}), ...(num(props.altura) !== undefined ? { height: num(props.altura) } : {}), loading: 'lazy', style: { maxWidth: '100%', height: 'auto', ...(props.fluida === true || (proporcaoDaImagem(props) && num(props.largura) === undefined) ? { width: '100%' } : {}), ...(proporcaoDaImagem(props) ? { aspectRatio: proporcaoDaImagem(props), objectFit: 'cover' } : {}) } })
   },
   'computacao/canvas-gl': ({ props, id }) => (ident(props.kernel) ? createElement('canvas', { ...(id ? { id } : {}), width: dimensao(props.largura), height: dimensao(props.altura), role: 'img', 'aria-label': txt(props.alt), 'data-polaris-kernel': ident(props.kernel), 'data-polaris-entradas': entradasJson(props.entradas) }, txt(props.alt)) : null),
   'entrada/area': ({ props, on, id }) =>

@@ -83,7 +83,7 @@ body{margin:0;background:var(--cor-fundo);color:var(--cor-texto);font-family:var
 #polaris button[data-variante=secundario]:hover:not(:disabled){background:var(--cor-superficie-alt);border-color:var(--cor-primaria)}
 #polaris button[data-variante=fantasma]{background:transparent;color:var(--cor-texto)}
 #polaris button[data-variante=fantasma]:hover:not(:disabled){background:var(--cor-superficie-alt)}
-#polaris input[type=text],#polaris input[type=number],#polaris input[type=search]{background:var(--cor-superficie);color:var(--cor-texto);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75);font:inherit}
+#polaris input[type=text],#polaris input[type=number],#polaris input[type=email],#polaris input[type=tel],#polaris input[type=url],#polaris input[type=password],#polaris input[type=date],#polaris input[type=time],#polaris input[type=datetime-local],#polaris textarea,#polaris select,#polaris input[type=search]{background:var(--cor-superficie);color:var(--cor-texto);border:var(--espacamento-borda) solid var(--cor-borda);border-radius:var(--raio-pequeno);padding:calc(var(--espacamento-base) * .75);font:inherit}
 #polaris form[role=search]{display:flex;align-items:center;gap:var(--espacamento-base);margin:0}
 #polaris form[role=search] input[type=search]{min-width:12ch;flex:1}
 #polaris form[role=search]{position:relative}

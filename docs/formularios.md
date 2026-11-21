@@ -86,7 +86,7 @@ Ações (`acoes[]`): `tipo` `enviar limpar cancelar voltar avancar personalizada
 ```json
 { "bloco": "form/formulario", "props": { "formulario": "contato" } }
 ```
-Props: `formulario` (id do nó; o do tenant vence o da plataforma), `valores` (iniciais, para edição; só primitivos e listas deles) e `idioma`. Eventos: `aoEnviado` (recebe `{ resultado, sucesso }`) e `aoErro` (`{ erros }` ou `{ status }`), que ligam ações da página como qualquer outro bloco.
+Props: `formulario` (id do nó; o do tenant vence o da plataforma), `valores` (iniciais, para edição; só primitivos e listas deles) e `idioma`. Eventos: `aoEnviado` (recebe `{ resultado, sucesso }`) e `aoErro` (`{ erros }` ou `{ status }`), que ligam ações da página como qualquer outro bloco (o detalhe chega em `evento`: `evento.valores` num formulário **sem** `envio`, que valida no navegador e não vai ao servidor). Os dois eventos sobem pelo DOM até o contêiner da página, que é onde o runtime os escuta.
 
 Como funciona (uma "ilha"): o servidor entrega só o ponto de montagem (`<div data-polaris-formulario="contato" role="group" aria-busy="true">Carregando formulário…</div>`); a página inclui o pacote da ilha (`PolarisFormularios`, ~60 KB, **só nas páginas que usam o bloco**, servido de `/_polaris/a/<hash>.js` com cache imutável), que **espera o runtime da página hidratar**, busca a definição (`GET /bff/formularios/:id`) e desenha os campos com o **mesmo motor** do servidor. A navegação sem recarregar (`docs/paginas.md`) monta a ilha da página nova.
 

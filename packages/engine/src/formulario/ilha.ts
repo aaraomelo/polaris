@@ -307,15 +307,15 @@ export async function montaFormulario(el: HTMLElement, opc: OpcoesIlha = {}): Pr
   async function enviaTudo(): Promise<void> {
     if (enviando) return
     tentou = true; const r = valida(); ultimo = r; aplicaEstado(r); mostraErros(r)
-    if (!r.ok) { const p = def.passos ? Math.min(...r.erros.map((e) => noPasso(e.campo.split('.')[0]!))) : 0; if (Number.isFinite(p) && def.passos) irPara(p); foca(r.erros); el.dispatchEvent(new CustomEvent('polaris-erro', { detail: { erros: r.erros } })); return }
-    if (!def.envio) { el.dispatchEvent(new CustomEvent('polaris-enviado', { detail: { valores: r.valores } })); return }
+    if (!r.ok) { const p = def.passos ? Math.min(...r.erros.map((e) => noPasso(e.campo.split('.')[0]!))) : 0; if (Number.isFinite(p) && def.passos) irPara(p); foca(r.erros); el.dispatchEvent(new CustomEvent('polaris-erro', { bubbles: true, detail: { erros: r.erros } })); return }
+    if (!def.envio) { el.dispatchEvent(new CustomEvent('polaris-enviado', { bubbles: true, detail: { valores: r.valores } })); return }
     enviando = true; raiz.setAttribute('aria-busy', 'true'); for (const b of botoes.values()) b.disabled = true; erroGeral.hidden = true; status.hidden = true
     try {
       const res = await envia(id, { valores: le(), idioma }, chaveEnvio)
       const corpo = (res.corpo ?? {}) as { ok?: boolean; resultado?: unknown; sucesso?: { mensagem?: string; limpar?: boolean; acoes?: AcaoPagina[] }; erro?: { mensagem?: string }; erros?: ErroCampo[] }
       if (res.status >= 200 && res.status < 300 && corpo.ok !== false) {
         enviando = false; status.setAttribute('data-tom', 'sucesso'); status.textContent = corpo.sucesso?.mensagem ?? T(def.envio.sucesso?.mensagem) ?? em('Enviado com sucesso.', 'Submitted.'); status.hidden = false
-        el.dispatchEvent(new CustomEvent('polaris-enviado', { detail: { resultado: corpo.resultado, sucesso: corpo.sucesso } }))
+        el.dispatchEvent(new CustomEvent('polaris-enviado', { bubbles: true, detail: { resultado: corpo.resultado, sucesso: corpo.sucesso } }))
         if (corpo.sucesso?.limpar) { const m = status.textContent; limpa(); status.setAttribute('data-tom', 'sucesso'); status.textContent = m; status.hidden = false }
         chaveEnvio = chaveAleatoria(); roda(corpo.sucesso?.acoes)
       } else if (res.status === 422 && Array.isArray(corpo.erros)) {
@@ -323,14 +323,14 @@ export async function montaFormulario(el: HTMLElement, opc: OpcoesIlha = {}): Pr
         const sintetico: ResultadoForm = { ok: false, valores: {}, erros: corpo.erros, porCampo, estado: ultimo?.estado ?? {} }; aplicaEstado(ultimo ?? sintetico); mostraErros(sintetico, new Set(Object.keys(porCampo)))
         if (porCampo._formulario || corpo.erro?.mensagem) { erroGeral.textContent = (porCampo._formulario ?? []).map((e) => e.mensagem).join(' ') || corpo.erro?.mensagem || ''; erroGeral.hidden = false }
         if (def.passos) { const p = Math.min(...corpo.erros.map((e) => noPasso(e.campo.split('.')[0]!))); if (Number.isFinite(p)) irPara(p) }
-        foca(corpo.erros); el.dispatchEvent(new CustomEvent('polaris-erro', { detail: { erros: corpo.erros } }))
+        foca(corpo.erros); el.dispatchEvent(new CustomEvent('polaris-erro', { bubbles: true, detail: { erros: corpo.erros } }))
       } else {
         enviando = false; erroGeral.textContent = corpo.erro?.mensagem ?? T(def.envio.erro?.mensagem) ?? em('Não foi possível enviar agora. Tente de novo em instantes.', 'Could not submit now. Try again shortly.'); erroGeral.hidden = false
-        el.dispatchEvent(new CustomEvent('polaris-erro', { detail: { status: res.status } })); roda(def.envio.erro?.acoes)
+        el.dispatchEvent(new CustomEvent('polaris-erro', { bubbles: true, detail: { status: res.status } })); roda(def.envio.erro?.acoes)
       }
     } catch {
       enviando = false; erroGeral.textContent = T(def.envio.erro?.mensagem) ?? em('Sem conexão. Tente de novo.', 'No connection. Try again.'); erroGeral.hidden = false
-      el.dispatchEvent(new CustomEvent('polaris-erro', { detail: { status: 0 } }))
+      el.dispatchEvent(new CustomEvent('polaris-erro', { bubbles: true, detail: { status: 0 } }))
     } finally { enviando = false; raiz.removeAttribute('aria-busy'); for (const b of botoes.values()) b.disabled = false; if (ultimo) aplicaEstado(ultimo); atualizaBotoesPasso() }
   }
   raiz.addEventListener('submit', (ev) => { ev.preventDefault(); void enviaTudo() })

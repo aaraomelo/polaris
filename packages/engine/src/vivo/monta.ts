@@ -531,7 +531,7 @@ export function montaVivoNucleo(o: OpcoesVivo): Vivo {
     }
   }
   // os eventos do DOM que os blocos declaram: `click`, `input`, `change` e os personalizados da tela de edição e da zona de soltar (o formulário avisa por outro caminho)
-  const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar']
+  const tipos = ['click', 'input', 'change', 'polaris-mover', 'polaris-selecionar', 'polaris-soltar', 'polaris-enviado', 'polaris-erro']
   for (const t of tipos) o.container.addEventListener(t, ouve)
 
   // estado que `persiste`: só no navegador, depois de hidratar (o servidor renderiza `inicial`). Valor de outro formato (com `lista`, não-lista) ou ilegível é ignorado; armazenamento indisponível não derruba a página.

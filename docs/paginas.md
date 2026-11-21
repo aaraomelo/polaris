@@ -48,6 +48,7 @@ Uma entrada de `spec.estado` com `"persiste": true` é guardada no `localStorage
 
 - O servidor sempre renderiza `inicial` (ele não vê o navegador); o valor guardado entra logo depois da hidratação e a página se atualiza.
 - O valor lido é conferido (tipo e, com `lista`, ser lista); texto corrompido ou de outro formato é ignorado e vale o `inicial`. Cota cheia ou armazenamento bloqueado não derrubam a página: ela funciona sem guardar.
+- Um estado `persiste` conta como mutável mesmo que nenhuma ação da página o escreva (uma página só de leitura, como a confirmação de pedido, também recebe o valor guardado).
 - Cada loja tem uma origem própria, então uma loja não lê o que outra guardou. Mas o valor fica **na máquina de quem visita** e pode ser alterado por ela: guarde só escolhas (ids e quantidades), nunca preço ou permissão, e recalcule do catálogo ao exibir (a sacola do exemplo faz isso).
 - Não há sincronização entre aparelhos nem com o servidor; para isso o caminho é o serviço `carrinho` (`docs/commerce.md`), que ainda não tem carregador no cliente das páginas.
 

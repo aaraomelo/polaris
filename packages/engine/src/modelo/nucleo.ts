@@ -81,6 +81,7 @@ function acoesDe(lista: IRAcao[], out: Set<string>): void {
 export function chavesMutaveis(programa: Programa): Set<string> {
   const out = new Set<string>()
   for (const [nome, d] of Object.entries(programa.pagina.dados)) if (d.stream) { out.add(nome); out.add(`status.${nome}`); out.add(`erros.${nome}`) }
+  for (const [nome, d] of Object.entries(programa.pagina.estado)) if (d.persiste) out.add(`estado.${nome}`) // o valor guardado no navegador entra depois da hidratação, mesmo que nenhuma ação desta página o escreva
   const vistos = new WeakSet<IRNo>()
   const anda = (no: IRNo) => {
     if (vistos.has(no)) return

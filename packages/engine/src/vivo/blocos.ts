@@ -53,7 +53,7 @@ export const d_midia_imagem: Descritor = {
     chave: (p) => (urlSegura(p.src) ? 'img' : null), tag: () => 'img',
     attrs: (p, id) => {
       const w = num(p.largura), h = num(p.altura), src = urlSegura(p.src) ?? '', sz = tamanhosDe(p.tamanhos, w), ss = sz ? srcsetDe(src) : undefined
-      return { ...comId(id), src, ...(ss ? { srcset: ss, sizes: sz! } : {}), alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: `max-width:100%;height:auto${p.fluida === true || proporcaoDaImagem(p) ? ';width:100%' : ''}${proporcaoDaImagem(p) ? `;aspect-ratio:${proporcaoDaImagem(p)};object-fit:cover` : ''}` } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
+      return { ...comId(id), src, ...(ss ? { srcset: ss, sizes: sz! } : {}), alt: txt(p.alt), ...(w !== undefined ? { width: String(w) } : {}), ...(h !== undefined ? { height: String(h) } : {}), loading: 'lazy', style: `max-width:100%;height:auto${p.fluida === true || (proporcaoDaImagem(p) && w === undefined) ? ';width:100%' : ''}${proporcaoDaImagem(p) ? `;aspect-ratio:${proporcaoDaImagem(p)};object-fit:cover` : ''}` } // `largura`/`altura` reservam o espaço (sem salto de layout), mas a imagem NUNCA passa do contêiner (coluna estreita, celular)
     },
   }
 export const d_nav_link: Descritor = {
