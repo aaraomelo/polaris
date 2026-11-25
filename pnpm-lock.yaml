@@ -167,8 +167,8 @@ importers:
   .:
     devDependencies:
       turbo:
-        specifier: ^2.11.11
-        version: 2.11.11
+        specifier: ^2.11.13
+        version: 2.11.13
 
   apps/polaris:
     dependencies:
@@ -210,11 +210,11 @@ importers:
         version: 8.23.1
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@electric-sql/pglite-socket':
-        specifier: ^0.2.19
-        version: 0.2.19(@electric-sql/pglite-age@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_hashids@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_ivm@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_textsearch@0.0.18(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_uuidv7@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgtap@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgvector@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite@0.5.16)
+        specifier: ^0.2.20
+        version: 0.2.20(@electric-sql/pglite-age@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_hashids@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_ivm@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_textsearch@0.0.19(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_uuidv7@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgtap@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgvector@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite@0.5.17)
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -237,8 +237,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   apps/studio:
     dependencies:
@@ -268,8 +268,8 @@ importers:
         version: 19.3.1(react@19.3.1)
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -292,8 +292,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/acesso:
     dependencies:
@@ -311,8 +311,8 @@ importers:
         version: 6.2.17
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -320,8 +320,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/computacao:
     dependencies:
@@ -345,8 +345,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/documentos:
     dependencies:
@@ -382,8 +382,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/e2e:
     dependencies:
@@ -404,8 +404,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/engine:
     dependencies:
@@ -447,8 +447,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/eventos:
     dependencies:
@@ -466,8 +466,8 @@ importers:
         version: 3.0.1(ajv@8.20.0)
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -475,8 +475,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/gateway:
     dependencies:
@@ -506,8 +506,8 @@ importers:
         version: 17.1.0
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@polaris/servico':
         specifier: workspace:*
         version: link:../servico
@@ -521,8 +521,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/observabilidade:
     devDependencies:
@@ -536,8 +536,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/packs:
     dependencies:
@@ -561,11 +561,11 @@ importers:
         version: 0.34.5
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@electric-sql/pglite-socket':
-        specifier: ^0.2.19
-        version: 0.2.19(@electric-sql/pglite-age@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_hashids@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_ivm@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_textsearch@0.0.18(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_uuidv7@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgtap@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgvector@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite@0.5.16)
+        specifier: ^0.2.20
+        version: 0.2.20(@electric-sql/pglite-age@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_hashids@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_ivm@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_textsearch@0.0.19(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_uuidv7@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgtap@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgvector@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite@0.5.17)
       '@polaris/engine':
         specifier: workspace:*
         version: link:../engine
@@ -585,8 +585,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/pg:
     dependencies:
@@ -595,11 +595,11 @@ importers:
         version: 8.23.1
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@electric-sql/pglite-socket':
-        specifier: ^0.2.19
-        version: 0.2.19(@electric-sql/pglite-age@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_hashids@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_ivm@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_textsearch@0.0.18(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_uuidv7@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgtap@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgvector@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite@0.5.16)
+        specifier: ^0.2.20
+        version: 0.2.20(@electric-sql/pglite-age@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_hashids@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_ivm@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_textsearch@0.0.19(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_uuidv7@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgtap@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgvector@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite@0.5.17)
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -610,8 +610,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/pgreal:
     dependencies:
@@ -656,8 +656,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/schema:
     dependencies:
@@ -669,8 +669,8 @@ importers:
         version: 3.0.1(ajv@8.20.0)
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -678,8 +678,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/servico:
     dependencies:
@@ -706,8 +706,8 @@ importers:
         version: 5.12.8
     devDependencies:
       '@electric-sql/pglite':
-        specifier: ^0.5.16
-        version: 0.5.16
+        specifier: ^0.5.17
+        version: 0.5.17
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -718,8 +718,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/signmaker:
     dependencies:
@@ -764,8 +764,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/studio:
     dependencies:
@@ -783,8 +783,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
   tools/ferramentas:
     dependencies:
@@ -799,64 +799,64 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5.1.0
-        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
 packages:
 
   '@casl/ability@6.8.4':
     resolution: {integrity: sha512-fsTh9PtQWCSdffmeEF+FXpygmoBMWw+Cq2CMKfEEtixxL3rp4R+jOUGoxB0jDHZ739imgFiqByiSy5lODVrpcg==}
 
-  '@electric-sql/pglite-age@0.0.17':
-    resolution: {integrity: sha512-31zR5HxRK1ZQdLgZ7ohym/GMvS576/YAWjXsrNkeyqb4gpvRoeia6rfVO+MovkJ9XTkqp5dgkpc8/fEGkOVNTw==}
+  '@electric-sql/pglite-age@0.0.18':
+    resolution: {integrity: sha512-JVuUqMEmF3Kb2MUETJ0X7uRxfmeIA5+tYMrYrckDzpFdhx4JptbIdJ5RyVV3E+z+ok+A81tf/fgiBNzdrQE3Mg==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_hashids@0.0.17':
-    resolution: {integrity: sha512-DGi/c6XCkwXq9lcdmq0tBzlpjx+CTUPsIg43Ave4RGqVR78w7rWqwpEA0L4oEx4z1QPrFASYxCetFPpwsmKgwg==}
+  '@electric-sql/pglite-pg_hashids@0.0.18':
+    resolution: {integrity: sha512-yFDB0tS1SxGd4dETU+DXbJx38PsSDyVOQBUJd8RajSPrv/HpUnplj/4w9MCGmT/gkI/UAEvVILLpkfnQGhQoUQ==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_ivm@0.0.17':
-    resolution: {integrity: sha512-8KF4PGdN/QdB+dxsGjNpFkPyDd8YrMoLDuNkbS4nZ7Xj2bEpEt2RN/dYd9ZI+tIosy98Uu7WHLHxoepEpBGmSg==}
+  '@electric-sql/pglite-pg_ivm@0.0.18':
+    resolution: {integrity: sha512-wrSd3jLfvF3ST1BTHAPSwesYE3SwHnyqgdWwMH7NJpp1UpYFwcJLcwTTf9CcvUjn0HGsf7ousp+p7TgZWzwMVg==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_textsearch@0.0.18':
-    resolution: {integrity: sha512-Fb7Aw8H+XsiwfojJsXSMHBX4lWANU8M2aHKe5hQkEUzm56DZYnMhKTJjDx84lmmRw4wb4MbZMQOa4dT32EbGAQ==}
+  '@electric-sql/pglite-pg_textsearch@0.0.19':
+    resolution: {integrity: sha512-4P3+iJQOf/yoWrjOLCveuMT9u/Je9b4tNdyY+OTIyS2CQaIesMfVjgTkxbMJWmZA0PooyCSj4L6VjZsc5nk6Bg==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_uuidv7@0.0.17':
-    resolution: {integrity: sha512-eWfMwDE/S8DLYE6GCztbfnKTnE1h0BCJ1x6QqpZf+t51CkuDe6WmV2t8ubOIN/qBpr7IQH35SUZaeHnqkuY4LA==}
+  '@electric-sql/pglite-pg_uuidv7@0.0.18':
+    resolution: {integrity: sha512-HIMMW1VKQmSWS+cVkIoo0uHKsN704iDfGldfRkrmUUeqhD8nE6OA0SZhH3g8c80oz1vQT9dI/UT1WSox18Mf1A==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pgtap@0.0.17':
-    resolution: {integrity: sha512-36rMqHS3EfY/jlpcbw5IXp1qD3WXXD1fCYQBBbIFdYUKb70RrJT2Jv8S/kZNeDByBmCm9cZmCgsFzhfbQyvmKg==}
+  '@electric-sql/pglite-pgtap@0.0.18':
+    resolution: {integrity: sha512-EG3chLw5hlzhdd2+lpoq0Voa1DVVUnSenXCrIiZVpOxHJ6LF9vUlxcu43j4RAkPxQBSIUaXlmbSLQJl6+hXQTw==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pgvector@0.0.17':
-    resolution: {integrity: sha512-tOFBigmwl+6qqZ5y2wOUeDngKeO22lLslSQjmaZri5WAh7V3bDUQaxxlT9MJLSPmdwPjR0NRHqk2V5yFtgLUYQ==}
+  '@electric-sql/pglite-pgvector@0.0.18':
+    resolution: {integrity: sha512-G2d2rFS/rsRTXl7fvTuVIhD/fA6MIdDQB3l/xzIyRcDIVUl4KAcAEcqXPPTAXwJlqLViNGHFX+d1yn63V91xpQ==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-socket@0.2.19':
-    resolution: {integrity: sha512-OwZ2U2ICkI2dQXwZKrfK68i1XIjIx4aU658AwxYZGteXSCZ7MOkpeznAwaA+tOJtNzBegxz4cW/Hcu1L/KuE+A==}
+  '@electric-sql/pglite-socket@0.2.20':
+    resolution: {integrity: sha512-ES5Zf3oZLUHJkeKabfNWlhG6BLYZOu0iHXt7eGgwMp+aTsymSY4aoU3v4SGDaKV1j0YlgORrPSHHvOzv1iH5yw==}
     hasBin: true
     peerDependencies:
-      '@electric-sql/pglite': 0.5.16
-      '@electric-sql/pglite-age': 0.0.17
-      '@electric-sql/pglite-pg_hashids': 0.0.17
-      '@electric-sql/pglite-pg_ivm': 0.0.17
-      '@electric-sql/pglite-pg_textsearch': 0.0.18
-      '@electric-sql/pglite-pg_uuidv7': 0.0.17
-      '@electric-sql/pglite-pgtap': 0.0.17
-      '@electric-sql/pglite-pgvector': 0.0.17
+      '@electric-sql/pglite': 0.5.17
+      '@electric-sql/pglite-age': 0.0.18
+      '@electric-sql/pglite-pg_hashids': 0.0.18
+      '@electric-sql/pglite-pg_ivm': 0.0.18
+      '@electric-sql/pglite-pg_textsearch': 0.0.19
+      '@electric-sql/pglite-pg_uuidv7': 0.0.18
+      '@electric-sql/pglite-pgtap': 0.0.18
+      '@electric-sql/pglite-pgvector': 0.0.18
 
-  '@electric-sql/pglite@0.5.16':
-    resolution: {integrity: sha512-Nj8KcIsJL748W408U2N8q4+9IlONdpRIU8MJypIAAINMJ5nqKyqpX7Mgg/5XKkXiAib3AoZGR6hnJFlrlLBrcg==}
+  '@electric-sql/pglite@0.5.17':
+    resolution: {integrity: sha512-8SvKjiUjaU+0O0dbxjOfN+jXz14TEqDWbwDkYOW1aQ11y/ph2JvFVI27ABBo5nfw+ZfSqy4hKCNlbnbB1TDE+g==}
 
   '@emnapi/core@2.0.0-beta.2':
     resolution: {integrity: sha512-MzCVoWtcg4Pm2B3je5mMvYMvj3MmBKw+fU7vbsJc9/iT8ip6/eYIHo/Dsm/mr+wsHB6SEyJDuxB09Yy6r/8+4A==}
@@ -1360,33 +1360,33 @@ packages:
   '@rolldown/pluginutils@1.1.1':
     resolution: {integrity: sha512-glFIJDvLNDtJhT9qrMFWLPbvS+skxgt4L0K8Ei2YtnhPysAJnsI7nyxSJxKj4ADeKX0OLjC4ntRkwpLOoS3rwA==}
 
-  '@turbo/darwin-64@2.11.11':
-    resolution: {integrity: sha512-HMMeUIEAsmyIbSYn1ySvF/4gGMa0joiTMq4dQDuloIAnOpbtFT3JEiVsYnASdTWDXvplbRbZlqjU1EBeSR9G1A==}
+  '@turbo/darwin-64@2.11.13':
+    resolution: {integrity: sha512-5IT29i4j55E5O66+la7L8Y46ut7dFaNZqrgUIYYNtcpMt9Ql7aYnSQb/6tZ+prE2AfX1RBCAtRJE41txS2rG3w==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.11.11':
-    resolution: {integrity: sha512-+8iySNgqYWY6PZYUQzYu6zn0C04z2OEq1vQ6oMGsJ9sxN6wOpg1gzi1AJ5VKDHviWvMUjhqng51hTEQZOuiqYQ==}
+  '@turbo/darwin-arm64@2.11.13':
+    resolution: {integrity: sha512-YFJPayVNlhSPRIZSeERiZYGKKqPs6N6qGhim8J3GtBdv5ZjUNF1ixfnAAyCVTqFEnMSkn1W7F0Y07kca8EjWsg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/linux-64@2.11.11':
-    resolution: {integrity: sha512-uImTKFYCFKsoFxjaXeJXlMPv4uU3OIIDjyzoIwYVqOtu9LnCZ/5/fzu/WP6+G9YfwGAPRplTHkKFfcI5t97RGw==}
+  '@turbo/linux-64@2.11.13':
+    resolution: {integrity: sha512-R5RIQflV4ffBDNuUwjmtmzIr6Y2UeyeeHTtultYF7cnFn3tG1RZ4GRBlpjUhHB6JxuR7l1B450hlbzdtlD3ghg==}
     cpu: [x64]
     os: [android, linux]
 
-  '@turbo/linux-arm64@2.11.11':
-    resolution: {integrity: sha512-Y7xffSVfyyYRGzNy6PLdrFL4xXN6iTuR3W0SyJvH/yd3d4defA6dansZwJpPDVnIpD8a2Qn256DwY/Qin4Ip4g==}
+  '@turbo/linux-arm64@2.11.13':
+    resolution: {integrity: sha512-AwV8pVO/cH/lwx1B7SGfzUA/3e6vmPaygFp9NOSRESs6t3Wr63zrBuXlluDogAOIxIMlHDB2ZbBueDsBnQxh2Q==}
     cpu: [arm64]
     os: [android, linux]
 
-  '@turbo/windows-64@2.11.11':
-    resolution: {integrity: sha512-e2WqNtkPGo3QDwNNwwBo89Dx3PtSJ9Wp9QuRNzn80rrRnSHB+1mfBMZTpdHjA8/G/sG9rl76TdWdpgVsimjRdg==}
+  '@turbo/windows-64@2.11.13':
+    resolution: {integrity: sha512-PGXYTaFaN3FZloe4RffNGJmfB+TIWlqQgKK1PVyKwPN+PUzxGa+byxHBWFHredMaVbnUc6L/F6/QR4iHyM/wug==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.11.11':
-    resolution: {integrity: sha512-LURivfmgv34Osm8NR1gZGx4vdlux9KAgRM+FoooXNG0838ff0+akWZ76iPSke0NS2rsf7Z4Gw+YSaygzNTZuRA==}
+  '@turbo/windows-arm64@2.11.13':
+    resolution: {integrity: sha512-YdRHWstBUHWt/eChOEM4f9LT0dPiWK5SNgtV77bLCr3JNke9M5E7metqelNYj+tXe36dH0BZrk2CMnFlWqHKng==}
     cpu: [arm64]
     os: [win32]
 
@@ -1572,8 +1572,8 @@ packages:
   '@ucast/mongo@3.0.0':
     resolution: {integrity: sha512-kwuSH+kdB4GCR0LGhy/PEDm4PCflur89AlK82kNiYD0FvsA8A/p+0sx7m+/R8mMFAlmlkAd3VXp7sM/cLLYWYg==}
 
-  '@vitest/mocker@5.1.0':
-    resolution: {integrity: sha512-5umB9/jlWcqVS6fsrFmv5Gdnpu6wAUio/lEOwAmvB7v+lFo/IW2B9FhAD0p19GCULTgMzLCdUmuCDCnAzWgppQ==}
+  '@vitest/mocker@5.1.1':
+    resolution: {integrity: sha512-b2OgTB4+3ImWIVafXKazJXwLKwQxUNnix6b3xUvUTMh7RyXlrtzoxfZr8aEz9zkHOMAS4K5lu3TvFWoiVeVTQg==}
     peerDependencies:
       msw: ^2.4.9 || ^3.0.0
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -1583,8 +1583,8 @@ packages:
       vite:
         optional: true
 
-  '@vitest/spy@5.1.0':
-    resolution: {integrity: sha512-2DPO5OMHWKrBngC+fCmTQqemNF0gidRhp3lxbBmRhW+M1XJrfgPpqNqWVevXtn2f2ufD5ZaR1B6B641aAlcX5A==}
+  '@vitest/spy@5.1.1':
+    resolution: {integrity: sha512-6K8C6alQG1/Yc8/ZI22iJS7JEsxPdVzqtqDq+/xM4Z0mGVykemMVjLhqMy/q6/IHYG3kKD8hKSwRen/ZdyI9vQ==}
 
   abstract-logging@2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
@@ -2091,8 +2091,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  turbo@2.11.11:
-    resolution: {integrity: sha512-AI4UJbUE/2cVZdoXJ4PODc8qvrjhQQX9Fa93eKGOI6Ims/w7+kUIb9T1jhlgSnZcf+gtUruci/ohSwqtNNC5Yw==}
+  turbo@2.11.13:
+    resolution: {integrity: sha512-2EZ8StW6tqaj71HGF60oUOmJrPQHidmZ5dcwv2VORofya9JthVrfZhxbzRMx/QxjPwYi754i2h5RFsZSDzpnaQ==}
     hasBin: true
 
   typescript@7.0.2:
@@ -2150,20 +2150,20 @@ packages:
       yaml:
         optional: true
 
-  vitest@5.1.0:
-    resolution: {integrity: sha512-MzmNFnrwa8v8lF1bLxw3UJ4EREwVOVb75VqJZmUDRjJ6EluK/x9th7qTbaeDk41WxE1GxWqmTXcdsfobfH5sOA==}
+  vitest@5.1.1:
+    resolution: {integrity: sha512-trVmzUFOSraCZcI3uZIMD5FqBh4atFkC/XuJP/IU7qtyQay0FCs3Ia+0QiQ2JJwGyWG/xrcBoJNel2+O7kEZ0g==}
     engines: {node: ^22.12.0 || ^24.0.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@opentelemetry/api': ^1.9.0
       '@types/node': ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 5.1.0
-      '@vitest/browser-preview': 5.1.0
+      '@vitest/browser-playwright': 5.1.1
+      '@vitest/browser-preview': 5.1.1
       '@vitest/browser-webdriverio': ^5.0.0-beta.5 || >=5.0.0
-      '@vitest/coverage-istanbul': 5.1.0
-      '@vitest/coverage-v8': 5.1.0
-      '@vitest/ui': 5.1.0
+      '@vitest/coverage-istanbul': 5.1.1
+      '@vitest/coverage-v8': 5.1.1
+      '@vitest/ui': 5.1.1
       happy-dom: '*'
       jsdom: '*'
       vite: ^6.4.0 || ^7.0.0 || ^8.0.0
@@ -2234,46 +2234,46 @@ snapshots:
     dependencies:
       '@ucast/mongo2js': 1.4.1
 
-  '@electric-sql/pglite-age@0.0.17(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-age@0.0.18(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_hashids@0.0.17(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-pg_hashids@0.0.18(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_ivm@0.0.17(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-pg_ivm@0.0.18(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_textsearch@0.0.18(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-pg_textsearch@0.0.19(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pg_uuidv7@0.0.17(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-pg_uuidv7@0.0.18(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pgtap@0.0.17(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-pgtap@0.0.18(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-pgvector@0.0.17(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-pgvector@0.0.18(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
+      '@electric-sql/pglite': 0.5.17
 
-  '@electric-sql/pglite-socket@0.2.19(@electric-sql/pglite-age@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_hashids@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_ivm@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_textsearch@0.0.18(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pg_uuidv7@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgtap@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite-pgvector@0.0.17(@electric-sql/pglite@0.5.16))(@electric-sql/pglite@0.5.16)':
+  '@electric-sql/pglite-socket@0.2.20(@electric-sql/pglite-age@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_hashids@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_ivm@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_textsearch@0.0.19(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pg_uuidv7@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgtap@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite-pgvector@0.0.18(@electric-sql/pglite@0.5.17))(@electric-sql/pglite@0.5.17)':
     dependencies:
-      '@electric-sql/pglite': 0.5.16
-      '@electric-sql/pglite-age': 0.0.17(@electric-sql/pglite@0.5.16)
-      '@electric-sql/pglite-pg_hashids': 0.0.17(@electric-sql/pglite@0.5.16)
-      '@electric-sql/pglite-pg_ivm': 0.0.17(@electric-sql/pglite@0.5.16)
-      '@electric-sql/pglite-pg_textsearch': 0.0.18(@electric-sql/pglite@0.5.16)
-      '@electric-sql/pglite-pg_uuidv7': 0.0.17(@electric-sql/pglite@0.5.16)
-      '@electric-sql/pglite-pgtap': 0.0.17(@electric-sql/pglite@0.5.16)
-      '@electric-sql/pglite-pgvector': 0.0.17(@electric-sql/pglite@0.5.16)
+      '@electric-sql/pglite': 0.5.17
+      '@electric-sql/pglite-age': 0.0.18(@electric-sql/pglite@0.5.17)
+      '@electric-sql/pglite-pg_hashids': 0.0.18(@electric-sql/pglite@0.5.17)
+      '@electric-sql/pglite-pg_ivm': 0.0.18(@electric-sql/pglite@0.5.17)
+      '@electric-sql/pglite-pg_textsearch': 0.0.19(@electric-sql/pglite@0.5.17)
+      '@electric-sql/pglite-pg_uuidv7': 0.0.18(@electric-sql/pglite@0.5.17)
+      '@electric-sql/pglite-pgtap': 0.0.18(@electric-sql/pglite@0.5.17)
+      '@electric-sql/pglite-pgvector': 0.0.18(@electric-sql/pglite@0.5.17)
 
-  '@electric-sql/pglite@0.5.16': {}
+  '@electric-sql/pglite@0.5.17': {}
 
   '@emnapi/core@2.0.0-beta.2':
     dependencies:
@@ -2601,22 +2601,22 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.1': {}
 
-  '@turbo/darwin-64@2.11.11':
+  '@turbo/darwin-64@2.11.13':
     optional: true
 
-  '@turbo/darwin-arm64@2.11.11':
+  '@turbo/darwin-arm64@2.11.13':
     optional: true
 
-  '@turbo/linux-64@2.11.11':
+  '@turbo/linux-64@2.11.13':
     optional: true
 
-  '@turbo/linux-arm64@2.11.11':
+  '@turbo/linux-arm64@2.11.13':
     optional: true
 
-  '@turbo/windows-64@2.11.11':
+  '@turbo/windows-64@2.11.13':
     optional: true
 
-  '@turbo/windows-arm64@2.11.11':
+  '@turbo/windows-arm64@2.11.13':
     optional: true
 
   '@tybys/wasm-util@0.10.5':
@@ -2758,16 +2758,16 @@ snapshots:
     dependencies:
       '@ucast/core': 2.0.0
 
-  '@vitest/mocker@5.1.0(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))':
+  '@vitest/mocker@5.1.1(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@vitest/spy': 5.1.0
+      '@vitest/spy': 5.1.1
       estree-walker: 3.0.3
       magic-string: 1.4.5
     optionalDependencies:
       vite: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1)
 
-  '@vitest/spy@5.1.0': {}
+  '@vitest/spy@5.1.1': {}
 
   abstract-logging@2.0.1: {}
 
@@ -3298,14 +3298,14 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  turbo@2.11.11:
+  turbo@2.11.13:
     optionalDependencies:
-      '@turbo/darwin-64': 2.11.11
-      '@turbo/darwin-arm64': 2.11.11
-      '@turbo/linux-64': 2.11.11
-      '@turbo/linux-arm64': 2.11.11
-      '@turbo/windows-64': 2.11.11
-      '@turbo/windows-arm64': 2.11.11
+      '@turbo/darwin-64': 2.11.13
+      '@turbo/darwin-arm64': 2.11.13
+      '@turbo/linux-64': 2.11.13
+      '@turbo/linux-arm64': 2.11.13
+      '@turbo/windows-64': 2.11.13
+      '@turbo/windows-arm64': 2.11.13
 
   typescript@7.0.2:
     optionalDependencies:
@@ -3348,10 +3348,10 @@ snapshots:
       tsx: 4.23.15
       yaml: 2.9.1
 
-  vitest@5.1.0(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1)):
+  vitest@5.1.1(@types/node@26.6.6)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.1.0(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
+      '@vitest/mocker': 5.1.1(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0

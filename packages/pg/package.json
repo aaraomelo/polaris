@@ -6,6 +6,6 @@
   "main": "src/index.ts",
   "scripts": { "test": "vitest run", "tipos": "tsc --noEmit" },
   "dependencies": { "pg": "^8.13.1" },
-  "devDependencies": { "@electric-sql/pglite": "^0.5.16", "@electric-sql/pglite-socket": "^0.2.19", "@types/node": "^26.6.6", "@types/pg": "^8.11.10", "typescript": "^7.0.2", "vitest": "^5.1.0" },
+  "devDependencies": { "@electric-sql/pglite": "^0.5.17", "@electric-sql/pglite-socket": "^0.2.20", "@types/node": "^26.6.6", "@types/pg": "^8.11.10", "typescript": "^7.0.2", "vitest": "^5.1.1" },
   "exports": { ".": "./src/index.ts" }
 }

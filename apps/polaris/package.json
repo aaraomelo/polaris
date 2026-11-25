@@ -24,13 +24,13 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.16",
-    "@electric-sql/pglite-socket": "^0.2.19",
+    "@electric-sql/pglite": "^0.5.17",
+    "@electric-sql/pglite-socket": "^0.2.20",
     "@types/node": "^26.6.6",
     "esbuild": "^0.28.2",
     "jose": "^6.2.17",
     "typescript": "^7.0.2",
-    "vitest": "^5.1.0",
+    "vitest": "^5.1.1",
     "@types/pg": "^8.11.10",
     "tsx": "^4.21.0",
     "playwright-core": "^1.49.1"

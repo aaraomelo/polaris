@@ -20,14 +20,14 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.16",
+    "@electric-sql/pglite": "^0.5.17",
     "@types/node": "^26.6.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "esbuild": "0.28.2",
     "playwright-core": "^1.49.1",
     "typescript": "^7.0.2",
-    "vitest": "^5.1.0",
+    "vitest": "^5.1.1",
     "tsx": "^4.21.0"
   },
   "main": "src/servidor.ts",
